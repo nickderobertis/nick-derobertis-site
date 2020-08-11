@@ -5,6 +5,8 @@ from typing import Optional, Dict, Any
 from jinja2 import Environment, FileSystemLoader
 from panel.pane import HTML
 
+from nick_derobertis_site.landing.components.card.card_model import CardModel
+
 ROOT_PATH = pathlib.Path(__file__).parent
 HTML_PATH = ROOT_PATH / "card.html"
 
@@ -13,12 +15,8 @@ class CardComponent(HTML):
     template_path = HTML_PATH
     exclude_attrs = tuple()
 
-    def __init__(self, heading: str, body_text: str, image_path: str, link: Optional[str] = None,
-                 **kwargs):
-        self.heading = heading
-        self.body_text = body_text
-        self.image_path = image_path
-        self.link = link
+    def __init__(self, model: CardModel, **kwargs):
+        self.model = model
 
         if self.template_path is not None:
             template_dir = os.path.dirname(os.path.realpath(self.template_path))
