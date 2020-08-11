@@ -1,0 +1,8 @@
+<div class="col-lg-4">
+    <img class="rounded-circle" src="{{ image_path }}" alt="Generic placeholder image" width="140" height="140">
+    <h2>{{ heading }}</h2>
+    <p>{{ body_text }}</p>
+    {% if link %}
+        <p><a class="btn btn-secondary" href="{{ link }}" role="button">View details &raquo;</a></p>
+    {% endif %}
+</div>
