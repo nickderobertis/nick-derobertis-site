@@ -1,13 +1,20 @@
 import importlib
 import os
 import pathlib
+from weakref import WeakSet
 from typing import Optional, Dict, Any, Sequence
 
+import param
 from jinja2 import Environment, FileSystemLoader, Template
 from panel.pane import HTML
 
+from nick_derobertis_site.common.model import ComponentModel
+from nick_derobertis_site.common.updating import UpdatingItem
+from nick_derobertis_site.logger import logger
 
-class HTMLComponent(HTML):
+
+class HTMLComponent(HTML, UpdatingItem):
+    model = param.ClassSelector(class_=ComponentModel)
     template_path: Optional[str] = None
     template_str: Optional[str] = None
     exclude_attrs: Sequence[str] = tuple()
@@ -37,6 +44,11 @@ class HTMLComponent(HTML):
     def contents(self) -> str:
         return self.template.render(**self.render_dict)
 
+    def _update_contents(self, *events):
+        logger.debug(f'Component {self} update for {events}')
+        self.object = self.contents
+        super()._update_contents()
+
     @property
     def render_dict(self) -> Dict[str, Any]:
         always_exclude_attrs = [
@@ -46,6 +58,15 @@ class HTMLComponent(HTML):
             'render_dict',
             'contents',
             'exclude_attrs',
+            # Parameterized attributes
+            'add_periodic_callback',
+            'app',
+            'applies', 'clone', 'controls', 'debug', 'defaults', 'embed', 'force_new_dynamic_value',
+            'get_pane_type', 'get_param_values', 'get_root', 'get_value_generator', 'inspect_value',
+            'jscallback', 'jslink', 'link', 'message', 'param', 'param_change', 'params',
+            'pprint', 'print_param_defaults', 'print_param_values', 'priority', 'save',
+            'script_repr', 'select', 'servable', 'server_doc', 'set_default', 'set_dynamic_time_fn',
+            'set_param', 'show', 'state_pop', 'state_push', 'verbose', 'warning'
         ]
         full_exclude = always_exclude_attrs + list(self.exclude_attrs)
         attrs = [item for item in dir(self) if item not in full_exclude and not item.startswith('_')]
