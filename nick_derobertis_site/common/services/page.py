@@ -65,7 +65,7 @@ class PageService(param.Parameterized):
 
     def _update_pages_list(self):
         with param.edit_constant(self):
-            self.pages = sorted(list(self._pages.values()))
+            self.pages = list(self._pages.values())
 
     def bulk_create(self, pages: List[HTMLComponent]):
         """Creates the list of pages
