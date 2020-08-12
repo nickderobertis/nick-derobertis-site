@@ -1,0 +1,4 @@
+from nick_derobertis_site.landing.config.cards import LANDING_CARD_MODELS
+from nick_derobertis_site.landing.page.landing_page_model import LandingPageModel
+
+LANDING_PAGE_MODEL = LandingPageModel(LANDING_CARD_MODELS)
