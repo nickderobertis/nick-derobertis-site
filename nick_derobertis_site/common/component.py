@@ -13,7 +13,7 @@ from nick_derobertis_site.common.updating import UpdatingItem
 from nick_derobertis_site.logger import logger
 
 
-class HTMLComponent(HTML, UpdatingItem):
+class HTMLComponent(UpdatingItem, HTML):
     model = param.ClassSelector(class_=ComponentModel)
     template_path: Optional[str] = None
     template_str: Optional[str] = None
@@ -37,8 +37,8 @@ class HTMLComponent(HTML, UpdatingItem):
         # Set up default styles
         if 'margin' not in kwargs:
             kwargs['margin'] = (0, 0, 0, 0)  # remove default left and top margin
-
-        super().__init__(self.contents, **kwargs)
+        UpdatingItem.__init__(self, **kwargs)
+        HTML.__init__(self, self.contents, **kwargs)
 
     @property
     def contents(self) -> str:

@@ -13,6 +13,7 @@ class LandingPageModel(ComponentModel):
 
     def __init__(self, **params):
         super().__init__(**params)
+        self._set_cards()
 
     @param.depends('card_models', watch=True)
     def _set_cards(self):
