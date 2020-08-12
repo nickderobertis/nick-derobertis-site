@@ -24,6 +24,7 @@ cruft = "*"
 panel = "*"
 jupyterlab = "*"
 awesome-panel-extensions = "*"
+fire = "*"
 
 [requires]
 python_version = "3.7"
