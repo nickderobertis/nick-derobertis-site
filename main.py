@@ -3,11 +3,21 @@ from sys import platform
 
 import panel as pn
 
+from nick_derobertis_site.common.services.common import Services
 from nick_derobertis_site.templates.home.home_template import HomeTemplate
+from nick_derobertis_site import page_config as pc
 
 
 def view() -> HomeTemplate:
-    template = HomeTemplate()
+    services = Services()
+
+    services.page_service.set_default_page(pc.LANDING_PAGE)
+    services.page_service.bulk_create(pc.PAGES)
+    services.page_service.param.page.objects = pc.PAGES
+    services.page_service.param.page.default = pc.LANDING_PAGE
+    services.page_service.page = pc.LANDING_PAGE
+
+    template = HomeTemplate(services=services)
     return template
 
 

@@ -13,6 +13,7 @@ class HTMLComponent(HTML):
     exclude_attrs: Sequence[str] = tuple()
 
     def __init__(self, **kwargs):
+        # Set up template
         self._validate_template()
         if self.template_path is not None:
             template_dir = os.path.dirname(os.path.realpath(self.template_path))
@@ -25,6 +26,11 @@ class HTMLComponent(HTML):
             self._active_template_path = template_name
         else:
             self._environment = Environment()
+
+        # Set up default styles
+        if 'margin' not in kwargs:
+            kwargs['margin'] = (0, 0, 0, 0)  # remove default left and top margin
+
         super().__init__(self.contents, **kwargs)
 
     @property

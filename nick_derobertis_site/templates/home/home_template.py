@@ -2,26 +2,41 @@
 import pathlib
 
 import panel as pn
+import param
 
+from nick_derobertis_site.common.services.common import Services
 from nick_derobertis_site.landing.config.page import LANDING_PAGE_MODEL
 from nick_derobertis_site.landing.page.landing_page_component import LandingPageComponent
 
 ROOT_PATH = pathlib.Path(__file__).parent
 HTML_PATH = ROOT_PATH / "home_template.html"
 CSS_PATH = ROOT_PATH / "home_template.css"
+BASE_CSS_PATH = pathlib.Path('nick_derobertis_site') / 'common' / 'custom.css'
 
 
 class HomeTemplate(pn.Template):
     """
     A Template based on Bootstrap-Material design
     """
+    services = param.ClassSelector(class_=Services)
 
     def __init__(self, **params):
         pn.config.sizing_mode = "stretch_width"
 
         params["template"] = HTML_PATH.read_text()
+        pn.config.css_files.append(BASE_CSS_PATH.resolve())
         pn.config.css_files.append(CSS_PATH.resolve())
 
+        if "services" not in params:
+            params["services"] = Services()
+
         super().__init__(**params)
-        self.landing_page: LandingPageComponent = LandingPageComponent(LANDING_PAGE_MODEL)
-        self.add_variable('landing_page', self.landing_page)
+        self.main = pn.Column(
+            name="main", css_classes=["main"],
+        )
+        self._update_main_container()
+        self.add_panel('main', self.main)
+
+    @param.depends("services.page_service.page", watch=True)
+    def _update_main_container(self):
+        self.main[:] = [self.services.page_service.page]
