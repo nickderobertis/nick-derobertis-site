@@ -98,6 +98,8 @@ class HTMLComponent(UpdatingItem, HTML):
     @property
     def _root_path(self) -> pathlib.Path:
         module = importlib.import_module(self.__module__)
+        if module.__name__ == '__main__':
+            return pathlib.Path('.')
         return pathlib.Path(module.__file__).parent
 
     @property
