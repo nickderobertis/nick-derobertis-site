@@ -2,22 +2,54 @@ import importlib
 import os
 import pathlib
 from weakref import WeakSet
-from typing import Optional, Dict, Any, Sequence
+from typing import Optional, Dict, Any, Sequence, List
 
 import param
+from bokeh.models import Row as BkRow
+from bokeh.models import Column as BkColumn
 from jinja2 import Environment, FileSystemLoader, Template
+from panel import Column, Row
 from panel.pane import HTML
+from panel.viewable import Viewable
 
+from nick_derobertis_site.common.component_template import ComponentTemplateEnvironment
 from nick_derobertis_site.common.model import ComponentModel
 from nick_derobertis_site.common.updating import UpdatingItem
 from nick_derobertis_site.logger import logger
 
 
-class HTMLComponent(UpdatingItem, HTML):
+class HTMLComponent(UpdatingItem, Column, Row):
     model = param.ClassSelector(class_=ComponentModel)
+    layout_class = param.ObjectSelector(objects=[Column, Row], default=Column)
     template_path: Optional[str] = None
     template_str: Optional[str] = None
     exclude_attrs: Sequence[str] = tuple()
+    _column_attrs: Sequence[str] = (
+        'align',
+        'aspect_ratio',
+        'background',
+        'children',
+        'css_classes',
+        'disabled',
+        'height',
+        'height_policy',
+        'js_event_callbacks',
+        'js_property_callbacks',
+        'margin',
+        'max_height',
+        'max_width',
+        'min_height',
+        'min_width',
+        'name',
+        'rows',
+        'sizing_mode',
+        'spacing',
+        'subscribed_events',
+        'tags',
+        'visible',
+        'width',
+        'width_policy'
+    )
 
     def __init__(self, **kwargs):
         # Set up template
@@ -27,27 +59,39 @@ class HTMLComponent(UpdatingItem, HTML):
             template_name = os.path.basename(self.template_path)
 
             # Create environment with file system loader in the folder containing the template
-            self._environment = Environment(loader=FileSystemLoader(template_dir))
+            self._environment = ComponentTemplateEnvironment(loader=FileSystemLoader(template_dir))
 
             # Switch template path str passed to environment to just name, as environment was created in that folder
             self._active_template_path = template_name
         else:
-            self._environment = Environment()
+            self._environment = ComponentTemplateEnvironment()
 
         # Set up default styles
         if 'margin' not in kwargs:
             kwargs['margin'] = (0, 0, 0, 0)  # remove default left and top margin
+        if 'sizing_mode' not in kwargs:
+            kwargs['sizing_mode'] = 'stretch_width'
         UpdatingItem.__init__(self, **kwargs)
-        HTML.__init__(self, self.contents, **kwargs)
+
+        column_kwargs = {k: v for k, v in kwargs.items() if k in self._column_attrs}
+        self.layout_class.__init__(self, *self.contents, **column_kwargs)
 
     @property
-    def contents(self) -> str:
+    def contents(self) -> List[Viewable]:
         return self.template.render(**self.render_dict)
 
     def _update_contents(self, *events):
         logger.debug(f'Component {self} update for {events}')
-        self.object = self.contents
+        self[:] = self.contents
         super()._update_contents()
+
+    @property
+    def _bokeh_model(self):
+        models = {
+            Row: BkRow,
+            Column: BkColumn
+        }
+        return models[self.layout_class]
 
     @property
     def render_dict(self) -> Dict[str, Any]:
@@ -71,6 +115,11 @@ class HTMLComponent(UpdatingItem, HTML):
         full_exclude = always_exclude_attrs + list(self.exclude_attrs)
         attrs = [item for item in dir(self) if item not in full_exclude and not item.startswith('_')]
         return {attr: getattr(self, attr) for attr in attrs}
+
+    def _init_properties(self):
+        props = super()._init_properties()
+        column_props = {k: v for k, v in props.items() if k in self._column_attrs}
+        return column_props
 
     def _validate_template(self):
         if self.template_str is not None and self.template_path is not None:
