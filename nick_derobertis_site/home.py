@@ -1,7 +1,8 @@
-import os
-from sys import platform
+import pathlib
+import sys
 
-import panel as pn
+ROOT_PATH = pathlib.Path(__file__).parent.parent
+sys.path.insert(0, str(ROOT_PATH))
 
 from nick_derobertis_site.common.services.common import Services
 from nick_derobertis_site.templates.home.home_template import HomeTemplate
