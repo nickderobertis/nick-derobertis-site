@@ -1,7 +1,6 @@
 import pathlib
 
 from bokeh.models import Box
-from bokeh.models.layouts import QuickTrackSizing, IntOrString, RowSizing, LayoutDOM
 from bokeh.util.compiler import TypeScript
 from bokeh.core.properties import (
     List,

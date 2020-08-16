@@ -1,6 +1,9 @@
 import { LayoutDOM, LayoutDOMView } from "models/layouts/layout_dom";
 import * as p from "core/properties";
 import { UnsizedBox } from "./unsizedBox";
+import { Raw } from "./raw";
+
+let counter: number = 0;
 
 export class ContainerView extends LayoutDOMView {
   model: Container;
@@ -50,6 +53,40 @@ export class ContainerView extends LayoutDOMView {
       elem.removeAttribute("style");
       for (const klass of this.model.child_css_classes) {
         elem.classList.add(klass);
+        elem.setAttribute("id", this.uniqueNodeId);
+      }
+    }
+
+    this.el.innerHTML = this.fullHTMLContent;
+    this.replaceElementsWithViewElements();
+  }
+
+  get fullHTMLContent(): string {
+    let fullHTML = "";
+    for (const view of this.child_views) {
+      if (view.model.type === "Raw") {
+        fullHTML += (view.model as Raw).text;
+      } else {
+        fullHTML += view.el.outerHTML;
+      }
+    }
+    return fullHTML;
+  }
+
+  get uniqueNodeId(): string {
+    counter++;
+    return `panel-unique-obj-id-${counter}`;
+  }
+
+  replaceElementsWithViewElements() {
+    for (const view of this.child_views) {
+      if (view.model.type !== "Raw") {
+        const elem: Element = view.el;
+        const replaceElem = document.querySelector(`#${elem.id}`);
+        if (!replaceElem) continue;
+        const parent = replaceElem.parentElement;
+        if (!parent) continue;
+        parent.replaceChild(elem, replaceElem);
       }
     }
   }
