@@ -1,6 +1,6 @@
 import re
 from html import escape
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Sequence, Optional
 from weakref import WeakValueDictionary
 
 import panel as pn
@@ -50,7 +50,10 @@ class ComponentTemplate(Template):
             embed=self._embed
         )
 
-    def _embed(self, item) -> str:
+    def _embed(self, item: Any, css_classes: Optional[Sequence[str]] = None,
+               child_css_classes: Optional[Sequence[str]] = None) -> str:
+        _add_to_css_classes(item, css_classes)
+        _add_to_css_classes(item, child_css_classes, attr='child_css_classes')
         self._add_embedded_item(item)
         return _object_ref_xml(item)
 
@@ -60,3 +63,13 @@ class ComponentTemplate(Template):
 
 class ComponentTemplateEnvironment(Environment):
     template_class = ComponentTemplate
+
+
+def _add_to_css_classes(item: Any, css_classes: Optional[Sequence[str]] = None, attr='css_classes'):
+    if css_classes is None:
+        return
+    classes = getattr(item, attr)
+    if classes is None:
+        classes = []
+    classes.extend(css_classes)
+    setattr(item, attr, classes)
