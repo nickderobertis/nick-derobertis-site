@@ -26,17 +26,32 @@ export class ContainerView extends LayoutDOMView {
   render(): void {
     super.render();
 
+    // TODO: Set up container elements correctly in the first place
+    //
+    // Currently just modifying the DOM after the initial render, but
+    // further customization of the base behavior should be done so that
+    // the elements are set up correctly in the first place.
+
     // Remove generated bk div children and bring content up a level
-    // TODO: it would be better to prevent these elements from ever being added
     const childrenToRemove = document.querySelectorAll(
-      `div[data-root-id="${this.model.id}"] > div.bk > div[class="bk"]`
+      `div[data-root-id="${this.model.id}"] > div.bk > div[class="bk panel-class-which-marks-elements-to-be-removed"]`
     );
     removeElements([...childrenToRemove]);
 
     // Remove generated bk-clearfix divs around HTML elements
-    // TODO: it would be better to prevent clear-fix elements from ever being added
     const clearFixElements = this.el.getElementsByClassName("bk-clearfix");
     removeElements([...clearFixElements]);
+
+    // Remove bokeh-applied styling to necessary generated bk components and add child class
+    const childrenToModify = document.querySelectorAll(
+      `div[data-root-id="${this.model.id}"] > div.bk > div[class="bk"]`
+    );
+    for (const elem of childrenToModify) {
+      elem.removeAttribute("style");
+      for (const klass of this.model.child_css_classes) {
+        elem.classList.add(klass);
+      }
+    }
   }
 }
 

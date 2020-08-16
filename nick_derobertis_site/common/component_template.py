@@ -34,7 +34,7 @@ class ComponentTemplate(Template):
                 obj_id = _id_from_panel_object_ref(part)
                 panel_obj = self._embedded_items[obj_id]
             else:
-                panel_obj = pn.pane.HTML(part)
+                panel_obj = pn.pane.HTML(part, css_classes=['panel-class-which-marks-elements-to-be-removed'])
             viewables.append(panel_obj)
         return viewables
 
