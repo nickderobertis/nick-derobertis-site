@@ -6,17 +6,14 @@ export class RawView extends MarkupView {
 
   render(): void {
     super.render();
-    if (this.model.render_as_text) this.markup_el.textContent = this.model.text;
-    else this.markup_el.innerHTML = this.model.text;
+    this.markup_el.innerHTML = this.model.text;
   }
 }
 
 export namespace Raw {
   export type Attrs = p.AttrsOf<Props>;
 
-  export type Props = Markup.Props & {
-    render_as_text: p.Property<boolean>;
-  };
+  export type Props = Markup.Props;
 }
 
 export interface Raw extends Raw.Attrs {}
@@ -32,8 +29,6 @@ export class Raw extends Markup {
   static init_Raw(): void {
     this.prototype.default_view = RawView;
 
-    this.define<Raw.Props>({
-      render_as_text: [p.Boolean, false],
-    });
+    this.define<Raw.Props>({});
   }
 }
