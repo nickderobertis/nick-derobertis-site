@@ -1,6 +1,9 @@
 import { LayoutDOM, LayoutDOMView } from "models/layouts/layout_dom";
 import * as p from "core/properties";
 import { UnsizedBox } from "./unsizedBox";
+import { Raw } from "./raw";
+
+let counter: number = 0;
 
 export class ContainerView extends LayoutDOMView {
   model: Container;
@@ -26,29 +29,84 @@ export class ContainerView extends LayoutDOMView {
   render(): void {
     super.render();
 
-    // Remove generated bk-clearfix divs around HTML elements
-    // TODO: it would be better to prevent clear-fix elements from ever being added
-    let clearFixElements = this.el.getElementsByClassName("bk-clearfix");
-    while (clearFixElements.length > 0) {
-      const elem = clearFixElements[0];
-      const fragment = document.createDocumentFragment();
-      while (elem.firstChild) {
-        fragment.appendChild(elem.firstChild);
-      }
-      if (elem.parentNode) {
-        elem.parentNode.replaceChild(fragment, elem);
-      }
-      clearFixElements = this.el.getElementsByClassName("bk-clearfix");
-    }
+    // TODO: Set up container elements correctly in the first place
+    //
+    // Currently just modifying the DOM after the initial render, but
+    // further customization of the base behavior should be done so that
+    // the elements are set up correctly in the first place.
 
-    // Clear existing postion: absolute on children
-    // and add child css classes if any
-    const subElements = this.el.children;
-    for (const elem of subElements) {
+    // Remove generated bk div children and bring content up a level
+    const childrenToRemove = document.querySelectorAll(
+      `div[data-root-id="${this.model.id}"] > div.bk > div[class="bk panel-class-which-marks-elements-to-be-removed"]`
+    );
+    removeElements([...childrenToRemove]);
+
+    // Remove generated bk-clearfix divs around HTML elements
+    const clearFixElements = this.el.getElementsByClassName("bk-clearfix");
+    removeElements([...clearFixElements]);
+
+    // Remove bokeh-applied styling to necessary generated bk components and add child class
+    const childrenToModify = document.querySelectorAll(
+      `div[data-root-id="${this.model.id}"] > div.bk > div[class="bk"]`
+    );
+    for (const elem of childrenToModify) {
       elem.removeAttribute("style");
       for (const klass of this.model.child_css_classes) {
         elem.classList.add(klass);
+        elem.setAttribute("id", this.uniqueNodeId);
       }
+    }
+
+    this.el.innerHTML = this.fullHTMLContent;
+    this.replaceElementsWithViewElements();
+  }
+
+  get fullHTMLContent(): string {
+    let fullHTML = "";
+    for (const view of this.child_views) {
+      if (view.model.type === "Raw") {
+        fullHTML += (view.model as Raw).text;
+      } else {
+        fullHTML += view.el.outerHTML;
+      }
+    }
+    return fullHTML;
+  }
+
+  get uniqueNodeId(): string {
+    counter++;
+    return `panel-unique-obj-id-${counter}`;
+  }
+
+  replaceElementsWithViewElements() {
+    for (const view of this.child_views) {
+      if (view.model.type !== "Raw") {
+        const elem: Element = view.el;
+        const replaceElem = document.querySelector(`#${elem.id}`);
+        if (!replaceElem) continue;
+        const parent = replaceElem.parentElement;
+        if (!parent) continue;
+        parent.replaceChild(elem, replaceElem);
+      }
+    }
+  }
+}
+
+function removeElement(elem: Element) {
+  const fragment = document.createDocumentFragment();
+  while (elem.firstChild) {
+    fragment.appendChild(elem.firstChild);
+  }
+  if (elem.parentNode) {
+    elem.parentNode.replaceChild(fragment, elem);
+  }
+}
+
+function removeElements(elems: Element[]) {
+  while (elems.length > 0) {
+    const elem = elems.pop();
+    if (elem) {
+      removeElement(elem);
     }
   }
 }

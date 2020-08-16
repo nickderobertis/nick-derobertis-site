@@ -1,10 +1,16 @@
 import re
+from html import escape
 from typing import Dict, Any, List
 from weakref import WeakValueDictionary
 
 import panel as pn
+from bokeh.models import Markup
 from jinja2 import Template, Environment
+from panel.models import HTML as _BkHTML
+from panel.pane.markup import DivPaneBase
 from panel.viewable import Viewable
+
+from nick_derobertis_site.common.raw import Raw
 
 FIND_PANEL_OBJECT_REGEX = r'(<panel-object-ref>[\d]+<\/panel-object-ref>)'
 PARSE_PANEL_OBJECT_REGEX = r'<panel-object-ref>([\d]+)<\/panel-object-ref>'
@@ -34,7 +40,7 @@ class ComponentTemplate(Template):
                 obj_id = _id_from_panel_object_ref(part)
                 panel_obj = self._embedded_items[obj_id]
             else:
-                panel_obj = pn.pane.HTML(part)
+                panel_obj = Raw(part, css_classes=['panel-class-which-marks-elements-to-be-removed'])
             viewables.append(panel_obj)
         return viewables
 
