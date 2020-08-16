@@ -1,55 +1,24 @@
 import importlib
 import os
 import pathlib
-from weakref import WeakSet
 from typing import Optional, Dict, Any, Sequence, List
 
 import param
-from bokeh.models import Row as BkRow
-from bokeh.models import Column as BkColumn
-from jinja2 import Environment, FileSystemLoader, Template
-from panel import Column, Row
-from panel.pane import HTML
+from jinja2 import FileSystemLoader, Template
 from panel.viewable import Viewable
 
 from nick_derobertis_site.common.component_template import ComponentTemplateEnvironment
+from nick_derobertis_site.common.container import Container
 from nick_derobertis_site.common.model import ComponentModel
 from nick_derobertis_site.common.updating import UpdatingItem
 from nick_derobertis_site.logger import logger
 
 
-class HTMLComponent(UpdatingItem, Column, Row):
+class HTMLComponent(UpdatingItem, Container):
     model = param.ClassSelector(class_=ComponentModel)
-    layout_class = param.ObjectSelector(objects=[Column, Row], default=Column)
     template_path: Optional[str] = None
     template_str: Optional[str] = None
     exclude_attrs: Sequence[str] = tuple()
-    _column_attrs: Sequence[str] = (
-        'align',
-        'aspect_ratio',
-        'background',
-        'children',
-        'css_classes',
-        'disabled',
-        'height',
-        'height_policy',
-        'js_event_callbacks',
-        'js_property_callbacks',
-        'margin',
-        'max_height',
-        'max_width',
-        'min_height',
-        'min_width',
-        'name',
-        'rows',
-        'sizing_mode',
-        'spacing',
-        'subscribed_events',
-        'tags',
-        'visible',
-        'width',
-        'width_policy'
-    )
 
     def __init__(self, **kwargs):
         # Set up template
@@ -66,15 +35,8 @@ class HTMLComponent(UpdatingItem, Column, Row):
         else:
             self._environment = ComponentTemplateEnvironment()
 
-        # Set up default styles
-        if 'margin' not in kwargs:
-            kwargs['margin'] = (0, 0, 0, 0)  # remove default left and top margin
-        if 'sizing_mode' not in kwargs:
-            kwargs['sizing_mode'] = 'stretch_width'
         UpdatingItem.__init__(self, **kwargs)
-
-        column_kwargs = {k: v for k, v in kwargs.items() if k in self._column_attrs}
-        self.layout_class.__init__(self, *self.contents, **column_kwargs)
+        Container.__init__(self, *self.contents, **self.container_params(kwargs))
 
     @property
     def contents(self) -> List[Viewable]:
@@ -85,13 +47,9 @@ class HTMLComponent(UpdatingItem, Column, Row):
         self[:] = self.contents
         super()._update_contents()
 
-    @property
-    def _bokeh_model(self):
-        models = {
-            Row: BkRow,
-            Column: BkColumn
-        }
-        return models[self.layout_class]
+    def container_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        keys = [key for key, value in Container.get_param_values()]
+        return {k: v for k, v in params.items() if k in keys}
 
     @property
     def render_dict(self) -> Dict[str, Any]:
@@ -102,13 +60,16 @@ class HTMLComponent(UpdatingItem, Column, Row):
             'render_dict',
             'contents',
             'exclude_attrs',
+            'non_container_params',
+            'container_params',
             # Parameterized attributes
             'add_periodic_callback',
             'app',
-            'applies', 'clone', 'controls', 'debug', 'defaults', 'embed', 'force_new_dynamic_value',
-            'get_pane_type', 'get_param_values', 'get_root', 'get_value_generator', 'inspect_value',
-            'jscallback', 'jslink', 'link', 'message', 'param', 'param_change', 'params',
-            'pprint', 'print_param_defaults', 'print_param_values', 'priority', 'save',
+            'applies', 'append', 'clear', 'clone', 'controls', 'debug', 'defaults', 'embed', 'extend',
+            'force_new_dynamic_value',
+            'get_pane_type', 'get_param_values', 'get_root', 'get_value_generator', 'insert', 'inspect_value',
+            'jscallback', 'jslink', 'link', 'message', 'param', 'param_change', 'params', 'pop',
+            'pprint', 'print_param_defaults', 'print_param_values', 'priority', 'remove', 'reverse', 'save',
             'script_repr', 'select', 'servable', 'server_doc', 'set_default', 'set_dynamic_time_fn',
             'set_param', 'show', 'state_pop', 'state_push', 'verbose', 'warning'
         ]
@@ -118,8 +79,7 @@ class HTMLComponent(UpdatingItem, Column, Row):
 
     def _init_properties(self):
         props = super()._init_properties()
-        column_props = {k: v for k, v in props.items() if k in self._column_attrs}
-        return column_props
+        return self.container_params(props)
 
     def _validate_template(self):
         if self.template_str is not None and self.template_path is not None:

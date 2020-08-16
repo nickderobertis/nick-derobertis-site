@@ -33,7 +33,7 @@ class ComponentTemplate(Template):
                 obj_id = _id_from_panel_object_ref(part)
                 panel_obj = self._embedded_items[obj_id]
             else:
-                panel_obj = pn.pane.HTML(part, margin=(0, 0, 0, 0))
+                panel_obj = pn.pane.HTML(part)
             viewables.append(panel_obj)
         return viewables
 
