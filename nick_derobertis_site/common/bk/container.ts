@@ -26,6 +26,21 @@ export class ContainerView extends LayoutDOMView {
   render(): void {
     super.render();
 
+    // Remove generated bk-clearfix divs around HTML elements
+    // TODO: it would be better to prevent clear-fix elements from ever being added
+    let clearFixElements = this.el.getElementsByClassName("bk-clearfix");
+    while (clearFixElements.length > 0) {
+      const elem = clearFixElements[0];
+      const fragment = document.createDocumentFragment();
+      while (elem.firstChild) {
+        fragment.appendChild(elem.firstChild);
+      }
+      if (elem.parentNode) {
+        elem.parentNode.replaceChild(fragment, elem);
+      }
+      clearFixElements = this.el.getElementsByClassName("bk-clearfix");
+    }
+
     const subElements = this.el.getElementsByClassName("bk");
     for (const elem of subElements) {
       elem.removeAttribute("style");
