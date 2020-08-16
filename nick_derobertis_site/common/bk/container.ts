@@ -41,9 +41,14 @@ export class ContainerView extends LayoutDOMView {
       clearFixElements = this.el.getElementsByClassName("bk-clearfix");
     }
 
-    const subElements = this.el.getElementsByClassName("bk");
+    // Clear existing postion: absolute on children
+    // and add child css classes if any
+    const subElements = this.el.children;
     for (const elem of subElements) {
       elem.removeAttribute("style");
+      for (const klass of this.model.child_css_classes) {
+        elem.classList.add(klass);
+      }
     }
   }
 }
@@ -53,6 +58,7 @@ export namespace Container {
 
   export type Props = LayoutDOM.Props & {
     children: p.Property<LayoutDOM[]>;
+    child_css_classes: p.Property<string[]>;
   };
 }
 
@@ -71,6 +77,7 @@ export class Container extends LayoutDOM {
 
     this.define<Container.Props>({
       children: [p.Array, []],
+      child_css_classes: [p.Array, []],
     });
   }
 }

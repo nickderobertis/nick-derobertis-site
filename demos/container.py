@@ -16,6 +16,8 @@ view = Container(
     inp,
     button,
     pn.pane.HTML('<p>it works end</p>'),
+    css_classes=['parent1', 'parent2'],
+    child_css_classes=['child1', 'child2'],
 )
 
 view.servable()
