@@ -27,8 +27,9 @@ class ComponentTemplate(Template):
         all_kwargs = {**kwargs, **self._render_dict}
         rendered = super().render(*args, **all_kwargs)
         parts = re.split(FIND_PANEL_OBJECT_REGEX, rendered)
+        valid_parts = [part for part in parts if not part.isspace()]
         viewables = []
-        for part in parts:
+        for part in valid_parts:
             if part.startswith('<panel-object-ref>'):
                 obj_id = _id_from_panel_object_ref(part)
                 panel_obj = self._embedded_items[obj_id]
