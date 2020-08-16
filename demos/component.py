@@ -33,6 +33,6 @@ button = pn.widgets.Button(name="yeah")
 inp = pn.widgets.TextInput(value=button.name)
 inp.link(button, value="name")
 model = MyModel(button=button, inp=inp)
-view = MyComp(model=model)
+view = MyComp(model=model, css_classes=['parent'], child_css_classes=['child'])
 
 view.servable()
