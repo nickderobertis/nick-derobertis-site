@@ -57,7 +57,9 @@
 
           <!-- Three columns of text below the carousel -->
           <div class="row">
-            {{ embed(model.cards) }}
+            {% for card in model.cards %}
+              {{ embed(card, css_classes=["col-md-4"]) }}
+            {% endfor %}
           </div><!-- /.row -->
 
 
