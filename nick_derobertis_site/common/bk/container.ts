@@ -1,30 +1,49 @@
-import { Box, BoxView } from "models/layouts/box";
-import { Column as ColumnLayout, RowsSizing } from "core/layout/grid";
+import { LayoutDOM, LayoutDOMView } from "models/layouts/layout_dom";
 import * as p from "core/properties";
+import { UnsizedBox } from "./unsizedBox";
 
-export class ContainerView extends BoxView {
+export class ContainerView extends LayoutDOMView {
   model: Container;
+  layout: UnsizedBox;
+
+  initialize(): void {
+    super.initialize();
+    this.el.style.removeProperty("position");
+  }
+
+  connect_signals(): void {}
+
+  get child_models(): LayoutDOM[] {
+    return this.model.children;
+  }
 
   _update_layout(): void {
-    const items = this.child_views.map((child) => child.layout);
-    this.layout = new ColumnLayout(items);
-    this.layout.rows = this.model.rows;
-    this.layout.spacing = [this.model.spacing, 0];
-    this.layout.set_sizing(this.box_sizing());
+    this.layout = new UnsizedBox();
+  }
+
+  update_position(): void {}
+
+  render(): void {
+    super.render();
+
+    const subElements = this.el.getElementsByClassName("bk");
+    for (const elem of subElements) {
+      elem.removeAttribute("style");
+    }
   }
 }
 
 export namespace Container {
   export type Attrs = p.AttrsOf<Props>;
 
-  export type Props = Box.Props & {
-    rows: p.Property<RowsSizing>;
+  export type Props = LayoutDOM.Props & {
+    children: p.Property<LayoutDOM[]>;
   };
 }
 
 export interface Container extends Container.Attrs {}
 
-export class Container extends Box {
+export class Container extends LayoutDOM {
   properties: Container.Props;
   __view_type__: ContainerView;
 
@@ -36,7 +55,7 @@ export class Container extends Box {
     this.prototype.default_view = ContainerView;
 
     this.define<Container.Props>({
-      rows: [p.Any, "auto"],
+      children: [p.Array, []],
     });
   }
 }
