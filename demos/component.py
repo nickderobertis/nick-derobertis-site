@@ -13,8 +13,12 @@ import panel as pn
 
 component_template = """
 <p>it works begin</p>
-{{ embed(model.inp) }}
-{{ embed(model.button) }}
+<div id="should-contain-the-items" style="background-color: blue">
+    <p>some static content in the div before dynamic content</p>
+    {{ embed(model.inp) }}
+    {{ embed(model.button) }}
+    <p>some static content in the div after dynamic content</p>
+</div>
 <p>it works end</p>
 """
 
