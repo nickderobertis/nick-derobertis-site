@@ -1,3 +1,13 @@
 .bk {
   width: 100%;
 }
+
+.bk-root {
+  position: unset;
+  width: unset;
+  height: unset;
+  z-index: unset;
+  box-sizing: unset;
+  font-family: unset;
+  font-size: unset;
+}
