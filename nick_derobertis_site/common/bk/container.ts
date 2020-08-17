@@ -37,7 +37,7 @@ export class ContainerView extends LayoutDOMView {
 
     // Remove generated bk div children and bring content up a level
     const childrenToRemove = this.el.querySelectorAll(
-      `:scope > div[class="bk panel-class-which-marks-elements-to-be-removed"]`
+      `:scope > div.panel-class-which-marks-elements-to-be-removed`
     );
     removeElements([...childrenToRemove]);
 
@@ -46,9 +46,7 @@ export class ContainerView extends LayoutDOMView {
     removeElements([...clearFixElements]);
 
     // Remove bokeh-applied styling to necessary generated bk components and add child class
-    const childrenToModify = this.el.querySelectorAll(
-      `:scope > div[class="bk"]`
-    );
+    const childrenToModify = this.el.querySelectorAll(`:scope > div.bk`);
     for (const elem of childrenToModify) {
       elem.removeAttribute("style");
       elem.setAttribute("id", this.uniqueNodeId);

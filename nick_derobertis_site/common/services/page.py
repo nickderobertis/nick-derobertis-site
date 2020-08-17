@@ -15,6 +15,7 @@ class PageService(param.Parameterized):
 
     pages = param.List(constant=True)
     page = param.ObjectSelector(allow_None=False, doc="The currently active page")
+    routes = param.Dict()
     default_page = param.ClassSelector(class_=HTMLComponent, constant=True)
     load_default_page = param.Action()
 
@@ -22,11 +23,18 @@ class PageService(param.Parameterized):
         if "default_page" not in params:
             if "pages" in params and params["pages"]:
                 params["default_page"] = params["pages"][0]
+        if 'pages' not in params and 'routes' in params:
+            params['pages'] = list(params['routes'].values())
 
         super().__init__(**params)
 
         self._pages = {page.name: page for page in self.pages}
         self.load_default_page = self._load_default_page
+
+        self.set_default_page(self.default_page)
+        self.bulk_create(self.pages)
+        self.param.page.objects = self.pages
+        self.param.page.default = self.default_page
 
     def create(self, page: HTMLComponent):
         """Creates the specified Page
@@ -94,3 +102,7 @@ class PageService(param.Parameterized):
 
     def _load_default_page(self, _=None):
         self.page = self.default_page
+
+    def navigate(self, route: str):
+        page = self.routes[route]
+        self.page = page

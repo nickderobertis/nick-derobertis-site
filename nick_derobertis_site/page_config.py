@@ -6,7 +6,7 @@ from nick_derobertis_site.story_page.story_page_component import StoryPageCompon
 LANDING_PAGE: LandingPageComponent = LandingPageComponent(model=LANDING_PAGE_MODEL)
 STORY_PAGE: StoryPageComponent = StoryPageComponent(model=STORY_PAGE_MODEL)
 
-PAGES = [
-    LANDING_PAGE,
-    STORY_PAGE
-]
+ROUTES = {
+    'home': LANDING_PAGE,
+    'story': STORY_PAGE
+}

@@ -14,3 +14,13 @@ class Services(param.Parameterized):
             params["page_service"] = PageService()
 
         super().__init__(**params)
+
+
+def get_default_services() -> Services:
+    from nick_derobertis_site import page_config as pc
+
+    page_service = PageService(
+        routes=pc.ROUTES, page=pc.LANDING_PAGE, default_page=pc.LANDING_PAGE
+    )
+    services = Services(page_service=page_service)
+    return services

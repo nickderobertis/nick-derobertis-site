@@ -6,6 +6,7 @@ from typing import Optional, Dict, Any, Sequence, List
 import param
 from jinja2 import FileSystemLoader, Template
 from panel.viewable import Viewable
+from param import Parameterized
 
 from nick_derobertis_site.common.component_template import ComponentTemplateEnvironment
 from nick_derobertis_site.common.container import Container
@@ -36,7 +37,7 @@ class HTMLComponent(UpdatingItem, Container):
             self._environment = ComponentTemplateEnvironment()
 
         UpdatingItem.__init__(self, **kwargs)
-        Container.__init__(self, *self.contents, **self.container_params(kwargs))
+        Container.__init__(self, *self.contents, **kwargs)
 
     @property
     def contents(self) -> List[Viewable]:
