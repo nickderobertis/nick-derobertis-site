@@ -1,13 +1,11 @@
-from typing import List
-
 import param
 
-from nick_derobertis_site.common.model import ComponentModel
 from nick_derobertis_site.landing.components.card.card_component import CardComponent
 from nick_derobertis_site.landing.components.card.card_model import CardModel
+from nick_derobertis_site.common.page_model import PageModel
 
 
-class LandingPageModel(ComponentModel):
+class LandingPageModel(PageModel):
     card_models = param.List(class_=CardModel)
     cards = param.List(class_=CardComponent)
 

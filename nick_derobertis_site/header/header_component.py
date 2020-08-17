@@ -16,8 +16,8 @@ class HeaderComponent(HasPageService, HTMLComponent):
 
     def __init__(self, **params):
         self.page_buttons = []
-        for page_name in self.page_service.routes.keys():
-            button = pn.widgets.Button(name=page_name)
+        for page_name, page in self.page_service.routes.items():
+            button = pn.widgets.Button(name=page.model.page_link_text)
             button.on_click(partial(self.navigate_to_page, page_name))
             self.page_buttons.append(button)
 
