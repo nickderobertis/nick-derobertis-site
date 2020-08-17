@@ -1,5 +1,5 @@
-import { Layoutable } from "core/layout/layoutable";
-import { Size, Sizeable, SizeHint } from "core/layout/types";
+import { Layoutable, ExtBoxSizing } from "core/layout/layoutable";
+import { Size, Sizeable, SizeHint, BoxSizing } from "core/layout/types";
 
 export class UnsizedBox extends Layoutable {
   is_width_expanding(): boolean {
@@ -25,5 +25,13 @@ export class UnsizedBox extends Layoutable {
     width;
     height;
     return { width: 0, height: 0 };
+  }
+
+  set_sizing(sizing: Partial<BoxSizing>): void {
+    sizing;
+  }
+
+  get sizing(): ExtBoxSizing {
+    return {} as ExtBoxSizing;
   }
 }
