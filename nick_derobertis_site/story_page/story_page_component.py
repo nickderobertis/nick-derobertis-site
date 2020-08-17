@@ -6,5 +6,3 @@ from .story_page_model import StoryPageModel
 
 class StoryPageComponent(HTMLComponent):
     model = param.ClassSelector(class_=StoryPageModel)
-
-
