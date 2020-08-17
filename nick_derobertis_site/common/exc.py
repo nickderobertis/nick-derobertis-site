@@ -1,0 +1,3 @@
+
+class TemplateItemNotFoundException(Exception):
+    pass

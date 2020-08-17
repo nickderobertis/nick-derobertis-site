@@ -5,11 +5,12 @@ from weakref import WeakValueDictionary
 
 import panel as pn
 from bokeh.models import Markup
-from jinja2 import Template, Environment
+from jinja2 import Template, Environment, Undefined
 from panel.models import HTML as _BkHTML
 from panel.pane.markup import DivPaneBase
 from panel.viewable import Viewable
 
+from nick_derobertis_site.common.exc import TemplateItemNotFoundException
 from nick_derobertis_site.common.raw import Raw
 
 FIND_PANEL_OBJECT_REGEX = r'(<panel-object-ref>[\d]+<\/panel-object-ref>)'
@@ -54,7 +55,12 @@ class ComponentTemplate(Template):
                child_css_classes: Optional[Sequence[str]] = None) -> str:
         _add_to_css_classes(item, css_classes)
         _add_to_css_classes(item, child_css_classes, attr='child_css_classes')
-        self._add_embedded_item(item)
+        try:
+            self._add_embedded_item(item)
+        except TypeError as e:
+            if "cannot create weak reference to 'Undefined' object" in str(e):
+                item: Undefined
+                raise TemplateItemNotFoundException(f"Could not embed in template, {item._undefined_message}")
         return _object_ref_xml(item)
 
     def _add_embedded_item(self, item: Any):
