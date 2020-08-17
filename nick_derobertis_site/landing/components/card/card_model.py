@@ -10,3 +10,4 @@ class CardModel(ComponentModel):
     body_text = param.String()
     image_path = param.String(default=PLACEHOLDER_IMAGE)
     link = param.String(default=None)
+    link_display_text = param.String(default=None)

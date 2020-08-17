@@ -3,6 +3,6 @@
     <h2>{{ model.heading }}</h2>
     <p>{{ model.body_text }}</p>
     {% if model.link %}
-        <p><a class="btn btn-secondary" href="{{ model.link }}" role="button">View details &raquo;</a></p>
+        {{ embed(button) }}
     {% endif %}
 </div>
