@@ -36,8 +36,8 @@ export class ContainerView extends LayoutDOMView {
     // the elements are set up correctly in the first place.
 
     // Remove generated bk div children and bring content up a level
-    const childrenToRemove = document.querySelectorAll(
-      `div[data-root-id="${this.model.id}"] > div.bk > div[class="bk panel-class-which-marks-elements-to-be-removed"]`
+    const childrenToRemove = this.el.querySelectorAll(
+      `:scope > div[class="bk panel-class-which-marks-elements-to-be-removed"]`
     );
     removeElements([...childrenToRemove]);
 
@@ -46,14 +46,14 @@ export class ContainerView extends LayoutDOMView {
     removeElements([...clearFixElements]);
 
     // Remove bokeh-applied styling to necessary generated bk components and add child class
-    const childrenToModify = document.querySelectorAll(
-      `div[data-root-id="${this.model.id}"] > div.bk > div[class="bk"]`
+    const childrenToModify = this.el.querySelectorAll(
+      `:scope > div[class="bk"]`
     );
     for (const elem of childrenToModify) {
       elem.removeAttribute("style");
+      elem.setAttribute("id", this.uniqueNodeId);
       for (const klass of this.model.child_css_classes) {
         elem.classList.add(klass);
-        elem.setAttribute("id", this.uniqueNodeId);
       }
     }
 
@@ -80,7 +80,14 @@ export class ContainerView extends LayoutDOMView {
 
   replaceElementsWithViewElements() {
     for (const view of this.child_views) {
-      if (view.model.type !== "Raw") {
+      if (view.model.type == "Container") {
+        // TODO: replace elements approach becomes very inefficient with multiple layers of components
+        //
+        // It starts from the inner-most component and works to outer, each time recursively
+        // replacing in all inner components. Need to figure out a way to prevent inner
+        // replaces when it will later be done with outer, or avoid replacing approach alltogether
+        (view as ContainerView).replaceElementsWithViewElements();
+      } else if (view.model.type !== "Raw") {
         const elem: Element = view.el;
         const replaceElem = document.querySelector(`#${elem.id}`);
         if (!replaceElem) continue;
