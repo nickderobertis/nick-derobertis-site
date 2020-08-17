@@ -4,7 +4,9 @@ import pathlib
 import panel as pn
 import param
 
+from nick_derobertis_site.common.container import Container
 from nick_derobertis_site.common.services.common import Services
+from nick_derobertis_site.header.header_component import HeaderComponent
 from nick_derobertis_site.landing.config.page import LANDING_PAGE_MODEL
 from nick_derobertis_site.landing.page.landing_page_component import LandingPageComponent
 
@@ -31,11 +33,13 @@ class HomeTemplate(pn.Template):
             params["services"] = Services()
 
         super().__init__(**params)
-        self.main = pn.Column(
+        self.main = Container(
             name="main", css_classes=["main"],
         )
         self._update_main_container()
         self.add_panel('main', self.main)
+        self.header = Container(HeaderComponent(), name='header')
+        self.add_panel('header', self.header)
 
     @param.depends("services.page_service.page", watch=True)
     def _update_main_container(self):
