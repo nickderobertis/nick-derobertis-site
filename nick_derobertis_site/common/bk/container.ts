@@ -14,7 +14,9 @@ export class ContainerView extends LayoutDOMView {
     this.el.style.removeProperty("position");
   }
 
-  connect_signals(): void {}
+  connect_signals(): void {
+    this.connect(this.model.properties.children.change, () => this.rebuild());
+  }
 
   get child_models(): LayoutDOM[] {
     return this.model.children;
