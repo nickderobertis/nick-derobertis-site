@@ -10,7 +10,7 @@ from nick_derobertis_site.landing.components.card.card_model import CardModel
 
 class CardComponent(HTMLComponent):
     model: CardModel = param.ClassSelector(class_=CardModel)
-    _page_service: PageService = param.ClassSelector(class_=PageService)
+    _page_service: PageService
     exclude_attrs = ('_page_service', 'page_service')
 
     def __init__(self, **params):
@@ -23,7 +23,7 @@ class CardComponent(HTMLComponent):
 
     @property
     def page_service(self) -> PageService:
-        breakpoint()
-        if self._page_service is None:
-            self._page_service = get_default_services().page_service
+        if not hasattr(self, '_page_service') or self._page_service is None:
+            from nick_derobertis_site.service_config import SERVICES
+            self._page_service = SERVICES.page_service
         return self._page_service
