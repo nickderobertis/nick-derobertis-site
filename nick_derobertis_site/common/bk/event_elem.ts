@@ -2,6 +2,16 @@ import * as p from "core/properties";
 import { Widget, WidgetView } from "models/widgets/widget";
 import { ButtonClick } from "core/bokeh_events";
 
+export class GeneralEvent extends ButtonClick {
+  event_name: string = "general_event";
+  event_type: string;
+
+  constructor(event_type: string) {
+    super();
+    this.event_type = event_type;
+  }
+}
+
 export class EventElementView extends WidgetView {
   model: EventElement;
 
@@ -21,7 +31,7 @@ export class EventElementView extends WidgetView {
   }
 
   click(): void {
-    this.model.trigger_event(new ButtonClick());
+    this.model.trigger_event(new GeneralEvent("click"));
   }
 }
 
