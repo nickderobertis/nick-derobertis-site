@@ -83,9 +83,7 @@ class EventElement(Widget):
         self.events.param.set_param(**self._process_property_change(events))
 
     def on(self, event_type: str, callback: Callable):
-        breakpoint()
-        watch_str = 'events.' + event_type
-        self.param.watch(callback, watch_str)
+        self.events.param.watch(callback, event_type)
 
     def js_on(self, event_type: str, args={}, code=""):
         """
