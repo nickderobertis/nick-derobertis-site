@@ -15,6 +15,7 @@ export class GeneralEvent extends ButtonClick {
 
 export class EventElementView extends WidgetView {
   model: EventElement;
+  private _watchedEvents: string[] = [];
 
   connect_signals(): void {
     super.connect_signals();
@@ -25,7 +26,9 @@ export class EventElementView extends WidgetView {
     super.render();
     this.el.innerHTML = this.model.text;
     for (const eventName of this.model.watch_events) {
+      if (this._watchedEvents.includes(eventName)) continue;
       this.el.addEventListener(eventName, () => this.triggerEvent(eventName));
+      this._watchedEvents.push(eventName);
     }
   }
 
