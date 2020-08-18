@@ -1,7 +1,8 @@
 import pathlib
+from typing import Callable
 
 from bokeh.core.has_props import HasProps
-from bokeh.events import Event
+from bokeh import events
 from bokeh.models import Widget
 from bokeh.util.compiler import TypeScript
 from bokeh.core.properties import (
@@ -13,11 +14,11 @@ from bokeh.core.properties import (
 TS_PATH = pathlib.Path(__file__).parent / "event_elem.ts"
 
 
-class GeneralEvent(Event):
+class GeneralEvent(events.Event):
     """
     Any event
     """
-    event_name = 'general_event'
+    event_name: str = 'general_event'
 
 
 class EventElement(Widget, HasProps):
@@ -43,7 +44,7 @@ class EventElement(Widget, HasProps):
         """,
     ).accepts(Seq(String), lambda x: list(x))
 
-    def on_click(self, handler):
+    def on(self, event_type: str, handler: Callable):
         ''' Set up a handler for button clicks.
 
         Args:
@@ -53,8 +54,8 @@ class EventElement(Widget, HasProps):
             None
 
         '''
-        self.on_event(GeneralEvent, handler)
+        self.on_event(event_type, handler)
 
-    def js_on_click(self, handler):
+    def js_on(self, event_type: str, handler: Callable):
         ''' Set up a JavaScript handler for button clicks. '''
-        self.js_on_event(GeneralEvent, handler)
+        self.js_on_event(event_type, handler)

@@ -1,10 +1,18 @@
 from functools import partial
+from typing import Callable
 
 import param
 from panel.links import Callback
-from panel.widgets import Widget, Button
+from panel.viewable import Reactive
+from panel.widgets import Widget
+from bokeh import events
 
-from nick_derobertis_site.common.bk.event_elem import EventElement as _BkEventElement
+from nick_derobertis_site.common.bk.event_elem import EventElement as _BkEventElement, GeneralEvent
+from nick_derobertis_site.common.updating import UpdatingItem
+
+
+class EventCollection(Reactive, UpdatingItem):
+    pass
 
 
 class EventElement(Widget):
@@ -19,18 +27,44 @@ class EventElement(Widget):
 
     text = param.String()
 
-    clicks = param.Integer(default=0)
+    events = param.ClassSelector(class_=EventCollection)
 
-    _rename = {'clicks': None}
+    _rename = {'events': None}
+
+    def __init__(self, **params):
+        SelectedEventCollection = type(
+            'SelectedEventCollection',
+            (EventCollection,),
+            {event_name: param.Integer(default=0) for event_name in params['watch_events']}
+        )
+        params['events'] = SelectedEventCollection()
+        for event_name in params['watch_events']:
+            if (
+                event_name in events._CONCRETE_EVENT_CLASSES and
+                events._CONCRETE_EVENT_CLASSES[event_name] != GeneralEvent
+            ):
+                raise ValueError(
+                    f'passed event name {event_name} which conflicts with '
+                    f'existing event {events._CONCRETE_EVENT_CLASSES[event_name]}')
+            klass_name = f'GeneralEvent{event_name.title()}'
+            klass = type(klass_name, (GeneralEvent,), {'event_name': event_name})
+            events._CONCRETE_EVENT_CLASSES[event_name] = klass
+
+        super().__init__(**params)
+
+    def _update_model(self, events, msg, root, model, doc, comm):
+        breakpoint()
+        super()._update_model(events, msg, root, model, doc, comm)
 
     def _get_model(self, doc, root=None, parent=None, comm=None):
         model = super()._get_model(doc, root, parent, comm)
         ref = (root or model).ref['id']
-        model.on_click(partial(self._server_click, doc, ref))
+        for event_type in self.watch_events:
+            model.on(event_type, partial(self._server_on, doc, ref, event_type))
         return model
 
-    def _server_click(self, doc, ref, event):
-        self._events.update({"clicks": 1})
+    def _server_on(self, doc, ref, event_type: str, event):
+        self._events.update({event_type: 1})
         if not self._processing:
             self._processing = True
             if doc.session_context:
@@ -40,14 +74,20 @@ class EventElement(Widget):
 
     def _process_property_change(self, msg):
         msg = super()._process_property_change(msg)
-        if 'clicks' in msg:
-            msg['clicks'] = self.clicks + 1
+        for key in msg:
+            if key in self.watch_events:
+                msg[key] = getattr(self.events, key) + 1
         return msg
 
-    def on_click(self, callback):
-        self.param.watch(callback, 'clicks')
+    def _process_events(self, events):
+        self.events.param.set_param(**self._process_property_change(events))
 
-    def js_on_click(self, args={}, code=""):
+    def on(self, event_type: str, callback: Callable):
+        breakpoint()
+        watch_str = 'events.' + event_type
+        self.param.watch(callback, watch_str)
+
+    def js_on(self, event_type: str, args={}, code=""):
         """
         Allows defining a JS callback to be triggered when the button
         is clicked.
@@ -64,7 +104,7 @@ class EventElement(Widget):
         callback: Callback
           The Callback which can be used to disable the callback.
         """
-        return Callback(self, code={'event:button_click': code}, args=args)
+        return Callback(self, code={'event:' + event_type: code}, args=args)
 
     def jscallback(self, args={}, **callbacks):
         """
@@ -87,7 +127,6 @@ class EventElement(Widget):
           The Callback which can be used to disable the callback.
         """
         for k, v in list(callbacks.items()):
-            if k == 'clicks':
-                k = 'event:button_click'
+            k = 'event:' + k
             callbacks[k] = self._rename.get(v, v)
         return Callback(self, code=callbacks, args=args)

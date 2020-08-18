@@ -1,23 +1,20 @@
 import * as p from "core/properties";
 import { Widget, WidgetView } from "models/widgets/widget";
-import { ButtonClick } from "core/bokeh_events";
+import { ButtonClick, EventJSON } from "core/bokeh_events";
+
+export type GeneralEventJSON = EventJSON & { event_type: string };
 
 export class GeneralEvent extends ButtonClick {
-  event_name: string = "general_event";
-  event_type: string;
+  event_name: string;
 
-  constructor(event_type: string) {
+  constructor(event_name: string) {
     super();
-    this.event_type = event_type;
+    this.event_name = event_name;
   }
 }
 
 export class EventElementView extends WidgetView {
   model: EventElement;
-
-  //   *controls() {
-  //     yield this.el;
-  //   }
 
   connect_signals(): void {
     super.connect_signals();
@@ -27,11 +24,13 @@ export class EventElementView extends WidgetView {
   render(): void {
     super.render();
     this.el.innerHTML = this.model.text;
-    this.el.addEventListener("click", () => this.click());
+    for (const eventName of this.model.watch_events) {
+      this.el.addEventListener(eventName, () => this.triggerEvent(eventName));
+    }
   }
 
-  click(): void {
-    this.model.trigger_event(new GeneralEvent("click"));
+  triggerEvent(eventName: string): void {
+    this.model.trigger_event(new GeneralEvent(eventName));
   }
 }
 
