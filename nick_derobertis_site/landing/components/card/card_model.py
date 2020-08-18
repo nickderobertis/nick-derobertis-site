@@ -2,12 +2,14 @@ import param
 
 from nick_derobertis_site.common.model import ComponentModel
 
-PLACEHOLDER_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
-
 
 class CardModel(ComponentModel):
     heading = param.String()
     body_text = param.String()
-    image_path = param.String(default=PLACEHOLDER_IMAGE)
+    icon_classes = param.List(class_=str, default=['fas', 'fa-chart-bar', 'fa-5x'])
     link = param.String(default=None)
     link_display_text = param.String(default=None)
+
+    @property
+    def icon_class_str(self) -> str:
+        return ' '.join(self.icon_classes)
