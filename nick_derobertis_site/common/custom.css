@@ -11,3 +11,8 @@
   font-family: unset;
   font-size: unset;
 }
+
+.p {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
