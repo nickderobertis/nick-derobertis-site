@@ -17,6 +17,8 @@ class ButtonBase(HasPageService, EventElement):
     def __init__(self, **params):
         params['text'] = self._button_html(params)
         params['watch_events'] = ['click']
+        if 'css_classes' not in params:
+            params['css_classes'] = ['d-contents']
         self_params = dict(
             display_text=params.pop('display_text'),
             page_path=params.pop('page_path'),

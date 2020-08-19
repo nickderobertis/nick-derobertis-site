@@ -16,3 +16,7 @@
   margin-top: 0;
   margin-bottom: 1rem;
 }
+
+.d-contents.d-contents {
+  display: contents;
+}
