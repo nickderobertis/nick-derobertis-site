@@ -41,7 +41,7 @@ class EventElement(Widget):
         for event_name in params['watch_events']:
             if (
                 event_name in events._CONCRETE_EVENT_CLASSES and
-                events._CONCRETE_EVENT_CLASSES[event_name] != GeneralEvent
+                not issubclass(events._CONCRETE_EVENT_CLASSES[event_name], GeneralEvent)
             ):
                 raise ValueError(
                     f'passed event name {event_name} which conflicts with '
