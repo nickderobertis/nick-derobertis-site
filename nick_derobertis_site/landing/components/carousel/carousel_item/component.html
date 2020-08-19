@@ -1,0 +1,12 @@
+<img src="{{ model.image_src }}">
+<div class="container">
+  <div class="{{ model.caption_div_classes_str }}">
+    <h1>{{ model.header_text }}</h1>
+    <p>{{ model.body_text }}</p>
+    <p>
+        {% for button in model.buttons %}
+          {{ embed(button) }}
+        {% endfor %}
+    </p>
+  </div>
+</div>
