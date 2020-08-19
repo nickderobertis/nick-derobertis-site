@@ -13,7 +13,7 @@ from nick_derobertis_site.landing.page.landing_page_component import LandingPage
 ROOT_PATH = pathlib.Path(__file__).parent
 HTML_PATH = ROOT_PATH / "home_template.html"
 CSS_PATH = ROOT_PATH / "home_template.css"
-BASE_CSS_PATH = pathlib.Path('nick_derobertis_site') / 'common' / 'custom.css'
+BASE_CSS_PATH = pathlib.Path('nick_derobertis_site') / 'styles.css'
 
 
 class HomeTemplate(pn.Template):

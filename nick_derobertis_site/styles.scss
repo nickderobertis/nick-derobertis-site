@@ -20,3 +20,12 @@
 .d-contents.d-contents {
   display: contents;
 }
+
+// Bootstrap variable overrides
+$body-bg: #fbfcfd;
+
+$theme-colors: (
+  "primary": #25ad30,
+);
+
+@import "bootstrap-material/scss/bootstrap-material-design";
