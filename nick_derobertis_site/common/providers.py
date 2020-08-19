@@ -9,7 +9,8 @@ class HasPageService:
     exclude_attrs: Sequence[str]
 
     def __init__(self, **params):
-        self.exclude_attrs = tuple(self.exclude_attrs) + self.__exclude_attrs
+        if hasattr(self, 'exclude_attrs'):
+            self.exclude_attrs = tuple(self.exclude_attrs) + self.__exclude_attrs
         super().__init__(**params)
 
     @property
