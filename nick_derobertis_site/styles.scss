@@ -21,10 +21,16 @@
   display: contents;
 }
 
-.carousel-item > img {
-  opacity: 35%;
-  object-position: center;
-  object-fit: cover;
+.software-card-github-button {
+  width: 90px;
+}
+
+.software-card-docs-button {
+  width: 75px;
+}
+
+.software-card-img {
+  max-height: 250px;
 }
 
 // Bootstrap variable overrides
@@ -35,3 +41,34 @@ $theme-colors: (
 );
 
 @import "bootstrap-material/scss/bootstrap-material-design";
+
+.carousel-item > img {
+  opacity: 35%;
+  object-position: center;
+  object-fit: cover;
+}
+
+.jumbotron {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  margin-bottom: 0;
+  background-color: #fff;
+}
+@media (min-width: 768px) {
+  .jumbotron {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+}
+
+.jumbotron p:last-child {
+  margin-bottom: 0;
+}
+
+.jumbotron h1 {
+  font-weight: 300;
+}
+
+.jumbotron .container {
+  max-width: 40rem;
+}

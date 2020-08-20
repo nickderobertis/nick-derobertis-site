@@ -2,9 +2,8 @@ import param
 
 from nick_derobertis_site.common.model import ComponentModel
 from nick_derobertis_site.general.models.image import ImageModel
+from nick_derobertis_site.general.utils import PLACEHOLDER_IMAGE
 from nick_derobertis_site.general.widgets.button import ButtonBase
-
-PLACEHOLDER_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
 
 
 class CarouselItemModel(ComponentModel):

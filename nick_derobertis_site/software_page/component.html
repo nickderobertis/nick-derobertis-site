@@ -1,1 +1,12 @@
-<p>SoftwarePageComponent works!</p>
+{{ embed(model.banner) }}
+
+  <div class="album py-5 bg-light">
+    <div class="container">
+
+      <div class="row">
+        {% for card in model.cards %}
+          {{ embed(card, css_classes=['col-md-4', 'pl-3', 'pr-3']) }}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
