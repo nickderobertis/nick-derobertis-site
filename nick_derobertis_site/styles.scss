@@ -21,6 +21,12 @@
   display: contents;
 }
 
+.carousel-item > img {
+  opacity: 35%;
+  object-position: center;
+  object-fit: cover;
+}
+
 // Bootstrap variable overrides
 $body-bg: #fbfcfd;
 
