@@ -25,6 +25,7 @@ panel = "*"
 jupyterlab = "*"
 awesome-panel-extensions = "*"
 fire = "*"
+derobertis-cv = "*"
 
 [requires]
 python_version = "3.7"
