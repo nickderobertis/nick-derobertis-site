@@ -1,0 +1,11 @@
+<div class="row research-pane{% if is_reversed %} flex-row-reverse{% endif %}">
+    <div class="col-md-7 research-header-description-container d-flex flex-column justify-content-center">
+      <h2 class="featurette-heading research-heading">{{ model.title }}</h2>
+      <p class="lead">{{ model.description }}</p>
+    </div>
+    <div class="col-md-5 d-flex flex-wrap">
+      {% for category in model.categories %}
+        {{ embed(category, css_classes=['width-unset']) }}
+      {% endfor %}
+    </div>
+</div>

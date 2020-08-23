@@ -1,1 +1,10 @@
-<p>ResearchPageComponent works!</p>
+{{ embed(model.banner) }}
+
+<div class="research-pane-container">
+  {% for pane in model.panes %}
+    {{ embed(pane) }}
+    {% if not loop.last %}
+      <hr class="featurette-divider">
+    {% endif %}
+  {% endfor %}
+</div>

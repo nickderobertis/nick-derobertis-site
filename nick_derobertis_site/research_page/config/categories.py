@@ -1,0 +1,3 @@
+from nick_derobertis_site.research_page.research_category.research_category_model import ResearchCategoryModel
+
+PLACEHOLDER_CATEGORY_MODEL = ResearchCategoryModel()
