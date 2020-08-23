@@ -46,6 +46,24 @@
   margin-left: 20px;
 }
 
+.software-banner {
+  background-color: black;
+  margin-bottom: 0;
+  position: relative;
+  min-height: 30rem;
+}
+
+.software-banner > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  height: 30rem;
+  opacity: 35%;
+  object-position: center;
+  object-fit: cover;
+}
+
 .nd-logo {
   width: 45px;
   height: 45px;
