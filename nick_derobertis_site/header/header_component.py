@@ -7,7 +7,7 @@ from param.parameterized import Event
 
 from nick_derobertis_site.common.component import HTMLComponent
 from .header_model import HeaderModel
-from nick_derobertis_site.common.providers import HasPageService
+from ..common.providers.page_service import HasPageService
 from nick_derobertis_site.general.widgets.button import PrimaryButton
 from ..common.event_elem import EventElement
 

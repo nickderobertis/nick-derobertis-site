@@ -4,7 +4,7 @@ from bokeh.events import Event
 from nick_derobertis_site.common.component import HTMLComponent
 from .story_page_model import StoryPageModel
 from nick_derobertis_site.common.event_elem import EventElement
-from nick_derobertis_site.common.providers import HasPageService
+from ..common.providers.page_service import HasPageService
 
 
 class StoryPageComponent(HasPageService, HTMLComponent):

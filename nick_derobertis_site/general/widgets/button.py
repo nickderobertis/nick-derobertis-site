@@ -4,7 +4,7 @@ import param
 from bokeh.events import Event
 
 from nick_derobertis_site.common.event_elem import EventElement
-from nick_derobertis_site.common.providers import HasPageService
+from nick_derobertis_site.common.providers.page_service import HasPageService
 
 
 class ButtonBase(HasPageService, EventElement):

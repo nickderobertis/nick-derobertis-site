@@ -6,7 +6,7 @@ from param.parameterized import Event
 
 from nick_derobertis_site.common.component import HTMLComponent
 from nick_derobertis_site.common.event_elem import EventElement
-from nick_derobertis_site.common.providers import HasPageService
+from nick_derobertis_site.common.providers.page_service import HasPageService
 from nick_derobertis_site.general.widgets.button import PrimaryButton
 from nick_derobertis_site.landing.components.card.card_model import CardModel
 
