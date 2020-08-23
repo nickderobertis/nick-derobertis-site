@@ -20,7 +20,7 @@ class SoftwareCardModel(ComponentModel):
             body_text=project.description,
             header_text=project.display_title,
             small_header_text=project.title,
-            github_url=project.url or '',
+            github_url=project.github_url or '',
             image_src=project.logo_url or project.logo_base64 or '',
             docs_url=project.docs_url or '',
             accent_text=f'{project.commits} Commits, {project.loc:,.0f} LOC'
