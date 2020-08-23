@@ -1,12 +1,11 @@
 import os
 import pathlib
 
+from nick_derobertis_site.general.config import IMAGES_PATH
 from nick_derobertis_site.general.models.image import ImageModel
 from nick_derobertis_site.general.widgets.button import PrimaryButton
 from nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model import CarouselItemModel
 from nick_derobertis_site.landing.components.carousel.carousel_model import CarouselModel
-
-IMAGES_PATH = pathlib.Path('nick_derobertis_site') / 'assets' / 'images'
 
 CAROUSEL_RESEARCH_BUTTON = PrimaryButton(display_text='Research', page_path='research')
 CAROUSEL_COURSES_BUTTON = PrimaryButton(display_text='Courses', page_path='courses')
