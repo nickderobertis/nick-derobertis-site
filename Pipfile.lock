@@ -69,11 +69,11 @@
         },
         "awesome-panel-extensions": {
             "hashes": [
-                "sha256:5c0eee259f443ca7453bbfd24526eac6c97609a0b6bea954dc3a78478c7502bd",
-                "sha256:a111cd212881c889ca641b0a9d4e4bac66be00378fd2b596eed156762338f714"
+                "sha256:048a97a93c2199e47c2eade328931cf5ee6506f76388917d8cb54533a0cdb627",
+                "sha256:1df522a50d75be88b8fcffbd8650019af2c315964ed137e7692f11cd4746b347"
             ],
             "index": "pypi",
-            "version": "==20200817.1"
+            "version": "==20200823.2"
         },
         "babel": {
             "hashes": [
@@ -300,11 +300,11 @@
         },
         "derobertis-cv": {
             "hashes": [
-                "sha256:8f1f883fed101903cb6e9c469705ef3a583a396bf5ed7356a1047f885b3d5c16",
-                "sha256:dd9471079accd1c7300e851c8422f931b106700db4fbac9a1da038f9d733d714"
+                "sha256:706c12bb8b5c7b76ff57d7bc3fa767c5c3717403fcab77120bf72bff78c47718",
+                "sha256:79dca698fac3bd6cd0efde7fa53d455f0b1ed67641ebef6fd768f3142b8d4e68"
             ],
             "index": "pypi",
-            "version": "==0.2.0"
+            "version": "==0.2.8"
         },
         "docutils": {
             "hashes": [
@@ -492,11 +492,11 @@
         },
         "keyring": {
             "hashes": [
-                "sha256:22df6abfed49912fc560806030051067fba9f0069cffa79da72899aeea4ccbd5",
-                "sha256:e7a17caf40c40b6bb8c4772224a487e4a63013560ed0c521065aeba7ecd42182"
+                "sha256:182f94fc0381546489e3e4d90384a8c1d43cc09ffe2eb4a826e7312df6e1be7c",
+                "sha256:cd4d486803d55bdb13e2d453eb61dbbc984773e4f2b98a455aa85b1f4bc421e4"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==21.3.0"
+            "version": "==21.3.1"
         },
         "latex": {
             "hashes": [
