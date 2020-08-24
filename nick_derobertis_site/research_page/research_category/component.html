@@ -7,13 +7,13 @@
     </div>
   {% elif model.fa_logo_class_str %}
     <div class="research-category-img">
-      <i class="{{ model.fa_logo_class_str }} text-secondary"></i>
+      <i class="{{ model.fa_logo_class_str }}"></i>
     </div>
   {% else %}
     <div class="research-category-img">
-      <i class="fas fa-book-open text-secondary"></i>
+      <i class="fas fa-book-open"></i>
     </div>
   {% endif %}
   <div class="research-category-spacer"></div>
-  <small class="text-uppercase font-weight-bold text-secondary">{{ model.title }}</small>
+  <small class="text-uppercase font-weight-bold">{{ model.title }}</small>
 </div>

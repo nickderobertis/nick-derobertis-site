@@ -17,6 +17,13 @@
   margin-bottom: 1rem;
 }
 
+@mixin set-dual-colors($primary, $secondary) {
+  background-color: $secondary;
+  color: $primary;
+  fill: $primary;
+  stroke: $primary;
+}
+
 .d-contents.d-contents {
   display: contents;
 }
@@ -94,9 +101,6 @@
 }
 
 .research-pane-container {
-  padding: 3rem;
-  padding-top: 5rem;
-  padding-bottom: 5rem;
 }
 
 .nd-logo {
@@ -143,9 +147,6 @@
   padding: 2px;
 }
 
-.research-pane {
-}
-
 .research-pane-heading {
   letter-spacing: -0.02rem;
   margin-top: 0;
@@ -173,12 +174,20 @@ $body-bg: #fbfcfd;
 
 $theme-colors: (
   "primary": #25ad30,
+  "tertiary": #38483b,
+  "tertiary-offset": white,
+  "background": #fbfcfd,
 );
 
 @import "bootstrap-material/scss/bootstrap-material-design";
 
 // Set variables based on bootstrap variables
 
+// Default background
+$default-bg: map-get(
+  $map: $theme-colors,
+  $key: "background",
+);
 // Background for logo
 $logo-bg: map-get(
   $map: $theme-colors,
@@ -186,6 +195,10 @@ $logo-bg: map-get(
 );
 // ND part of logo color
 $logo-fg: white;
+
+body {
+  background-color: $default-bg;
+}
 
 .nd-logo-background {
   fill: $logo-bg;
@@ -253,10 +266,45 @@ $research-category-img-color: map-get(
   $key: "secondary",
 );
 
+// Research page variables
+$research-panel-fg: map-get(
+  $map: $theme-colors,
+  $key: "secondary",
+);
+$research-panel-bg: $default-bg;
+$research-panel-offset-bg: map-get(
+  $map: $theme-colors,
+  $key: "tertiary",
+);
+$research-panel-offset-fg: map-get(
+  $map: $theme-colors,
+  $key: "tertiary-offset",
+);
+
 .research-category-img path,
 .research-category-img rect {
   fill: $research-category-img-color;
   stroke: $research-category-img-color;
+}
+
+.research-pane {
+  padding: 3rem;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.research-pane * {
+  @include set-dual-colors(
+    $primary: $research-panel-fg,
+    $secondary: $research-panel-bg
+  );
+}
+
+.research-pane-offset.research-pane-offset * {
+  @include set-dual-colors(
+    $primary: $research-panel-offset-fg,
+    $secondary: $research-panel-offset-bg
+  );
 }
 
 .navbar.navbar {

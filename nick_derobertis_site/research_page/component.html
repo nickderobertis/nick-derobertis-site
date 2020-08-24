@@ -2,9 +2,10 @@
 
 <div class="research-pane-container">
   {% for pane in model.panes %}
-    {{ embed(pane) }}
-    {% if not loop.last %}
-      <hr class="featurette-divider">
+    {% if loop.index0 % 2 == 0 %}
+      {{ embed(pane) }}
+    {% else %}
+      {{ embed(pane, css_classes=['research-pane-offset']) }}
     {% endif %}
   {% endfor %}
 </div>
