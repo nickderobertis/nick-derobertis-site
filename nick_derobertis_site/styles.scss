@@ -74,7 +74,11 @@
 }
 
 .software-banner > img {
-  @include page-banner-img;
+  @include page-banner-img($opacity: 50%);
+}
+
+.software-banner-content-container {
+  @include banner-content-container;
 }
 
 .research-banner {
