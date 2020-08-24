@@ -1,16 +1,19 @@
+{% if not model.is_child %}
 <div class="dropdown show">
-    <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+{% endif %}
+    <a class="{% if model.is_child %}dropdown-item {% endif %}{% if items %}dropdown-toggle{% endif %}"
+       href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
       {{ model.title }} {{ model.level }}
     </a>
-    <ul class="dropdown-menu">
-      <li class="dropdown-submenu">
-        <a class="dropdown-item dropdown-toggle" href="#">Arts</a>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">History</a></li>
-          <li><a class="dropdown-item" href="#">Geography</a></li>
-          <li><a class="dropdown-item" href="#">Sociology</a></li>
-        </ul>
-      </li>
-    </ul>
-  </div>
-
+    {% if items %}
+      <ul class="dropdown-menu">
+        {% for child in items %}
+          <li class="dropdown-submenu">
+            {{ embed(child) }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+{% if not model.is_child %}
+</div>
+{% endif %}

@@ -12,5 +12,5 @@ class SkillsWidgetModel(ComponentModel):
     items = param.List(class_=SkillsWidgetDropdownComponent)
 
     def __init__(self, **params):
-        params['items'] = [SkillsWidgetDropdownComponent(model=model) for model in params['item_models']]
+        params['items'] = [model.to_nested_component() for model in params['item_models']]
         super().__init__(**params)
