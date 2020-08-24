@@ -64,6 +64,11 @@
   object-fit: cover;
 }
 
+@mixin banner-content-container($zIndex: 5, $color: white) {
+  z-index: $zIndex;
+  color: $color;
+}
+
 .software-banner {
   @include page-banner;
 }
@@ -78,6 +83,10 @@
 
 .research-banner > img {
   @include page-banner-img;
+}
+
+.research-banner-content-container {
+  @include banner-content-container;
 }
 
 .research-pane-container {
@@ -106,26 +115,53 @@
 .research-category-img {
   width: 50px;
   height: 50px;
-  margin-bottom: 3px;
+  display: inline-block;
+}
+
+.research-category-img > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.research-category-img > i {
+  font-size: 50px;
 }
 
 .research-category {
-  height: 65px;
-  width: 65px;
+  height: 100px;
+  width: 100px;
   margin: 15px;
   text-align: center;
 }
 
+.research-category-spacer {
+  width: 100%;
+  padding: 2px;
+}
+
 .research-pane {
+}
+
+.research-pane-heading {
+  letter-spacing: -0.02rem;
+  margin-top: 0;
 }
 
 .research-header-description-container {
   padding: 15px;
 }
 
+.research-header-description-container > * {
+  margin-bottom: 1rem;
+}
+
 // Utility classes
 .width-unset {
   width: unset !important;
+}
+
+.fa-2-5x {
+  font-size: 2.5em;
 }
 
 // Bootstrap variable overrides
@@ -208,6 +244,17 @@ $logo-fg: white;
   }
 }
 
-.featurette-heading.research-heading {
-  margin-top: 0;
+$research-category-img-color: map-get(
+  $map: $theme-colors,
+  $key: "secondary",
+);
+
+.research-category-img path,
+.research-category-img rect {
+  fill: $research-category-img-color;
+  stroke: $research-category-img-color;
+}
+
+.navbar.navbar {
+  z-index: 20;
 }

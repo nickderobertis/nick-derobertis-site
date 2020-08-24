@@ -1,4 +1,19 @@
 <div class="research-category">
-  <img src="{{ model.image_src }}" class="research-category-img">
+  {% if model.image_src %}
+    <img src="{{ model.image_src }}" class="research-category-img">
+  {% elif model.image_svg_text %}
+    <div class="research-category-img">
+      {{ model.image_svg_text }}
+    </div>
+  {% elif model.fa_logo_class_str %}
+    <div class="research-category-img">
+      <i class="{{ model.fa_logo_class_str }} text-secondary"></i>
+    </div>
+  {% else %}
+    <div class="research-category-img">
+      <i class="fas fa-book-open text-secondary"></i>
+    </div>
+  {% endif %}
+  <div class="research-category-spacer"></div>
   <small class="text-uppercase font-weight-bold text-secondary">{{ model.title }}</small>
 </div>

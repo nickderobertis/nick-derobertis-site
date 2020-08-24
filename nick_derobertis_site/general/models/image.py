@@ -13,7 +13,8 @@ class ImageModel(param.Parameterized):
         super().__init__(**params)
         if not self.image_type:
             self._set_image_type()
-        self._set_src()
+        if not self.src:
+            self._set_src()
         self.param.watch(self._set_image_type_and_src, 'image_path')
 
     def _set_image_type_and_src(self):
