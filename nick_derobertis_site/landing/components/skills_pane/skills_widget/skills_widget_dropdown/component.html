@@ -1,14 +1,26 @@
 {% if not model.is_child %}
-<div class="dropdown show">
+<div class="dropdown show skill-container">
 {% endif %}
-    <a class="{% if model.is_child %}dropdown-item {% endif %}{% if items %}dropdown-toggle{% endif %}"
+    <a class="{% if model.is_child %}dropdown-item skill-dropdown-item {% endif %}{% if items %}dropdown-toggle{% endif %}"
        href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      {{ model.title }} {{ model.level }}
+        <div class="skill-dropdown-wrapper">
+            <div class="skill-name">
+                {{ model.title }}
+            </div>
+            <div class="skill-bar-background">
+                <div class="skill-bar-foreground" style="width: {{ model.level * 20 }}%"></div>
+            </div>
+            {% if items %}
+              <div class="skill-dropdown-arrow"></div>
+            {% else %}
+              <div class="skill-dropdown-arrow-spacer"></div>
+            {% endif %}
+        </div>
     </a>
     {% if items %}
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu skill-dropdown-menu">
         {% for child in items %}
-          <li class="dropdown-submenu">
+          <li class="dropdown-submenu skill-dropdown-submenu">
             {{ embed(child) }}
           </li>
         {% endfor %}

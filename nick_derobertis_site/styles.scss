@@ -192,6 +192,7 @@ $body-bg: #fbfcfd;
 
 $theme-colors: (
   "primary": #25ad30,
+  "primary-offset": #ccf7cf,
   "tertiary": #38483b,
   "tertiary-offset": white,
   "background": #fbfcfd,
@@ -237,6 +238,99 @@ body {
   opacity: 35%;
   object-position: center;
   object-fit: cover;
+}
+
+$skill-bar-fg: map-get(
+  $map: $theme-colors,
+  $key: "primary",
+);
+
+$skill-bar-bg: map-get(
+  $map: $theme-colors,
+  $key: "primary-offset",
+);
+
+$skill-name-bg: map-get(
+  $map: $theme-colors,
+  $key: "tertiary",
+);
+
+$skill-name-fg: map-get(
+  $map: $theme-colors,
+  $key: "tertiary-offset",
+);
+
+$skill-bar-border-radius: 20px;
+
+.skill-dropdown-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: $skill-name-bg;
+  padding: 5px;
+  width: 100%;
+}
+
+.skill-dropdown-menu.skill-dropdown-menu {
+  background-color: $skill-name-bg;
+  width: 100%;
+}
+
+.skill-dropdown-submenu.skill-dropdown-submenu {
+  background-color: $skill-name-bg;
+  width: 100%;
+}
+
+.skill-dropdown-menu .skill-dropdown-menu.skill-dropdown-menu {
+  position: absolute;
+  transform: translate3d(0px, 32px, 0px);
+  top: 0px;
+  left: 0px;
+  will-change: transform;
+}
+
+.skill-dropdown-item.skill-dropdown-item {
+  max-width: unset;
+}
+
+.skill-dropdown-item.skill-dropdown-item:hover {
+  background-color: $skill-name-bg;
+}
+
+.skill-name {
+  color: $skill-name-fg;
+  margin-right: 5px;
+}
+
+.skill-bar-background {
+  background-color: $skill-bar-bg;
+  border-radius: $skill-bar-border-radius;
+  flex: 1;
+  height: 1.3em;
+}
+
+.skill-bar-foreground {
+  background-color: $skill-bar-fg;
+  border-radius: $skill-bar-border-radius;
+  height: 100%;
+}
+
+.skill-dropdown-arrow {
+  width: 0;
+  height: 0;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+
+.skill-container .dropdown-toggle::after {
+  content: none;
+}
+
+.skill-dropdown-arrow-spacer {
+  width: 14px;
 }
 
 .jumbotron {
