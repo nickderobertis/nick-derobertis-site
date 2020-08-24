@@ -183,6 +183,11 @@
   width: unset !important;
 }
 
+.no-link {
+  cursor: default;
+  text-decoration: none;
+}
+
 .fa-2-5x {
   font-size: 2.5em;
 }
@@ -262,6 +267,11 @@ $skill-name-fg: map-get(
 
 $skill-bar-border-radius: 20px;
 
+.skills-widget-wrapper {
+  background-color: $skill-name-bg;
+  padding: 20px;
+}
+
 .skill-dropdown-wrapper {
   display: flex;
   align-items: center;
@@ -273,6 +283,7 @@ $skill-bar-border-radius: 20px;
 .skill-dropdown-menu.skill-dropdown-menu {
   background-color: $skill-name-bg;
   width: 100%;
+  padding: 3%;
 }
 
 .skill-dropdown-submenu.skill-dropdown-submenu {
@@ -290,10 +301,13 @@ $skill-bar-border-radius: 20px;
 
 .skill-dropdown-item.skill-dropdown-item {
   max-width: unset;
+  color: $skill-bar-fg;
 }
 
-.skill-dropdown-item.skill-dropdown-item:hover {
+.skill-dropdown-item.skill-dropdown-item:hover,
+.skill-dropdown-item.skill-dropdown-item:focus {
   background-color: $skill-name-bg;
+  color: $skill-bar-bg;
 }
 
 .skill-name {
@@ -323,6 +337,11 @@ $skill-bar-border-radius: 20px;
   border-right: 0.3em solid transparent;
   border-bottom: 0;
   border-left: 0.3em solid transparent;
+}
+
+.skill-container {
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .skill-container .dropdown-toggle::after {
