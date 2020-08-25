@@ -1,0 +1,9 @@
+<div class="row featurette">
+    <div class="col-md-3 d-flex flex-column justify-content-center">
+      <h2 class="featurette-heading">Highly Skilled in...</h2>
+      <p class="lead skills-pane-description">Browse {{ model.num_skills }} skills by category. Click the dropdowns to see nested skills.</p>
+    </div>
+    <div class="col-md-9">
+      {{ embed(model.widget) }}
+    </div>
+  </div>
