@@ -12,4 +12,4 @@ SKILL_DROPDOWN_MODELS = [SkillsWidgetDropdownModel.from_skill_model(model) for m
 
 SKILLS_WIDGET_MODEL = SkillsWidgetModel(item_models=SKILL_DROPDOWN_MODELS)
 
-SKILLS_PANE_MODEL = SkillsPaneModel(widget_model=SKILLS_WIDGET_MODEL)
+SKILLS_PANE_MODEL = SkillsPaneModel(widget_model=SKILLS_WIDGET_MODEL, num_skills=len(ALL_SKILL_MODELS))

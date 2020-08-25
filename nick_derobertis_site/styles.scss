@@ -267,9 +267,17 @@ $skill-name-fg: map-get(
 
 $skill-bar-border-radius: 20px;
 
+.skills-pane-description {
+  margin-bottom: 50px;
+  @include media-breakpoint-up(md) {
+    margin-bottom: 0px;
+  }
+}
+
 .skills-widget-wrapper {
   background-color: $skill-name-bg;
   padding: 20px;
+  border-radius: 40px;
 }
 
 .skill-dropdown-wrapper {

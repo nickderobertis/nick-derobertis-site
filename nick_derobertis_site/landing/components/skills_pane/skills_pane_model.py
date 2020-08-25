@@ -9,6 +9,7 @@ from nick_derobertis_site.landing.components.skills_pane.skills_widget.skills_wi
 class SkillsPaneModel(ComponentModel):
     widget_model = param.ClassSelector(class_=SkillsWidgetModel)
     widget = param.ClassSelector(class_=SkillsWidgetComponent)
+    num_skills: int = param.Integer()
 
     def __init__(self, **params):
         params['widget'] = SkillsWidgetComponent(model=params['widget_model'])
