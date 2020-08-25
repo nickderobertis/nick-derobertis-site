@@ -300,11 +300,11 @@
         },
         "derobertis-cv": {
             "hashes": [
-                "sha256:6aea3367a165159c617bdf3f6d863c7e796e0e22ece44b9693cbb4b37d44230d",
-                "sha256:e0381b6bbbbeb3f5506009dcb0f0b7bb83b4f249de89e03785ac631bbbcf84e9"
+                "sha256:1ea512b3cdc86e0e783f77154faafdf0c255fa955a53a31f5f7f83b373d24e73",
+                "sha256:64a87869de4469b86d1ce43aa1246fcff215caff6d91e9bb3c9e5932f2f1cf57"
             ],
             "index": "pypi",
-            "version": "==0.4.0"
+            "version": "==0.4.1"
         },
         "docutils": {
             "hashes": [
@@ -476,11 +476,11 @@
         },
         "jupyterlab": {
             "hashes": [
-                "sha256:0fdab89e647eecc33fd3057c3d8b4896da365b22223e2174356ab05288f5b0ec",
-                "sha256:f7d669b33192e89c499b884994a9194175981d586631ced2a0793950238eef81"
+                "sha256:6554b022d2cd120100e165ec537c6511d70de7f89e253b3c667ea28f2a9263ff",
+                "sha256:ae557386633fcb74359f436f2b87788a451260a07f2f14a1880fca8f4a9f64de"
             ],
             "index": "pypi",
-            "version": "==2.2.5"
+            "version": "==2.2.6"
         },
         "jupyterlab-server": {
             "hashes": [
