@@ -199,6 +199,18 @@
   margin-bottom: 1rem;
 }
 
+.courses-banner {
+  @include page-banner;
+}
+
+.courses-banner > img {
+  @include page-banner-img($opacity: 50%);
+}
+
+.courses-banner-content-container {
+  @include banner-content-container;
+}
+
 // Utility classes
 .width-unset {
   width: unset !important;
