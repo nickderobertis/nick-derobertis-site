@@ -245,6 +245,24 @@ body {
   object-fit: cover;
 }
 
+@mixin add-bottom-spacer-md-down($size: 50px) {
+  margin-bottom: $size;
+  @include media-breakpoint-up(md) {
+    margin-bottom: 0px;
+  }
+}
+
+.featurette-image {
+  border-radius: 20px;
+}
+
+.story-highlight-pane-button-wrapper {
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  @include add-bottom-spacer-md-down(25px);
+}
+
 $skill-bar-fg: map-get(
   $map: $theme-colors,
   $key: "primary",
@@ -268,10 +286,7 @@ $skill-name-fg: map-get(
 $skill-bar-border-radius: 20px;
 
 .skills-pane-description {
-  margin-bottom: 50px;
-  @include media-breakpoint-up(md) {
-    margin-bottom: 0px;
-  }
+  @include add-bottom-spacer-md-down;
 }
 
 .skills-widget-wrapper {
