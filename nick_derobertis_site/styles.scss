@@ -208,15 +208,9 @@ $theme-colors: (
 // Set variables based on bootstrap variables
 
 // Default background
-$default-bg: map-get(
-  $map: $theme-colors,
-  $key: "background",
-);
+$default-bg: var(--background);
 // Background for logo
-$logo-bg: map-get(
-  $map: $theme-colors,
-  $key: "primary",
-);
+$logo-bg: var(--primary);
 // ND part of logo color
 $logo-fg: white;
 
@@ -263,25 +257,13 @@ body {
   @include add-bottom-spacer-md-down(25px);
 }
 
-$skill-bar-fg: map-get(
-  $map: $theme-colors,
-  $key: "primary",
-);
+$skill-bar-fg: var(--primary);
 
-$skill-bar-bg: map-get(
-  $map: $theme-colors,
-  $key: "primary-offset",
-);
+$skill-bar-bg: var(--primary-offset);
 
-$skill-name-bg: map-get(
-  $map: $theme-colors,
-  $key: "tertiary",
-);
+$skill-name-bg: var(--tertiary);
 
-$skill-name-fg: map-get(
-  $map: $theme-colors,
-  $key: "tertiary-offset",
-);
+$skill-name-fg: var(--tertiary-offset);
 
 $skill-bar-border-radius: 20px;
 
@@ -423,25 +405,13 @@ $skill-bar-border-radius: 20px;
   }
 }
 
-$research-category-img-color: map-get(
-  $map: $theme-colors,
-  $key: "secondary",
-);
+$research-category-img-color: var(--secondary);
 
 // Research page variables
-$research-panel-fg: map-get(
-  $map: $theme-colors,
-  $key: "secondary",
-);
+$research-panel-fg: var(--secondary);
 $research-panel-bg: $default-bg;
-$research-panel-offset-bg: map-get(
-  $map: $theme-colors,
-  $key: "tertiary",
-);
-$research-panel-offset-fg: map-get(
-  $map: $theme-colors,
-  $key: "tertiary-offset",
-);
+$research-panel-offset-bg: var(--tertiary);
+$research-panel-offset-fg: var(--tertiary-offset);
 
 .research-category-img path,
 .research-category-img rect {
