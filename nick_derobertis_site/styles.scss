@@ -278,6 +278,7 @@ $skill-bar-border-radius: 20px;
   background-color: $skill-name-bg;
   padding: 5px;
   width: 100%;
+  height: 3em;
 }
 
 .skill-dropdown-menu.skill-dropdown-menu {
@@ -302,6 +303,9 @@ $skill-bar-border-radius: 20px;
 .skill-dropdown-item.skill-dropdown-item {
   max-width: unset;
   color: $skill-bar-fg;
+  padding: unset;
+  white-space: unset;
+  line-height: 1.42857143;
 }
 
 .skill-dropdown-item.skill-dropdown-item:hover,
@@ -313,6 +317,10 @@ $skill-bar-border-radius: 20px;
 .skill-name {
   color: $skill-name-fg;
   margin-right: 5px;
+  width: 50%;
+  @include media-breakpoint-up(lg) {
+    width: 25%;
+  }
 }
 
 .skill-bar-background {
