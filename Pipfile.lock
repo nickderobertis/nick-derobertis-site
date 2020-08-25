@@ -300,11 +300,11 @@
         },
         "derobertis-cv": {
             "hashes": [
-                "sha256:1ea512b3cdc86e0e783f77154faafdf0c255fa955a53a31f5f7f83b373d24e73",
-                "sha256:64a87869de4469b86d1ce43aa1246fcff215caff6d91e9bb3c9e5932f2f1cf57"
+                "sha256:01cb42ceb894cf049110782143d3cec5054af12bdfd4ddda87d1f7f3a3fa66bf",
+                "sha256:571f4a223dae57f97740842e03b67bf2abd3a3e2840ac50550844d4e496ca4f5"
             ],
             "index": "pypi",
-            "version": "==0.4.1"
+            "version": "==0.5.0"
         },
         "docutils": {
             "hashes": [
@@ -1396,6 +1396,12 @@
                 "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"
             ],
             "version": "==0.2.5"
+        },
+        "weakreflist": {
+            "hashes": [
+                "sha256:28bb41d87b8d4ae9ca9c388ef322c6f4473346d54985863d41ba4f29ba797a09"
+            ],
+            "version": "==0.4"
         },
         "webencodings": {
             "hashes": [

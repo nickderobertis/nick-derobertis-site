@@ -1,1 +1,5 @@
 {{ embed(model.banner) }}
+
+{% for pane in model.panes %}
+  {{ embed(pane) }}
+{% endfor %}
