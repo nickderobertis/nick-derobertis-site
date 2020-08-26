@@ -35,9 +35,6 @@
           {% endif %}
         </div>
       </section>
-
-
-
     </div>
     <div class="col-md-7 d-flex flex-wrap align-content-center justify-content-center">
       {% if model.topics %}
@@ -57,7 +54,9 @@
           </div>
         </section>
       {% endif %}
-      {% if model.software %}
+    </div>
+    {% if model.software %}
+      <div class="col-md-12 d-flex flex-wrap align-content-center justify-content-center">
         <section class="courses-software-container">
           <h3 class="courses-section-header">View related software</h3>
           <div class="courses-software-card-container d-flex flex-wrap justify-content-center">
@@ -68,6 +67,6 @@
             {% endfor %}
           </div>
         </section>
-      {% endif %}
-    </div>
+      </div>
+    {% endif %}
 </div>
