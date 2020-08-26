@@ -46,16 +46,12 @@
           <div class="courses-topics-container d-flex flex-wrap justify-content-center">
             {% for main_topic, child_topics in model.topics.items() %}
               <div class="card shadow course-topic-card">
-                <table class="table course-topics-table">
-                  <tbody>
-                      <tr>
-                        <th>{{ main_topic }}</th>
-                      </tr>
-                      {% for child in child_topics %}
-                        <tr><td>{{ child }}</td></tr>
-                      {% endfor %}
-                  </tbody>
-                </table>
+                <h5 class="course-topic-heading">{{ main_topic }}</h5>
+                <ol class="course-topic-container">
+                  {% for child in child_topics %}
+                    <li class="course-topic-wrapper">{{ child }}</li>
+                  {% endfor %}
+                </ol>
               </div>
             {% endfor %}
           </div>

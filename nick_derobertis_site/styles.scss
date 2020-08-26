@@ -212,6 +212,8 @@
 }
 
 $evaluation-score-color: var(--primary);
+$course-card-min-width: 200px;
+$course-card-max-width: 300px;
 
 .course-pane-heading {
   letter-spacing: -0.02rem;
@@ -298,8 +300,8 @@ $evaluation-score-color: var(--primary);
 }
 
 .courses-software-wrapper {
-  max-width: 300px;
-  min-width: 200px;
+  max-width: $course-card-max-width;
+  min-width: $course-card-min-width;
   margin: 1rem;
 }
 
@@ -316,20 +318,16 @@ $evaluation-score-color: var(--primary);
   padding: 20px;
   padding-top: 30px;
   margin: 1rem;
-  min-width: 200px;
+  min-width: $course-card-min-width;
+  max-width: $course-card-max-width;
 }
 
-.course-topics-table.course-topics-table {
-  max-width: 300px;
+.course-topic-container {
+  list-style: lower-roman;
 }
 
-.course-topics-table.course-topics-table th,
-.course-topics-table.course-topics-table td {
-  padding: 0.4rem;
-}
-
-.course-topics-table.course-topics-table td {
-  padding-left: 1.5rem;
+.course-topic-wrapper {
+  padding: 0.25em 0.5em;
 }
 
 // Utility classes
