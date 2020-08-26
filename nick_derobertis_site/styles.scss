@@ -87,7 +87,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  min-width: 100%;
+  width: 100%;
   height: $height;
   opacity: $opacity;
   object-position: center;
@@ -504,6 +504,13 @@ $logo-fg: white;
 body {
   background-color: $default-bg;
   padding-bottom: 0;
+
+  // TODO: determine why overflow-x: hidden is needed.
+  //
+  // Without it,
+  // then X is scrollable with a tiny area outside the
+  // body on the right
+  overflow-x: hidden;
 }
 
 .nd-logo-background {
