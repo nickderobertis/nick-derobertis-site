@@ -24,8 +24,8 @@
   stroke: $primary;
 }
 
-.d-contents.d-contents {
-  display: contents;
+.btn-narrow.btn-narrow {
+  padding: 0.46875rem 0.7rem;
 }
 
 .dropdown-submenu {
@@ -329,6 +329,10 @@ $course-card-max-width: 300px;
 // Utility classes
 .width-unset {
   width: unset !important;
+}
+
+.d-contents.d-contents {
+  display: contents;
 }
 
 .no-link {

@@ -2,12 +2,16 @@ from typing import Dict, Any, Sequence
 
 import param
 from bokeh.events import Event
+from panel.widgets import Widget
 
+from nick_derobertis_site.common.component import HTMLComponent
 from nick_derobertis_site.common.event_elem import EventElement
 from nick_derobertis_site.common.providers.page_service import HasPageService
+from nick_derobertis_site.common.providers.pdf import HasPDFModel
+from nick_derobertis_site.general.utils import PLACEHOLDER_PDF
 
 
-class ButtonBase(HasPageService, EventElement):
+class PageButtonBase(HasPageService, EventElement):
     display_text = param.String()
     page_path = param.String()
     button_css_classes: Sequence[str] = ('btn',)
@@ -36,5 +40,38 @@ class ButtonBase(HasPageService, EventElement):
         self.page_service.navigate(self.page_path)
 
 
-class PrimaryButton(ButtonBase):
-    button_css_classes = tuple(ButtonBase.button_css_classes) + ('btn-primary',)
+class PDFButtonBase(HTMLComponent):
+    """
+    :Notes:
+
+        This requires jQuery to work, it is included in the home
+        template targeting the class has-pdf
+    """
+    _default_button_css_classes: Sequence[str] = ('btn',)
+    display_text = param.String()
+    button_css_classes: str = param.List(class_=str, default=list(_default_button_css_classes))
+    pdf_src: str = param.String(default=PLACEHOLDER_PDF)
+    template_str = '<button class="has-pdf {{ button_css_classes | join(" ") }}" data-pdf-src="{{ pdf_src }}">{{ display_text }}</button>'
+
+    def __init__(self, **params):
+        if 'button_css_classes' not in params:
+            params['button_css_classes'] = list(self._default_button_css_classes)
+        else:
+            params['button_css_classes'].extend(self._default_button_css_classes)
+        super().__init__(**params)
+
+
+class PrimaryButton(PageButtonBase):
+    button_css_classes = tuple(PageButtonBase.button_css_classes) + ('btn-primary',)
+
+
+class NarrowPrimaryButton(PrimaryButton):
+    button_css_classes = tuple(PrimaryButton.button_css_classes) + ('btn-narrow',)
+
+
+class PrimaryPDFButton(PDFButtonBase):
+    _default_button_css_classes = tuple(PDFButtonBase._default_button_css_classes) + ('btn-primary',)
+
+
+class NarrowPrimaryPDFButton(PrimaryPDFButton):
+    _default_button_css_classes = tuple(PrimaryPDFButton._default_button_css_classes) + ('btn-narrow',)

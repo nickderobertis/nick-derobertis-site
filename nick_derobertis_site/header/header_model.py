@@ -1,11 +1,12 @@
 import param
 
 from nick_derobertis_site.common.model import ComponentModel
+from nick_derobertis_site.common.providers.pdf import HasPDFModel
 from nick_derobertis_site.general.models.image import ImageModel
 from nick_derobertis_site.general.utils import PLACEHOLDER_IMAGE
 
 
-class HeaderModel(ComponentModel):
+class HeaderModel(HasPDFModel, ComponentModel):
     logo_src = param.String(default=PLACEHOLDER_IMAGE)
     logo = param.ClassSelector(class_=ImageModel)
 
