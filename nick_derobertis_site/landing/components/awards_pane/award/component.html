@@ -1,0 +1,17 @@
+<div class="award-container">
+  <div class="award-images-container">
+    {{ model.image_src }}
+    <div class="award-specific-image-wrapper">
+      {% if model.logo_svg_text %}
+        {{ model.logo_svg_text }}
+      {% else %}
+        <i class="{{ model.logo_fa_class_str }}"></i>
+      {% endif %}
+    </div>
+  </div>
+  <div class="award-description-container">
+    {% for line in model.description_lines %}
+      <p class="award-description text-uppercase">{{ line }}</p>
+    {% endfor %}
+  </div>
+</div>

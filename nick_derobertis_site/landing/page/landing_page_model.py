@@ -1,5 +1,7 @@
 import param
 
+from nick_derobertis_site.landing.components.awards_pane.awards_pane_component import AwardsPaneComponent
+from nick_derobertis_site.landing.components.awards_pane.awards_pane_model import AwardsPaneModel
 from nick_derobertis_site.landing.components.card.card_component import CardComponent
 from nick_derobertis_site.landing.components.card.card_model import CardModel
 from nick_derobertis_site.common.page_model import PageModel
@@ -22,11 +24,14 @@ class LandingPageModel(PageModel):
     skills = param.ClassSelector(class_=SkillsPaneComponent)
     story_highlight_model = param.ClassSelector(class_=StoryHighlightPaneModel)
     story_highlight = param.ClassSelector(class_=StoryHighlightPaneComponent)
+    awards_model = param.ClassSelector(class_=AwardsPaneModel)
+    awards = param.ClassSelector(class_=AwardsPaneComponent)
 
     def __init__(self, **params):
         params['carousel'] = CarouselComponent(model=params['carousel_model'])
         params['skills'] = SkillsPaneComponent(model=params['skills_model'])
         params['story_highlight'] = StoryHighlightPaneComponent(model=params['story_highlight_model'])
+        params['awards'] = AwardsPaneComponent(model=params['awards_model'])
         super().__init__(**params)
         self._set_cards()
 
