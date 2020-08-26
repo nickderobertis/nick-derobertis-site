@@ -349,6 +349,7 @@ $theme-colors: (
   "tertiary": #38483b,
   "tertiary-offset": white,
   "background": #fbfcfd,
+  "gold": #e2ca11,
 );
 
 @import "bootstrap-material/scss/bootstrap-material-design";
@@ -514,9 +515,7 @@ $skill-bar-border-radius: 20px;
 }
 
 $award-laurel-size: 200px;
-$award-image-width: 150px;
-$award-image-height: 110px;
-$award-fa-size: 70px;
+$award-image-width: 125px;
 
 .awards-heading {
   margin-top: 0;
@@ -526,15 +525,19 @@ $award-fa-size: 70px;
   width: 300px;
   height: 300px;
   position: relative;
-  border-radius: 30px;
+  border-radius: 70px;
   margin: 20px;
 }
 
-.award-images-container > svg {
+.award-image-wrapper {
+  position: absolute;
+  height: $award-laurel-size;
+  width: 100%;
+}
+
+.award-image-wrapper > svg {
   width: $award-laurel-size;
   height: $award-laurel-size;
-  position: absolute;
-  left: calc(50% - #{$award-laurel-size} / 2);
 }
 
 .award-images-container {
@@ -543,21 +546,27 @@ $award-fa-size: 70px;
 }
 
 .award-specific-image-wrapper {
-  position: absolute;
-  top: calc(50% - #{$award-image-height} / 2);
-  left: calc(50% - #{$award-image-width} / 2);
   width: $award-image-width;
 }
 
 .award-specific-fa-wrapper {
-  position: absolute;
   font-size: 4em;
-  left: calc(50% - #{$award-fa-size} / 2);
-  top: 60px;
+}
+
+.award-received {
+  position: absolute;
+  top: 20%;
+  color: var(--gold);
+  font-weight: bold;
 }
 
 .award-description-container {
   text-align: center;
+  line-height: 0.8em;
+}
+
+.award-header {
+  margin-bottom: 0.8em;
 }
 
 .jumbotron {
