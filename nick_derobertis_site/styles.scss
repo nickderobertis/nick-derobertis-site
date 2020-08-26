@@ -138,6 +138,15 @@
   text-align: center;
 }
 
+$footer-height: 61px;
+
+.footer {
+  height: $footer-height;
+  background-color: var(--dark);
+  color: white;
+  padding: calc(#{$footer-height} / 2 - 0.6em);
+}
+
 .background-loader-container {
   z-index: -1000;
   position: fixed;
@@ -484,6 +493,7 @@ $logo-fg: white;
 
 body {
   background-color: $default-bg;
+  padding-bottom: 0;
 }
 
 .nd-logo-background {

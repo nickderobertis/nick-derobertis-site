@@ -6,6 +6,8 @@ import param
 
 from nick_derobertis_site.common.container import Container
 from nick_derobertis_site.common.services.common import Services
+from nick_derobertis_site.footer.config import FOOTER_MODEL
+from nick_derobertis_site.footer.footer_component import FooterComponent
 from nick_derobertis_site.header.config import HEADER_MODEL
 from nick_derobertis_site.header.header_component import HeaderComponent
 from nick_derobertis_site.landing.config.page import LANDING_PAGE_MODEL
@@ -41,6 +43,8 @@ class HomeTemplate(pn.Template):
         self.add_panel('main', self.main)
         self.header = Container(HeaderComponent(model=HEADER_MODEL), name='header')
         self.add_panel('header', self.header)
+        self.footer = Container(FooterComponent(model=FOOTER_MODEL), name='footer')
+        self.add_panel('footer', self.footer)
 
     @param.depends("services.page_service.page", watch=True)
     def _update_main_container(self):
