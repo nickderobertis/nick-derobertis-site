@@ -7,6 +7,8 @@ from nick_derobertis_site.landing.components.card.card_model import CardModel
 from nick_derobertis_site.common.page_model import PageModel
 from nick_derobertis_site.landing.components.carousel.carousel_component import CarouselComponent
 from nick_derobertis_site.landing.components.carousel.carousel_model import CarouselModel
+from nick_derobertis_site.landing.components.contact_pane.contact_pane_component import ContactPaneComponent
+from nick_derobertis_site.landing.components.contact_pane.contact_pane_model import ContactPaneModel
 from nick_derobertis_site.landing.components.skills_pane.skills_pane_component import SkillsPaneComponent
 from nick_derobertis_site.landing.components.skills_pane.skills_pane_model import SkillsPaneModel
 from nick_derobertis_site.landing.components.story_highlight_pane.story_highlight_pane_component import \
@@ -26,11 +28,14 @@ class LandingPageModel(PageModel):
     story_highlight = param.ClassSelector(class_=StoryHighlightPaneComponent)
     awards_model = param.ClassSelector(class_=AwardsPaneModel)
     awards = param.ClassSelector(class_=AwardsPaneComponent)
+    contact_model = param.ClassSelector(class_=ContactPaneModel)
+    contact = param.ClassSelector(class_=ContactPaneComponent)
 
     def __init__(self, **params):
         params['carousel'] = CarouselComponent(model=params['carousel_model'])
         params['skills'] = SkillsPaneComponent(model=params['skills_model'])
         params['story_highlight'] = StoryHighlightPaneComponent(model=params['story_highlight_model'])
+        params['contact'] = ContactPaneComponent(model=params['contact_model'])
         params['awards'] = AwardsPaneComponent(model=params['awards_model'])
         super().__init__(**params)
         self._set_cards()
