@@ -300,11 +300,11 @@
         },
         "derobertis-cv": {
             "hashes": [
-                "sha256:1daf72a844976dbc39ba58bf35850cdb025a62121dae4047a8d4877bc4ee7336",
-                "sha256:a0fec50b140d7209eb9693c051b142fcbd8748fc67fac38f5ba5c1ad754cec9f"
+                "sha256:0955df4048bcce2e29e7626b3ae8d4fcbe752575ae7d2be7cbc29af31f656cc1",
+                "sha256:94183db0248272fea0dbf155bb717685a1c7025c2891211c992e7e2d1d89e977"
             ],
             "index": "pypi",
-            "version": "==0.5.2"
+            "version": "==0.5.3"
         },
         "docutils": {
             "hashes": [
