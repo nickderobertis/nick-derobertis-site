@@ -5,11 +5,12 @@ import param
 from derobertis_cv.models.course import CourseModel
 
 from nick_derobertis_site.common.model import ComponentModel
+from nick_derobertis_site.common.providers.pdf import HasPDFModel
 from nick_derobertis_site.software_page.software_card.software_card_component import SoftwareCardComponent
 from nick_derobertis_site.software_page.software_card.software_card_model import SoftwareCardModel
 
 
-class CoursePaneModel(ComponentModel):
+class CoursePaneModel(HasPDFModel, ComponentModel):
     title: str = param.String(default='My Course')
     description: str = param.String(default='Placeholder description')
     periods_taught: List[str] = param.List(class_=str)

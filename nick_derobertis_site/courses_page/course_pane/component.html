@@ -34,6 +34,11 @@
             </div>
           {% endif %}
         </div>
+        {% if syllabus_button %}
+          <div class="course-syllabus-wrapper">
+            {{ embed(syllabus_button) }}
+          </div>
+        {% endif %}
       </section>
     </div>
     <div class="col-md-7 d-flex flex-wrap align-content-center justify-content-center">

@@ -87,3 +87,5 @@ class NarrowPrimaryPDFButton(PrimaryPDFButton):
     _default_button_css_classes = tuple(PrimaryPDFButton._default_button_css_classes) + ('btn-narrow',)
 
 
+class RaisedPrimaryPDFButton(PrimaryPDFButton):
+    _default_button_css_classes = tuple(PrimaryPDFButton._default_button_css_classes) + ('btn-raised',)
