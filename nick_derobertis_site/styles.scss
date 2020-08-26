@@ -211,6 +211,127 @@
   @include banner-content-container;
 }
 
+$evaluation-score-color: var(--primary);
+
+.course-pane-heading {
+  letter-spacing: -0.02rem;
+  margin-top: 0;
+}
+
+.course-header-description-container {
+  padding: 15px;
+}
+
+.course-header-description-container > * {
+  margin-bottom: 1rem;
+}
+
+.course-university-logo-container {
+  max-width: fit-content;
+  text-align: center;
+}
+
+.course-pane {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.course-overview-container {
+  padding: 2rem;
+  width: 100%;
+}
+
+.course-overview-description {
+  padding: 20px 0;
+}
+
+.course-periods-taught-container {
+  width: 100%;
+  padding-bottom: 20px;
+}
+
+.course-periods-taught-container span {
+  margin: 5px;
+}
+
+.course-logos-container {
+  width: 100%;
+}
+
+.course-evaluations-container {
+  max-width: 150px;
+}
+
+.course-evaluations-logo-score-container {
+  padding-bottom: 5px;
+}
+
+.course-evaluations-score-container {
+  display: inline-block;
+  font-size: 1.5em;
+  padding-left: 10px;
+}
+
+.course-evaluations-score-wrapper {
+  color: $evaluation-score-color;
+  display: inline;
+  font-size: 1.35em;
+  padding-right: 5px;
+}
+
+.course-university-logo-wrapper {
+  padding-bottom: 10px;
+}
+
+.course-university-logo {
+  height: 40px;
+}
+
+.courses-section-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.courses-software-container {
+  width: 100%;
+  padding: 20px 0;
+}
+
+.courses-software-wrapper {
+  max-width: 300px;
+  min-width: 200px;
+  margin: 1rem;
+}
+
+.courses-software-wrapper .software-card {
+  min-height: unset;
+}
+
+.courses-topics-section-container {
+  width: 100%;
+  padding: 20px 0;
+}
+
+.course-topic-card.course-topic-card {
+  padding: 20px;
+  padding-top: 30px;
+  margin: 1rem;
+  min-width: 200px;
+}
+
+.course-topics-table.course-topics-table {
+  max-width: 300px;
+}
+
+.course-topics-table.course-topics-table th,
+.course-topics-table.course-topics-table td {
+  padding: 0.4rem;
+}
+
+.course-topics-table.course-topics-table td {
+  padding-left: 1.5rem;
+}
+
 // Utility classes
 .width-unset {
   width: unset !important;
@@ -423,6 +544,7 @@ $skill-bar-border-radius: 20px;
 }
 
 .software-card {
+  border-radius: 0.3rem;
   @include media-breakpoint-up(lg) {
     min-height: 500px;
   }

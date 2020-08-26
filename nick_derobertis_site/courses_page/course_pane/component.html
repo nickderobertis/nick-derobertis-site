@@ -1,9 +1,77 @@
 <div class="row course-pane{% if is_reversed %} flex-row-reverse{% endif %}">
-    <div class="col-md-7 course-header-description-container d-flex flex-column justify-content-center">
-      <h2 class="course-pane-heading">{{ model.title }}</h2>
-      <p class="lead">{{ model.description }}</p>
+    <div class="col-md-5 course-header-description-container d-flex flex-column justify-content-center">
+      <section class="course-overview-container">
+        <h2 class="featurette-heading course-pane-heading">{{ model.title }}</h2>
+        {% if model.course_id %}
+          <h4>{{ model.course_id }}</h4>
+        {% endif %}
+        <p class="course-overview-description lead">{{ model.description }}</p>
+        <div class="course-periods-taught-container d-flex flex-wrap justify-content-center">
+          {% for period in model.periods_taught %}
+            <span class="badge badge-pill badge-primary">{{ period }}</span>
+          {% endfor %}
+        </div>
+        <div class="course-logos-container d-flex justify-content-around">
+          {% if model.evaluation_score %}
+            <div class="course-evaluations-container d-flex flex-column align-items-center justify-content-between">
+                <div class="course-evaluations-logo-score-container d-flex align-items-center justify-content-between">
+                  <i class="fas fa-tasks fa-2x" aria-hidden="true"></i>
+                  <div class="course-evaluations-score-container d-flex align-items-center">
+                    <div class="course-evaluations-score-wrapper">
+                      {{ model.evaluation_score }}
+                    </div>/{{ model.evaluation_max_score }}
+                  </div>
+                </div>
+                <small class="text-uppercase">Evaluations</small>
+            </div>
+          {% endif %}
+          {% if model.university_name %}
+            <div class="course-university-logo-container d-flex flex-column justify-content-between">
+              <div class="course-university-logo-wrapper d-flex justify-content-center">
+                <img src="{{ model.university_logo_src }}" class="course-university-logo">
+              </div>
+              <small class="text-uppercase">{{ model.university_name }}</small>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+
+
+
     </div>
-    <div class="col-md-5 d-flex flex-wrap align-content-center justify-content-center">
-        <p>Placeholder content</p>
+    <div class="col-md-7 d-flex flex-wrap align-content-center justify-content-center">
+      {% if model.topics %}
+        <section class="courses-topics-section-container">
+          <h3 class="courses-section-header">Topics Covered</h3>
+          <div class="courses-topics-container d-flex flex-wrap justify-content-center">
+            {% for main_topic, child_topics in model.topics.items() %}
+              <div class="card shadow course-topic-card">
+                <table class="table course-topics-table">
+                  <tbody>
+                      <tr>
+                        <th>{{ main_topic }}</th>
+                      </tr>
+                      {% for child in child_topics %}
+                        <tr><td>{{ child }}</td></tr>
+                      {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+      {% if model.software %}
+        <section class="courses-software-container">
+          <h3 class="courses-section-header">View related software</h3>
+          <div class="courses-software-card-container d-flex flex-wrap justify-content-center">
+            {% for card in model.software %}
+              <div class="courses-software-wrapper">
+                {{ embed(card) }}
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
     </div>
 </div>
