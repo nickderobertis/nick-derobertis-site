@@ -1,13 +1,14 @@
-<div class="award-container">
+<div class="card award-container">
   <div class="award-images-container">
     {{ model.image_src }}
-    <div class="award-specific-image-wrapper">
-      {% if model.logo_svg_text %}
+    {% if model.logo_svg_text %}
+      <div class="award-specific-image-wrapper">
         {{ model.logo_svg_text }}
-      {% else %}
-        <i class="{{ model.logo_fa_class_str }}"></i>
-      {% endif %}
-    </div>
+       </div>
+    {% else %}
+      <i class="award-specific-fa-wrapper {{ model.logo_fa_class_str }}"></i>
+    {% endif %}
+    <small class="award-received">{{ model.received }}</small>
   </div>
   <div class="award-description-container">
     {% for line in model.description_lines %}

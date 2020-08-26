@@ -513,6 +513,53 @@ $skill-bar-border-radius: 20px;
   width: 14px;
 }
 
+$award-laurel-size: 200px;
+$award-image-width: 150px;
+$award-image-height: 110px;
+$award-fa-size: 70px;
+
+.awards-heading {
+  margin-top: 0;
+}
+
+.award-container {
+  width: 300px;
+  height: 300px;
+  position: relative;
+  border-radius: 30px;
+  margin: 20px;
+}
+
+.award-images-container > svg {
+  width: $award-laurel-size;
+  height: $award-laurel-size;
+  position: absolute;
+  left: calc(50% - #{$award-laurel-size} / 2);
+}
+
+.award-images-container {
+  position: relative;
+  height: $award-laurel-size;
+}
+
+.award-specific-image-wrapper {
+  position: absolute;
+  top: calc(50% - #{$award-image-height} / 2);
+  left: calc(50% - #{$award-image-width} / 2);
+  width: $award-image-width;
+}
+
+.award-specific-fa-wrapper {
+  position: absolute;
+  font-size: 4em;
+  left: calc(50% - #{$award-fa-size} / 2);
+  top: 60px;
+}
+
+.award-description-container {
+  text-align: center;
+}
+
 .jumbotron {
   padding-top: 3rem;
   padding-bottom: 3rem;
