@@ -37,6 +37,8 @@ class PageButtonBase(HasPageService, EventElement):
         return f'<button class="{css_class_str}">{params["display_text"]}</button>'
 
     def navigate_to_page(self, event: Event):
+        if self.page_path == '#':
+            return
         self.page_service.navigate(self.page_path)
 
 
@@ -61,8 +63,16 @@ class PDFButtonBase(HTMLComponent):
         super().__init__(**params)
 
 
+class SkillsButton(PageButtonBase):
+    button_css_classes = tuple(PageButtonBase.button_css_classes) + ('scroll-to-skills',)
+
+
 class PrimaryButton(PageButtonBase):
     button_css_classes = tuple(PageButtonBase.button_css_classes) + ('btn-primary',)
+
+
+class PrimarySkillsButton(SkillsButton):
+    button_css_classes = tuple(SkillsButton.button_css_classes) + ('btn-primary',)
 
 
 class NarrowPrimaryButton(PrimaryButton):
@@ -75,3 +85,5 @@ class PrimaryPDFButton(PDFButtonBase):
 
 class NarrowPrimaryPDFButton(PrimaryPDFButton):
     _default_button_css_classes = tuple(PrimaryPDFButton._default_button_css_classes) + ('btn-narrow',)
+
+

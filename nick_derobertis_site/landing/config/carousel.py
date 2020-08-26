@@ -3,14 +3,14 @@ import pathlib
 
 from nick_derobertis_site.general.config import IMAGES_PATH
 from nick_derobertis_site.general.models.image import ImageModel
-from nick_derobertis_site.general.widgets.button import PrimaryButton
+from nick_derobertis_site.general.widgets.button import PrimaryButton, PrimarySkillsButton
 from nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model import CarouselItemModel
 from nick_derobertis_site.landing.components.carousel.carousel_model import CarouselModel
 
 CAROUSEL_RESEARCH_BUTTON = PrimaryButton(display_text='Research', page_path='research')
 CAROUSEL_COURSES_BUTTON = PrimaryButton(display_text='Courses', page_path='courses')
 CAROUSEL_SOFTWARE_BUTTON = PrimaryButton(display_text='Software Projects', page_path='software')
-CAROUSEL_SKILLS_BUTTON = PrimaryButton(display_text='Skills', page_path='software')  # TODO: scroll to skills section
+CAROUSEL_SKILLS_BUTTON = PrimarySkillsButton(display_text='Skills', page_path='#')
 
 DATA_SCIENCE_BANNER_IMAGE_MODEL = ImageModel(image_path=os.path.join(IMAGES_PATH, 'data-science-banner.jpg'))
 RESEARCH_IMAGE_MODEL = ImageModel(image_path=os.path.join(IMAGES_PATH, 'finance-research-banner.jpg'))
