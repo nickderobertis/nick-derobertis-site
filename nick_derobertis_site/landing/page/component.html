@@ -1,37 +1,38 @@
-{{ embed(model.carousel) }}
+<div class="page-container">
+  {{ embed(model.carousel) }}
 
-<!-- Marketing messaging and featurettes
-================================================== -->
-<!-- Wrap the rest of the page in another container to center all the content. -->
+  <!-- Marketing messaging and featurettes
+  ================================================== -->
+  <!-- Wrap the rest of the page in another container to center all the content. -->
 
-<div class="container marketing">
+  <div class="container marketing">
 
-  <!-- Three columns of text below the carousel -->
-  <div class="row">
-    {% for card in model.cards %}
-      {{ embed(card, css_classes=["col-md-4"]) }}
-    {% endfor %}
-  </div><!-- /.row -->
+    <!-- Three columns of text below the carousel -->
+    <div class="row">
+      {% for card in model.cards %}
+        {{ embed(card, css_classes=["col-md-4"]) }}
+      {% endfor %}
+    </div><!-- /.row -->
 
 
-  <!-- START THE FEATURETTES -->
+    <!-- START THE FEATURETTES -->
 
-  <hr class="featurette-divider">
+    <hr class="featurette-divider">
 
-  {{ embed(model.story_highlight) }}
+    {{ embed(model.story_highlight) }}
 
-  <hr class="featurette-divider">
+    <hr class="featurette-divider">
 
-  {{ embed(model.skills) }}
+    {{ embed(model.skills) }}
 
-  <hr class="featurette-divider">
+    <hr class="featurette-divider">
 
-  {{ embed(model.awards) }}
+    {{ embed(model.awards) }}
 
-  <hr class="featurette-divider">
+    <hr class="featurette-divider">
 
-  {{ embed(model.contact) }}
+    {{ embed(model.contact) }}
 
-  <!-- /END THE FEATURETTES -->
 
-</div><!-- /.container -->
+  </div>
+</div>

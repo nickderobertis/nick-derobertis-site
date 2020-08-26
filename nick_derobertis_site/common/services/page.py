@@ -17,6 +17,7 @@ class PageService(param.Parameterized):
     page = param.ObjectSelector(allow_None=False, doc="The currently active page")
     routes = param.Dict()
     default_page = param.ClassSelector(class_=HTMLComponent, constant=True)
+    loading_page = param.ClassSelector(class_=HTMLComponent, constant=True)
     load_default_page = param.Action()
 
     def __init__(self, **params):
@@ -104,5 +105,6 @@ class PageService(param.Parameterized):
         self.page = self.default_page
 
     def navigate(self, route: str):
+        self.page = self.loading_page
         page = self.routes[route]
         self.page = page

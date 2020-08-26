@@ -20,7 +20,8 @@ def get_default_services() -> Services:
     from nick_derobertis_site import page_config as pc
 
     page_service = PageService(
-        routes=pc.ROUTES, page=pc.LANDING_PAGE, default_page=pc.LANDING_PAGE
+        routes=pc.ROUTES, page=pc.LANDING_PAGE, default_page=pc.LANDING_PAGE,
+        loading_page=pc.LOADING_PAGE,
     )
     services = Services(page_service=page_service)
     return services
