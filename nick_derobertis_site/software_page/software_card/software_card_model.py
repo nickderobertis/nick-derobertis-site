@@ -7,6 +7,7 @@ from nick_derobertis_site.general.utils import PLACEHOLDER_IMAGE
 
 class SoftwareCardModel(ComponentModel):
     image_src: str = param.String(default=PLACEHOLDER_IMAGE)
+    fa_class_str: str = param.String(default='fas fa-microchip')
     body_text: str = param.String(default='Placeholder body')
     header_text: str = param.String(default='Title')
     small_header_text: str = param.String(default='Small Title')
@@ -16,7 +17,7 @@ class SoftwareCardModel(ComponentModel):
 
     @classmethod
     def from_software_project(cls, project: SoftwareProject):
-        return cls(
+        params = dict(
             body_text=project.description,
             header_text=project.display_title,
             small_header_text=project.title,
@@ -25,6 +26,11 @@ class SoftwareCardModel(ComponentModel):
             docs_url=project.docs_url or '',
             accent_text=f'{project.commits} Commits, {project.loc:,.0f} LOC'
         )
+
+        if project.logo_fa_icon_class_str is not None:
+            params.update(fa_class_str=project.logo_fa_icon_class_str)
+
+        return cls(**params)
 
 
 
