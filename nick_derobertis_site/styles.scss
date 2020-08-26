@@ -191,10 +191,6 @@
   margin-top: 0;
 }
 
-.research-header-description-container {
-  padding: 15px;
-}
-
 .research-header-description-container > * {
   margin-bottom: 1rem;
 }
@@ -231,11 +227,6 @@ $course-card-max-width: 300px;
 .course-university-logo-container {
   max-width: fit-content;
   text-align: center;
-}
-
-.course-pane {
-  padding-top: 20px;
-  padding-bottom: 20px;
 }
 
 .course-overview-container {
@@ -296,7 +287,7 @@ $course-card-max-width: 300px;
 
 .courses-software-container {
   width: 100%;
-  padding: 20px 0;
+  padding-bottom: 20px;
 }
 
 .courses-software-wrapper {
@@ -324,6 +315,7 @@ $course-card-max-width: 300px;
   margin: 1rem;
   min-width: $course-card-min-width;
   max-width: $course-card-max-width;
+  color: black;
 }
 
 .course-topic-container {
@@ -555,6 +547,12 @@ $skill-bar-border-radius: 20px;
   }
 }
 
+.software-card.software-card.software-card,
+.software-card.software-card.software-card * {
+  color: black;
+  background-color: white;
+}
+
 .software-card-img-placeholder {
   font-size: 5em;
   @include media-breakpoint-up(lg) {
@@ -593,6 +591,25 @@ $research-panel-offset-fg: var(--tertiary-offset);
   @include set-dual-colors(
     $primary: $research-panel-offset-fg,
     $secondary: $research-panel-offset-bg
+  );
+}
+
+$course-panel-fg: var(--secondary);
+$course-panel-bg: $default-bg;
+$course-panel-offset-bg: var(--tertiary);
+$course-panel-offset-fg: var(--tertiary-offset);
+
+.course-pane *:not(.no-color) {
+  @include set-dual-colors(
+    $primary: $course-panel-fg,
+    $secondary: $course-panel-bg
+  );
+}
+
+.course-pane-offset.course-pane-offset *:not(.no-color) {
+  @include set-dual-colors(
+    $primary: $course-panel-offset-fg,
+    $secondary: $course-panel-offset-bg
   );
 }
 

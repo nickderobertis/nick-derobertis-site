@@ -1,5 +1,11 @@
 {{ embed(model.banner) }}
 
-{% for pane in model.panes %}
-  {{ embed(pane) }}
-{% endfor %}
+<div class="course-pane-container">
+  {% for pane in model.panes %}
+    {% if loop.index0 % 2 == 0 %}
+      {{ embed(pane) }}
+    {% else %}
+      {{ embed(pane, css_classes=['course-pane-offset']) }}
+    {% endif %}
+  {% endfor %}
+</div>
