@@ -505,7 +505,7 @@ body {
   background-color: $default-bg;
   padding-bottom: 0;
 
-  // TODO: determine why overflow-x: hidden is needed.
+  // TODO [$5f48ee221eb7f00008112573]: determine why overflow-x: hidden is needed.
   //
   // Without it,
   // then X is scrollable with a tiny area outside the
