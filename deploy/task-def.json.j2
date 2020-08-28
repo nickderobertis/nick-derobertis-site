@@ -1,10 +1,10 @@
 {
-    "family": "nick-derobertis-site-task-description",
+    "family": "{{ app_name }}-task-description",
     "networkMode": "awsvpc",
     "containerDefinitions": [
         {
-            "name": "nick-derobertis-site-main-app",
-            "image": "nick-derobertis-site:latest",
+            "name": "{{ app_name }}-main-app",
+            "image": "{{ app_name }}:latest",
             "portMappings": [
                 {
                     "containerPort": 80,
@@ -25,6 +25,7 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
+    "executionRoleArn": "arn:aws:iam::{{ aws_account_id }}:role/{{ app_name }}-execution-role",
     "cpu": "256",
     "memory": "512"
 }
