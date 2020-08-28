@@ -300,11 +300,11 @@
         },
         "derobertis-cv": {
             "hashes": [
-                "sha256:610e6fe808f2be5c7ba790fb0115e2ba061f3b4fd894e2d7a4569009390bf88a",
-                "sha256:f1652637858307b176bdde33f12dd245d8a85c0d5a97d434f72502f4821de668"
+                "sha256:0b592f244141812f8eb5f583a0f8222792c786462fc80fba18886502a5502910",
+                "sha256:c46c382f2e43d8e4f1616d7a95f0d5725ef54a24cab2ed3bf6770d14fe76d852"
             ],
             "index": "pypi",
-            "version": "==0.5.5"
+            "version": "==0.5.6"
         },
         "docutils": {
             "hashes": [
@@ -857,10 +857,10 @@
         },
         "project-report": {
             "hashes": [
-                "sha256:3b5a03974adc58b98d78a63e2535bb953bc24dc310529314972e2d5e91bd9953",
-                "sha256:cf89912b217d0ed0598f63513b7f095d33fda2c1ac42a7562ec4f12073c61902"
+                "sha256:55e90b12beaf0514460e169bfc582eebb74a3d436def16ddf84b63276e04c281",
+                "sha256:c33b90ab31e9551c382007e1f78da409ac8e1f4e8b8e2228062989d0f54d977d"
             ],
-            "version": "==0.4.0"
+            "version": "==0.4.1"
         },
         "prometheus-client": {
             "hashes": [

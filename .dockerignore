@@ -1,0 +1,8 @@
+**/__pycache__/
+**/.git
+**/.ipynb_checkpoints
+**/.mypy_cache/
+**/.pytest_cache
+**/.venv/
+**/.vscode/
+**/.env
