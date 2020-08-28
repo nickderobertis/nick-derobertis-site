@@ -1,0 +1,36 @@
+nick\_derobertis\_site.courses\_page package
+============================================
+
+.. automodule:: nick_derobertis_site.courses_page
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   nick_derobertis_site.courses_page.config
+   nick_derobertis_site.courses_page.course_pane
+   nick_derobertis_site.courses_page.courses_banner
+
+Submodules
+----------
+
+nick\_derobertis\_site.courses\_page.courses\_page\_component module
+--------------------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.courses_page.courses_page_component
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.courses\_page.courses\_page\_model module
+----------------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.courses_page.courses_page_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

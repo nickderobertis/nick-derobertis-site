@@ -1,0 +1,43 @@
+nick\_derobertis\_site.research\_page.config package
+====================================================
+
+.. automodule:: nick_derobertis_site.research_page.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+nick\_derobertis\_site.research\_page.config.banner module
+----------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.research_page.config.banner
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.research\_page.config.categories module
+--------------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.research_page.config.categories
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.research\_page.config.page module
+--------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.research_page.config.page
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.research\_page.config.panes module
+---------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.research_page.config.panes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

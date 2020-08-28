@@ -1,0 +1,19 @@
+nick\_derobertis\_site.landing.components package
+=================================================
+
+.. automodule:: nick_derobertis_site.landing.components
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   nick_derobertis_site.landing.components.awards_pane
+   nick_derobertis_site.landing.components.card
+   nick_derobertis_site.landing.components.carousel
+   nick_derobertis_site.landing.components.contact_pane
+   nick_derobertis_site.landing.components.skills_pane
+   nick_derobertis_site.landing.components.story_highlight_pane

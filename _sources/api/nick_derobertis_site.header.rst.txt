@@ -1,0 +1,35 @@
+nick\_derobertis\_site.header package
+=====================================
+
+.. automodule:: nick_derobertis_site.header
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+nick\_derobertis\_site.header.config module
+-------------------------------------------
+
+.. automodule:: nick_derobertis_site.header.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.header.header\_component module
+------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.header.header_component
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.header.header\_model module
+--------------------------------------------------
+
+.. automodule:: nick_derobertis_site.header.header_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

@@ -1,0 +1,34 @@
+nick\_derobertis\_site.landing.components.awards\_pane package
+==============================================================
+
+.. automodule:: nick_derobertis_site.landing.components.awards_pane
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   nick_derobertis_site.landing.components.awards_pane.award
+
+Submodules
+----------
+
+nick\_derobertis\_site.landing.components.awards\_pane.awards\_pane\_component module
+-------------------------------------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.components.awards_pane.awards_pane_component
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.landing.components.awards\_pane.awards\_pane\_model module
+---------------------------------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.components.awards_pane.awards_pane_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

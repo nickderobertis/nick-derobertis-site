@@ -1,0 +1,67 @@
+nick\_derobertis\_site.landing.config package
+=============================================
+
+.. automodule:: nick_derobertis_site.landing.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+nick\_derobertis\_site.landing.config.awards module
+---------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.config.awards
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.landing.config.cards module
+--------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.config.cards
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.landing.config.carousel module
+-----------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.config.carousel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.landing.config.contact module
+----------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.config.contact
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.landing.config.page module
+-------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.config.page
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.landing.config.skills module
+---------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.config.skills
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.landing.config.story\_highlight module
+-------------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.landing.config.story_highlight
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

@@ -1,0 +1,27 @@
+nick\_derobertis\_site.courses\_page.course\_pane package
+=========================================================
+
+.. automodule:: nick_derobertis_site.courses_page.course_pane
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+nick\_derobertis\_site.courses\_page.course\_pane.course\_pane\_component module
+--------------------------------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.courses_page.course_pane.course_pane_component
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.courses\_page.course\_pane.course\_pane\_model module
+----------------------------------------------------------------------------
+
+.. automodule:: nick_derobertis_site.courses_page.course_pane.course_pane_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

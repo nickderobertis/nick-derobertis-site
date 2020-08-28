@@ -1,0 +1,61 @@
+nick\_derobertis\_site package
+==============================
+
+.. automodule:: nick_derobertis_site
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   nick_derobertis_site.common
+   nick_derobertis_site.courses_page
+   nick_derobertis_site.footer
+   nick_derobertis_site.gen_content
+   nick_derobertis_site.general
+   nick_derobertis_site.header
+   nick_derobertis_site.landing
+   nick_derobertis_site.loading_page
+   nick_derobertis_site.research_page
+   nick_derobertis_site.software_page
+   nick_derobertis_site.story_page
+   nick_derobertis_site.templates
+
+Submodules
+----------
+
+nick\_derobertis\_site.home module
+----------------------------------
+
+.. automodule:: nick_derobertis_site.home
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.logger module
+------------------------------------
+
+.. automodule:: nick_derobertis_site.logger
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.page\_config module
+------------------------------------------
+
+.. automodule:: nick_derobertis_site.page_config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.service\_config module
+---------------------------------------------
+
+.. automodule:: nick_derobertis_site.service_config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

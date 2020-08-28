@@ -1,0 +1,35 @@
+nick\_derobertis\_site.general package
+======================================
+
+.. automodule:: nick_derobertis_site.general
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   nick_derobertis_site.general.models
+   nick_derobertis_site.general.widgets
+
+Submodules
+----------
+
+nick\_derobertis\_site.general.config module
+--------------------------------------------
+
+.. automodule:: nick_derobertis_site.general.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.general.utils module
+-------------------------------------------
+
+.. automodule:: nick_derobertis_site.general.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

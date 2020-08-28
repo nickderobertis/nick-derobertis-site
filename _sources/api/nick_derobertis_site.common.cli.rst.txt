@@ -1,0 +1,19 @@
+nick\_derobertis\_site.common.cli package
+=========================================
+
+.. automodule:: nick_derobertis_site.common.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+nick\_derobertis\_site.common.cli.create module
+-----------------------------------------------
+
+.. automodule:: nick_derobertis_site.common.cli.create
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

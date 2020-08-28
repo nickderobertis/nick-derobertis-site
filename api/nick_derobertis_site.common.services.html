@@ -1,0 +1,487 @@
+
+
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>nick_derobertis_site.common.services package &mdash; nick-derobertis-site 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/sphinx_paramlinks.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="nick_derobertis_site.courses_page package" href="nick_derobertis_site.courses_page.html" />
+    <link rel="prev" title="nick_derobertis_site.common.providers package" href="nick_derobertis_site.common.providers.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> nick-derobertis-site
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Getting started with nick-derobertis-site</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">This is my gallery</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">nick_derobertis_site</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="nick_derobertis_site.html">nick_derobertis_site package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="nick_derobertis_site.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="nick_derobertis_site.common.html">nick_derobertis_site.common package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.courses_page.html">nick_derobertis_site.courses_page package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.footer.html">nick_derobertis_site.footer package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.gen_content.html">nick_derobertis_site.gen_content package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.general.html">nick_derobertis_site.general package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.header.html">nick_derobertis_site.header package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.landing.html">nick_derobertis_site.landing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.loading_page.html">nick_derobertis_site.loading_page package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.research_page.html">nick_derobertis_site.research_page package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.software_page.html">nick_derobertis_site.software_page package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.story_page.html">nick_derobertis_site.story_page package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.templates.html">nick_derobertis_site.templates package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#nick-derobertis-site-home-module">nick_derobertis_site.home module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#module-nick_derobertis_site.logger">nick_derobertis_site.logger module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#nick-derobertis-site-page-config-module">nick_derobertis_site.page_config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#nick-derobertis-site-service-config-module">nick_derobertis_site.service_config module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">nick-derobertis-site</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">nick_derobertis_site</a> &raquo;</li>
+        
+          <li><a href="nick_derobertis_site.html">nick_derobertis_site package</a> &raquo;</li>
+        
+          <li><a href="nick_derobertis_site.common.html">nick_derobertis_site.common package</a> &raquo;</li>
+        
+      <li>nick_derobertis_site.common.services package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/nick_derobertis_site.common.services.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-nick_derobertis_site.common.services">
+<span id="nick-derobertis-site-common-services-package"></span><h1>nick_derobertis_site.common.services package<a class="headerlink" href="#module-nick_derobertis_site.common.services" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-nick_derobertis_site.common.services.common">
+<span id="nick-derobertis-site-common-services-common-module"></span><h2>nick_derobertis_site.common.services.common module<a class="headerlink" href="#module-nick_derobertis_site.common.services.common" title="Permalink to this headline">¶</a></h2>
+<p>Collection of services which are used globally</p>
+<dl class="py class">
+<dt id="nick_derobertis_site.common.services.common.Services">
+<em class="property">class </em><code class="sig-prename descclassname">nick_derobertis_site.common.services.common.</code><code class="sig-name descname">Services</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">params</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/common.html#Services"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.common.Services" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">param.parameterized.Parameterized</span></code></p>
+<p>params(page_service=ClassSelector, name=String)
+The Services is a placeholder for the different services required by an Application
+[1;32mParameters of ‘Services’
+========================
+[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName          Value       Type        Mode  [0m</p>
+<p>page_service   None  ClassSelector  V RW AN</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34mpage_service: &lt; No docstring available &gt;[0m</p>
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.common.Services.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">params</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/common.html#Services.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.common.Services.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.common.Services.name">
+<code class="sig-name descname">name</code><em class="property"> = 'Services'</em><a class="headerlink" href="#nick_derobertis_site.common.services.common.Services.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.common.Services.page_service">
+<code class="sig-name descname">page_service</code><em class="property"> = None</em><a class="headerlink" href="#nick_derobertis_site.common.services.common.Services.page_service" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.common.Services.param">
+<code class="sig-name descname">param</code><em class="property"> = &lt;param.parameterized.Parameters object&gt;</em><a class="headerlink" href="#nick_derobertis_site.common.services.common.Services.param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="nick_derobertis_site.common.services.common.get_default_services">
+<code class="sig-prename descclassname">nick_derobertis_site.common.services.common.</code><code class="sig-name descname">get_default_services</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/common.html#get_default_services"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.common.get_default_services" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#nick_derobertis_site.common.services.common.Services" title="nick_derobertis_site.common.services.common.Services"><code class="xref py py-class docutils literal notranslate"><span class="pre">Services</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-nick_derobertis_site.common.services.page">
+<span id="nick-derobertis-site-common-services-page-module"></span><h2>nick_derobertis_site.common.services.page module<a class="headerlink" href="#module-nick_derobertis_site.common.services.page" title="Permalink to this headline">¶</a></h2>
+<p>This module contains a CRUD Service for Pages</p>
+<dl class="py class">
+<dt id="nick_derobertis_site.common.services.page.PageService">
+<em class="property">class </em><code class="sig-prename descclassname">nick_derobertis_site.common.services.page.</code><code class="sig-name descname">PageService</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">params</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">param.parameterized.Parameterized</span></code></p>
+<p>params(default_page=ClassSelector, load_default_page=Action, loading_page=ClassSelector, page=ObjectSelector, pages=List, routes=Dict, name=String)
+A CRUD Service for Pages</p>
+<blockquote>
+<div><p>Notes:
+- The pages list is kept sorted.
+- DON’T change the pages list manually. Use the functions of the service</p>
+</div></blockquote>
+<p>[0m
+[1;31mParameters changed from their default values are marked in red.[0m
+[1;36mSoft bound values are marked in cyan.[0m
+C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
+<p>[1;34mName               Value       Type         Bounds     Mode  [0m</p>
+<p>default_page        None  ClassSelector              C RW AN 
+load_default_page   None      Action                 V RW AN 
+loading_page        None  ClassSelector              C RW AN 
+page                None  ObjectSelector               V RW  
+pages                []        List       (0, None)    C RW  
+routes              None       Dict                  V RW AN</p>
+<p>[1;32mParameter docstrings:
+=====================[0m</p>
+<p>[1;34mdefault_page:      &lt; No docstring available &gt;[0m
+[1;31mload_default_page: &lt; No docstring available &gt;[0m
+[1;34mloading_page:      &lt; No docstring available &gt;[0m
+[1;31mpage:              The currently active page[0m
+[1;34mpages:             &lt; No docstring available &gt;[0m
+[1;31mroutes:            &lt; No docstring available &gt;[0m</p>
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">params</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.bulk_create">
+<code class="sig-name descname">bulk_create</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pages</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.bulk_create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.bulk_create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the list of pages
+Args:</p>
+<blockquote>
+<div><p>pages (List[Page]): A list of Pages to create</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.create">
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">page</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the specified Page
+Args:</p>
+<blockquote>
+<div><p>page (Page): A Page to create</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.page.PageService.default_page">
+<code class="sig-name descname">default_page</code><em class="property"> = None</em><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.default_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.delete">
+<code class="sig-name descname">delete</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">page</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes the given page
+Args:</p>
+<blockquote>
+<div><p>page (Page): [description]</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.page.PageService.load_default_page">
+<code class="sig-name descname">load_default_page</code><em class="property"> = None</em><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.load_default_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.page.PageService.loading_page">
+<code class="sig-name descname">loading_page</code><em class="property"> = None</em><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.loading_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.page.PageService.name">
+<code class="sig-name descname">name</code><em class="property"> = 'PageService'</em><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.navigate">
+<code class="sig-name descname">navigate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">route</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.navigate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.navigate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.page.PageService.page">
+<code class="sig-name descname">page</code><em class="property"> = None</em><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.page.PageService.pages">
+<code class="sig-name descname">pages</code><em class="property"> = []</em><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.pages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.page.PageService.param">
+<code class="sig-name descname">param</code><em class="property"> = &lt;param.parameterized.Parameters object&gt;</em><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.param" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Page with the given name
+Args:</p>
+<blockquote>
+<div><p>name (str): The name of the Page to return</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Optional[Page]: The Page with the given name if it exists. Otherwise None</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.8)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="nick_derobertis_site.common.html#nick_derobertis_site.common.component.HTMLComponent" title="nick_derobertis_site.common.component.HTMLComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTMLComponent</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets to the defaults</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="nick_derobertis_site.common.services.page.PageService.routes">
+<code class="sig-name descname">routes</code><em class="property"> = None</em><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.routes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.set_default_page">
+<code class="sig-name descname">set_default_page</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">page</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.set_default_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.set_default_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the default_page to the specified page
+Args:</p>
+<blockquote>
+<div><p>page (Page): The new default_page</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nick_derobertis_site.common.services.page.PageService.update">
+<code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">page</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/common/services/page.html#PageService.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.common.services.page.PageService.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the given page
+Args:</p>
+<blockquote>
+<div><p>page (Page): A Page to update</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="nick_derobertis_site.courses_page.html" class="btn btn-neutral float-right" title="nick_derobertis_site.courses_page package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nick_derobertis_site.common.providers.html" class="btn btn-neutral float-left" title="nick_derobertis_site.common.providers package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Nick DeRobertis
+
+    </p>
+  </div>
+    
+    
+      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-175183613-1', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+   
+
+</body>
+</html>

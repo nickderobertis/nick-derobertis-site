@@ -1,0 +1,19 @@
+nick\_derobertis\_site.gen\_content package
+===========================================
+
+.. automodule:: nick_derobertis_site.gen_content
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+nick\_derobertis\_site.gen\_content.pdfs module
+-----------------------------------------------
+
+.. automodule:: nick_derobertis_site.gen_content.pdfs
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
