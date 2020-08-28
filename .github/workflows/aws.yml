@@ -50,14 +50,14 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
     - name: Install dependencies
-        run: |
-          pipenv sync
+      run: |
+        pipenv sync
     - name: Create ECR task definition JSON
-        run: |
-          pipenv run python deploy/create_task_def.py
-        env:
-          AWS_ROOT_ACCOUNT_ID: ${{ secrets.AWS_ROOT_ACCOUNT_ID }}
-          DEPLOY_APP_NAME: nick-derobertis-site
+      run: |
+        pipenv run python deploy/create_task_def.py
+      env:
+        AWS_ROOT_ACCOUNT_ID: ${{ secrets.AWS_ROOT_ACCOUNT_ID }}
+        DEPLOY_APP_NAME: nick-derobertis-site
 
     - name: Login to Amazon ECR
       id: login-ecr
