@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  deploy:
+    build: .
+    volumes:
+      - .:/home/docker
+    env_file:
+      - .env

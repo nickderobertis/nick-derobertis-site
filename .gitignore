@@ -73,3 +73,6 @@ nick_derobertis_site/styles.css
 nick_derobertis_site/styles.css.map
 Documents
 nick_derobertis_site/assets/pdfs/generated
+
+# Environment files
+deploy/.env
