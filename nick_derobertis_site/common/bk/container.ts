@@ -31,7 +31,7 @@ export class ContainerView extends LayoutDOMView {
   render(): void {
     super.render();
 
-    // TODO [$5f48ee221eb7f00008112571]: Set up container elements correctly in the first place
+    // TODO [#3]: Set up container elements correctly in the first place
     //
     // Currently just modifying the DOM after the initial render, but
     // further customization of the base behavior should be done so that
@@ -81,7 +81,7 @@ export class ContainerView extends LayoutDOMView {
   replaceElementsWithViewElements() {
     for (const view of this.child_views) {
       if (view.model.type == "Container") {
-        // TODO [$5f48ee221eb7f00008112572]: replace elements approach becomes very inefficient with multiple layers of components
+        // TODO [#4]: replace elements approach becomes very inefficient with multiple layers of components
         //
         // It starts from the inner-most component and works to outer, each time recursively
         // replacing in all inner components. Need to figure out a way to prevent inner
