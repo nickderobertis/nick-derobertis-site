@@ -39,6 +39,10 @@ class DeployCdkStack(core.Stack):
             effect=iam.Effect.ALLOW,
             resources=["*"],
             actions=[
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ]
