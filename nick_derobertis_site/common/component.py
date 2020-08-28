@@ -41,7 +41,7 @@ class HTMLComponent(UpdatingItem, Container):
 
     @property
     def contents(self) -> List[Viewable]:
-        return self.template.render(**self.render_dict)
+        return self.template.render(**self.render_dict)  # type: ignore
 
     def _update_contents(self, *events):
         logger.debug(f'Component {self} update for {events}')

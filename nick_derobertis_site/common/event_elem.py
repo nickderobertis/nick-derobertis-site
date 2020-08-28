@@ -19,6 +19,7 @@ class EventElement(Widget):
     """
     Element that can trigger arbitrary events
     """
+    _processing: bool
     _widget_type = _BkEventElement
 
     watch_events = param.List(class_=str, doc="""

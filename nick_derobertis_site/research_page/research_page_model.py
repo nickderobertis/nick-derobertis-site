@@ -1,4 +1,4 @@
-from typing import List, Any, Dict, Optional
+from typing import List, Any, Dict, Optional, Union
 
 import param
 
@@ -32,9 +32,9 @@ class ResearchPageModel(PageModel):
 
         all_panes = []
         for i, mod in enumerate(pane_models):
-            kwargs = dict(model=mod)
+            kwargs: Dict[str, Union[ResearchProjectPaneModel, bool]] = dict(model=mod)
             if i % 2 != 0:
-                kwargs.update(is_reversed=True)
+                kwargs.update(dict(is_reversed=True))
             all_panes.append(ResearchProjectPaneComponent(**kwargs))
 
         if params is None:

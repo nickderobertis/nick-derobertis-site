@@ -1,6 +1,6 @@
 import re
 from html import escape
-from typing import Dict, Any, List, Sequence, Optional
+from typing import Dict, Any, List, Sequence, Optional, cast
 from weakref import WeakValueDictionary
 
 import panel as pn
@@ -24,13 +24,15 @@ def _object_ref_xml(obj: Any) -> str:
 def _id_from_panel_object_ref(ref: str) -> int:
     pattern = re.compile(PARSE_PANEL_OBJECT_REGEX)
     match = pattern.match(ref)
+    if match is None:
+        raise ValueError(f'got invalid ref {ref}')
     return int(match.group(1))
 
 
 class ComponentTemplate(Template):
     _embedded_items: WeakValueDictionary = WeakValueDictionary()
 
-    def render(self, *args, **kwargs) -> List[Viewable]:
+    def render(self, *args, **kwargs) -> List[Viewable]:  # type: ignore
         all_kwargs = {**kwargs, **self._render_dict}
         rendered = super().render(*args, **all_kwargs)
         parts = re.split(FIND_PANEL_OBJECT_REGEX, rendered)
@@ -59,7 +61,7 @@ class ComponentTemplate(Template):
             self._add_embedded_item(item)
         except TypeError as e:
             if "cannot create weak reference to 'Undefined' object" in str(e):
-                item: Undefined
+                item = cast(Undefined, item)
                 raise TemplateItemNotFoundException(f"Could not embed in template, {item._undefined_message}")
         return _object_ref_xml(item)
 
