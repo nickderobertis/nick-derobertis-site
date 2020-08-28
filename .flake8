@@ -1,0 +1,2 @@
+[flake8]
+exclude = deploy,nick_derobertis_site/common/cli/templates
