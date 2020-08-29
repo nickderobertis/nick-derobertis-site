@@ -7,6 +7,6 @@ from deploy_cdk.deploy_cdk_stack import DeployCdkStack
 
 cfg = DeploymentConfig()
 app = core.App()
-DeployCdkStack(app, cfg.names.app, cfg=cfg)
+stack = DeployCdkStack(app, cfg.names.app, cfg=cfg)
 
 app.synth()

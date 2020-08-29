@@ -10,7 +10,7 @@ from aws_cdk import (
     aws_elasticloadbalancingv2 as elbv2,
 )
 
-from config import DeploymentConfig
+from .config import DeploymentConfig
 
 DUMMY_REGISTRY_PATH = "amazon/amazon-ecs-sample"
 
@@ -22,7 +22,13 @@ class DeployCdkStack(core.Stack):
     See more here: https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ecs.README.html
     """
 
-    def __init__(self, scope: core.Construct, id: str, cfg: DeploymentConfig = DeploymentConfig(), **kwargs) -> None:
+    def __init__(
+        self,
+        scope: core.Construct,
+        id: str,
+        cfg: DeploymentConfig = DeploymentConfig(),
+        **kwargs
+    ) -> None:
         super().__init__(scope, id, **kwargs)
 
         # Create the ECR Repository
@@ -36,10 +42,7 @@ class DeployCdkStack(core.Stack):
         # Create the ECS Cluster (and VPC)
         vpc = ec2.Vpc(self, cfg.names.vpc, max_azs=3)
         cluster = ecs.Cluster(
-            self,
-            cfg.names.ecs_cluster,
-            cluster_name=cfg.names.ecs_cluster,
-            vpc=vpc,
+            self, cfg.names.ecs_cluster, cluster_name=cfg.names.ecs_cluster, vpc=vpc,
         )
 
         # Create the ECS Task Definition with placeholder container (and named Task Execution IAM Role)
@@ -75,6 +78,7 @@ class DeployCdkStack(core.Stack):
             image=ecs.ContainerImage.from_registry(DUMMY_REGISTRY_PATH),
             logging=ecs.LogDrivers.aws_logs(stream_prefix=cfg.names.app),
         )
+        container.add_port_mappings(ecs.PortMapping(container_port=80, host_port=80))
 
         # Create the ECS Service
         service = ecs.FargateService(
@@ -93,8 +97,19 @@ class DeployCdkStack(core.Stack):
             internet_facing=cfg.is_public,
             load_balancer_name=cfg.names.load_balancer,
         )
-        listener = lb.add_listener("Listener", port=80)
-        target_group = listener.add_targets("ECS", port=80, targets=[service])
+        health_check = elbv2.HealthCheck(path="/", interval=core.Duration.minutes(5))
+        target_group = elbv2.ApplicationTargetGroup(
+            self,
+            cfg.names.autoscaling_target_group,
+            targets=[service],
+            health_check=health_check,
+            vpc=vpc,
+            port=80,
+        )
+        listener = lb.add_listener(cfg.names.load_balancer_listener, port=80)
+        listener.add_target_groups(
+            cfg.names.load_balancer_listener_target_groups, target_groups=[target_group]
+        )
 
         # Auto scaling options
         scaling = service.auto_scale_task_count(max_capacity=cfg.autoscale.count_limit)

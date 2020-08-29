@@ -30,9 +30,12 @@ class DeploymentNames(BaseSettings):
     ecs_task_definition: str = 'task-definition'
     ecs_service: str = 'service'
     load_balancer: str = 'load-balancer'
+    load_balancer_listener: str = 'load-balancer-listener'
+    load_balancer_listener_target_groups: str = 'load-balancer-listener-target-groups'
     autoscaling_cpu_policy: str = 'auto-scaling-policy-cpu'
     autoscaling_memory_policy: str = 'auto-scaling-policy-memory'
     autoscaling_requests_policy: str = 'auto-scaling-policy-requests'
+    autoscaling_target_group: str = 'auto-scaling-target-group'
 
     @root_validator
     def add_app_name(cls, values: dict) -> dict:
