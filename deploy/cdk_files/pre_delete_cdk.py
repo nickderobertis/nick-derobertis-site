@@ -6,6 +6,7 @@ Currently removes any images in ECR
 from typing import List, Optional, Sequence, Dict
 
 import boto3
+import botocore
 
 from .config import DeploymentConfig
 
@@ -36,7 +37,13 @@ def delete_images(
 
 
 def pre_delete_cdk_operations(cfg: DeploymentConfig = DeploymentConfig()):
-    delete_images(cfg)
+    try:
+        delete_images(cfg)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == 'RepositoryNotFoundException':
+            print(f'No repository with name {cfg.names.ecr_repo} so will not delete images')
+        else:
+            raise e
 
 
 if __name__ == "__main__":
