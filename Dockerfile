@@ -20,7 +20,7 @@ COPY Pipfile.lock .
 
 RUN pipenv sync
 
-ENV BOKEH_ALLOW_WS_ORIGIN=localhost,nickderobertis.com,www.nickderobertis.com,85a22048de9a.ngrok.io
+ENV BOKEH_ALLOW_WS_ORIGIN=localhost,nickderobertis.com,www.nickderobertis.com
 ENV BOKEH_RESOURCES=cdn
 
 EXPOSE 80
