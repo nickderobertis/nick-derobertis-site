@@ -46,6 +46,12 @@ or taking down an app entirely to save costs.
 
 # Development of the Deployment Infrastructure
 
+## Run a command in the container
+
+The `./run-docker.sh` script should be used to run one-off commands
+in the container to ensure correct setup. It can be passed
+`docker run` arguments.
+
 ## CloudFormation Stack
 
 Modify `./cdk_files/deploy_cdk_stack.py` to change the CloudFormation
@@ -55,6 +61,14 @@ infrastructure.
 
 Add additional classes to  `./cdk_files/deploy_cdk_stack.py` and then
 import and instantiate them in `./cdk_files/app.py`.
+
+## Modify Dependencies
+
+Python dependencies are defined in `./build-scripts/setup-aws-cdk.sh`. 
+To reinstall dependencies, delete the `./deploy-cdk` folder and the 
+next time something is run with `./run-docker.sh` it will
+reinstall them. Linux users will need 
+to run `sudo chown -R $USER deploy-cdk/` to delete the deploy folder.
 
 ## CloudFormation Deletion
 

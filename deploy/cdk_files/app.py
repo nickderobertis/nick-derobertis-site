@@ -2,10 +2,11 @@
 
 from aws_cdk import core
 
-from deploy_cdk.deploy_cdk_stack import DeployCdkStack, APP_NAME
+from config import DeploymentConfig
+from deploy_cdk.deploy_cdk_stack import DeployCdkStack
 
-
+cfg = DeploymentConfig()
 app = core.App()
-DeployCdkStack(app, APP_NAME)
+DeployCdkStack(app, cfg.names.app, cfg=cfg)
 
 app.synth()
