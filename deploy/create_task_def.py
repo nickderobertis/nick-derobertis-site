@@ -4,9 +4,13 @@ import pathlib
 from jinja2 import Template
 
 try:
-    from .cdk_files.config import DeploymentConfig
-except ImportError:
-    from cdk_files.config import DeploymentConfig
+    from .cdk_files.config import DeploymentConfig  # for running from root repo on CI
+except ImportError as e:
+    if "attempted relative import with no known parent package" in str(e):
+        # for running with deploy ./run-docker.sh to see actual output locally
+        from cdk_files.config import DeploymentConfig
+    else:
+        raise e
 
 TEMPLATE_PATH = pathlib.Path(__file__).parent / "task-def.json.j2"
 
