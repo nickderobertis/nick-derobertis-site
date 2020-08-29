@@ -11,6 +11,11 @@ REGISTRY_PATH = "amazon/amazon-ecs-sample"
 
 
 class DeployCdkStack(core.Stack):
+    """
+    Creates AWS infrastructure using AWS CDK
+
+    See more here: https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_ecs.README.html
+    """
 
     def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
@@ -53,7 +58,8 @@ class DeployCdkStack(core.Stack):
                                                     family=f"{APP_NAME}-task-definition")
         container = task_definition.add_container(
             APP_NAME,
-            image=ecs.ContainerImage.from_registry(REGISTRY_PATH)
+            image=ecs.ContainerImage.from_registry(REGISTRY_PATH),
+            logging=ecs.LogDrivers.aws_logs(stream_prefix=APP_NAME)
         )
 
         # Create the ECS Service
