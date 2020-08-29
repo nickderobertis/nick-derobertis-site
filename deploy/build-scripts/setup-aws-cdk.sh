@@ -15,7 +15,7 @@ source .env/bin/activate
 # Install CDK Python general dependencies
 pip install -r requirements.txt
 # Install CDK Python ECS dependencies
-pip install aws_cdk.aws_ec2 aws_cdk.aws_ecs aws_cdk.aws_iam boto3 pydantic
+pip install aws_cdk.aws_ec2 aws_cdk.aws_ecs aws_cdk.aws_iam boto3 pydantic jinja2
 
 # Clean up unnecessary git repo
 rm -rf .git

@@ -21,6 +21,16 @@ class AutoscaleSettings(BaseSettings):
         env_prefix = "deploy_autoscale_"
 
 
+class AWSSettings(BaseSettings):
+    access_key_id: Optional[str] = None
+    secret_access_key: Optional[str] = None
+    default_region: Optional[str] = None
+    root_account_id: Optional[str] = None
+
+    class Config:
+        env_prefix = 'aws_'
+
+
 class DeploymentNames(BaseSettings):
     app: str = Field(env='DEPLOY_APP_NAME')
     short_app: str = Field(env='DEPLOY_APP_SHORT_NAME')
@@ -61,6 +71,7 @@ class DeploymentConfig(BaseSettings):
     is_public: bool = True
     autoscale: AutoscaleSettings = AutoscaleSettings()
     names: DeploymentNames = DeploymentNames()
+    aws: AWSSettings = AWSSettings()
 
     class Config:
         env_prefix = "deploy_"

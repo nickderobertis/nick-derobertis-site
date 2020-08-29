@@ -1,10 +1,10 @@
 {
-    "family": "{{ app_name }}-task-description",
+    "family": "{{ names.ecs_task_definition }}",
     "networkMode": "awsvpc",
     "containerDefinitions": [
         {
-            "name": "{{ app_name }}-main-app",
-            "image": "{{ app_name }}:latest",
+            "name": "{{ names.app }}",
+            "image": "{{ names.app }}:latest",
             "portMappings": [
                 {
                     "containerPort": 80,
@@ -16,9 +16,9 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                   "awslogs-group" : "/ecs/{{ app_name }}",
-                   "awslogs-region": "{{ aws_region }}",
-                   "awslogs-stream-prefix": "{{ app_name }}",
+                   "awslogs-group" : "/ecs/{{ names.app }}",
+                   "awslogs-region": "{{ aws.default_region }}",
+                   "awslogs-stream-prefix": "{{ names.app }}",
                    "awslogs-create-group": "true"
                 }
             }
@@ -27,7 +27,7 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "executionRoleArn": "arn:aws:iam::{{ aws_account_id }}:role/{{ app_name }}-execution-role",
+    "executionRoleArn": "arn:aws:iam::{{ aws.root_account_id }}:role/{{ names.ecs_execution_role }}",
     "cpu": "256",
     "memory": "512"
 }
