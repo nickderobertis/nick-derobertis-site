@@ -67,11 +67,22 @@ class DeploymentNames(BaseSettings):
         env_prefix = 'deploy_name_suffix_'
 
 
+class HealthCheckSettings(BaseSettings):
+    enable: bool = True
+    path: str = '/'
+    interval_minutes: int = 1
+
+    class Config:
+        env_prefix = 'deploy_health_check_'
+
+
 class DeploymentConfig(BaseSettings):
     is_public: bool = True
+    use_health_check: bool = True
     autoscale: AutoscaleSettings = AutoscaleSettings()
     names: DeploymentNames = DeploymentNames()
     aws: AWSSettings = AWSSettings()
+    health_check: HealthCheckSettings = HealthCheckSettings()
 
     class Config:
         env_prefix = "deploy_"
