@@ -19,6 +19,7 @@ user in that AWS account with the following permissions:
 - `CloudWatchFullAccess`
 - `AmazonECS_FullAccess`
 - `AmazonVPCFullAccess`
+- `AmazonRoute53FullAccess`
 - `AWSCloudFormationFullAccess`
 
 Then take that user's access key and secret key and put them in the 

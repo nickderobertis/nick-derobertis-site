@@ -8,6 +8,8 @@ from aws_cdk import (
     aws_iam as iam,
     aws_ecr as ecr,
     aws_elasticloadbalancingv2 as elbv2,
+    aws_route53 as route53,
+    aws_route53_targets as alias,
 )
 
 from .config import DeploymentConfig
@@ -27,7 +29,7 @@ class DeployCdkStack(core.Stack):
         scope: core.Construct,
         id: str,
         cfg: DeploymentConfig = DeploymentConfig(),
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
 
@@ -140,4 +142,24 @@ class DeployCdkStack(core.Stack):
                 requests_per_target=cfg.autoscale.request_count_limit,
                 target_group=target_group,
                 policy_name=cfg.names.autoscaling_requests_policy,
+            )
+
+        # Route53 DNS Config
+        public_dns_zone = route53.PublicHostedZone(
+            self, cfg.names.route53_zone, zone_name=cfg.url
+        )
+        route53.ARecord(
+            self,
+            cfg.names.alias_record,
+            zone=public_dns_zone,
+            target=route53.RecordTarget.from_alias(alias.LoadBalancerTarget(lb)),
+            record_name=cfg.url,
+        )
+        if cfg.include_www:
+            route53.CnameRecord(
+                self,
+                cfg.names.www_record,
+                domain_name=cfg.url,
+                zone=public_dns_zone,
+                record_name=f"www.{cfg.url}",
             )

@@ -48,6 +48,9 @@ class DeploymentNames(BaseSettings):
     autoscaling_memory_policy: str = 'as-policy-memory'
     autoscaling_requests_policy: str = 'as-policy-requests'
     autoscaling_target_group: str = 'as-target-group'
+    route53_zone: str = 'hosted-zone'
+    alias_record: str = 'alias-record'
+    www_record: str = 'cname-www'
 
     @root_validator
     def add_app_name(cls, values: dict) -> dict:
@@ -77,8 +80,10 @@ class HealthCheckSettings(BaseSettings):
 
 
 class DeploymentConfig(BaseSettings):
+    url: str
     is_public: bool = True
     use_health_check: bool = True
+    include_www: bool = True
     autoscale: AutoscaleSettings = AutoscaleSettings()
     names: DeploymentNames = DeploymentNames()
     aws: AWSSettings = AWSSettings()
