@@ -30,6 +30,7 @@ jupyterlab = "*"
 awesome-panel-extensions = "*"
 fire = "*"
 derobertis-cv = "*"
+pydantic = "*"
 
 [requires]
 python_version = "3.7"
