@@ -42,7 +42,8 @@ class DeploymentNames(BaseSettings):
     ecs_task_definition: str = 'task-definition'
     ecs_service: str = 'service'
     load_balancer: str = 'lb'
-    load_balancer_listener: str = 'lb-listener'
+    load_balancer_http_listener: str = 'lb-http-listener'
+    load_balancer_https_listener: str = 'lb-https-listener'
     load_balancer_listener_target_groups: str = 'lb-listener-tgs'
     autoscaling_cpu_policy: str = 'as-policy-cpu'
     autoscaling_memory_policy: str = 'as-policy-memory'
@@ -51,6 +52,7 @@ class DeploymentNames(BaseSettings):
     route53_zone: str = 'hosted-zone'
     alias_record: str = 'alias-record'
     www_record: str = 'cname-www'
+    cert: str = 'cert'
 
     @root_validator
     def add_app_name(cls, values: dict) -> dict:

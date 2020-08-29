@@ -10,6 +10,7 @@ from aws_cdk import (
     aws_elasticloadbalancingv2 as elbv2,
     aws_route53 as route53,
     aws_route53_targets as alias,
+    aws_certificatemanager as acm,
 )
 
 from .config import DeploymentConfig
@@ -91,6 +92,17 @@ class DeployCdkStack(core.Stack):
             service_name=cfg.names.ecs_service,
         )
 
+        # Create SSL Certificate
+        public_dns_zone = route53.PublicHostedZone(
+            self, cfg.names.route53_zone, zone_name=cfg.url
+        )
+        cert = acm.Certificate(
+            self,
+            cfg.names.cert,
+            domain_name=cfg.url,
+            validation=acm.CertificateValidation.from_dns(),
+        )
+
         # Create a load balancer for the service
         lb = elbv2.ApplicationLoadBalancer(
             self,
@@ -103,8 +115,10 @@ class DeployCdkStack(core.Stack):
         health_check = elbv2.HealthCheck(
             path=cfg.health_check.path,
             interval=core.Duration.minutes(cfg.health_check.interval_minutes),
-            timeout=cfg.health_check.timeout_seconds,
-            healthy_http_codes=','.join([str(code) for code in cfg.health_check.healthy_http_codes])
+            timeout=core.Duration.seconds(cfg.health_check.timeout_seconds),
+            healthy_http_codes=",".join(
+                [str(code) for code in cfg.health_check.healthy_http_codes]
+            ),
         )
 
         target_group = elbv2.ApplicationTargetGroup(
@@ -115,8 +129,15 @@ class DeployCdkStack(core.Stack):
             port=80,
             health_check=health_check,
         )
-        listener = lb.add_listener(cfg.names.load_balancer_listener, port=80)
-        listener.add_target_groups(
+        https_listener = lb.add_listener(
+            cfg.names.load_balancer_https_listener, port=443, certificates=[cert]
+        )
+        http_listener = lb.add_listener(
+            cfg.names.load_balancer_http_listener,
+            port=80,
+            default_action=elbv2.ListenerAction.redirect(protocol="HTTPS"),
+        )
+        https_listener.add_target_groups(
             cfg.names.load_balancer_listener_target_groups, target_groups=[target_group]
         )
 
@@ -145,9 +166,6 @@ class DeployCdkStack(core.Stack):
             )
 
         # Route53 DNS Config
-        public_dns_zone = route53.PublicHostedZone(
-            self, cfg.names.route53_zone, zone_name=cfg.url
-        )
         route53.ARecord(
             self,
             cfg.names.alias_record,
