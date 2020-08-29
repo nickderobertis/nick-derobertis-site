@@ -75,7 +75,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: nick-derobertis-site-repository
+        ECR_REPOSITORY: nds-repository
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and
@@ -90,13 +90,13 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-def.json
-        container-name: nick-derobertis-site-main-app
+        container-name: nick-derobertis-site
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: nick-derobertis-site-service
-        cluster: nick-derobertis-site-cluster
+        service: nds-service
+        cluster: nds-cluster
         wait-for-service-stability: true
