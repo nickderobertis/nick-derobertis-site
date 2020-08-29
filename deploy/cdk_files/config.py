@@ -23,28 +23,34 @@ class AutoscaleSettings(BaseSettings):
 
 class DeploymentNames(BaseSettings):
     app: str = Field(env='DEPLOY_APP_NAME')
+    short_app: str = Field(env='DEPLOY_APP_SHORT_NAME')
+
     ecr_repo: str = 'repository'
     vpc: str = 'vpc'
     ecs_cluster: str = 'cluster'
     ecs_execution_role: str = 'execution-role'
     ecs_task_definition: str = 'task-definition'
     ecs_service: str = 'service'
-    load_balancer: str = 'load-balancer'
-    load_balancer_listener: str = 'load-balancer-listener'
-    load_balancer_listener_target_groups: str = 'load-balancer-listener-target-groups'
-    autoscaling_cpu_policy: str = 'auto-scaling-policy-cpu'
-    autoscaling_memory_policy: str = 'auto-scaling-policy-memory'
-    autoscaling_requests_policy: str = 'auto-scaling-policy-requests'
-    autoscaling_target_group: str = 'auto-scaling-target-group'
+    load_balancer: str = 'lb'
+    load_balancer_listener: str = 'lb-listener'
+    load_balancer_listener_target_groups: str = 'lb-listener-tgs'
+    autoscaling_cpu_policy: str = 'as-policy-cpu'
+    autoscaling_memory_policy: str = 'as-policy-memory'
+    autoscaling_requests_policy: str = 'as-policy-requests'
+    autoscaling_target_group: str = 'as-target-group'
 
     @root_validator
     def add_app_name(cls, values: dict) -> dict:
         out_dict = {}
         for key, value in values.items():
-            if key == 'app':
+            if key in ('app', 'short_app'):
                 out_dict[key] = value
                 continue
-            out_dict[key] = f"{values['app']}-{value}"
+            new_name = f"{values['short_app']}-{value}"
+            if len(new_name) > 32:
+                raise ValueError(f'AWS name must be 32 characters or less. '
+                                 f'Got {new_name} of length {len(new_name)} for {key}')
+            out_dict[key] = new_name
         return out_dict
 
     class Config:
