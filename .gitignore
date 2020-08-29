@@ -74,7 +74,7 @@ nick_derobertis_site/styles.css.map
 Documents
 nick_derobertis_site/assets/pdfs/generated
 deploy/deploy-cdk
-task-def.json
+**/task-def.json
 
 # Environment files
 deploy/.env
