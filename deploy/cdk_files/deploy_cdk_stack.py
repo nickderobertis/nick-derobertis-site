@@ -99,22 +99,22 @@ class DeployCdkStack(core.Stack):
             internet_facing=cfg.is_public,
             load_balancer_name=cfg.names.load_balancer,
         )
-        target_group_config = dict(
+
+        health_check = elbv2.HealthCheck(
+            path=cfg.health_check.path,
+            interval=core.Duration.minutes(cfg.health_check.interval_minutes),
+            timeout=cfg.health_check.timeout_seconds,
+            healthy_http_codes=','.join([str(code) for code in cfg.health_check.healthy_http_codes])
+        )
+
+        target_group = elbv2.ApplicationTargetGroup(
             scope=self,
             id=cfg.names.autoscaling_target_group,
             targets=[service],
             vpc=vpc,
             port=80,
+            health_check=health_check,
         )
-
-        if cfg.health_check.enable:
-            health_check = elbv2.HealthCheck(
-                path=cfg.health_check.path,
-                interval=core.Duration.minutes(cfg.health_check.interval_minutes),
-            )
-            target_group_config.update(health_check=health_check)
-
-        target_group = elbv2.ApplicationTargetGroup(**target_group_config)
         listener = lb.add_listener(cfg.names.load_balancer_listener, port=80)
         listener.add_target_groups(
             cfg.names.load_balancer_listener_target_groups, target_groups=[target_group]

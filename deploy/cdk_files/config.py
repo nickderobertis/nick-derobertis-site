@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Sequence
 
 from pydantic import validator, BaseSettings, Field, root_validator
 
@@ -71,9 +71,11 @@ class DeploymentNames(BaseSettings):
 
 
 class HealthCheckSettings(BaseSettings):
-    enable: bool = True
     path: str = '/'
     interval_minutes: int = 1
+    timeout_seconds: int = 30
+    healthy_http_codes: Sequence[int] = (200,)
+
 
     class Config:
         env_prefix = 'deploy_health_check_'
