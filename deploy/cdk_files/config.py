@@ -53,6 +53,7 @@ class DeploymentNames(BaseSettings):
     alias_record: str = 'alias-record'
     www_record: str = 'cname-www-record'
     cert: str = 'cert'
+    public_key_param: str = 'public-key-param'
 
     @root_validator
     def add_app_name(cls, values: dict) -> dict:
@@ -70,6 +71,13 @@ class DeploymentNames(BaseSettings):
 
     class Config:
         env_prefix = 'deploy_name_suffix_'
+
+
+class ParameterNames(BaseSettings):
+    ssh_key: str = 'SSH_PUBLIC_KEY'
+
+    class Config:
+        env_prefix = 'deploy_parameter_name_'
 
 
 class HealthCheckSettings(BaseSettings):
@@ -93,6 +101,7 @@ class DeploymentConfig(BaseSettings):
     names: DeploymentNames = DeploymentNames()
     aws: AWSSettings = AWSSettings()
     health_check: HealthCheckSettings = HealthCheckSettings()
+    params: ParameterNames = ParameterNames()
 
     class Config:
         env_prefix = "deploy_"

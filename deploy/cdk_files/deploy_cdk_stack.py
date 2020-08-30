@@ -12,9 +12,11 @@ from aws_cdk import (
     aws_route53 as route53,
     aws_route53_targets as alias,
     aws_certificatemanager as acm,
+    aws_ssm as ssm,
 )
 
 from .config import DeploymentConfig
+from create_ssh_key import PUBLIC_KEY_PATH
 
 DUMMY_REGISTRY_PATH = "amazon/amazon-ecs-sample"
 
@@ -25,6 +27,7 @@ class InitialRoute53Stack(core.Stack):
     by AWS CLI to have the correct name servers before
     going to create the full stack.
     """
+
     hosted_zone: Optional[route53.HostedZone] = None
 
     def __init__(
@@ -44,7 +47,7 @@ class InitialRoute53Stack(core.Stack):
                 self, cfg.names.route53_zone, zone_name=cfg.url
             )
         else:
-            raise NotImplementedError('need to implement private hosted zone')
+            raise NotImplementedError("need to implement private hosted zone")
 
 
 class DeployCdkStack(core.Stack):
@@ -63,6 +66,15 @@ class DeployCdkStack(core.Stack):
         **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
+
+        ssm.StringParameter(
+            self,
+            cfg.names.public_key_param,
+            description="SSH Public Key",
+            parameter_name=cfg.params.ssh_key,
+            string_value=PUBLIC_KEY_PATH.read_text(),
+            tier=ssm.ParameterTier.STANDARD,
+        )
 
         # Create the ECR Repository
         ecr_repository = ecr.Repository(
@@ -167,16 +179,17 @@ class DeployCdkStack(core.Stack):
                 default_action=elbv2.ListenerAction.redirect(protocol="HTTPS"),
             )
             https_listener.add_target_groups(
-                cfg.names.load_balancer_listener_target_groups, target_groups=[target_group]
+                cfg.names.load_balancer_listener_target_groups,
+                target_groups=[target_group],
             )
         else:
             # Listen on 80
             http_listener = lb.add_listener(
-                cfg.names.load_balancer_http_listener,
-                port=80,
+                cfg.names.load_balancer_http_listener, port=80,
             )
             http_listener.add_target_groups(
-                cfg.names.load_balancer_listener_target_groups, target_groups=[target_group]
+                cfg.names.load_balancer_listener_target_groups,
+                target_groups=[target_group],
             )
 
         # Auto scaling options
@@ -220,4 +233,3 @@ class DeployCdkStack(core.Stack):
                     zone=hosted_zone,
                     record_name=f"www.{cfg.url}",
                 )
-
