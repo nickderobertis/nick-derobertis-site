@@ -78,3 +78,6 @@ deploy/deploy-cdk
 
 # Environment files
 deploy/.env
+deploy/.env.prod
+deploy/.env.staging
+deploy/.env.bak

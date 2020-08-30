@@ -7,7 +7,14 @@ the deploy folder so you may need to `cd deploy`.
 
 ## Environment Variables
 
-Copy `.env.template` to `.env` and fill in the values.
+Copy `.env.template` to `.env.prod` and fill in the values. For multiple
+deploys, you can add additional files such as `.env.staging`. The 
+`.env` file will actually be used by the deployment, but on running
+the deployment scripts, the matching environment's file will be
+copied to `.env`. It defaults to `prod` so if you have `.env.prod`
+and just run the scripts it will get copied to `.env`. For
+other environments, pass the name of the environment to the scripts,
+e.g. `./initial-deploy.sh staging` to use `.env.staging`.
 
 ## AWS Setup
 
