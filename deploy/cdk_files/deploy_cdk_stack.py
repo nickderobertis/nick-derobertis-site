@@ -112,6 +112,7 @@ class DeployCdkStack(core.Stack):
                     "logs:CreateLogStream",
                     "logs:CreateLogGroup",
                     "logs:PutLogEvents",
+                    "ssm:GetParameters",
                 ],
             )
         )
