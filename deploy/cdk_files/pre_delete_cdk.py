@@ -7,13 +7,14 @@ from typing import List, Optional, Sequence, Dict
 
 import boto3
 import botocore
+from boto3_type_annotations.ecr import Client as ECRClient
 
 from .config import DeploymentConfig
 
-ECR_CLIENT = boto3.client("ecr")
+ECR_CLIENT: ECRClient = boto3.client("ecr")
 
 
-def _get_ecr_images_dict(repository_name: str, client=ECR_CLIENT) -> dict:
+def _get_ecr_images_dict(repository_name: str, client: ECRClient = ECR_CLIENT) -> dict:
     return client.list_images(repositoryName=repository_name, maxResults=1000)
 
 
@@ -25,7 +26,7 @@ def _get_ecr_image_id_dicts(repository_name: str) -> List[str]:
 def delete_images(
     cfg: DeploymentConfig,
     images: Optional[Sequence[Dict[str, str]]] = None,
-    client=ECR_CLIENT,
+    client: ECRClient = ECR_CLIENT,
 ):
     if images is None:
         images = _get_ecr_image_id_dicts(cfg.names.ecr_repo)

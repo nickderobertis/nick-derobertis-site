@@ -51,7 +51,7 @@ class DeploymentNames(BaseSettings):
     autoscaling_target_group: str = 'as-target-group'
     route53_zone: str = 'hosted-zone'
     alias_record: str = 'alias-record'
-    www_record: str = 'cname-www'
+    www_record: str = 'cname-www-record'
     cert: str = 'cert'
 
     @root_validator
@@ -88,6 +88,7 @@ class DeploymentConfig(BaseSettings):
     is_public: bool = True
     use_health_check: bool = True
     include_www: bool = True
+    name_servers: Optional[Sequence[str]] = None
     autoscale: AutoscaleSettings = AutoscaleSettings()
     names: DeploymentNames = DeploymentNames()
     aws: AWSSettings = AWSSettings()

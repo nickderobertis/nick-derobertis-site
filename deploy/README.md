@@ -20,6 +20,7 @@ user in that AWS account with the following permissions:
 - `AmazonECS_FullAccess`
 - `AmazonVPCFullAccess`
 - `AmazonRoute53FullAccess`
+- `AWSCertificateManagerFullAccess`
 - `AWSCloudFormationFullAccess`
 
 Then take that user's access key and secret key and put them in the 

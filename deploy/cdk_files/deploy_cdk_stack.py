@@ -18,6 +18,27 @@ from .config import DeploymentConfig
 DUMMY_REGISTRY_PATH = "amazon/amazon-ecs-sample"
 
 
+class InitialRoute53Stack(core.Stack):
+    """
+    Sets up temporary Route53 config which will be modified
+    by AWS CLI to have the correct name servers before
+    going to create the full stack.
+    """
+
+    def __init__(
+        self,
+        scope: core.Construct,
+        id: str,
+        cfg: DeploymentConfig = DeploymentConfig(),
+        **kwargs,
+    ) -> None:
+        super().__init__(scope, id, **kwargs)
+
+        public_dns_zone = route53.PublicHostedZone(
+            self, cfg.names.route53_zone, zone_name=cfg.url
+        )
+
+
 class DeployCdkStack(core.Stack):
     """
     Creates AWS infrastructure using AWS CDK
@@ -93,20 +114,20 @@ class DeployCdkStack(core.Stack):
         )
 
         # Create SSL Certificate
-        public_dns_zone = route53.PublicHostedZone(
-            self, cfg.names.route53_zone, zone_name=cfg.url
+        public_dns_zone = route53.PublicHostedZone.from_lookup(
+            self, cfg.names.route53_zone, domain_name=cfg.url
         )
         cert = acm.Certificate(
             self,
             cfg.names.cert,
             domain_name=cfg.url,
-            validation=acm.CertificateValidation.from_dns(),
+            validation=acm.CertificateValidation.from_dns(public_dns_zone),
         )
 
         # Create a load balancer for the service
         lb = elbv2.ApplicationLoadBalancer(
             self,
-            "LB",
+            cfg.names.load_balancer,
             vpc=vpc,
             internet_facing=cfg.is_public,
             load_balancer_name=cfg.names.load_balancer,
@@ -181,3 +202,4 @@ class DeployCdkStack(core.Stack):
                 zone=public_dns_zone,
                 record_name=f"www.{cfg.url}",
             )
+
