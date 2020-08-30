@@ -64,8 +64,8 @@ jobs:
       env:
         AWS_ROOT_ACCOUNT_ID: ${{ secrets.AWS_ROOT_ACCOUNT_ID }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        DEPLOY_APP_NAME: nick-derobertis-site
-        DEPLOY_APP_SHORT_NAME: nds
+        DEPLOY_APP_NAME: test-site
+        DEPLOY_APP_SHORT_NAME: ts
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -75,7 +75,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: nds-repository
+        ECR_REPOSITORY: ts-repository
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and
@@ -90,13 +90,13 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-def.json
-        container-name: nick-derobertis-site
+        container-name: test-site
         image: ${{ steps.build-image.outputs.image }}
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: nds-service
-        cluster: nds-cluster
+        service: ts-service
+        cluster: ts-cluster
         wait-for-service-stability: true
