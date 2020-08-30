@@ -1,5 +1,6 @@
 """AWS CDK module to create ECS infrastructure"""
 import os
+from typing import Optional
 
 from aws_cdk import (
     core,
@@ -24,7 +25,7 @@ class InitialRoute53Stack(core.Stack):
     by AWS CLI to have the correct name servers before
     going to create the full stack.
     """
-    public_dns_zone: route53.HostedZone
+    hosted_zone: Optional[route53.HostedZone] = None
 
     def __init__(
         self,
@@ -35,9 +36,15 @@ class InitialRoute53Stack(core.Stack):
     ) -> None:
         super().__init__(scope, id, **kwargs)
 
-        self.public_dns_zone = route53.PublicHostedZone(
-            self, cfg.names.route53_zone, zone_name=cfg.url
-        )
+        if not cfg.url:
+            return
+
+        if cfg.is_public:
+            self.hosted_zone = route53.PublicHostedZone(
+                self, cfg.names.route53_zone, zone_name=cfg.url
+            )
+        else:
+            raise NotImplementedError('need to implement private hosted zone')
 
 
 class DeployCdkStack(core.Stack):
@@ -51,7 +58,7 @@ class DeployCdkStack(core.Stack):
         self,
         scope: core.Construct,
         id: str,
-        hosted_zone: route53.HostedZone,
+        hosted_zone: Optional[route53.HostedZone],
         cfg: DeploymentConfig = DeploymentConfig(),
         **kwargs,
     ) -> None:
@@ -115,15 +122,6 @@ class DeployCdkStack(core.Stack):
             service_name=cfg.names.ecs_service,
         )
 
-        # Create SSL Certificate
-        public_dns_zone = hosted_zone
-        cert = acm.Certificate(
-            self,
-            cfg.names.cert,
-            domain_name=cfg.url,
-            validation=acm.CertificateValidation.from_dns(public_dns_zone),
-        )
-
         # Create a load balancer for the service
         lb = elbv2.ApplicationLoadBalancer(
             self,
@@ -150,17 +148,36 @@ class DeployCdkStack(core.Stack):
             port=80,
             health_check=health_check,
         )
-        https_listener = lb.add_listener(
-            cfg.names.load_balancer_https_listener, port=443, certificates=[cert]
-        )
-        http_listener = lb.add_listener(
-            cfg.names.load_balancer_http_listener,
-            port=80,
-            default_action=elbv2.ListenerAction.redirect(protocol="HTTPS"),
-        )
-        https_listener.add_target_groups(
-            cfg.names.load_balancer_listener_target_groups, target_groups=[target_group]
-        )
+        if cfg.include_ssl:
+            # Create SSL Certificate
+            cert = acm.Certificate(
+                self,
+                cfg.names.cert,
+                domain_name=cfg.url,
+                validation=acm.CertificateValidation.from_dns(hosted_zone),
+            )
+
+            # Listen on 443 with cert, 80 redirects to 443
+            https_listener = lb.add_listener(
+                cfg.names.load_balancer_https_listener, port=443, certificates=[cert]
+            )
+            http_listener = lb.add_listener(
+                cfg.names.load_balancer_http_listener,
+                port=80,
+                default_action=elbv2.ListenerAction.redirect(protocol="HTTPS"),
+            )
+            https_listener.add_target_groups(
+                cfg.names.load_balancer_listener_target_groups, target_groups=[target_group]
+            )
+        else:
+            # Listen on 80
+            http_listener = lb.add_listener(
+                cfg.names.load_balancer_http_listener,
+                port=80,
+            )
+            http_listener.add_target_groups(
+                cfg.names.load_balancer_listener_target_groups, target_groups=[target_group]
+            )
 
         # Auto scaling options
         scaling = service.auto_scale_task_count(max_capacity=cfg.autoscale.count_limit)
@@ -187,19 +204,20 @@ class DeployCdkStack(core.Stack):
             )
 
         # Route53 DNS Config
-        route53.ARecord(
-            self,
-            cfg.names.alias_record,
-            zone=public_dns_zone,
-            target=route53.RecordTarget.from_alias(alias.LoadBalancerTarget(lb)),
-            record_name=cfg.url,
-        )
-        if cfg.include_www:
-            route53.CnameRecord(
+        if cfg.url and hosted_zone is not None:
+            route53.ARecord(
                 self,
-                cfg.names.www_record,
-                domain_name=cfg.url,
-                zone=public_dns_zone,
-                record_name=f"www.{cfg.url}",
+                cfg.names.alias_record,
+                zone=hosted_zone,
+                target=route53.RecordTarget.from_alias(alias.LoadBalancerTarget(lb)),
+                record_name=cfg.url,
             )
+            if cfg.include_www:
+                route53.CnameRecord(
+                    self,
+                    cfg.names.www_record,
+                    domain_name=cfg.url,
+                    zone=hosted_zone,
+                    record_name=f"www.{cfg.url}",
+                )
 

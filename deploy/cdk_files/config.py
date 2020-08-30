@@ -84,10 +84,10 @@ class HealthCheckSettings(BaseSettings):
 
 
 class DeploymentConfig(BaseSettings):
-    url: str
+    url: Optional[str] = None
     is_public: bool = True
-    use_health_check: bool = True
     include_www: bool = True
+    include_ssl: bool = True
     name_servers: Optional[Sequence[str]] = None
     autoscale: AutoscaleSettings = AutoscaleSettings()
     names: DeploymentNames = DeploymentNames()
