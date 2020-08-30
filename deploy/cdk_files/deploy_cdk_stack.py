@@ -24,6 +24,7 @@ class InitialRoute53Stack(core.Stack):
     by AWS CLI to have the correct name servers before
     going to create the full stack.
     """
+    public_dns_zone: route53.HostedZone
 
     def __init__(
         self,
@@ -34,7 +35,7 @@ class InitialRoute53Stack(core.Stack):
     ) -> None:
         super().__init__(scope, id, **kwargs)
 
-        public_dns_zone = route53.PublicHostedZone(
+        self.public_dns_zone = route53.PublicHostedZone(
             self, cfg.names.route53_zone, zone_name=cfg.url
         )
 
@@ -50,6 +51,7 @@ class DeployCdkStack(core.Stack):
         self,
         scope: core.Construct,
         id: str,
+        hosted_zone: route53.HostedZone,
         cfg: DeploymentConfig = DeploymentConfig(),
         **kwargs,
     ) -> None:
@@ -114,9 +116,7 @@ class DeployCdkStack(core.Stack):
         )
 
         # Create SSL Certificate
-        public_dns_zone = route53.PublicHostedZone.from_lookup(
-            self, cfg.names.route53_zone, domain_name=cfg.url
-        )
+        public_dns_zone = hosted_zone
         cert = acm.Certificate(
             self,
             cfg.names.cert,
