@@ -76,6 +76,8 @@ nick_derobertis_site/assets/pdfs/generated
 deploy/deploy-cdk
 **/task-def.json
 **/id_rsa*
+awesome_panel_extensions
+awesome-panel-extensions
 
 # Environment files
 deploy/.env
