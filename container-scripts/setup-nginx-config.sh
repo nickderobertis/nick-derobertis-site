@@ -31,7 +31,7 @@ server {
     }
 
     location /healthcheck {
-        # TODO: disable this to have a real health check
+        # TODO [#7]: disable this to have a real health check
         add_header Content-Type text/plain;
         return 200 'OK';
     }
