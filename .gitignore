@@ -75,8 +75,7 @@ Documents
 nick_derobertis_site/assets/pdfs/generated
 deploy/deploy-cdk
 **/task-def.json
-deploy/id_rsa
-deploy/id_rsa.pub
+**/id_rsa*
 
 # Environment files
 deploy/.env
