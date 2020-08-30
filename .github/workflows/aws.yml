@@ -63,7 +63,7 @@ jobs:
         pipenv run python -m deploy.create_task_def
       env:
         AWS_ROOT_ACCOUNT_ID: ${{ secrets.AWS_ROOT_ACCOUNT_ID }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        AWS_DEFAULT_REGION: us-west-1
         DEPLOY_APP_NAME: test-site
         DEPLOY_APP_SHORT_NAME: ts
 
