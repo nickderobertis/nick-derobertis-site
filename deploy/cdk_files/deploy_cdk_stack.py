@@ -1,5 +1,4 @@
 """AWS CDK module to create ECS infrastructure"""
-import os
 from typing import Optional
 
 from aws_cdk import (

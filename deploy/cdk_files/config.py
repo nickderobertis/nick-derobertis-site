@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Any
 
 from pydantic import validator, BaseSettings, Field, root_validator
 
@@ -50,6 +50,7 @@ class DeploymentNames(BaseSettings):
     autoscaling_requests_policy: str = 'as-policy-requests'
     autoscaling_target_group: str = 'as-target-group'
     route53_zone: str = 'hosted-zone'
+    route53_stack: str = 'route53-stack'
     alias_record: str = 'alias-record'
     www_record: str = 'cname-www-record'
     cert: str = 'cert'
@@ -107,5 +108,25 @@ class DeploymentConfig(BaseSettings):
         env_prefix = "deploy_"
 
 
+def get_fully_qualified_name_from_config(cfg: DeploymentConfig, name: str) -> Any:
+    name_parts = name.split('.')
+    value = cfg
+    for part in name_parts:
+        value = getattr(value, part)
+    return value
+
+
 if __name__ == "__main__":
-    print(DeploymentConfig().dict())
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-g', '--get', help='Attribute of config to print, e.g. names.cert')
+
+    args = parser.parse_args()
+
+    cfg = DeploymentConfig()
+
+    if args.get:
+        print(get_fully_qualified_name_from_config(cfg, args.get))
+    else:
+        print(cfg.dict())
