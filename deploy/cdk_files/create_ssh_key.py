@@ -15,6 +15,10 @@ def _key_pair_name(env_name: str, public: bool = True) -> str:
     return name
 
 
+def key_pair_path(env_name: str, public: bool = True, out_folder: pathlib.Path = OUT_FOLDER):
+    return out_folder / _key_pair_name(env_name, public=public)
+
+
 def _create_ssh_key_bytes() -> Tuple[bytes, bytes]:
     key = rsa.generate_private_key(
         backend=crypto_default_backend(), public_exponent=65537, key_size=2048
@@ -50,10 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--out-folder', default=OUT_FOLDER, help='Output folder')
     args = parser.parse_args()
 
-    public_key_name = _key_pair_name(args.env, public=True)
-    private_key_name = _key_pair_name(args.env, public=False)
-
-    public_key_path = args.out_folder / public_key_name
-    private_key_path = args.out_folder / private_key_name
+    public_key_path = key_pair_path(args.env, public=True, out_folder=args.out_folder)
+    private_key_path = key_pair_path(args.env, public=False, out_folder=args.out_folder)
 
     create_ssh_keys(public_key_path, private_key_path)

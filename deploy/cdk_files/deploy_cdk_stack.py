@@ -1,4 +1,5 @@
 """AWS CDK module to create ECS infrastructure"""
+import os
 from typing import Optional
 
 from aws_cdk import (
@@ -15,9 +16,10 @@ from aws_cdk import (
 )
 
 from .config import DeploymentConfig
-from create_ssh_key import PUBLIC_KEY_PATH
+from create_ssh_key import key_pair_path
 
 DUMMY_REGISTRY_PATH = "amazon/amazon-ecs-sample"
+DEPLOY_ENV_NAME = os.environ['DEPLOY_ENVIRONMENT_NAME']
 
 
 class InitialRoute53Stack(core.Stack):
@@ -66,12 +68,14 @@ class DeployCdkStack(core.Stack):
     ) -> None:
         super().__init__(scope, id, **kwargs)
 
+        kp_path = key_pair_path(DEPLOY_ENV_NAME, public=True)
+
         ssm.StringParameter(
             self,
             cfg.names.public_key_param,
             description="SSH Public Key",
             parameter_name=cfg.params.ssh_key,
-            string_value=PUBLIC_KEY_PATH.read_text(),
+            string_value=kp_path.read_text(),
             tier=ssm.ParameterTier.STANDARD,
         )
 
