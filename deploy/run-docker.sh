@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose run deploy "$@"
+docker-compose run --rm deploy "$@"
