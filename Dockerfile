@@ -10,7 +10,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN pip install pipenv
 
-RUN apt-get update && apt-get install -y curl git texlive texlive-luatex texlive-science texlive-latex-extra
+RUN apt-get update && apt-get install -y \
+    curl git texlive texlive-luatex texlive-science texlive-latex-extra \
+    nginx
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
 RUN npm install -g sass
@@ -29,4 +31,4 @@ COPY . .
 
 RUN pipenv run ./build.sh
 
-ENTRYPOINT [ "pipenv", "run", "python", "nick_derobertis_site/home.py"]
+ENTRYPOINT [ "entrypoint.sh"]
