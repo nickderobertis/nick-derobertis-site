@@ -136,6 +136,7 @@ class DeployCdkStack(core.Stack):
             cluster=cluster,
             task_definition=task_definition,
             service_name=cfg.names.ecs_service,
+            assign_public_ip=cfg.container_public_ip,
         )
 
         # Create a load balancer for the service
