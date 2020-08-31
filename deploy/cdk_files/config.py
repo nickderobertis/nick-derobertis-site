@@ -97,7 +97,6 @@ class DeploymentConfig(BaseSettings):
     include_www: bool = True
     include_ssl: bool = True
     container_public_ip: bool = True
-    name_servers: Optional[Sequence[str]] = None
     autoscale: AutoscaleSettings = AutoscaleSettings()
     names: DeploymentNames = DeploymentNames()
     aws: AWSSettings = AWSSettings()

@@ -19,36 +19,7 @@ from .config import DeploymentConfig
 from create_ssh_key import key_pair_path
 
 DUMMY_REGISTRY_PATH = "amazon/amazon-ecs-sample"
-DEPLOY_ENV_NAME = os.environ['DEPLOY_ENVIRONMENT_NAME']
-
-
-class InitialRoute53Stack(core.Stack):
-    """
-    Sets up temporary Route53 config which will be modified
-    by AWS CLI to have the correct name servers before
-    going to create the full stack.
-    """
-
-    hosted_zone: Optional[route53.HostedZone] = None
-
-    def __init__(
-        self,
-        scope: core.Construct,
-        id: str,
-        cfg: DeploymentConfig = DeploymentConfig(),
-        **kwargs,
-    ) -> None:
-        super().__init__(scope, id, **kwargs)
-
-        if not cfg.url:
-            return
-
-        if cfg.is_public:
-            self.hosted_zone = route53.PublicHostedZone(
-                self, cfg.names.route53_zone, zone_name=cfg.url
-            )
-        else:
-            raise NotImplementedError("need to implement private hosted zone")
+DEPLOY_ENV_NAME = os.environ["DEPLOY_ENVIRONMENT_NAME"]
 
 
 class DeployCdkStack(core.Stack):
@@ -62,7 +33,6 @@ class DeployCdkStack(core.Stack):
         self,
         scope: core.Construct,
         id: str,
-        hosted_zone: Optional[route53.HostedZone],
         cfg: DeploymentConfig = DeploymentConfig(),
         **kwargs,
     ) -> None:
@@ -165,12 +135,23 @@ class DeployCdkStack(core.Stack):
             port=80,
             health_check=health_check,
         )
+
+        # Get existing hosted zone for URL
+        hosted_zone = route53.HostedZone.from_lookup(
+            self, cfg.names.route53_zone, domain_name=cfg.url
+        )
+
         if cfg.include_ssl:
+            if cfg.include_www:
+                subject_alternative_names = [f"www.{cfg.url}"]
+            else:
+                subject_alternative_names = None
             # Create SSL Certificate
             cert = acm.Certificate(
                 self,
                 cfg.names.cert,
                 domain_name=cfg.url,
+                subject_alternative_names=subject_alternative_names,
                 validation=acm.CertificateValidation.from_dns(hosted_zone),
             )
 

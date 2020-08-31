@@ -10,9 +10,6 @@ cd deploy-cdk
 python -m create_ssh_key $DEPLOY_ENVIRONMENT_NAME
 cp id_rsa.$DEPLOY_ENVIRONMENT_NAME ..
 cp id_rsa.$DEPLOY_ENVIRONMENT_NAME.pub ..
-cdk deploy $ROUTE53_DEPLOY_NAME
-cd ..
-python -m cdk_files.update_name_servers
-cd deploy-cdk
 cdk deploy $MAIN_DEPLOY_NAME
+cd ..
 python -m cdk_files.update_service_sg

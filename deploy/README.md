@@ -18,6 +18,8 @@ e.g. `./initial-deploy.sh staging` to use `.env.staging`.
 
 ## AWS Setup
 
+### IAM User
+
 You will need to have an AWS account and then create an IAM
 user in that AWS account with the following permissions:
 
@@ -32,6 +34,11 @@ user in that AWS account with the following permissions:
 
 Then take that user's access key and secret key and put them in the 
 environment variables.
+
+### Hosted Zone
+
+If you want to do a deploy with a URL, you should already have a 
+Route53 hosted zone with the same domain name as is set in `DEPLOY_URL`
 
 # First Deployment
 
