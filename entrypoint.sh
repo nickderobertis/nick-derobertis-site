@@ -29,4 +29,4 @@ echo "Starting nginx"
 nginx;
 
 echo "Starting bokeh server"
-pipenv run panel serve nick_derobertis_site/home.py --port 5100 --address 0.0.0.0 --log-level info --num-procs 4
+pipenv run panel serve nick_derobertis_site/home.py --port 5100 --address 0.0.0.0 --log-level info --num-procs 2
