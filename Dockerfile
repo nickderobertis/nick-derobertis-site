@@ -23,7 +23,7 @@ COPY Pipfile.lock .
 
 RUN pipenv sync
 
-ENV BOKEH_ALLOW_WS_ORIGIN=localhost,nickderobertis.com,www.nickderobertis.com
+ENV BOKEH_ALLOW_WS_ORIGIN=localhost,nickderobertis.com,www.nickderobertis.com,ts-lb-1673545034.us-west-1.elb.amazonaws.com
 
 EXPOSE 80 5100 22
 
