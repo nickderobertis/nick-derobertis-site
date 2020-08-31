@@ -15,3 +15,4 @@ cd ..
 python -m cdk_files.update_name_servers
 cd deploy-cdk
 cdk deploy $MAIN_DEPLOY_NAME
+python -m cdk_files.update_service_sg
