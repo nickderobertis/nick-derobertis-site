@@ -1,7 +1,1 @@
-import param
-
-from nick_derobertis_site.common.updating import UpdatingItem
-
-
-class ComponentModel(UpdatingItem):
-    pass
+from awesome_panel_extensions.model import ComponentModel
