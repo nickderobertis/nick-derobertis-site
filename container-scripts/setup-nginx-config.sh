@@ -19,6 +19,9 @@ server {
 
     root /front/dist/webapp;
 
+    # Avoid gateway timeouts
+    proxy_read_timeout 120s;
+
 
     location / {
         proxy_pass http://127.0.0.1:5100;
