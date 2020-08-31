@@ -162,7 +162,7 @@ class DeployCdkStack(core.Stack):
             http_listener = lb.add_listener(
                 cfg.names.load_balancer_http_listener,
                 port=80,
-                default_action=elbv2.ListenerAction.redirect(protocol="HTTPS"),
+                default_action=elbv2.ListenerAction.redirect(protocol="HTTPS", permanent=True, port='443'),
             )
             https_listener.add_target_groups(
                 cfg.names.load_balancer_listener_target_groups,
