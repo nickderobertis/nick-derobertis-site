@@ -22,4 +22,11 @@ if __name__.startswith("bokeh"):
 else:
     address = os.getenv("BOKEH_ADDRESS", "0.0.0.0")
     APP_ROUTES = {"": view}
-    pn.serve(APP_ROUTES, port=5100, dev=False, title="Nick DeRobertis' Personal Site", address=address, num_procs=4)
+    pn.serve(
+        APP_ROUTES,
+        port=5100,
+        dev=False,
+        title="Nick DeRobertis' Personal Site",
+        address=address,
+        num_procs=4,
+    )
