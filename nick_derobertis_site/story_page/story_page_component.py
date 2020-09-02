@@ -4,10 +4,9 @@ from bokeh.events import Event
 from nick_derobertis_site.common.component import HTMLComponent
 from .story_page_model import StoryPageModel
 from nick_derobertis_site.common.event_elem import EventElement
-from ..common.providers.page_service import HasPageService
 
 
-class StoryPageComponent(HasPageService, HTMLComponent):
+class StoryPageComponent(HTMLComponent):
     model = param.ClassSelector(class_=StoryPageModel)
     software_link = param.ClassSelector(class_=EventElement)
 
@@ -17,4 +16,4 @@ class StoryPageComponent(HasPageService, HTMLComponent):
         self.software_link.on('click', self.navigate_to_software_page)
 
     def navigate_to_software_page(self, event: Event):
-        self.page_service.navigate('software')
+        self.services.page_service.navigate('software')

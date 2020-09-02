@@ -4,19 +4,23 @@ import param
 from bokeh.events import Event
 from panel.widgets import Widget
 
+from awesome_panel_extensions.model import ComponentModel
 from nick_derobertis_site.common.component import HTMLComponent
 from nick_derobertis_site.common.event_elem import EventElement
-from nick_derobertis_site.common.providers.page_service import HasPageService
 from nick_derobertis_site.common.providers.pdf import HasPDFModel
 from nick_derobertis_site.general.utils import PLACEHOLDER_PDF
 
 
-class PageButtonBase(HasPageService, EventElement):
+class ButtonModel(ComponentModel):
     display_text = param.String()
     page_path = param.String()
+
+
+class PageButtonBase(EventElement):
+    model: ButtonModel = param.ClassSelector(class_=ButtonModel)
     button_css_classes: Sequence[str] = ('btn',)
 
-    _rename = {**EventElement._rename, 'display_text': None, 'page_path': None}
+    _rename = {**EventElement._rename, 'model': None}
 
     def __init__(self, **params):
         params['text'] = self._button_html(params)
@@ -24,8 +28,7 @@ class PageButtonBase(HasPageService, EventElement):
         if 'css_classes' not in params:
             params['css_classes'] = ['d-contents']
         self_params = dict(
-            display_text=params.pop('display_text'),
-            page_path=params.pop('page_path'),
+            model=params.pop('model'),
         )
         super().__init__(**params)
         all_params = {**dict(self.get_param_values()), **self_params}
@@ -34,12 +37,12 @@ class PageButtonBase(HasPageService, EventElement):
 
     def _button_html(self, params: Dict[str, Any]) -> str:
         css_class_str = ' '.join(self.button_css_classes)
-        return f'<button class="{css_class_str}">{params["display_text"]}</button>'
+        return f'<button class="{css_class_str}">{params["model"].display_text}</button>'
 
     def navigate_to_page(self, event: Event):
-        if self.page_path == '#':
+        if self.model.page_path == '#':
             return
-        self.page_service.navigate(self.page_path)
+        self.services.page_service.navigate(self.model.page_path)
 
 
 class PDFButtonBase(HTMLComponent):

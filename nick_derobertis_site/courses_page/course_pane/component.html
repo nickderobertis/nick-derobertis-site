@@ -60,12 +60,12 @@
         </section>
       {% endif %}
     </div>
-    {% if model.software %}
+    {% if software %}
       <div class="col-md-12 d-flex flex-wrap align-content-center justify-content-center">
         <section class="courses-software-container">
           <h3 class="courses-section-header">View related software</h3>
           <div class="courses-software-card-container d-flex flex-wrap justify-content-center">
-            {% for card in model.software %}
+            {% for card in software %}
               <div class="courses-software-wrapper">
                 {{ embed(card, css_classes=['no-color']) }}
               </div>

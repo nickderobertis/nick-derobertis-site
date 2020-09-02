@@ -2,26 +2,35 @@
 import param
 
 from nick_derobertis_site.common.services.page import PageService
+from nick_derobertis_site.page_config import get_pages
 
 
 class Services(param.Parameterized):
     """The Services is a placeholder for the different services required by an Application"""
 
-    page_service = param.ClassSelector(class_=PageService, allow_None=False)
+    page_service = param.ClassSelector(class_=PageService)
 
     def __init__(self, **params):
         if "page_service" not in params:
-            params["page_service"] = PageService()
+            params["page_service"] = PageService(
+                routes={},
+            )
 
         super().__init__(**params)
 
+        routes = get_pages(self)
+        home_page = routes["home"]
+        loading_page = routes.pop(
+            "loading"
+        )  # switch to key lookup to work on loading page without it going away
+        self.page_service = PageService(
+            routes=routes,
+            page=home_page,
+            default_page=home_page,
+            loading_page=loading_page,
+        )
+
 
 def get_default_services() -> Services:
-    from nick_derobertis_site import page_config as pc
-
-    page_service = PageService(
-        routes=pc.ROUTES, page=pc.LANDING_PAGE, default_page=pc.LANDING_PAGE,
-        loading_page=pc.LOADING_PAGE,
-    )
-    services = Services(page_service=page_service)
+    services = Services()
     return services

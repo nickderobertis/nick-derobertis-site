@@ -5,7 +5,7 @@
     <li data-target="#myCarousel" data-slide-to="2"></li>
   </ol>
   <div class="carousel-inner">
-      {% for item in model.items %}
+      {% for item in items %}
         {% if loop.first %}
           {{ embed(item, css_classes=['carousel-item', 'active']) }}
         {% else %}

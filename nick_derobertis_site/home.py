@@ -11,9 +11,9 @@ from nick_derobertis_site.templates.home.home_template import HomeTemplate
 
 
 def view() -> HomeTemplate:
-    from nick_derobertis_site.service_config import SERVICES
+    from nick_derobertis_site.common.services.common import get_default_services
 
-    template = HomeTemplate(services=SERVICES)
+    template = HomeTemplate(services=get_default_services())
     return template
 
 

@@ -1,5 +1,5 @@
 <div class="page-container">
-  {{ embed(model.carousel) }}
+  {{ embed(carousel) }}
 
   <!-- Marketing messaging and featurettes
   ================================================== -->
@@ -9,7 +9,7 @@
 
     <!-- Three columns of text below the carousel -->
     <div class="row">
-      {% for card in model.cards %}
+      {% for card in cards %}
         {{ embed(card, css_classes=["col-md-4"]) }}
       {% endfor %}
     </div><!-- /.row -->
@@ -19,19 +19,19 @@
 
     <hr class="featurette-divider">
 
-    {{ embed(model.story_highlight) }}
+    {{ embed(story_highlight) }}
 
     <hr class="featurette-divider">
 
-    {{ embed(model.skills) }}
+    {{ embed(skills) }}
 
     <hr class="featurette-divider">
 
-    {{ embed(model.awards) }}
+    {{ embed(awards) }}
 
     <hr class="featurette-divider">
 
-    {{ embed(model.contact) }}
+    {{ embed(contact) }}
 
 
   </div>

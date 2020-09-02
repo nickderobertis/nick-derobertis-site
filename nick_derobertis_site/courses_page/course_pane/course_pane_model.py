@@ -6,7 +6,6 @@ from derobertis_cv.models.course import CourseModel
 
 from nick_derobertis_site.common.model import ComponentModel
 from nick_derobertis_site.common.providers.pdf import HasPDFModel
-from nick_derobertis_site.software_page.software_card.software_card_component import SoftwareCardComponent
 from nick_derobertis_site.software_page.software_card.software_card_model import SoftwareCardModel
 
 
@@ -21,11 +20,7 @@ class CoursePaneModel(HasPDFModel, ComponentModel):
     course_id: str = param.String()
     topics: Dict[str, List[str]] = param.Dict()
     software_models: List[SoftwareCardModel] = param.List(class_=SoftwareCardModel)
-    software: List[SoftwareCardComponent] = param.List(class_=SoftwareCardComponent)
 
-    def __init__(self, **params):
-        params['software'] = [SoftwareCardComponent(model=mod) for mod in params.get('software_models', [])]
-        super().__init__(**params)
 
     @classmethod
     def from_course_model(cls, model: CourseModel) -> 'CoursePaneModel':
