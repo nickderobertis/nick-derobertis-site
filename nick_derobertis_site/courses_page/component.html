@@ -1,7 +1,7 @@
-{{ embed(model.banner) }}
+{{ embed(banner) }}
 
 <div class="course-pane-container">
-  {% for pane in model.panes %}
+  {% for pane in panes %}
     {% if loop.index0 % 2 == 0 %}
       {{ embed(pane) }}
     {% else %}

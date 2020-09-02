@@ -6,12 +6,11 @@ from panel.widgets import Widget
 
 from nick_derobertis_site.common.component import HTMLComponent
 from nick_derobertis_site.common.event_elem import EventElement
-from nick_derobertis_site.common.providers.page_service import HasPageService
 from nick_derobertis_site.common.providers.pdf import HasPDFModel
 from nick_derobertis_site.general.utils import PLACEHOLDER_PDF
 
 
-class PageButtonBase(HasPageService, EventElement):
+class PageButtonBase(EventElement):
     display_text = param.String()
     page_path = param.String()
     button_css_classes: Sequence[str] = ('btn',)
@@ -39,7 +38,7 @@ class PageButtonBase(HasPageService, EventElement):
     def navigate_to_page(self, event: Event):
         if self.page_path == '#':
             return
-        self.page_service.navigate(self.page_path)
+        self.services.page_service.navigate(self.page_path)
 
 
 class PDFButtonBase(HTMLComponent):

@@ -41,9 +41,9 @@ class HomeTemplate(pn.Template):
         )
         self._update_main_container()
         self.add_panel('main', self.main)
-        self.header = Container(HeaderComponent(model=HEADER_MODEL), name='header')
+        self.header = Container(HeaderComponent(model=HEADER_MODEL, services=self.services), name='header')
         self.add_panel('header', self.header)
-        self.footer = Container(FooterComponent(model=FOOTER_MODEL), name='footer')
+        self.footer = Container(FooterComponent(model=FOOTER_MODEL, services=self.services), name='footer')
         self.add_panel('footer', self.footer)
 
     @param.depends("services.page_service.page", watch=True)

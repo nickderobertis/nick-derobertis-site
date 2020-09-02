@@ -7,12 +7,11 @@ from param.parameterized import Event
 
 from nick_derobertis_site.common.component import HTMLComponent
 from .header_model import HeaderModel
-from ..common.providers.page_service import HasPageService
 from nick_derobertis_site.general.widgets.button import NarrowPrimaryButton, NarrowPrimaryPDFButton
 from ..common.event_elem import EventElement
 
 
-class HeaderComponent(HasPageService, HTMLComponent):
+class HeaderComponent(HTMLComponent):
     model = param.ClassSelector(class_=HeaderModel)
     page_buttons: List[NarrowPrimaryButton]
     cv_button: NarrowPrimaryPDFButton
@@ -32,10 +31,10 @@ class HeaderComponent(HasPageService, HTMLComponent):
         self.logo.on('click', self.navigate_to_home)
 
     def navigate_to_page(self, page_name: str, event: Event):
-        self.page_service.navigate(page_name)
+        self.services.page_service.navigate(page_name)
 
     def navigate_to_home(self, event: Event):
-        self.page_service.navigate('home')
+        self.services.page_service.navigate('home')
 
 
 
