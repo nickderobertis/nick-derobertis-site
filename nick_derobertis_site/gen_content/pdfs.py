@@ -17,7 +17,7 @@ def build_pdfs():
 
 def _build_pdfs():
     for file in next(os.walk(SOURCES_ROOT))[2]:
-        if file == '__init__.py':
+        if file in ('__init__.py', 'professional_cv.py'):
             continue
         file_path = (SOURCES_ROOT / file).resolve()
         build_by_file_path(file_path)
