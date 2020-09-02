@@ -10,11 +10,15 @@ class CarouselItemComponent(HTMLComponent):
     buttons = param.List(class_=PageButtonBase)
 
     def __init__(self, **params):
-        if not params['model'].buttons_are_for_skills:
-            button_cls = PrimaryButton
-        else:
-            button_cls = PrimarySkillsButton
-        params['buttons'] = [button_cls(model=mod) for mod in params['model'].button_models]
+        buttons = []
+        for mod in params['model'].button_models:
+            kwargs = dict(model=mod, services=params['services'])
+            if mod.page_path == '#':
+                buttons.append(PrimarySkillsButton(**kwargs))
+            else:
+                buttons.append(PrimaryButton(**kwargs))
+
+        params['buttons'] = buttons
         super().__init__(**params)
 
 

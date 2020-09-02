@@ -38,7 +38,6 @@ CAROUSEL_ITEM_MODELS = [
         button_models=[CAROUSEL_SKILLS_BUTTON_MODEL, CAROUSEL_SOFTWARE_BUTTON_MODEL],
         caption_div_classes=['carousel-caption', 'text-right'],
         image=DATA_SCIENCE_BANNER_IMAGE_MODEL,
-        buttons_are_for_skills=True
     )
 ]
 

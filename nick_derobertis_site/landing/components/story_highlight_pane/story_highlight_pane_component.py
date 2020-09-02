@@ -10,7 +10,7 @@ class StoryHighlightPaneComponent(HTMLComponent):
     button: PrimaryButton = param.ClassSelector(class_=PrimaryButton)
 
     def __init__(self, **params):
-        params['button'] = PrimaryButton(model=params['model'].button_model)
+        params['button'] = PrimaryButton(model=params['model'].button_model, services=params['services'])
         super().__init__(**params)
 
 

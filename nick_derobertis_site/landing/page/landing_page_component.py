@@ -45,12 +45,8 @@ class LandingPageComponent(HTMLComponent):
         params["awards"] = AwardsPaneComponent(
             model=params["model"].awards_model, services=params["services"]
         )
-        super().__init__(**params)
-        self._set_cards()
-
-    @param.depends("model", watch=True)
-    def _set_cards(self):
-        self.cards = [
-            CardComponent(model=mod, services=self.services)
-            for mod in self.model.card_models
+        params["cards"] = [
+            CardComponent(model=mod, services=params["services"])
+            for mod in params["model"].card_models
         ]
+        super().__init__(**params)

@@ -40,9 +40,9 @@ class PageButtonBase(EventElement):
         return f'<button class="{css_class_str}">{params["model"].display_text}</button>'
 
     def navigate_to_page(self, event: Event):
-        if self.page_path == '#':
+        if self.model.page_path == '#':
             return
-        self.services.page_service.navigate(self.page_path)
+        self.services.page_service.navigate(self.model.page_path)
 
 
 class PDFButtonBase(HTMLComponent):
