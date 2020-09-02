@@ -14,18 +14,18 @@ class CoursesPageComponent(HTMLComponent):
     panes: List[CoursePaneComponent] = param.List(class_=CoursePaneComponent)
 
     def __init__(self, **params):
-        params['banner'] = CoursesBannerComponent(model=params['model'].banner_model, services=params['services'])
+        params["banner"] = CoursesBannerComponent(
+            model=params["model"].banner_model, services=params["services"]
+        )
+        self._set_panes(params)
         super().__init__(**params)
-        self._set_panes()
 
-    @param.depends('model', watch=True)
-    def _set_panes(self):
+    def _set_panes(self, params):
         all_panes = []
-        for i, mod in enumerate(self.model.pane_models):
-            kwargs = dict(model=mod, services=self.services)
+        for i, mod in enumerate(params["model"].pane_models):
+            kwargs = dict(model=mod, services=params["services"])
             if i % 2 != 0:
                 kwargs.update(is_reversed=True)
             all_panes.append(CoursePaneComponent(**kwargs))
 
-        self.panes = all_panes
-
+        params["panes"] = all_panes
