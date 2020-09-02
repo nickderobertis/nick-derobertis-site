@@ -7,7 +7,7 @@ from param.parameterized import Event
 
 from nick_derobertis_site.common.component import HTMLComponent
 from .header_model import HeaderModel
-from nick_derobertis_site.general.widgets.button import NarrowPrimaryButton, NarrowPrimaryPDFButton
+from nick_derobertis_site.general.widgets.button import NarrowPrimaryButton, NarrowPrimaryPDFButton, ButtonModel
 from ..common.event_elem import EventElement
 
 
@@ -22,8 +22,9 @@ class HeaderComponent(HTMLComponent):
         params['logo'] = EventElement(text=logo_src, watch_events=['click'])
         self.page_buttons = []
         for page_name, page in params['services'].page_service.routes.items():
+            button_model = ButtonModel(display_text=page.model.page_link_text, page_path=page_name)
             button = NarrowPrimaryButton(
-                display_text=page.model.page_link_text, page_path=page_name
+                model=button_model, services=params['services']
             )
             self.page_buttons.append(button)
         self.cv_button = NarrowPrimaryPDFButton(display_text='CV', pdf_src=params['model'].pdf_src)

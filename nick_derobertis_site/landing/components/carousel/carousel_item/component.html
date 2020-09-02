@@ -4,7 +4,7 @@
     <h1>{{ model.header_text }}</h1>
     <p>{{ model.body_text }}</p>
     <p>
-        {% for button in model.buttons %}
+        {% for button in buttons %}
           {{ embed(button) }}
         {% endfor %}
     </p>
