@@ -6,3 +6,5 @@ from nick_derobertis_site.common.services.common import Services
 
 class EventElement(AwesomeEventElement):
     services: Services = param.ClassSelector(class_=Services)
+
+    _rename = {**AwesomeEventElement._rename, **{'services': None}}

@@ -12,19 +12,23 @@ class Services(param.Parameterized):
 
     def __init__(self, **params):
         if "page_service" not in params:
-            routes = get_pages(self)
-            home_page = routes["home"]
-            loading_page = routes.pop(
-                "loading"
-            )  # switch to key lookup to work on loading page without it going away
             params["page_service"] = PageService(
-                routes=routes,
-                page=home_page,
-                default_page=home_page,
-                loading_page=loading_page,
+                routes={},
             )
 
         super().__init__(**params)
+
+        routes = get_pages(self)
+        home_page = routes["home"]
+        loading_page = routes.pop(
+            "loading"
+        )  # switch to key lookup to work on loading page without it going away
+        self.page_service = PageService(
+            routes=routes,
+            page=home_page,
+            default_page=home_page,
+            loading_page=loading_page,
+        )
 
 
 def get_default_services() -> Services:

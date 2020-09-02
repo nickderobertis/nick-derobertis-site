@@ -15,11 +15,10 @@ class CoursesPageComponent(HTMLComponent):
 
     def __init__(self, **params):
         params['banner'] = CoursesBannerComponent(model=params['model'].banner_model, services=params['services'])
-        breakpoint()
         super().__init__(**params)
         self._set_panes()
 
-    @param.depends('model.pane_models', watch=True)
+    @param.depends('model', watch=True)
     def _set_panes(self):
         all_panes = []
         for i, mod in enumerate(self.model.pane_models):

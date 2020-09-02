@@ -21,7 +21,7 @@ class HeaderComponent(HTMLComponent):
         logo_src = params['model'].logo_src + '<a class="navbar-brand" href="#">Nick DeRobertis</a>'
         params['logo'] = EventElement(text=logo_src, watch_events=['click'])
         self.page_buttons = []
-        for page_name, page in self.page_service.routes.items():
+        for page_name, page in params['services'].page_service.routes.items():
             button = NarrowPrimaryButton(
                 display_text=page.model.page_link_text, page_path=page_name
             )
