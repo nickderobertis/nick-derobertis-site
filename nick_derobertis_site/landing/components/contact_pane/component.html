@@ -8,4 +8,13 @@
       </button>
     </form>
   </div>
+  <div class="col-md-12 d-flex flex-column align-items-center">
+    <h2 class="featurette-heading contact-heading">Not Convinced?</h2>
+    <div class="contact-not-convinced-button-container d-flex flex-wrap justify-content-around">
+      {% for button in buttons %}
+        {{ embed(button) }}
+      {% endfor %}
+      {{ embed(cv_button, css_classes=['d-contents']) }}
+    </div>
+  </div>
 </div>
