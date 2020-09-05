@@ -777,10 +777,10 @@ $award-image-width: 125px;
 .software-card {
   border-radius: 0.3rem;
   @include media-breakpoint-up(lg) {
-    min-height: 500px;
+    min-height: 475px;
   }
   @include media-breakpoint-up(xl) {
-    min-height: 400px;
+    min-height: 410px;
   }
 }
 
