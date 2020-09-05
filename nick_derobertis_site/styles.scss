@@ -329,7 +329,7 @@ $footer-height: 61px;
 }
 
 .courses-banner > img {
-  @include page-banner-img($opacity: 50%);
+  @include page-banner-img($opacity: 40%);
 }
 
 .courses-banner-content-container {
