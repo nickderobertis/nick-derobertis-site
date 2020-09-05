@@ -22,5 +22,6 @@ class CoursePaneComponent(HTMLComponent):
     def __init__(self, **params):
         params['software'] = [SoftwareCardComponent(model=mod) for mod in params['model'].software_models]
         if params['model'].pdf_src != PLACEHOLDER_PDF:
-            params['syllabus_button'] = NoColorRaisedPrimaryPDFButton(display_text='Syllabus', pdf_src=params['model'].pdf_src)
+            params['syllabus_button'] = NoColorRaisedPrimaryPDFButton(display_text='Syllabus', pdf_src=params['model'].pdf_src,
+                                                                      pdf_name=f'{params["model"].title} Syllabus')
         super().__init__(**params)

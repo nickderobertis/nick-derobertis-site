@@ -56,7 +56,8 @@ class PDFButtonBase(HTMLComponent):
     display_text = param.String()
     button_css_classes: str = param.List(class_=str, default=list(_default_button_css_classes))
     pdf_src: str = param.String(default=PLACEHOLDER_PDF)
-    template_str = '<button class="has-pdf {{ button_css_classes | join(" ") }}" data-pdf-src="{{ pdf_src }}">{{ display_text }}</button>'
+    pdf_name: str = param.String()
+    template_str = '<button class="has-pdf {{ button_css_classes | join(" ") }}" data-pdf-src="{{ pdf_src }}" data-pdf-name="{{ pdf_name }}">{{ display_text }}</button>'
 
     def __init__(self, **params):
         if 'button_css_classes' not in params:

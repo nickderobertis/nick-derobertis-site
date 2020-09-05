@@ -19,6 +19,7 @@ class CoursePaneModel(HasPDFModel, ComponentModel):
     university_logo_src: str = param.String()
     course_id: str = param.String()
     topics: Dict[str, List[str]] = param.Dict()
+    website_url: str = param.String()
     software_models: List[SoftwareCardModel] = param.List(class_=SoftwareCardModel)
 
 
@@ -49,5 +50,8 @@ class CoursePaneModel(HasPDFModel, ComponentModel):
         if model.software_projects is not None:
             software_card_models = [SoftwareCardModel.from_software_project(mod) for mod in model.software_projects]
             params.update(software_models=software_card_models)
+
+        if model.website_url is not None:
+            params.update(website_url=model.website_url)
 
         return cls(**params)

@@ -27,7 +27,8 @@ class HeaderComponent(HTMLComponent):
                 model=button_model, services=params['services']
             )
             self.page_buttons.append(button)
-        self.cv_button = NarrowPrimaryPDFButton(display_text='CV', pdf_src=params['model'].pdf_src)
+        self.cv_button = NarrowPrimaryPDFButton(display_text='CV', pdf_src=params['model'].pdf_src,
+                                                pdf_name='Nick DeRobertis CV')
         super().__init__(**params)
         self.logo.on('click', self.navigate_to_home)
 
