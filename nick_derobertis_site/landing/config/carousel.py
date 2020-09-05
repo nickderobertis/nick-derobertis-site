@@ -15,6 +15,7 @@ CAROUSEL_SKILLS_BUTTON_MODEL = ButtonModel(display_text='Skills', page_path='#')
 DATA_SCIENCE_BANNER_IMAGE_MODEL = ImageModel(image_path=os.path.join(IMAGES_PATH, 'data-science-banner.jpg'))
 RESEARCH_IMAGE_MODEL = ImageModel(image_path=os.path.join(IMAGES_PATH, 'finance-research-banner.jpg'))
 TEACHING_IMAGE_MODEL = ImageModel(image_path=os.path.join(IMAGES_PATH, 'teaching-banner.jpg'))
+SOFTWARE_ENGINEERING_BANNER_IMAGE_MODEL = ImageModel(image_path=os.path.join(IMAGES_PATH, 'software-engineering-banner.jpg'))
 
 CAROUSEL_ITEM_MODELS = [
     CarouselItemModel(
@@ -30,14 +31,20 @@ CAROUSEL_ITEM_MODELS = [
         button_models=[CAROUSEL_COURSES_BUTTON_MODEL],
         image=TEACHING_IMAGE_MODEL,
     ),
-    # TODO: separate into two items
     CarouselItemModel(
-        header_text='Data Scientist and Full-Stack Software Engineer',
-        body_text='Highly proficient at extracting insights from data. Maintainer of '
-                  'dozens of open-source packages, experienced in creating full web applications',
-        button_models=[CAROUSEL_SKILLS_BUTTON_MODEL, CAROUSEL_SOFTWARE_BUTTON_MODEL],
+        header_text='Data Scientist',
+        body_text='Highly proficient at extracting insights from data, effective at '
+                  'summarizing and visualizing insights',
+        button_models=[CAROUSEL_SKILLS_BUTTON_MODEL],
         caption_div_classes=['carousel-caption', 'text-right'],
         image=DATA_SCIENCE_BANNER_IMAGE_MODEL,
+    ),
+    CarouselItemModel(
+        header_text='Full-Stack Software Engineer',
+        body_text='Maintainer of '
+                  'dozens of open-source packages, experienced in creating full web applications',
+        button_models=[CAROUSEL_SOFTWARE_BUTTON_MODEL],
+        image=SOFTWARE_ENGINEERING_BANNER_IMAGE_MODEL,
     )
 ]
 
