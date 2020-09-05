@@ -78,12 +78,28 @@ class PrimarySkillsButton(SkillsButton):
     button_css_classes = tuple(SkillsButton.button_css_classes) + ('btn-primary',)
 
 
+class PrimaryRaisedButton(PrimaryButton):
+    button_css_classes = tuple(PrimaryButton.button_css_classes) + ('btn-raised',)
+
+
+class PrimaryOutlineButton(PrimaryButton):
+    button_css_classes = tuple(PrimaryButton.button_css_classes) + ('border', 'border-primary')
+
+
+class PrimaryOutlineSkillsButton(PrimarySkillsButton):
+    button_css_classes = tuple(PrimarySkillsButton.button_css_classes) + ('border', 'border-primary')
+
+
 class NarrowPrimaryButton(PrimaryButton):
     button_css_classes = tuple(PrimaryButton.button_css_classes) + ('btn-narrow',)
 
 
 class PrimaryPDFButton(PDFButtonBase):
     _default_button_css_classes = tuple(PDFButtonBase._default_button_css_classes) + ('btn-primary',)
+
+
+class PrimaryOutlinePDFButton(PrimaryPDFButton):
+    _default_button_css_classes = tuple(PrimaryPDFButton._default_button_css_classes) + ('border', 'border-primary')
 
 
 class NarrowPrimaryPDFButton(PrimaryPDFButton):
