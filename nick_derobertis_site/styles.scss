@@ -486,12 +486,17 @@ $course-card-max-width: 300px;
   font-size: 2.5em;
 }
 
+.bg-offset-dark.bg-offset-dark.bg-offset-dark {
+  background-color: var(--primary-offset-dark);
+}
+
 // Bootstrap variable overrides
 $body-bg: #fbfcfd;
 
 $theme-colors: (
   "primary": #25ad30,
-  "primary-offset": #ccf7cf,
+  "primary-offset-light": #ccf7cf,
+  "primary-offset-dark": #00000080,
   "tertiary": #38483b,
   "tertiary-offset": white,
   "background": #fbfcfd,
@@ -537,7 +542,7 @@ body {
 }
 
 .carousel-item > img {
-  opacity: 35%;
+  opacity: 30%;
   object-position: center;
   object-fit: cover;
 }
@@ -562,7 +567,7 @@ body {
 
 $skill-bar-fg: var(--primary);
 
-$skill-bar-bg: var(--primary-offset);
+$skill-bar-bg: var(--primary-offset-light);
 
 $skill-name-bg: var(--tertiary);
 

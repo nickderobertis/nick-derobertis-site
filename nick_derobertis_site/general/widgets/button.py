@@ -87,8 +87,16 @@ class PrimaryOutlineButton(PrimaryButton):
     button_css_classes = tuple(PrimaryButton.button_css_classes) + ('border', 'border-primary')
 
 
+class PrimaryOutlineDarkBackgroundButton(PrimaryButton):
+    button_css_classes = tuple(PrimaryOutlineButton.button_css_classes) + ('bg-offset-dark',)
+
+
 class PrimaryOutlineSkillsButton(PrimarySkillsButton):
     button_css_classes = tuple(PrimarySkillsButton.button_css_classes) + ('border', 'border-primary')
+
+
+class PrimaryOutlineDarkBackgroundSkillsButton(PrimarySkillsButton):
+    button_css_classes = tuple(PrimaryOutlineSkillsButton.button_css_classes) + ('bg-offset-dark',)
 
 
 class NarrowPrimaryButton(PrimaryButton):
@@ -101,6 +109,10 @@ class PrimaryPDFButton(PDFButtonBase):
 
 class PrimaryOutlinePDFButton(PrimaryPDFButton):
     _default_button_css_classes = tuple(PrimaryPDFButton._default_button_css_classes) + ('border', 'border-primary')
+
+
+class PrimaryOutlineDarkBackgroundPDFButton(PrimaryOutlinePDFButton):
+    _default_button_css_classes = tuple(PrimaryOutlinePDFButton._default_button_css_classes) + ('bg-offset-dark',)
 
 
 class NarrowPrimaryPDFButton(PrimaryPDFButton):
