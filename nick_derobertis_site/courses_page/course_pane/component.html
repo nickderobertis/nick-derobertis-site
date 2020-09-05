@@ -34,11 +34,18 @@
             </div>
           {% endif %}
         </div>
-        {% if syllabus_button %}
-          <div class="course-syllabus-wrapper">
-            {{ embed(syllabus_button) }}
-          </div>
-        {% endif %}
+        {% if syllabus_button or model.website_url %}
+          <div class="course-syllabus-wrapper d-flex flex-wrap justify-content-around">
+            {% if syllabus_button %}
+              {{ embed(syllabus_button, css_classes=['d-contents']) }}
+            {% endif %}
+            {% if model.website_url %}
+              <a href="{{ model.website_url }}">
+                <button class="btn btn-primary btn-raised">Website</button>
+              </a>
+           {% endif %}
+        </div>
+       {% endif %}
       </section>
     </div>
     <div class="col-md-7 d-flex flex-wrap align-content-center justify-content-center">
