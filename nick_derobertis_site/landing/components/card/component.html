@@ -1,6 +1,6 @@
 <div class="home-page-card">
-    <i class="{{ model.icon_class_str }}" aria-hidden="true"></i>
-    <h2>{{ model.heading }}</h2>
+    <i class="{{ model.icon_class_str }} text-tertiary" aria-hidden="true"></i>
+    <h2 class="text-tertiary">{{ model.heading }}</h2>
     <p>{{ model.body_text }}</p>
     {% if model.link %}
         {{ embed(button) }}
