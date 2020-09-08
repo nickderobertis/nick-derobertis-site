@@ -9,7 +9,7 @@ LANDING_CARD_MODELS = [
         and cryptocurrency valuation. 
         """,
         link='research',
-        link_display_text='See Research',
+        link_display_text='View Research',
         icon_classes=['fas', 'fa-chart-bar', 'fa-5x'],
     ),
     CardModel(
@@ -20,7 +20,7 @@ LANDING_CARD_MODELS = [
         Python and Excel at the University of Florida.
         """,
         link='courses',
-        link_display_text='See Courses',
+        link_display_text='View Courses',
         icon_classes=['fas', 'fa-graduation-cap', 'fa-5x'],
     ),
     CardModel(
@@ -32,7 +32,7 @@ LANDING_CARD_MODELS = [
         and usually build open-source tools along the way.
         """,
         link='software',
-        link_display_text='See Software',
+        link_display_text='View Software',
         icon_classes=['fas', 'fa-cogs', 'fa-5x'],
     ),
 ]

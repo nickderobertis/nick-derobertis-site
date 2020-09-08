@@ -15,7 +15,7 @@ class ContactPaneComponent(HTMLComponent):
     model = param.ClassSelector(class_=ContactPaneModel)
     buttons: List[PrimaryRaisedButton] = param.List(class_=PrimaryRaisedButton)
     cv_button: RaisedPrimaryPDFButton = RaisedPrimaryPDFButton(
-        display_text="See CV", pdf_src=CV_PDF_MODEL.src, pdf_name="Nick DeRobertis CV"
+        display_text="View CV", pdf_src=CV_PDF_MODEL.src, pdf_name="Nick DeRobertis CV"
     )
 
     def __init__(self, **params):
