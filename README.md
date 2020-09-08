@@ -1,33 +1,18 @@
 
 [![](https://codecov.io/gh/nickderobertis/nick-derobertis-site/branch/master/graph/badge.svg)](https://codecov.io/gh/nickderobertis/nick-derobertis-site)
 
-# nick-derobertis-site
+# Nick DeRobertis' Personal Website
 
 ## Overview
 
-Nick DeRobertis' Personal Website
+Nick DeRobertis' Personal Website, built with Python, Panel, Bootstrap, and jQuery.
 
-## Getting Started
-
-Install `nick-derobertis-site`:
-
-```
-pip install nick-derobertis-site
-```
-
-A simple example:
-
-```python
-import nick_derobertis_site
-
-# Do something with nick_derobertis_site
-```
 
 ## Links
 
-See the
-[documentation here.](
-https://nickderobertis.github.io/nick-derobertis-site/
+See the website
+[at nickderobertis.com.](
+https://nickderobertis.com
 )
 
 ## Author
