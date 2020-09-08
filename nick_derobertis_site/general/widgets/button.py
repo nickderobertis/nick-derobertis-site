@@ -72,7 +72,7 @@ class SkillsButton(PageButtonBase):
 
 
 class PrimaryButton(PageButtonBase):
-    button_css_classes = tuple(PageButtonBase.button_css_classes) + ('btn-primary',)
+    button_css_classes = tuple(PageButtonBase.button_css_classes) + ('btn-primary', 'scroll-to-top-immediately')
 
 
 class PrimarySkillsButton(SkillsButton):
