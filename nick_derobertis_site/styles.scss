@@ -331,7 +331,7 @@ $footer-height: 61px;
   @include banner-content-container;
 }
 
-$evaluation-score-color: var(--primary);
+$evaluation-score-color: var(--green);
 $course-card-min-width: 200px;
 $course-card-max-width: 300px;
 
@@ -489,12 +489,12 @@ $course-card-max-width: 300px;
 $body-bg: #fbfcfd;
 
 $theme-colors: (
-  "primary": #25ad30,
-  "primary-offset-light": #ccf7cf,
-  "primary-offset-dark": #00000080,
-  "tertiary": #38483b,
+  "primary": #e44f4f,
+  "primary-offset-light": #eec9c9,
+  "primary-offset-dark": hsla(0, 50%, 12%, 0.63),
+  "tertiary": #332b2b,
   "tertiary-offset": white,
-  "background": #fbfcfd,
+  "background": #f1e9e9,
   "gold": #e2ca11,
 );
 
