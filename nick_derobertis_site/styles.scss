@@ -46,11 +46,6 @@
   margin-right: 0.1rem;
 }
 
-.home-page-card {
-  text-align: center;
-  padding: 20px;
-}
-
 .software-card-github-button {
   width: 90px;
 }
@@ -556,6 +551,28 @@ body {
 
 .featurette-image {
   border-radius: 20px;
+}
+
+.home-page-card {
+  text-align: center;
+  padding: 20px;
+  @include media-breakpoint-up(md) {
+    min-height: 380px;
+  }
+  @include media-breakpoint-up(lg) {
+    min-height: 340px;
+  }
+}
+
+.home-page-card-wrapper.home-page-card-wrapper {
+  margin-bottom: 3rem;
+  @include media-breakpoint-up(md) {
+    margin-bottom: unset;
+  }
+}
+
+.home-page-card-wrapper.home-page-card-wrapper:last-of-type {
+  margin-bottom: unset;
 }
 
 .story-highlight-pane-button-wrapper {
