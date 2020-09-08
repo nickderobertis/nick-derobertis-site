@@ -284,15 +284,15 @@ $footer-height: 61px;
 }
 
 .story-header-logo-wrapper {
-  width: 3rem;
+  margin-left: 0.3rem;
   text-align: center;
   display: inline-block;
 }
 
-h3.cover-heading {
+h3 + h4.cover-heading {
   margin-top: 2rem;
-  margin-bottom: 2rem;
 }
+
 .cover-heading {
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
@@ -534,6 +534,10 @@ body {
   // then X is scrollable with a tiny area outside the
   // body on the right
   overflow-x: hidden;
+}
+
+.text-green {
+  color: var(--green);
 }
 
 .nd-logo-background {
