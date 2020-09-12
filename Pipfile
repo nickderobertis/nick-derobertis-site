@@ -31,6 +31,8 @@ awesome-panel-extensions = "*"
 fire = "*"
 derobertis-cv = "*"
 pydantic = "*"
+fastapi = "*"
+uvicorn = "*"
 
 [requires]
 python_version = "3.7"
