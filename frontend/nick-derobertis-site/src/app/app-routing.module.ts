@@ -1,6 +1,9 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { CoursesPageComponent } from './courses/courses-page/courses-page.component';
 import { HomePageComponent } from './home/home-page/home-page.component';
+import { ResearchPageComponent } from './research/research-page/research-page.component';
+import { SoftwarePageComponent } from './software/software-page/software-page.component';
 import { StoryPageComponent } from './story/story-page/story-page.component';
 
 const routes: Routes = [
@@ -11,6 +14,18 @@ const routes: Routes = [
   {
     path: 'story',
     component: StoryPageComponent,
+  },
+  {
+    path: 'research',
+    component: ResearchPageComponent,
+  },
+  {
+    path: 'software',
+    component: SoftwarePageComponent,
+  },
+  {
+    path: 'courses',
+    component: CoursesPageComponent,
   },
 ];
 
