@@ -5,6 +5,7 @@ import { HomeCarouselComponent } from './home-carousel/home-carousel.component';
 import { HomeCarouselItemComponent } from './home-carousel/home-carousel-item/home-carousel-item.component';
 import { RouterModule } from '@angular/router';
 import { HomeCardComponent } from './home-card/home-card.component';
+import { HomeStoryComponent } from './home-story/home-story.component';
 
 @NgModule({
   declarations: [
@@ -12,6 +13,7 @@ import { HomeCardComponent } from './home-card/home-card.component';
     HomeCarouselComponent,
     HomeCarouselItemComponent,
     HomeCardComponent,
+    HomeStoryComponent,
   ],
   imports: [CommonModule, RouterModule],
   exports: [HomePageComponent],
