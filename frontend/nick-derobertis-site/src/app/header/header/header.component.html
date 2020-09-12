@@ -20,14 +20,14 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav mr-auto">
         <div class="d-contents d-md-block">
-          <a *ngFor="let link of routerLinks" routerLink="{{ link.link }}">
+          <a *ngFor="let link of routerLinks" [routerLink]="link.link">
             <button
               class="btn btn-primary scroll-to-top-immediately btn-narrow"
             >
               {{ link.title }}
             </button>
           </a>
-          <a *ngFor="let link of normalLinks" routerLink="{{ link.link }}">
+          <a *ngFor="let link of normalLinks" href="{{ link.link }}">
             <button class="btn btn-primary btn-narrow">{{ link.title }}</button>
           </a>
         </div>

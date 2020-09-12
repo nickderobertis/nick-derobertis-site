@@ -9,7 +9,7 @@ import { PageLink } from 'src/app/global/interfaces/page-link';
 export class HeaderComponent implements OnInit {
   routerLinks: PageLink[] = [
     {
-      link: 'home',
+      link: '',
       title: 'Home',
     },
     {
