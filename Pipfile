@@ -33,6 +33,7 @@ derobertis-cv = "*"
 pydantic = "*"
 fastapi = "*"
 uvicorn = "*"
+pydantic-to-typescript = "*"
 
 [requires]
 python_version = "3.7"
