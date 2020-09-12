@@ -1,1 +1,12 @@
-<nds-home-carousel></nds-home-carousel>
+<div class="page-container">
+  <nds-home-carousel></nds-home-carousel>
+  <div class="container marketing">
+    <div class="row">
+      <nds-home-card
+        *ngFor="let model of cardModels"
+        [model]="model"
+        class="col-md-4 home-page-card-wrapper"
+      ></nds-home-card>
+    </div>
+  </div>
+</div>
