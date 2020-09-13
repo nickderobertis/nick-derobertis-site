@@ -28,5 +28,9 @@ echo "Starting SSH daemon"
 echo "Starting nginx"
 nginx;
 
-echo "Starting bokeh server"
-pipenv run panel serve nick_derobertis_site/home.py --port 5100 --address 0.0.0.0 --log-level info --num-procs 2
+echo "Starting backend"
+pipenv run uvicorn nick_derobertis_site.api.main:app --host 0.0.0.0 &
+
+echo "Starting frontend"
+cd frontend/nick-derobertis-site
+npm run serve:ssr

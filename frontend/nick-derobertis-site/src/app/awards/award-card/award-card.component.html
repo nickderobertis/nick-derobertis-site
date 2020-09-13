@@ -1,0 +1,22 @@
+<div class="card award-container">
+  <div class="award-images-container">
+    <div
+      class="award-image-wrapper d-flex justify-content-center align-items-center"
+    >
+      <img src="assets/images/laurel.svg" />
+    </div>
+    <div
+      class="award-image-wrapper d-flex justify-content-center align-items-center"
+      [innerHtml]="model.imageHTML | safeHtml"
+    ></div>
+    <div class="award-image-wrapper d-flex justify-content-center">
+      <small class="award-received">{{ model.received }}</small>
+    </div>
+  </div>
+  <div class="award-description-container">
+    <ng-container *ngFor="let line of model.awardParts; first as isFirst">
+      <h6 class="award-header" *ngIf="isFirst">{{ line }}</h6>
+      <p class="award-description" *ngIf="!isFirst">{{ line }}</p>
+    </ng-container>
+  </div>
+</div>

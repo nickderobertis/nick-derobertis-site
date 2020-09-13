@@ -1,0 +1,16 @@
+<div class="row featurette" id="skills-pane">
+  <div
+    class="col-md-3 d-flex flex-column justify-content-center"
+    *ngIf="!loading"
+  >
+    <h2 class="featurette-heading">Highly Skilled in...</h2>
+    <p class="lead skills-pane-description">
+      Browse {{ model?.count }} skills in {{ model?.parentCount }} categories.
+      Click the dropdowns to see nested skills.
+    </p>
+  </div>
+  <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
+  <div class="col-md-9">
+    <nds-skills-widget></nds-skills-widget>
+  </div>
+</div>

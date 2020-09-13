@@ -1,0 +1,10 @@
+<nds-courses-banner></nds-courses-banner>
+
+<nds-loading-spinner *ngIf="!model"></nds-loading-spinner>
+<div class="course-pane-container" *ngIf="model">
+  <nds-course-pane
+    *ngFor="let courseModel of model.courseModels; odd as isOdd"
+    [model]="courseModel"
+    [ngClass]="{ 'course-pane-offset': isOdd }"
+  ></nds-course-pane>
+</div>

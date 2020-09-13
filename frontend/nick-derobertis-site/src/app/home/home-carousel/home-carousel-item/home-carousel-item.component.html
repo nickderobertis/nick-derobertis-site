@@ -1,0 +1,25 @@
+<img src="{{ model.imageHref }}" />
+<div class="container">
+  <div class="{{ model.captionDivClassesStr }}">
+    <h1>{{ model.headerText }}</h1>
+    <p>{{ model.bodyText }}</p>
+    <p>
+      <a *ngFor="let link of model.links" [routerLink]="link.link">
+        <button
+          class="btn btn-primary scroll-to-top-immediately border border-primary bg-offset-dark"
+        >
+          {{ link.title }}
+        </button>
+      </a>
+      <a
+        *ngFor="let link of model.fragmentLinks"
+        [routerLink]="'.'"
+        [fragment]="link.link"
+      >
+        <button class="btn btn-primary border border-primary bg-offset-dark">
+          {{ link.title }}
+        </button>
+      </a>
+    </p>
+  </div>
+</div>

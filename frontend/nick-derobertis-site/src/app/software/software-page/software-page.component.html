@@ -1,0 +1,14 @@
+<nds-software-banner></nds-software-banner>
+
+<div class="album py-5 bg-background">
+  <div class="container">
+    <nds-loading-spinner *ngIf="!model"></nds-loading-spinner>
+    <div class="row" *ngIf="model">
+      <nds-software-card
+        *ngFor="let projectModel of model.projectModels"
+        [model]="projectModel"
+        class="col-lg-4 pl-3 pr-3"
+      ></nds-software-card>
+    </div>
+  </div>
+</div>
