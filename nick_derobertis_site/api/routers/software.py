@@ -16,6 +16,7 @@ router = APIRouter()
 class APISoftwareModel(BaseModel):
     title: str
     description: str
+    display_title: str
     created: Optional[datetime] = None
     updated: Optional[datetime] = None
     loc: Optional[int] = None
@@ -33,6 +34,7 @@ class APISoftwareModel(BaseModel):
         return cls(
             title=model.title,
             description=model.description,
+            display_title=model.display_title,
             created=model.created,
             updated=model.updated,
             loc=model.loc,
