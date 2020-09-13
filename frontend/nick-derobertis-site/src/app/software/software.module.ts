@@ -14,5 +14,6 @@ import { SoftwareService } from './software.service';
   ],
   imports: [CommonModule, GlobalModule],
   providers: [SoftwareService],
+  exports: [SoftwareCardComponent],
 })
 export class SoftwareModule {}

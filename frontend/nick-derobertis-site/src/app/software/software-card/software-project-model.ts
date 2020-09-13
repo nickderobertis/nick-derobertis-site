@@ -16,6 +16,7 @@ export class SoftwareProjectModel {
   packageDirectory?: string;
   logoSvgText?: string;
   logoFaIconClassStr: string = 'fas fa-microchip';
+  logoBase64?: string;
 
   constructor(args: APISoftwareModel) {
     this.title = args.title;
@@ -55,6 +56,9 @@ export class SoftwareProjectModel {
     if (args.logo_fa_icon_class_str) {
       this.logoFaIconClassStr = args.logo_fa_icon_class_str;
     }
+    if (args.logo_base64) {
+      this.logoBase64 = args.logo_base64;
+    }
   }
 
   static arrFromAPIArr(args: APISoftwareModel[]): SoftwareProjectModel[] {
@@ -69,6 +73,8 @@ export class SoftwareProjectModel {
   get logoHTML(): string {
     if (this.logoUrl) {
       return `<img src="${this.logoUrl}" class="card-img-top software-card-img">`;
+    } else if (this.logoBase64) {
+      return `<img src="${this.logoBase64}" class="card-img-top software-card-img">`;
     } else {
       return `<i
         class="software-card-img software-card-img-placeholder ${this.logoFaIconClassStr} text-secondary text-center"

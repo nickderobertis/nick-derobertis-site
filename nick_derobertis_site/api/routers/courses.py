@@ -18,6 +18,7 @@ class APIUniversityModel(BaseModel):
     logo_url: Optional[str] = None
     logo_svg_text: Optional[str] = None
     logo_fa_icon_class_str: Optional[str] = None
+    logo_base64: Optional[str] = None
 
     @classmethod
     def from_cv_model(cls, model: UniversityModel) -> "APIUniversityModel":
@@ -27,6 +28,7 @@ class APIUniversityModel(BaseModel):
             logo_url=model.logo_url,
             logo_svg_text=model.logo_svg_text,
             logo_fa_icon_class_str=model.logo_fa_icon_class_str,
+            logo_base64=model.logo_base64
         )
 
 
@@ -34,7 +36,7 @@ class APICourseTopicModel(BaseModel):
     title: str
     logo_svg_text: Optional[str] = None
     logo_fa_icon_class_str: Optional[str] = None
-    parents: Optional[Sequence["APICourseTopicModel"]] = None
+    children: Optional[Sequence["APICourseTopicModel"]] = None
 
     @classmethod
     def from_cv_category_model(cls, model: CategoryModel) -> "APICourseTopicModel":
@@ -42,7 +44,7 @@ class APICourseTopicModel(BaseModel):
             title=model.title,
             logo_svg_text=model.logo_svg_text,
             logo_fa_icon_class_str=model.logo_fa_icon_class_str,
-            parents=cls.list_from_cv_seq(model.parents),
+            children=cls.list_from_cv_seq(model.children),
         )
 
     @classmethod

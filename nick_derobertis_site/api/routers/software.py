@@ -28,6 +28,7 @@ class APISoftwareModel(BaseModel):
     package_directory: Optional[str] = None
     logo_svg_text: Optional[str] = None
     logo_fa_icon_class_str: Optional[str] = None
+    logo_base64: Optional[str] = None
 
     @classmethod
     def from_cv_model(cls, model: SoftwareProject) -> "APISoftwareModel":
@@ -46,6 +47,7 @@ class APISoftwareModel(BaseModel):
             package_directory=model.package_directory,
             logo_svg_text=model.logo_svg_text,
             logo_fa_icon_class_str=model.logo_fa_icon_class_str,
+            logo_base64=model.logo_base64,
         )
 
     @classmethod
