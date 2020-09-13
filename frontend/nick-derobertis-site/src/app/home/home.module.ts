@@ -10,6 +10,9 @@ import { SkillsPaneComponent } from './skills-pane/skills-pane.component';
 import { SkillsService } from '../skills/skills.service';
 import { SkillsModule } from '../skills/skills.module';
 import { GlobalModule } from '../global/global.module';
+import { AwardsPaneComponent } from './awards-pane/awards-pane.component';
+import { AwardsModule } from '../awards/awards.module';
+import { AwardService } from '../awards/award.service';
 
 @NgModule({
   declarations: [
@@ -19,9 +22,16 @@ import { GlobalModule } from '../global/global.module';
     HomeCardComponent,
     HomeStoryComponent,
     SkillsPaneComponent,
+    AwardsPaneComponent,
   ],
-  imports: [CommonModule, RouterModule, SkillsModule, GlobalModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    SkillsModule,
+    GlobalModule,
+    AwardsModule,
+  ],
   exports: [HomePageComponent],
-  providers: [SkillsService],
+  providers: [SkillsService, AwardService],
 })
 export class HomeModule {}

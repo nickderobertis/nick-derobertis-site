@@ -10,9 +10,7 @@ router = APIRouter()
 
 class APIAwardModel(BaseModel):
     title: str
-    logo_url: Optional[str] = None
     logo_svg_text: Optional[str] = None
-    logo_base64: Optional[str] = None
     logo_fa_icon_class_str: Optional[str] = None
     received: Optional[str] = None
     extra_info: Optional[str] = None
@@ -22,9 +20,7 @@ class APIAwardModel(BaseModel):
     def from_cv_award_model(cls, model: AwardModel) -> "APIAwardModel":
         kwargs = dict(
             title=model.title,
-            logo_url=model.logo_url,
             logo_svg_text=model.logo_svg_text,
-            logo_base64=model.logo_base64,
             logo_fa_icon_class_str=model.logo_fa_icon_class_str,
             received=model.received,
             extra_info=model.extra_info,
