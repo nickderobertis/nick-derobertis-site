@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from nick_derobertis_site.api.routers import skills, awards, research, software
+from nick_derobertis_site.api.routers import skills, awards, research, software, courses
 
 
 app = FastAPI()
@@ -19,8 +19,8 @@ app.add_middleware(
 )
 
 
-app.include_router(skills.router, prefix='/skills', tags=['skills'])
-app.include_router(awards.router, prefix='/awards', tags=['awards'])
-app.include_router(research.router, prefix='/research', tags=['research'])
-app.include_router(software.router, prefix='/software', tags=['software'])
-
+app.include_router(skills.router, prefix="/skills", tags=["skills"])
+app.include_router(awards.router, prefix="/awards", tags=["awards"])
+app.include_router(research.router, prefix="/research", tags=["research"])
+app.include_router(software.router, prefix="/software", tags=["software"])
+app.include_router(courses.router, prefix="/courses", tags=["courses"])
