@@ -587,6 +587,10 @@ $course-card-max-width: 300px;
   font-size: 2.5em;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .bg-offset-dark.bg-offset-dark.bg-offset-dark {
   background-color: var(--primary-offset-dark);
 }
@@ -979,4 +983,12 @@ $course-panel-offset-fg: var(--tertiary-offset);
 
 .navbar.navbar {
   z-index: 20;
+}
+
+button.header-btn {
+  width: 100%;
+  margin-bottom: unset;
+  @include media-breakpoint-up(md) {
+    width: unset;
+  }
 }

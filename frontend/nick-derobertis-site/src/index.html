@@ -81,14 +81,6 @@
           });
         return false;
       });
-
-      // On clicking a page button, go back to top of page
-      // TODO: use js callback from panel to avoid timeout hack
-      $("body").on("click", ".scroll-to-top-immediately", function (e) {
-        setTimeout(function () {
-          $([document.documentElement, document.body]).scrollTop(0);
-        }, 300);
-      });
     </script>
   </body>
 </html>
