@@ -6,6 +6,10 @@ import { HomeCarouselItemComponent } from './home-carousel/home-carousel-item/ho
 import { RouterModule } from '@angular/router';
 import { HomeCardComponent } from './home-card/home-card.component';
 import { HomeStoryComponent } from './home-story/home-story.component';
+import { SkillsPaneComponent } from './skills-pane/skills-pane.component';
+import { SkillsService } from '../skills/skills.service';
+import { SkillsModule } from '../skills/skills.module';
+import { GlobalModule } from '../global/global.module';
 
 @NgModule({
   declarations: [
@@ -14,8 +18,10 @@ import { HomeStoryComponent } from './home-story/home-story.component';
     HomeCarouselItemComponent,
     HomeCardComponent,
     HomeStoryComponent,
+    SkillsPaneComponent,
   ],
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SkillsModule, GlobalModule],
   exports: [HomePageComponent],
+  providers: [SkillsService],
 })
 export class HomeModule {}
