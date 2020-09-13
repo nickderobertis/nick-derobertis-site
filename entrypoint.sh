@@ -29,7 +29,7 @@ echo "Starting nginx"
 nginx;
 
 echo "Starting backend"
-uvicorn nick_derobertis_site.api.main:app --host 0.0.0.0 &
+pipenv run uvicorn nick_derobertis_site.api.main:app --host 0.0.0.0 &
 
 echo "Starting frontend"
 cd frontend/nick-derobertis-site

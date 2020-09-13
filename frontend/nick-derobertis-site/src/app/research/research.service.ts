@@ -13,6 +13,6 @@ export class ResearchService extends BaseService {
   }
 
   getResearch(): Observable<APIResearchResponseModel> {
-    return this.get('research');
+    return this.get('research/');
   }
 }

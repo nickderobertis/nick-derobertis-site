@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from nick_derobertis_site.api.routers import skills, awards, research, software, courses
 
 
-app = FastAPI()
+app = FastAPI(openapi_prefix='/api')
 
 origins = [
     "http://localhost",

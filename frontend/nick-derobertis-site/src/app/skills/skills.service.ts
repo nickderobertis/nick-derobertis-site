@@ -16,7 +16,7 @@ export class SkillsService extends BaseService {
   }
 
   getParentSkills(): Observable<APISkillModel[]> {
-    return this.get('skills');
+    return this.get('skills/');
   }
 
   getStatistics(): Observable<APISkillStatisticsModel> {

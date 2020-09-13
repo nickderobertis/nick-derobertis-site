@@ -13,6 +13,6 @@ export class SoftwareService extends BaseService {
   }
 
   getSoftware(): Observable<APISoftwareModel[]> {
-    return this.get('software');
+    return this.get('software/');
   }
 }

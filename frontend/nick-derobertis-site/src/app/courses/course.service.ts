@@ -13,6 +13,6 @@ export class CourseService extends BaseService {
   }
 
   getCourses(): Observable<APICourseModel[]> {
-    return this.get('courses');
+    return this.get('courses/');
   }
 }
