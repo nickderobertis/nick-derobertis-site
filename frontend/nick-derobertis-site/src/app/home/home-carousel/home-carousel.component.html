@@ -3,7 +3,7 @@
     <li
       *ngFor="let model of itemModels; index as i; first as isFirst"
       data-target="#myCarousel"
-      data-slide-to="{{ i }}"
+      [attr.data-slide-to]="i"
       [ngClass]="{ active: isFirst }"
     ></li>
   </ol>
