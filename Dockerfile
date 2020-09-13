@@ -31,6 +31,7 @@ RUN pipenv run ./build.sh
 
 WORKDIR /home/docker/frontend/nick-derobertis-site
 
+RUN npm install
 RUN npm run build:ssr
 
 WORKDIR /home/docker
