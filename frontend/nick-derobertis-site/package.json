@@ -8,7 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "dev:ssr": "ng run nick-derobertis-site:serve-ssr",
+    "dev:ssr": "ng run --configuration=development nick-derobertis-site:serve-ssr",
     "serve:ssr": "node dist/nick-derobertis-site/server/main.js",
     "build:ssr": "ng build --prod && ng run nick-derobertis-site:server:production",
     "prerender": "ng run nick-derobertis-site:prerender"
