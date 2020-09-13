@@ -13,6 +13,7 @@ import { GlobalModule } from '../global/global.module';
 import { AwardsPaneComponent } from './awards-pane/awards-pane.component';
 import { AwardsModule } from '../awards/awards.module';
 import { AwardService } from '../awards/award.service';
+import { ContactPaneComponent } from './contact-pane/contact-pane.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { AwardService } from '../awards/award.service';
     HomeStoryComponent,
     SkillsPaneComponent,
     AwardsPaneComponent,
+    ContactPaneComponent,
   ],
   imports: [
     CommonModule,
