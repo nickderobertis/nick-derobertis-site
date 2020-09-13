@@ -1,0 +1,110 @@
+<div class="{{ containerClassStr }}">
+  <div
+    class="col-md-5 course-header-description-container d-flex flex-column justify-content-center"
+  >
+    <section class="course-overview-container">
+      <h2 class="featurette-heading course-pane-heading">{{ model.title }}</h2>
+      <h4 *ngIf="model.courseId">{{ model.courseId }}</h4>
+      <p class="course-overview-description lead">{{ model.description }}</p>
+      <div
+        class="course-periods-taught-container d-flex flex-wrap justify-content-center"
+      >
+        <span
+          class="badge badge-pill badge-primary no-color"
+          *ngFor="let period of model.periodsTaught"
+          >{{ period }}</span
+        >
+      </div>
+      <div class="course-logos-container d-flex justify-content-around">
+        <div
+          class="course-evaluations-container d-flex flex-column align-items-center justify-content-between"
+          *ngIf="model.evaluationScore"
+        >
+          <div
+            class="course-evaluations-logo-score-container d-flex align-items-center justify-content-between"
+          >
+            <i class="fas fa-tasks fa-2x" aria-hidden="true"></i>
+            <div
+              class="course-evaluations-score-container d-flex align-items-center"
+            >
+              <div class="course-evaluations-score-wrapper no-color">
+                {{ model.evaluationScore }}
+              </div>
+              /{{ model.evaluationMaxScore }}
+            </div>
+          </div>
+          <small class="text-uppercase">Evaluations</small>
+        </div>
+        <div
+          class="course-university-logo-container d-flex flex-column justify-content-between"
+          *ngIf="model.university"
+        >
+          <div
+            class="course-university-logo-wrapper d-flex justify-content-center"
+            [innerHTML]="model.university.imageHTML | safeHtml"
+          ></div>
+          <small class="text-uppercase">{{ model.university.title }}</small>
+        </div>
+      </div>
+      <div
+        class="course-syllabus-wrapper d-flex flex-wrap justify-content-around"
+        *ngIf="model.pdfName || model.websiteUrl"
+      >
+        <a *ngIf="model.pdfName" href="{{ model.pdfPath }}">
+          <button class="has-pdf btn btn-primary btn-raised no-color">
+            Syllabus
+          </button>
+        </a>
+        <a *ngIf="model.websiteUrl" href="{{ model.websiteUrl }}">
+          <button class="btn btn-primary btn-raised">Website</button>
+        </a>
+      </div>
+    </section>
+  </div>
+  <div
+    class="col-md-7 d-flex flex-wrap align-content-center justify-content-center"
+  >
+    <section *ngIf="model.topics" class="courses-topics-section-container">
+      <h3 class="courses-section-header">Topics Covered</h3>
+      <div
+        class="courses-topics-container d-flex flex-wrap justify-content-center"
+      >
+        <div
+          *ngFor="let topic of model.topics"
+          class="card shadow course-topic-card no-color"
+        >
+          <h5 class="course-topic-heading no-color">{{ topic.title }}</h5>
+          <ol class="course-topic-container no-color">
+            <li
+              *ngFor="let child of topic.children"
+              class="course-topic-wrapper no-color"
+            >
+              {{ child.title }}
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div
+    *ngIf="model.softwareProjects.length > 0"
+    class="col-md-12 d-flex flex-wrap align-content-center justify-content-center"
+  >
+    <section class="courses-software-container">
+      <h3 class="courses-section-header">View related software</h3>
+      <div
+        class="courses-software-card-container d-flex flex-wrap justify-content-center"
+      >
+        <div
+          *ngFor="let softwareModel of model.softwareProjects"
+          class="courses-software-wrapper"
+        >
+          <nds-software-card
+            [model]="softwareModel"
+            class="no-color"
+          ></nds-software-card>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
