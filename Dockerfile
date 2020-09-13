@@ -23,12 +23,16 @@ COPY Pipfile.lock .
 
 RUN pipenv sync
 
-ENV BOKEH_ALLOW_WS_ORIGIN=localhost,nickderobertis.com,www.nickderobertis.com
-
 EXPOSE 80 5100 22
 
 COPY . .
 
 RUN pipenv run ./build.sh
+
+WORKDIR /home/docker/frontend/nick-derobertis-site
+
+RUN npm run build:ssr
+
+WORKDIR /home/docker
 
 ENTRYPOINT [ "./entrypoint.sh"]
