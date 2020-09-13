@@ -671,10 +671,10 @@ body {
   text-align: center;
   padding: 20px;
   @include media-breakpoint-up(md) {
-    min-height: 380px;
+    min-height: 440px;
   }
   @include media-breakpoint-up(lg) {
-    min-height: 340px;
+    min-height: 370px;
   }
 }
 
@@ -878,7 +878,7 @@ $award-image-width: 125px;
 
 .contact-not-convinced-button-container button {
   margin: 1rem;
-  width: 8.5rem;
+  width: 9.5rem;
 }
 
 .jumbotron {
