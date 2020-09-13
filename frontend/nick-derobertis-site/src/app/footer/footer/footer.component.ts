@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { copyright } from 'src/app/global/classes/copyright';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'nds-footer',
@@ -8,6 +9,7 @@ import { copyright } from 'src/app/global/classes/copyright';
 })
 export class FooterComponent implements OnInit {
   copyright: string = copyright.str;
+  apiDocsUrl: string = `${environment.apiUrl}/docs`;
 
   constructor() {}
 
