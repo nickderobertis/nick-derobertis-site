@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -11,9 +11,15 @@ export class BaseService {
 
   constructor(private http: HttpClient) {}
 
-  get(path: string): Observable<any> {
+  get(path: string, params?: { [key: string]: string }): Observable<any> {
     const fullPath = this.fullPath(path);
-    return this.http.get(fullPath);
+    const httpParams = new HttpParams();
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        httpParams.set(key, value);
+      }
+    }
+    return this.http.get(fullPath, { params });
   }
 
   fullPath(path: string): string {
