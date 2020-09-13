@@ -5,5 +5,6 @@ export interface IHomeCarouselItemModel {
   captionClasses?: string[];
   headerText: string;
   bodyText: string;
-  links: PageLink[];
+  links?: PageLink[];
+  fragmentLinks?: PageLink[];
 }

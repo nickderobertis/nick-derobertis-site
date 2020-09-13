@@ -11,6 +11,15 @@
           {{ link.title }}
         </button>
       </a>
+      <a
+        *ngFor="let link of model.fragmentLinks"
+        [routerLink]="'.'"
+        [fragment]="link.link"
+      >
+        <button class="btn btn-primary border border-primary bg-offset-dark">
+          {{ link.title }}
+        </button>
+      </a>
     </p>
   </div>
 </div>

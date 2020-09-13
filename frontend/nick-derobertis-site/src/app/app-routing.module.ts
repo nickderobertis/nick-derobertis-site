@@ -33,6 +33,9 @@ const routes: Routes = [
   imports: [
     RouterModule.forRoot(routes, {
       initialNavigation: 'enabled',
+      anchorScrolling: 'enabled',
+      scrollPositionRestoration: 'enabled',
+      scrollOffset: [0, 64],
     }),
   ],
   exports: [RouterModule],

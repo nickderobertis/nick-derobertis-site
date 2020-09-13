@@ -30,7 +30,7 @@ export class HomeCarouselComponent implements OnInit {
         'Highly proficient at extracting insights from data, effective at summarizing and visualizing insights',
       captionClasses: ['carousel-caption', 'text-right'],
       imageHref: 'assets/images/data-science-banner.jpg',
-      links: [{ link: '#skills', title: 'Skills' }],
+      fragmentLinks: [{ link: 'skills', title: 'Skills' }],
     }),
     new HomeCarouselItemModel({
       headerText: 'Full-Stack Software Engineer',

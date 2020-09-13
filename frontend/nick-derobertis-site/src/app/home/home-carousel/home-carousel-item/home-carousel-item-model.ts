@@ -6,7 +6,8 @@ export class HomeCarouselItemModel implements IHomeCarouselItemModel {
   captionClasses: string[];
   headerText: string;
   bodyText: string;
-  links: PageLink[];
+  links: PageLink[] = [];
+  fragmentLinks: PageLink[] = [];
 
   constructor(args: IHomeCarouselItemModel) {
     if (!args.captionClasses) {
@@ -15,10 +16,17 @@ export class HomeCarouselItemModel implements IHomeCarouselItemModel {
       this.captionClasses = args.captionClasses;
     }
 
+    if (args.links) {
+      this.links = args.links;
+    }
+
+    if (args.fragmentLinks) {
+      this.fragmentLinks = args.fragmentLinks;
+    }
+
     this.imageHref = args.imageHref;
     this.headerText = args.headerText;
     this.bodyText = args.bodyText;
-    this.links = args.links;
   }
 
   get captionDivClassesStr(): string {

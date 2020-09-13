@@ -98,16 +98,6 @@
         newPage.document.close();
       });
 
-      // Enable scroll to skills pane
-      $("body").on("click", ".scroll-to-skills", function (e) {
-        $([document.documentElement, document.body]).animate(
-          {
-            scrollTop: $("#skills-pane").offset().top - 100,
-          },
-          1000
-        );
-      });
-
       // On clicking a page button, go back to top of page
       // TODO: use js callback from panel to avoid timeout hack
       $("body").on("click", ".scroll-to-top-immediately", function (e) {
