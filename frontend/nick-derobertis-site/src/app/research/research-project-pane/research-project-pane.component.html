@@ -1,0 +1,17 @@
+<div class="{{ containerClassStr }}">
+  <div
+    class="col-md-7 research-header-description-container d-flex flex-column justify-content-center"
+  >
+    <h2 class="research-pane-heading">{{ model.title }}</h2>
+    <h6 *ngIf="model.coAuthors">With {{ model.coAuthorsStr }}</h6>
+    <p class="lead">{{ model.description }}</p>
+  </div>
+  <div
+    class="col-md-5 d-flex flex-wrap align-content-center justify-content-center"
+  >
+    <nds-research-category
+      *ngFor="let category of model.categories"
+      [model]="category"
+    ></nds-research-category>
+  </div>
+</div>
