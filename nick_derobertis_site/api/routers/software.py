@@ -1,0 +1,76 @@
+from datetime import datetime
+from typing import List, Sequence, Optional
+
+from derobertis_cv.pldata.software import get_software_projects
+from derobertis_cv.pltemplates.software.project import SoftwareProject
+from derobertis_cv.pldata.software.config import (
+    EXCLUDED_SOFTWARE_PROJECTS,
+    PROFESSIONAL_SOFTWARE_PROJECT_ORDER,
+)
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+router = APIRouter()
+
+
+class APISoftwareModel(BaseModel):
+    title: str
+    description: str
+    created: Optional[datetime] = None
+    updated: Optional[datetime] = None
+    loc: Optional[int] = None
+    commits: Optional[int] = None
+    url: Optional[str] = None
+    github_url: Optional[str] = None
+    docs_url: Optional[str] = None
+    logo_url: Optional[str] = None
+    package_directory: Optional[str] = None
+    logo_svg_text: Optional[str] = None
+    logo_fa_icon_class_str: Optional[str] = None
+
+    @classmethod
+    def from_cv_model(cls, model: SoftwareProject) -> "APISoftwareModel":
+        return cls(
+            title=model.title,
+            description=model.description,
+            created=model.created,
+            updated=model.updated,
+            loc=model.loc,
+            commits=model.commits,
+            url=model.url,
+            github_url=model.github_url,
+            docs_url=model.docs_url,
+            logo_url=model.logo_url,
+            package_directory=model.package_directory,
+            logo_svg_text=model.logo_svg_text,
+            logo_fa_icon_class_str=model.logo_fa_icon_class_str,
+        )
+
+    @classmethod
+    def list_from_cv_seq(
+        cls, models: Sequence[SoftwareProject]
+    ) -> List["APISoftwareModel"]:
+        return [cls.from_cv_model(mod) for mod in models]
+
+
+class APISoftwareStatisticsModel(BaseModel):
+    count: int
+
+
+ALL_PROJECT_CV_MODELS: List[SoftwareProject] = get_software_projects(
+    exclude_projects=EXCLUDED_SOFTWARE_PROJECTS,
+    order=PROFESSIONAL_SOFTWARE_PROJECT_ORDER,
+)
+ALL_PROJECT_MODELS = APISoftwareModel.list_from_cv_seq(ALL_PROJECT_CV_MODELS)
+PROJECT_COUNT = len(ALL_PROJECT_MODELS)
+PROJECT_STATS = APISoftwareStatisticsModel(count=PROJECT_COUNT)
+
+
+@router.get("/", tags=["software"], response_model=List[APISoftwareModel])
+async def read_parent_skills():
+    return ALL_PROJECT_MODELS
+
+
+@router.get("/stats", tags=["software"], response_model=APISoftwareStatisticsModel)
+async def read_skill_stats():
+    return PROJECT_STATS
