@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for API_NAME in skills awards
+for API_NAME in skills awards research
 do
   python -m pydantic2ts.cli.script \
   --module nick_derobertis_site.api.routers.$API_NAME \

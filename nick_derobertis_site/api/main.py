@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from nick_derobertis_site.api.routers import skills, awards
+from nick_derobertis_site.api.routers import skills, awards, research
 
 
 app = FastAPI()
@@ -21,4 +21,5 @@ app.add_middleware(
 
 app.include_router(skills.router, prefix='/skills', tags=['skills'])
 app.include_router(awards.router, prefix='/awards', tags=['awards'])
+app.include_router(research.router, prefix='/research', tags=['research'])
 
