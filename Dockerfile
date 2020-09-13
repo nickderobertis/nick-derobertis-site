@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     nginx openssh-server
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
-RUN npm install -g sass json-schema-to-typescript
+RUN npm install -g @angular/cli json-schema-to-typescript
 RUN mkdir -p /var/run/sshd
 
 COPY Pipfile .
