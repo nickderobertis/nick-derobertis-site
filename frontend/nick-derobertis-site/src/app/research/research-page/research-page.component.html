@@ -6,6 +6,7 @@
       *ngFor="let paneModel of model.allResearch; odd as isOdd"
       [model]="paneModel"
       [ngClass]="{ 'research-pane-offset': isOdd }"
+      [isReversed]="isOdd"
     ></nds-research-project-pane>
   </div>
 </div>
