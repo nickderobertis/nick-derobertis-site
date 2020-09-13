@@ -51,9 +51,7 @@
         *ngIf="model.pdfName || model.websiteUrl"
       >
         <a *ngIf="model.pdfName" href="{{ model.pdfPath }}">
-          <button class="has-pdf btn btn-primary btn-raised no-color">
-            Syllabus
-          </button>
+          <button class="btn btn-primary btn-raised no-color">Syllabus</button>
         </a>
         <a *ngIf="model.websiteUrl" href="{{ model.websiteUrl }}">
           <button class="btn btn-primary btn-raised">Website</button>

@@ -71,7 +71,7 @@ export class CoursePaneModel {
       return;
     }
 
-    return `assets/images/pdfs/generated/${this.pdfName}`;
+    return `assets/pdfs/generated/${this.pdfName}`;
   }
 
   static arrFromAPIArr(args: APICourseModel[]): CoursePaneModel[] {

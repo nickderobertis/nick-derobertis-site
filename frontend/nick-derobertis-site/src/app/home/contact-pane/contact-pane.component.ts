@@ -28,7 +28,7 @@ export class ContactPaneComponent implements OnInit {
   ];
   normalLinks: PageLink[] = [
     {
-      link: 'pdfs/generated/Nick DeRobertis CV.pdf',
+      link: 'assets/pdfs/generated/Nick DeRobertis CV.pdf',
       title: 'View CV',
     },
   ];

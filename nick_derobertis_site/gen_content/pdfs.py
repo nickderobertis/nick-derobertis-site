@@ -7,7 +7,7 @@ import derobertis_cv
 
 SOURCES_ROOT = pathlib.Path(derobertis_cv.__file__).parent / 'plbuild' / 'sources' / 'document'
 DOCUMENTS_OUT_PATH = pathlib.Path('Documents')
-DOCUMENTS_MOVE_TO = pathlib.Path(__file__).parent.parent / 'assets' / 'pdfs' / 'generated'
+DOCUMENTS_MOVE_TO = pathlib.Path(__file__).parent.parent.parent / 'frontend' / 'nick-derobertis-site' / 'src' / 'assets' / 'pdfs' / 'generated'
 
 
 def build_pdfs():

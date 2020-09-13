@@ -82,22 +82,6 @@
         return false;
       });
 
-      // Enables PDF buttons
-      // See nick_derobertis_site.general.widgets.button.PDFButtonBase
-      $("body").on("click", ".has-pdf", function (e) {
-        var pdfContent = this.dataset.pdfSrc;
-        var title = `<title>${this.dataset.pdfName}</title>`;
-        var pdfIframe =
-          "<iframe width='100%' height='100%' src='" +
-          pdfContent +
-          "'></iframe>";
-        var newPage = window.open();
-        newPage.document.open();
-        newPage.document.write(title);
-        newPage.document.write(pdfIframe);
-        newPage.document.close();
-      });
-
       // On clicking a page button, go back to top of page
       // TODO: use js callback from panel to avoid timeout hack
       $("body").on("click", ".scroll-to-top-immediately", function (e) {
