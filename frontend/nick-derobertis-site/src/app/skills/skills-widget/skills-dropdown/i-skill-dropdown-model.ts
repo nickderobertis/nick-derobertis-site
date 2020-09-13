@@ -4,4 +4,5 @@ export interface ISkillDropdownModel {
   skill: SkillModel;
   childSkills: SkillModel[];
   loadChildren: boolean;
+  isChild: boolean;
 }

@@ -49,7 +49,7 @@ async def read_all_skills():
 @router.get("/children", tags=["skills"], response_model=List[APISkillModel])
 async def read_child_skills(title: str):
     for skill in ALL_SKILL_CV_MODELS:
-        if skill.title == title:
+        if skill.to_title_case_str() == title:
             return APISkillModel.list_from_cv_skills(skill.children)
     raise HTTPException(status_code=404, detail=f"Skill with title {title} not found")
 

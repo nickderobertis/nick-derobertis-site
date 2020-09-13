@@ -1,1 +1,48 @@
-<p>{{ model.skill.title }} {{ model.skill.level }}</p>
+<div
+  class="dropdown show skill-container"
+  *ngIf="!model.isChild; else dropdown"
+>
+  <ng-container *ngTemplateOutlet="dropdown"></ng-container>
+</div>
+
+<ng-template #dropdown>
+  <a
+    class="{{ aClassStr }}"
+    href="#"
+    role="button"
+    data-toggle="dropdown"
+    data-flip="false"
+    aria-haspopup="true"
+    aria-expanded="false"
+    (click)="loadChildSkillsInChildren($event)"
+  >
+    <div class="skill-dropdown-wrapper">
+      <div class="skill-name">
+        {{ model.skill.title }}
+      </div>
+      <div class="skill-bar-background">
+        <div
+          class="skill-bar-foreground"
+          style="width: {{ model.skill.level * 20 }}%"
+        ></div>
+      </div>
+      <div
+        class="skill-dropdown-arrow"
+        *ngIf="model.hasChildren; else noItemsSpacer"
+      ></div>
+      <ng-template #noItemsSpacer>
+        <div class="skill-dropdown-arrow-spacer"></div>
+      </ng-template>
+    </div>
+  </a>
+  <ng-container *ngIf="model.hasChildren">
+    <ul class="dropdown-menu skill-dropdown-menu shadow-lg">
+      <li
+        class="dropdown-submenu skill-dropdown-submenu"
+        *ngFor="let childModel of childDropdownModels"
+      >
+        <nds-skills-dropdown [model]="childModel"></nds-skills-dropdown>
+      </li>
+    </ul>
+  </ng-container>
+</ng-template>
