@@ -3,7 +3,7 @@
     class="col-md-7 research-header-description-container d-flex flex-column justify-content-center"
   >
     <h2 class="research-pane-heading">{{ model.title }}</h2>
-    <h6 *ngIf="model.coAuthors">With {{ model.coAuthorsStr }}</h6>
+    <h6 *ngIf="model.coAuthors.length > 0">With {{ model.coAuthorsStr }}</h6>
     <p class="lead">{{ model.description }}</p>
   </div>
   <div
