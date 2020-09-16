@@ -4,8 +4,10 @@
 
 export const environment = {
   production: false,
+  name: '',
   apiUrl: '',
   googleAnalyticsTrackingCode: '',
+  sentryDSN: '',
 };
 
 /*

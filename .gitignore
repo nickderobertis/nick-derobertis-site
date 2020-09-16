@@ -84,3 +84,4 @@ deploy/.env
 deploy/.env.prod
 deploy/.env.staging
 deploy/.env.bak
+.env.sh
