@@ -17,10 +17,14 @@ export class EventService {
   }
 
   pageView(pagePath: string): void {
+    this._reportToAnalytics('pageView', [pagePath]);
+  }
+
+  private _reportToAnalytics(methodName: string, args: any[]): void {
     const context = this.appContext;
     for (const handler of this.handlers) {
       if (handler.isEnabled(context)) {
-        handler.pageView(pagePath);
+        handler[methodName](...args);
       }
     }
   }
