@@ -39,6 +39,7 @@ export class HeaderComponent implements OnInit {
     },
   ];
   viewCVEvent: IEvent = EventTypes.viewCV;
+  viewGithubEvent: IEvent = EventTypes.viewGithub;
 
   constructor() {}
 

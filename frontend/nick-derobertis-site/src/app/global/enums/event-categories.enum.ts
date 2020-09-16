@@ -1,3 +1,3 @@
 export enum EventCategories {
-  Navigation = 'Navgation',
+  Navigation = 'Navigation',
 }

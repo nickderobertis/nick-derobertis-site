@@ -4,6 +4,7 @@ import { EventLabels } from '../enums/event-labels.enum';
 import { IEvent } from '../services/events/i-event';
 
 export class EventTypes {
+  static viewGithub: IEvent = EventTypes.viewExternalSite('Github');
   static viewCV: IEvent = {
     action: EventActions.ViewPDF,
     category: EventCategories.Navigation,
