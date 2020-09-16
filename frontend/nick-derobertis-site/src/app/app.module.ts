@@ -12,6 +12,7 @@ import { SoftwareModule } from './software/software.module';
 import { CoursesModule } from './courses/courses.module';
 import { HttpClientModule } from '@angular/common/http';
 import { GlobalModule } from './global/global.module';
+import { EventService } from './global/services/event.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -28,7 +29,7 @@ import { GlobalModule } from './global/global.module';
     CoursesModule,
     GlobalModule,
   ],
-  providers: [],
+  providers: [EventService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -1,6 +1,6 @@
-import { isPlatformBrowser } from '@angular/common';
-import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
+import { EventService } from './global/services/event.service';
 
 declare let gtag: Function;
 
@@ -12,18 +12,11 @@ declare let gtag: Function;
 export class AppComponent {
   title = 'nick-derobertis-site';
 
-  constructor(
-    public router: Router,
-    @Inject(PLATFORM_ID) private readonly platformId: Object
-  ) {
+  constructor(public router: Router, private eventService: EventService) {
     // subscribe to router events and send page views to Google Analytics
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        if (isPlatformBrowser(this.platformId)) {
-          gtag('event', 'page_view', {
-            page_path: event.urlAfterRedirects,
-          });
-        }
+        this.eventService.pageView(event.urlAfterRedirects);
       }
     });
   }
