@@ -36,6 +36,7 @@ export class ContactPaneComponent implements OnInit {
     },
   ];
   viewCVEvent: IEvent = EventTypes.viewCV;
+  sendMeEmailEvent: IEvent = EventTypes.sendMeEmail;
 
   constructor() {}
 

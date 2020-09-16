@@ -10,6 +10,11 @@ export class EventTypes {
     category: EventCategories.Navigation,
     label: EventLabels.CV,
   };
+  static sendMeEmail: IEvent = {
+    action: EventActions.SendEmail,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
 
   static viewSyllabus(name: string): IEvent {
     const event: IEvent = {
