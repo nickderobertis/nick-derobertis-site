@@ -2,6 +2,7 @@ import { EventActions } from '../enums/event-actions.enum';
 import { EventCategories } from '../enums/event-categories.enum';
 import { EventLabels } from '../enums/event-labels.enum';
 import { IEvent } from '../services/events/i-event';
+import { IItem } from '../services/events/i-item';
 
 export class EventTypes {
   static viewGithub: IEvent = EventTypes.viewExternalSite('Github');

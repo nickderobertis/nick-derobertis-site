@@ -1,6 +1,7 @@
 import { EventAppContext } from '../event-app-context';
 import { EventModel } from '../event-model';
 import { IEventHandler } from '../i-event-handler';
+import { IItem } from '../i-item';
 
 declare let gtag: Function;
 
@@ -17,5 +18,9 @@ export class GTagEventHandler implements IEventHandler {
 
   event(event: EventModel): void {
     gtag('event', event.action, event.toGTagEvent());
+  }
+
+  viewItem(items: IItem[]): void {
+    gtag('event', 'view_item', { items });
   }
 }

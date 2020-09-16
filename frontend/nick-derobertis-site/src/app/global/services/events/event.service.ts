@@ -5,6 +5,7 @@ import { EventModel } from './event-model';
 import { GTagEventHandler } from './gtag/gtag-event-handler';
 import { IEvent } from './i-event';
 import { IEventHandler } from './i-event-handler';
+import { IItem } from './i-item';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +26,10 @@ export class EventService {
   event(event: IEvent): void {
     const eventModel = new EventModel(event);
     this._reportToAnalytics('event', [eventModel]);
+  }
+
+  viewItem(items: IItem[]): void {
+    this._reportToAnalytics('viewItem', [items]);
   }
 
   private _reportToAnalytics(methodName: string, args: any[]): void {
