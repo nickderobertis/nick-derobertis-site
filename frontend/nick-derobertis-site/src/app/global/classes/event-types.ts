@@ -9,4 +9,23 @@ export class EventTypes {
     category: EventCategories.Navigation,
     label: EventLabels.CV,
   };
+
+  static viewSyllabus(name: string): IEvent {
+    const event: IEvent = {
+      action: EventActions.ViewPDF,
+      category: EventCategories.Navigation,
+    };
+    const label = `Syllabus - ${name}`;
+    event.label = label;
+    return event;
+  }
+
+  static viewExternalSite(name: string): IEvent {
+    const event: IEvent = {
+      action: EventActions.ViewExternalSite,
+      category: EventCategories.Navigation,
+    };
+    event.label = name;
+    return event;
+  }
 }

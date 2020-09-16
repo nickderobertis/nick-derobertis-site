@@ -50,10 +50,20 @@
         class="course-syllabus-wrapper d-flex flex-wrap justify-content-around"
         *ngIf="model.pdfName || model.websiteUrl"
       >
-        <a *ngIf="model.pdfName" href="{{ model.pdfPath }}">
+        <a
+          *ngIf="model.pdfName"
+          href="{{ model.pdfPath }}"
+          ndsClickEvent
+          [event]="model.syllabusEvent"
+        >
           <button class="btn btn-primary btn-raised no-color">Syllabus</button>
         </a>
-        <a *ngIf="model.websiteUrl" href="{{ model.websiteUrl }}">
+        <a
+          *ngIf="model.websiteUrl"
+          href="{{ model.websiteUrl }}"
+          ndsClickEvent
+          [event]="model.websiteEvent"
+        >
           <button class="btn btn-primary btn-raised">Website</button>
         </a>
       </div>
