@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
+import * as Sentry from '@sentry/angular';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -13,6 +14,7 @@ import { CoursesModule } from './courses/courses.module';
 import { HttpClientModule } from '@angular/common/http';
 import { GlobalModule } from './global/global.module';
 import { EventService } from './global/services/events/event.service';
+import { Router } from '@angular/router';
 
 @NgModule({
   declarations: [AppComponent],
@@ -29,7 +31,25 @@ import { EventService } from './global/services/events/event.service';
     CoursesModule,
     GlobalModule,
   ],
-  providers: [EventService],
+  providers: [
+    EventService,
+    {
+      provide: ErrorHandler,
+      useValue: Sentry.createErrorHandler({
+        showDialog: false,
+      }),
+    },
+    {
+      provide: Sentry.TraceService,
+      deps: [Router],
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: () => () => {},
+      deps: [Sentry.TraceService],
+      multi: true,
+    },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

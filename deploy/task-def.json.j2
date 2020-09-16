@@ -21,6 +21,10 @@
                 {
                     "valueFrom": "arn:aws:ssm:{{ aws.default_region }}:{{ aws.root_account_id }}:parameter/SSH_PUBLIC_KEY",
                     "name": "SSH_PUBLIC_KEY"
+                },
+                {
+                    "valueFrom": "arn:aws:ssm:{{ aws.default_region }}:{{ aws.root_account_id }}:parameter/BE_SENTRY_DSN",
+                    "name": "BE_SENTRY_DSN"
                 }
             ],
             "essential": true,
