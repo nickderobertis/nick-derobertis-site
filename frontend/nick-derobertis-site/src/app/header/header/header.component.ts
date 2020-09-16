@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { EventTypes } from 'src/app/global/classes/event-types';
 import { PageLink } from 'src/app/global/interfaces/page-link';
+import { IEvent } from 'src/app/global/services/events/i-event';
 
 @Component({
   selector: 'nds-header',
@@ -29,12 +31,14 @@ export class HeaderComponent implements OnInit {
       title: 'Courses',
     },
   ];
+  // TODO: better structure for header links now that CV has specific event
   normalLinks: PageLink[] = [
     {
       link: 'assets/pdfs/generated/Nick DeRobertis CV.pdf',
       title: 'CV',
     },
   ];
+  viewCVEvent: IEvent = EventTypes.viewCV;
 
   constructor() {}
 

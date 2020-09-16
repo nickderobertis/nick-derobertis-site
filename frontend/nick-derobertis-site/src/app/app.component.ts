@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { EventService } from './global/services/event.service';
+import { EventService } from './global/services/events/event.service';
 
 declare let gtag: Function;
 

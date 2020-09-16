@@ -12,7 +12,7 @@ import { SoftwareModule } from './software/software.module';
 import { CoursesModule } from './courses/courses.module';
 import { HttpClientModule } from '@angular/common/http';
 import { GlobalModule } from './global/global.module';
-import { EventService } from './global/services/event.service';
+import { EventService } from './global/services/events/event.service';
 
 @NgModule({
   declarations: [AppComponent],

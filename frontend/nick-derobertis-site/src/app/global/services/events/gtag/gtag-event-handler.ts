@@ -1,5 +1,6 @@
-import { EventAppContext } from './event-app-context';
-import { IEventHandler } from './i-event-handler';
+import { EventAppContext } from '../event-app-context';
+import { EventModel } from '../event-model';
+import { IEventHandler } from '../i-event-handler';
 
 declare let gtag: Function;
 
@@ -12,5 +13,9 @@ export class GTagEventHandler implements IEventHandler {
     gtag('event', 'page_view', {
       page_path: pagePath,
     });
+  }
+
+  event(event: EventModel): void {
+    gtag('event', event.action, event.toGTagEvent());
   }
 }
