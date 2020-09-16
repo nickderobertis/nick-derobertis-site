@@ -14,14 +14,15 @@ export class AppComponent {
 
   constructor(
     public router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
     // subscribe to router events and send page views to Google Analytics
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         if (isPlatformBrowser(this.platformId)) {
-          gtag('set', 'page', event.urlAfterRedirects);
-          gtag('send', 'pageview');
+          gtag('event', 'page_view', {
+            page_path: event.urlAfterRedirects,
+          });
         }
       }
     });

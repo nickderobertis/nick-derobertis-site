@@ -11,6 +11,7 @@ import { ResearchModule } from './research/research.module';
 import { SoftwareModule } from './software/software.module';
 import { CoursesModule } from './courses/courses.module';
 import { HttpClientModule } from '@angular/common/http';
+import { GlobalModule } from './global/global.module';
 
 @NgModule({
   declarations: [AppComponent],
@@ -25,6 +26,7 @@ import { HttpClientModule } from '@angular/common/http';
     ResearchModule,
     SoftwareModule,
     CoursesModule,
+    GlobalModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
