@@ -20,6 +20,8 @@
           *ngIf="model.githubUrl"
           href="{{ model.githubUrl }}"
           class="btn btn-sm btn-outline-secondary software-card-github-button d-flex justify-content-between align-items-center"
+          ndsClickEvent
+          [event]="model.viewGithubEvent"
         >
           <i class="fab fa-github fa-lg" aria-hidden="true"></i>
           <div>Github</div>
@@ -28,6 +30,8 @@
           *ngIf="model.docsUrl"
           href="{{ model.docsUrl }}"
           class="btn btn-sm btn-outline-secondary software-card-docs-button d-flex justify-content-between align-items-center"
+          ndsClickEvent
+          [event]="model.viewDocsEvent"
         >
           <i class="fas fa-book fa-lg" aria-hidden="true"></i>
           <div>Docs</div>

@@ -1,5 +1,7 @@
+import { EventTypes } from 'src/app/global/classes/event-types';
 import { numberWithCommasAndKM } from 'src/app/global/functions/text';
 import { APISoftwareModel } from 'src/app/global/interfaces/generated/software';
+import { IEvent } from 'src/app/global/services/events/i-event';
 
 export class SoftwareProjectModel {
   title: string;
@@ -93,5 +95,15 @@ export class SoftwareProjectModel {
       accentParts.push(`${locStr} LOC`);
     }
     return accentParts.join(', ');
+  }
+
+  get viewGithubEvent(): IEvent {
+    const siteName: string = `Github - ${this.title}`;
+    return EventTypes.viewExternalSite(siteName);
+  }
+
+  get viewDocsEvent(): IEvent {
+    const siteName: string = `Docs - ${this.title}`;
+    return EventTypes.viewExternalSite(siteName);
   }
 }
