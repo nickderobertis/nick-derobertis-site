@@ -5,6 +5,7 @@ import { IEvent } from '../services/events/i-event';
 
 export class EventTypes {
   static viewGithub: IEvent = EventTypes.viewExternalSite('Github');
+  static viewAPI: IEvent = EventTypes.viewExternalSite('API');
   static viewCV: IEvent = {
     action: EventActions.ViewPDF,
     category: EventCategories.Navigation,
