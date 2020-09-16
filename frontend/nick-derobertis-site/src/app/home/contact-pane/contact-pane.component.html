@@ -22,7 +22,12 @@
           {{ link.title }}
         </button>
       </a>
-      <a *ngFor="let link of normalLinks" href="{{ link.link }}">
+      <a
+        *ngFor="let link of normalLinks"
+        href="{{ link.link }}"
+        ndsClickEvent
+        [event]="viewCVEvent"
+      >
         <button class="btn btn-primary btn-raised">{{ link.title }}</button>
       </a>
     </div>
