@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { copyright } from 'src/app/global/classes/copyright';
+import { EventTypes } from 'src/app/global/classes/event-types';
+import { IEvent } from 'src/app/global/services/events/i-event';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -10,6 +12,7 @@ import { environment } from 'src/environments/environment';
 export class FooterComponent implements OnInit {
   copyright: string = copyright.str;
   apiDocsUrl: string = `${environment.apiUrl}/docs`;
+  viewAPIEvent: IEvent = EventTypes.viewAPI;
 
   constructor() {}
 

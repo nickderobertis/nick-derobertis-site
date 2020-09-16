@@ -6,6 +6,7 @@ import {
   ViewChildren,
 } from '@angular/core';
 import { APISkillModel } from 'src/app/global/interfaces/generated/skills';
+import { EventService } from 'src/app/global/services/events/event.service';
 import { SkillsService } from '../../skills.service';
 import { SkillDropdownModel } from './skill-dropdown-model';
 import { SkillModel } from './skill-model';
@@ -22,7 +23,10 @@ export class SkillsDropdownComponent implements OnInit {
   >;
   childDropdownModels: SkillDropdownModel[] = [];
 
-  constructor(private skillsService: SkillsService) {}
+  constructor(
+    private skillsService: SkillsService,
+    private eventService: EventService
+  ) {}
 
   ngOnInit(): void {
     if (this.model.loadChildren) {
@@ -46,7 +50,19 @@ export class SkillsDropdownComponent implements OnInit {
     );
   }
 
-  loadChildSkillsInChildren(event: MouseEvent): void {
+  handleClick(event: MouseEvent): void {
+    this.loadChildSkillsInChildren();
+    this.reportSkillClickEvent();
+    this.model.hasBeenOpened = true;
+  }
+
+  reportSkillClickEvent(): void {
+    if (!this.model.hasBeenOpened) {
+      this.eventService.viewItem([this.model.eventItem]);
+    }
+  }
+
+  loadChildSkillsInChildren(): void {
     if (this.model.childrensChildrenHaveBeenLoaded) {
       return;
     }

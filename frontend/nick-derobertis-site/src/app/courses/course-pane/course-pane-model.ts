@@ -1,4 +1,6 @@
+import { EventTypes } from 'src/app/global/classes/event-types';
 import { APICourseModel } from 'src/app/global/interfaces/generated/courses';
+import { IEvent } from 'src/app/global/services/events/i-event';
 import { SoftwareProjectModel } from 'src/app/software/software-card/software-project-model';
 import { CourseTopicModel } from './course-topic-model';
 import { UniversityModel } from './university-model';
@@ -81,5 +83,14 @@ export class CoursePaneModel {
       models.push(mod);
     }
     return models;
+  }
+
+  get syllabusEvent(): IEvent {
+    return EventTypes.viewSyllabus(this.title);
+  }
+
+  get websiteEvent(): IEvent {
+    const websiteTitle = `Course Website - ${this.title}`;
+    return EventTypes.viewExternalSite(websiteTitle);
   }
 }

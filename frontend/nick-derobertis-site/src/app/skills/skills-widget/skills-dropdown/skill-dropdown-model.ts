@@ -1,3 +1,4 @@
+import { IItem } from 'src/app/global/services/events/i-item';
 import { ISkillDropdownModel } from './i-skill-dropdown-model';
 import { SkillModel } from './skill-model';
 
@@ -7,6 +8,7 @@ export class SkillDropdownModel implements ISkillDropdownModel {
   loadChildren: boolean;
   isChild: boolean;
   childrensChildrenHaveBeenLoaded: boolean;
+  hasBeenOpened: boolean = false;
 
   constructor(args: ISkillDropdownModel) {
     this.skill = args.skill;
@@ -51,5 +53,14 @@ export class SkillDropdownModel implements ISkillDropdownModel {
 
   get hasChildren(): boolean {
     return this.childSkills.length > 0;
+  }
+
+  get eventItem(): IItem {
+    return {
+      id: this.skill.title,
+      name: this.skill.title,
+      variant: this.skill.level.toString(),
+      category: 'Skill',
+    };
   }
 }

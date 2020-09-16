@@ -5,6 +5,8 @@
       target="_top"
       href="mailto:{{ personalDetails.email }}"
       class="contact-button-wrapper"
+      ndsClickEvent
+      [event]="sendMeEmailEvent"
     >
       <button class="btn btn-primary btn-raised btn-lg">
         <i class="far fa-envelope contact-button-icon"></i>
@@ -22,7 +24,12 @@
           {{ link.title }}
         </button>
       </a>
-      <a *ngFor="let link of normalLinks" href="{{ link.link }}">
+      <a
+        *ngFor="let link of normalLinks"
+        href="{{ link.link }}"
+        ndsClickEvent
+        [event]="viewCVEvent"
+      >
         <button class="btn btn-primary btn-raised">{{ link.title }}</button>
       </a>
     </div>

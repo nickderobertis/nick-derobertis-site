@@ -29,13 +29,23 @@
               {{ link.title }}
             </button>
           </a>
-          <a *ngFor="let link of normalLinks" href="{{ link.link }}">
+          <a
+            *ngFor="let link of normalLinks"
+            href="{{ link.link }}"
+            ndsClickEvent
+            [event]="viewCVEvent"
+          >
             <button class="header-btn btn btn-primary btn-narrow">
               {{ link.title }}
             </button>
           </a>
         </div>
-        <a href="https://github.com/nickderobertis" class="nav-icon">
+        <a
+          href="https://github.com/nickderobertis"
+          class="nav-icon"
+          ndsClickEvent
+          [event]="viewGithubEvent"
+        >
           <i class="fab fa-github fa-lg"></i>
         </a>
       </ul>
