@@ -58,7 +58,7 @@ class DeployCdkStack(core.Stack):
         )
 
         # Create the ECS Cluster (and VPC)
-        vpc = ec2.Vpc(self, cfg.names.vpc, max_azs=3)
+        vpc = ec2.Vpc(self, cfg.names.vpc, max_azs=3, nat_gateways=0)
         cluster = ecs.Cluster(
             self, cfg.names.ecs_cluster, cluster_name=cfg.names.ecs_cluster, vpc=vpc,
         )
