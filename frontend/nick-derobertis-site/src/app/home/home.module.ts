@@ -14,6 +14,9 @@ import { AwardsPaneComponent } from './awards-pane/awards-pane.component';
 import { AwardsModule } from '../awards/awards.module';
 import { AwardService } from '../awards/award.service';
 import { ContactPaneComponent } from './contact-pane/contact-pane.component';
+import { TimelinePaneComponent } from './timeline-pane/timeline-pane.component';
+import { TimelineWidgetComponent } from './timeline-pane/timeline-widget/timeline-widget.component';
+import { TimelineService } from './timeline-pane/timeline.service';
 
 @NgModule({
   declarations: [
@@ -25,6 +28,8 @@ import { ContactPaneComponent } from './contact-pane/contact-pane.component';
     SkillsPaneComponent,
     AwardsPaneComponent,
     ContactPaneComponent,
+    TimelinePaneComponent,
+    TimelineWidgetComponent,
   ],
   imports: [
     CommonModule,
@@ -34,6 +39,6 @@ import { ContactPaneComponent } from './contact-pane/contact-pane.component';
     AwardsModule,
   ],
   exports: [HomePageComponent],
-  providers: [SkillsService, AwardService],
+  providers: [SkillsService, AwardService, TimelineService],
 })
 export class HomeModule {}
