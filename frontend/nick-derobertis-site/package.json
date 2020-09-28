@@ -27,6 +27,7 @@
     "@nguniversal/express-engine": "^10.1.0",
     "@sentry/angular": "^5.23.0",
     "@sentry/tracing": "^5.23.0",
+    "angular-google-charts": "^1.1.6",
     "express": "^4.15.2",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
