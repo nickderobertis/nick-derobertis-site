@@ -312,11 +312,11 @@
         },
         "derobertis-cv": {
             "hashes": [
-                "sha256:d6e04a7af064d6e304746965f76ec13264ca82f2228a8b62f3ed5507341dabe3",
-                "sha256:ef729c1b1b37b0cc494abae79ef8971da3da1e6705f061d14cf849173b14dba5"
+                "sha256:d0a5a9dab1be258adce37867c33e90e5dbd9e42f882d89bdd77946097c2218f1",
+                "sha256:dccf030a61993dc496f9d776d9dbfd35111b9fe2429b3a75de5ea8bae2eb7c08"
             ],
             "index": "pypi",
-            "version": "==0.6.0"
+            "version": "==0.6.1"
         },
         "docutils": {
             "hashes": [
@@ -503,10 +503,10 @@
         },
         "jupyterlab-pygments": {
             "hashes": [
-                "sha256:19a0ccde7daddec638363cd3d60b63a4f6544c9181d65253317b2fb492a797b9",
-                "sha256:c9535e5999f29bff90bd0fa423717dcaf247b71fad505d66b17d3217e9021fc5"
+                "sha256:abfb880fd1561987efaefcb2d2ac75145d2a5d0139b1876d5be806e32f630008",
+                "sha256:cfcda0873626150932f438eccf0f8bf22bfa92345b814890ab360d666b254146"
             ],
-            "version": "==0.1.1"
+            "version": "==0.1.2"
         },
         "jupyterlab-server": {
             "hashes": [
@@ -1167,11 +1167,11 @@
         },
         "sentry-sdk": {
             "hashes": [
-                "sha256:c9c0fa1412bad87104c4eee8dd36c7bbf60b0d92ae917ab519094779b22e6d9a",
-                "sha256:e159f7c919d19ae86e5a4ff370fccc45149fab461fbeb93fb5a735a0b33a9cb1"
+                "sha256:1d91a0059d2d8bb980bec169578035c2f2d4b93cd8a4fb5b85c81904d33e221a",
+                "sha256:6222cf623e404c3e62b8e0e81c6db866ac2d12a663b7c1f7963350e3f397522a"
             ],
             "index": "pypi",
-            "version": "==0.17.8"
+            "version": "==0.18.0"
         },
         "shutilwhich": {
             "hashes": [
@@ -1856,11 +1856,11 @@
         },
         "jsii": {
             "hashes": [
-                "sha256:27ecf9167ba37635549f5779c14a63a14d38fcc467b0eaa319e8fceab69202d7",
-                "sha256:d17f93e41e938633a4a906511bfa514f70c24e0aa31155adf1dc25ac2a77076a"
+                "sha256:255ed3539e507f70db00d06339994667801231f9e7312b86e8f695350621ac8a",
+                "sha256:e6f4e4daa2f262044d09a39224dd8fedcda2cd6cc917a8f39fafa43c09e9e57d"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==1.12.0"
+            "version": "==1.13.0"
         },
         "publication": {
             "hashes": [
