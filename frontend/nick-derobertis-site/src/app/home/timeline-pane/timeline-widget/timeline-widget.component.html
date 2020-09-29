@@ -35,12 +35,22 @@
         [type]="chartType"
         [data]="chartData"
         [columns]="model.chartColumns"
-        [options]="{ tooltip: { trigger: 'none' } }"
+        [options]="{
+          tooltip: { trigger: 'none' },
+          colors: model.timelineColors
+        }"
         [dynamicResize]="true"
         [height]="model.chartHeight"
         (mouseover)="onMouseOver($event)"
       ></google-chart>
-      <div class="card shadow-lg description-card" *ngIf="selectedModel">
+      <div
+        class="card shadow-lg description-card"
+        *ngIf="selectedModel"
+        [ngStyle]="{
+          'background-color': selectedModel.colorPair.background,
+          color: selectedModel.colorPair.text
+        }"
+      >
         <h5>{{ selectedModel.organization }}</h5>
         <h6>{{ selectedModel.role }}</h6>
         <div>

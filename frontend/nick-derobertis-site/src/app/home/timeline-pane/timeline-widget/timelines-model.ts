@@ -2,6 +2,7 @@ import {
   APITimelineResponseModel,
   TimelineTypes,
 } from 'src/app/global/interfaces/generated/timeline';
+import { TimelineColorPair, TIMELINE_COLORS } from './timeline-color-pair';
 import { TimelineDataRow } from './timeline-data-row';
 import { TimelineModel } from './timeline-model';
 
@@ -23,6 +24,8 @@ export class TimelinesModel {
     { type: 'date', id: 'End' },
   ];
   chartHeight: number;
+  colorPairs: TimelineColorPair[] = TIMELINE_COLORS;
+  timelineColors: string[];
 
   constructor(args?: APITimelineResponseModel) {
     if (!args) {
@@ -30,6 +33,7 @@ export class TimelinesModel {
     }
     this.timelines = TimelineModel.arrayFromAPIArray(args.items);
     this.chartHeight = chartHeightFromTimelines(this.timelines);
+    this.timelineColors = this.getTimelineColors();
   }
 
   toChartData(): TimelineDataRow[] {
@@ -51,7 +55,16 @@ export class TimelinesModel {
     const mod: TimelinesModel = new TimelinesModel();
     mod.timelines = acceptedTimelines;
     mod.chartHeight = chartHeightFromTimelines(acceptedTimelines);
+    mod.timelineColors = mod.getTimelineColors();
     return mod;
+  }
+
+  getTimelineColors(): string[] {
+    const colors: string[] = [];
+    for (const colorPair of this.colorPairs) {
+      colors.push(colorPair.background);
+    }
+    return colors;
   }
 }
 
