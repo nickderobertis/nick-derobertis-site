@@ -25,13 +25,14 @@ class APITimelineModel(BaseModel):
     organization: str
     role: str
     location: str
+    timeline_id: int
     item_type: TimelineTypes
     begin_date: datetime.date
     end_date: Optional[datetime.date] = None
     description: Optional[Sequence[str]] = None
 
     @classmethod
-    def from_cv_employment(cls, model: EmploymentModel) -> "APITimelineModel":
+    def from_cv_employment(cls, model: EmploymentModel, timeline_id: int) -> "APITimelineModel":
         if isinstance(model, AcademicEmploymentModel):
             item_type = TimelineTypes.ACADEMIC_EMPLOYMENT
         else:
@@ -41,6 +42,7 @@ class APITimelineModel(BaseModel):
             organization=model.company_name,
             role=model.job_title,
             location=model.location,
+            timeline_id=timeline_id,
             item_type=item_type,
             begin_date=model.begin_date,
             end_date=model.end_date,
@@ -48,11 +50,12 @@ class APITimelineModel(BaseModel):
         )
 
     @classmethod
-    def from_cv_education(cls, model: EducationModel) -> "APITimelineModel":
+    def from_cv_education(cls, model: EducationModel, timeline_id: int) -> "APITimelineModel":
         return cls(
             organization=model.institution.title,
             role=model.degree_name,
             location=model.institution.location,
+            timeline_id=timeline_id,
             item_type=TimelineTypes.EDUCATION,
             begin_date=model.begin_date,
             end_date=model.end_date,
@@ -63,11 +66,12 @@ class APITimelineModel(BaseModel):
         cls, models: Sequence[Union[EmploymentModel, EducationModel]]
     ) -> List["APITimelineModel"]:
         api_models = []
-        for mod in models:
+        for i, mod in enumerate(models):
+            timeline_id = i + 1
             if isinstance(mod, EducationModel):
-                api_models.append(cls.from_cv_education(mod))
+                api_models.append(cls.from_cv_education(mod, timeline_id=timeline_id))
             elif isinstance(mod, EmploymentModel):
-                api_models.append(cls.from_cv_employment(mod))
+                api_models.append(cls.from_cv_employment(mod, timeline_id=timeline_id))
             else:
                 raise ValueError(
                     f"must pass models of type EducationModel or EmploymentModel, "

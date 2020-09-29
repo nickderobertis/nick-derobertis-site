@@ -3,6 +3,7 @@ import { ChartType } from 'angular-google-charts';
 import { Observable } from 'rxjs';
 import { APITimelineResponseModel } from 'src/app/global/interfaces/generated/timeline';
 import { TimelineService } from '../timeline.service';
+import { TimelineDataRow } from './timeline-data-row';
 import { TimelineModel } from './timeline-model';
 import { TimelinesModel } from './timelines-model';
 
@@ -15,7 +16,7 @@ export class TimelineWidgetComponent implements OnInit {
   model: TimelinesModel;
   loading: boolean = true;
   chartType: ChartType = ChartType.Timeline;
-  chartData: [string, Date, Date][];
+  chartData: TimelineDataRow[];
 
   constructor(private timelineService: TimelineService) {}
 

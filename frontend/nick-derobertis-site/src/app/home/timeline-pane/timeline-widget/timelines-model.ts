@@ -1,4 +1,5 @@
 import { APITimelineResponseModel } from 'src/app/global/interfaces/generated/timeline';
+import { TimelineDataRow } from './timeline-data-row';
 import { TimelineModel } from './timeline-model';
 
 export class TimelinesModel {
@@ -9,10 +10,10 @@ export class TimelinesModel {
     this.timelines = TimelineModel.arrayFromAPIArray(args.items);
   }
 
-  toChartData(): [string, Date, Date][] {
-    const data: [string, Date, Date][] = [];
+  toChartData(): TimelineDataRow[] {
+    const data: TimelineDataRow[] = [];
     for (const timeline of this.timelines) {
-      const timelineData: [string, Date, Date] = timeline.toChartData();
+      const timelineData: TimelineDataRow = timeline.toChartData();
       data.push(timelineData);
     }
     return data;
