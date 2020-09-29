@@ -1,23 +1,33 @@
-<div class="timeline-widget-container">
+<div class="card timeline-widget-container">
   <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
   <div *ngIf="!loading">
-    <div>
-      <input
-        type="checkbox"
-        id="timeline-employment-checkbox"
-        [(ngModel)]="showEmployment"
-        name="timeline-employment-checkbox"
-        (ngModelChange)="checkboxChanged()"
-      />
-      <label for="timeline-employment-checkbox">Employment</label>
-      <input
-        type="checkbox"
-        id="timeline-education-checkbox"
-        [(ngModel)]="showEducation"
-        name="timeline-education-checkbox"
-        (ngModelChange)="checkboxChanged()"
-      />
-      <label for="timeline-education-checkbox">Education</label>
+    <div class="timeline-filters-container d-flex flex-wrap">
+      <span class="filters-description-wrapper">
+        <i class="fas fa-filter"></i>
+        Filters:
+      </span>
+      <span class="checkbox-container">
+        <span class="checkbox-wrapper">
+          <input
+            type="checkbox"
+            id="timeline-employment-checkbox"
+            [(ngModel)]="showEmployment"
+            name="timeline-employment-checkbox"
+            (ngModelChange)="checkboxChanged()"
+          />
+          <label for="timeline-employment-checkbox">Employment</label>
+        </span>
+        <span class="checkbox-wrapper">
+          <input
+            type="checkbox"
+            id="timeline-education-checkbox"
+            [(ngModel)]="showEducation"
+            name="timeline-education-checkbox"
+            (ngModelChange)="checkboxChanged()"
+          />
+          <label for="timeline-education-checkbox">Education</label>
+        </span>
+      </span>
     </div>
     <div *ngIf="model">
       <google-chart

@@ -1,3 +1,21 @@
 google-chart {
   width: 100%;
 }
+
+.filters-description-wrapper {
+  margin-bottom: 0.5rem;
+}
+
+.checkbox-wrapper {
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+  display: inline-block;
+}
+
+.checkbox-wrapper input {
+  margin-right: 0.25rem;
+}
+
+.checkbox-container {
+  text-align: center;
+}

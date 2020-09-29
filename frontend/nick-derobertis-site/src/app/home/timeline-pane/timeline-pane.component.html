@@ -1,15 +1,10 @@
 <div class="row featurette" id="skills-pane">
-  <div
-    class="col-md-3 d-flex flex-column justify-content-center flex-reverse"
-    *ngIf="!loading"
-  >
-    <h2 class="featurette-heading">Positions over Time</h2>
-    <p class="lead skills-pane-description">
-      Hover over positions in the timeline to learn more.
-    </p>
+  <div class="overview-wrapper" *ngIf="!loading">
+    <h2 class="heading featurette-heading">Positions over Time</h2>
+    <p class="lead">Hover over positions in the timeline to learn more.</p>
   </div>
   <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
-  <div class="col-md-9">
+  <div class="timeline-wrapper">
     <nds-timeline-widget></nds-timeline-widget>
   </div>
 </div>
