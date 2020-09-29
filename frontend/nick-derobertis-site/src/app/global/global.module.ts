@@ -4,6 +4,8 @@ import { LoadingSpinnerComponent } from './components/loading-spinner/loading-sp
 import { SafeHtmlPipe } from './pipes/safe-html.pipe';
 import { GoogleAnalyticsGTagComponent } from './components/google-analytics-gtag/google-analytics-gtag.component';
 import { ClickEventDirective } from './directives/click-event.directive';
+import { AppShellRenderDirective } from './directives/app-shell-render.directive';
+import { AppShellNoRenderDirective } from './directives/app-shell-no-render.directive';
 
 @NgModule({
   declarations: [
@@ -11,6 +13,8 @@ import { ClickEventDirective } from './directives/click-event.directive';
     SafeHtmlPipe,
     GoogleAnalyticsGTagComponent,
     ClickEventDirective,
+    AppShellRenderDirective,
+    AppShellNoRenderDirective,
   ],
   imports: [CommonModule],
   exports: [
@@ -18,6 +22,8 @@ import { ClickEventDirective } from './directives/click-event.directive';
     SafeHtmlPipe,
     GoogleAnalyticsGTagComponent,
     ClickEventDirective,
+    AppShellRenderDirective,
+    AppShellNoRenderDirective,
   ],
 })
 export class GlobalModule {}
