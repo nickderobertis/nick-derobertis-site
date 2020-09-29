@@ -18,6 +18,7 @@ import { TimelinePaneComponent } from './timeline-pane/timeline-pane.component';
 import { TimelineWidgetComponent } from './timeline-pane/timeline-widget/timeline-widget.component';
 import { TimelineService } from './timeline-pane/timeline.service';
 import { GoogleChartsModule } from 'angular-google-charts';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -35,6 +36,7 @@ import { GoogleChartsModule } from 'angular-google-charts';
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule,
     SkillsModule,
     GlobalModule,
     AwardsModule,

@@ -1,10 +1,13 @@
-import { APITimelineResponseModel } from 'src/app/global/interfaces/generated/timeline';
+import {
+  APITimelineResponseModel,
+  TimelineTypes,
+} from 'src/app/global/interfaces/generated/timeline';
 import { TimelineDataRow } from './timeline-data-row';
 import { TimelineModel } from './timeline-model';
 
 const HEIGHT_PER_SINGLE_ROW: number = 40.99;
 const HEIGHT_PER_DOUBLE_ROW: number = 70.98;
-const HEIGHT_PADDING: number = 30;
+const HEIGHT_PADDING: number = 60;
 
 export class TimelinesModel {
   timelines: TimelineModel[];
@@ -21,7 +24,10 @@ export class TimelinesModel {
   ];
   chartHeight: number;
 
-  constructor(args: APITimelineResponseModel) {
+  constructor(args?: APITimelineResponseModel) {
+    if (!args) {
+      return;
+    }
     this.timelines = TimelineModel.arrayFromAPIArray(args.items);
     this.chartHeight = chartHeightFromTimelines(this.timelines);
   }
@@ -33,6 +39,19 @@ export class TimelinesModel {
       data.push(timelineData);
     }
     return data;
+  }
+
+  filter(allowedTypes: TimelineTypes[]): TimelinesModel {
+    const acceptedTimelines: TimelineModel[] = [];
+    for (const timeline of this.timelines) {
+      if (allowedTypes.indexOf(timeline.itemType) !== -1) {
+        acceptedTimelines.push(timeline);
+      }
+    }
+    const mod: TimelinesModel = new TimelinesModel();
+    mod.timelines = acceptedTimelines;
+    mod.chartHeight = chartHeightFromTimelines(acceptedTimelines);
+    return mod;
   }
 }
 

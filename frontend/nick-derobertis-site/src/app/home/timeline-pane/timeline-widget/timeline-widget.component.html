@@ -1,27 +1,50 @@
 <div class="timeline-widget-container">
   <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
   <div *ngIf="!loading">
-    <google-chart
-      *ndsAppShellNoRender
-      [type]="chartType"
-      [data]="chartData"
-      [columns]="model.chartColumns"
-      [options]="{ tooltip: { trigger: 'none' } }"
-      [dynamicResize]="true"
-      [height]="model.chartHeight"
-      (mouseover)="onMouseOver($event)"
-    ></google-chart>
-    <div *ngIf="selectedModel">
-      <h5>{{ selectedModel.organization }}</h5>
-      <h6>{{ selectedModel.role }}</h6>
-      <div>
-        <span>{{ selectedModel.beginDateStr }}</span>
-        <span>-</span>
-        <span>{{ selectedModel.endDateStr }}</span>
+    <div>
+      <input
+        type="checkbox"
+        id="timeline-employment-checkbox"
+        [(ngModel)]="showEmployment"
+        name="timeline-employment-checkbox"
+        (ngModelChange)="checkboxChanged()"
+      />
+      <label for="timeline-employment-checkbox">Employment</label>
+      <input
+        type="checkbox"
+        id="timeline-education-checkbox"
+        [(ngModel)]="showEducation"
+        name="timeline-education-checkbox"
+        (ngModelChange)="checkboxChanged()"
+      />
+      <label for="timeline-education-checkbox">Education</label>
+    </div>
+    <div *ngIf="model">
+      <google-chart
+        *ndsAppShellNoRender
+        [type]="chartType"
+        [data]="chartData"
+        [columns]="model.chartColumns"
+        [options]="{ tooltip: { trigger: 'none' } }"
+        [dynamicResize]="true"
+        [height]="model.chartHeight"
+        (mouseover)="onMouseOver($event)"
+      ></google-chart>
+      <div *ngIf="selectedModel">
+        <h5>{{ selectedModel.organization }}</h5>
+        <h6>{{ selectedModel.role }}</h6>
+        <div>
+          <span>{{ selectedModel.beginDateStr }}</span>
+          <span>-</span>
+          <span>{{ selectedModel.endDateStr }}</span>
+        </div>
+        <ul>
+          <li *ngFor="let desc of selectedModel.description">{{ desc }}</li>
+        </ul>
       </div>
-      <ul>
-        <li *ngFor="let desc of selectedModel.description">{{ desc }}</li>
-      </ul>
+    </div>
+    <div *ngIf="!model">
+      <h5>Please select education or employment to see the timeline</h5>
     </div>
   </div>
 </div>
