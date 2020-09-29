@@ -4,10 +4,15 @@ import { TimelineModel } from './timeline-model';
 
 export class TimelinesModel {
   timelines: TimelineModel[];
-  chartColumns: { type: string; id?: string; role?: string }[] = [
+  chartColumns: {
+    type: string;
+    id?: string;
+    role?: string;
+    p?: { html: boolean };
+  }[] = [
     { type: 'string', id: 'Organization' },
     { type: 'string', id: 'Position' },
-    { type: 'string', role: 'tooltip' },
+    { type: 'string', role: 'tooltip', p: { html: true } },
     { type: 'date', id: 'Start' },
     { type: 'date', id: 'End' },
   ];
