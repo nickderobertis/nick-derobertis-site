@@ -8,6 +8,7 @@
       [columns]="model.chartColumns"
       [options]="{ tooltip: { trigger: 'none' } }"
       [dynamicResize]="true"
+      [height]="model.chartHeight"
       (mouseover)="onMouseOver($event)"
     ></google-chart>
     <div *ngIf="selectedModel">
