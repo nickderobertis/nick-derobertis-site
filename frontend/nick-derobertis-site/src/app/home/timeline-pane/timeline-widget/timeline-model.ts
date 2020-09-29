@@ -12,6 +12,7 @@ export class TimelineModel {
   itemType: TimelineTypes;
   beginDate: Date;
   endDate?: Date;
+  timelineEndDate: Date;
   description?: string[];
 
   constructor(args: APITimelineModel) {
@@ -23,12 +24,13 @@ export class TimelineModel {
     this.beginDate = new Date(args.begin_date);
     if (args.end_date) {
       this.endDate = new Date(args.end_date);
+      this.timelineEndDate = this.endDate;
     } else {
-      this.endDate = new Date();
+      this.timelineEndDate = new Date();
     }
     // Trim future end dates to today
-    if (this.endDate > new Date()) {
-      this.endDate = new Date();
+    if (this.timelineEndDate > new Date()) {
+      this.timelineEndDate = new Date();
     }
     if (args.description) {
       this.description = args.description;
@@ -45,6 +47,24 @@ export class TimelineModel {
   }
 
   toChartData(): TimelineDataRow {
-    return [this.organization, this.role, this.beginDate, this.endDate];
+    return [this.organization, this.role, this.beginDate, this.timelineEndDate];
   }
+
+  get endDateStr(): string {
+    if (!this.endDate) {
+      return 'Present';
+    }
+
+    return dateAsYearMonth(this.endDate);
+  }
+
+  get beginDateStr(): string {
+    return dateAsYearMonth(this.beginDate);
+  }
+}
+
+function dateAsYearMonth(d: Date): string {
+  const year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(d);
+  const month = new Intl.DateTimeFormat('en', { month: 'short' }).format(d);
+  return `${month} ${year}`;
 }
