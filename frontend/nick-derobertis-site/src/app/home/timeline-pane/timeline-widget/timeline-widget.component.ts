@@ -15,6 +15,7 @@ export class TimelineWidgetComponent implements OnInit {
   model: TimelinesModel;
   loading: boolean = true;
   chartType: ChartType = ChartType.Timeline;
+  chartData: [string, Date, Date][];
 
   constructor(private timelineService: TimelineService) {}
 
@@ -27,6 +28,7 @@ export class TimelineWidgetComponent implements OnInit {
       .getTimelines()
       .subscribe((timelines: APITimelineResponseModel) => {
         this.model = new TimelinesModel(timelines);
+        this.chartData = this.model.toChartData();
         this.loading = false;
       });
   }

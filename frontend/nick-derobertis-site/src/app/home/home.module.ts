@@ -38,7 +38,7 @@ import { GoogleChartsModule } from 'angular-google-charts';
     SkillsModule,
     GlobalModule,
     AwardsModule,
-    GoogleChartsModule,
+    GoogleChartsModule.forRoot({ version: 'current' }),
   ],
   exports: [HomePageComponent],
   providers: [SkillsService, AwardService, TimelineService],
