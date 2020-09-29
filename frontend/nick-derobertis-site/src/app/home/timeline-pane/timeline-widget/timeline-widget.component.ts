@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ChartType } from 'angular-google-charts';
+import { ChartMouseOverEvent, ChartType } from 'angular-google-charts';
 import { Observable } from 'rxjs';
 import { APITimelineResponseModel } from 'src/app/global/interfaces/generated/timeline';
 import { TimelineService } from '../timeline.service';
@@ -17,6 +17,7 @@ export class TimelineWidgetComponent implements OnInit {
   loading: boolean = true;
   chartType: ChartType = ChartType.Timeline;
   chartData: TimelineDataRow[];
+  selectedModel: TimelineModel;
 
   constructor(private timelineService: TimelineService) {}
 
@@ -32,5 +33,14 @@ export class TimelineWidgetComponent implements OnInit {
         this.chartData = this.model.toChartData();
         this.loading = false;
       });
+  }
+
+  onMouseOver($event: ChartMouseOverEvent): void {
+    if ($event.row === undefined) {
+      return;
+    }
+    this.selectedModel = this.model.timelines[$event.row];
+
+    this.timelineService.pushSelectRowEvent(this.selectedModel);
   }
 }

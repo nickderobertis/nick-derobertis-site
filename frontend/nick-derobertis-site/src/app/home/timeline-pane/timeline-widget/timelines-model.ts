@@ -12,7 +12,6 @@ export class TimelinesModel {
   }[] = [
     { type: 'string', id: 'Organization' },
     { type: 'string', id: 'Position' },
-    { type: 'string', role: 'tooltip', p: { html: true } },
     { type: 'date', id: 'Start' },
     { type: 'date', id: 'End' },
   ];

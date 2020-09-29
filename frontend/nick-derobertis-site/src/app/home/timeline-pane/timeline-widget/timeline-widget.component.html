@@ -6,7 +6,15 @@
       [type]="chartType"
       [data]="chartData"
       [columns]="model.chartColumns"
-      [options]="{ tooltip: { isHtml: true } }"
+      [options]="{ tooltip: { trigger: 'none' } }"
+      (mouseover)="onMouseOver($event)"
     ></google-chart>
+    <div *ngIf="selectedModel">
+      <h5>{{ selectedModel.organization }}</h5>
+      <h6>{{ selectedModel.role }}</h6>
+      <ul>
+        <li *ngFor="let desc of selectedModel.description">{{ desc }}</li>
+      </ul>
+    </div>
   </div>
 </div>

@@ -44,34 +44,7 @@ export class TimelineModel {
     return modelArr;
   }
 
-  get descriptionStr(): string {
-    if (!this.description) {
-      return null;
-    }
-    let bulletHtml: string = '';
-    for (const desc of this.description) {
-      bulletHtml += `
-      <li>${desc}</li>
-      `;
-    }
-
-    const html: string = `
-    <h5>${this.organization}</h5>
-    <h6>${this.role}</h6>
-    <ul>
-      ${bulletHtml}
-    </ul>
-    `;
-    return html;
-  }
-
   toChartData(): TimelineDataRow {
-    return [
-      this.organization,
-      this.role,
-      this.descriptionStr,
-      this.beginDate,
-      this.endDate,
-    ];
+    return [this.organization, this.role, this.beginDate, this.endDate];
   }
 }
