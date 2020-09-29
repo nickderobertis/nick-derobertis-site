@@ -4,7 +4,13 @@ import { TimelineModel } from './timeline-model';
 
 export class TimelinesModel {
   timelines: TimelineModel[];
-  chartColumns: string[] = ['Organization', 'Start', 'End'];
+  chartColumns: { type: string; id?: string; role?: string }[] = [
+    { type: 'string', id: 'Organization' },
+    { type: 'string', id: 'Position' },
+    { type: 'string', role: 'tooltip' },
+    { type: 'date', id: 'Start' },
+    { type: 'date', id: 'End' },
+  ];
 
   constructor(args: APITimelineResponseModel) {
     this.timelines = TimelineModel.arrayFromAPIArray(args.items);

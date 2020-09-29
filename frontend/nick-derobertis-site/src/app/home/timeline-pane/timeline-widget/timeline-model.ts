@@ -44,7 +44,20 @@ export class TimelineModel {
     return modelArr;
   }
 
+  get descriptionStr(): string {
+    if (!this.description) {
+      return null;
+    }
+    return this.description.join(', ');
+  }
+
   toChartData(): TimelineDataRow {
-    return [this.organization, this.beginDate, this.endDate];
+    return [
+      this.organization,
+      this.role,
+      this.descriptionStr,
+      this.beginDate,
+      this.endDate,
+    ];
   }
 }

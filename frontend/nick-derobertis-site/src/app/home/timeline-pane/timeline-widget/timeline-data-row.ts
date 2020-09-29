@@ -1,1 +1,1 @@
-export type TimelineDataRow = [string, Date, Date];
+export type TimelineDataRow = [string, string, string, Date, Date];
