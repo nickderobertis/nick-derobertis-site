@@ -17,6 +17,7 @@ import { ContactPaneComponent } from './contact-pane/contact-pane.component';
 import { TimelinePaneComponent } from './timeline-pane/timeline-pane.component';
 import { TimelineWidgetComponent } from './timeline-pane/timeline-widget/timeline-widget.component';
 import { TimelineService } from './timeline-pane/timeline.service';
+import { GoogleChartsModule } from 'angular-google-charts';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { TimelineService } from './timeline-pane/timeline.service';
     SkillsModule,
     GlobalModule,
     AwardsModule,
+    GoogleChartsModule,
   ],
   exports: [HomePageComponent],
   providers: [SkillsService, AwardService, TimelineService],

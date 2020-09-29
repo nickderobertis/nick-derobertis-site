@@ -8,8 +8,8 @@ export class TimelineModel {
   role: string;
   location: string;
   itemType: TimelineTypes;
-  beginDate: string;
-  endDate?: string;
+  beginDate: Date;
+  endDate?: Date;
   description?: string[];
 
   constructor(args: APITimelineModel) {
@@ -17,9 +17,11 @@ export class TimelineModel {
     this.role = args.role;
     this.location = args.location;
     this.itemType = args.item_type;
-    this.beginDate = args.begin_date;
+    this.beginDate = new Date(args.begin_date);
     if (args.end_date) {
-      this.endDate = args.end_date;
+      this.endDate = new Date(args.end_date);
+    } else {
+      this.endDate = new Date();
     }
     if (args.description) {
       this.description = args.description;
@@ -33,5 +35,9 @@ export class TimelineModel {
       modelArr.push(mod);
     }
     return modelArr;
+  }
+
+  toChartData(): [string, Date, Date] {
+    return [this.organization, this.beginDate, this.endDate];
   }
 }

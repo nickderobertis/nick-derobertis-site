@@ -1,1 +1,9 @@
-<p>timeline-widget works!</p>
+<div class="timeline-widget-container">
+  <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
+  <google-chart
+    *ngIf="!loading"
+    [type]="chartType"
+    [data]="model.toChartData()"
+    [columns]="model.chartColumns"
+  ></google-chart>
+</div>

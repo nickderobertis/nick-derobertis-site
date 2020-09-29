@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ChartType } from 'angular-google-charts';
 import { Observable } from 'rxjs';
 import { APITimelineResponseModel } from 'src/app/global/interfaces/generated/timeline';
 import { TimelineService } from '../timeline.service';
@@ -13,6 +14,7 @@ import { TimelinesModel } from './timelines-model';
 export class TimelineWidgetComponent implements OnInit {
   model: TimelinesModel;
   loading: boolean = true;
+  chartType: ChartType = ChartType.Timeline;
 
   constructor(private timelineService: TimelineService) {}
 
