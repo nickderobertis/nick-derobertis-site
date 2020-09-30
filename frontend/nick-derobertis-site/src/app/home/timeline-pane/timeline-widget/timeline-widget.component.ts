@@ -16,6 +16,7 @@ import {
   TimelineTypes,
 } from 'src/app/global/interfaces/generated/timeline';
 import { CSSVariablesService } from 'src/app/global/services/css-variables.service';
+import { EventService } from 'src/app/global/services/events/event.service';
 import { TimelineService } from '../timeline.service';
 import { TimelineDataRow } from './timeline-data-row';
 import { TimelineModel } from './timeline-model';
@@ -42,6 +43,7 @@ export class TimelineWidgetComponent implements OnInit {
   constructor(
     private timelineService: TimelineService,
     private cssVariablesService: CSSVariablesService,
+    private eventService: EventService,
     @Inject(PLATFORM_ID) private platformId
   ) {}
 
@@ -67,6 +69,12 @@ export class TimelineWidgetComponent implements OnInit {
     }
     this.selectedModel = this.model.timelines[$event.row];
 
+    this.eventService.event(
+      EventTypes.viewTimelineDetail(
+        this.selectedModel.organization,
+        this.selectedModel.role
+      )
+    );
     this.timelineService.pushSelectRowEvent(this.selectedModel);
   }
 
