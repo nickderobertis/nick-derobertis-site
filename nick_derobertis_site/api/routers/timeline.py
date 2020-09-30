@@ -50,7 +50,7 @@ class APITimelineModel(BaseModel):
             short_organization=model.company_short_name or model.company_name,
             short_role=model.short_job_title or model.job_title,
             end_date=model.end_date,
-            description=model.contents,
+            description=model.description,
         )
 
     @classmethod

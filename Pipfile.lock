@@ -312,11 +312,11 @@
         },
         "derobertis-cv": {
             "hashes": [
-                "sha256:d0a5a9dab1be258adce37867c33e90e5dbd9e42f882d89bdd77946097c2218f1",
-                "sha256:dccf030a61993dc496f9d776d9dbfd35111b9fe2429b3a75de5ea8bae2eb7c08"
+                "sha256:3f8b0fba637261d97bf3803c7e2117f29fc74fbc2241c2c596c1b2c9af2d0e2f",
+                "sha256:bae88a8fd3918657233742956dd7f5acff44271a2d6e8bd74626c3ce32fbe496"
             ],
             "index": "pypi",
-            "version": "==0.6.1"
+            "version": "==0.6.2"
         },
         "docutils": {
             "hashes": [
@@ -1463,11 +1463,11 @@
         },
         "uvicorn": {
             "hashes": [
-                "sha256:9a8f3501d977dedf77a540a0ec3cfadf409fe48eafca2c100d45d843ac62bc7b",
-                "sha256:fbe9d1b764bc1f4599e1f150a0974feea0fd6380bec889c0d907ebd0a2e896a7"
+                "sha256:a461e76406088f448f36323f5ac774d50e5a552b6ccb54e4fca8d83ef614a7c2",
+                "sha256:d06a25caa8dc680ad92eb3ec67363f5281c092059613a1cc0100acba37fc0f45"
             ],
             "index": "pypi",
-            "version": "==0.12.0"
+            "version": "==0.12.1"
         },
         "watchdog": {
             "hashes": [
