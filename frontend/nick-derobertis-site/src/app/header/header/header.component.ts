@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { EventTypes } from 'src/app/global/classes/event-types';
 import { PageLink } from 'src/app/global/interfaces/page-link';
 import { IEvent } from 'src/app/global/services/events/i-event';
+
+declare const $;
 
 @Component({
   selector: 'nds-header',
@@ -40,8 +42,22 @@ export class HeaderComponent implements OnInit {
   ];
   viewCVEvent: IEvent = EventTypes.viewCV;
   viewGithubEvent: IEvent = EventTypes.viewGithub;
+  dropdownOpen: boolean = false;
 
-  constructor() {}
+  constructor(private el: ElementRef) {}
 
   ngOnInit(): void {}
+
+  @HostListener('document:click', ['$event'])
+  outsideClick(event: MouseEvent): void {
+    if (this.el.nativeElement.contains(event.target)) {
+      return;
+    }
+    // Close dropdown when clicking outside header
+    this.closeDropdown();
+  }
+
+  closeDropdown(): void {
+    $('.navbar-collapse').collapse('hide');
+  }
 }
