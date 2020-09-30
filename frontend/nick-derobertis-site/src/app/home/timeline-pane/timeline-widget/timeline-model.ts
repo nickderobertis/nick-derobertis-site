@@ -81,6 +81,14 @@ export class TimelineModel {
   get beginDateStr(): string {
     return dateAsYearMonth(this.beginDate);
   }
+
+  get iconClassStr(): string {
+    if (this.itemType === 'education') {
+      return 'fas fa-graduation-cap';
+    }
+
+    return 'far fa-building';
+  }
 }
 
 function dateAsYearMonth(d: Date): string {

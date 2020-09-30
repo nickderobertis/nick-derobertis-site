@@ -52,7 +52,10 @@
           color: selectedModel.colorPair.text
         }"
       >
-        <h5>{{ selectedModel.organization }}</h5>
+        <h5>
+          <i class="{{ selectedModel.iconClassStr }}"></i>
+          {{ selectedModel.organization }}
+        </h5>
         <h6>{{ selectedModel.role }}</h6>
         <hr *ngIf="selectedModel.description" />
         <div>
