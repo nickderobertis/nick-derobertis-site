@@ -107,13 +107,13 @@ async def read_all_research():
     return ALL_RESEARCH
 
 
-@router.get("/working-papers", tags=["awards"], response_model=List[APIResearchModel])
+@router.get("/working-papers", tags=["research"], response_model=List[APIResearchModel])
 async def read_working_papers():
     return WORKING_PAPERS
 
 
 @router.get(
-    "/works-in-progress", tags=["awards"], response_model=List[APIResearchModel]
+    "/works-in-progress", tags=["research"], response_model=List[APIResearchModel]
 )
 async def read_works_in_progress():
     return WORKS_IN_PROGRESS
@@ -121,7 +121,7 @@ async def read_works_in_progress():
 
 @router.get(
     "/stats",
-    tags=["awards"],
+    tags=["research"],
     response_model=APIResearchStatisticsResponseModel,
 )
 async def read_skill_stats():

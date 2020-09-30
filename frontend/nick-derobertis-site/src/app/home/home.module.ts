@@ -14,6 +14,12 @@ import { AwardsPaneComponent } from './awards-pane/awards-pane.component';
 import { AwardsModule } from '../awards/awards.module';
 import { AwardService } from '../awards/award.service';
 import { ContactPaneComponent } from './contact-pane/contact-pane.component';
+import { TimelinePaneComponent } from './timeline-pane/timeline-pane.component';
+import { TimelineWidgetComponent } from './timeline-pane/timeline-widget/timeline-widget.component';
+import { TimelineService } from './timeline-pane/timeline.service';
+import { GoogleChartsModule } from 'angular-google-charts';
+import { FormsModule } from '@angular/forms';
+import { CSSVariablesService } from '../global/services/css-variables.service';
 
 @NgModule({
   declarations: [
@@ -25,15 +31,24 @@ import { ContactPaneComponent } from './contact-pane/contact-pane.component';
     SkillsPaneComponent,
     AwardsPaneComponent,
     ContactPaneComponent,
+    TimelinePaneComponent,
+    TimelineWidgetComponent,
   ],
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule,
     SkillsModule,
     GlobalModule,
     AwardsModule,
+    GoogleChartsModule.forRoot({ version: 'current' }),
   ],
   exports: [HomePageComponent],
-  providers: [SkillsService, AwardService],
+  providers: [
+    SkillsService,
+    AwardService,
+    TimelineService,
+    CSSVariablesService,
+  ],
 })
 export class HomeModule {}

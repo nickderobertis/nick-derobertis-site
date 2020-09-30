@@ -1,0 +1,42 @@
+google-chart {
+  width: 100%;
+}
+
+.filters-description-wrapper {
+  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
+  margin-left: 1rem;
+}
+
+.checkbox-wrapper {
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+  padding-top: 0.7rem;
+
+  @media (max-width: 420px) {
+    display: inline-block;
+  }
+}
+
+.checkbox-wrapper input {
+  margin-right: 0.25rem;
+}
+
+.checkbox-container {
+  text-align: center;
+  margin-top: 0.55rem;
+}
+
+.timeline-description-card ul {
+  margin-top: 0.5rem;
+  margin-block-end: 0;
+}
+
+.no-select-message-wrapper {
+  background-color: var(--warning);
+  border-radius: 10px;
+}
+
+.no-select-message-wrapper h5 {
+  text-align: center;
+}

@@ -1,0 +1,79 @@
+<div class="card timeline-widget-container">
+  <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
+  <div *ngIf="!loading">
+    <div class="timeline-filters-container d-flex flex-wrap">
+      <span class="filters-description-wrapper">
+        <i class="fas fa-filter"></i>
+        Filters:
+      </span>
+      <span class="checkbox-container">
+        <span class="checkbox-wrapper">
+          <input
+            ndsClickEvent
+            type="checkbox"
+            id="timeline-employment-checkbox"
+            [(ngModel)]="showEmployment"
+            name="timeline-employment-checkbox"
+            (ngModelChange)="checkboxChanged()"
+            [event]="filterEmploymentEvent"
+          />
+          <label for="timeline-employment-checkbox">Employment</label>
+        </span>
+        <span class="checkbox-wrapper">
+          <input
+            ndsClickEvent
+            type="checkbox"
+            id="timeline-education-checkbox"
+            [(ngModel)]="showEducation"
+            name="timeline-education-checkbox"
+            (ngModelChange)="checkboxChanged()"
+            [event]="filterEducationEvent"
+          />
+          <label for="timeline-education-checkbox">Education</label>
+        </span>
+      </span>
+    </div>
+    <div *ngIf="model">
+      <google-chart
+        *ndsAppShellNoRender
+        [type]="chartType"
+        [data]="chartData"
+        [columns]="model.chartColumns"
+        [options]="{
+          tooltip: { trigger: 'none' },
+          colors: model.timelineColors
+        }"
+        [dynamicResize]="true"
+        [height]="model.chartHeight"
+        (mouseover)="onMouseOver($event)"
+        (ready)="onChartReady()"
+      ></google-chart>
+      <div
+        class="card shadow-lg timeline-description-card"
+        *ngIf="selectedModel"
+        [ngStyle]="{
+          'background-color': selectedModel.colorPair.background,
+          color: selectedModel.colorPair.text
+        }"
+      >
+        <h5>
+          <i class="{{ selectedModel.iconClassStr }}"></i>
+          {{ selectedModel.organization }}
+        </h5>
+        <h6>{{ selectedModel.role }}</h6>
+        <hr *ngIf="selectedModel.description" />
+        <div>
+          <span>{{ selectedModel.beginDateStr }}</span>
+          <span> - </span>
+          <span>{{ selectedModel.endDateStr }}</span>
+        </div>
+        <ul *ngIf="selectedModel.description">
+          <li *ngFor="let desc of selectedModel.description">{{ desc }}</li>
+        </ul>
+      </div>
+    </div>
+    <div *ngIf="!model" class="no-select-message-wrapper">
+      <h5>Please select education or employment to see the timeline</h5>
+    </div>
+  </div>
+</div>

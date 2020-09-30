@@ -2,7 +2,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from nick_derobertis_site.api.routers import skills, awards, research, software, courses
+from nick_derobertis_site.api.routers import skills, awards, research, software, courses, timeline
 import sentry_sdk
 
 from nick_derobertis_site.logger import logger
@@ -44,3 +44,4 @@ app.include_router(awards.router, prefix="/awards", tags=["awards"])
 app.include_router(research.router, prefix="/research", tags=["research"])
 app.include_router(software.router, prefix="/software", tags=["software"])
 app.include_router(courses.router, prefix="/courses", tags=["courses"])
+app.include_router(timeline.router, prefix="/timeline", tags=["timeline"])

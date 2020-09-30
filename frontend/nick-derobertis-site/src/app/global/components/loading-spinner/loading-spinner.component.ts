@@ -1,15 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'nds-loading-spinner',
   templateUrl: './loading-spinner.component.html',
-  styleUrls: ['./loading-spinner.component.scss']
+  styleUrls: ['./loading-spinner.component.scss'],
 })
 export class LoadingSpinnerComponent implements OnInit {
+  @Input() size: number = 40;
 
-  constructor() { }
+  constructor() {}
 
-  ngOnInit(): void {
+  ngOnInit(): void {}
+
+  get fontSize(): string {
+    return `${this.size}px`;
   }
-
 }

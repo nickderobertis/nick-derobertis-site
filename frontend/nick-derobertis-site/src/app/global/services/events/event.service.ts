@@ -13,7 +13,7 @@ import { IItem } from './i-item';
 export class EventService {
   handlers: IEventHandler[] = [new GTagEventHandler()];
 
-  constructor(@Inject(PLATFORM_ID) private readonly platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {}
 
   get appContext(): EventAppContext {
     return { isBrowser: isPlatformBrowser(this.platformId) };
