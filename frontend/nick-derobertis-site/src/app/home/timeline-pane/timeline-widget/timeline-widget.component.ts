@@ -25,6 +25,7 @@ export class TimelineWidgetComponent implements OnInit {
   selectedModel: TimelineModel;
   showEmployment: boolean = true;
   showEducation: boolean = true;
+  drawnWidth: number;
 
   constructor(
     private timelineService: TimelineService,
@@ -42,6 +43,7 @@ export class TimelineWidgetComponent implements OnInit {
         this.model = new TimelinesModel(timelines);
         this.fullModel = new TimelinesModel(timelines);
         this.chartData = this.sizedChartData;
+        this.drawnWidth = this.screenWidth;
         this.loading = false;
       });
   }
@@ -53,6 +55,14 @@ export class TimelineWidgetComponent implements OnInit {
     this.selectedModel = this.model.timelines[$event.row];
 
     this.timelineService.pushSelectRowEvent(this.selectedModel);
+  }
+
+  onChartReady(): void {
+    if (this.drawnWidth !== this.screenWidth) {
+      // Screen must have been resized
+      this.chartData = this.sizedChartData;
+      this.drawnWidth = this.screenWidth;
+    }
   }
 
   checkboxChanged(): void {

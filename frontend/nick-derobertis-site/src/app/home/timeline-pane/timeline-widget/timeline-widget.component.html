@@ -42,6 +42,7 @@
         [dynamicResize]="true"
         [height]="model.chartHeight"
         (mouseover)="onMouseOver($event)"
+        (ready)="onChartReady()"
       ></google-chart>
       <div
         class="card shadow-lg description-card"
