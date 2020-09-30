@@ -28,6 +28,8 @@ class APITimelineModel(BaseModel):
     timeline_id: int
     item_type: TimelineTypes
     begin_date: datetime.date
+    short_organization: str
+    short_role: str
     end_date: Optional[datetime.date] = None
     description: Optional[Sequence[str]] = None
 
@@ -45,6 +47,8 @@ class APITimelineModel(BaseModel):
             timeline_id=timeline_id,
             item_type=item_type,
             begin_date=model.begin_date,
+            short_organization=model.company_short_name or model.company_name,
+            short_role=model.short_job_title or model.job_title,
             end_date=model.end_date,
             description=model.contents,
         )
@@ -57,6 +61,8 @@ class APITimelineModel(BaseModel):
             location=model.institution.location,
             timeline_id=timeline_id,
             item_type=TimelineTypes.EDUCATION,
+            short_organization=model.institution.abbreviation or model.institution.title,
+            short_role=model.short_degree_name or model.degree_name,
             begin_date=model.begin_date,
             end_date=model.end_date,
         )

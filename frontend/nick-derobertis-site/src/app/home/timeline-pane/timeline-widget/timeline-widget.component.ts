@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { ChartMouseOverEvent, ChartType } from 'angular-google-charts';
 import { Observable } from 'rxjs';
+import { CSSVariables } from 'src/app/global/classes/css-variables';
 import {
   APITimelineResponseModel,
   TimelineTypes,
@@ -25,7 +26,10 @@ export class TimelineWidgetComponent implements OnInit {
   showEmployment: boolean = true;
   showEducation: boolean = true;
 
-  constructor(private timelineService: TimelineService) {}
+  constructor(
+    private timelineService: TimelineService,
+    private el: ElementRef
+  ) {}
 
   ngOnInit(): void {
     this.getTimelines();
@@ -37,7 +41,7 @@ export class TimelineWidgetComponent implements OnInit {
       .subscribe((timelines: APITimelineResponseModel) => {
         this.model = new TimelinesModel(timelines);
         this.fullModel = new TimelinesModel(timelines);
-        this.chartData = this.model.toChartData();
+        this.chartData = this.sizedChartData;
         this.loading = false;
       });
   }
@@ -69,5 +73,23 @@ export class TimelineWidgetComponent implements OnInit {
     this.model = this.fullModel.filter(allowedTypes);
     this.chartData = this.model.toChartData();
     this.loading = false;
+  }
+
+  get screenWidth(): number {
+    return window.innerWidth;
+  }
+
+  get shortCutoff(): number {
+    const lgBreakpointPx = CSSVariables.get('breakpoint-lg');
+    return CSSVariables.numbersFromString(lgBreakpointPx);
+  }
+
+  get sizedChartData(): TimelineDataRow[] {
+    const width: number = this.screenWidth;
+    if (width > this.shortCutoff) {
+      return this.model.toChartData();
+    } else {
+      return this.model.toShortChartData();
+    }
   }
 }

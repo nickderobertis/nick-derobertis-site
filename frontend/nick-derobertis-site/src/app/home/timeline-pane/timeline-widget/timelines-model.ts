@@ -46,6 +46,15 @@ export class TimelinesModel {
     return data;
   }
 
+  toShortChartData(): TimelineDataRow[] {
+    const data: TimelineDataRow[] = [];
+    for (const timeline of this.timelines) {
+      const timelineData: TimelineDataRow = timeline.toShortChartData();
+      data.push(timelineData);
+    }
+    return data;
+  }
+
   filter(allowedTypes: TimelineTypes[]): TimelinesModel {
     const colors: TimelineColors = new TimelineColors();
     for (const timeline of this.timelines) {

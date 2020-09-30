@@ -9,6 +9,8 @@ import { TimelineDataRow } from './timeline-data-row';
 export class TimelineModel {
   organization: string;
   role: string;
+  shortOrganization: string;
+  shortRole: string;
   location: string;
   timelineId: number;
   itemType: TimelineTypes;
@@ -24,6 +26,9 @@ export class TimelineModel {
     this.location = args.location;
     this.timelineId = args.timeline_id;
     this.itemType = args.item_type;
+    this.shortOrganization = args.short_organization;
+    this.shortRole = args.short_role;
+
     this.beginDate = new Date(args.begin_date);
     if (args.end_date) {
       this.endDate = new Date(args.end_date);
@@ -54,6 +59,15 @@ export class TimelineModel {
 
   toChartData(): TimelineDataRow {
     return [this.organization, this.role, this.beginDate, this.timelineEndDate];
+  }
+
+  toShortChartData(): TimelineDataRow {
+    return [
+      this.shortOrganization,
+      this.shortRole,
+      this.beginDate,
+      this.timelineEndDate,
+    ];
   }
 
   get endDateStr(): string {
