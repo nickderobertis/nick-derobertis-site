@@ -1,4 +1,12 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  Inject,
+  OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
 import { ChartMouseOverEvent, ChartType } from 'angular-google-charts';
 import { Observable } from 'rxjs';
 import { CSSVariables } from 'src/app/global/classes/css-variables';
@@ -6,6 +14,7 @@ import {
   APITimelineResponseModel,
   TimelineTypes,
 } from 'src/app/global/interfaces/generated/timeline';
+import { CSSVariablesService } from 'src/app/global/services/css-variables.service';
 import { TimelineService } from '../timeline.service';
 import { TimelineDataRow } from './timeline-data-row';
 import { TimelineModel } from './timeline-model';
@@ -29,7 +38,8 @@ export class TimelineWidgetComponent implements OnInit {
 
   constructor(
     private timelineService: TimelineService,
-    private el: ElementRef
+    private cssVariablesService: CSSVariablesService,
+    @Inject(PLATFORM_ID) private platformId
   ) {}
 
   ngOnInit(): void {
@@ -86,12 +96,20 @@ export class TimelineWidgetComponent implements OnInit {
   }
 
   get screenWidth(): number {
+    if (isPlatformServer(this.platformId)) {
+      return 600;
+    }
     return window.innerWidth;
   }
 
   get shortCutoff(): number {
-    const lgBreakpointPx = CSSVariables.get('breakpoint-lg');
-    return CSSVariables.numbersFromString(lgBreakpointPx);
+    const lgBreakpointPx = this.cssVariablesService.get('breakpoint-lg');
+    if (lgBreakpointPx) {
+      // On browser, got actual breakpoint
+      return CSSVariables.numbersFromString(lgBreakpointPx);
+    }
+    // On server, need placeholder cutoff
+    return 1000;
   }
 
   get sizedChartData(): TimelineDataRow[] {

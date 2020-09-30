@@ -19,6 +19,7 @@ import { TimelineWidgetComponent } from './timeline-pane/timeline-widget/timelin
 import { TimelineService } from './timeline-pane/timeline.service';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { FormsModule } from '@angular/forms';
+import { CSSVariablesService } from '../global/services/css-variables.service';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,11 @@ import { FormsModule } from '@angular/forms';
     GoogleChartsModule.forRoot({ version: 'current' }),
   ],
   exports: [HomePageComponent],
-  providers: [SkillsService, AwardService, TimelineService],
+  providers: [
+    SkillsService,
+    AwardService,
+    TimelineService,
+    CSSVariablesService,
+  ],
 })
 export class HomeModule {}
