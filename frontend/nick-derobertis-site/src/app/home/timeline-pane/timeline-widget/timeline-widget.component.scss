@@ -31,3 +31,12 @@ google-chart {
   margin-top: 0.5rem;
   margin-block-end: 0;
 }
+
+.no-select-message-wrapper {
+  background-color: var(--warning);
+  border-radius: 10px;
+}
+
+.no-select-message-wrapper h5 {
+  text-align: center;
+}
