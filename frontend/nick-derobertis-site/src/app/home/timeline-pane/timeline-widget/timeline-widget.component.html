@@ -54,12 +54,13 @@
       >
         <h5>{{ selectedModel.organization }}</h5>
         <h6>{{ selectedModel.role }}</h6>
+        <hr *ngIf="selectedModel.description" />
         <div>
           <span>{{ selectedModel.beginDateStr }}</span>
-          <span>-</span>
+          <span> - </span>
           <span>{{ selectedModel.endDateStr }}</span>
         </div>
-        <ul>
+        <ul *ngIf="selectedModel.description">
           <li *ngFor="let desc of selectedModel.description">{{ desc }}</li>
         </ul>
       </div>
