@@ -1005,8 +1005,15 @@ button.header-btn {
 
 .timeline-filters-container {
   justify-content: space-around;
+  margin-bottom: 0.5rem;
+  background-color: var(--primary-offset-light);
+  border-radius: 10px;
 
   @include media-breakpoint-up(md) {
     justify-content: unset;
+  }
+
+  @include media-breakpoint-up(lg) {
+    width: fit-content;
   }
 }
