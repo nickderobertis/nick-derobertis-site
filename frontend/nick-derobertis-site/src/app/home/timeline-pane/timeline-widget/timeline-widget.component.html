@@ -9,21 +9,25 @@
       <span class="checkbox-container">
         <span class="checkbox-wrapper">
           <input
+            ndsClickEvent
             type="checkbox"
             id="timeline-employment-checkbox"
             [(ngModel)]="showEmployment"
             name="timeline-employment-checkbox"
             (ngModelChange)="checkboxChanged()"
+            [event]="filterEmploymentEvent"
           />
           <label for="timeline-employment-checkbox">Employment</label>
         </span>
         <span class="checkbox-wrapper">
           <input
+            ndsClickEvent
             type="checkbox"
             id="timeline-education-checkbox"
             [(ngModel)]="showEducation"
             name="timeline-education-checkbox"
             (ngModelChange)="checkboxChanged()"
+            [event]="filterEducationEvent"
           />
           <label for="timeline-education-checkbox">Education</label>
         </span>

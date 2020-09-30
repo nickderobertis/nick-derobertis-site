@@ -1,3 +1,4 @@
+import { TimelineFilterTypes } from 'src/app/home/timeline-pane/timeline-widget/timeline-filter-types.enum';
 import { EventActions } from '../enums/event-actions.enum';
 import { EventCategories } from '../enums/event-categories.enum';
 import { EventLabels } from '../enums/event-labels.enum';
@@ -17,6 +18,12 @@ export class EventTypes {
     category: EventCategories.Navigation,
     label: EventLabels.HomePageButton,
   };
+  static filterTimelineEmployment: IEvent = EventTypes.filterTimeline(
+    TimelineFilterTypes.EMPLOYMENT
+  );
+  static filterTimelineEducation: IEvent = EventTypes.filterTimeline(
+    TimelineFilterTypes.EDUCATION
+  );
 
   static viewSyllabus(name: string): IEvent {
     const event: IEvent = {
@@ -34,6 +41,26 @@ export class EventTypes {
       category: EventCategories.Navigation,
     };
     event.label = name;
+    return event;
+  }
+
+  static viewTimelineDetail(organization: string, role: string): IEvent {
+    const event: IEvent = {
+      action: EventActions.ViewTimeline,
+      category: EventCategories.Navigation,
+    };
+    const label = `${organization} - ${role}`;
+    event.label = label;
+    return event;
+  }
+
+  static filterTimeline(filterType: TimelineFilterTypes): IEvent {
+    const event: IEvent = {
+      action: EventActions.FilterTimeline,
+      category: EventCategories.Interaction,
+      label: filterType,
+    };
+
     return event;
   }
 }

@@ -10,6 +10,7 @@ import {
 import { ChartMouseOverEvent, ChartType } from 'angular-google-charts';
 import { Observable } from 'rxjs';
 import { CSSVariables } from 'src/app/global/classes/css-variables';
+import { EventTypes } from 'src/app/global/classes/event-types';
 import {
   APITimelineResponseModel,
   TimelineTypes,
@@ -35,6 +36,8 @@ export class TimelineWidgetComponent implements OnInit {
   showEmployment: boolean = true;
   showEducation: boolean = true;
   drawnWidth: number;
+  filterEmploymentEvent = EventTypes.filterTimelineEmployment;
+  filterEducationEvent = EventTypes.filterTimelineEducation;
 
   constructor(
     private timelineService: TimelineService,
