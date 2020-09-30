@@ -22,6 +22,7 @@ COPY Pipfile .
 COPY Pipfile.lock .
 
 RUN pipenv sync
+RUN pipenv run pip install uvicorn==0.11.8
 
 EXPOSE 80 22
 
