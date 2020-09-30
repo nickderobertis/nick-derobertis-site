@@ -47,12 +47,13 @@ export class TimelinesModel {
   }
 
   filter(allowedTypes: TimelineTypes[]): TimelinesModel {
-    const acceptedTimelines: TimelineModel[] = [];
+    const colors: TimelineColors = new TimelineColors();
     for (const timeline of this.timelines) {
       if (allowedTypes.indexOf(timeline.itemType) !== -1) {
-        acceptedTimelines.push(timeline);
+        colors.registerTimeline(timeline);
       }
     }
+    const acceptedTimelines: TimelineModel[] = colors.timelinesWithColors;
     const mod: TimelinesModel = new TimelinesModel();
     mod.timelines = acceptedTimelines;
     mod.chartHeight = chartHeightFromTimelines(acceptedTimelines);
