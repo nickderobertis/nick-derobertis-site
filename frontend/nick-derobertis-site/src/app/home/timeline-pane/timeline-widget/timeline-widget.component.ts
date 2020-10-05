@@ -17,6 +17,7 @@ import {
 } from 'src/app/global/interfaces/generated/timeline';
 import { CSSVariablesService } from 'src/app/global/services/css-variables.service';
 import { EventService } from 'src/app/global/services/events/event.service';
+import { LoggerService } from 'src/app/global/services/logger.service';
 import { TimelineService } from '../timeline.service';
 import { TimelineDataRow } from './timeline-data-row';
 import { TimelineModel } from './timeline-model';
@@ -44,7 +45,8 @@ export class TimelineWidgetComponent implements OnInit {
     private timelineService: TimelineService,
     private cssVariablesService: CSSVariablesService,
     private eventService: EventService,
-    @Inject(PLATFORM_ID) private platformId
+    @Inject(PLATFORM_ID) private platformId,
+    private log: LoggerService
   ) {}
 
   ngOnInit(): void {
@@ -52,15 +54,18 @@ export class TimelineWidgetComponent implements OnInit {
   }
 
   getTimelines(): void {
-    this.timelineService
-      .getTimelines()
-      .subscribe((timelines: APITimelineResponseModel) => {
+    this.timelineService.getTimelines().subscribe(
+      (timelines: APITimelineResponseModel) => {
         this.model = new TimelinesModel(timelines);
         this.fullModel = new TimelinesModel(timelines);
         this.chartData = this.sizedChartData;
         this.drawnWidth = this.screenWidth;
         this.loading = false;
-      });
+      },
+      (error: Error) => {
+        this.log.exception(error, 'Error getting timeline information');
+      }
+    );
   }
 
   onMouseOver($event: ChartMouseOverEvent): void {
