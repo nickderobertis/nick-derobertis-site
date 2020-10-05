@@ -4,6 +4,7 @@ import {
   personalDetails,
   PersonalDetails,
 } from 'src/app/global/classes/personal-details';
+import { FilePaths } from 'src/app/global/enums/file-paths.enum';
 import { PageLink } from 'src/app/global/interfaces/page-link';
 import { IEvent } from 'src/app/global/services/events/i-event';
 
@@ -31,7 +32,7 @@ export class ContactPaneComponent implements OnInit {
   // TODO: restructure CV link now that it has a specific event
   normalLinks: PageLink[] = [
     {
-      link: 'assets/pdfs/generated/Nick DeRobertis CV.pdf',
+      link: FilePaths.CV,
       title: 'View CV',
     },
   ];
