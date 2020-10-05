@@ -20,7 +20,12 @@ class APISkillModel(BaseModel):
 
     @classmethod
     def list_from_cv_skills(cls, models: Sequence[CVSkillModel]):
-        return [cls.from_cv_skill_model(mod) for mod in models]
+        unique_mods: List[CVSkillModel] = []
+        for mod in models:
+            if mod not in unique_mods:
+                unique_mods.append(mod)
+
+        return [cls.from_cv_skill_model(mod) for mod in unique_mods]
 
 
 class APISkillStatisticsModel(BaseModel):
@@ -29,7 +34,13 @@ class APISkillStatisticsModel(BaseModel):
 
 
 ALL_SKILL_CV_MODELS = get_skills()
-PARENT_SKILL_CV_MODELS = [model for model in ALL_SKILL_CV_MODELS if not model.parents]
+PARENT_SKILL_CV_MODELS = []
+for model in ALL_SKILL_CV_MODELS:
+    parent = model.category
+    if parent not in PARENT_SKILL_CV_MODELS:
+        PARENT_SKILL_CV_MODELS.append(parent)
+    if parent not in ALL_SKILL_CV_MODELS:
+        ALL_SKILL_CV_MODELS.append(parent)
 ALL_SKILL_MODELS = APISkillModel.list_from_cv_skills(ALL_SKILL_CV_MODELS)
 PARENT_SKILL_MODELS = APISkillModel.list_from_cv_skills(PARENT_SKILL_CV_MODELS)
 SKILL_COUNT = len(ALL_SKILL_MODELS)
