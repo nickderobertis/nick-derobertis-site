@@ -1,4 +1,4 @@
-FROM python:3.7-slim
+FROM ubuntu:20.04
 
 WORKDIR /home/docker
 
@@ -8,15 +8,16 @@ ENV PYTHONUNBUFFERED 1
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN pip install pipenv
-
 RUN apt-get update && apt-get install -y \
     curl git texlive texlive-luatex texlive-science texlive-latex-extra \
-    nginx openssh-server
+    texlive-plain-generic texlive-extra-utils nginx openssh-server \
+    python3.8-dev python3.8-distutils python3-pip
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
 RUN npm install -g @angular/cli json-schema-to-typescript
 RUN mkdir -p /var/run/sshd
+
+RUN python3.8 -m pip install pipenv
 
 COPY Pipfile .
 COPY Pipfile.lock .
