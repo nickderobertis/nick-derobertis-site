@@ -1,7 +1,9 @@
 <div class="row featurette" id="skills-pane">
   <div class="overview-wrapper" *ngIf="!loading">
     <h2 class="heading featurette-heading">Educated and Experienced</h2>
-    <p class="lead">Hover over positions in the timeline to learn more.</p>
+    <p class="lead">
+      {{ actionWord }} positions in the timeline to learn more.
+    </p>
   </div>
   <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
   <div class="timeline-wrapper">
