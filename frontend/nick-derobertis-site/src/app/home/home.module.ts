@@ -20,6 +20,7 @@ import { TimelineService } from './timeline-pane/timeline.service';
 import { GoogleChartsModule } from 'angular-google-charts';
 import { FormsModule } from '@angular/forms';
 import { CSSVariablesService } from '../global/services/css-variables.service';
+import { LoggerService } from '../global/services/logger.service';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { CSSVariablesService } from '../global/services/css-variables.service';
     AwardService,
     TimelineService,
     CSSVariablesService,
+    LoggerService,
   ],
 })
 export class HomeModule {}

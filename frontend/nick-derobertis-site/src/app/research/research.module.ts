@@ -6,6 +6,7 @@ import { ResearchProjectPaneComponent } from './research-project-pane/research-p
 import { ResearchCategoryComponent } from './research-category/research-category.component';
 import { GlobalModule } from '../global/global.module';
 import { ResearchService } from './research.service';
+import { LoggerService } from '../global/services/logger.service';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,6 @@ import { ResearchService } from './research.service';
     ResearchCategoryComponent,
   ],
   imports: [CommonModule, GlobalModule],
-  providers: [ResearchService],
+  providers: [ResearchService, LoggerService],
 })
 export class ResearchModule {}

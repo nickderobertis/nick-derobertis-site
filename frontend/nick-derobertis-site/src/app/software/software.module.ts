@@ -5,6 +5,7 @@ import { SoftwareBannerComponent } from './software-banner/software-banner.compo
 import { SoftwareCardComponent } from './software-card/software-card.component';
 import { GlobalModule } from '../global/global.module';
 import { SoftwareService } from './software.service';
+import { LoggerService } from '../global/services/logger.service';
 
 @NgModule({
   declarations: [
@@ -13,7 +14,7 @@ import { SoftwareService } from './software.service';
     SoftwareCardComponent,
   ],
   imports: [CommonModule, GlobalModule],
-  providers: [SoftwareService],
+  providers: [SoftwareService, LoggerService],
   exports: [SoftwareCardComponent],
 })
 export class SoftwareModule {}

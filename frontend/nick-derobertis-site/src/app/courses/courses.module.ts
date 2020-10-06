@@ -6,6 +6,7 @@ import { CoursePaneComponent } from './course-pane/course-pane.component';
 import { GlobalModule } from '../global/global.module';
 import { SoftwareModule } from '../software/software.module';
 import { CourseService } from './course.service';
+import { LoggerService } from '../global/services/logger.service';
 
 @NgModule({
   declarations: [
@@ -14,6 +15,6 @@ import { CourseService } from './course.service';
     CoursePaneComponent,
   ],
   imports: [CommonModule, GlobalModule, SoftwareModule],
-  providers: [CourseService],
+  providers: [CourseService, LoggerService],
 })
 export class CoursesModule {}

@@ -1,5 +1,6 @@
 import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { APISkillModel } from 'src/app/global/interfaces/generated/skills';
+import { LoggerService } from 'src/app/global/services/logger.service';
 import { SkillsService } from '../skills.service';
 import { SkillDropdownModel } from './skills-dropdown/skill-dropdown-model';
 import { SkillModel } from './skills-dropdown/skill-model';
@@ -14,12 +15,20 @@ export class SkillsWidgetComponent implements OnInit {
   parentSkills: SkillModel[] = [];
   parentSkillDropdowns: SkillDropdownModel[] = [];
 
-  constructor(private skillsService: SkillsService) {}
+  constructor(
+    private skillsService: SkillsService,
+    private log: LoggerService
+  ) {}
 
   ngOnInit(): void {
-    this.skillsService.getParentSkills().subscribe((res: APISkillModel[]) => {
-      this.setParentSkills(res);
-    });
+    this.skillsService.getParentSkills().subscribe(
+      (res: APISkillModel[]) => {
+        this.setParentSkills(res);
+      },
+      (error: Error) => {
+        this.log.exception(error, 'Error getting parent skills');
+      }
+    );
   }
 
   setParentSkills(skills: APISkillModel[]): void {

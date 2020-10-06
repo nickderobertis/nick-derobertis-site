@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { EventTypes } from 'src/app/global/classes/event-types';
+import { FilePaths } from 'src/app/global/enums/file-paths.enum';
 import { PageLink } from 'src/app/global/interfaces/page-link';
 import { IEvent } from 'src/app/global/services/events/i-event';
 
@@ -36,7 +37,7 @@ export class HeaderComponent implements OnInit {
   // TODO: better structure for header links now that CV has specific event
   normalLinks: PageLink[] = [
     {
-      link: 'assets/pdfs/generated/Nick DeRobertis CV.pdf',
+      link: FilePaths.CV,
       title: 'CV',
     },
   ];

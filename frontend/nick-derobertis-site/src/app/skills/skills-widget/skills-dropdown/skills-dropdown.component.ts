@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { APISkillModel } from 'src/app/global/interfaces/generated/skills';
 import { EventService } from 'src/app/global/services/events/event.service';
+import { LoggerService } from 'src/app/global/services/logger.service';
 import { SkillsService } from '../../skills.service';
 import { SkillDropdownModel } from './skill-dropdown-model';
 import { SkillModel } from './skill-model';
@@ -25,7 +26,8 @@ export class SkillsDropdownComponent implements OnInit {
 
   constructor(
     private skillsService: SkillsService,
-    private eventService: EventService
+    private eventService: EventService,
+    private log: LoggerService
   ) {}
 
   ngOnInit(): void {
@@ -35,11 +37,17 @@ export class SkillsDropdownComponent implements OnInit {
   }
 
   getChildSkills(): void {
-    this.skillsService
-      .getChildSkills(this.model.skill.title)
-      .subscribe((skills: APISkillModel[]) => {
+    this.skillsService.getChildSkills(this.model.skill.title).subscribe(
+      (skills: APISkillModel[]) => {
         this.setChildSkills(skills);
-      });
+      },
+      (error: Error) => {
+        this.log.exception(
+          error,
+          `error getting child skills for ${this.model.skill.title}`
+        );
+      }
+    );
   }
 
   setChildSkills(skills: APISkillModel[]): void {

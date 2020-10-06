@@ -1,7 +1,7 @@
 from typing import List, Sequence
 
 from derobertis_cv.models.skill import SkillModel as CVSkillModel
-from derobertis_cv.pldata.skills import get_skills
+from derobertis_cv.pldata.skills import get_skills, CV_EXCLUDE_SKILLS, CV_SKILL_SECTION_ORDER
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -20,7 +20,12 @@ class APISkillModel(BaseModel):
 
     @classmethod
     def list_from_cv_skills(cls, models: Sequence[CVSkillModel]):
-        return [cls.from_cv_skill_model(mod) for mod in models]
+        unique_mods: List[CVSkillModel] = []
+        for mod in models:
+            if mod not in unique_mods:
+                unique_mods.append(mod)
+
+        return [cls.from_cv_skill_model(mod) for mod in unique_mods]
 
 
 class APISkillStatisticsModel(BaseModel):
@@ -28,8 +33,24 @@ class APISkillStatisticsModel(BaseModel):
     parent_count: int
 
 
-ALL_SKILL_CV_MODELS = get_skills()
-PARENT_SKILL_CV_MODELS = [model for model in ALL_SKILL_CV_MODELS if not model.parents]
+EXCLUDE_SKILLS = CV_EXCLUDE_SKILLS
+
+ALL_SKILL_CV_MODELS = get_skills(exclude_skills=EXCLUDE_SKILLS, exclude_skill_children=False)
+PARENT_SKILL_CV_MODELS = []
+for model in ALL_SKILL_CV_MODELS:
+    parent = model.category
+    if parent not in PARENT_SKILL_CV_MODELS:
+        PARENT_SKILL_CV_MODELS.append(parent)
+    if parent not in ALL_SKILL_CV_MODELS:
+        ALL_SKILL_CV_MODELS.append(parent)
+ALL_SKILL_CV_MODELS.sort(key=lambda skill: skill.level, reverse=True)
+
+orig_category_names = CV_SKILL_SECTION_ORDER.copy()
+PARENT_SKILL_CV_MODELS.sort(
+    key=lambda skill: CV_SKILL_SECTION_ORDER.index(skill.to_title_case_str())
+    if skill.to_title_case_str() in CV_SKILL_SECTION_ORDER else 1000
+)
+
 ALL_SKILL_MODELS = APISkillModel.list_from_cv_skills(ALL_SKILL_CV_MODELS)
 PARENT_SKILL_MODELS = APISkillModel.list_from_cv_skills(PARENT_SKILL_CV_MODELS)
 SKILL_COUNT = len(ALL_SKILL_MODELS)
@@ -50,7 +71,9 @@ async def read_all_skills():
 async def read_child_skills(title: str):
     for skill in ALL_SKILL_CV_MODELS:
         if skill.to_title_case_str() == title:
-            return APISkillModel.list_from_cv_skills(skill.children)
+            children = list(skill.children)
+            children.sort(key=lambda skill: skill.level, reverse=True)
+            return APISkillModel.list_from_cv_skills(children)
     raise HTTPException(status_code=404, detail=f"Skill with title {title} not found")
 
 
