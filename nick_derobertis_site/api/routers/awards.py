@@ -41,6 +41,7 @@ class APIAwardStatisticsModel(BaseModel):
 SELECT_AWARD_NAMES = [
     "Warrington College of Business Ph.D. Student Teaching Award",
     "CFA Global Investment Research Challenge – Global Semi-Finalist",
+    "Graduate Management Admission Test (GMAT) Score",
     "Finance Student of the Year",
 ]
 
