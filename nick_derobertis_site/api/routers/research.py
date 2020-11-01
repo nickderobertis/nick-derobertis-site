@@ -2,6 +2,7 @@ from typing import List, Sequence, Optional
 
 from derobertis_cv.models.award import AwardModel
 from derobertis_cv.models.category import CategoryModel
+from derobertis_cv.models.resources import ResourceModel
 from derobertis_cv.pldata.awards import get_awards
 from derobertis_cv.pldata.papers import (
     ResearchProjectModel,
@@ -48,12 +49,33 @@ class APICoAuthorModel(BaseModel):
         return [cls.from_cv_co_author_model(mod) for mod in models]
 
 
+class APIResourceModel(BaseModel):
+    name: str
+    url: str
+    author: Optional[str] = None
+    description: Optional[str] = None
+
+    @classmethod
+    def from_cv_model(cls, model: ResourceModel) -> 'APIResourceModel':
+        return cls(
+            name=model.name,
+            url=model.url,
+            author=model.author,
+            description=model.description
+        )
+
+    @classmethod
+    def list_from_cv_seq(cls, models: Sequence[ResourceModel]) -> List["APIResourceModel"]:
+        return [cls.from_cv_model(mod) for mod in models]
+
+
 class APIResearchModel(BaseModel):
     title: str
     co_authors: List[APICoAuthorModel] = Field(default_factory=lambda: [])
     href: Optional[str] = None
     description: str = ""
     categories: Sequence[APIResearchCategoryModel] = Field(default_factory=lambda: [])
+    resources: Sequence[APIResourceModel] = Field(default_factory=lambda: [])
 
     @classmethod
     def from_cv_research_model(cls, model: ResearchProjectModel) -> "APIResearchModel":
@@ -63,6 +85,7 @@ class APIResearchModel(BaseModel):
             href=model.href,
             description=model.description or "",
             categories=APIResearchCategoryModel.list_from_cv_seq(model.categories or []),
+            resources=APIResourceModel.list_from_cv_seq(model.resources or [])
         )
 
     @classmethod
