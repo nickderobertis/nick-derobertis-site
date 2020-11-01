@@ -1,6 +1,7 @@
 import { andJoin } from 'src/app/global/functions/text';
 import { APIResearchModel } from 'src/app/global/interfaces/generated/research';
 import { ResearchCategoryModel } from '../research-category/research-category-model';
+import { ResearchResourceModel } from '../research-resource/research-resource-model';
 import { CoAuthorModel } from './co-author-model';
 
 export class ResearchModel {
@@ -8,6 +9,7 @@ export class ResearchModel {
   coAuthors: CoAuthorModel[] = [];
   description: string;
   categories: ResearchCategoryModel[] = [];
+  resources: ResearchResourceModel[] = [];
   href?: string;
 
   constructor(args: APIResearchModel) {
@@ -15,6 +17,7 @@ export class ResearchModel {
     this.coAuthors = CoAuthorModel.arrFromAPIArr(args.co_authors);
     this.description = args.description;
     this.categories = ResearchCategoryModel.arrFromAPIArr(args.categories);
+    this.resources = ResearchResourceModel.arrFromAPIArr(args.resources);
 
     if (args.href) {
       this.href = args.href;
