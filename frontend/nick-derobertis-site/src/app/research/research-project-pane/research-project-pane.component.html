@@ -13,5 +13,18 @@
       *ngFor="let category of model.categories"
       [model]="category"
     ></nds-research-category>
+    <div
+      class="research-resources-container"
+      *ngIf="model.resources.length > 0"
+    >
+    <hr class="research-resource-divider">
+    <h4 class="research-resource-header">Links</h4>
+    <ul>
+      <nds-research-resource
+      *ngFor="let resource of model.resources"
+      [model]="resource"
+    ></nds-research-resource>
+    </ul>
+    </div>
   </div>
 </div>

@@ -7,6 +7,7 @@ import { ResearchCategoryComponent } from './research-category/research-category
 import { GlobalModule } from '../global/global.module';
 import { ResearchService } from './research.service';
 import { LoggerService } from '../global/services/logger.service';
+import { ResearchResourceComponent } from './research-resource/research-resource.component';
 
 @NgModule({
   declarations: [
@@ -14,6 +15,7 @@ import { LoggerService } from '../global/services/logger.service';
     ResearchBannerComponent,
     ResearchProjectPaneComponent,
     ResearchCategoryComponent,
+    ResearchResourceComponent,
   ],
   imports: [CommonModule, GlobalModule],
   providers: [ResearchService, LoggerService],
