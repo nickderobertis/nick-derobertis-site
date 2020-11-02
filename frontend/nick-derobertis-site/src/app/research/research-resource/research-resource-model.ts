@@ -1,3 +1,4 @@
+import { EventTypes } from 'src/app/global/classes/event-types';
 import { APIResourceModel } from 'src/app/global/interfaces/generated/research';
 
 export class ResearchResourceModel implements APIResourceModel {
@@ -37,6 +38,11 @@ export class ResearchResourceModel implements APIResourceModel {
       desc += ` | ${this.description}`;
     }
     return desc;
+  }
+
+  get viewEvent(): EventTypes {
+    const eventName: string = `${this.fullDescription} - ${this.url}`;
+    return EventTypes.viewExternalSite(eventName);
   }
 
 }

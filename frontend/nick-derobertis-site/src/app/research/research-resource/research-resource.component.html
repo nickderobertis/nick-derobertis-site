@@ -1,1 +1,5 @@
-<li><a href="{{model.url}}">{{model.fullDescription}}</a></li>
+<li><a
+  href="{{model.url}}"
+  ndsClickEvent
+  [event]="model.viewEvent"
+>{{model.fullDescription}}</a></li>
