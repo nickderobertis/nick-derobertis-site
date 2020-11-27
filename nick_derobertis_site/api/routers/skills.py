@@ -33,12 +33,14 @@ class APISkillStatisticsModel(BaseModel):
     parent_count: int
 
 
-EXCLUDE_SKILLS = CV_EXCLUDE_SKILLS
+EXCLUDE_SKILLS = CV_EXCLUDE_SKILLS + ['soft skills']
 
 ALL_SKILL_CV_MODELS = get_skills(exclude_skills=EXCLUDE_SKILLS, exclude_skill_children=False)
 PARENT_SKILL_CV_MODELS = []
 for model in ALL_SKILL_CV_MODELS:
     parent = model.category
+    if parent.to_lower_case_str() in EXCLUDE_SKILLS:
+        continue
     if parent not in PARENT_SKILL_CV_MODELS:
         PARENT_SKILL_CV_MODELS.append(parent)
     if parent not in ALL_SKILL_CV_MODELS:
