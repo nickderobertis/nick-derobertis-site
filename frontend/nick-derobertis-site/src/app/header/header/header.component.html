@@ -1,5 +1,5 @@
 <header>
-  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <nav class="navbar header-navbar-expand navbar-dark fixed-top bg-dark">
     <a class="navbar-brand" routerLink="/" (click)="closeDropdown()">
       <img
         src="https://nickderobertis.github.io/derobertis-project-logo/_images/nick_derobertis_site.svg"
@@ -20,7 +20,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav mr-auto align-items-center">
         <div class="d-contents d-md-block">
           <a
             *ngFor="let link of routerLinks"
@@ -44,14 +44,32 @@
             </button>
           </a>
         </div>
-        <a
-          href="https://github.com/nickderobertis"
+        <span class="d-flex">
+          <a
+          href="{{ personalDetails.linkedInUrl }}"
           class="nav-icon"
           ndsClickEvent
-          [event]="viewGithubEvent"
-        >
-          <i class="fab fa-github fa-lg"></i>
-        </a>
+          [event]="viewLinkedInEvent"
+          >
+            <i class="fab fa-linkedin fa-lg"></i>
+          </a>
+          <a
+            href="mailto:{{ personalDetails.email }}"
+            class="nav-icon"
+            ndsClickEvent
+            [event]="viewLinkedInEvent"
+          >
+            <i class="fas fa-envelope fa-lg"></i>
+          </a>
+          <a
+            href="{{ personalDetails.githubUrl }}"
+            class="nav-icon"
+            ndsClickEvent
+            [event]="viewGithubEvent"
+          >
+            <i class="fab fa-github fa-lg"></i>
+          </a>
+        </span>
       </ul>
     </div>
   </nav>

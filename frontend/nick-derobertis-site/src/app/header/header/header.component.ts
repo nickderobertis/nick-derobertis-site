@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { EventTypes } from 'src/app/global/classes/event-types';
+import { personalDetails } from 'src/app/global/classes/personal-details';
 import { FilePaths } from 'src/app/global/enums/file-paths.enum';
 import { PageLink } from 'src/app/global/interfaces/page-link';
 import { IEvent } from 'src/app/global/services/events/i-event';
@@ -43,6 +44,9 @@ export class HeaderComponent implements OnInit {
   ];
   viewCVEvent: IEvent = EventTypes.viewCV;
   viewGithubEvent: IEvent = EventTypes.viewGithub;
+  viewLinkedInEvent: IEvent = EventTypes.viewLinkedIn;
+  viewEmailEvent: IEvent = EventTypes.sendMeEmail;
+  personalDetails = personalDetails;
   dropdownOpen: boolean = false;
 
   constructor(private el: ElementRef) {}
