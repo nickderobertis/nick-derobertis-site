@@ -18,8 +18,8 @@ export class HeaderComponent implements OnInit {
       title: 'Home',
     },
     {
-      link: 'story',
-      title: 'Story',
+      link: 'bio',
+      title: 'bio',
     },
     {
       link: 'research',
