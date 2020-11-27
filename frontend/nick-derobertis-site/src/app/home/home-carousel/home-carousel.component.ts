@@ -10,9 +10,9 @@ import { HomeCarouselItemModel } from './home-carousel-item/home-carousel-item-m
 export class HomeCarouselComponent implements OnInit {
   itemModels: HomeCarouselItemModel[] = [
     new HomeCarouselItemModel({
-      headerText: 'Finance Expert and Researcher',
+      headerText: 'Finance Ph.D. Candidate',
       bodyText:
-        'Focusing on market intervention, alternative assets, and behavioral finance',
+        'Research focuses on market intervention, alternative assets, and behavioral finance',
       links: [{ link: 'research', title: 'Research' }],
       captionClasses: ['carousel-caption', 'text-left'],
       imageHref: 'assets/images/finance-research-banner.jpg',
