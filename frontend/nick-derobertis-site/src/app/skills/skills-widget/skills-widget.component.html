@@ -1,6 +1,15 @@
-<div class="skills-widget-wrapper">
+<div class="skills-widget-wrapper" >
   <nds-skills-dropdown
     *ngFor="let model of parentSkillDropdowns"
     [model]="model"
   ></nds-skills-dropdown>
+  <div class="info-circle-row">
+    <i
+      class="fas fa-info-circle"
+      data-toggle="tooltip"
+      data-placement="top"
+      data-html="true"
+      title="<p>The bars represent a self-evaluation of skill level from 1 to 5.</p><p>For more information, such as relevant project experience, please contact me.</p>">
+    </i>
+  </div>
 </div>
