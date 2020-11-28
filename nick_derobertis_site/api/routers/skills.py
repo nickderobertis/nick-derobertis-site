@@ -19,8 +19,11 @@ class APISkillModel(BaseModel):
         if not model.parents:
             params['direct_parent_title'] = None
         else:
-            first_parent = cast(CVSkillModel, model.parents[0])
-            params['direct_parent_title'] = first_parent.to_title_case_str()
+            first_parent = cast(CVSkillModel, model.category)
+            if first_parent == model:
+                params['direct_parent_title'] = None
+            else:
+                params['direct_parent_title'] = first_parent.to_title_case_str()
 
         return cls(**params)
 
@@ -72,7 +75,7 @@ for mod in PARENT_SKILL_CV_MODELS:
     for child in get_recursive_child_skills(mod):
         if child in PARENT_TO_CHILD_SKILL_CV_MODELS:
             continue
-        if child.parents[0] not in PARENT_SKILL_CV_MODELS:
+        if child.category not in PARENT_SKILL_CV_MODELS:
             continue
         PARENT_TO_CHILD_SKILL_CV_MODELS.append(child)
 
