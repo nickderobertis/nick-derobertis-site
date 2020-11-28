@@ -38,6 +38,9 @@ export class ContactPaneComponent implements OnInit {
   ];
   viewCVEvent: IEvent = EventTypes.viewCV;
   sendMeEmailEvent: IEvent = EventTypes.sendMeEmail;
+  callPhoneEvent: IEvent = EventTypes.callPhone;
+  viewLinkedInEvent: IEvent = EventTypes.viewLinkedIn;
+  viewGithubEvent: IEvent = EventTypes.viewGithub;
 
   constructor() {}
 

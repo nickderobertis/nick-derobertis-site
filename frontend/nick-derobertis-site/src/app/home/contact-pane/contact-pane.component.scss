@@ -1,0 +1,43 @@
+.contact-icon {
+  padding-right: 0.5rem;
+  color: var(--primary);
+}
+
+.contact-heading {
+  margin-bottom: 3rem;
+}
+
+.contact-info-column {
+  padding-bottom: 2rem;
+  min-height: 13rem;
+}
+
+.end-contact-spacer {
+  margin-top: 5rem;
+}
+
+.map-card {
+  padding: 5px;
+  background: var(--secondary);
+  border-radius: 10px;
+  width: 100%;
+}
+
+.contact-map {
+  border-radius: 5px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.contact-button-link {
+  color: white;
+  width: 40%;
+}
+
+.contact-button-link:first-of-type {
+  margin-right: 20%;
+}
+
+.contact-btn {
+  width: 100%;
+}

@@ -866,22 +866,22 @@ $award-image-width: 125px;
   margin-top: 0;
 }
 
-.contact-button-wrapper {
-  margin: 5rem;
+.contact-info-column {
+  @include media-breakpoint-up(md) {
+    padding-top: 2rem;
+  }
 }
 
-.contact-button-icon {
-  margin-right: 0.5rem;
+.contact-row {
+  @include media-breakpoint-up(md) {
+    padding-left: 1rem;
+  }
 }
 
-.contact-not-convinced-button-container {
-  padding: 3rem;
-  padding-bottom: 5rem;
-}
-
-.contact-not-convinced-button-container button {
-  margin: 1rem;
-  width: 9.5rem;
+.map-card.map-card.map-card {
+  @include media-breakpoint-up(md) {
+    width: unset;
+  }
 }
 
 .jumbotron {

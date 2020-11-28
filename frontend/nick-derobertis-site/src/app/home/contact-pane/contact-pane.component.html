@@ -1,37 +1,73 @@
-<div class="row featurette">
+<div class="row featurette flex-row-reverse">
   <div class="col-md-12 d-flex flex-column align-items-center">
-    <h2 class="featurette-heading contact-heading">Want to Hire Me?</h2>
-    <a
-      target="_top"
-      href="mailto:{{ personalDetails.email }}"
-      class="contact-button-wrapper"
-      ndsClickEvent
-      [event]="sendMeEmailEvent"
-    >
-      <button class="btn btn-primary btn-raised btn-lg">
-        <i class="far fa-envelope contact-button-icon"></i>
-        Send me an Email
-      </button>
-    </a>
+    <h2 class="featurette-heading contact-heading">Contact</h2>
   </div>
-  <div class="col-md-12 d-flex flex-column align-items-center">
-    <h2 class="featurette-heading contact-heading">Not Convinced?</h2>
-    <div
-      class="contact-not-convinced-button-container d-flex flex-wrap justify-content-around"
-    >
-      <a *ngFor="let link of routerLinks" [routerLink]="link.link">
-        <button class="btn btn-primary scroll-to-top-immediately btn-raised">
-          {{ link.title }}
+  <div
+    class="col-md-4 d-flex flex-column align-items-left justify-content-around contact-info-column order-md-1"
+  >
+    <span class="contact-row d-flex align-items-center">
+      <a
+        target="_top"
+        href="mailto:{{ personalDetails.email }}"
+        class="contact-link d-flex align-items-center"
+        ndsClickEvent
+        [event]="sendMeEmailEvent"
+      >
+        <i class="fas fa-envelope fa-lg contact-icon"></i>
+      </a>
+      <span class="contact-text">{{ personalDetails.email }}</span>
+    </span>
+    <span class="contact-row d-flex align-items-center">
+      <a
+        target="_top"
+        href="{{ personalDetails.phoneNumberTelLink }}"
+        class="contact-link d-flex align-items-center"
+        ndsClickEvent
+        [event]="callPhoneEvent"
+      >
+        <i class="fas fa-phone fa-lg contact-icon"></i>
+        <span class="contact-text">{{
+          personalDetails.phoneNumberDisplay
+        }}</span>
+      </a>
+    </span>
+    <span class="contact-row d-flex align-items-center">
+      <i class="fas fa-map-marker-alt fa-lg contact-icon"></i>
+      <span class="contact-text">{{ personalDetails.fullAddress }}</span>
+    </span>
+    <span class="contact-row d-flex align-items-center">
+      <a
+        href="{{ personalDetails.linkedInUrl }}"
+        class="contact-button-link"
+        ndsClickEvent
+        [event]="viewLinkedInEvent"
+      >
+        <button class="btn btn-primary btn-raised contact-btn">
+          <i class="fab fa-linkedin fa-lg"></i>
         </button>
       </a>
       <a
-        *ngFor="let link of normalLinks"
-        href="{{ link.link }}"
+        href="{{ personalDetails.githubUrl }}"
+        class="contact-button-link"
         ndsClickEvent
-        [event]="viewCVEvent"
+        [event]="viewGithubEvent"
       >
-        <button class="btn btn-primary btn-raised">{{ link.title }}</button>
+        <button class="btn btn-primary btn-raised contact-btn">
+          <i class="fab fa-github fa-lg"></i>
+        </button>
       </a>
+    </span>
+  </div>
+  <div class="col-md-8 d-flex flex-column align-items-center order-md-2">
+    <div class="card shadow-lg map-card">
+      <img
+        src="assets/images/contact-map.png"
+        alt="Contact Map"
+        class="contact-map"
+      />
     </div>
   </div>
+</div>
+<div class="row">
+  <div class="end-contact-spacer"></div>
 </div>
