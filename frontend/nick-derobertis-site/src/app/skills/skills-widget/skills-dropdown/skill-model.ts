@@ -4,6 +4,13 @@ export class SkillModel {
   title: string;
   level: number;
   directParentTitle?: string;
+  levelNames: { [level: number]: string } = {
+    1: 'Have Used',
+    2: 'Some Experience',
+    3: 'Moderate Experience',
+    4: 'Experienced',
+    5: 'Highly Experienced',
+  };
 
   constructor(args: APISkillModel) {
     this.title = args.title;
@@ -20,5 +27,9 @@ export class SkillModel {
       modelArr.push(mod);
     }
     return modelArr;
+  }
+
+  get levelName(): string {
+    return this.levelNames[this.level];
   }
 }

@@ -18,11 +18,13 @@ export class SkillChartModel {
   toChartArgs(): SunburstArgs {
     const labels: string[] = [];
     const parents: string[] = [];
+    const text: string[] = [];
     const values: number[] = [];
 
     for (const skill of this.skills) {
       labels.push(skill.title);
       values.push(skill.level);
+      text.push(skill.levelName);
       if (skill.directParentTitle) {
         parents.push(skill.directParentTitle);
       } else {
@@ -32,9 +34,12 @@ export class SkillChartModel {
     const data: SunburstData[] = [
       {
         type: 'sunburst',
+        hoverinfo: 'label+text',
+        textinfo: 'label',
         labels,
         parents,
         values,
+        text,
       },
     ];
     const args: SunburstArgs = {
