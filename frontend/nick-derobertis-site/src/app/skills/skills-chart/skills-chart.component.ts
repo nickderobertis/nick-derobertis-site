@@ -1,4 +1,4 @@
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -45,6 +45,15 @@ export class SkillsChartComponent implements OnInit {
     this.graph.layout.plot_bgcolor = bgColor;
   }
 
+  setHeight(): void {
+    this.graph.layout.height = this.chartHeight;
+  }
+
+  adjustChartOptions(): void {
+    this.setBackgroundColor();
+    this.setHeight();
+  }
+
   generateChart(): void {
     this.skillChart = Plotly.newPlot(
       this.skillChart.nativeElement,
@@ -72,7 +81,31 @@ export class SkillsChartComponent implements OnInit {
 
   setModelAndGenerateChart(skills: APISkillModel[]): void {
     this.setModel(skills);
-    this.setBackgroundColor();
+    this.adjustChartOptions();
     this.generateChart();
+  }
+
+  get screenWidth(): number {
+    if (isPlatformServer(this.platformId)) {
+      return 600;
+    }
+    return window.innerWidth;
+  }
+
+  get chartHeight(): number {
+    const screenWidth: number = this.screenWidth;
+    let height: number;
+    switch (true) {
+      case screenWidth < 768:
+        height = 0.75 * screenWidth;
+        break;
+      case screenWidth < 992:
+        height = 0.5 * screenWidth;
+        break;
+      default:
+        height = 700;
+        break;
+    }
+    return height;
   }
 }

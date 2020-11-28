@@ -43,6 +43,7 @@ export class SkillChartModel {
         paper_bgcolor: '#f1e9e9',
         plot_bgcolor: '#f1e9e9',
         margin: { l: 0, r: 0, t: 0, b: 0 },
+        height: 700,
       },
       options: {
         responsive: true,
