@@ -22,6 +22,12 @@ class APISkillModel(BaseModel):
             first_parent = cast(CVSkillModel, model.category)
             if first_parent == model:
                 params['direct_parent_title'] = None
+            elif first_parent.to_lower_case_str() == 'programming' and model.to_lower_case_str() == 'frameworks':
+                # TODO: come up with a better way of modifying skill parents
+                #
+                # Currently added an explicit condition to check for the frameworks skill and remove the parent,
+                # but should have a more general system for this
+                params['direct_parent_title'] = None
             else:
                 params['direct_parent_title'] = first_parent.to_title_case_str()
 
