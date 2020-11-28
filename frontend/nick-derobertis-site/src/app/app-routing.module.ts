@@ -12,8 +12,12 @@ const routes: Routes = [
     component: HomePageComponent,
   },
   {
-    path: 'story',
+    path: 'bio',
     component: StoryPageComponent,
+  },
+  {
+    path: 'story',
+    redirectTo: 'bio',
   },
   {
     path: 'research',

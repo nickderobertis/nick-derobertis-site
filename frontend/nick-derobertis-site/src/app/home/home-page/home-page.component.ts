@@ -11,7 +11,7 @@ export class HomePageComponent implements OnInit {
     new HomeCardModel({
       heading: 'Research',
       bodyText: `
-      I am a skilled empirical researcher working in the finance field.
+      I am an empirical researcher working in the finance field.
       My latest work focuses on central bank intervention in markets
       and cryptocurrency valuation.
       `,

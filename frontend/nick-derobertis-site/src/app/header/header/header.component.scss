@@ -6,3 +6,32 @@
 nav {
   padding: 0.25rem 0.5rem;
 }
+
+.navbar-nav {
+  padding-bottom: 0.2rem;
+}
+
+// Override breakpoint for header so it switches just as it has enough space
+@media (min-width: 829px) {
+  .header-navbar-expand {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+  }
+  .header-navbar-expand .navbar-nav {
+    flex-direction: row;
+  }
+  .header-navbar-expand .navbar-nav .nav-link {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+  }
+  .header-navbar-expand .navbar-collapse {
+    display: flex !important;
+  }
+  .header-navbar-expand .navbar-toggler {
+    display: none;
+  }
+  .navbar-nav {
+    padding-bottom: unset;
+  }
+}

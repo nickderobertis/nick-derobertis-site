@@ -8,6 +8,7 @@ import { IItem } from '../services/events/i-item';
 export class EventTypes {
   static viewGithub: IEvent = EventTypes.viewExternalSite('Github');
   static viewAPI: IEvent = EventTypes.viewExternalSite('API');
+  static viewLinkedIn: IEvent = EventTypes.viewExternalSite('LinkedIn');
   static viewCV: IEvent = {
     action: EventActions.ViewPDF,
     category: EventCategories.Navigation,
@@ -15,6 +16,16 @@ export class EventTypes {
   };
   static sendMeEmail: IEvent = {
     action: EventActions.SendEmail,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
+  static viewPhone: IEvent = {
+    action: EventActions.ViewPhone,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
+  static callPhone: IEvent = {
+    action: EventActions.callPhone,
     category: EventCategories.Navigation,
     label: EventLabels.HomePageButton,
   };
