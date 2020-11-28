@@ -15,7 +15,7 @@ import { LoggerService } from 'src/app/global/services/logger.service';
 import { SkillsService } from '../skills.service';
 import { SkillChartModel } from './skill-chart-model';
 import { SunburstArgs } from './sunburst-args';
-import { SunburstHoverEvent } from './sunburst-hover-event';
+import { SunburstEvent } from './sunburst-event';
 
 declare const Plotly: any;
 
@@ -70,13 +70,14 @@ export class SkillsChartComponent implements OnInit {
   }
 
   registerEventHandlers(): void {
-    this.skillChart.nativeElement.on(
-      'plotly_hover',
-      (data: SunburstHoverEvent) => {
-        const event: IEvent = EventTypes.hoverChartSkill(data.points[0].label);
-        this.eventService.event(event);
-      }
-    );
+    this.skillChart.nativeElement.on('plotly_hover', (data: SunburstEvent) => {
+      const event: IEvent = EventTypes.hoverChartSkill(data.points[0].label);
+      this.eventService.event(event);
+    });
+    this.skillChart.nativeElement.on('plotly_click', (data: SunburstEvent) => {
+      const event: IEvent = EventTypes.clickChartSkill(data.points[0].label);
+      this.eventService.event(event);
+    });
   }
 
   getSkills(): void {

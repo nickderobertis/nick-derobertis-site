@@ -94,4 +94,14 @@ export class EventTypes {
 
     return event;
   }
+
+  static clickChartSkill(title: string): IEvent {
+    const event: IEvent = {
+      action: EventActions.ClickSkillChart,
+      category: EventCategories.Interaction,
+      label: title,
+    };
+
+    return event;
+  }
 }
