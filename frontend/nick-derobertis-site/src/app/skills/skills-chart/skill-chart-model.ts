@@ -20,7 +20,7 @@ export class SkillChartModel {
     const parents: string[] = [];
     const values: number[] = [];
 
-    for (let skill of this.skills) {
+    for (const skill of this.skills) {
       labels.push(skill.title);
       values.push(skill.level);
       if (skill.directParentTitle) {

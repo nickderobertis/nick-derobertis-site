@@ -39,6 +39,14 @@ class APISkillStatisticsModel(BaseModel):
     parent_count: int
 
 
+def get_recursive_child_skills(mod: CVSkillModel) -> List[CVSkillModel]:
+    models: List[CVSkillModel] = []
+    models.extend(mod.children)
+    for child in mod.children:
+        models.extend(get_recursive_child_skills(child))
+    return models
+
+
 EXCLUDE_SKILLS = CV_EXCLUDE_SKILLS + ['soft skills']
 
 ALL_SKILL_CV_MODELS = get_skills(exclude_skills=EXCLUDE_SKILLS, exclude_skill_children=False)
@@ -59,8 +67,18 @@ PARENT_SKILL_CV_MODELS.sort(
     if skill.to_title_case_str() in CV_SKILL_SECTION_ORDER else 1000
 )
 
+PARENT_TO_CHILD_SKILL_CV_MODELS: List[CVSkillModel] = PARENT_SKILL_CV_MODELS.copy()
+for mod in PARENT_SKILL_CV_MODELS:
+    for child in get_recursive_child_skills(mod):
+        if child in PARENT_TO_CHILD_SKILL_CV_MODELS:
+            continue
+        if child.parents[0] not in PARENT_SKILL_CV_MODELS:
+            continue
+        PARENT_TO_CHILD_SKILL_CV_MODELS.append(child)
+
 ALL_SKILL_MODELS = APISkillModel.list_from_cv_skills(ALL_SKILL_CV_MODELS)
 PARENT_SKILL_MODELS = APISkillModel.list_from_cv_skills(PARENT_SKILL_CV_MODELS)
+PARENT_TO_CHILD_SKILL_MODELS = APISkillModel.list_from_cv_skills(PARENT_TO_CHILD_SKILL_CV_MODELS)
 SKILL_COUNT = len(ALL_SKILL_MODELS)
 PARENT_SKILL_COUNT = len(PARENT_SKILL_MODELS)
 
@@ -72,7 +90,7 @@ async def read_parent_skills():
 
 @router.get("/all", tags=["skills"], response_model=List[APISkillModel])
 async def read_all_skills():
-    return ALL_SKILL_MODELS
+    return PARENT_TO_CHILD_SKILL_MODELS
 
 
 @router.get("/children", tags=["skills"], response_model=List[APISkillModel])
