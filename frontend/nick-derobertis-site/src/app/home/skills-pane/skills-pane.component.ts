@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { EventTypes } from 'src/app/global/classes/event-types';
 import { APISkillStatisticsModel } from 'src/app/global/interfaces/generated/skills';
+import { EventService } from 'src/app/global/services/events/event.service';
 import { LoggerService } from 'src/app/global/services/logger.service';
 import { SkillsService } from 'src/app/skills/skills.service';
 import { SkillStatisticsModel } from './skill-statistics-model';
@@ -19,7 +21,8 @@ export class SkillsPaneComponent implements OnInit {
 
   constructor(
     private skillsService: SkillsService,
-    private log: LoggerService
+    private log: LoggerService,
+    private eventService: EventService
   ) {}
 
   ngOnInit(): void {
@@ -78,5 +81,13 @@ export class SkillsPaneComponent implements OnInit {
 
   changeActiveComponent(name: ValueOf<SkillsComponents>): void {
     this.selectedComponent = name;
+
+    if (this.selectedComponent === SkillsComponents.CHART) {
+      this.eventService.event(EventTypes.viewSkillsChart);
+    } else if (this.selectedComponent === SkillsComponents.DROPDOWNS) {
+      this.eventService.event(EventTypes.viewSkillsDropdowns);
+    } else {
+      throw new Error(`Unknown selected component ${this.selectedComponent}`);
+    }
   }
 }

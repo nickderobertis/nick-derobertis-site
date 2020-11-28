@@ -25,7 +25,17 @@ export class EventTypes {
     label: EventLabels.HomePageButton,
   };
   static callPhone: IEvent = {
-    action: EventActions.callPhone,
+    action: EventActions.CallPhone,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
+  static viewSkillsChart: IEvent = {
+    action: EventActions.ViewSkillChart,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
+  static viewSkillsDropdowns: IEvent = {
+    action: EventActions.ViewSkillDropdowns,
     category: EventCategories.Navigation,
     label: EventLabels.HomePageButton,
   };
