@@ -46,20 +46,40 @@
         </div>
         <span class="d-flex">
           <a
-          href="{{ personalDetails.linkedInUrl }}"
-          class="nav-icon"
-          ndsClickEvent
-          [event]="viewLinkedInEvent"
+            id="header-email-button"
+            href="javascript:void(0);"
+            class="nav-icon"
+            ndsClickEvent
+            [event]="viewEmailEvent"
+            data-toggle="tooltip"
+            data-html="true"
+            data-placement="bottom"
+            data-trigger="click"
+            title="{{ emailToolTipHTML }}"
           >
-            <i class="fab fa-linkedin fa-lg"></i>
+            <i class="fas fa-envelope fa-lg"></i>
           </a>
           <a
-            href="mailto:{{ personalDetails.email }}"
+            id="header-phone-button"
+            href="javascript:void(0);"
+            class="nav-icon"
+            ndsClickEvent
+            [event]="viewPhoneEvent"
+            data-toggle="tooltip"
+            data-html="true"
+            data-placement="bottom"
+            data-trigger="click"
+            title="{{ phoneToolTipHTML }}"
+          >
+            <i class="fas fa-phone fa-lg"></i>
+          </a>
+          <a
+            href="{{ personalDetails.linkedInUrl }}"
             class="nav-icon"
             ndsClickEvent
             [event]="viewLinkedInEvent"
           >
-            <i class="fas fa-envelope fa-lg"></i>
+            <i class="fab fa-linkedin fa-lg"></i>
           </a>
           <a
             href="{{ personalDetails.githubUrl }}"

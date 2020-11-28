@@ -19,6 +19,16 @@ export class EventTypes {
     category: EventCategories.Navigation,
     label: EventLabels.HomePageButton,
   };
+  static viewPhone: IEvent = {
+    action: EventActions.ViewPhone,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
+  static callPhone: IEvent = {
+    action: EventActions.callPhone,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
   static filterTimelineEmployment: IEvent = EventTypes.filterTimeline(
     TimelineFilterTypes.EMPLOYMENT
   );

@@ -1,4 +1,10 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { EventTypes } from 'src/app/global/classes/event-types';
 import { personalDetails } from 'src/app/global/classes/personal-details';
 import { FilePaths } from 'src/app/global/enums/file-paths.enum';
@@ -46,23 +52,86 @@ export class HeaderComponent implements OnInit {
   viewGithubEvent: IEvent = EventTypes.viewGithub;
   viewLinkedInEvent: IEvent = EventTypes.viewLinkedIn;
   viewEmailEvent: IEvent = EventTypes.sendMeEmail;
+  viewPhoneEvent: IEvent = EventTypes.viewPhone;
   personalDetails = personalDetails;
   dropdownOpen: boolean = false;
+  emailTooltip: HTMLSpanElement;
 
   constructor(private el: ElementRef) {}
 
   ngOnInit(): void {}
 
-  @HostListener('document:click', ['$event'])
-  outsideClick(event: MouseEvent): void {
-    if (this.el.nativeElement.contains(event.target)) {
-      return;
-    }
+  @HostListener('document:click', ['$event.target'])
+  outsideClick(element: HTMLElement): void {
     // Close dropdown when clicking outside header
-    this.closeDropdown();
+    if (!this.el.nativeElement.contains(element)) {
+      this.closeDropdown();
+    }
+
+    // Close tooltips when clicking outside their buttons
+    if (element.classList.contains('fa-envelope')) {
+      this.closePhoneTooltip();
+    }
+
+    if (element.classList.contains('fa-phone')) {
+      this.closeEmailTooltip();
+    }
+
+    if (
+      !Boolean(element.closest('.tooltip-inner')) &&
+      !element.classList.contains('fa-envelope') &&
+      !element.classList.contains('fa-phone')
+    ) {
+      this.closeTooltips();
+    }
   }
 
   closeDropdown(): void {
     $('.navbar-collapse').collapse('hide');
+  }
+
+  closeTooltips(): void {
+    this.closeEmailTooltip();
+    this.closePhoneTooltip();
+  }
+
+  closeEmailTooltip(): void {
+    $('#header-email-button').tooltip('hide');
+  }
+
+  closePhoneTooltip(): void {
+    $('#header-phone-button').tooltip('hide');
+  }
+
+  get emailToolTipHTML(): string {
+    return `
+    <span class="header-email-tooltip">
+      <a
+        href="mailto:${this.personalDetails.email}"
+      >
+        <i class="fas fa-envelope fa-lg"></i>
+      </a>
+      <span class="p-1"></span>
+      <span>
+        ${this.personalDetails.email}
+      </span>
+    </span>
+    `;
+  }
+
+  get phoneToolTipHTML(): string {
+    return `
+    <span class="header-phone-tooltip">
+      <a
+        href="${this.personalDetails.phoneNumberTelLink}"
+      >
+        <i class="fas fa-phone fa-lg"></i>
+        <span class="p-1"></span>
+        <span class="text-white">
+          ${this.personalDetails.phoneNumberDisplay}
+        </span>
+      </a>
+    </span>
+    `;
   }
 }
