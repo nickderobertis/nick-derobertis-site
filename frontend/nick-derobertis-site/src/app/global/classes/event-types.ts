@@ -84,4 +84,14 @@ export class EventTypes {
 
     return event;
   }
+
+  static hoverChartSkill(title: string): IEvent {
+    const event: IEvent = {
+      action: EventActions.HoverSkillChart,
+      category: EventCategories.Interaction,
+      label: title,
+    };
+
+    return event;
+  }
 }

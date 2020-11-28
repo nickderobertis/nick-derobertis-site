@@ -7,11 +7,15 @@ import {
   PLATFORM_ID,
   ViewChild,
 } from '@angular/core';
+import { EventTypes } from 'src/app/global/classes/event-types';
 import { APISkillModel } from 'src/app/global/interfaces/generated/skills';
+import { EventService } from 'src/app/global/services/events/event.service';
+import { IEvent } from 'src/app/global/services/events/i-event';
 import { LoggerService } from 'src/app/global/services/logger.service';
 import { SkillsService } from '../skills.service';
 import { SkillChartModel } from './skill-chart-model';
 import { SunburstArgs } from './sunburst-args';
+import { SunburstHoverEvent } from './sunburst-hover-event';
 
 declare const Plotly: any;
 
@@ -28,7 +32,8 @@ export class SkillsChartComponent implements OnInit {
   constructor(
     @Inject(PLATFORM_ID) private readonly platformId: object,
     private skillsService: SkillsService,
-    private log: LoggerService
+    private log: LoggerService,
+    private eventService: EventService
   ) {}
 
   ngOnInit(): void {
@@ -55,11 +60,22 @@ export class SkillsChartComponent implements OnInit {
   }
 
   generateChart(): void {
-    this.skillChart = Plotly.newPlot(
+    Plotly.newPlot(
       this.skillChart.nativeElement,
       this.graph.data,
       this.graph.layout,
       this.graph.options
+    );
+    this.registerEventHandlers();
+  }
+
+  registerEventHandlers(): void {
+    this.skillChart.nativeElement.on(
+      'plotly_hover',
+      (data: SunburstHoverEvent) => {
+        const event: IEvent = EventTypes.hoverChartSkill(data.points[0].label);
+        this.eventService.event(event);
+      }
     );
   }
 

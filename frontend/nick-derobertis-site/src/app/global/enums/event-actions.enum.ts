@@ -5,6 +5,7 @@ export enum EventActions {
   ViewPhone = 'View Phone Number',
   ViewSkillChart = 'View Skill Chart',
   ViewSkillDropdowns = 'View Skill Dropdowns',
+  HoverSkillChart = 'Hover Skill Chart',
   FilterTimeline = 'Filter Timeline',
   SendEmail = 'Send me an Email',
   CallPhone = 'Call Phone Number',
