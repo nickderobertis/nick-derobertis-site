@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { EventTypes } from 'src/app/global/classes/event-types';
 import { APISkillStatisticsModel } from 'src/app/global/interfaces/generated/skills';
+import { EventService } from 'src/app/global/services/events/event.service';
 import { LoggerService } from 'src/app/global/services/logger.service';
 import { SkillsService } from 'src/app/skills/skills.service';
 import { SkillStatisticsModel } from './skill-statistics-model';
+import { SkillsComponents } from './skills-components.enum';
+
+type ValueOf<T> = T[keyof T];
 
 @Component({
   selector: 'nds-skills-pane',
@@ -12,10 +17,12 @@ import { SkillStatisticsModel } from './skill-statistics-model';
 export class SkillsPaneComponent implements OnInit {
   model: SkillStatisticsModel;
   loading: boolean = true;
+  selectedComponent: ValueOf<SkillsComponents> = 'chart';
 
   constructor(
     private skillsService: SkillsService,
-    private log: LoggerService
+    private log: LoggerService,
+    private eventService: EventService
   ) {}
 
   ngOnInit(): void {
@@ -28,5 +35,59 @@ export class SkillsPaneComponent implements OnInit {
         this.log.exception(error, 'Error getting skill statistics');
       }
     );
+  }
+
+  get shouldShowChart(): boolean {
+    return this.selectedComponent === SkillsComponents.CHART;
+  }
+
+  get chartStyles(): { [key: string]: string } {
+    if (this.shouldShowChart) {
+      return {};
+    } else {
+      return { display: 'none' };
+    }
+  }
+
+  get shouldShowDropdowns(): boolean {
+    return this.selectedComponent === SkillsComponents.DROPDOWNS;
+  }
+
+  get dropdownStyles(): { [key: string]: string } {
+    if (this.shouldShowDropdowns) {
+      return {};
+    } else {
+      return { display: 'none' };
+    }
+  }
+
+  get description(): string {
+    const browse: string = `Browse ${this.model?.count} skills in ${this.model?.parentCount} categories. `;
+    let use: string;
+    let switching: string;
+    if (this.shouldShowChart) {
+      use = 'Click inner categories in the chart to zoom in and out, ';
+      switching = 'or click the button below to switch to a dropdown view';
+    } else if (this.shouldShowDropdowns) {
+      use = 'Click the dropdowns to see nested skills, ';
+      switching =
+        'or click the button below to switch to a sunburst chart view';
+    } else {
+      throw new Error(`Unknown selected component ${this.selectedComponent}`);
+    }
+
+    return browse + use + switching + '.';
+  }
+
+  changeActiveComponent(name: ValueOf<SkillsComponents>): void {
+    this.selectedComponent = name;
+
+    if (this.selectedComponent === SkillsComponents.CHART) {
+      this.eventService.event(EventTypes.viewSkillsChart);
+    } else if (this.selectedComponent === SkillsComponents.DROPDOWNS) {
+      this.eventService.event(EventTypes.viewSkillsDropdowns);
+    } else {
+      throw new Error(`Unknown selected component ${this.selectedComponent}`);
+    }
   }
 }

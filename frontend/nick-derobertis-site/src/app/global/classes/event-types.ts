@@ -25,7 +25,17 @@ export class EventTypes {
     label: EventLabels.HomePageButton,
   };
   static callPhone: IEvent = {
-    action: EventActions.callPhone,
+    action: EventActions.CallPhone,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
+  static viewSkillsChart: IEvent = {
+    action: EventActions.ViewSkillChart,
+    category: EventCategories.Navigation,
+    label: EventLabels.HomePageButton,
+  };
+  static viewSkillsDropdowns: IEvent = {
+    action: EventActions.ViewSkillDropdowns,
     category: EventCategories.Navigation,
     label: EventLabels.HomePageButton,
   };
@@ -70,6 +80,26 @@ export class EventTypes {
       action: EventActions.FilterTimeline,
       category: EventCategories.Interaction,
       label: filterType,
+    };
+
+    return event;
+  }
+
+  static hoverChartSkill(title: string): IEvent {
+    const event: IEvent = {
+      action: EventActions.HoverSkillChart,
+      category: EventCategories.Interaction,
+      label: title,
+    };
+
+    return event;
+  }
+
+  static clickChartSkill(title: string): IEvent {
+    const event: IEvent = {
+      action: EventActions.ClickSkillChart,
+      category: EventCategories.Interaction,
+      label: title,
     };
 
     return event;

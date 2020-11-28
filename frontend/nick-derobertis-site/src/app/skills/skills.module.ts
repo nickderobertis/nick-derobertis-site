@@ -5,11 +5,16 @@ import { SkillsDropdownComponent } from './skills-widget/skills-dropdown/skills-
 import { SkillsService } from './skills.service';
 import { GlobalModule } from '../global/global.module';
 import { LoggerService } from '../global/services/logger.service';
+import { SkillsChartComponent } from './skills-chart/skills-chart.component';
 
 @NgModule({
-  declarations: [SkillsWidgetComponent, SkillsDropdownComponent],
+  declarations: [
+    SkillsWidgetComponent,
+    SkillsDropdownComponent,
+    SkillsChartComponent,
+  ],
   imports: [CommonModule, GlobalModule],
   providers: [SkillsService, LoggerService],
-  exports: [SkillsWidgetComponent],
+  exports: [SkillsWidgetComponent, SkillsChartComponent],
 })
 export class SkillsModule {}

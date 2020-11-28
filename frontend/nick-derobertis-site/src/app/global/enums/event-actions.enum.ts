@@ -3,7 +3,11 @@ export enum EventActions {
   ViewExternalSite = 'View External Site',
   ViewTimeline = 'View Timeline Detail',
   ViewPhone = 'View Phone Number',
+  ViewSkillChart = 'View Skill Chart',
+  ViewSkillDropdowns = 'View Skill Dropdowns',
+  HoverSkillChart = 'Hover Skill Chart',
+  ClickSkillChart = 'Click Skill Chart',
   FilterTimeline = 'Filter Timeline',
   SendEmail = 'Send me an Email',
-  callPhone = 'Call Phone Number',
+  CallPhone = 'Call Phone Number',
 }

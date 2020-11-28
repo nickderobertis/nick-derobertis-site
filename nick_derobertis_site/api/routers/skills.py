@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import List, Sequence, Optional, cast
 
 from derobertis_cv.models.skill import SkillModel as CVSkillModel
 from derobertis_cv.pldata.skills import get_skills, CV_EXCLUDE_SKILLS, CV_SKILL_SECTION_ORDER
@@ -11,10 +11,25 @@ router = APIRouter()
 class APISkillModel(BaseModel):
     title: str
     level: int
+    direct_parent_title: Optional[str]
 
     @classmethod
     def from_cv_skill_model(cls, model: CVSkillModel):
-        params = dict(title=model.to_title_case_str(), level=model.level,)
+        params = dict(title=model.to_title_case_str(), level=model.level)
+        if not model.parents:
+            params['direct_parent_title'] = None
+        else:
+            first_parent = cast(CVSkillModel, model.category)
+            if first_parent == model:
+                params['direct_parent_title'] = None
+            elif first_parent.to_lower_case_str() == 'programming' and model.to_lower_case_str() == 'frameworks':
+                # TODO: come up with a better way of modifying skill parents
+                #
+                # Currently added an explicit condition to check for the frameworks skill and remove the parent,
+                # but should have a more general system for this
+                params['direct_parent_title'] = None
+            else:
+                params['direct_parent_title'] = first_parent.to_title_case_str()
 
         return cls(**params)
 
@@ -31,6 +46,14 @@ class APISkillModel(BaseModel):
 class APISkillStatisticsModel(BaseModel):
     count: int
     parent_count: int
+
+
+def get_recursive_child_skills(mod: CVSkillModel) -> List[CVSkillModel]:
+    models: List[CVSkillModel] = []
+    models.extend(mod.children)
+    for child in mod.children:
+        models.extend(get_recursive_child_skills(child))
+    return models
 
 
 EXCLUDE_SKILLS = CV_EXCLUDE_SKILLS + ['soft skills']
@@ -53,8 +76,18 @@ PARENT_SKILL_CV_MODELS.sort(
     if skill.to_title_case_str() in CV_SKILL_SECTION_ORDER else 1000
 )
 
+PARENT_TO_CHILD_SKILL_CV_MODELS: List[CVSkillModel] = PARENT_SKILL_CV_MODELS.copy()
+for mod in PARENT_SKILL_CV_MODELS:
+    for child in get_recursive_child_skills(mod):
+        if child in PARENT_TO_CHILD_SKILL_CV_MODELS:
+            continue
+        if child.category not in PARENT_SKILL_CV_MODELS:
+            continue
+        PARENT_TO_CHILD_SKILL_CV_MODELS.append(child)
+
 ALL_SKILL_MODELS = APISkillModel.list_from_cv_skills(ALL_SKILL_CV_MODELS)
 PARENT_SKILL_MODELS = APISkillModel.list_from_cv_skills(PARENT_SKILL_CV_MODELS)
+PARENT_TO_CHILD_SKILL_MODELS = APISkillModel.list_from_cv_skills(PARENT_TO_CHILD_SKILL_CV_MODELS)
 SKILL_COUNT = len(ALL_SKILL_MODELS)
 PARENT_SKILL_COUNT = len(PARENT_SKILL_MODELS)
 
@@ -66,7 +99,7 @@ async def read_parent_skills():
 
 @router.get("/all", tags=["skills"], response_model=List[APISkillModel])
 async def read_all_skills():
-    return ALL_SKILL_MODELS
+    return PARENT_TO_CHILD_SKILL_MODELS
 
 
 @router.get("/children", tags=["skills"], response_model=List[APISkillModel])
