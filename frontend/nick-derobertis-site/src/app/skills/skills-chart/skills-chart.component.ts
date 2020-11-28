@@ -47,7 +47,10 @@ export class SkillsChartComponent implements OnInit {
         values: [10, 14, 12, 10, 2, 6, 6, 4, 4],
       },
     ],
-    layout: {},
+    layout: {
+      paper_bgcolor: '#f1e9e9',
+      plot_bgcolor: '#f1e9e9',
+    },
     options: {
       responsive: true,
     },
@@ -57,8 +60,17 @@ export class SkillsChartComponent implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      this.setBackgroundColor();
       this.generateChart();
     }
+  }
+
+  setBackgroundColor(): void {
+    const bgColor: string = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue('--background');
+    this.graph.layout.paper_bgcolor = bgColor;
+    this.graph.layout.plot_bgcolor = bgColor;
   }
 
   generateChart(): void {

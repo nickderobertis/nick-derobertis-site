@@ -3,4 +3,6 @@ export interface SunburstLayout {
   width?: number;
   height?: number;
   title?: string;
+  paper_bgcolor?: string;
+  plot_bgcolor?: string;
 }
