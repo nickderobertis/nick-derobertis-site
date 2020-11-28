@@ -47,9 +47,9 @@ export class SkillsChartComponent implements OnInit {
         values: [10, 14, 12, 10, 2, 6, 6, 4, 4],
       },
     ],
-    layout: {
-      width: 500,
-      height: 500,
+    layout: {},
+    options: {
+      responsive: true,
     },
   };
 
@@ -65,7 +65,8 @@ export class SkillsChartComponent implements OnInit {
     this.skillChart = Plotly.newPlot(
       this.skillChart.nativeElement,
       this.graph.data,
-      this.graph.layout
+      this.graph.layout,
+      this.graph.options
     );
   }
 }
