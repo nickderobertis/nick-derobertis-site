@@ -1,4 +1,4 @@
-from typing import List, Sequence
+from typing import List, Sequence, Optional, cast
 
 from derobertis_cv.models.skill import SkillModel as CVSkillModel
 from derobertis_cv.pldata.skills import get_skills, CV_EXCLUDE_SKILLS, CV_SKILL_SECTION_ORDER
@@ -11,10 +11,16 @@ router = APIRouter()
 class APISkillModel(BaseModel):
     title: str
     level: int
+    direct_parent_title: Optional[str]
 
     @classmethod
     def from_cv_skill_model(cls, model: CVSkillModel):
-        params = dict(title=model.to_title_case_str(), level=model.level,)
+        params = dict(title=model.to_title_case_str(), level=model.level)
+        if not model.parents:
+            params['direct_parent_title'] = None
+        else:
+            first_parent = cast(CVSkillModel, model.parents[0])
+            params['direct_parent_title'] = first_parent.to_title_case_str()
 
         return cls(**params)
 

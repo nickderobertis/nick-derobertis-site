@@ -7,6 +7,10 @@ import {
   PLATFORM_ID,
   ViewChild,
 } from '@angular/core';
+import { APISkillModel } from 'src/app/global/interfaces/generated/skills';
+import { LoggerService } from 'src/app/global/services/logger.service';
+import { SkillsService } from '../skills.service';
+import { SkillChartModel } from './skill-chart-model';
 import { SunburstArgs } from './sunburst-args';
 
 declare const Plotly: any;
@@ -18,50 +22,18 @@ declare const Plotly: any;
 })
 export class SkillsChartComponent implements OnInit {
   @ViewChild('skillChart', { static: true }) skillChart: ElementRef;
-  graph: SunburstArgs = {
-    data: [
-      {
-        type: 'sunburst',
-        labels: [
-          'Eve',
-          'Cain',
-          'Seth',
-          'Enos',
-          'Noam',
-          'Abel',
-          'Awan',
-          'Enoch',
-          'Azura',
-        ],
-        parents: [
-          '',
-          'Eve',
-          'Eve',
-          'Seth',
-          'Seth',
-          'Eve',
-          'Eve',
-          'Awan',
-          'Eve',
-        ],
-        values: [10, 14, 12, 10, 2, 6, 6, 4, 4],
-      },
-    ],
-    layout: {
-      paper_bgcolor: '#f1e9e9',
-      plot_bgcolor: '#f1e9e9',
-    },
-    options: {
-      responsive: true,
-    },
-  };
+  model: SkillChartModel;
+  graph: SunburstArgs;
 
-  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {}
+  constructor(
+    @Inject(PLATFORM_ID) private readonly platformId: object,
+    private skillsService: SkillsService,
+    private log: LoggerService
+  ) {}
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
-      this.setBackgroundColor();
-      this.generateChart();
+      this.getSkills();
     }
   }
 
@@ -80,5 +52,27 @@ export class SkillsChartComponent implements OnInit {
       this.graph.layout,
       this.graph.options
     );
+  }
+
+  getSkills(): void {
+    this.skillsService.getAllSkills().subscribe(
+      (res: APISkillModel[]) => {
+        this.setModelAndGenerateChart(res);
+      },
+      (error: Error) => {
+        this.log.exception(error, 'Error getting all skills');
+      }
+    );
+  }
+
+  setModel(skills: APISkillModel[]): void {
+    this.model = SkillChartModel.fromAPIArray(skills);
+    this.graph = this.model.toChartArgs();
+  }
+
+  setModelAndGenerateChart(skills: APISkillModel[]): void {
+    this.setModel(skills);
+    this.setBackgroundColor();
+    this.generateChart();
   }
 }
