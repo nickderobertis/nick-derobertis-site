@@ -8,23 +8,28 @@
       Browse {{ model?.count }} skills in {{ model?.parentCount }} categories.
       Click the dropdowns to see nested skills.
     </p>
+    <div class="skill-pane-options-wrapper d-flex justify-content-center">
+      <div
+        class="skill-pane-options card shadow d-flex flex-column justify-content-around"
+      >
+        <p class="lead">Skills Options</p>
+        <button
+          class="btn btn-primary btn-raised skill-pane-button"
+          (click)="changeActiveComponent('chart')"
+        >
+          View Chart
+        </button>
+        <button
+          class="btn btn-primary btn-raised skill-pane-button"
+          (click)="changeActiveComponent('dropdowns')"
+        >
+          View Dropdowns
+        </button>
+      </div>
+    </div>
   </div>
   <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
   <div class="col-md-9">
-    <div class="skill-pane-button-row">
-      <button
-        class="btn btn-primary skill-pane-button"
-        (click)="changeActiveComponent('chart')"
-      >
-        Chart
-      </button>
-      <button
-        class="btn btn-primary skill-pane-button"
-        (click)="changeActiveComponent('dropdowns')"
-      >
-        Dropdowns
-      </button>
-    </div>
     <nds-skills-chart [ngStyle]="chartStyles"></nds-skills-chart>
     <nds-skills-widget [ngStyle]="dropdownStyles"></nds-skills-widget>
   </div>

@@ -710,7 +710,16 @@ $skill-name-fg: var(--tertiary-offset);
 $skill-bar-border-radius: 20px;
 
 .skills-pane-description {
-  @include add-bottom-spacer-md-down;
+  margin-bottom: 50px;
+  @include media-breakpoint-up(md) {
+    margin-bottom: 25px;
+  }
+}
+
+.skill-pane-options.skill-pane-options.skill-pane-options {
+  @include media-breakpoint-up(md) {
+    width: 100%;
+  }
 }
 
 .skills-widget-wrapper {
