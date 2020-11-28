@@ -11,7 +11,21 @@
   </div>
   <nds-loading-spinner *ngIf="loading"></nds-loading-spinner>
   <div class="col-md-9">
-    <nds-skills-chart></nds-skills-chart>
-    <!-- <nds-skills-widget></nds-skills-widget> -->
+    <div class="skill-pane-button-row">
+      <button
+        class="btn btn-primary skill-pane-button"
+        (click)="changeActiveComponent('chart')"
+      >
+        Chart
+      </button>
+      <button
+        class="btn btn-primary skill-pane-button"
+        (click)="changeActiveComponent('dropdowns')"
+      >
+        Dropdowns
+      </button>
+    </div>
+    <nds-skills-chart [ngStyle]="chartStyles"></nds-skills-chart>
+    <nds-skills-widget [ngStyle]="dropdownStyles"></nds-skills-widget>
   </div>
 </div>
