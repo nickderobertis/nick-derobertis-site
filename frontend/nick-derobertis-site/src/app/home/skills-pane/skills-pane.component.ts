@@ -58,6 +58,24 @@ export class SkillsPaneComponent implements OnInit {
     }
   }
 
+  get description(): string {
+    const browse: string = `Browse ${this.model?.count} skills in ${this.model?.parentCount} categories. `;
+    let use: string;
+    let switching: string;
+    if (this.shouldShowChart) {
+      use = 'Click inner categories in the chart to zoom in and out, ';
+      switching = 'or click the button below to switch to a dropdown view';
+    } else if (this.shouldShowDropdowns) {
+      use = 'Click the dropdowns to see nested skills, ';
+      switching =
+        'or click the button below to switch to a sunburst chart view';
+    } else {
+      throw new Error(`Unknown selected component ${this.selectedComponent}`);
+    }
+
+    return browse + use + switching + '.';
+  }
+
   changeActiveComponent(name: ValueOf<SkillsComponents>): void {
     this.selectedComponent = name;
   }
