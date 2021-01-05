@@ -1,9 +1,11 @@
-from typing import List, Sequence, Optional, cast
+import datetime
+from typing import List, Sequence, Optional, cast, Dict, Union
 
 from derobertis_cv.models.skill import SkillModel as CVSkillModel
+from derobertis_cv.pldata.cover_letters.models import SpecificApplicationFocus, ApplicationFocus
 from derobertis_cv.pldata.skills import get_skills, CV_EXCLUDE_SKILLS, CV_SKILL_SECTION_ORDER
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 router = APIRouter()
 
@@ -12,10 +14,25 @@ class APISkillModel(BaseModel):
     title: str
     level: int
     direct_parent_title: Optional[str]
+    hours: Optional[float] = None
+    first_used: Optional[datetime.datetime] = None
+    priorities: Dict[Union[SpecificApplicationFocus, ApplicationFocus], int] = Field(default_factory=lambda: {})
+
+    # TODO: maybe need a PR into pydantic2ts as it does not support enums as dictionary keys
+    #
+    # It currently casts them to strings and does not bring the enums through as ts types.
+    # It should bring over the enum as a ts type and then have [k in EnumName] as the key
+    # type, e.g. priorities?: {
+    #     [k in ApplicationFocus]: number;
+    #   }
+    #
+    # The current code is a hack to get the enums coming through
+    unused_for_pydantic2ts: Optional[Union[SpecificApplicationFocus, ApplicationFocus]] = None
 
     @classmethod
     def from_cv_skill_model(cls, model: CVSkillModel):
-        params = dict(title=model.to_title_case_str(), level=model.level)
+        params = dict(title=model.to_title_case_str(), level=model.level, priorities=model.priority.levels)
+
         if not model.parents:
             params['direct_parent_title'] = None
         else:
@@ -30,6 +47,10 @@ class APISkillModel(BaseModel):
                 params['direct_parent_title'] = None
             else:
                 params['direct_parent_title'] = first_parent.to_title_case_str()
+
+        if model.experience is not None:
+            params['hours'] = model.experience.hours
+            params['first_used'] = model.experience.begin_date
 
         return cls(**params)
 
