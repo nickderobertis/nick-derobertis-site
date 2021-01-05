@@ -68,13 +68,25 @@ export class SkillModel {
     return includedInfo;
   }
 
-  get infoStr(): string {
+  get chartInfoStr(): string {
     let info = '';
     for (const infoItem of this.info) {
       info += infoItem;
       info += '<br>';
     }
     info = info.slice(0, -4); // remove final line break
+    return info;
+  }
+
+  get dropdownInfoStr(): string {
+    let info = '';
+    const infoArr: string[] = this.info;
+    infoArr.shift(); // remove self-assessed skill level as is already in bar length
+    for (const infoItem of infoArr) {
+      info += infoItem;
+      info += ', ';
+    }
+    info = info.slice(0, -2); // remove final comma
     return info;
   }
 }

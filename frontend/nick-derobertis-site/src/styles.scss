@@ -732,9 +732,8 @@ $skill-bar-border-radius: 20px;
   display: flex;
   align-items: center;
   background-color: $skill-name-bg;
-  padding: 5px;
+  padding: 10px 5px 0px 5px;
   width: 100%;
-  height: 3em;
 }
 
 .skill-dropdown-menu.skill-dropdown-menu {
@@ -814,6 +813,17 @@ $skill-bar-border-radius: 20px;
 
 .skill-dropdown-arrow-spacer {
   width: 14px;
+}
+
+.skill-dropdown-extra-info-text {
+  font-size: x-small;
+  color: $skill-name-fg;
+}
+
+.skill-dropdown-extra-info-row {
+  margin-left: 5px;
+  margin-top: 1px;
+  min-height: 0.7rem;
 }
 
 $award-laurel-size: 200px;

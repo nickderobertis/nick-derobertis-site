@@ -34,6 +34,12 @@
         <div class="skill-dropdown-arrow-spacer"></div>
       </ng-template>
     </div>
+    <div class="skill-dropdown-extra-info-row">
+      <span class="skill-dropdown-extra-info-text">{{
+        model.skill.dropdownInfoStr
+      }}</span>
+      <div class="skill-dropdown-arrow-spacer"></div>
+    </div>
   </a>
   <ng-container *ngIf="model.hasChildren">
     <ul class="dropdown-menu skill-dropdown-menu shadow-lg">
