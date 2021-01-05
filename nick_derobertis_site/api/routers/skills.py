@@ -32,7 +32,10 @@ class APISkillModel(BaseModel):
 
     @classmethod
     def from_cv_skill_model(cls, model: CVSkillModel):
-        params = dict(title=model.to_title_case_str(), level=model.level, priorities=model.priority.levels)
+        params = dict(title=model.to_title_case_str(), level=model.level)
+
+        # Uncomment to send priorities once they are to be used on the frontend. Disabled to reduce response size
+        # params['priorities'] = model.priority.levels
 
         if not model.parents:
             params['direct_parent_title'] = None
