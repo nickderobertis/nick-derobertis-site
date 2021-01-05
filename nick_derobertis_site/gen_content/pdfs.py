@@ -4,6 +4,7 @@ import shutil
 
 from plbuilder.cli import build_by_file_path
 import derobertis_cv
+import derobertis_cv.pldata.cv as cv
 
 SOURCES_ROOT = pathlib.Path(derobertis_cv.__file__).parent / 'plbuild' / 'sources' / 'document'
 DOCUMENTS_OUT_PATH = pathlib.Path('Documents')
@@ -16,11 +17,12 @@ def build_pdfs():
 
 
 def _build_pdfs():
-    for file in next(os.walk(SOURCES_ROOT))[2]:
-        if file in ('__init__.py', 'professional_cv.py'):
-            continue
-        file_path = (SOURCES_ROOT / file).resolve()
-        build_by_file_path(file_path)
+    file_path = (SOURCES_ROOT / 'fin_model_syllabus.py').resolve()
+    build_by_file_path(file_path)
+
+    hybrid_model = cv.CV_MODELS[cv.CVTypes.HYBRID]
+    build_cv_models = (hybrid_model,)
+    cv.build_cvs(build_cv_models, DOCUMENTS_OUT_PATH)
 
 
 def _move_pdfs():
