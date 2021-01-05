@@ -3,7 +3,7 @@ export class PersonalDetails {
   firstName: string = 'Nick';
   lastName: string = 'DeRobertis';
   githubUsername: string = 'nickderobertis';
-  linkedInUrl: string = 'https://www.linkedin.com/in/nick-derobertis-14062217/';
+  linkedInUrl: string = 'https://www.linkedin.com/in/nick-derobertis/';
   phoneNumber: number = 7038284709;
   countryCode: number = 1;
   addressLine1: string = 'Stuzin Hall';
