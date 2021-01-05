@@ -16,6 +16,7 @@ class APISkillModel(BaseModel):
     direct_parent_title: Optional[str]
     hours: Optional[float] = None
     first_used: Optional[datetime.datetime] = None
+    experience_length_str: Optional[str] = None
     priorities: Dict[Union[SpecificApplicationFocus, ApplicationFocus], int] = Field(default_factory=lambda: {})
 
     # TODO: maybe need a PR into pydantic2ts as it does not support enums as dictionary keys
@@ -51,6 +52,7 @@ class APISkillModel(BaseModel):
         if model.experience is not None:
             params['hours'] = model.experience.hours
             params['first_used'] = model.experience.begin_date
+            params['experience_length_str'] = model.experience.experience_length_str
 
         return cls(**params)
 
