@@ -24,7 +24,7 @@ export class SkillChartModel {
     for (const skill of this.skills) {
       labels.push(skill.title);
       values.push(skill.level);
-      text.push(skill.levelName);
+      text.push(skill.infoStr);
       if (skill.directParentTitle) {
         parents.push(skill.directParentTitle);
       } else {
