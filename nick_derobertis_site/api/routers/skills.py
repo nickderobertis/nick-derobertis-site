@@ -15,7 +15,7 @@ class APISkillModel(BaseModel):
     level: int
     direct_parent_title: Optional[str]
     hours: Optional[float] = None
-    first_used: Optional[datetime.datetime] = None
+    first_used: Optional[datetime.date] = None
     experience_length_str: Optional[str] = None
     priorities: Dict[Union[SpecificApplicationFocus, ApplicationFocus], int] = Field(default_factory=lambda: {})
 

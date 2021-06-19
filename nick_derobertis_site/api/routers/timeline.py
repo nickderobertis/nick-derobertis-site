@@ -83,6 +83,7 @@ class APITimelineModel(BaseModel):
                     f"must pass models of type EducationModel or EmploymentModel, "
                     f"got {mod} of type {type(mod)}"
                 )
+        api_models.sort(key=lambda mod: mod.begin_date, reverse=True)
 
         return api_models
 
@@ -139,6 +140,7 @@ ACADEMIC_TIMELINE_MODELS: List[APITimelineModel] = APITimelineModel.list_from_cv
 ALL_TIMELINE_MODELS = (
     EDUCATION_TIMELINE_MODELS + PROFESSIONAL_TIMELINE_MODELS + ACADEMIC_TIMELINE_MODELS
 )
+ALL_TIMELINE_MODELS.sort(key=lambda mod: mod.begin_date, reverse=True)
 ALL_RESPONSE_MODEL = APITimelineResponseModel(items=ALL_TIMELINE_MODELS)
 STATS = APITimelineStatisticsResponseModel(
     education=APITimelineStatisticsModel.from_api_timeline_models(

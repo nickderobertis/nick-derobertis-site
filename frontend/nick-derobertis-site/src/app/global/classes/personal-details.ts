@@ -1,16 +1,16 @@
 export class PersonalDetails {
-  email: string = 'derobertisna@ufl.edu';
+  email: string = 'derobertis.nick@gmail.com';
   firstName: string = 'Nick';
   lastName: string = 'DeRobertis';
   githubUsername: string = 'nickderobertis';
   linkedInUrl: string = 'https://www.linkedin.com/in/nick-derobertis/';
   phoneNumber: number = 7038284709;
   countryCode: number = 1;
-  addressLine1: string = 'Stuzin Hall';
-  addressLine2: string = '1454 Union Rd.';
-  city: string = 'Gainesville';
-  stateCode: string = 'FL';
-  zipCode: string = '32611';
+  addressLine1: string = 'Carbon Health';
+  addressLine2: string = '55 Pacific Ave';
+  city: string = 'San Francisco';
+  stateCode: string = 'CA';
+  zipCode: string = '94111';
   country: string = 'United States';
 
   get fullName(): string {
