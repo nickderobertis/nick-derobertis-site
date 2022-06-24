@@ -19,6 +19,7 @@ class APISoftwareModel(BaseModel):
     display_title: str
     created: Optional[datetime] = None
     updated: Optional[datetime] = None
+    version: Optional[str] = None
     loc: Optional[int] = None
     commits: Optional[int] = None
     url: Optional[str] = None
@@ -38,6 +39,7 @@ class APISoftwareModel(BaseModel):
             display_title=model.display_title,
             created=model.created,
             updated=model.updated,
+            version=model.version,
             loc=model.loc,
             commits=model.commits,
             url=model.url,

@@ -9,6 +9,7 @@ export class SoftwareProjectModel {
   displayTitle: string;
   created?: string;
   updated?: string;
+  version?: string;
   loc?: number;
   commits?: number;
   url?: string;
@@ -30,6 +31,9 @@ export class SoftwareProjectModel {
     }
     if (args.updated) {
       this.updated = args.updated;
+    }
+    if (args.version) {
+      this.version = args.version;
     }
     if (args.loc) {
       this.loc = args.loc;
@@ -86,6 +90,10 @@ export class SoftwareProjectModel {
 
   get accentText(): string {
     const accentParts: string[] = [];
+    const formattedVersion = this.formattedVersion;
+    if (formattedVersion) {
+      accentParts.push(formattedVersion);
+    }
     if (this.commits) {
       const commitsStr: string = numberWithCommasAndKM(this.commits);
       accentParts.push(`${commitsStr} Commits`);
@@ -105,5 +113,24 @@ export class SoftwareProjectModel {
   get viewDocsEvent(): IEvent {
     const siteName: string = `Docs - ${this.title}`;
     return EventTypes.viewExternalSite(siteName);
+  }
+
+  get formattedVersion(): string | undefined {
+    if (!this.version) {
+      return undefined;
+    }
+
+    if (
+      this.version.startsWith('untagged') ||
+      this.version === '0.0.0-development'
+    ) {
+      return undefined;
+    }
+
+    if (this.version.startsWith('v')) {
+      return this.version;
+    }
+
+    return `v${this.version}`;
   }
 }
