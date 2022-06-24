@@ -933,14 +933,26 @@ $award-image-width: 125px;
     min-height: 475px;
   }
   @include media-breakpoint-up(xl) {
-    min-height: 410px;
+    min-height: 440px;
   }
 }
 
 .software-card.software-card.software-card,
-.software-card.software-card.software-card * {
+.software-card.software-card.software-card *:not(.no-color) {
   color: black;
   background-color: white;
+}
+
+.software-card-button {
+  width: 40%;
+
+  @include media-breakpoint-up(sm) {
+    width: 30%;
+  }
+
+  @include media-breakpoint-up(lg) {
+    width: 40%;
+  }
 }
 
 .software-card-img-placeholder {

@@ -1,3 +1,40 @@
 .software-card-buttons {
-  width: 165px;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
+
+
+
+.software-card-button * {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.software-card-github-button {
+  min-width: 85px;
+}
+
+.software-card-docs-button {
+  min-width: 70px;
+}
+
+.software-card-badge-container {
+  height: 100%;
+  width: 100%;
+  max-width: 260px;
+  display: flex;
+  justify-content: space-around;
+
+}
+
+.software-card-badge-container * {
+  margin: 3px;
+}
+
+.software-buttons-and-badge-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

@@ -88,7 +88,7 @@ export class SoftwareProjectModel {
     }
   }
 
-  get accentText(): string {
+  get accentParts(): string[] {
     const accentParts: string[] = [];
     const formattedVersion = this.formattedVersion;
     if (formattedVersion) {
@@ -102,7 +102,7 @@ export class SoftwareProjectModel {
       const locStr: string = numberWithCommasAndKM(this.loc);
       accentParts.push(`${locStr} LOC`);
     }
-    return accentParts.join(', ');
+    return accentParts;
   }
 
   get viewGithubEvent(): IEvent {
