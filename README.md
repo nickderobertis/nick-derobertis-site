@@ -15,6 +15,27 @@ See the website
 https://nickderobertis.com
 )
 
+# Developing
+
+## Backend Development
+
+Make sure you have `pipenv` install and run `pipenv sync`.
+
+Run `./run-be-local.sh` to start the backend server.
+
+## Frontend Development
+
+Make sure you have `npm` installed and run `npm install`.
+
+Run `npm run dev:ssr` to start the frontend server.
+
+## QA
+
+Make sure you have Docker installed.
+
+Run `./build-docker.sh && ./run-docker.sh` to start a production-like 
+build. Run `./stop-docker.sh` to stop.
+
 ## Author
 
 Created by Nick DeRobertis. MIT License.
