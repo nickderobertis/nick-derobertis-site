@@ -61,11 +61,16 @@ target/
 .idea
 
 .mypy_cache
-docs
+.vscode
+docs/
 docsrc/source/auto_examples
 _examples
 **/.ipynb_checkpoints
-.vscode
+venvs/
+node_modules
+scripts/bin/
+!.venvs/docs/
+
 Scratch
 
 # Generated files

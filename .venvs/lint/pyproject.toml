@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "nick-derobertis-site-lint"
+description = "Linting for nick-derobertis-site"
+version = "1.0.0"
+authors = ["Nick DeRobertis <whoopnip@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+nick-derobertis-site = {path = "../..", develop = true}
+flake8 = "*"
+mypy = "*"

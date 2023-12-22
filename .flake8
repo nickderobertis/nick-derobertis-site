@@ -1,2 +1,2 @@
 [flake8]
-exclude = deploy,nick_derobertis_site/common/cli/templates
+exclude = .git,__pycache__,dist,build,docs,docsrc/source/conf.py,lib,.venv,.venvs,deploy,nick_derobertis_site/common/cli/templates
