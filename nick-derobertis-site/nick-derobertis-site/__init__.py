@@ -1,3 +1,0 @@
-"""
-Nick DeRobertis' Personal Website
-"""
