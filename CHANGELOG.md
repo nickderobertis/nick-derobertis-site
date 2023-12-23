@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.1](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.0.0...v1.0.1) (2023-12-23)
+
+
+### Bug Fixes
+
+* Try to enable CD on release ([75e7aa0](https://github.com/nickderobertis/nick-derobertis-site/commit/75e7aa0be35f4d847d781d64639da8718207d4e2))
+
 ## 1.0.0 (2023-12-23)
 
 
