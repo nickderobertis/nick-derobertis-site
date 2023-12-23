@@ -61,7 +61,10 @@
           {{ selectedModel.organization }}
         </h5>
         <h6>{{ selectedModel.role }}</h6>
-        <hr *ngIf="selectedModel.description" />
+        <hr
+          *ngIf="selectedModel.description"
+          class="timeline-description-card-divider"
+        />
         <div>
           <span>{{ selectedModel.beginDateStr }}</span>
           <span> - </span>
