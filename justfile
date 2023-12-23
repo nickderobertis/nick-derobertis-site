@@ -141,8 +141,14 @@ dev-fe:
 generate:
     just poetry run root ./build.sh
 
+build-docker:
+    ./build-docker.sh
+
+run-docker:
+    ./run-docker.sh
+
 qa:
-    ./build-docker.sh && ./run-docker.sh
+    just build-docker run-docker
 
 create-task-def:
     just poetry run root python -m deploy.create_task_def

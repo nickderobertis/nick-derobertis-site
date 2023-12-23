@@ -1,0 +1,46 @@
+name: Run E2E tests
+description: "Runs end-to-end tests against a live deployment"
+inputs:
+  fe-url:
+    description: 'The URL of the frontend to test'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        cache: pip
+        cache-dependency-path: global-requirements.txt
+    - name: Install Just command runner
+      uses: taiki-e/install-action@v2
+      with:
+        tool: just@1.13.0
+    - uses: actions/cache@v3
+      id: cache-venvs
+      name: Cache venvs
+      with:
+        path: e2e/.venv
+        key: ${{ env.pythonLocation }}-venvs-${{ hashFiles('e2e/poetry.lock') }}
+    - name: Create venvs
+      shell: bash
+      working-directory: e2e
+      if: steps.cache-venvs.outputs.cache-hit != 'true'
+      run: just sync
+    - name: Install dependencies
+      working-directory: e2e
+      shell: bash
+      run: poetry run playwright install
+    - name: Run e2e tests
+      working-directory: e2e
+      shell: bash
+      run: just test
+      env:
+        E2E_URL: ${{ inputs.fe-url }}
+    - uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: e2e-test-results
+        path: e2e/test-results

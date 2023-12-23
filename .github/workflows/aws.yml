@@ -41,8 +41,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
-
+      uses: actions/checkout@v4
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -60,11 +59,9 @@ jobs:
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
         DEPLOY_APP_NAME: nick-derobertis-site
         DEPLOY_APP_SHORT_NAME: nds
-
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
-
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
@@ -78,7 +75,6 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -86,7 +82,6 @@ jobs:
         task-definition: task-def.json
         container-name: nick-derobertis-site
         image: ${{ steps.build-image.outputs.image }}
-
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
@@ -94,3 +89,19 @@ jobs:
         service: nds-service
         cluster: nds-cluster
         wait-for-service-stability: true
+
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 1
+      matrix:
+        python-version: [ "3.11" ]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: ./.github/actions/e2e-test
+      with:
+        fe-url: https://nickderobertis.com

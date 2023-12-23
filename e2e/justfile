@@ -1,0 +1,85 @@
+set fallback := true
+
+run := "poetry run"
+run-test := "PYTHONPATH=. poetry run pytest -s --screenshot only-on-failure --tracing retain-on-failure"
+
+# Run in global with pipx
+run-lint := ""
+
+export PYTHONPATH := justfile_directory()
+
+default:
+    #!/usr/bin/env bash
+    exit_code=0
+
+    just format || ((exit_code++))
+    just strip || ((exit_code++))
+    just lint || ((exit_code++))
+    just test || ((exit_code++))
+
+    exit $exit_code
+
+check:
+    #!/usr/bin/env bash
+    exit_code=0
+
+    just format-check || ((exit_code++))
+    just strip-check || ((exit_code++))
+    just lint || ((exit_code++))
+    just test || ((exit_code++))
+
+    exit $exit_code
+
+
+format *FILES='.':
+    {{run-lint}} isort {{FILES}}
+    {{run-lint}} black {{FILES}}
+
+format-check *FILES='.':
+    {{run-lint}} isort --check-only {{FILES}}
+    {{run-lint}} black --check {{FILES}}
+
+lint:
+    {{run-lint}} flake8 --count --select=E9,F63,F7,F82 --show-source --statistics
+    {{run-lint}} flake8 --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+strip-opts := "--remove-all-unused-imports --in-place --recursive --exclude=test*,__init__.py,venv*,build*,dist*,node_modules*,be_client*"
+
+strip *FILES='.':
+    {{run-lint}} autoflake {{strip-opts}} {{FILES}}
+
+strip-check *FILES='.':
+    {{run-lint}} autoflake --check {{strip-opts}} {{FILES}}
+
+test *OPTIONS:
+    {{run-test}} test {{OPTIONS}}
+
+debug *OPTIONS:
+    PWDEBUG=1 just test -s {{OPTIONS}}
+
+sync *OPTIONS:
+    poetry install --all-extras --sync {{OPTIONS}}
+
+run *OPTIONS:
+    poetry run {{OPTIONS}}
+
+wipe-artifacts:
+    rm -rf traces/e2e-* || true
+
+download-artifact ID:
+    just wipe-artifacts
+    mkdir -p traces
+    cd traces && gh run download {{ID}} --name e2e-test-results
+
+show-trace folder_or_zip *OPTIONS:
+    #!/usr/bin/env bash
+    # Check if folder_or_zip is a zip file
+    if [[ -f "{{folder_or_zip}}" ]]; then
+      # Directly show-trace on the zip
+      poetry run playwright show-trace {{OPTIONS}} {{folder_or_zip}}
+    else
+      # Run show-trace on the folder + trace.zip
+      poetry run playwright show-trace {{OPTIONS}} {{folder_or_zip}}/trace.zip
+    fi
+
+

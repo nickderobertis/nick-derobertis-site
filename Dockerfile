@@ -11,8 +11,8 @@ ENV NODE_OPTIONS="--openssl-legacy-provider"
 
 RUN apt-get update && apt-get install -y \
     curl git texlive texlive-luatex texlive-science texlive-latex-extra \
-    texlive-plain-generic texlive-extra-utils nginx openssh-server \
-    nodejs npm
+    texlive-plain-generic texlive-extra-utils nginx nodejs npm
+
 RUN npm install -g @angular/cli json-schema-to-typescript
 RUN mkdir -p /var/run/sshd
 
@@ -24,7 +24,7 @@ COPY poetry.lock .
 
 RUN poetry install
 
-EXPOSE 80 22
+EXPOSE 80
 
 COPY . .
 

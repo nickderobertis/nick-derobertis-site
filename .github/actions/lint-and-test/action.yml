@@ -6,3 +6,16 @@ runs:
     - name: Check code formatting, linting, and run tests
       shell: bash
       run: just check
+    - name: Build docker image
+      shell: bash
+      run: just build-docker
+    - name: Start local server in background
+      shell: bash
+      run: just run-docker &
+    - name: Wait for local server to be up
+      shell: bash
+      run: |
+        curl --retry 30 --retry-delay 3 --fail --retry-connrefused -Lsv localhost
+    - uses: ./.github/actions/e2e-test
+      with:
+        fe-url: http://localhost
