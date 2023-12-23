@@ -11,7 +11,6 @@ Subpackages
 
 .. toctree::
 
-   nick_derobertis_site.common.bk
    nick_derobertis_site.common.cli
    nick_derobertis_site.common.providers
    nick_derobertis_site.common.services

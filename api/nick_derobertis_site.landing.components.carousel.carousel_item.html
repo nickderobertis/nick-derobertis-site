@@ -1,533 +1,412 @@
-
-
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>nick_derobertis_site.landing.components.carousel.carousel_item package &mdash; nick-derobertis-site 0.1.0 documentation</title>
-  
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
 
   
-  
-  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
   
 
+  <link rel="stylesheet" href="../_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="../_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="../_static/stylesheets/application-fixes.css"/>
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <link rel="stylesheet" href="../_static/fonts/material-icons.css"/>
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/language_data.js"></script>
-        <script src="../_static/clipboard.min.js"></script>
-        <script src="../_static/copybutton.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  <meta name="theme-color" content="#3f51b5">
+  <script src="../_static/javascripts/modernizr.js"></script>
+  
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-175183613-1"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
 
-    
+    function gtag() {
+        dataLayer.push(arguments);
+    }
 
+    gtag('js', new Date());
+
+    gtag('config', 'UA-175183613-1');
+</script>
   
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/sphinx_paramlinks.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery-binder.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/gallery-dataframe.css" type="text/css" />
+  
+    <title>nick_derobertis_site.landing.components.carousel.carousel_item package &#8212; nick-derobertis-site 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../_static/material.css?v=79c92029" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_paramlinks.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <link rel="canonical" href="https://nickderobertis.github.io/nick-derobertis-site/api/nick_derobertis_site.landing.components.carousel.carousel_item.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="nick_derobertis_site.landing.components.contact_pane package" href="nick_derobertis_site.landing.components.contact_pane.html" />
-    <link rel="prev" title="nick_derobertis_site.landing.components.carousel package" href="nick_derobertis_site.landing.components.carousel.html" /> 
-</head>
-
-<body class="wy-body-for-nav">
-
+    <link rel="prev" title="nick_derobertis_site.landing.components.carousel package" href="nick_derobertis_site.landing.components.carousel.html" />
+  
    
-  <div class="wy-grid-for-nav">
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-          
 
+  </head>
+  <body dir=ltr
+        data-md-color-primary=indigo data-md-color-accent=deep-purple>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#api/nick_derobertis_site.landing.components.carousel.carousel_item" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../index.html" title="nick-derobertis-site 1.0.0 documentation"
+           class="md-header-nav__button md-logo">
           
-            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> nick-derobertis-site
+            <i class="md-icon">&#xe869</i>
           
-
-          
-          </a>
-
-          
-            
-            
-              <div class="version">
-                0.1.0
-              </div>
-            
-          
-
-          
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Tutorial</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Getting started with nick-derobertis-site</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">This is my gallery</a></li>
-</ul>
-<p class="caption"><span class="caption-text">API Documentation</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">nick_derobertis_site</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="nick_derobertis_site.html">nick_derobertis_site package</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="nick_derobertis_site.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.common.html">nick_derobertis_site.common package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.courses_page.html">nick_derobertis_site.courses_page package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.footer.html">nick_derobertis_site.footer package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.gen_content.html">nick_derobertis_site.gen_content package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.general.html">nick_derobertis_site.general package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.header.html">nick_derobertis_site.header package</a></li>
-<li class="toctree-l4 current"><a class="reference internal" href="nick_derobertis_site.landing.html">nick_derobertis_site.landing package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.loading_page.html">nick_derobertis_site.loading_page package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.research_page.html">nick_derobertis_site.research_page package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.software_page.html">nick_derobertis_site.software_page package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.story_page.html">nick_derobertis_site.story_page package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="nick_derobertis_site.templates.html">nick_derobertis_site.templates package</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#nick-derobertis-site-home-module">nick_derobertis_site.home module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#module-nick_derobertis_site.logger">nick_derobertis_site.logger module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#nick-derobertis-site-page-config-module">nick_derobertis_site.page_config module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="nick_derobertis_site.html#nick-derobertis-site-service-config-module">nick_derobertis_site.service_config module</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-            
-          
-        </div>
-        
+        </a>
       </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">nick-derobertis-site</span>
+          <span class="md-header-nav__topic"> nick_derobertis_site.landing.components.carousel.carousel_item package </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
         
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../index.html">nick-derobertis-site</a>
-        
-      </nav>
-
-
-      <div class="wy-nav-content">
-        
-        <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
-  <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="modules.html">nick_derobertis_site</a> &raquo;</li>
-        
-          <li><a href="nick_derobertis_site.html">nick_derobertis_site package</a> &raquo;</li>
-        
-          <li><a href="nick_derobertis_site.landing.html">nick_derobertis_site.landing package</a> &raquo;</li>
-        
-          <li><a href="nick_derobertis_site.landing.components.html">nick_derobertis_site.landing.components package</a> &raquo;</li>
-        
-          <li><a href="nick_derobertis_site.landing.components.carousel.html">nick_derobertis_site.landing.components.carousel package</a> &raquo;</li>
-        
-      <li>nick_derobertis_site.landing.components.carousel.carousel_item package</li>
-    
-    
-      <li class="wy-breadcrumbs-aside">
-        
-            
-            <a href="../_sources/api/nick_derobertis_site.landing.components.carousel.carousel_item.rst.txt" rel="nofollow"> View page source</a>
-          
-        
-      </li>
-    
-  </ul>
-
-  
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-            
-  <div class="section" id="module-nick_derobertis_site.landing.components.carousel.carousel_item">
-<span id="nick-derobertis-site-landing-components-carousel-carousel-item-package"></span><h1>nick_derobertis_site.landing.components.carousel.carousel_item package<a class="headerlink" href="#module-nick_derobertis_site.landing.components.carousel.carousel_item" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component">
-<span id="nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-component-module"></span><h2>nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component module<a class="headerlink" href="#module-nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.CarouselItemComponent">
-<em class="property">class </em><code class="sig-prename descclassname">nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.</code><code class="sig-name descname">CarouselItemComponent</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/landing/components/carousel/carousel_item/carousel_item_component.html#CarouselItemComponent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.CarouselItemComponent" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nick_derobertis_site.common.html#nick_derobertis_site.common.component.HTMLComponent" title="nick_derobertis_site.common.component.HTMLComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">nick_derobertis_site.common.component.HTMLComponent</span></code></a></p>
-<p>params(model=ClassSelector, child_css_classes=List, objects=List, scroll=Boolean, align=ObjectSelector, aspect_ratio=Parameter, background=Parameter, css_classes=List, height=Integer, height_policy=ObjectSelector, margin=Parameter, max_height=Integer, max_width=Integer, min_height=Integer, min_width=Integer, sizing_mode=ObjectSelector, width=Integer, width_policy=ObjectSelector, name=String)
-[1;32mParameters of ‘CarouselItemComponent’
-=====================================
-[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                 Value        Type         Bounds     Mode  [0m</p>
-<p>align               ‘start’  ObjectSelector               V RW  
-aspect_ratio          None     Parameter                V RW AN 
-background            None     Parameter                V RW AN 
-child_css_classes      []         List       (0, None)    V RW  
-css_classes           None        List       (0, None)  V RW AN 
-height                None      Integer      (0, None)  V RW AN 
-height_policy        ‘auto’  ObjectSelector               V RW  
-margin                 0       Parameter                  V RW  
-max_height            None      Integer      (0, None)  V RW AN 
-max_width             None      Integer      (0, None)  V RW AN 
-min_height            None      Integer      (0, None)  V RW AN 
-min_width             None      Integer      (0, None)  V RW AN 
-model                 None   ClassSelector              V RW AN 
-objects                []         List       (0, None)    V RW  
-scroll               False      Boolean        (0, 1)     V RW  
-sizing_mode           None   ObjectSelector               V RW  
-width                 None      Integer      (0, None)  V RW AN 
-width_policy         ‘auto’  ObjectSelector               V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34malign:             Whether the object should be aligned with the start, end or[0m
-[1;34m                   center of its container[0m
-[1;31maspect_ratio:      Describes the proportional relationship between component’s[0m
-[1;31m                   width and height.  This works if any of component’s dimensions[0m
-[1;31m                   are flexible in size. If set to a number, <code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">/</span> <span class="pre">height</span> <span class="pre">=[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">aspect_ratio</span></code> relationship will be maintained.  Otherwise, if[0m
-[1;31m                   set to <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, component’s preferred width and height will[0m
-[1;31m                   be used to determine the aspect (if not set, no aspect will be[0m
-[1;31m                   preserved).[0m
-[1;34mbackground:        Background color of the component.[0m
-[1;31mchild_css_classes: A list of CSS class names to add to the immediate children of the DOM element. [0m
-[1;31m                   [0m
-[1;31m                   Note: the class names are[0m
-[1;31m                   simply added as-is, no other guarantees are provided.[0m
-[1;31m                   [0m
-[1;31m                   It is also permissible to assign from tuples, however these are adapted – the[0m
-[1;31m                   property will always contain a list.[0m
-[1;34mcss_classes:       CSS classes to apply to the layout.[0m
-[1;31mheight:            The height of the component (in pixels).  This can be either[0m
-[1;31m                   fixed or preferred height, depending on height sizing policy.[0m
-[1;34mheight_policy:     Describes how the component should maintain its height.[0m
-[1;34m                   [0m
-[1;34m                   <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;``[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Use</span> <span class="pre">component's</span> <span class="pre">preferred</span> <span class="pre">sizing</span> <span class="pre">policy.[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;fixed&quot;``[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Use</span> <span class="pre">exactly</span> <span class="pre">``height</span></code> pixels. Component will overflow if[0m
-[1;34m                       it can’t fit in the available vertical space.[0m
-[1;34m                   [0m
-[1;34m                   <code class="docutils literal notranslate"><span class="pre">&quot;fit&quot;``[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Use</span> <span class="pre">component's</span> <span class="pre">preferred</span> <span class="pre">height</span> <span class="pre">(if</span> <span class="pre">set)</span> <span class="pre">and</span> <span class="pre">allow</span> <span class="pre">to</span> <span class="pre">fit[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">into</span> <span class="pre">the</span> <span class="pre">available</span> <span class="pre">vertical</span> <span class="pre">space</span> <span class="pre">within</span> <span class="pre">the</span> <span class="pre">minimum</span> <span class="pre">and[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">maximum</span> <span class="pre">height</span> <span class="pre">bounds</span> <span class="pre">(if</span> <span class="pre">set).</span> <span class="pre">Component's</span> <span class="pre">height</span> <span class="pre">neither[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">will</span> <span class="pre">be</span> <span class="pre">aggressively</span> <span class="pre">minimized</span> <span class="pre">nor</span> <span class="pre">maximized.[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;min&quot;``[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Use</span> <span class="pre">as</span> <span class="pre">little</span> <span class="pre">vertical</span> <span class="pre">space</span> <span class="pre">as</span> <span class="pre">possible,</span> <span class="pre">not</span> <span class="pre">less</span> <span class="pre">than[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">the</span> <span class="pre">minimum</span> <span class="pre">height</span> <span class="pre">(if</span> <span class="pre">set).</span>&#160; <span class="pre">The</span> <span class="pre">starting</span> <span class="pre">point</span> <span class="pre">is</span> <span class="pre">the[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">preferred</span> <span class="pre">height</span> <span class="pre">(if</span> <span class="pre">set).</span> <span class="pre">The</span> <span class="pre">height</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">may[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">shrink</span> <span class="pre">or</span> <span class="pre">grow</span> <span class="pre">depending</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">parent</span> <span class="pre">layout,</span> <span class="pre">aspect[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">management</span> <span class="pre">and</span> <span class="pre">other</span> <span class="pre">factors.[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;max&quot;``[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Use</span> <span class="pre">as</span> <span class="pre">much</span> <span class="pre">vertical</span> <span class="pre">space</span> <span class="pre">as</span> <span class="pre">possible,</span> <span class="pre">not</span> <span class="pre">more</span> <span class="pre">than</span> <span class="pre">the[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">maximum</span> <span class="pre">height</span> <span class="pre">(if</span> <span class="pre">set).</span>&#160; <span class="pre">The</span> <span class="pre">starting</span> <span class="pre">point</span> <span class="pre">is</span> <span class="pre">the[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">preferred</span> <span class="pre">height</span> <span class="pre">(if</span> <span class="pre">set).</span> <span class="pre">The</span> <span class="pre">height</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">may[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">shrink</span> <span class="pre">or</span> <span class="pre">grow</span> <span class="pre">depending</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">parent</span> <span class="pre">layout,</span> <span class="pre">aspect[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">management</span> <span class="pre">and</span> <span class="pre">other</span> <span class="pre">factors.[0m</span>
-<span class="pre">[1;31mmargin:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Allows</span> <span class="pre">to</span> <span class="pre">create</span> <span class="pre">additional</span> <span class="pre">space</span> <span class="pre">around</span> <span class="pre">the</span> <span class="pre">component.</span> <span class="pre">May[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">be</span> <span class="pre">specified</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">two-tuple</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">form</span> <span class="pre">(vertical,</span> <span class="pre">horizontal)[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">or</span> <span class="pre">a</span> <span class="pre">four-tuple</span> <span class="pre">(top,</span> <span class="pre">right,</span> <span class="pre">bottom,</span> <span class="pre">left).[0m</span>
-<span class="pre">[1;34mmax_height:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Minimal</span> <span class="pre">height</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">(in</span> <span class="pre">pixels)</span> <span class="pre">if</span> <span class="pre">height</span> <span class="pre">is</span> <span class="pre">adjustable.[0m</span>
-<span class="pre">[1;31mmax_width:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Minimal</span> <span class="pre">width</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">(in</span> <span class="pre">pixels)</span> <span class="pre">if</span> <span class="pre">width</span> <span class="pre">is</span> <span class="pre">adjustable.[0m</span>
-<span class="pre">[1;34mmin_height:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Minimal</span> <span class="pre">height</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">(in</span> <span class="pre">pixels)</span> <span class="pre">if</span> <span class="pre">height</span> <span class="pre">is</span> <span class="pre">adjustable.[0m</span>
-<span class="pre">[1;31mmin_width:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Minimal</span> <span class="pre">width</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">(in</span> <span class="pre">pixels)</span> <span class="pre">if</span> <span class="pre">width</span> <span class="pre">is</span> <span class="pre">adjustable.[0m</span>
-<span class="pre">[1;34mmodel:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">&lt;</span> <span class="pre">No</span> <span class="pre">docstring</span> <span class="pre">available</span> <span class="pre">&gt;[0m</span>
-<span class="pre">[1;31mobjects:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">The</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">child</span> <span class="pre">objects</span> <span class="pre">that</span> <span class="pre">make</span> <span class="pre">up</span> <span class="pre">the</span> <span class="pre">layout.[0m</span>
-<span class="pre">[1;34mscroll:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Whether</span> <span class="pre">to</span> <span class="pre">add</span> <span class="pre">scrollbars</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">content</span> <span class="pre">overflows</span> <span class="pre">the</span> <span class="pre">size[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">of</span> <span class="pre">the</span> <span class="pre">container.[0m</span>
-<span class="pre">[1;31msizing_mode:</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">How</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">should</span> <span class="pre">size</span> <span class="pre">itself.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">This</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">high-level</span> <span class="pre">setting</span> <span class="pre">for</span> <span class="pre">maintaining</span> <span class="pre">width</span> <span class="pre">and</span> <span class="pre">height[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component.</span> <span class="pre">To</span> <span class="pre">gain</span> <span class="pre">more</span> <span class="pre">fine</span> <span class="pre">grained</span> <span class="pre">control</span> <span class="pre">over[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">sizing,</span> <span class="pre">use</span> <span class="pre">``width_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">height_policy</span></code> and[0m
-[1;31m                   <code class="docutils literal notranslate"><span class="pre">aspect_ratio</span></code> instead (those take precedence over[0m
-[1;31m                   <code class="docutils literal notranslate"><span class="pre">sizing_mode</span></code>).[0m
-[1;31m                   [0m
-[1;31m                   <code class="docutils literal notranslate"><span class="pre">&quot;fixed&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Component</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">responsive.</span> <span class="pre">It</span> <span class="pre">will</span> <span class="pre">retain</span> <span class="pre">its</span> <span class="pre">original[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">width</span> <span class="pre">and</span> <span class="pre">height</span> <span class="pre">regardless</span> <span class="pre">of</span> <span class="pre">any</span> <span class="pre">subsequent</span> <span class="pre">browser[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">window</span> <span class="pre">resize</span> <span class="pre">events.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;stretch_width&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Component</span> <span class="pre">will</span> <span class="pre">responsively</span> <span class="pre">resize</span> <span class="pre">to</span> <span class="pre">stretch</span> <span class="pre">to</span> <span class="pre">the[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">available</span> <span class="pre">width,</span> <span class="pre">without</span> <span class="pre">maintaining</span> <span class="pre">any</span> <span class="pre">aspect</span> <span class="pre">ratio.</span> <span class="pre">The[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">height</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">depends</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">type</span> <span class="pre">of</span> <span class="pre">the[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">component</span> <span class="pre">and</span> <span class="pre">may</span> <span class="pre">be</span> <span class="pre">fixed</span> <span class="pre">or</span> <span class="pre">fit</span> <span class="pre">to</span> <span class="pre">component's</span> <span class="pre">contents.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;stretch_height&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Component</span> <span class="pre">will</span> <span class="pre">responsively</span> <span class="pre">resize</span> <span class="pre">to</span> <span class="pre">stretch</span> <span class="pre">to</span> <span class="pre">the[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">available</span> <span class="pre">height,</span> <span class="pre">without</span> <span class="pre">maintaining</span> <span class="pre">any</span> <span class="pre">aspect[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">ratio.</span> <span class="pre">The</span> <span class="pre">width</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">depends</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">type</span> <span class="pre">of[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">the</span> <span class="pre">component</span> <span class="pre">and</span> <span class="pre">may</span> <span class="pre">be</span> <span class="pre">fixed</span> <span class="pre">or</span> <span class="pre">fit</span> <span class="pre">to</span> <span class="pre">component's[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">contents.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;stretch_both&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Component</span> <span class="pre">is</span> <span class="pre">completely</span> <span class="pre">responsive,</span> <span class="pre">independently</span> <span class="pre">in</span> <span class="pre">width[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">and</span> <span class="pre">height,</span> <span class="pre">and</span> <span class="pre">will</span> <span class="pre">occupy</span> <span class="pre">all</span> <span class="pre">the</span> <span class="pre">available</span> <span class="pre">horizontal[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">and</span> <span class="pre">vertical</span> <span class="pre">space,</span> <span class="pre">even</span> <span class="pre">if</span> <span class="pre">this</span> <span class="pre">changes</span> <span class="pre">the</span> <span class="pre">aspect</span> <span class="pre">ratio[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;scale_width&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Component</span> <span class="pre">will</span> <span class="pre">responsively</span> <span class="pre">resize</span> <span class="pre">to</span> <span class="pre">stretch</span> <span class="pre">to</span> <span class="pre">the[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">available</span> <span class="pre">width,</span> <span class="pre">while</span> <span class="pre">maintaining</span> <span class="pre">the</span> <span class="pre">original</span> <span class="pre">or[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">provided</span> <span class="pre">aspect</span> <span class="pre">ratio.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;scale_height&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Component</span> <span class="pre">will</span> <span class="pre">responsively</span> <span class="pre">resize</span> <span class="pre">to</span> <span class="pre">stretch</span> <span class="pre">to</span> <span class="pre">the[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">available</span> <span class="pre">height,</span> <span class="pre">while</span> <span class="pre">maintaining</span> <span class="pre">the</span> <span class="pre">original</span> <span class="pre">or[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">provided</span> <span class="pre">aspect</span> <span class="pre">ratio.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;scale_both&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Component</span> <span class="pre">will</span> <span class="pre">responsively</span> <span class="pre">resize</span> <span class="pre">to</span> <span class="pre">both</span> <span class="pre">the</span> <span class="pre">available[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">width</span> <span class="pre">and</span> <span class="pre">height,</span> <span class="pre">while</span> <span class="pre">maintaining</span> <span class="pre">the</span> <span class="pre">original</span> <span class="pre">or[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">provided</span> <span class="pre">aspect</span> <span class="pre">ratio.[0m</span>
-<span class="pre">[1;34mwidth:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">The</span> <span class="pre">width</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">(in</span> <span class="pre">pixels).</span> <span class="pre">This</span> <span class="pre">can</span> <span class="pre">be</span> <span class="pre">either[0m</span>
-<span class="pre">[1;34m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">fixed</span> <span class="pre">or</span> <span class="pre">preferred</span> <span class="pre">width,</span> <span class="pre">depending</span> <span class="pre">on</span> <span class="pre">width</span> <span class="pre">sizing</span> <span class="pre">policy.[0m</span>
-<span class="pre">[1;31mwidth_policy:</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">Describes</span> <span class="pre">how</span> <span class="pre">the</span> <span class="pre">component</span> <span class="pre">should</span> <span class="pre">maintain</span> <span class="pre">its</span> <span class="pre">width.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;auto&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Use</span> <span class="pre">component's</span> <span class="pre">preferred</span> <span class="pre">sizing</span> <span class="pre">policy.[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">``&quot;fixed&quot;``[0m</span>
-<span class="pre">[1;31m</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Use</span> <span class="pre">exactly</span> <span class="pre">``width</span></code> pixels. Component will overflow if[0m
-[1;31m                       it can’t fit in the available horizontal space.[0m
-[1;31m                   [0m
-[1;31m                   <a href="#id1"><span class="problematic" id="id2">``</span></a>”fit”<a href="#id3"><span class="problematic" id="id4">``</span></a>[0m
-[1;31m                       Use component’s preferred width (if set) and allow it to[0m
-[1;31m                       fit into the available horizontal space within the minimum[0m
-[1;31m                       and maximum width bounds (if set). Component’s width[0m
-[1;31m                       neither will be aggressively minimized nor maximized.[0m
-[1;31m                   [0m
-[1;31m                   <a href="#id5"><span class="problematic" id="id6">``</span></a>”min”<a href="#id7"><span class="problematic" id="id8">``</span></a>[0m
-[1;31m                       Use as little horizontal space as possible, not less than[0m
-[1;31m                       the minimum width (if set).  The starting point is the[0m
-[1;31m                       preferred width (if set). The width of the component may[0m
-[1;31m                       shrink or grow depending on the parent layout, aspect[0m
-[1;31m                       management and other factors.[0m
-[1;31m                   [0m
-[1;31m                   <a href="#id9"><span class="problematic" id="id10">``</span></a>”max”<a href="#id11"><span class="problematic" id="id12">``</span></a>[0m
-[1;31m                       Use as much horizontal space as possible, not more than[0m
-[1;31m                       the maximum width (if set).  The starting point is the[0m
-[1;31m                       preferred width (if set). The width of the component may[0m
-[1;31m                       shrink or grow depending on the parent layout, aspect[0m
-[1;31m                       management and other factors.[0m</p>
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.CarouselItemComponent.model">
-<code class="sig-name descname">model</code><em class="property"> = None</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.CarouselItemComponent.model" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.CarouselItemComponent.name">
-<code class="sig-name descname">name</code><em class="property"> = 'CarouselItemComponent'</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.CarouselItemComponent.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.CarouselItemComponent.param">
-<code class="sig-name descname">param</code><em class="property"> = &lt;param.parameterized.Parameters object&gt;</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component.CarouselItemComponent.param" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model">
-<span id="nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-model-module"></span><h2>nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model module<a class="headerlink" href="#module-nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel">
-<em class="property">class </em><code class="sig-prename descclassname">nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.</code><code class="sig-name descname">CarouselItemModel</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">params</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/nick_derobertis_site/landing/components/carousel/carousel_item/carousel_item_model.html#CarouselItemModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nick_derobertis_site.common.providers.html#nick_derobertis_site.common.providers.image.HasImageModel" title="nick_derobertis_site.common.providers.image.HasImageModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">nick_derobertis_site.common.providers.image.HasImageModel</span></code></a>, <a class="reference internal" href="nick_derobertis_site.common.html#nick_derobertis_site.common.model.ComponentModel" title="nick_derobertis_site.common.model.ComponentModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">nick_derobertis_site.common.model.ComponentModel</span></code></a></p>
-<p>params(body_text=String, buttons=List, caption_div_classes=List, header_text=String, image=ClassSelector, image_src=String, name=String)
-[1;32mParameters of ‘CarouselItemModel’
-=================================
-[0m
-[1;31mParameters changed from their default values are marked in red.[0m
-[1;36mSoft bound values are marked in cyan.[0m
-C/V= Constant/Variable, RO/RW = ReadOnly/ReadWrite, AN=Allow None</p>
-<p>[1;34mName                                   Value                         Type        Bounds     Mode  [0m</p>
-<p>body_text                                ‘’                         String                  V RW  
-buttons                                  []                          List      (0, None)    V RW  
-caption_div_classes             [‘carousel-caption’]                 List      (0, None)    V RW  
-header_text                              ‘’                         String                  V RW  
-image                                   None                    ClassSelector             V RW AN 
-image_src             ‘<a class="reference external" href="data:image/gif;base64,R0lGODlhAQABAI">data:image/gif;base64,R0lGODlhAQABAI</a>…      String                  V RW</p>
-<p>[1;32mParameter docstrings:
-=====================[0m</p>
-<p>[1;34mbody_text:           &lt; No docstring available &gt;[0m
-[1;31mbuttons:             &lt; No docstring available &gt;[0m
-[1;34mcaption_div_classes: &lt; No docstring available &gt;[0m
-[1;31mheader_text:         &lt; No docstring available &gt;[0m
-[1;34mimage:               &lt; No docstring available &gt;[0m
-[1;31mimage_src:           &lt; No docstring available &gt;[0m</p>
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.body_text">
-<code class="sig-name descname">body_text</code><em class="property"> = ''</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.body_text" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.buttons">
-<code class="sig-name descname">buttons</code><em class="property"> = []</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.buttons" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.caption_div_classes">
-<code class="sig-name descname">caption_div_classes</code><em class="property"> = ['carousel-caption']</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.caption_div_classes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.caption_div_classes_str">
-<em class="property">property </em><code class="sig-name descname">caption_div_classes_str</code><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.caption_div_classes_str" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.header_text">
-<code class="sig-name descname">header_text</code><em class="property"> = ''</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.header_text" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.name">
-<code class="sig-name descname">name</code><em class="property"> = 'CarouselItemModel'</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt id="nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.param">
-<code class="sig-name descname">param</code><em class="property"> = &lt;param.parameterized.Parameters object&gt;</em><a class="headerlink" href="#nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model.CarouselItemModel.param" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-</div>
-
-
-           </div>
-           
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="../search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder=""Search""
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
       
-        <a href="nick_derobertis_site.landing.components.contact_pane.html" class="btn btn-neutral float-right" title="nick_derobertis_site.landing.components.contact_pane package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="nick_derobertis_site.landing.components.carousel.html" class="btn btn-neutral float-left" title="nick_derobertis_site.landing.components.carousel package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            <a href="https://github.com/nickderobertis/nick-derobertis-site" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
     </div>
   
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>
-        
-        &copy; Copyright 2020, Nick DeRobertis
-
-    </p>
+  <div class="md-source__repository">
+    nick-derobertis-site
   </div>
+</a>
+          </div>
+        </div>
+      
+      
+  
+  <script src="../_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = "../"versions.json"",
+        target_loc = "../../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
     
     
-      Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="../index.html" class="md-tabs__link">nick-derobertis-site 1.0.0 documentation</a></li>
+          <li class="md-tabs__item"><a href="modules.html" class="md-tabs__link">nick_derobertis_site</a></li>
+          <li class="md-tabs__item"><a href="nick_derobertis_site.html" class="md-tabs__link">nick_derobertis_site package</a></li>
+          <li class="md-tabs__item"><a href="nick_derobertis_site.landing.html" class="md-tabs__link">nick_derobertis_site.landing package</a></li>
+          <li class="md-tabs__item"><a href="nick_derobertis_site.landing.components.html" class="md-tabs__link">nick_derobertis_site.landing.components package</a></li>
+          <li class="md-tabs__item"><a href="nick_derobertis_site.landing.components.carousel.html" class="md-tabs__link">nick_derobertis_site.landing.components.carousel package</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../index.html" title="nick-derobertis-site 1.0.0 documentation" class="md-nav__button md-logo">
+      
+        <i class="md-icon">&#xe869</i>
+      
+    </a>
+    <a href="../index.html"
+       title="nick-derobertis-site 1.0.0 documentation">nick-derobertis-site</a>
+  </label>
+    <div class="md-nav__source">
+      <a href="https://github.com/nickderobertis/nick-derobertis-site" title="Go to repository" class="md-source" data-md-source="github">
 
-</footer>
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    nick-derobertis-site
+  </div>
+</a>
+    </div>
+  
+  
 
+  
+  <ul class="md-nav__list">
+    <li class="md-nav__item">
+    
+    
+      <a href="../tutorial.html" class="md-nav__link">Getting started with nick-derobertis-site</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../auto_examples/index.html" class="md-nav__link">This is my gallery</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="modules.html" class="md-nav__link">nick_derobertis_site</a>
+      <ul class="md-nav__list"> 
+    <li class="md-nav__item">
+    
+    
+      <a href="nick_derobertis_site.html" class="md-nav__link">nick_derobertis_site package</a>
+      <ul class="md-nav__list"> 
+    <li class="md-nav__item">
+    
+    
+      <a href="nick_derobertis_site.html#subpackages" class="md-nav__link">Subpackages</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="nick_derobertis_site.html#submodules" class="md-nav__link">Submodules</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="nick_derobertis_site.html#nick-derobertis-site-home-module" class="md-nav__link">nick_derobertis_site.home module</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="nick_derobertis_site.html#module-nick_derobertis_site.logger" class="md-nav__link">nick_derobertis_site.logger module</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="nick_derobertis_site.html#module-nick_derobertis_site.page_config" class="md-nav__link">nick_derobertis_site.page_config module</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="nick_derobertis_site.html#nick-derobertis-site-service-config-module" class="md-nav__link">nick_derobertis_site.service_config module</a>
+      
+    
+    </li></ul>
+    
+    </li></ul>
+    
+    </li>
+  </ul>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#api-nick-derobertis-site-landing-components-carousel-carousel-item--page-root" class="md-nav__link">nick_derobertis_site.landing.components.carousel.carousel_item package</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#submodules" class="md-nav__link">Submodules</a>
+        </li>
+        <li class="md-nav__item"><a href="#nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-component-module" class="md-nav__link">nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component module</a>
+        </li>
+        <li class="md-nav__item"><a href="#nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-model-module" class="md-nav__link">nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model module</a>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="../_sources/api/nick_derobertis_site.landing.components.carousel.carousel_item.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  <section id="module-nick_derobertis_site.landing.components.carousel.carousel_item">
+<span id="nick-derobertis-site-landing-components-carousel-carousel-item-package"></span><h1 id="api-nick-derobertis-site-landing-components-carousel-carousel-item--page-root">nick_derobertis_site.landing.components.carousel.carousel_item package<a class="headerlink" href="#api-nick-derobertis-site-landing-components-carousel-carousel-item--page-root" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2 id="submodules">Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-component-module">
+<h2 id="nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-component-module">nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_component module<a class="headerlink" href="#nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-component-module" title="Link to this heading">¶</a></h2>
+</section>
+<section id="nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-model-module">
+<h2 id="nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-model-module">nick_derobertis_site.landing.components.carousel.carousel_item.carousel_item_model module<a class="headerlink" href="#nick-derobertis-site-landing-components-carousel-carousel-item-carousel-item-model-module" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </article>
         </div>
       </div>
-
-    </section>
-
+    </main>
   </div>
-  
-
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script>
-
-  
-  
-    
-    <!-- Theme Analytics -->
-    <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-175183613-1', 'auto');
-    ga('send', 'pageview');
-    </script>
-
-    
-   
-
-</body>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+            <a href="nick_derobertis_site.landing.components.carousel.html" title="nick_derobertis_site.landing.components.carousel package"
+               class="md-flex md-footer-nav__link md-footer-nav__link--prev"
+               rel="prev">
+              <div class="md-flex__cell md-flex__cell--shrink">
+                <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+              </div>
+              <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+                <span class="md-flex__ellipsis">
+                  <span
+                      class="md-footer-nav__direction"> "Previous" </span> nick_derobertis_site.landing.components.carousel package </span>
+              </div>
+            </a>
+          
+          
+            <a href="nick_derobertis_site.landing.components.contact_pane.html" title="nick_derobertis_site.landing.components.contact_pane package"
+               class="md-flex md-footer-nav__link md-footer-nav__link--next"
+               rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
+                class="md-flex__ellipsis"> <span
+                class="md-footer-nav__direction"> "Next" </span> nick_derobertis_site.landing.components.contact_pane package </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink"><i
+                class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2023, Nick DeRobertis.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="../_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
 </html>

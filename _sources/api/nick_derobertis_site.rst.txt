@@ -11,6 +11,7 @@ Subpackages
 
 .. toctree::
 
+   nick_derobertis_site.api
    nick_derobertis_site.common
    nick_derobertis_site.courses_page
    nick_derobertis_site.footer

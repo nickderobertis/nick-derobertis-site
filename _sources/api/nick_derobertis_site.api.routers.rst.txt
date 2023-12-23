@@ -1,0 +1,59 @@
+nick\_derobertis\_site.api.routers package
+==========================================
+
+.. automodule:: nick_derobertis_site.api.routers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+nick\_derobertis\_site.api.routers.awards module
+------------------------------------------------
+
+.. automodule:: nick_derobertis_site.api.routers.awards
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.api.routers.courses module
+-------------------------------------------------
+
+.. automodule:: nick_derobertis_site.api.routers.courses
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.api.routers.research module
+--------------------------------------------------
+
+.. automodule:: nick_derobertis_site.api.routers.research
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.api.routers.skills module
+------------------------------------------------
+
+.. automodule:: nick_derobertis_site.api.routers.skills
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.api.routers.software module
+--------------------------------------------------
+
+.. automodule:: nick_derobertis_site.api.routers.software
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nick\_derobertis\_site.api.routers.timeline module
+--------------------------------------------------
+
+.. automodule:: nick_derobertis_site.api.routers.timeline
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

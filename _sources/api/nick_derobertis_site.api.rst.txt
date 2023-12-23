@@ -1,0 +1,26 @@
+nick\_derobertis\_site.api package
+==================================
+
+.. automodule:: nick_derobertis_site.api
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+   nick_derobertis_site.api.routers
+
+Submodules
+----------
+
+nick\_derobertis\_site.api.main module
+--------------------------------------
+
+.. automodule:: nick_derobertis_site.api.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
