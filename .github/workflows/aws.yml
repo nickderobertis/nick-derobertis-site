@@ -37,7 +37,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        python-version: [ 3.8 ]
+        python-version: [ "3.10" ]
 
     steps:
     - name: Checkout
@@ -49,18 +49,12 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+    - uses: ./.github/actions/install-dependencies
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Pipenv
-      uses: dschep/install-pipenv-action@v1
-    - name: Install dependencies
-      run: |
-        pipenv sync
     - name: Create ECR task definition JSON
       run: |
-        pipenv run python -m deploy.create_task_def
+        just create-task-def
       env:
         AWS_ROOT_ACCOUNT_ID: ${{ secrets.AWS_ROOT_ACCOUNT_ID }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}

@@ -129,3 +129,6 @@ generate:
 
 qa:
     ./build-docker.sh && ./run-docker.sh
+
+create-task-def:
+    just poetry run root python -m deploy.create_task_def
