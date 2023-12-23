@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.1](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.3.0...v1.3.1) (2023-12-23)
+
+
+### Bug Fixes
+
+* Install global deps before e2e test and make prod e2e test run only after deploy ([b203b78](https://github.com/nickderobertis/nick-derobertis-site/commit/b203b781fead016f090260cf935e587c31708d41))
+
 ## [1.3.0](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.2.0...v1.3.0) (2023-12-23)
 
 
