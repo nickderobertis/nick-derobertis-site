@@ -1,8 +1,8 @@
-from typing import List, Sequence, Optional
+from typing import List, Optional, Sequence
 
 from derobertis_cv.models.award import AwardModel
 from derobertis_cv.pldata.awards import get_awards
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 router = APIRouter()

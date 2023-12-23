@@ -4,7 +4,10 @@ import pathlib
 from jinja2 import Template
 
 try:
-    from .cdk_files.config import AWSSettings, DeploymentNames  # for running from root repo on CI
+    from .cdk_files.config import (  # for running from root repo on CI
+        AWSSettings,
+        DeploymentNames,
+    )
 except ImportError as e:
     if "attempted relative import with no known parent package" in str(e):
         # for running with deploy ./run-docker.sh to see actual output locally
@@ -21,7 +24,9 @@ def _load_template(path: str = str(TEMPLATE_PATH)) -> str:
     return contents
 
 
-def _fill_values_in_template(template_str: str, aws_model: AWSSettings, names_model: DeploymentNames) -> str:
+def _fill_values_in_template(
+    template_str: str, aws_model: AWSSettings, names_model: DeploymentNames
+) -> str:
     tmpl = Template(template_str)
     return tmpl.render(aws=aws_model.dict(), names=names_model.dict())
 
@@ -33,7 +38,9 @@ def create_task_def_json(
     names_model: DeploymentNames = DeploymentNames(),
 ):
     template = _load_template(template_path)
-    templated = _fill_values_in_template(template, aws_model=aws_model, names_model=names_model)
+    templated = _fill_values_in_template(
+        template, aws_model=aws_model, names_model=names_model
+    )
     out_path = os.path.join(out_folder, "task-def.json")
     with open(out_path, "w") as f:
         f.write(templated)

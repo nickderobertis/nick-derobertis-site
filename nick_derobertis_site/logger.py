@@ -6,9 +6,7 @@ class CustomFormatter(logging.Formatter):
     debug_formatter = logging.Formatter(
         "%(asctime)s: %(name)s - %(filename)s L%(lineno)s - %(levelname)s - %(message)s"
     )
-    other_formatter = logging.Formatter(
-        '[%(name)s %(levelname)s]: %(message)s'
-    )
+    other_formatter = logging.Formatter("[%(name)s %(levelname)s]: %(message)s")
 
     def format(self, record: logging.LogRecord) -> str:
         if record.levelno <= logging.DEBUG:

@@ -1,14 +1,14 @@
 import datetime
 from enum import Enum
-from typing import List, Sequence, Optional, Union
+from typing import List, Optional, Sequence, Union
 
 from derobertis_cv.pldata.education import get_education
 from derobertis_cv.pldata.education_model import EducationModel
 from derobertis_cv.pldata.employment_model import (
-    EmploymentModel,
     AcademicEmploymentModel,
+    EmploymentModel,
 )
-from derobertis_cv.pldata.jobs import get_professional_jobs, get_academic_jobs
+from derobertis_cv.pldata.jobs import get_academic_jobs, get_professional_jobs
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -34,7 +34,9 @@ class APITimelineModel(BaseModel):
     description: Optional[Sequence[str]] = None
 
     @classmethod
-    def from_cv_employment(cls, model: EmploymentModel, timeline_id: int) -> "APITimelineModel":
+    def from_cv_employment(
+        cls, model: EmploymentModel, timeline_id: int
+    ) -> "APITimelineModel":
         if isinstance(model, AcademicEmploymentModel):
             item_type = TimelineTypes.ACADEMIC_EMPLOYMENT
         else:
@@ -54,14 +56,17 @@ class APITimelineModel(BaseModel):
         )
 
     @classmethod
-    def from_cv_education(cls, model: EducationModel, timeline_id: int) -> "APITimelineModel":
+    def from_cv_education(
+        cls, model: EducationModel, timeline_id: int
+    ) -> "APITimelineModel":
         return cls(
             organization=model.institution.title,
             role=model.degree_name,
             location=model.institution.location,
             timeline_id=timeline_id,
             item_type=TimelineTypes.EDUCATION,
-            short_organization=model.institution.abbreviation or model.institution.title,
+            short_organization=model.institution.abbreviation
+            or model.institution.title,
             short_role=model.short_degree_name or model.degree_name,
             begin_date=model.begin_date,
             end_date=model.end_date,

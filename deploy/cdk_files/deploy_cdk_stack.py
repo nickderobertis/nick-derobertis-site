@@ -1,22 +1,19 @@
 """AWS CDK module to create ECS infrastructure"""
 import os
-from typing import Optional
 
-from aws_cdk import (
-    core,
-    aws_ecs as ecs,
-    aws_ec2 as ec2,
-    aws_iam as iam,
-    aws_ecr as ecr,
-    aws_elasticloadbalancingv2 as elbv2,
-    aws_route53 as route53,
-    aws_route53_targets as alias,
-    aws_certificatemanager as acm,
-    aws_ssm as ssm,
-)
+from aws_cdk import aws_certificatemanager as acm
+from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_ecr as ecr
+from aws_cdk import aws_ecs as ecs
+from aws_cdk import aws_elasticloadbalancingv2 as elbv2
+from aws_cdk import aws_iam as iam
+from aws_cdk import aws_route53 as route53
+from aws_cdk import aws_route53_targets as alias
+from aws_cdk import aws_ssm as ssm
+from aws_cdk import core
+from create_ssh_key import key_pair_path
 
 from .config import DeploymentConfig
-from create_ssh_key import key_pair_path
 
 DUMMY_REGISTRY_PATH = "amazon/amazon-ecs-sample"
 DEPLOY_ENV_NAME = os.environ["DEPLOY_ENVIRONMENT_NAME"]
@@ -60,7 +57,10 @@ class DeployCdkStack(core.Stack):
         # Create the ECS Cluster (and VPC)
         vpc = ec2.Vpc(self, cfg.names.vpc, max_azs=3, nat_gateways=0)
         cluster = ecs.Cluster(
-            self, cfg.names.ecs_cluster, cluster_name=cfg.names.ecs_cluster, vpc=vpc,
+            self,
+            cfg.names.ecs_cluster,
+            cluster_name=cfg.names.ecs_cluster,
+            vpc=vpc,
         )
 
         # Create the ECS Task Definition with placeholder container (and named Task Execution IAM Role)
@@ -162,7 +162,9 @@ class DeployCdkStack(core.Stack):
             http_listener = lb.add_listener(
                 cfg.names.load_balancer_http_listener,
                 port=80,
-                default_action=elbv2.ListenerAction.redirect(protocol="HTTPS", permanent=True, port='443'),
+                default_action=elbv2.ListenerAction.redirect(
+                    protocol="HTTPS", permanent=True, port="443"
+                ),
             )
             https_listener.add_target_groups(
                 cfg.names.load_balancer_listener_target_groups,
@@ -171,7 +173,8 @@ class DeployCdkStack(core.Stack):
         else:
             # Listen on 80
             http_listener = lb.add_listener(
-                cfg.names.load_balancer_http_listener, port=80,
+                cfg.names.load_balancer_http_listener,
+                port=80,
             )
             http_listener.add_target_groups(
                 cfg.names.load_balancer_listener_target_groups,

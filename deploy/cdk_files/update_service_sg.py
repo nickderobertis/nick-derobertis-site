@@ -1,9 +1,8 @@
 from boto3_type_annotations.ec2 import Client as EC2Client
-
 from cdk_files.aws_ext.ec2 import (
-    get_service_security_group_id,
     EC2_CLIENT,
     add_rule_to_security_group,
+    get_service_security_group_id,
 )
 from cdk_files.config import DeploymentConfig
 

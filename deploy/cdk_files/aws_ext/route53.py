@@ -1,4 +1,4 @@
-from typing import List, Sequence, Optional
+from typing import List, Optional, Sequence
 
 import boto3
 from boto3_type_annotations.route53 import Client as Route53Client

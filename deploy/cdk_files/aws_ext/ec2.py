@@ -1,8 +1,5 @@
-from typing import List
-
 import boto3
 from boto3_type_annotations.ec2 import Client as EC2Client
-
 from cdk_files.config import DeploymentConfig
 
 EC2_CLIENT: EC2Client = boto3.client("ec2")

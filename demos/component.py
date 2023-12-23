@@ -4,12 +4,10 @@ import sys
 ROOT_PATH = pathlib.Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT_PATH))
 
+import panel as pn
 import param
 
 from nick_derobertis_site.common.component import HTMLComponent
-
-
-import panel as pn
 
 sub_component_template = """
 <p>subcomponent begin</p>
@@ -51,13 +49,16 @@ class MyComp(HTMLComponent):
     model = param.ClassSelector(class_=MyModel)
     template_str = component_template
 
+
 sub_components = []
 for i in range(3):
     button = pn.widgets.Button(name=f"yeah {i}")
     inp = pn.widgets.TextInput(value=button.name)
     inp.link(button, value="name")
     model = MySubModel(button=button, inp=inp)
-    sub_comp = MySubComp(model=model, css_classes=['parent'], child_css_classes=['child'])
+    sub_comp = MySubComp(
+        model=model, css_classes=["parent"], child_css_classes=["child"]
+    )
     sub_components.append(sub_comp)
 
 model = MyModel(sub_components=sub_components)

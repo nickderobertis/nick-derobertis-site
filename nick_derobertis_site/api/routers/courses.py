@@ -1,10 +1,10 @@
-from typing import List, Sequence, Optional
+from typing import List, Optional, Sequence
 
 from derobertis_cv.models.category import CategoryModel
 from derobertis_cv.models.course import CourseModel
 from derobertis_cv.models.university import UniversityModel
 from derobertis_cv.pldata.courses.main import get_courses
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 from nick_derobertis_site.api.routers.software import APISoftwareModel
@@ -28,7 +28,7 @@ class APIUniversityModel(BaseModel):
             logo_url=model.logo_url,
             logo_svg_text=model.logo_svg_text,
             logo_fa_icon_class_str=model.logo_fa_icon_class_str,
-            logo_base64=model.logo_base64
+            logo_base64=model.logo_base64,
         )
 
 

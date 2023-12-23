@@ -1,16 +1,14 @@
-from typing import List, Sequence, Optional
+from typing import List, Optional, Sequence
 
-from derobertis_cv.models.award import AwardModel
 from derobertis_cv.models.category import CategoryModel
 from derobertis_cv.models.resources import ResourceModel
-from derobertis_cv.pldata.awards import get_awards
 from derobertis_cv.pldata.papers import (
     ResearchProjectModel,
     get_working_papers,
     get_works_in_progress,
 )
 from derobertis_cv.pltemplates.coauthor import CoAuthor
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 from pydantic.fields import Field
 
@@ -56,16 +54,18 @@ class APIResourceModel(BaseModel):
     description: Optional[str] = None
 
     @classmethod
-    def from_cv_model(cls, model: ResourceModel) -> 'APIResourceModel':
+    def from_cv_model(cls, model: ResourceModel) -> "APIResourceModel":
         return cls(
             name=model.name,
             url=model.url,
             author=model.author,
-            description=model.description
+            description=model.description,
         )
 
     @classmethod
-    def list_from_cv_seq(cls, models: Sequence[ResourceModel]) -> List["APIResourceModel"]:
+    def list_from_cv_seq(
+        cls, models: Sequence[ResourceModel]
+    ) -> List["APIResourceModel"]:
         return [cls.from_cv_model(mod) for mod in models]
 
 
@@ -84,8 +84,10 @@ class APIResearchModel(BaseModel):
             co_authors=APICoAuthorModel.list_from_cv_seq(model.co_authors or []),
             href=model.href,
             description=model.description or "",
-            categories=APIResearchCategoryModel.list_from_cv_seq(model.categories or []),
-            resources=APIResourceModel.list_from_cv_seq(model.resources or [])
+            categories=APIResearchCategoryModel.list_from_cv_seq(
+                model.categories or []
+            ),
+            resources=APIResourceModel.list_from_cv_seq(model.resources or []),
         )
 
     @classmethod
@@ -122,7 +124,6 @@ STATS = APIResearchStatisticsResponseModel(
     working_papers=APIResearchStatisticsModel(count=COUNT_WP),
     works_in_progress=APIResearchStatisticsModel(count=COUNT_WIP),
 )
-
 
 
 @router.get("/", tags=["research"], response_model=APIResearchResponseModel)

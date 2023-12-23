@@ -1,9 +1,9 @@
 import pathlib
 from typing import Tuple
 
+from cryptography.hazmat.backends import default_backend as crypto_default_backend
 from cryptography.hazmat.primitives import serialization as crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.backends import default_backend as crypto_default_backend
 
 OUT_FOLDER = pathlib.Path(__file__).parent
 
@@ -15,7 +15,9 @@ def _key_pair_name(env_name: str, public: bool = True) -> str:
     return name
 
 
-def key_pair_path(env_name: str, public: bool = True, out_folder: pathlib.Path = OUT_FOLDER):
+def key_pair_path(
+    env_name: str, public: bool = True, out_folder: pathlib.Path = OUT_FOLDER
+):
     return out_folder / _key_pair_name(env_name, public=public)
 
 
@@ -51,7 +53,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("env", help="Name of environment")
-    parser.add_argument('-o', '--out-folder', default=OUT_FOLDER, help='Output folder')
+    parser.add_argument("-o", "--out-folder", default=OUT_FOLDER, help="Output folder")
     args = parser.parse_args()
 
     public_key_path = key_pair_path(args.env, public=True, out_folder=args.out_folder)

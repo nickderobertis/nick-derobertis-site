@@ -6,10 +6,7 @@ from derobertis_cv.pldata.cover_letters.models import (
     ApplicationFocus,
     SpecificApplicationFocus,
 )
-from derobertis_cv.pldata.skills import (
-    CV_SKILL_SECTION_ORDER,
-    get_skills,
-)
+from derobertis_cv.pldata.skills import CV_SKILL_SECTION_ORDER, get_skills
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 

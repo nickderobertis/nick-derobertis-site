@@ -1,13 +1,13 @@
 from datetime import datetime
-from typing import List, Sequence, Optional
+from typing import List, Optional, Sequence
 
 from derobertis_cv.pldata.software import get_software_projects
-from derobertis_cv.pltemplates.software.project import SoftwareProject
 from derobertis_cv.pldata.software.config import (
     EXCLUDED_SOFTWARE_PROJECTS,
     PROFESSIONAL_SOFTWARE_PROJECT_ORDER,
 )
-from fastapi import APIRouter, HTTPException
+from derobertis_cv.pltemplates.software.project import SoftwareProject
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 router = APIRouter()

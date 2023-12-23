@@ -1,6 +1,6 @@
-from typing import Optional, Sequence, Any
+from typing import Any, Optional, Sequence
 
-from pydantic import validator, BaseSettings, Field, root_validator
+from pydantic import BaseSettings, Field, root_validator, validator
 
 
 class AutoscaleSettings(BaseSettings):
@@ -28,67 +28,69 @@ class AWSSettings(BaseSettings):
     root_account_id: Optional[str] = None
 
     class Config:
-        env_prefix = 'aws_'
+        env_prefix = "aws_"
 
 
 class DeploymentNames(BaseSettings):
-    app: str = Field(env='DEPLOY_APP_NAME')
-    short_app: str = Field(env='DEPLOY_APP_SHORT_NAME')
+    app: str = Field(env="DEPLOY_APP_NAME")
+    short_app: str = Field(env="DEPLOY_APP_SHORT_NAME")
 
-    ecr_repo: str = 'repository'
-    vpc: str = 'vpc'
-    ecs_cluster: str = 'cluster'
-    ecs_execution_role: str = 'execution-role'
-    ecs_task_definition: str = 'task-definition'
-    ecs_service: str = 'service'
-    load_balancer: str = 'lb'
-    load_balancer_http_listener: str = 'lb-http-listener'
-    load_balancer_https_listener: str = 'lb-https-listener'
-    load_balancer_listener_target_groups: str = 'lb-listener-tgs'
-    autoscaling_cpu_policy: str = 'as-policy-cpu'
-    autoscaling_memory_policy: str = 'as-policy-memory'
-    autoscaling_requests_policy: str = 'as-policy-requests'
-    autoscaling_target_group: str = 'as-target-group'
-    route53_zone: str = 'hosted-zone'
-    route53_stack: str = 'route53-stack'
-    alias_record: str = 'alias-record'
-    www_record: str = 'cname-www-record'
-    cert: str = 'cert'
-    public_key_param: str = 'public-key-param'
+    ecr_repo: str = "repository"
+    vpc: str = "vpc"
+    ecs_cluster: str = "cluster"
+    ecs_execution_role: str = "execution-role"
+    ecs_task_definition: str = "task-definition"
+    ecs_service: str = "service"
+    load_balancer: str = "lb"
+    load_balancer_http_listener: str = "lb-http-listener"
+    load_balancer_https_listener: str = "lb-https-listener"
+    load_balancer_listener_target_groups: str = "lb-listener-tgs"
+    autoscaling_cpu_policy: str = "as-policy-cpu"
+    autoscaling_memory_policy: str = "as-policy-memory"
+    autoscaling_requests_policy: str = "as-policy-requests"
+    autoscaling_target_group: str = "as-target-group"
+    route53_zone: str = "hosted-zone"
+    route53_stack: str = "route53-stack"
+    alias_record: str = "alias-record"
+    www_record: str = "cname-www-record"
+    cert: str = "cert"
+    public_key_param: str = "public-key-param"
 
     @root_validator
     def add_app_name(cls, values: dict) -> dict:
         out_dict = {}
         for key, value in values.items():
-            if key in ('app', 'short_app'):
+            if key in ("app", "short_app"):
                 out_dict[key] = value
                 continue
             new_name = f"{values['short_app']}-{value}"
             if len(new_name) > 32:
-                raise ValueError(f'AWS name must be 32 characters or less. '
-                                 f'Got {new_name} of length {len(new_name)} for {key}')
+                raise ValueError(
+                    f"AWS name must be 32 characters or less. "
+                    f"Got {new_name} of length {len(new_name)} for {key}"
+                )
             out_dict[key] = new_name
         return out_dict
 
     class Config:
-        env_prefix = 'deploy_name_suffix_'
+        env_prefix = "deploy_name_suffix_"
 
 
 class ParameterNames(BaseSettings):
-    ssh_key: str = 'SSH_PUBLIC_KEY'
+    ssh_key: str = "SSH_PUBLIC_KEY"
 
     class Config:
-        env_prefix = 'deploy_parameter_name_'
+        env_prefix = "deploy_parameter_name_"
 
 
 class HealthCheckSettings(BaseSettings):
-    path: str = '/'
+    path: str = "/"
     interval_minutes: int = 1
     timeout_seconds: int = 30
     healthy_http_codes: Sequence[int] = (200,)
 
     class Config:
-        env_prefix = 'deploy_health_check_'
+        env_prefix = "deploy_health_check_"
 
 
 class DeploymentConfig(BaseSettings):
@@ -108,7 +110,7 @@ class DeploymentConfig(BaseSettings):
 
 
 def get_fully_qualified_name_from_config(cfg: DeploymentConfig, name: str) -> Any:
-    name_parts = name.split('.')
+    name_parts = name.split(".")
     value = cfg
     for part in name_parts:
         value = getattr(value, part)
@@ -119,7 +121,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--get', help='Attribute of config to print, e.g. names.cert')
+    parser.add_argument(
+        "-g", "--get", help="Attribute of config to print, e.g. names.cert"
+    )
 
     args = parser.parse_args()
 
