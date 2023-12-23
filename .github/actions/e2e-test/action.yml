@@ -34,6 +34,7 @@ runs:
       shell: bash
       run: poetry run playwright install
     - name: Run e2e tests
+      working-directory: e2e
       shell: bash
       run: just test
       env:
