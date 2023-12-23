@@ -1,9 +1,15 @@
 import datetime
-from typing import List, Sequence, Optional, cast, Dict, Union
+from typing import Dict, List, Optional, Sequence, Union, cast
 
 from derobertis_cv.models.skill import SkillModel as CVSkillModel
-from derobertis_cv.pldata.cover_letters.models import SpecificApplicationFocus, ApplicationFocus
-from derobertis_cv.pldata.skills import get_skills, CV_EXCLUDE_SKILLS, CV_SKILL_SECTION_ORDER
+from derobertis_cv.pldata.cover_letters.models import (
+    ApplicationFocus,
+    SpecificApplicationFocus,
+)
+from derobertis_cv.pldata.skills import (
+    CV_SKILL_SECTION_ORDER,
+    get_skills,
+)
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -17,7 +23,9 @@ class APISkillModel(BaseModel):
     hours: Optional[float] = None
     first_used: Optional[datetime.date] = None
     experience_length_str: Optional[str] = None
-    priorities: Dict[Union[SpecificApplicationFocus, ApplicationFocus], int] = Field(default_factory=lambda: {})
+    priorities: Dict[Union[SpecificApplicationFocus, ApplicationFocus], int] = Field(
+        default_factory=lambda: {}
+    )
 
     # TODO: maybe need a PR into pydantic2ts as it does not support enums as dictionary keys
     #
@@ -28,7 +36,9 @@ class APISkillModel(BaseModel):
     #   }
     #
     # The current code is a hack to get the enums coming through
-    unused_for_pydantic2ts: Optional[Union[SpecificApplicationFocus, ApplicationFocus]] = None
+    unused_for_pydantic2ts: Optional[
+        Union[SpecificApplicationFocus, ApplicationFocus]
+    ] = None
 
     @classmethod
     def from_cv_skill_model(cls, model: CVSkillModel):
@@ -38,24 +48,27 @@ class APISkillModel(BaseModel):
         # params['priorities'] = model.priority.levels
 
         if not model.parents:
-            params['direct_parent_title'] = None
+            params["direct_parent_title"] = None
         else:
             first_parent = cast(CVSkillModel, model.category)
             if first_parent == model:
-                params['direct_parent_title'] = None
-            elif first_parent.to_lower_case_str() == 'programming' and model.to_lower_case_str() == 'frameworks':
+                params["direct_parent_title"] = None
+            elif (
+                first_parent.to_lower_case_str() == "programming"
+                and model.to_lower_case_str() == "frameworks"
+            ):
                 # TODO: come up with a better way of modifying skill parents
                 #
                 # Currently added an explicit condition to check for the frameworks skill and remove the parent,
                 # but should have a more general system for this
-                params['direct_parent_title'] = None
+                params["direct_parent_title"] = None
             else:
-                params['direct_parent_title'] = first_parent.to_title_case_str()
+                params["direct_parent_title"] = first_parent.to_title_case_str()
 
         if model.experience is not None:
-            params['hours'] = model.experience.hours
-            params['first_used'] = model.experience.begin_date
-            params['experience_length_str'] = model.experience.experience_length_str
+            params["hours"] = model.experience.hours
+            params["first_used"] = model.experience.begin_date
+            params["experience_length_str"] = model.experience.experience_length_str
 
         return cls(**params)
 
@@ -82,9 +95,11 @@ def get_recursive_child_skills(mod: CVSkillModel) -> List[CVSkillModel]:
     return models
 
 
-EXCLUDE_SKILLS = CV_EXCLUDE_SKILLS + ['soft skills']
+EXCLUDE_SKILLS = ["research", "soft skills"]
 
-ALL_SKILL_CV_MODELS = get_skills(exclude_skills=EXCLUDE_SKILLS, exclude_skill_children=False)
+ALL_SKILL_CV_MODELS = get_skills(
+    exclude_skills=EXCLUDE_SKILLS, exclude_skill_children=False
+)
 PARENT_SKILL_CV_MODELS = []
 for model in ALL_SKILL_CV_MODELS:
     parent = model.category
@@ -99,7 +114,8 @@ ALL_SKILL_CV_MODELS.sort(key=lambda skill: skill.level, reverse=True)
 orig_category_names = CV_SKILL_SECTION_ORDER.copy()
 PARENT_SKILL_CV_MODELS.sort(
     key=lambda skill: CV_SKILL_SECTION_ORDER.index(skill.to_title_case_str())
-    if skill.to_title_case_str() in CV_SKILL_SECTION_ORDER else 1000
+    if skill.to_title_case_str() in CV_SKILL_SECTION_ORDER
+    else 1000
 )
 
 PARENT_TO_CHILD_SKILL_CV_MODELS: List[CVSkillModel] = PARENT_SKILL_CV_MODELS.copy()
@@ -113,7 +129,9 @@ for mod in PARENT_SKILL_CV_MODELS:
 
 ALL_SKILL_MODELS = APISkillModel.list_from_cv_skills(ALL_SKILL_CV_MODELS)
 PARENT_SKILL_MODELS = APISkillModel.list_from_cv_skills(PARENT_SKILL_CV_MODELS)
-PARENT_TO_CHILD_SKILL_MODELS = APISkillModel.list_from_cv_skills(PARENT_TO_CHILD_SKILL_CV_MODELS)
+PARENT_TO_CHILD_SKILL_MODELS = APISkillModel.list_from_cv_skills(
+    PARENT_TO_CHILD_SKILL_CV_MODELS
+)
 SKILL_COUNT = len(ALL_SKILL_MODELS)
 PARENT_SKILL_COUNT = len(PARENT_SKILL_MODELS)
 
@@ -138,7 +156,7 @@ async def read_child_skills(title: str):
     raise HTTPException(status_code=404, detail=f"Skill with title {title} not found")
 
 
-@router.get('/stats', tags=['skills'], response_model=APISkillStatisticsModel)
+@router.get("/stats", tags=["skills"], response_model=APISkillStatisticsModel)
 async def read_skill_stats():
     mod = APISkillStatisticsModel(count=SKILL_COUNT, parent_count=PARENT_SKILL_COUNT)
     return mod
