@@ -28,11 +28,11 @@ def build_pdfs():
 
 def _build_pdfs():
     file_path = (SOURCES_ROOT / "fin_model_syllabus.py").resolve()
-    build_by_file_path(file_path)
+    build_by_file_path(str(file_path))
 
-    hybrid_model = cv.CV_MODELS[cv.CVTypes.HYBRID]
-    build_cv_models = (hybrid_model,)
-    cv.build_cvs(build_cv_models, DOCUMENTS_OUT_PATH)
+    professional_model = cv.CV_MODELS[cv.CVTypes.PROFESSIONAL]
+    build_cv_models = (professional_model,)
+    cv.build_cvs(build_cv_models, str(DOCUMENTS_OUT_PATH))
 
 
 def _move_pdfs():
