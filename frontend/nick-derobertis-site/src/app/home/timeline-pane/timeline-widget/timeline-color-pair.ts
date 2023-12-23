@@ -3,7 +3,6 @@ export interface TimelineColorPair {
   text: string;
 }
 
-// https://coolors.co/273043-9c6615-c2aff0-6e0e0a-c45baa-ad343e-d63230-a755c2-9a031e-ef476f
 export const TIMELINE_COLORS: TimelineColorPair[] = [
   { background: '#273043', text: 'white' },
   { background: '#9c6615', text: 'white' },
@@ -15,4 +14,6 @@ export const TIMELINE_COLORS: TimelineColorPair[] = [
   { background: '#a755c2', text: 'white' },
   { background: '#9a031e', text: 'white' },
   { background: '#ef476f', text: 'white' },
+  { background: '#113583', text: 'white' },
+  { background: '#fdc9e6', text: 'black' },
 ];
