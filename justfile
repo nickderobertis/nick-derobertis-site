@@ -126,3 +126,6 @@ dev-fe:
 
 generate:
     just poetry run root ./build.sh
+
+qa:
+    ./build-docker.sh && ./run-docker.sh
