@@ -93,6 +93,7 @@ jobs:
 
   test:
     name: Test
+    needs: deploy
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
