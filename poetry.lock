@@ -740,13 +740,13 @@ dev = ["PyTest", "PyTest-Cov", "bump2version (<1)", "sphinx (<2)", "tox"]
 
 [[package]]
 name = "derobertis-cv"
-version = "1.3.3"
+version = "1.4.0"
 description = "Nick DeRobertis' CV Data and pyexlatex Build"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "derobertis_cv-1.3.3-py3-none-any.whl", hash = "sha256:33d15d3a24fbc1b9ef612fd38768c5bbe9e8f555819b0c8c2f7c9d7ad959b0c3"},
-    {file = "derobertis_cv-1.3.3.tar.gz", hash = "sha256:769a5ea3b871f2d507ee923f06c93860f20e84d7bce982fde492236f84be4092"},
+    {file = "derobertis_cv-1.4.0-py3-none-any.whl", hash = "sha256:be0dafc18e501bc72ea4d461522f4ef0316bd7b0653f934bdd2f6ed6db2bfa4b"},
+    {file = "derobertis_cv-1.4.0.tar.gz", hash = "sha256:23638667c9e321a774e0f44191e051e0ad0e2e88cd40ef88b5f9fe8b543d9da8"},
 ]
 
 [package.dependencies]
