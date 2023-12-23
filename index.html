@@ -335,18 +335,17 @@
 <h1 id="developing">Developing<a class="headerlink" href="#developing" title="Link to this heading">¶</a></h1>
 <section id="backend-development">
 <h2 id="backend-development">Backend Development<a class="headerlink" href="#backend-development" title="Link to this heading">¶</a></h2>
-<p>Make sure you have <code class="docutils literal notranslate"><span class="pre">pipenv</span></code> install and run <code class="docutils literal notranslate"><span class="pre">pipenv</span> <span class="pre">sync</span></code>.</p>
-<p>Run <code class="docutils literal notranslate"><span class="pre">./run-be-local.sh</span></code> to start the backend server.</p>
+<p>Run <code class="docutils literal notranslate"><span class="pre">just</span> <span class="pre">dev-be</span></code> to run the backend server.</p>
 </section>
 <section id="frontend-development">
 <h2 id="frontend-development">Frontend Development<a class="headerlink" href="#frontend-development" title="Link to this heading">¶</a></h2>
-<p>Make sure you have <code class="docutils literal notranslate"><span class="pre">npm</span></code> installed and run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">install</span></code>.</p>
-<p>Run <code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">run</span> <span class="pre">dev:ssr</span></code> to start the frontend server.</p>
+<p>Run <code class="docutils literal notranslate"><span class="pre">just</span> <span class="pre">dev-fe</span></code> to run the frontend server. You may need to
+cd into the frontend/nick-derobertis-site directory and run <code class="docutils literal notranslate"><span class="pre">pnpm</span> <span class="pre">i</span></code> first.</p>
 </section>
 <section id="qa">
 <h2 id="qa">QA<a class="headerlink" href="#qa" title="Link to this heading">¶</a></h2>
 <p>Make sure you have Docker installed.</p>
-<p>Run <code class="docutils literal notranslate"><span class="pre">./build-docker.sh</span> <span class="pre">&amp;&amp;</span> <span class="pre">./run-docker.sh</span></code> to start a production-like
+<p>Run <code class="docutils literal notranslate"><span class="pre">just</span> <span class="pre">qa</span></code> to start a production-like
 build. Run <code class="docutils literal notranslate"><span class="pre">./stop-docker.sh</span></code> to stop.</p>
 </section>
 <section id="development-status">
