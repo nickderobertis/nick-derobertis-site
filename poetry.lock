@@ -740,13 +740,13 @@ dev = ["PyTest", "PyTest-Cov", "bump2version (<1)", "sphinx (<2)", "tox"]
 
 [[package]]
 name = "derobertis-cv"
-version = "1.4.0"
+version = "1.5.0"
 description = "Nick DeRobertis' CV Data and pyexlatex Build"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "derobertis_cv-1.4.0-py3-none-any.whl", hash = "sha256:be0dafc18e501bc72ea4d461522f4ef0316bd7b0653f934bdd2f6ed6db2bfa4b"},
-    {file = "derobertis_cv-1.4.0.tar.gz", hash = "sha256:23638667c9e321a774e0f44191e051e0ad0e2e88cd40ef88b5f9fe8b543d9da8"},
+    {file = "derobertis_cv-1.5.0-py3-none-any.whl", hash = "sha256:c608f91d703189da9fe59ada2875952bcdd8cbfc35fba17e2b3c919e5a06b858"},
+    {file = "derobertis_cv-1.5.0.tar.gz", hash = "sha256:541c5948a333c32e7fb84de49622b14cd65fc8e64750e513acf1225353af6907"},
 ]
 
 [package.dependencies]
@@ -3345,13 +3345,13 @@ tornado = ["tornado (>=5)"]
 
 [[package]]
 name = "setuptools"
-version = "69.0.2"
+version = "69.0.3"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "setuptools-69.0.2-py3-none-any.whl", hash = "sha256:1e8fdff6797d3865f37397be788a4e3cba233608e9b509382a2777d25ebde7f2"},
-    {file = "setuptools-69.0.2.tar.gz", hash = "sha256:735896e78a4742605974de002ac60562d286fa8051a7e2299445e8e8fbb01aa6"},
+    {file = "setuptools-69.0.3-py3-none-any.whl", hash = "sha256:385eb4edd9c9d5c17540511303e39a147ce2fc04bc55289c322b9e5904fe2c05"},
+    {file = "setuptools-69.0.3.tar.gz", hash = "sha256:be1af57fc409f93647f2e8e4573a142ed38724b8cdd389706a867bb4efcf1e78"},
 ]
 
 [package.extras]
