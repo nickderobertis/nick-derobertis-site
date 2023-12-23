@@ -88,6 +88,8 @@ poetry command target *ARGS:
 run target *ARGS:
     @cd {{invocation_directory()}} && just poetry run {{target}} {{ARGS}}
 
+# TODO: Can remove all the --no-root workarounds once poetry for applications is solved
+#  See: https://github.com/python-poetry/poetry/issues/1132
 poetry-all +ARGS:
     #!/usr/bin/env bash
     # Split args into command from the first argument
@@ -95,15 +97,27 @@ poetry-all +ARGS:
     IFS=' ' read -r command args <<< "{{ARGS}}"
 
     for target in root lint docs; do
-        echo "just poetry $command $target $args"
-        just poetry $command $target $args
+        # If target is not root and command is install, need to add --no-root option
+        if [ "$target" != "root" ] && [ "$command" = "install" ]; then
+            full_args="--no-root $args"
+        else
+            full_args="$args"
+        fi;
+        echo "just poetry $command $target $full_args"
+        just poetry $command $target $full_args
     done
 
 sync *TARGET:
     #!/usr/bin/env bash
     # Handle specific target sync
     if [ ! -z "{{TARGET}}" ]; then
-        just poetry install {{TARGET}} --all-extras --sync
+        # If target is not root, need to add --no-root option
+        if [ "{{TARGET}}" != "root" ]; then
+            just poetry install {{TARGET}} --all-extras --no-root --sync
+            exit 0;
+        fi
+
+        just poetry install root --all-extras --sync
         exit 0;
     fi
 
