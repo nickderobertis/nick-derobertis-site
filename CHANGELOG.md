@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.0](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.2.0...v1.3.0) (2023-12-23)
+
+
+### Features
+
+* Add e2e test suite ([e8ab88e](https://github.com/nickderobertis/nick-derobertis-site/commit/e8ab88ed9650853c92e95b48341543f89619478b))
+* Remove ssh capability from container as it's causing issues on CI ([ce1756e](https://github.com/nickderobertis/nick-derobertis-site/commit/ce1756e12ceb19ed95791b308a9782173acbe57c))
+
 ## [1.2.0](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.1.0...v1.2.0) (2023-12-23)
 
 
