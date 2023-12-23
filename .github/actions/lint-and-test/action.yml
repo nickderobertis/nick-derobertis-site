@@ -3,6 +3,16 @@ description: "Runs isort, black, flake8, mypy, pytest. Be sure to run install-de
 runs:
   using: composite
   steps:
+    - name: Start local server in background
+      shell: bash
+      run: just qa &
     - name: Check code formatting, linting, and run tests
       shell: bash
       run: just check
+    - name: Wait for local server to be up
+      shell: bash
+      run: |
+        curl --retry 30 --retry-delay 3 --fail --retry-connrefused -Lsv localhost
+    - uses: ./.github/actions/e2e-test
+      with:
+        fe-url: http://localhost

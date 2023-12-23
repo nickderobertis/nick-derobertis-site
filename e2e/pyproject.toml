@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "e2e"
+version = "1.0.0"
+description = "Nick DeRobertis Site E2E Tests"
+authors = ["Nick DeRobertis <derobertis.nick@gmail.com>"]
+readme = "README.md"
+packages = [
+    {include = "test"},
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0.0"
+pytest-playwright = "*"
+pydantic = {extras = ["dotenv"], version = "<2"}
+requests = "*"
+rich = "*"
