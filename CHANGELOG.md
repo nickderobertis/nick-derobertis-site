@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.0](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.1.0...v1.2.0) (2023-12-23)
+
+
+### Features
+
+* Better formatting for timeline description on mobile ([6973d5c](https://github.com/nickderobertis/nick-derobertis-site/commit/6973d5c4dc2afb0f5f3cb98faacf233761d0f9c0))
+* Improve spacing for timeline view on mobile ([3fc706a](https://github.com/nickderobertis/nick-derobertis-site/commit/3fc706ad18ef11f0da3e3bfe0d090a601e7237e7))
+
+
+### Bug Fixes
+
+* Fix bottom part of timeline by assigning colors ([19e0011](https://github.com/nickderobertis/nick-derobertis-site/commit/19e00110c414c5f37d4712dbc79ac9e505fc2888))
+
 ## [1.1.0](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.0.1...v1.1.0) (2023-12-23)
 
 
