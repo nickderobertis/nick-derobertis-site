@@ -4,7 +4,7 @@ version = "1.0.0"
 
 [tool.poetry]
 name = "nick-derobertis-site"
-version = "1.0.0"
+version = "1.0.1"
 description = "Nick DeRobertis' Personal Website"
 authors = ["Nick DeRobertis <whoopnip@gmail.com>"]
 readme = "README.md"
