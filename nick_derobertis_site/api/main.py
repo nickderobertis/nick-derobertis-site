@@ -1,26 +1,30 @@
 import os
 
+import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from nick_derobertis_site.api.routers import skills, awards, research, software, courses, timeline
-import sentry_sdk
 
+from nick_derobertis_site.api.routers import (
+    awards,
+    courses,
+    research,
+    skills,
+    software,
+    timeline,
+)
 from nick_derobertis_site.logger import logger
 
-ENVIRONMENT_NAME = os.environ.get('NDS_ENVIRONMENT_NAME', 'development')
-SENTRY_DSN = os.environ.get('BE_SENTRY_DSN', '')
+ENVIRONMENT_NAME = os.environ.get("NDS_ENVIRONMENT_NAME", "development")
+SENTRY_DSN = os.environ.get("BE_SENTRY_DSN", "")
 
-logger.info(f'Starting API in environment {ENVIRONMENT_NAME}')
+logger.info(f"Starting API in environment {ENVIRONMENT_NAME}")
 
 if SENTRY_DSN:
-    sentry_sdk.init(
-        SENTRY_DSN,
-        traces_sample_rate=1.0
-    )
-    logger.info(f'Sentry started with DSN: {SENTRY_DSN}')
+    sentry_sdk.init(SENTRY_DSN, traces_sample_rate=1.0)
+    logger.info(f"Sentry started with DSN: {SENTRY_DSN}")
 
 
-app = FastAPI(openapi_prefix='/api')
+app = FastAPI()
 
 origins = [
     "http://localhost",

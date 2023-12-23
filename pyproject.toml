@@ -1,3 +1,7 @@
+[project]
+name = "nick-derobertis-site"
+version = "1.0.0"
+
 [tool.poetry]
 name = "nick-derobertis-site"
 version = "1.0.0"
@@ -29,10 +33,23 @@ documentation = "https://nickderobertis.github.io/nick-derobertis-site"
 
 [tool.poetry.dependencies]
 python = ">=3.10"
+panel = "*"
+jupyterlab = "*"
+awesome-panel-extensions = "*"
+fire = "*"
+derobertis-cv = "*"
+pydantic = "*"
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+pydantic-to-typescript = "*"
+sentry-sdk = "*"
 
 [tool.poetry.group.test.dependencies]
 pytest = "*"
 pytest-cov = "*"
+
+[tool.setuptools]
+packages = ["nick_derobertis_site"]
 
 [tool.black]
 include = 'nick_derobertis_site.*\.pyi?$|tests.*\.pyi?$'

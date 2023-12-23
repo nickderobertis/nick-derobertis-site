@@ -117,3 +117,12 @@ inspect-build:
     @unzip -l dist/*.whl
     @echo "Contents of wheel:"
     @tar -tvf dist/*.tar.gz
+
+dev-be:
+    just poetry run root ./run-be-local.sh
+
+dev-fe:
+    cd frontend/nick-derobertis-site && npm run dev:ssr
+
+generate:
+    just poetry run root ./build.sh
