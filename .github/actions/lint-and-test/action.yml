@@ -3,12 +3,15 @@ description: "Runs isort, black, flake8, mypy, pytest. Be sure to run install-de
 runs:
   using: composite
   steps:
-    - name: Start local server in background
-      shell: bash
-      run: just qa &
     - name: Check code formatting, linting, and run tests
       shell: bash
       run: just check
+    - name: Build docker image
+      shell: bash
+      run: just build-docker
+    - name: Start local server in background
+      shell: bash
+      run: just run-docker &
     - name: Wait for local server to be up
       shell: bash
       run: |
