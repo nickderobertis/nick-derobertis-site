@@ -272,15 +272,15 @@
             
   <h1 id="modules-nick-derobertis-site-api-routers-software--page-root">Source code for nick_derobertis_site.api.routers.software</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">from</span> <span class="nn">derobertis_cv.pldata.software</span> <span class="kn">import</span> <span class="n">get_software_projects</span>
-<span class="kn">from</span> <span class="nn">derobertis_cv.pltemplates.software.project</span> <span class="kn">import</span> <span class="n">SoftwareProject</span>
 <span class="kn">from</span> <span class="nn">derobertis_cv.pldata.software.config</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">EXCLUDED_SOFTWARE_PROJECTS</span><span class="p">,</span>
     <span class="n">PROFESSIONAL_SOFTWARE_PROJECT_ORDER</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span>
+<span class="kn">from</span> <span class="nn">derobertis_cv.pltemplates.software.project</span> <span class="kn">import</span> <span class="n">SoftwareProject</span>
+<span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">APIRouter</span>
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span>
 
 <span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">()</span>

@@ -272,11 +272,14 @@
             
   <h1 id="modules-nick-derobertis-site-api-routers-skills--page-root">Source code for nick_derobertis_site.api.routers.skills</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">derobertis_cv.models.skill</span> <span class="kn">import</span> <span class="n">SkillModel</span> <span class="k">as</span> <span class="n">CVSkillModel</span>
-<span class="kn">from</span> <span class="nn">derobertis_cv.pldata.cover_letters.models</span> <span class="kn">import</span> <span class="n">SpecificApplicationFocus</span><span class="p">,</span> <span class="n">ApplicationFocus</span>
-<span class="kn">from</span> <span class="nn">derobertis_cv.pldata.skills</span> <span class="kn">import</span> <span class="n">get_skills</span><span class="p">,</span> <span class="n">CV_EXCLUDE_SKILLS</span><span class="p">,</span> <span class="n">CV_SKILL_SECTION_ORDER</span>
+<span class="kn">from</span> <span class="nn">derobertis_cv.pldata.cover_letters.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ApplicationFocus</span><span class="p">,</span>
+    <span class="n">SpecificApplicationFocus</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">derobertis_cv.pldata.skills</span> <span class="kn">import</span> <span class="n">CV_SKILL_SECTION_ORDER</span><span class="p">,</span> <span class="n">get_skills</span>
 <span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span>
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
 
@@ -292,7 +295,9 @@
     <span class="n">hours</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">first_used</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">experience_length_str</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">priorities</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SpecificApplicationFocus</span><span class="p">,</span> <span class="n">ApplicationFocus</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{})</span>
+    <span class="n">priorities</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SpecificApplicationFocus</span><span class="p">,</span> <span class="n">ApplicationFocus</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{}</span>
+    <span class="p">)</span>
 
     <span class="c1"># TODO: maybe need a PR into pydantic2ts as it does not support enums as dictionary keys</span>
     <span class="c1">#</span>
@@ -303,7 +308,9 @@
     <span class="c1">#   }</span>
     <span class="c1">#</span>
     <span class="c1"># The current code is a hack to get the enums coming through</span>
-    <span class="n">unused_for_pydantic2ts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">SpecificApplicationFocus</span><span class="p">,</span> <span class="n">ApplicationFocus</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">unused_for_pydantic2ts</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+        <span class="n">Union</span><span class="p">[</span><span class="n">SpecificApplicationFocus</span><span class="p">,</span> <span class="n">ApplicationFocus</span><span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="APISkillModel.from_cv_skill_model">
 <a class="viewcode-back" href="../../../../api/nick_derobertis_site.api.routers.html#nick_derobertis_site.api.routers.skills.APISkillModel.from_cv_skill_model">[docs]</a>
@@ -315,24 +322,27 @@
         <span class="c1"># params['priorities'] = model.priority.levels</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
-            <span class="n">params</span><span class="p">[</span><span class="s1">'direct_parent_title'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">"direct_parent_title"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">first_parent</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">CVSkillModel</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">category</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">first_parent</span> <span class="o">==</span> <span class="n">model</span><span class="p">:</span>
-                <span class="n">params</span><span class="p">[</span><span class="s1">'direct_parent_title'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">elif</span> <span class="n">first_parent</span><span class="o">.</span><span class="n">to_lower_case_str</span><span class="p">()</span> <span class="o">==</span> <span class="s1">'programming'</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">to_lower_case_str</span><span class="p">()</span> <span class="o">==</span> <span class="s1">'frameworks'</span><span class="p">:</span>
+                <span class="n">params</span><span class="p">[</span><span class="s2">"direct_parent_title"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="n">first_parent</span><span class="o">.</span><span class="n">to_lower_case_str</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"programming"</span>
+                <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">to_lower_case_str</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"frameworks"</span>
+            <span class="p">):</span>
                 <span class="c1"># TODO: come up with a better way of modifying skill parents</span>
                 <span class="c1">#</span>
                 <span class="c1"># Currently added an explicit condition to check for the frameworks skill and remove the parent,</span>
                 <span class="c1"># but should have a more general system for this</span>
-                <span class="n">params</span><span class="p">[</span><span class="s1">'direct_parent_title'</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">params</span><span class="p">[</span><span class="s2">"direct_parent_title"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">params</span><span class="p">[</span><span class="s1">'direct_parent_title'</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_parent</span><span class="o">.</span><span class="n">to_title_case_str</span><span class="p">()</span>
+                <span class="n">params</span><span class="p">[</span><span class="s2">"direct_parent_title"</span><span class="p">]</span> <span class="o">=</span> <span class="n">first_parent</span><span class="o">.</span><span class="n">to_title_case_str</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">experience</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">params</span><span class="p">[</span><span class="s1">'hours'</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">experience</span><span class="o">.</span><span class="n">hours</span>
-            <span class="n">params</span><span class="p">[</span><span class="s1">'first_used'</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">experience</span><span class="o">.</span><span class="n">begin_date</span>
-            <span class="n">params</span><span class="p">[</span><span class="s1">'experience_length_str'</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">experience</span><span class="o">.</span><span class="n">experience_length_str</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">"hours"</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">experience</span><span class="o">.</span><span class="n">hours</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">"first_used"</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">experience</span><span class="o">.</span><span class="n">begin_date</span>
+            <span class="n">params</span><span class="p">[</span><span class="s2">"experience_length_str"</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">experience</span><span class="o">.</span><span class="n">experience_length_str</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span></div>
 
@@ -370,9 +380,11 @@
 
 
 
-<span class="n">EXCLUDE_SKILLS</span> <span class="o">=</span> <span class="n">CV_EXCLUDE_SKILLS</span> <span class="o">+</span> <span class="p">[</span><span class="s1">'soft skills'</span><span class="p">]</span>
+<span class="n">EXCLUDE_SKILLS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"research"</span><span class="p">,</span> <span class="s2">"soft skills"</span><span class="p">]</span>
 
-<span class="n">ALL_SKILL_CV_MODELS</span> <span class="o">=</span> <span class="n">get_skills</span><span class="p">(</span><span class="n">exclude_skills</span><span class="o">=</span><span class="n">EXCLUDE_SKILLS</span><span class="p">,</span> <span class="n">exclude_skill_children</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ALL_SKILL_CV_MODELS</span> <span class="o">=</span> <span class="n">get_skills</span><span class="p">(</span>
+    <span class="n">exclude_skills</span><span class="o">=</span><span class="n">EXCLUDE_SKILLS</span><span class="p">,</span> <span class="n">exclude_skill_children</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
 <span class="n">PARENT_SKILL_CV_MODELS</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">ALL_SKILL_CV_MODELS</span><span class="p">:</span>
     <span class="n">parent</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">category</span>
@@ -387,7 +399,8 @@
 <span class="n">orig_category_names</span> <span class="o">=</span> <span class="n">CV_SKILL_SECTION_ORDER</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 <span class="n">PARENT_SKILL_CV_MODELS</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
     <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">skill</span><span class="p">:</span> <span class="n">CV_SKILL_SECTION_ORDER</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">to_title_case_str</span><span class="p">())</span>
-    <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">to_title_case_str</span><span class="p">()</span> <span class="ow">in</span> <span class="n">CV_SKILL_SECTION_ORDER</span> <span class="k">else</span> <span class="mi">1000</span>
+    <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">to_title_case_str</span><span class="p">()</span> <span class="ow">in</span> <span class="n">CV_SKILL_SECTION_ORDER</span>
+    <span class="k">else</span> <span class="mi">1000</span>
 <span class="p">)</span>
 
 <span class="n">PARENT_TO_CHILD_SKILL_CV_MODELS</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">CVSkillModel</span><span class="p">]</span> <span class="o">=</span> <span class="n">PARENT_SKILL_CV_MODELS</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -401,7 +414,9 @@
 
 <span class="n">ALL_SKILL_MODELS</span> <span class="o">=</span> <span class="n">APISkillModel</span><span class="o">.</span><span class="n">list_from_cv_skills</span><span class="p">(</span><span class="n">ALL_SKILL_CV_MODELS</span><span class="p">)</span>
 <span class="n">PARENT_SKILL_MODELS</span> <span class="o">=</span> <span class="n">APISkillModel</span><span class="o">.</span><span class="n">list_from_cv_skills</span><span class="p">(</span><span class="n">PARENT_SKILL_CV_MODELS</span><span class="p">)</span>
-<span class="n">PARENT_TO_CHILD_SKILL_MODELS</span> <span class="o">=</span> <span class="n">APISkillModel</span><span class="o">.</span><span class="n">list_from_cv_skills</span><span class="p">(</span><span class="n">PARENT_TO_CHILD_SKILL_CV_MODELS</span><span class="p">)</span>
+<span class="n">PARENT_TO_CHILD_SKILL_MODELS</span> <span class="o">=</span> <span class="n">APISkillModel</span><span class="o">.</span><span class="n">list_from_cv_skills</span><span class="p">(</span>
+    <span class="n">PARENT_TO_CHILD_SKILL_CV_MODELS</span>
+<span class="p">)</span>
 <span class="n">SKILL_COUNT</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ALL_SKILL_MODELS</span><span class="p">)</span>
 <span class="n">PARENT_SKILL_COUNT</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">PARENT_SKILL_MODELS</span><span class="p">)</span>
 
@@ -437,7 +452,7 @@
 
 <div class="viewcode-block" id="read_skill_stats">
 <a class="viewcode-back" href="../../../../api/nick_derobertis_site.api.routers.html#nick_derobertis_site.api.routers.skills.read_skill_stats">[docs]</a>
-<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'/stats'</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">'skills'</span><span class="p">],</span> <span class="n">response_model</span><span class="o">=</span><span class="n">APISkillStatisticsModel</span><span class="p">)</span>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/stats"</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"skills"</span><span class="p">],</span> <span class="n">response_model</span><span class="o">=</span><span class="n">APISkillStatisticsModel</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">read_skill_stats</span><span class="p">():</span>
     <span class="n">mod</span> <span class="o">=</span> <span class="n">APISkillStatisticsModel</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="n">SKILL_COUNT</span><span class="p">,</span> <span class="n">parent_count</span><span class="o">=</span><span class="n">PARENT_SKILL_COUNT</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mod</span></div>
