@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.0](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.0.1...v1.1.0) (2023-12-23)
+
+
+### Features
+
+* Update derobertis-cv to 1.4.0 ([e4b6109](https://github.com/nickderobertis/nick-derobertis-site/commit/e4b6109b4b660b3fec21190175340a42215a317e))
+
 ## [1.0.1](https://github.com/nickderobertis/nick-derobertis-site/compare/v1.0.0...v1.0.1) (2023-12-23)
 
 
