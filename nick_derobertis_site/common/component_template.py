@@ -1,1 +1,0 @@
-from awesome_panel_extensions.component_template import ComponentTemplate, ComponentTemplateEnvironment

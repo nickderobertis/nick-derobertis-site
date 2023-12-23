@@ -1,1 +1,0 @@
-from awesome_panel_extensions.updating import UpdatingItem
