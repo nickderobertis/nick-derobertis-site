@@ -7,6 +7,7 @@ specifiers:
   json-schema-to-typescript: ^13.1.1
   lint-staged: ^12.4.1
   playwright: 1.61.1
+  pngjs: 7.0.0
 
 devDependencies:
   '@commitlint/cli': 16.3.0
@@ -15,6 +16,7 @@ devDependencies:
   json-schema-to-typescript: 13.1.1
   lint-staged: 12.5.0
   playwright: 1.61.1
+  pngjs: 7.0.0
 
 packages:
 
@@ -1415,6 +1417,11 @@ packages:
       playwright-core: 1.61.1
     optionalDependencies:
       fsevents: 2.3.2
+    dev: true
+
+  /pngjs/7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
     dev: true
 
   /prettier/2.8.8:

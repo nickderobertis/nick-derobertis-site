@@ -1,6 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 const { chromium } = require('playwright');
+const { PNG } = require('pngjs');
 const config = require('../playwright.config');
 
 const routes = {
@@ -32,6 +33,24 @@ const deterministicStyles = `
   }
 `;
 
+function pngVisuallyEqual(left, right) {
+  const leftImage = PNG.sync.read(left);
+  const rightImage = PNG.sync.read(right);
+  if (leftImage.width !== rightImage.width || leftImage.height !== rightImage.height) {
+    return false;
+  }
+
+  let differentPixels = 0;
+  for (let offset = 0; offset < leftImage.data.length; offset += 4) {
+    if (!leftImage.data.subarray(offset, offset + 4)
+      .equals(rightImage.data.subarray(offset, offset + 4))) {
+      differentPixels += 1;
+      if (differentPixels > config.visualStability.pixelDifferenceLimit) return false;
+    }
+  }
+  return true;
+}
+
 async function settle(page) {
   await page.waitForLoadState('networkidle', { timeout: config.settleTimeout });
   await page.evaluate(async () => {
@@ -49,6 +68,20 @@ async function settle(page) {
     );
   });
   await page.addStyleTag({ content: deterministicStyles });
+  await page.evaluate(() => {
+    const carousel = document.querySelector('#myCarousel');
+    if (!carousel) return;
+
+    // Removing data-ride prevents initialization, but does not cancel a timer
+    // that Bootstrap has already started while the page was settling.
+    if (window.jQuery) window.jQuery(carousel).carousel('pause');
+    carousel.removeAttribute('data-ride');
+    const items = Array.from(carousel.querySelectorAll('.carousel-item'));
+    items.forEach((item, index) => item.classList.toggle('active', index === 0));
+    carousel.querySelectorAll('.carousel-indicators li').forEach(
+      (indicator, index) => indicator.classList.toggle('active', index === 0),
+    );
+  });
 }
 
 async function open(page, route) {
@@ -62,11 +95,30 @@ async function open(page, route) {
 async function save(pageOrLocator, segments, options = {}) {
   const outputPath = path.join(config.outputDirectory, ...segments);
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
-  await pageOrLocator.screenshot({
+  const screenshotOptions = {
     animations: 'disabled',
-    path: outputPath,
     ...options,
-  });
+  };
+  const deadline = Date.now() + config.visualStability.timeout;
+  let previous = await pageOrLocator.screenshot(screenshotOptions);
+
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, config.visualStability.interval));
+    const current = await pageOrLocator.screenshot(screenshotOptions);
+    if (current.equals(previous)) {
+      try {
+        const existing = await fs.readFile(outputPath);
+        if (pngVisuallyEqual(existing, current)) return;
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error;
+      }
+      await fs.writeFile(outputPath, current);
+      return;
+    }
+    previous = current;
+  }
+
+  throw new Error(`Visual state did not settle for ${segments.join('/')}`);
 }
 
 async function captureRoutes(page, viewportName) {
@@ -87,16 +139,6 @@ async function captureHome(page, viewportName) {
   await page.locator('nds-award-card').first().waitFor({
     state: 'visible',
     timeout: config.settleTimeout,
-  });
-
-  // Stop Bootstrap's automatic carousel timer on the first, canonical slide.
-  await page.evaluate(() => {
-    const items = Array.from(document.querySelectorAll('#myCarousel .carousel-item'));
-    items.forEach((item, index) => item.classList.toggle('active', index === 0));
-    document.querySelectorAll('#myCarousel .carousel-indicators li').forEach(
-      (indicator, index) => indicator.classList.toggle('active', index === 0),
-    );
-    document.querySelector('#myCarousel')?.removeAttribute('data-ride');
   });
 
   for (const [paneName, selector] of Object.entries(homePanes)) {
@@ -142,14 +184,6 @@ async function captureHome(page, viewportName) {
 
 async function main() {
   await fs.mkdir(config.outputDirectory, { recursive: true });
-  await Promise.all(
-    ['routes', 'home-panes'].map((directory) =>
-      fs.rm(path.join(config.outputDirectory, directory), {
-        force: true,
-        recursive: true,
-      }),
-    ),
-  );
   const browser = await chromium.launch({ headless: true });
   try {
     for (const [viewportName, viewport] of Object.entries(config.viewports)) {
