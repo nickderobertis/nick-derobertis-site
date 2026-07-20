@@ -16,9 +16,8 @@ const pages = [
   },
   {
     link: "Software",
-    heading: "Software",
+    heading: "Open-Source Software",
     path: "software",
-    remote: /Software remote loaded/,
   },
   {
     link: "Courses",
@@ -81,7 +80,9 @@ test("navigation works with the keyboard", async ({ page }) => {
 test("a remote consumes another remote", async ({ page }) => {
   await page.goto("research");
   await page.getByText("Related software federation").click();
-  await expect(page.getByText(/Software remote loaded/)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Open-Source Software" }),
+  ).toBeVisible();
 });
 
 test("the static 404 is intentional and the router recovers unknown routes", async ({

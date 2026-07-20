@@ -22,8 +22,8 @@
   {
     "path": "/software",
     "label": "Software",
-    "heading": "Software",
-    "description": "Open-source tools for finance, research, and Python.",
+    "heading": "Open-Source Software",
+    "description": "Free and open-source projects for finance, research, data, and Python.",
     "remote": "software"
   },
   {
