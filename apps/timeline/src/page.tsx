@@ -3,14 +3,22 @@ import { type CSSProperties, useId, useMemo, useState } from "react";
 import "./timeline.css";
 
 type Entry = Timeline[number];
-const COLORS = [
-  ["#28344a", "#ac7410"],
-  ["#bba5ed", "#7f110c"],
-  ["#c055a9", "#8b1010"],
-  ["#b13a45", "#dd3434"],
-  ["#a94fc8", "#a90026"],
-  ["#ef3e66", "#163c8a"],
-] as const;
+const ENTRY_COLORS: Readonly<Record<string, string>> = {
+  carbon_health_senior: "#ac7410",
+  carbon_health_staff: "#bba5ed",
+  claimfound_cto: "#8b1010",
+  cnc_managing_partner: "#ef3e66",
+  covariance_pm_eng: "#28344a",
+  evb_portfolio_analyst: "#163c8a",
+  frb_intern: "#ffb7e3",
+  parliament_tutor: "#c055a9",
+  spendoso_cto: "#7f110c",
+  uf_ga: "#dd3434",
+  "uf-ph-d-in-business-administration-finance-and-real-estate": "#b13a45",
+  "vcu-bachelor-of-science-in-business-concentration-in-finance": "#a94fc8",
+  "vcu-master-of-science-in-business-concentration-in-finance": "#a90026",
+  vcu_ga: "#dd3434",
+};
 
 function previewState() {
   if (typeof window === "undefined") return "ready";
@@ -129,7 +137,7 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
           className="timeline-chart"
           aria-label="Education and employment by year"
         >
-          {groups.map(([name, group], groupIndex) => (
+          {groups.map(([name, group]) => (
             <div className="timeline-row" key={name}>
               <span className="timeline-organization">
                 <span className="timeline-wide">
@@ -140,7 +148,7 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
                 </span>
               </span>
               <div className="timeline-periods">
-                {group.map((entry, entryIndex) => {
+                {group.map((entry) => {
                   const start = position(entry.start, finalYear);
                   const end = entry.end ? position(entry.end, finalYear) : 100;
                   return (
@@ -149,10 +157,7 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
                       key={entry.id}
                       style={
                         {
-                          "--period-color":
-                            COLORS[groupIndex % COLORS.length]?.[
-                              entryIndex % 2
-                            ],
+                          "--period-color": ENTRY_COLORS[entry.id],
                           left: `${start}%`,
                           width: `${Math.max(2, end - start)}%`,
                         } as CSSProperties

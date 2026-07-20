@@ -1,3 +1,4 @@
+import "@site/design-system";
 import { createRoot } from "react-dom/client";
 import TimelinePage from "./page";
 
