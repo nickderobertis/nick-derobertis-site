@@ -542,14 +542,23 @@ a {
   padding: clamp(3rem, 7vw, 6rem) max(var(--space), calc((100vw - 1100px) / 2));
   background: #f3eaea;
 }
-.awards-heading { text-align: center; }
-.awards-heading .eyebrow { margin-bottom: 0.35rem; }
+.awards-heading {
+  text-align: center;
+}
+.awards-heading .eyebrow {
+  margin-bottom: 0.35rem;
+}
 .awards-heading h2 {
   margin: 0;
   color: var(--navy);
-  font: 700 clamp(2.25rem, 6vw, 4rem) / 1 Georgia, serif;
+  font:
+    700 clamp(2.25rem, 6vw, 4rem) / 1 Georgia,
+    serif;
 }
-.awards-heading > p:last-child { margin-bottom: 0; color: var(--muted); }
+.awards-heading > p:last-child {
+  margin-bottom: 0;
+  color: var(--muted);
+}
 .awards-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -559,8 +568,13 @@ a {
   border-radius: 1rem;
   background: rgb(255 255 255 / 75%);
 }
-.awards-stats div { padding: 1rem; text-align: center; }
-.awards-stats div + div { border-left: 1px solid #ded2d2; }
+.awards-stats div {
+  padding: 1rem;
+  text-align: center;
+}
+.awards-stats div + div {
+  border-left: 1px solid #ded2d2;
+}
 .awards-stats dt {
   color: var(--muted);
   font-size: 0.72rem;
@@ -571,7 +585,9 @@ a {
 .awards-stats dd {
   margin: 0.25rem 0 0;
   color: var(--navy);
-  font: 700 1.75rem / 1 Georgia, serif;
+  font:
+    700 1.75rem / 1 Georgia,
+    serif;
 }
 .awards-grid {
   display: grid;
@@ -593,7 +609,12 @@ a {
   background: var(--paper);
   box-shadow: 0 0.15rem 0.2rem rgb(20 15 15 / 25%);
 }
-.award-date { margin: 0; color: #c79c00; font-size: 0.75rem; font-weight: 700; }
+.award-date {
+  margin: 0;
+  color: #c79c00;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
 .award-mark {
   display: grid;
   width: 7rem;
@@ -605,7 +626,12 @@ a {
   border-bottom: 0.3rem double #9a6112;
   border-radius: 50%;
 }
-.award-card h3 { margin: 0.6rem 0 0; color: #15191c; font-size: 1rem; line-height: 1.25; }
+.award-card h3 {
+  margin: 0.6rem 0 0;
+  color: #15191c;
+  font-size: 1rem;
+  line-height: 1.25;
+}
 .award-parts {
   display: grid;
   gap: 0.35rem;
@@ -624,8 +650,13 @@ a {
   text-align: center;
   background: rgb(255 255 255 / 75%);
 }
-.awards-state h3 { color: var(--navy); }
-.awards-state-error { border-color: #ba5b5b; background: #fff3f3; }
+.awards-state h3 {
+  color: var(--navy);
+}
+.awards-state-error {
+  border-color: #ba5b5b;
+  background: #fff3f3;
+}
 .awards-state button {
   padding: 0.55rem 0.9rem;
   border: 1px solid var(--navy);
@@ -677,7 +708,9 @@ a {
     border-top: 1px solid #ded2d2;
     border-left: 0;
   }
-  .award-card { min-height: 17rem; }
+  .award-card {
+    min-height: 17rem;
+  }
   .course-summary,
   .course-details {
     grid-template-columns: 1fr;
@@ -694,5 +727,7 @@ a {
   .software-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .awards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .awards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
