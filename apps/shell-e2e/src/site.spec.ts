@@ -10,9 +10,9 @@ const pages = [
   },
   {
     link: "Research",
-    heading: "Research",
+    heading: "Research Works",
+    staticHeading: "Research",
     path: "research",
-    remote: /Research remote loaded/,
   },
   {
     link: "Software",
@@ -54,7 +54,9 @@ test("every route has useful HTML with JavaScript disabled", async ({
   for (const route of pages) {
     await page.goto(route.path);
     await expect(
-      page.getByRole("heading", { name: route.heading }),
+      page.getByRole("heading", {
+        name: "staticHeading" in route ? route.staticHeading : route.heading,
+      }),
     ).toBeVisible();
     await expect(page.locator('meta[name="description"]')).toHaveAttribute(
       "content",

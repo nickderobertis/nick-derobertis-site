@@ -24,13 +24,7 @@ export function remoteConfig(name: string) {
         name,
         filename: "remoteEntry.js",
         exposes: { "./Page": "./src/page.tsx" },
-        remotes:
-          name === "research"
-            ? {
-                software:
-                  "software@/nick-derobertis-site/remotes/software/remoteEntry.js",
-              }
-            : {},
+        remotes: {},
         shared: {
           react: { singleton: true, requiredVersion: false, eager: true },
           "react-dom": { singleton: true, requiredVersion: false, eager: true },
