@@ -24,3 +24,35 @@ plugins:
   - "https://raw.githubusercontent.com/nickderobertis/dero-skills/main/skills/bootstrap/create-repo/assets/llmlint/languages/typescript.llmlint.yml@1"
   - "https://raw.githubusercontent.com/nickderobertis/dero-skills/main/skills/bootstrap/create-repo/assets/llmlint/ci.llmlint.yml@1"
   - "https://raw.githubusercontent.com/nickderobertis/dero-skills/main/skills/bootstrap/create-repo/assets/llmlint/monorepo.llmlint.yml@1"
+rules:
+  - name: changed_behavior_has_e2e
+    override: true
+    description: |
+      true ONLY when every route and every substantial feature or scenario has
+      real-browser end-to-end coverage for its happy path and its empty, loading,
+      and error states on BOTH supported render paths: the standalone Module
+      Federation remote and that remote composed into the host. Every test must
+      drive the real application through its user-visible browser interface and
+      must never mock the application under test or any app boundary whose real
+      behavior the scenario is intended to prove. false when any route,
+      substantial feature or scenario, required state, or render path lacks that
+      coverage, or when a purported end-to-end test mocks the app under test.
+
+  - name: microfrontends_split_aggressively
+    description: |
+      true when each feature domain is implemented as its own Module Federation
+      remote with a declared Nx project boundary, every remote is exposed to the
+      host only at the app/routes layer, no remote reaches into another remote's
+      internals, and no remote bundles unrelated feature domains. false when any
+      feature domain lacks its own remote or Nx boundary, a remote is exposed
+      below the app/routes layer, one remote reaches into another's internals, or
+      unrelated feature domains are bundled into one remote.
+    files:
+      include:
+        - "**/module-federation.config.*"
+        - "**/module-federation.*.config.*"
+        - "**/rspack.config.*"
+        - "**/project.json"
+    relevance: |
+      the target files configure or declare a Module Federation remote; skip
+      non-remote projects, including hosts and ordinary libraries
