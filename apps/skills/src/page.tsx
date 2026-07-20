@@ -69,7 +69,7 @@ function SkillDetails({ skill }: { skill: SkillTreeNode }) {
   );
 }
 
-function Chart({ tree }: { tree: SkillTree }) {
+function useChartModel(tree: SkillTree) {
   const [active, setActive] = useState<SkillTreeNode | null>(null);
   const [focused, setFocused] = useState<SkillTreeNode | null>(null);
   const categories = active ? [active] : tree.children;
@@ -77,6 +77,12 @@ function Chart({ tree }: { tree: SkillTree }) {
     (count, category) => count + Math.max(1, category.children.length),
     0,
   );
+  return { active, categories, focused, setActive, setFocused, total };
+}
+
+function Chart({ tree }: { tree: SkillTree }) {
+  const { active, categories, focused, setActive, setFocused, total } =
+    useChartModel(tree);
   let cursor = 0;
   return (
     <div className="chart-wrap">
@@ -159,28 +165,33 @@ function Chart({ tree }: { tree: SkillTree }) {
   );
 }
 
-function Dropdowns({ tree }: { tree: SkillTree }) {
-  const categoryId = useId();
-  const skillId = useId();
+function useDropdownModel(tree: SkillTree) {
   const [categoryIdValue, setCategoryIdValue] = useState(tree.children[0]?.id);
   const category = tree.children.find((item) => item.id === categoryIdValue);
   const [skillIdValue, setSkillIdValue] = useState(category?.children[0]?.id);
   const skill =
     category?.children.find((item) => item.id === skillIdValue) ??
     category?.children[0];
+  function selectCategory(id: string) {
+    const next = tree.children.find((item) => item.id === id);
+    setCategoryIdValue(next?.id);
+    setSkillIdValue(next?.children[0]?.id);
+  }
+  return { category, selectCategory, setSkillIdValue, skill };
+}
+
+function Dropdowns({ tree }: { tree: SkillTree }) {
+  const categoryId = useId();
+  const skillId = useId();
+  const { category, selectCategory, setSkillIdValue, skill } =
+    useDropdownModel(tree);
   return (
     <section className="skills-dropdowns" aria-label="Skills dropdown browser">
       <label htmlFor={categoryId}>Category</label>
       <select
         id={categoryId}
         value={category?.id}
-        onChange={(event) => {
-          const next = tree.children.find(
-            (item) => item.id === event.currentTarget.value,
-          );
-          setCategoryIdValue(next?.id);
-          setSkillIdValue(next?.children[0]?.id);
-        }}
+        onChange={(event) => selectCategory(event.currentTarget.value)}
       >
         {tree.children.map((item) => (
           <option key={item.id} value={item.id}>

@@ -26,7 +26,9 @@ for (const renderPath of renderPaths) {
     await expect(
       page.getByRole("button", { name: "Explore Programming category" }),
     ).toBeVisible();
-    await expect(page.locator(".skill-sector")).toHaveCount(199);
+    await expect(
+      page.getByLabel(/category, \d+ skills|, level \d$/),
+    ).toHaveCount(199);
   });
 
   test(`${renderPath.name} reveals stats on hover and keyboard focus`, async ({
@@ -56,7 +58,9 @@ for (const renderPath of renderPaths) {
     await expect(
       page.getByRole("button", { name: "Zoom out from Programming" }),
     ).toBeVisible();
-    await expect(page.locator(".skill-sector")).toHaveCount(50);
+    await expect(
+      page.getByLabel(/category, \d+ skills|, level \d$/),
+    ).toHaveCount(50);
     await page
       .getByRole("button", { name: "Zoom out from Programming" })
       .press("Enter");
