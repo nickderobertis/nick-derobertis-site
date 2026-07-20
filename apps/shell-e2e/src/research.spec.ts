@@ -79,10 +79,15 @@ for (const renderPath of renderPaths) {
         name: /Valuation without Cash Flows/,
       });
       await expect(project).toBeVisible();
-      const columns = await project.evaluate(
-        (element) => getComputedStyle(element).gridTemplateColumns,
-      );
-      expect(columns.trim().split(/\s+/)).toHaveLength(1);
+      const categories = await project
+        .getByRole("list", { name: "Research categories" })
+        .boundingBox();
+      const heading = await project
+        .getByRole("heading", { name: /Valuation without Cash Flows/ })
+        .boundingBox();
+      expect(categories).not.toBeNull();
+      expect(heading).not.toBeNull();
+      expect(categories?.y).toBeLessThan(heading?.y ?? 0);
       await expect(
         page.getByRole("link", { name: "View research" }),
       ).toBeVisible();

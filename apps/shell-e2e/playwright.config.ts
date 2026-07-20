@@ -9,7 +9,7 @@ export default defineConfig({
   webServer: {
     command: "node ../../scripts/serve-e2e.mjs",
     url: "http://127.0.0.1:4200/nick-derobertis-site/",
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });
