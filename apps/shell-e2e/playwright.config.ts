@@ -15,6 +15,7 @@ const testBaseUrl = `http://127.0.0.1:4301${siteConfig.pagesBase}/`;
 export default defineConfig({
   testDir: "./src",
   testIgnore: "unit/**",
+  workers: 1,
   expect: { timeout: 15_000 },
   timeout: 60_000,
   use: {
