@@ -171,14 +171,13 @@ for (const name of Object.keys(remoteManifest)) {
   try {
     await stat(source);
   } catch (error) {
-    if (
-      !(error instanceof Error) ||
-      !("code" in error) ||
-      error.code !== "ENOENT"
-    )
-      throw error;
+    if (error instanceof Error && "code" in error && error.code === "ENOENT")
+      throw new Error(
+        `Missing built remote at ${source}. Run just check to build every required remote before prerendering.`,
+      );
+    const detail = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Missing built remote at ${source}. Run just check to build every required remote before prerendering.`,
+      `Could not inspect built remote at ${source}: ${detail}. Verify the build directory is readable, then run just check again.`,
     );
   }
   await mkdir(dirname(destination), { recursive: true });
