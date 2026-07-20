@@ -1,4 +1,4 @@
-import { homeContent, readPaneState } from "@site/data-access";
+import { homeContent, readPaneState, siteBase } from "@site/data-access";
 import { useEffect, useState } from "react";
 
 function useCarousel(length: number, enabled: boolean) {
@@ -51,7 +51,7 @@ export default function HomeCarouselPage() {
       <div className="carousel-copy" aria-live="polite">
         <h1>{slide.title}</h1>
         <p>{slide.description}</p>
-        <a className="action" href={`/nick-derobertis-site${slide.link}`}>
+        <a className="action" href={`${siteBase}${slide.link}`}>
           {slide.linkLabel}
         </a>
       </div>

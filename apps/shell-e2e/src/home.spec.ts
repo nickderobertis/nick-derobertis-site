@@ -1,3 +1,7 @@
+import { spawnSync } from "node:child_process";
+import { cp, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 
 const panes = [
@@ -128,28 +132,92 @@ for (const pane of panes)
         );
       });
 
-test("carousel rotates automatically in its standalone remote", async ({
-  page,
-}) => {
-  await page.goto("remotes/home-carousel/");
-  await expect(
-    page.getByRole("heading", { name: "Finance researcher & educator" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", {
-      name: "Serial founder & full-stack software engineer",
-    }),
-  ).toBeVisible({ timeout: 6500 });
+for (const path of renderPaths) {
+  test(`carousel rotates automatically ${path.name}`, async ({ page }) => {
+    await page.goto(path.url("home-carousel"));
+    await expect(
+      page.getByRole("heading", { name: "Finance researcher & educator" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Serial founder & full-stack software engineer",
+      }),
+    ).toBeVisible({ timeout: 6500 });
+  });
+  test(`carousel controls rotate with keyboard ${path.name}`, async ({
+    page,
+  }) => {
+    await page.goto(path.url("home-carousel"));
+    await page.getByRole("button", { name: "Next featured story" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByText("Story 2 of 2")).toBeVisible();
+  });
+}
+
+test("script entry points reject invalid inputs with recovery actions", async () => {
+  const invalidPort = spawnSync(process.execPath, ["scripts/serve-e2e.mjs"], {
+    env: { ...process.env, PORT: "invalid" },
+    encoding: "utf8",
+  });
+  expect(invalidPort.status).not.toBe(0);
+  expect(invalidPort.stderr).toContain("run just test-e2e again");
+  const fixture = await mkdtemp(join(tmpdir(), "site-prerender-"));
+  try {
+    const output = join(fixture, "output");
+    const builds = join(fixture, "builds");
+    await mkdir(output);
+    await mkdir(builds);
+    await cp("dist/apps/shell/index.html", join(output, "index.html"));
+    const missing = spawnSync(process.execPath, ["scripts/prerender.mjs"], {
+      env: {
+        ...process.env,
+        PRERENDER_OUTPUT: output,
+        REMOTE_BUILD_ROOT: builds,
+      },
+      encoding: "utf8",
+    });
+    expect(missing.status).not.toBe(0);
+    expect(missing.stderr).toContain("Run just check");
+  } finally {
+    await rm(fixture, { recursive: true, force: true });
+  }
 });
 
-test("carousel controls rotate with keyboard in the host", async ({ page }) => {
-  await page.goto("");
-  await page.getByRole("button", { name: "Next featured story" }).focus();
-  await page.keyboard.press("Enter");
-  await expect(
-    page.getByRole("heading", {
-      name: "Serial founder & full-stack software engineer",
-    }),
-  ).toBeVisible();
-  await expect(page.getByText("Story 2 of 2")).toBeVisible();
+test("remote manifest matches Nx build dependencies", async () => {
+  const manifest: unknown = JSON.parse(
+    await readFile("libs/build-config/src/remotes.json", "utf8"),
+  );
+  const project: unknown = JSON.parse(
+    await readFile("apps/shell/project.json", "utf8"),
+  );
+  expect(typeof manifest).toBe("object");
+  expect(typeof project).toBe("object");
+  if (
+    !manifest ||
+    typeof manifest !== "object" ||
+    !project ||
+    typeof project !== "object" ||
+    !("targets" in project)
+  )
+    throw new Error("Validated manifest and project objects are required");
+  const targets = project.targets;
+  if (!targets || typeof targets !== "object" || !("prerender" in targets))
+    throw new Error("Validated prerender target is required");
+  const prerender = targets.prerender;
+  if (
+    !prerender ||
+    typeof prerender !== "object" ||
+    !("dependsOn" in prerender) ||
+    !Array.isArray(prerender.dependsOn)
+  )
+    throw new Error("Validated dependsOn list is required");
+  const projects = prerender.dependsOn.flatMap((item) =>
+    typeof item === "object" &&
+    item &&
+    "projects" in item &&
+    Array.isArray(item.projects)
+      ? item.projects
+      : [],
+  );
+  expect(projects.sort()).toEqual(Object.keys(manifest).sort());
 });

@@ -7,8 +7,29 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
 
-const output = process.env.PRERENDER_OUTPUT ?? "dist/apps/shell";
-const remoteBuildRoot = process.env.REMOTE_BUILD_ROOT ?? "dist/apps";
+function requirePath(value, fallback, name) {
+  const path = value ?? fallback;
+  if (typeof path !== "string" || path.length === 0 || path.includes("\0"))
+    throw new Error(`${name} must be a non-empty filesystem path`);
+  return path;
+}
+if (
+  Object.entries(remoteManifest).some(
+    ([name, alias]) =>
+      !/^[a-z][a-z-]+$/.test(name) || typeof alias !== "string",
+  )
+)
+  throw new Error("remotes.json must contain string remote-name mappings");
+const output = requirePath(
+  process.env.PRERENDER_OUTPUT,
+  "dist/apps/shell",
+  "PRERENDER_OUTPUT",
+);
+const remoteBuildRoot = requirePath(
+  process.env.REMOTE_BUILD_ROOT,
+  "dist/apps",
+  "REMOTE_BUILD_ROOT",
+);
 const base = "/nick-derobertis-site";
 const builtDocument = await readFile(join(output, "index.html"), "utf8");
 // Nx may restore a previously prerendered output from cache. Normalize it back

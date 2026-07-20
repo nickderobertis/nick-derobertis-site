@@ -1,4 +1,4 @@
-import { homeContent, readPaneState } from "@site/data-access";
+import { homeContent, readPaneState, siteBase } from "@site/data-access";
 
 export default function HomeCardsPage() {
   const state = readPaneState(window.location.search);
@@ -23,7 +23,7 @@ export default function HomeCardsPage() {
           </span>
           <h2>{card.title}</h2>
           <p>{card.description}</p>
-          <a className="action" href={`/nick-derobertis-site${card.link}`}>
+          <a className="action" href={`${siteBase}${card.link}`}>
             {card.linkLabel}
           </a>
         </article>

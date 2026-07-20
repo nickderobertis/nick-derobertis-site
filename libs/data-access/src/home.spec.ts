@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { homeContent, readPaneState } from "./home";
+import { siteBase } from "./site";
 
 describe("HOME content boundary", () => {
   it("defaults to happy and accepts every supported state", () => {
@@ -13,6 +14,7 @@ describe("HOME content boundary", () => {
   });
 
   it("provides all marketing domains from one typed source", () => {
+    expect(siteBase).toBe("/nick-derobertis-site");
     expect(homeContent.carousel).toHaveLength(2);
     expect(homeContent.cards.map(({ link }) => link)).toEqual([
       "/software",

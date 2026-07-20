@@ -15,3 +15,4 @@ export {
   validateCvData,
 } from "./client";
 export { homeContent, type PaneState, readPaneState } from "./home";
+export { siteBase } from "./site";

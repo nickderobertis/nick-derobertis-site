@@ -1,4 +1,4 @@
-import { homeContent, readPaneState } from "@site/data-access";
+import { homeContent, readPaneState, siteBase } from "@site/data-access";
 
 export default function HomeStoryPage() {
   const state = readPaneState(window.location.search);
@@ -21,10 +21,7 @@ export default function HomeStoryPage() {
         <p className="eyebrow">{homeContent.story.eyebrow}</p>
         <h2 id="story-title">{homeContent.story.title}</h2>
         <p>{homeContent.story.description}</p>
-        <a
-          className="action"
-          href={`/nick-derobertis-site${homeContent.story.link}`}
-        >
+        <a className="action" href={`${siteBase}${homeContent.story.link}`}>
           {homeContent.story.linkLabel}
         </a>
       </div>
