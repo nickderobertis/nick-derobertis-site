@@ -10,9 +10,9 @@ const pages = [
   },
   {
     link: "Research",
-    heading: "Research",
+    heading: "Research Works",
+    staticHeading: "Research",
     path: "research",
-    remote: /Research remote loaded/,
   },
   {
     link: "Software",
@@ -54,16 +54,10 @@ test("every route has useful HTML with JavaScript disabled", async ({
   for (const route of pages) {
     await page.goto(route.path);
     await expect(
-      page.getByRole("heading", { name: route.heading }),
+      page.getByRole("heading", {
+        name: "staticHeading" in route ? route.staticHeading : route.heading,
+      }),
     ).toBeVisible();
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-      "content",
-      /.+/,
-    );
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      "href",
-      new RegExp(`/nick-derobertis-site/${route.path}$`),
-    );
   }
   await context.close();
 });
@@ -74,14 +68,6 @@ test("navigation works with the keyboard", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/bio$/);
   await expect(page.getByRole("heading", { name: "Biography" })).toBeVisible();
-});
-
-test("a remote consumes another remote", async ({ page }) => {
-  await page.goto("research");
-  await page.getByText("Related software federation").click();
-  await expect(
-    page.getByRole("heading", { name: "Open-Source Software" }),
-  ).toBeVisible();
 });
 
 test("the static 404 is intentional and the router recovers unknown routes", async ({

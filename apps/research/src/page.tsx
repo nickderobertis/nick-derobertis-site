@@ -1,23 +1,29 @@
-import { cvDataClient } from "@site/data-access";
-import { lazy, Suspense } from "react";
+import { ResearchContent } from "./research-content";
+import { useResearch } from "./use-research";
+import "@site/design-system";
+import "./research.css";
 
-const SoftwarePage = lazy(() => import("software/Page"));
-export default function ResearchPage() {
+function StateMessage({ state }: { state: "empty" | "loading" | "error" }) {
+  const messages = {
+    empty: ["No research projects yet", "New research will appear here."],
+    error: [
+      "Research is unavailable",
+      "The research collection could not be loaded. Please try again later.",
+    ],
+    loading: ["Loading research", "Gathering working papers and projects…"],
+  } as const;
+  const [heading, detail] = messages[state];
   return (
-    <section className="hero">
-      <p className="eyebrow">Nick DeRobertis</p>
-      <h1>Research</h1>
-      <p>Working papers and research in finance.</p>
-      <output className="placeholder">
-        Research remote loaded ·{" "}
-        {cvDataClient.domain("research").projects?.length ?? 0} projects
-      </output>
-      <details>
-        <summary>Related software federation</summary>
-        <Suspense fallback={<span>Loading related software…</span>}>
-          <SoftwarePage />
-        </Suspense>
-      </details>
+    <section className="research-state" aria-live="polite">
+      <h2>{heading}</h2>
+      <p>{detail}</p>
     </section>
   );
+}
+
+export default function ResearchPage() {
+  const state = useResearch();
+  if (state.name !== "ready") return <StateMessage state={state.name} />;
+  if (!state.research.projects?.length) return <StateMessage state="empty" />;
+  return <ResearchContent research={state.research} />;
 }
