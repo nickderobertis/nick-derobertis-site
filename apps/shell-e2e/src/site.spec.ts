@@ -4,7 +4,7 @@ const pages = [
   { link: "Home", heading: "Finance, research, and software", path: "" },
   {
     link: "Bio",
-    heading: "Biography",
+    heading: "Optimizing Life",
     path: "bio",
   },
   {
@@ -72,7 +72,9 @@ test("navigation works with the keyboard", async ({ page }) => {
   await page.getByRole("link", { name: "Bio" }).focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/bio$/);
-  await expect(page.getByRole("heading", { name: "Biography" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Optimizing Life" }),
+  ).toBeVisible();
 });
 
 test("a remote consumes another remote", async ({ page }) => {
