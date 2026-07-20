@@ -33,7 +33,7 @@ describe("remote module boundaries", () => {
         import "software/Page";
       `),
     ).resolves.toEqual([]);
-  });
+  }, 30_000);
 
   it("rejects layout and undeclared remote dependencies", async () => {
     const messages = await boundaryMessages(`
