@@ -94,7 +94,9 @@ for (const renderPath of allAwardsPaths) {
       }),
     });
     await expect(withParts.getByText("2014", { exact: true })).toBeVisible();
-    await expect(withParts.locator(".award-extra-info")).toHaveText("780");
+    await expect(
+      withParts.getByRole("note", { name: "Award extra information" }),
+    ).toHaveText("780");
     await expect(
       withParts.getByLabel("Award parts").getByRole("listitem"),
     ).toHaveCount(1);
@@ -105,16 +107,18 @@ for (const renderPath of allAwardsPaths) {
         name: "Warrington Finance Ph.D. Research Grants",
       }),
     });
-    await expect(extraInfoOnly.locator(".award-extra-info")).toHaveText(
-      "$2000/yr",
-    );
+    await expect(
+      extraInfoOnly.getByRole("note", { name: "Award extra information" }),
+    ).toHaveText("$2000/yr");
     await expect(extraInfoOnly.getByLabel("Award parts")).toHaveCount(0);
 
     const withoutInfo = page.getByRole("article").filter({
       has: page.getByRole("heading", { name: "Finance Student of the Year" }),
     });
     await expect(withoutInfo.getByText("2013", { exact: true })).toBeVisible();
-    await expect(withoutInfo.locator(".award-extra-info")).toHaveCount(0);
+    await expect(
+      withoutInfo.getByRole("note", { name: "Award extra information" }),
+    ).toHaveCount(0);
     await expect(withoutInfo.getByLabel("Award parts")).toHaveCount(0);
   });
 
@@ -206,7 +210,7 @@ for (const statePath of statePaths) {
       await openAwards(page, `${baseUrl}${statePath.path}`);
       await expect(page.getByRole("status")).toContainText("No awards to show");
       await expect(
-        page.locator(".awards-pane").getByRole("article"),
+        page.getByRole("region", { name: "Awards" }).getByRole("article"),
       ).toHaveCount(0);
     });
   });

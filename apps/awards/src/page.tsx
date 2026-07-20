@@ -41,7 +41,15 @@ function AwardCard({ award }: { award: Award }) {
         ★
       </div>
       <h3>{award.title}</h3>
-      {extraInfo ? <p className="award-extra-info">{extraInfo}</p> : null}
+      {extraInfo ? (
+        <p
+          className="award-extra-info"
+          role="note"
+          aria-label="Award extra information"
+        >
+          {extraInfo}
+        </p>
+      ) : null}
       {parts.length > 0 ? (
         <ul className="award-parts" aria-label="Award parts">
           {parts.map((part) => (
