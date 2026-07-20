@@ -102,28 +102,38 @@ for (const renderPath of renderPaths) {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openCourses(page, renderPath.path);
-    const summary = page
-      .getByRole("article")
-      .first()
-      .locator(".course-summary");
-    const mobileColumns = await summary.evaluate(
-      (element) =>
-        getComputedStyle(element).gridTemplateColumns.split(" ").length,
+    const course = page.getByRole("article").filter({
+      has: page.getByRole("heading", { name: "Financial Modeling" }),
+    });
+    const title = course.getByRole("heading", { name: "Financial Modeling" });
+    const topics = course.getByLabel("Financial Modeling topics");
+    const mobileTitle = await title.boundingBox();
+    const mobileTopics = await topics.boundingBox();
+    expect(mobileTitle).not.toBeNull();
+    expect(mobileTopics).not.toBeNull();
+    expect(mobileTopics?.y).toBeGreaterThan(
+      (mobileTitle?.y ?? 0) + (mobileTitle?.height ?? 0),
     );
-    expect(mobileColumns).toBe(1);
+    expect(
+      Math.abs((mobileTopics?.x ?? 0) - (mobileTitle?.x ?? 0)),
+    ).toBeLessThan(10);
 
     await page.setViewportSize({ width: 800, height: 900 });
-    const tabletColumns = await summary.evaluate(
-      (element) =>
-        getComputedStyle(element).gridTemplateColumns.split(" ").length,
+    const tabletTitle = await title.boundingBox();
+    const tabletTopics = await topics.boundingBox();
+    expect(tabletTitle).not.toBeNull();
+    expect(tabletTopics).not.toBeNull();
+    expect(tabletTopics?.x).toBeGreaterThan(
+      (tabletTitle?.x ?? 0) + (tabletTitle?.width ?? 0),
     );
-    expect(tabletColumns).toBe(2);
 
     await page.setViewportSize({ width: 1280, height: 900 });
-    const desktopColumns = await summary.evaluate(
-      (element) =>
-        getComputedStyle(element).gridTemplateColumns.split(" ").length,
+    const desktopTitle = await title.boundingBox();
+    const desktopTopics = await topics.boundingBox();
+    expect(desktopTitle).not.toBeNull();
+    expect(desktopTopics).not.toBeNull();
+    expect(desktopTopics?.x).toBeGreaterThan(
+      (desktopTitle?.x ?? 0) + (desktopTitle?.width ?? 0),
     );
-    expect(desktopColumns).toBe(2);
   });
 }
