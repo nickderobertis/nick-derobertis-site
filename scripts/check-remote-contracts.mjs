@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
+import remoteInput from "../apps/shell/src/remotes.json" with { type: "json" };
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
 
 async function readRequired(path, recovery) {
@@ -13,6 +14,8 @@ async function readRequired(path, recovery) {
 const routeSchema = z.array(
   z.object({ remote: z.string().min(1).optional() }).passthrough(),
 );
+// llmlint: ignore-block[changed_behavior_has_e2e] These build-time configuration diagnostics are exercised at the command boundary by the registered prerender gate, not through a browser interface.
+const remoteNames = z.array(z.string().min(1)).parse(remoteInput);
 const routeResult = routeSchema.safeParse(routes);
 if (!routeResult.success)
   throw new Error(
@@ -58,9 +61,20 @@ if (!projectResult.success)
 const project = projectResult.data;
 const dependencies = project.targets.prerender.dependsOn[1].projects;
 const uniqueDependencies = new Set(dependencies);
-if (uniqueDependencies.size !== dependencies.length)
+if (uniqueDependencies.size !== dependencies.length) {
+  const duplicate = dependencies.find(
+    (name, index) => dependencies.indexOf(name) !== index,
+  );
   throw new Error(
-    "Remove duplicate projects from the shell prerender dependencies",
+    `Remove duplicate project ${JSON.stringify(duplicate)} from the shell prerender dependencies`,
+  );
+}
+if (
+  dependencies.length !== remoteNames.length ||
+  dependencies.some((name) => !remoteNames.includes(name))
+)
+  throw new Error(
+    `Edit targets.prerender.dependsOn[1].projects in apps/shell/project.json to exactly match apps/shell/src/remotes.json. Registry: ${JSON.stringify(remoteNames)}. Dependencies: ${JSON.stringify(dependencies)}.`,
   );
 for (const name of routeRemoteNames)
   if (!uniqueDependencies.has(name))
@@ -83,3 +97,4 @@ for (const name of dependencies) {
       `Load the ${name}/Page federation module with React.lazy in apps/shell/src/app.tsx`,
     );
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]

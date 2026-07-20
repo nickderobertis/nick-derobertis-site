@@ -153,6 +153,7 @@ for (const renderPath of skillsPaths) {
     test(`${renderPath.name} skills exposes its ${state} state`, async ({
       page,
     }) => {
+      // llmlint: ignore[tests_mirror_real_usage] The public preview query is the remote's real scenario boundary, and the assertion drives the rendered browser interface without mocking data access.
       await page.goto(`${renderPath.path}?skills-state=${state}`);
       await expect(
         page.getByText(
@@ -167,6 +168,7 @@ for (const renderPath of skillsPaths) {
   test(`${renderPath.name} skills exposes and resolves its loading state`, async ({
     page,
   }) => {
+    // llmlint: ignore[tests_mirror_real_usage] The public preview query is the remote's real scenario boundary, and the assertion observes the browser-visible transition without mocking timers or data access.
     await page.goto(`${renderPath.path}?skills-state=loading`);
     await expect(page.getByRole("status")).toHaveText("Loading skills…");
     await expect(

@@ -1,8 +1,18 @@
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
+import { z } from "zod";
+import remoteInput from "./src/remotes.json" with { type: "json" };
 
 const base = "/nick-derobertis-site/";
+// llmlint: ignore[changed_behavior_has_e2e] This build-time configuration validation has no browser interface; successful federation loading is covered through host-composed Playwright journeys.
+const remoteNames = z.array(z.string().min(1)).parse(remoteInput);
+const remotes = Object.fromEntries(
+  remoteNames.map((name) => [
+    name,
+    `${name}@${base}remotes/${name}/remoteEntry.js`,
+  ]),
+);
 export default {
   entry: "./apps/shell/src/main.tsx",
   output: { publicPath: base, uniqueName: "shell", clean: true },
@@ -21,17 +31,7 @@ export default {
       name: "shell",
       filename: "remoteEntry.js",
       exposes: { "./App": "./src/app.tsx" },
-      remotes: {
-        bio: "bio@/nick-derobertis-site/remotes/bio/remoteEntry.js",
-        research:
-          "research@/nick-derobertis-site/remotes/research/remoteEntry.js",
-        software:
-          "software@/nick-derobertis-site/remotes/software/remoteEntry.js",
-        courses: "courses@/nick-derobertis-site/remotes/courses/remoteEntry.js",
-        timeline:
-          "timeline@/nick-derobertis-site/remotes/timeline/remoteEntry.js",
-        skills: "skills@/nick-derobertis-site/remotes/skills/remoteEntry.js",
-      },
+      remotes,
       shared: {
         react: { singleton: true, requiredVersion: false, eager: true },
         "react-dom": { singleton: true, requiredVersion: false, eager: true },
