@@ -1,0 +1,33 @@
+{
+  "name": "awards",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/awards/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:awards"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/awards/rspack.config.ts",
+        "outputPath": "dist/apps/awards",
+        "main": "apps/awards/src/main.tsx",
+        "tsConfig": "apps/awards/tsconfig.app.json",
+        "index": "apps/awards/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/awards" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/awards/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --passWithNoTests apps/awards/src" }
+    }
+  }
+}

@@ -41,6 +41,10 @@ export default [
               onlyDependOnLibsWithTags: ["type:shared"],
             },
             {
+              sourceTag: "scope:awards",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
+            {
               sourceTag: "scope:research",
               onlyDependOnLibsWithTags: ["type:shared", "scope:software"],
             },

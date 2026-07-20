@@ -30,6 +30,7 @@ export default {
         courses: "courses@/nick-derobertis-site/remotes/courses/remoteEntry.js",
         timeline:
           "timeline@/nick-derobertis-site/remotes/timeline/remoteEntry.js",
+        awards: "awards@/nick-derobertis-site/remotes/awards/remoteEntry.js",
       },
       shared: {
         react: { singleton: true, requiredVersion: false, eager: true },

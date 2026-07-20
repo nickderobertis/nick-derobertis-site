@@ -8,6 +8,7 @@ const ResearchPage = lazy(() => import("research/Page"));
 const SoftwarePage = lazy(() => import("software/Page"));
 const CoursesPage = lazy(() => import("courses/Page"));
 const TimelinePage = lazy(() => import("timeline/Page"));
+const AwardsPage = lazy(() => import("awards/Page"));
 function requireRoute(path: string): SiteRoute {
   const route = routes.find((candidate) => candidate.path === path);
   if (!route) throw new Error(`Route ${path} is required`);
@@ -24,6 +25,7 @@ function HomePage() {
         <p>{homeRoute.description}</p>
       </section>
       <TimelinePage />
+      <AwardsPage selection="selected" />
     </>
   );
 }

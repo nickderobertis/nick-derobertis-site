@@ -19,7 +19,7 @@ for (const route of routes) {
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error("404 fallback is not intentional");
-for (const name of ["bio", "research", "software", "courses"])
+for (const name of ["bio", "research", "software", "courses", "awards"])
   await access(`${root}/remotes/${name}/remoteEntry.js`);
 for (const file of [
   "cv.json",
