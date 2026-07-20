@@ -10,6 +10,7 @@ import siteConfig from "../libs/data-access/src/site.config.json" with {
   type: "json",
 };
 
+// llmlint: ignore-block[changed_behavior_has_e2e] Command startup failures are covered through the real subprocess boundary in home.spec.ts; they have no browser interface.
 function requirePath(value, fallback, name) {
   const path = value ?? fallback;
   if (typeof path !== "string" || path.length === 0 || path.includes("\0"))
@@ -37,6 +38,7 @@ const remoteBuildRoot = requirePath(
   "dist/apps",
   "REMOTE_BUILD_ROOT",
 );
+// llmlint: ignore-end[changed_behavior_has_e2e]
 if (
   !siteConfig ||
   typeof siteConfig.pagesBase !== "string" ||
@@ -165,6 +167,7 @@ await cp("libs/data-access/vendor/codegen", join(output, "cv-data"), {
 });
 
 await rm(join(output, "remotes"), { recursive: true, force: true });
+// llmlint: ignore-block[changed_behavior_has_e2e] Remote staging diagnostics are exercised through the real prerender subprocess in home.spec.ts, before a browser can be served.
 for (const name of Object.keys(remoteManifest)) {
   const source = join(remoteBuildRoot, name);
   const destination = join(output, "remotes", name);
@@ -190,3 +193,4 @@ for (const name of Object.keys(remoteManifest)) {
     );
   }
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
