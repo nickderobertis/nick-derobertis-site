@@ -37,7 +37,7 @@ function categoryFor(skill: Skill): SkillCategoryId {
   ];
   return (
     candidates.find((candidate): candidate is SkillCategoryId =>
-      CATEGORY_SET.has(candidate ?? ""),
+      CATEGORY_SET.has(String(candidate)),
     ) ?? "other"
   );
 }
@@ -53,7 +53,7 @@ function toNode(skill: Skill, children: readonly SkillTreeNode[] = []) {
   return {
     children,
     experience: experienceLabel(skill.level),
-    firstUsed: starts.length > 0 ? (starts.sort()[0] ?? null) : null,
+    firstUsed: starts.length > 0 ? (starts.sort()[0] as string) : null,
     hours: skill.experience?.total_hours ?? null,
     id: skill.id,
     level: skill.level,
