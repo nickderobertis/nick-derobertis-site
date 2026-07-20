@@ -31,4 +31,4 @@ createServer(async (request, response) => {
     types[extname(file)] ?? "application/octet-stream",
   );
   createReadStream(file).pipe(response);
-}).listen(4200, "127.0.0.1");
+}).listen(Number(process.env.PORT ?? "4200"), "127.0.0.1");

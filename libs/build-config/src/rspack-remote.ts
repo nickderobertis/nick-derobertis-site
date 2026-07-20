@@ -1,9 +1,16 @@
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
-export function remoteConfig(name: string) {
+
+interface RemoteOptions {
+  federationName?: string;
+  remotes?: Record<string, string>;
+}
+
+export function remoteConfig(name: string, options: RemoteOptions = {}) {
   const root = `apps/${name}`;
   const publicPath = `/nick-derobertis-site/remotes/${name}/`;
+  const federationName = options.federationName ?? name;
   return {
     entry: `./${root}/src/main.tsx`,
     output: { publicPath, uniqueName: name, clean: true },
@@ -21,16 +28,17 @@ export function remoteConfig(name: string) {
       }),
       new NxReactRspackPlugin(),
       new ModuleFederationPlugin({
-        name,
+        name: federationName,
         filename: "remoteEntry.js",
         exposes: { "./Page": "./src/page.tsx" },
         remotes:
-          name === "research"
+          options.remotes ??
+          (name === "research"
             ? {
                 software:
                   "software@/nick-derobertis-site/remotes/software/remoteEntry.js",
               }
-            : {},
+            : {}),
         shared: {
           react: { singleton: true, requiredVersion: false, eager: true },
           "react-dom": { singleton: true, requiredVersion: false, eager: true },

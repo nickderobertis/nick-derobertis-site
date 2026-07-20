@@ -44,6 +44,32 @@ export default [
               sourceTag: "scope:research",
               onlyDependOnLibsWithTags: ["type:shared", "scope:software"],
             },
+            {
+              sourceTag: "scope:home",
+              onlyDependOnLibsWithTags: [
+                "type:shared",
+                "scope:home-carousel",
+                "scope:home-cards",
+                "scope:home-story",
+                "scope:home-contact",
+              ],
+            },
+            {
+              sourceTag: "scope:home-carousel",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
+            {
+              sourceTag: "scope:home-cards",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
+            {
+              sourceTag: "scope:home-story",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
+            {
+              sourceTag: "scope:home-contact",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
             { sourceTag: "type:e2e", onlyDependOnLibsWithTags: ["type:app"] },
           ],
         },

@@ -7,6 +7,8 @@
   --muted: #61717c;
   --paper: #fff;
   --line: #d6e0e6;
+  --coral: #e95155;
+  --blush: #f6eeee;
   --space: clamp(1rem, 3vw, 2rem);
   font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   color: var(--ink);
@@ -68,6 +70,172 @@ a {
   min-height: calc(100vh - 11rem);
   padding: clamp(3rem, 8vw, 7rem) 0;
 }
+.main:has(.home-main) {
+  width: 100%;
+  padding-block: 0;
+}
+.home-main {
+  display: grid;
+  gap: clamp(3rem, 7vw, 6rem);
+}
+.pane {
+  position: relative;
+}
+.pane-state {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: 3rem auto;
+  min-height: 10rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 1rem;
+  color: var(--muted);
+}
+.action {
+  display: inline-block;
+  border: 2px solid var(--coral);
+  border-radius: 0.2rem;
+  padding: 0.65rem 1rem;
+  background: var(--coral);
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+.action:focus-visible,
+.carousel-control:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+.home-carousel {
+  min-height: 31rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: white;
+  text-align: center;
+  background:
+    radial-gradient(circle at 30% 30%, #24638a99, transparent 35%),
+    linear-gradient(115deg, #071727, #123b58 55%, #08121d);
+}
+.home-carousel[data-tone="research"] {
+  background:
+    radial-gradient(circle at 70% 25%, #b8754a88, transparent 35%),
+    linear-gradient(115deg, #172337, #3e2c45 55%, #111b29);
+}
+.carousel-copy {
+  width: min(900px, calc(100% - 6rem));
+}
+.carousel-copy h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  margin: 0 0 1rem;
+}
+.carousel-copy p {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  line-height: 1.6;
+}
+.carousel-control {
+  position: absolute;
+  top: 50%;
+  border: 0;
+  background: transparent;
+  color: white;
+  font-size: 2.5rem;
+  cursor: pointer;
+}
+.carousel-control.previous {
+  left: 1rem;
+}
+.carousel-control.next {
+  right: 1rem;
+}
+.carousel-position {
+  position: absolute;
+  bottom: 1.5rem;
+}
+.home-cards,
+.story-pane,
+.contact-pane {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: auto;
+}
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+.marketing-card {
+  text-align: center;
+}
+.card-icon {
+  color: var(--navy);
+  font-size: 4rem;
+  line-height: 1;
+}
+.marketing-card h2 {
+  font-family: Georgia, serif;
+  font-size: 2rem;
+}
+.marketing-card p {
+  line-height: 1.65;
+  min-height: 5.5rem;
+}
+.story-pane {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: var(--blush);
+}
+.story-portrait {
+  min-height: 25rem;
+  background:
+    radial-gradient(circle at 52% 30%, #e8c6a9 0 8%, transparent 9%),
+    radial-gradient(ellipse at 52% 70%, #173b68 0 24%, transparent 25%),
+    linear-gradient(125deg, #d9dde0, #74906e);
+}
+.story-copy {
+  align-self: center;
+  padding: clamp(2rem, 5vw, 4rem);
+}
+.story-copy h2,
+.contact-copy h2 {
+  font-family: Georgia, serif;
+  color: var(--navy);
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  margin: 0.2rem 0 1rem;
+}
+.story-copy p,
+.contact-copy p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+.contact-pane {
+  padding: clamp(2rem, 6vw, 5rem);
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+.contact-links {
+  display: grid;
+  gap: 1rem;
+}
+.contact-links a {
+  padding: 1rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--navy);
+  font-weight: 700;
+  text-decoration: none;
+}
+.contact-links a:hover,
+.contact-links a:focus-visible {
+  color: var(--coral);
+}
 .hero {
   max-width: 760px;
 }
@@ -112,5 +280,19 @@ a {
   }
   .nav-link {
     padding: 0.5rem;
+  }
+  .home-cards,
+  .story-pane,
+  .contact-pane {
+    grid-template-columns: 1fr;
+  }
+  .marketing-card p {
+    min-height: auto;
+  }
+  .story-portrait {
+    min-height: 19rem;
+  }
+  .contact-pane {
+    padding-inline: 0;
   }
 }

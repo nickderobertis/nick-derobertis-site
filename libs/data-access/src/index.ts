@@ -14,3 +14,4 @@ export {
   domainNames,
   validateCvData,
 } from "./client";
+export { homeContent, type PaneState, readPaneState } from "./home";

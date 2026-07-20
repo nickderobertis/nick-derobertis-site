@@ -22,6 +22,7 @@ export default {
       filename: "remoteEntry.js",
       exposes: { "./App": "./src/app.tsx" },
       remotes: {
+        home: "home@/nick-derobertis-site/remotes/home/remoteEntry.js",
         bio: "bio@/nick-derobertis-site/remotes/bio/remoteEntry.js",
         research:
           "research@/nick-derobertis-site/remotes/research/remoteEntry.js",

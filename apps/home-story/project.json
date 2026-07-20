@@ -1,0 +1,35 @@
+{
+  "name": "home-story",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/home-story/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:home-story"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/home-story/rspack.config.ts",
+        "outputPath": "dist/apps/home-story",
+        "main": "apps/home-story/src/main.tsx",
+        "tsConfig": "apps/home-story/tsconfig.app.json",
+        "index": "apps/home-story/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/home-story" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/home-story/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --passWithNoTests apps/home-story/src"
+      }
+    }
+  }
+}
