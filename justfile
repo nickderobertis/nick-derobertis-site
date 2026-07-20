@@ -32,7 +32,7 @@ lint-llm:
     llmlint
 
 lint-llm-diff *args:
-    llmlint --diff --diff-base "origin/main" {{args}}
+    llmlint --diff --diff-base "origin/master" {{args}}
 
 lint-llm-validate *args:
     llmlint validate {{args}}

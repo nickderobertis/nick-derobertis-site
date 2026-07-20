@@ -2,7 +2,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [master]
 permissions:
   contents: read
 jobs:
@@ -18,7 +18,7 @@ jobs:
       - uses: extractions/setup-just@v2
       - run: just bootstrap
       - name: Derive affected range
-        run: echo "NX_BASE=$(git merge-base origin/main HEAD)" >> "$GITHUB_ENV"
+        run: echo "NX_BASE=$(git merge-base origin/master HEAD)" >> "$GITHUB_ENV"
       - run: just check
   llmlint:
     runs-on: ubuntu-latest
@@ -28,7 +28,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - uses: extractions/setup-just@v2
       - run: just setup-llmlint
-      - run: just lint-llm-validate --diff-base origin/main
+      - run: just lint-llm-validate --diff-base origin/master
       - name: Require harness credential
         env: {OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"}
         run: test -n "$OPENAI_API_KEY" || { echo 'OPENAI_API_KEY is required for llmlint'; exit 1; }

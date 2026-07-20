@@ -20,4 +20,4 @@ E2E visits all five routes at the Pages base path, verifies shared layout and ro
 
 ## Commits, releases, and merging
 
-Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `main` requiring `check` and `llmlint`; admins may override.
+Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override.
