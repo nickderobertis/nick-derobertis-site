@@ -11,7 +11,10 @@ const siteConfig: unknown = createRequire(import.meta.url)(
 );
 if (
   Object.entries(remoteManifest).some(
-    ([key, value]) => !/^[a-z][a-z-]+$/.test(key) || typeof value !== "string",
+    ([key, value]) =>
+      !/^[a-z][a-z-]+$/.test(key) ||
+      typeof value !== "string" ||
+      !/^[a-z][A-Za-z]*$/.test(value),
   )
 )
   throw new Error("remotes.json must contain string remote-name mappings");
@@ -67,12 +70,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
         exposes: { "./Page": "./src/page.tsx" },
         remotes:
           options.remotes ??
-          (name === "research"
-            ? {
-                software:
-                  "software@/nick-derobertis-site/remotes/software/remoteEntry.js",
-              }
-            : {}),
+          (name === "research" ? remoteMap(["software"]) : {}),
         shared: {
           react: { singleton: true, requiredVersion: false, eager: true },
           "react-dom": { singleton: true, requiredVersion: false, eager: true },

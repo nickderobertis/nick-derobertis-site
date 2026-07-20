@@ -175,6 +175,34 @@ for (const path of renderPaths) {
   });
 }
 
+for (const path of renderPaths) {
+  test(`HOME action links navigate ${path.name}`, async ({ page }) => {
+    const internalLinks = [
+      ["View research", "/research"],
+      ["View software", "/software"],
+      ["View courses", "/courses"],
+      ["View bio", "/bio"],
+    ] as const;
+    for (const [name, destination] of internalLinks) {
+      await page.goto(path.url("home"));
+      await page.getByRole("link", { name, exact: true }).first().click();
+      await expect(page).toHaveURL(new RegExp(`${destination}$`));
+    }
+    await page.goto(path.url("home"));
+    await expect(
+      page.getByRole("link", { name: "Email Nick" }),
+    ).toHaveAttribute("href", "mailto:derobertis.nick@gmail.com");
+    await expect(page.getByRole("link", { name: "LinkedIn" })).toHaveAttribute(
+      "href",
+      "https://www.linkedin.com/in/nickderobertis/",
+    );
+    await expect(page.getByRole("link", { name: "GitHub" })).toHaveAttribute(
+      "href",
+      "https://github.com/nickderobertis",
+    );
+  });
+}
+
 test("script entry points reject invalid inputs with recovery actions", async () => {
   const invalidPort = spawnSync(process.execPath, ["scripts/serve-e2e.mjs"], {
     env: { ...process.env, PORT: "invalid" },
