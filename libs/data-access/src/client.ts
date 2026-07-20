@@ -1,4 +1,4 @@
-import Ajv, { type ErrorObject } from "ajv";
+import Ajv, { type ErrorObject, type ValidateFunction } from "ajv";
 import addFormats from "ajv-formats";
 import type {
   Awards,
@@ -35,6 +35,7 @@ export interface CvDomains {
   software_projects: SoftwareProjects;
   timeline: Timeline;
 }
+export type CvDomainArtifacts = Record<CvDomain, unknown>;
 
 // `discriminator` is an OpenAPI annotation here; `oneOf` remains the validator.
 const ajv = new Ajv({
@@ -45,6 +46,34 @@ const ajv = new Ajv({
 ajv.addKeyword({ keyword: "discriminator", schemaType: "object" });
 addFormats(ajv);
 const validate = ajv.compile<CvData>(rootSchema);
+const domainValidators: {
+  [Name in CvDomain]: ValidateFunction<CvDomains[Name]>;
+} = {
+  awards: ajv.compile<Awards>({
+    $defs: rootSchema.$defs,
+    ...rootSchema.properties.awards,
+  }),
+  courses: ajv.compile<Courses>({
+    $defs: rootSchema.$defs,
+    ...rootSchema.properties.courses,
+  }),
+  research: ajv.compile<Research>({
+    $defs: rootSchema.$defs,
+    ...rootSchema.properties.research,
+  }),
+  skills: ajv.compile<Skills>({
+    $defs: rootSchema.$defs,
+    ...rootSchema.properties.skills,
+  }),
+  software_projects: ajv.compile<SoftwareProjects>({
+    $defs: rootSchema.$defs,
+    ...rootSchema.properties.software_projects,
+  }),
+  timeline: ajv.compile<Timeline>({
+    $defs: rootSchema.$defs,
+    ...rootSchema.properties.timeline,
+  }),
+};
 
 export class CvDataValidationError extends Error {
   readonly issues: ErrorObject[];
@@ -58,29 +87,123 @@ export class CvDataValidationError extends Error {
   }
 }
 
+export class CvDomainValidationError extends Error {
+  readonly domain: CvDomain;
+  readonly issues: ErrorObject[];
+  readonly reason: "schema" | "drift";
+
+  constructor(
+    domain: CvDomain,
+    reason: "schema" | "drift",
+    issues?: ErrorObject[] | null,
+  ) {
+    const normalizedIssues = issues ?? [];
+    const detail =
+      reason === "schema"
+        ? ajv.errorsText(normalizedIssues)
+        : "artifact differs from validated root data";
+    super(`CV ${domain} domain failed ${reason} validation: ${detail}`);
+    this.name = "CvDomainValidationError";
+    this.domain = domain;
+    this.issues = normalizedIssues;
+    this.reason = reason;
+  }
+}
+
 export function validateCvData(input: unknown): CvData {
   if (!validate(input)) throw new CvDataValidationError(validate.errors);
   return input;
 }
 
-export const cvData = validateCvData(rootData);
 export const cvSchema: unknown = rootSchema;
-export const cvDomains: CvDomains = {
-  awards: awards as Awards,
-  courses: courses as Courses,
-  research: research as Research,
-  skills: skills as unknown as Skills,
-  software_projects: softwareProjects as SoftwareProjects,
-  timeline: timeline as Timeline,
-};
 
 export interface CvDataClient {
   domain<Name extends CvDomain>(name: Name): CvDomains[Name];
   root(): CvData;
   schema(): unknown;
 }
-export const cvDataClient: CvDataClient = {
-  domain: (name) => cvDomains[name],
-  root: () => cvData,
-  schema: () => cvSchema,
+
+function validateDomain<Name extends CvDomain>(
+  name: Name,
+  input: unknown,
+  expected: CvDomains[Name] | undefined,
+  validator: ValidateFunction<CvDomains[Name]>,
+): CvDomains[Name] {
+  if (!validator(input))
+    throw new CvDomainValidationError(name, "schema", validator.errors);
+  if (
+    expected === undefined ||
+    JSON.stringify(input) !== JSON.stringify(expected)
+  )
+    throw new CvDomainValidationError(name, "drift");
+  return input;
+}
+
+export function createCvDataClient(
+  rootInput: unknown,
+  artifacts: CvDomainArtifacts,
+): CvDataClient {
+  const root = validateCvData(rootInput);
+  const domains: CvDomains = {
+    awards: validateDomain(
+      "awards",
+      artifacts.awards,
+      root.awards,
+      domainValidators.awards,
+    ),
+    courses: validateDomain(
+      "courses",
+      artifacts.courses,
+      root.courses,
+      domainValidators.courses,
+    ),
+    research: validateDomain(
+      "research",
+      artifacts.research,
+      root.research,
+      domainValidators.research,
+    ),
+    skills: validateDomain(
+      "skills",
+      artifacts.skills,
+      root.skills,
+      domainValidators.skills,
+    ),
+    software_projects: validateDomain(
+      "software_projects",
+      artifacts.software_projects,
+      root.software_projects,
+      domainValidators.software_projects,
+    ),
+    timeline: validateDomain(
+      "timeline",
+      artifacts.timeline,
+      root.timeline,
+      domainValidators.timeline,
+    ),
+  };
+  return {
+    domain: (name) => domains[name],
+    root: () => root,
+    schema: () => cvSchema,
+  };
+}
+
+const importedArtifacts = {
+  awards,
+  courses,
+  research,
+  skills,
+  software_projects: softwareProjects,
+  timeline,
+};
+export const cvDataClient = createCvDataClient(rootData, importedArtifacts);
+export const cvData = cvDataClient.root();
+export const cvDomains: CvDomains = {
+  awards: cvDataClient.domain("awards"),
+  courses: cvDataClient.domain("courses"),
+  research: cvDataClient.domain("research"),
+  skills: cvDataClient.domain("skills"),
+  software_projects: cvDataClient.domain("software_projects"),
+  timeline: cvDataClient.domain("timeline"),
 };

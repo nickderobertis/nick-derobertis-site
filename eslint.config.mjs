@@ -26,7 +26,23 @@ export default [
             },
             {
               sourceTag: "type:remote",
+              onlyDependOnLibsWithTags: ["type:shared", "type:remote"],
+            },
+            {
+              sourceTag: "scope:bio",
               onlyDependOnLibsWithTags: ["type:shared"],
+            },
+            {
+              sourceTag: "scope:courses",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
+            {
+              sourceTag: "scope:software",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
+            {
+              sourceTag: "scope:research",
+              onlyDependOnLibsWithTags: ["type:shared", "scope:software"],
             },
             { sourceTag: "type:e2e", onlyDependOnLibsWithTags: ["type:app"] },
           ],

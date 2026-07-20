@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   CvDataValidationError,
+  type CvDomainArtifacts,
+  CvDomainValidationError,
+  createCvDataClient,
   cvDataClient,
+  cvDomains,
   domainNames,
   validateCvData,
 } from "./client";
@@ -37,5 +41,39 @@ describe("vendored CV data boundary", () => {
       expect((error as CvDataValidationError).issues.length).toBeGreaterThan(0);
     }
     expect(new CvDataValidationError().issues).toEqual([]);
+  });
+
+  it("rejects a malformed imported domain through the client boundary", () => {
+    const artifacts: CvDomainArtifacts = structuredClone(cvDomains);
+    artifacts.awards = [{ id: 42 }];
+
+    expect(() => createCvDataClient(cvDataClient.root(), artifacts)).toThrow(
+      CvDomainValidationError,
+    );
+    try {
+      createCvDataClient(cvDataClient.root(), artifacts);
+    } catch (error) {
+      if (!(error instanceof CvDomainValidationError)) throw error;
+      expect(error.domain).toBe("awards");
+      expect(error.reason).toBe("schema");
+      expect(error.issues.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("rejects a valid domain artifact that drifts from the root", () => {
+    const artifacts: CvDomainArtifacts = structuredClone(cvDomains);
+    artifacts.awards = cvDomains.awards.slice(1);
+
+    expect(() => createCvDataClient(cvDataClient.root(), artifacts)).toThrow(
+      "artifact differs from validated root data",
+    );
+    try {
+      createCvDataClient(cvDataClient.root(), artifacts);
+    } catch (error) {
+      if (!(error instanceof CvDomainValidationError)) throw error;
+      expect(error.domain).toBe("awards");
+      expect(error.reason).toBe("drift");
+      expect(error.issues).toEqual([]);
+    }
   });
 });
