@@ -52,6 +52,7 @@ export default [
                 "scope:home-cards",
                 "scope:home-story",
                 "scope:home-contact",
+                "scope:skills",
               ],
             },
             {
@@ -72,6 +73,10 @@ export default [
             },
             {
               sourceTag: "scope:timeline",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
+            {
+              sourceTag: "scope:skills",
               onlyDependOnLibsWithTags: ["type:shared"],
             },
             { sourceTag: "type:e2e", onlyDependOnLibsWithTags: ["type:app"] },

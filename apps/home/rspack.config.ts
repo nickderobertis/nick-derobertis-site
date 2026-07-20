@@ -6,5 +6,6 @@ export default remoteConfig("home", {
     "home-story",
     "home-contact",
     "timeline",
+    "skills",
   ]),
 });
