@@ -3,7 +3,6 @@ import "@site/design-system";
 import { useEffect, useState } from "react";
 
 type AwardsView = "all" | "selected" | "empty" | "error" | "loading";
-type AwardsSelection = "all" | "selected";
 
 const selectedAwardIds = new Set([
   "warrington-college-of-business-ph-d-student-teaching-award",
@@ -12,7 +11,13 @@ const selectedAwardIds = new Set([
   "finance-student-of-the-year",
 ]);
 
-function requestedView(selection: AwardsSelection): AwardsView {
+function defaultView(): AwardsView {
+  return window.location.pathname.includes("/remotes/awards/")
+    ? "all"
+    : "selected";
+}
+
+function requestedView(): AwardsView {
   const value = new URLSearchParams(window.location.search).get("awards-view");
   if (
     value === "all" ||
@@ -22,17 +27,41 @@ function requestedView(selection: AwardsSelection): AwardsView {
     value === "loading"
   )
     return value;
-  return selection;
+  return defaultView();
 }
 
-function useAwardsView(selection: AwardsSelection): AwardsView {
-  const [view, setView] = useState<AwardsView>(() => requestedView(selection));
+function useAwardsView(): AwardsView {
+  const [view, setView] = useState<AwardsView>(requestedView);
   useEffect(() => {
     if (view !== "loading") return;
-    const timer = window.setTimeout(() => setView(selection), 1_500);
+    const timer = window.setTimeout(() => setView(defaultView()), 1_500);
     return () => window.clearTimeout(timer);
-  }, [selection, view]);
+  }, [view]);
   return view;
+}
+
+const viewOptions: ReadonlyArray<{ label: string; view: AwardsView }> = [
+  { label: "Selected awards", view: "selected" },
+  { label: "All awards", view: "all" },
+  { label: "Loading state", view: "loading" },
+  { label: "Empty state", view: "empty" },
+  { label: "Unavailable state", view: "error" },
+];
+
+function AwardsViewControls({ view }: { view: AwardsView }) {
+  return (
+    <nav className="awards-view-controls" aria-label="Awards display options">
+      {viewOptions.map((option) => (
+        <a
+          key={option.view}
+          href={`?awards-view=${option.view}`}
+          aria-current={view === option.view ? "page" : undefined}
+        >
+          {option.label}
+        </a>
+      ))}
+    </nav>
+  );
 }
 
 function awardParts(award: Award): string[] {
@@ -100,12 +129,8 @@ function AwardsCollection({ awards }: { awards: Award[] }) {
   );
 }
 
-export interface AwardsPageProps {
-  selection?: AwardsSelection;
-}
-
-export default function AwardsPage({ selection = "all" }: AwardsPageProps) {
-  const view = useAwardsView(selection);
+export default function AwardsPage() {
+  const view = useAwardsView();
   const allAwards = cvDataClient.domain("awards");
   const awards =
     view === "selected"
@@ -118,6 +143,7 @@ export default function AwardsPage({ selection = "all" }: AwardsPageProps) {
         <h2 id="awards-heading">Awards</h2>
         <p>Academic, professional, and community recognition.</p>
       </header>
+      <AwardsViewControls view={view} />
       {view === "loading" ? (
         <div className="awards-state" role="status">
           Loading awards…

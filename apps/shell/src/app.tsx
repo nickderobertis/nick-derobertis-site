@@ -25,7 +25,7 @@ function HomePage() {
         <p>{homeRoute.description}</p>
       </section>
       <TimelinePage />
-      <AwardsPage selection="selected" />
+      <AwardsPage />
     </>
   );
 }

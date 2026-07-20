@@ -550,6 +550,29 @@ a {
   font: 700 clamp(2.25rem, 6vw, 4rem) / 1 Georgia, serif;
 }
 .awards-heading > p:last-child { margin-bottom: 0; color: var(--muted); }
+.awards-view-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.awards-view-controls a {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #cdbebe;
+  border-radius: 2rem;
+  color: var(--navy);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: rgb(255 255 255 / 70%);
+}
+.awards-view-controls a:hover,
+.awards-view-controls a:focus-visible,
+.awards-view-controls a[aria-current="page"] {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--paper);
+}
 .awards-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

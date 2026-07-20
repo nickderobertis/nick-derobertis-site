@@ -5,19 +5,27 @@ const renderPaths = [
   { name: "standalone remote", path: "remotes/awards/" },
 ] as const;
 
-async function openAwards(page: Page, path: string, view?: string) {
-  const query = view ? `?awards-view=${view}` : "";
-  await page.goto(`${path}${query}`);
+async function openAwards(page: Page, path: string) {
+  await page.goto(path);
   await expect(
     page.getByRole("heading", { name: "Awards", exact: true }),
   ).toBeVisible();
+}
+
+async function chooseView(page: Page, name: string) {
+  await page.getByRole("link", { name, exact: true }).click();
+  await expect(page.getByRole("link", { name, exact: true })).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
 }
 
 for (const renderPath of renderPaths) {
   test(`${renderPath.name} renders selected and all awards with stats and optional parts`, async ({
     page,
   }) => {
-    await openAwards(page, renderPath.path, "selected");
+    await openAwards(page, renderPath.path);
+    await chooseView(page, "Selected awards");
     await expect(
       page.getByLabel("Awards list").getByRole("article"),
     ).toHaveCount(4);
@@ -47,7 +55,7 @@ for (const renderPath of renderPaths) {
     });
     await expect(withoutParts.getByLabel("Award details")).toHaveCount(0);
 
-    await openAwards(page, renderPath.path, "all");
+    await chooseView(page, "All awards");
     await expect(
       page.getByLabel("Awards list").getByRole("article"),
     ).toHaveCount(7);
@@ -66,15 +74,16 @@ for (const renderPath of renderPaths) {
   test(`${renderPath.name} exposes loading, empty, and error states`, async ({
     page,
   }) => {
-    await openAwards(page, renderPath.path, "loading");
+    await openAwards(page, renderPath.path);
+    await chooseView(page, "Loading state");
     await expect(page.getByRole("status")).toHaveText("Loading awards…");
     await expect(page.getByLabel("Awards list")).toBeVisible();
 
-    await openAwards(page, renderPath.path, "empty");
+    await chooseView(page, "Empty state");
     await expect(page.getByRole("status")).toContainText("No awards to show");
     await expect(page.getByRole("article")).toHaveCount(0);
 
-    await openAwards(page, renderPath.path, "error");
+    await chooseView(page, "Unavailable state");
     await expect(page.getByRole("alert")).toContainText(
       "Awards are unavailable",
     );
@@ -85,7 +94,8 @@ for (const renderPath of renderPaths) {
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await openAwards(page, renderPath.path, "all");
+    await openAwards(page, renderPath.path);
+    await chooseView(page, "All awards");
     const columns = () =>
       page
         .getByLabel("Awards list")

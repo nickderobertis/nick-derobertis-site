@@ -32,6 +32,6 @@ declare module "timeline/Page" {
 declare module "awards/Page" {
   import type { ComponentType } from "react";
 
-  const Page: ComponentType<{ selection?: "all" | "selected" }>;
+  const Page: ComponentType;
   export default Page;
 }
