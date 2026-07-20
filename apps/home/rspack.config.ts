@@ -7,5 +7,6 @@ export default remoteConfig("home", {
     "home-contact",
     "timeline",
     "skills",
+    "awards",
   ]),
 });

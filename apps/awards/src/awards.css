@@ -1,0 +1,129 @@
+.awards-pane,
+.awards-pane * {
+  box-sizing: border-box;
+}
+.awards-pane {
+  background: #f5eded;
+  padding: clamp(2rem, 5vw, 4.5rem) max(1rem, calc((100vw - 1100px) / 2));
+}
+.awards-intro {
+  align-items: end;
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+}
+.awards-eyebrow {
+  color: var(--coral, #e95155);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin: 0;
+  text-transform: uppercase;
+}
+.awards-intro h2 {
+  color: var(--navy, #12324a);
+  font:
+    400 clamp(2rem, 4vw, 3.25rem) / 1.1 Georgia,
+    serif;
+  margin: 0.2rem 0 0;
+}
+.awards-stats {
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  text-align: center;
+}
+.awards-stats div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+.awards-stats dt {
+  color: #61717c;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+.awards-stats dd {
+  color: #12324a;
+  font:
+    700 1.2rem Georgia,
+    serif;
+  margin: 0;
+}
+.award-grid {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.award-card {
+  align-content: start;
+  background: #fff;
+  border-radius: 4.5rem;
+  box-shadow: 0 2px 3px #0004;
+  display: grid;
+  min-height: 19rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+.award-card h3 {
+  font-size: 1rem;
+  margin: 1.5rem 0 0.6rem;
+}
+.award-laurel {
+  align-items: center;
+  color: #087517;
+  display: flex;
+  font-size: 4.5rem;
+  justify-content: center;
+  line-height: 1;
+}
+.award-laurel span:last-child {
+  transform: scaleX(-1);
+}
+.award-laurel time {
+  color: #dbb500;
+  font:
+    700 0.7rem Arial,
+    sans-serif;
+  min-width: 5.5rem;
+}
+.award-extra {
+  margin: 0;
+}
+.award-card ul {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+}
+.award-card li {
+  margin-top: 0.35rem;
+}
+.awards-state {
+  background: #e9f3f8;
+  border-left: 4px solid #2878a8;
+  margin: 4rem auto;
+  padding: 1rem;
+  width: min(1100px, calc(100% - 2rem));
+}
+@media (max-width: 760px) {
+  .awards-intro {
+    align-items: start;
+    flex-direction: column;
+  }
+  .awards-stats {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .award-grid {
+    grid-template-columns: 1fr;
+  }
+  .award-card {
+    border-radius: 4rem;
+    min-height: 19rem;
+  }
+}
+@media (min-width: 761px) and (max-width: 1000px) {
+  .award-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

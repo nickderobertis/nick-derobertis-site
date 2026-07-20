@@ -95,6 +95,9 @@ for (const path of renderPaths)
     await expect(
       page.getByRole("region", { name: "Timeline visualization" }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Selected awards" }),
+    ).toBeVisible();
   });
 
 for (const path of renderPaths)

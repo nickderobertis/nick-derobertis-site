@@ -36,3 +36,9 @@ declare module "skills/Page" {
   const Page: ComponentType;
   export default Page;
 }
+declare module "awards/Page" {
+  import type { ComponentType } from "react";
+
+  const Page: ComponentType;
+  export default Page;
+}
