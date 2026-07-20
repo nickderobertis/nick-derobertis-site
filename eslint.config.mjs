@@ -44,6 +44,10 @@ export default [
               sourceTag: "scope:research",
               onlyDependOnLibsWithTags: ["type:shared", "scope:software"],
             },
+            {
+              sourceTag: "scope:timeline",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
             { sourceTag: "type:e2e", onlyDependOnLibsWithTags: ["type:app"] },
           ],
         },

@@ -27,7 +27,7 @@
         "build",
         {
           "target": "build",
-          "projects": ["bio", "research", "software", "courses"]
+          "projects": ["bio", "research", "software", "courses", "timeline"]
         }
       ],
       "options": {
