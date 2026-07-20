@@ -56,6 +56,7 @@ for (const name of remoteNames) {
     );
   }
 }
+await access(`${root}/remotes/awards/selected/index.html`);
 for (const file of [
   "cv.json",
   "cv.schema.json",

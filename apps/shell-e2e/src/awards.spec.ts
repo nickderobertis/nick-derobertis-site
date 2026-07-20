@@ -9,10 +9,14 @@ const allAwardsPaths = [
   { name: "host-composed", path: "awards" },
   { name: "standalone remote", path: "remotes/awards/" },
 ] as const;
-const statePaths = [
+const selectedAwardsPaths = [
   { name: "home selected awards", path: "" },
-  ...allAwardsPaths,
+  {
+    name: "standalone selected awards",
+    path: "remotes/awards/selected/",
+  },
 ] as const;
+const statePaths = [...selectedAwardsPaths, ...allAwardsPaths] as const;
 const artifactPath = "cv-data/domains/awards.json";
 
 async function withArtifactOutcome(
@@ -44,22 +48,27 @@ async function openAwards(page: Page, path: string) {
   ).toBeVisible();
 }
 
-test("home renders the data-access selected awards subset", async ({
-  page,
-}) => {
-  await openAwards(page, "");
-  await expect(page.getByLabel("Awards list").getByRole("article")).toHaveCount(
-    4,
-  );
-  await expect(
-    page.getByRole("heading", { name: "Finance Student of the Year" }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", {
-      name: "Warrington Finance Ph.D. Research Grants",
-    }),
-  ).toHaveCount(0);
-});
+for (const renderPath of selectedAwardsPaths) {
+  test(`${renderPath.name} renders the data-access subset and stats`, async ({
+    page,
+  }) => {
+    await openAwards(page, renderPath.path);
+    await expect(
+      page.getByLabel("Awards list").getByRole("article"),
+    ).toHaveCount(4);
+    await expect(
+      page.getByLabel("Awards statistics").getByText("4", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Finance Student of the Year" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "Warrington Finance Ph.D. Research Grants",
+      }),
+    ).toHaveCount(0);
+  });
+}
 
 for (const renderPath of allAwardsPaths) {
   test(`${renderPath.name} renders all awards, stats, extra info, and award parts`, async ({
@@ -85,7 +94,7 @@ for (const renderPath of allAwardsPaths) {
       }),
     });
     await expect(withParts.getByText("2014", { exact: true })).toBeVisible();
-    await expect(withParts.getByText("780", { exact: true })).toBeVisible();
+    await expect(withParts.locator(".award-extra-info")).toHaveText("780");
     await expect(
       withParts.getByLabel("Award parts").getByRole("listitem"),
     ).toHaveCount(1);
@@ -96,13 +105,16 @@ for (const renderPath of allAwardsPaths) {
         name: "Warrington Finance Ph.D. Research Grants",
       }),
     });
-    await expect(extraInfoOnly.getByText("$2000/yr")).toBeVisible();
+    await expect(extraInfoOnly.locator(".award-extra-info")).toHaveText(
+      "$2000/yr",
+    );
     await expect(extraInfoOnly.getByLabel("Award parts")).toHaveCount(0);
 
     const withoutInfo = page.getByRole("article").filter({
       has: page.getByRole("heading", { name: "Finance Student of the Year" }),
     });
     await expect(withoutInfo.getByText("2013", { exact: true })).toBeVisible();
+    await expect(withoutInfo.locator(".award-extra-info")).toHaveCount(0);
     await expect(withoutInfo.getByLabel("Award parts")).toHaveCount(0);
   });
 
@@ -138,6 +150,37 @@ for (const renderPath of allAwardsPaths) {
     );
   });
 }
+
+test("standalone selected awards responds from mobile through desktop", async ({
+  page,
+}) => {
+  const path = "remotes/awards/selected/";
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openAwards(page, path);
+  const columns = () =>
+    page
+      .getByLabel("Awards list")
+      .evaluate(
+        (element) =>
+          getComputedStyle(element).gridTemplateColumns.split(" ").length,
+      );
+  expect(await columns()).toBe(1);
+  await page.setViewportSize({ width: 800, height: 900 });
+  expect(await columns()).toBe(2);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  expect(await columns()).toBe(3);
+});
+
+test("standalone selected awards matches its visual baseline", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 1600 });
+  await openAwards(page, "remotes/awards/selected/");
+  await expect(page).toHaveScreenshot("standalone-selected-awards.png", {
+    animations: "disabled",
+    fullPage: true,
+  });
+});
 
 for (const statePath of statePaths) {
   test(`${statePath.name} exposes a genuine slow-network loading state`, async ({

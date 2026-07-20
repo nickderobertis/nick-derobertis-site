@@ -141,6 +141,14 @@ for (const name of remoteNames) {
   await mkdir(dirname(destination), { recursive: true });
   try {
     await cp(join("dist/apps", name), destination, { recursive: true });
+    if (name === "awards") {
+      const selectedDestination = join(destination, "selected");
+      await mkdir(selectedDestination, { recursive: true });
+      await cp(
+        join(destination, "index.html"),
+        join(selectedDestination, "index.html"),
+      );
+    }
   } catch (error) {
     throw new Error(
       `Cannot stage the ${name} remote; run \`pnpm exec nx run ${name}:build\` before prerendering.`,

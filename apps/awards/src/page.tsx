@@ -91,13 +91,8 @@ function AwardsCollection({ awards }: { awards: Award[] }) {
   );
 }
 
-function isSelectedAwardsPane(): boolean {
-  return /\/nick-derobertis-site\/?$/.test(window.location.pathname);
-}
-
-export default function AwardsPage() {
+export function AwardsPage({ selected = false }: { selected?: boolean }) {
   const { refresh, state } = useAwardsData();
-  const selected = isSelectedAwardsPane();
   const Heading = selected ? "h2" : "h1";
   const awards =
     state.status === "loaded" && selected
@@ -134,4 +129,9 @@ export default function AwardsPage() {
       )}
     </section>
   );
+}
+
+export default function ShellAwardsPage() {
+  const selected = /\/nick-derobertis-site\/?$/.test(window.location.pathname);
+  return <AwardsPage selected={selected} />;
 }

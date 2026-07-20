@@ -23,7 +23,13 @@ export function remoteConfig(name: string) {
       new ModuleFederationPlugin({
         name,
         filename: "remoteEntry.js",
-        exposes: { "./Page": "./src/page.tsx" },
+        exposes:
+          name === "awards"
+            ? {
+                "./Page": "./src/page.tsx",
+                "./SelectedPage": "./src/selected-page.tsx",
+              }
+            : { "./Page": "./src/page.tsx" },
         remotes:
           name === "research"
             ? {
