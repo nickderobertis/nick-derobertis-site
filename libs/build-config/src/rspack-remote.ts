@@ -68,9 +68,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
         name: federationName,
         filename: "remoteEntry.js",
         exposes: { "./Page": "./src/page.tsx" },
-        remotes:
-          options.remotes ??
-          (name === "research" ? remoteMap(["software"]) : {}),
+        remotes: options.remotes ?? {},
         shared: {
           react: { singleton: true, requiredVersion: false, eager: true },
           "react-dom": { singleton: true, requiredVersion: false, eager: true },

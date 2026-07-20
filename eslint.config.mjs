@@ -42,7 +42,7 @@ export default [
             },
             {
               sourceTag: "scope:research",
-              onlyDependOnLibsWithTags: ["type:shared", "scope:software"],
+              onlyDependOnLibsWithTags: ["type:shared"],
             },
             {
               sourceTag: "scope:home",

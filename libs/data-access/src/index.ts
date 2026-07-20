@@ -13,6 +13,7 @@ export {
   cvSchema,
   domainNames,
   validateCvData,
+  validateCvDomain,
 } from "./client";
 export { homeContent, type PaneState, readPaneState } from "./home";
 export { siteBase } from "./site";

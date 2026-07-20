@@ -139,6 +139,16 @@ function validateDomain<Name extends CvDomain>(
   return input;
 }
 
+export function validateCvDomain<Name extends CvDomain>(
+  name: Name,
+  input: unknown,
+): CvDomains[Name] {
+  const validator = domainValidators[name] as ValidateFunction<CvDomains[Name]>;
+  if (!validator(input))
+    throw new CvDomainValidationError(name, "schema", validator.errors);
+  return input;
+}
+
 export function createCvDataClient(
   rootInput: unknown,
   artifacts: CvDomainArtifacts,

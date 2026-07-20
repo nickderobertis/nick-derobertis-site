@@ -8,6 +8,7 @@ import {
   cvDomains,
   domainNames,
   validateCvData,
+  validateCvDomain,
 } from "./client";
 
 describe("vendored CV data boundary", () => {
@@ -75,5 +76,14 @@ describe("vendored CV data boundary", () => {
       expect(error.reason).toBe("drift");
       expect(error.issues).toEqual([]);
     }
+  });
+
+  it("validates independently loaded domain responses", () => {
+    expect(validateCvDomain("research", { projects: [] })).toEqual({
+      projects: [],
+    });
+    expect(() =>
+      validateCvDomain("research", { projects: [{ id: 42 }] }),
+    ).toThrow(CvDomainValidationError);
   });
 });
