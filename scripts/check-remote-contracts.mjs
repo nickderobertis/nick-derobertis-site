@@ -19,10 +19,12 @@ if (!routeResult.success)
     `Invalid apps/shell/src/routes.json remote configuration. Give each route an optional non-empty string "remote" field, then rerun the shell prerender. Details: ${z.prettifyError(routeResult.error)}`,
   );
 const validatedRoutes = routeResult.data;
-const names = validatedRoutes.flatMap((route) => route.remote ?? []);
-const uniqueNames = new Set(names);
-if (uniqueNames.size !== names.length) {
-  const duplicate = names.find((name, index) => names.indexOf(name) !== index);
+const routeRemoteNames = validatedRoutes.flatMap((route) => route.remote ?? []);
+const uniqueRouteRemoteNames = new Set(routeRemoteNames);
+if (uniqueRouteRemoteNames.size !== routeRemoteNames.length) {
+  const duplicate = routeRemoteNames.find(
+    (name, index) => routeRemoteNames.indexOf(name) !== index,
+  );
   throw new Error(
     `Remote ${JSON.stringify(duplicate)} appears more than once in apps/shell/src/routes.json. Remove the duplicate entry or rename one remote, then rerun the shell prerender.`,
   );
@@ -55,6 +57,14 @@ if (!projectResult.success)
   );
 const project = projectResult.data;
 const dependencies = project.targets.prerender.dependsOn[1].projects;
+const uniqueDependencies = new Set(dependencies);
+if (uniqueDependencies.size !== dependencies.length)
+  throw new Error(
+    "Remove duplicate projects from the shell prerender dependencies",
+  );
+for (const name of routeRemoteNames)
+  if (!uniqueDependencies.has(name))
+    throw new Error(`Add ${name} to the shell prerender project dependencies`);
 const declarations = await readRequired(
   "apps/shell/src/remotes.d.ts",
   "Restore the shell remote declarations, then rerun the shell prerender.",
@@ -63,9 +73,7 @@ const shellApp = await readRequired(
   "apps/shell/src/app.tsx",
   "Restore the shell application entry point, then rerun the shell prerender.",
 );
-for (const name of names) {
-  if (!dependencies.includes(name))
-    throw new Error(`Add ${name} to the shell prerender project dependencies`);
+for (const name of dependencies) {
   if (!declarations.includes(`declare module "${name}/Page"`))
     throw new Error(
       `Declare the ${name}/Page federation module in apps/shell/src/remotes.d.ts`,
@@ -75,8 +83,3 @@ for (const name of names) {
       `Load the ${name}/Page federation module with React.lazy in apps/shell/src/app.tsx`,
     );
 }
-const staleDependency = dependencies.find((name) => !uniqueNames.has(name));
-if (staleDependency)
-  throw new Error(
-    `Remove stale prerender dependency ${JSON.stringify(staleDependency)} from apps/shell/project.json or add its remote to apps/shell/src/routes.json`,
-  );
