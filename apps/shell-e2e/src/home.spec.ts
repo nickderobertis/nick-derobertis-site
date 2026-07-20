@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { cp, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
@@ -181,6 +182,20 @@ test("script entry points reject invalid inputs with recovery actions", async ()
   });
   expect(invalidPort.status).not.toBe(0);
   expect(invalidPort.stderr).toContain("run just test-e2e again");
+  const occupiedServer = createServer();
+  await new Promise<void>((resolve) =>
+    occupiedServer.listen(0, "127.0.0.1", resolve),
+  );
+  const address = occupiedServer.address();
+  if (address === null || typeof address === "string")
+    throw new Error("Expected a TCP address for the occupied test port");
+  const occupiedPort = spawnSync(process.execPath, ["scripts/serve-e2e.mjs"], {
+    env: { ...process.env, PORT: String(address.port) },
+    encoding: "utf8",
+  });
+  occupiedServer.close();
+  expect(occupiedPort.status).not.toBe(0);
+  expect(occupiedPort.stderr).toContain("Choose an available PORT");
   const fixture = await mkdtemp(join(tmpdir(), "site-prerender-"));
   try {
     const output = join(fixture, "output");

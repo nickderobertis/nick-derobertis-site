@@ -180,6 +180,13 @@ for (const name of Object.keys(remoteManifest)) {
       `Could not inspect built remote at ${source}: ${detail}. Verify the build directory is readable, then run just check again.`,
     );
   }
-  await mkdir(dirname(destination), { recursive: true });
-  await cp(source, destination, { recursive: true });
+  try {
+    await mkdir(dirname(destination), { recursive: true });
+    await cp(source, destination, { recursive: true });
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Could not stage built remote from ${source} to ${destination}: ${detail}. Verify both build directories are writable, then run just check again.`,
+    );
+  }
 }

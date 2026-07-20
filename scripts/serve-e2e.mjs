@@ -29,7 +29,7 @@ const types = {
   ".js": "text/javascript",
   ".json": "application/json",
 };
-createServer(async (request, response) => {
+const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
   const relative = normalize(
     url.pathname.startsWith(base)
@@ -48,4 +48,11 @@ createServer(async (request, response) => {
     types[extname(file)] ?? "application/octet-stream",
   );
   createReadStream(file).pipe(response);
-}).listen(port, "127.0.0.1");
+});
+server.on("error", (error) => {
+  console.error(
+    `Could not start the e2e server on port ${port}: ${error.message}. Choose an available PORT and run just test-e2e again.`,
+  );
+  process.exitCode = 1;
+});
+server.listen(port, "127.0.0.1");
