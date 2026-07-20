@@ -3,9 +3,20 @@ import { stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import siteConfig from "../libs/data-access/src/site.config.json" with {
+  type: "json",
+};
 
 const root = fileURLToPath(new URL("../dist/apps/shell", import.meta.url));
-const base = "/nick-derobertis-site";
+if (
+  !siteConfig ||
+  typeof siteConfig.pagesBase !== "string" ||
+  !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase)
+)
+  throw new Error(
+    `site.config.json pagesBase must match /[a-z0-9-]+; received ${JSON.stringify(siteConfig?.pagesBase)}. Fix it and run just test-e2e again.`,
+  );
+const base = siteConfig.pagesBase;
 const portValue = process.env.PORT ?? "4200";
 const port = Number(portValue);
 if (!Number.isInteger(port) || port < 1 || port > 65_535)

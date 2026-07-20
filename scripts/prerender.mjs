@@ -6,11 +6,16 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
+import siteConfig from "../libs/data-access/src/site.config.json" with {
+  type: "json",
+};
 
 function requirePath(value, fallback, name) {
   const path = value ?? fallback;
   if (typeof path !== "string" || path.length === 0 || path.includes("\0"))
-    throw new Error(`${name} must be a non-empty filesystem path`);
+    throw new Error(
+      `${name} must be a non-empty filesystem path. Set ${name} to a valid path and run just check again.`,
+    );
   return path;
 }
 if (
@@ -19,7 +24,9 @@ if (
       !/^[a-z][a-z-]+$/.test(name) || typeof alias !== "string",
   )
 )
-  throw new Error("remotes.json must contain string remote-name mappings");
+  throw new Error(
+    "remotes.json must contain string remote-name mappings. Fix libs/build-config/src/remotes.json and run just check again.",
+  );
 const output = requirePath(
   process.env.PRERENDER_OUTPUT,
   "dist/apps/shell",
@@ -30,7 +37,15 @@ const remoteBuildRoot = requirePath(
   "dist/apps",
   "REMOTE_BUILD_ROOT",
 );
-const base = "/nick-derobertis-site";
+if (
+  !siteConfig ||
+  typeof siteConfig.pagesBase !== "string" ||
+  !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase)
+)
+  throw new Error(
+    `site.config.json pagesBase must match /[a-z0-9-]+; received ${JSON.stringify(siteConfig?.pagesBase)}. Fix it and run just check again.`,
+  );
+const base = siteConfig.pagesBase;
 const builtDocument = await readFile(join(output, "index.html"), "utf8");
 // Nx may restore a previously prerendered output from cache. Normalize it back
 // to the rspack template so this target is idempotent as well as parallel-safe.
@@ -155,7 +170,13 @@ for (const name of Object.keys(remoteManifest)) {
   const destination = join(output, "remotes", name);
   try {
     await stat(source);
-  } catch {
+  } catch (error) {
+    if (
+      !(error instanceof Error) ||
+      !("code" in error) ||
+      error.code !== "ENOENT"
+    )
+      throw error;
     throw new Error(
       `Missing built remote at ${source}. Run just check to build every required remote before prerendering.`,
     );

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { cp, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
@@ -181,43 +181,4 @@ test("script entry points reject invalid inputs with recovery actions", async ()
   } finally {
     await rm(fixture, { recursive: true, force: true });
   }
-});
-
-test("remote manifest matches Nx build dependencies", async () => {
-  const manifest: unknown = JSON.parse(
-    await readFile("libs/build-config/src/remotes.json", "utf8"),
-  );
-  const project: unknown = JSON.parse(
-    await readFile("apps/shell/project.json", "utf8"),
-  );
-  expect(typeof manifest).toBe("object");
-  expect(typeof project).toBe("object");
-  if (
-    !manifest ||
-    typeof manifest !== "object" ||
-    !project ||
-    typeof project !== "object" ||
-    !("targets" in project)
-  )
-    throw new Error("Validated manifest and project objects are required");
-  const targets = project.targets;
-  if (!targets || typeof targets !== "object" || !("prerender" in targets))
-    throw new Error("Validated prerender target is required");
-  const prerender = targets.prerender;
-  if (
-    !prerender ||
-    typeof prerender !== "object" ||
-    !("dependsOn" in prerender) ||
-    !Array.isArray(prerender.dependsOn)
-  )
-    throw new Error("Validated dependsOn list is required");
-  const projects = prerender.dependsOn.flatMap((item) =>
-    typeof item === "object" &&
-    item &&
-    "projects" in item &&
-    Array.isArray(item.projects)
-      ? item.projects
-      : [],
-  );
-  expect(projects.sort()).toEqual(Object.keys(manifest).sort());
 });

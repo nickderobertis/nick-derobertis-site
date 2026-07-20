@@ -37,14 +37,14 @@ export function remoteMap(names: readonly RemoteProject[]) {
 }
 
 interface RemoteOptions {
-  federationName?: string;
   remotes?: Record<string, string>;
 }
 
 export function remoteConfig(name: string, options: RemoteOptions = {}) {
   const root = `apps/${name}`;
   const publicPath = `${pagesBase}/remotes/${name}/`;
-  const federationName = options.federationName ?? name;
+  const federationName =
+    name in remoteManifest ? remoteManifest[name as RemoteProject] : name;
   return {
     entry: `./${root}/src/main.tsx`,
     output: { publicPath, uniqueName: name, clean: true },
