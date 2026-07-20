@@ -49,6 +49,21 @@ async function openAwards(page: Page, path: string) {
   ).toBeVisible();
 }
 
+async function expectAwardColumns(page: Page, expected: number) {
+  const cards = page.getByLabel("Awards list").getByRole("article");
+  const first = await cards.nth(0).boundingBox();
+  if (!first) throw new Error("Expected the first award card to be visible");
+  for (let index = 1; index < expected; index += 1) {
+    const box = await cards.nth(index).boundingBox();
+    if (!box) throw new Error(`Expected award card ${index + 1} to be visible`);
+    expect(box.y).toBeCloseTo(first.y, 0);
+  }
+  const nextRow = await cards.nth(expected).boundingBox();
+  if (!nextRow)
+    throw new Error(`Expected award card ${expected + 1} to be visible`);
+  expect(nextRow.y).toBeGreaterThan(first.y);
+}
+
 for (const renderPath of selectedAwardsPaths) {
   test(`${renderPath.name} renders the data-access subset and stats`, async ({
     page,
@@ -128,20 +143,13 @@ for (const renderPath of allAwardsPaths) {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openAwards(page, renderPath.path);
-    const columns = () =>
-      page
-        .getByLabel("Awards list")
-        .evaluate(
-          (element) =>
-            getComputedStyle(element).gridTemplateColumns.split(" ").length,
-        );
-    expect(await columns()).toBe(1);
+    await expectAwardColumns(page, 1);
 
     await page.setViewportSize({ width: 800, height: 900 });
-    expect(await columns()).toBe(2);
+    await expectAwardColumns(page, 2);
 
     await page.setViewportSize({ width: 1280, height: 900 });
-    expect(await columns()).toBe(3);
+    await expectAwardColumns(page, 3);
   });
 
   test(`${renderPath.name} matches the awards visual baseline`, async ({
@@ -162,18 +170,11 @@ test("standalone selected awards responds from mobile through desktop", async ({
   const path = "remotes/awards/selected/";
   await page.setViewportSize({ width: 390, height: 844 });
   await openAwards(page, path);
-  const columns = () =>
-    page
-      .getByLabel("Awards list")
-      .evaluate(
-        (element) =>
-          getComputedStyle(element).gridTemplateColumns.split(" ").length,
-      );
-  expect(await columns()).toBe(1);
+  await expectAwardColumns(page, 1);
   await page.setViewportSize({ width: 800, height: 900 });
-  expect(await columns()).toBe(2);
+  await expectAwardColumns(page, 2);
   await page.setViewportSize({ width: 1280, height: 900 });
-  expect(await columns()).toBe(3);
+  await expectAwardColumns(page, 3);
 });
 
 test("standalone selected awards matches its visual baseline", async ({
