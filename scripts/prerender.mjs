@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -136,7 +136,15 @@ for (const name of [
   "software",
   "courses",
 ]) {
+  const source = join("dist/apps", name);
   const destination = join(output, "remotes", name);
+  try {
+    await stat(source);
+  } catch {
+    throw new Error(
+      `Missing built remote at ${source}. Run just check to build every required remote before prerendering.`,
+    );
+  }
   await mkdir(dirname(destination), { recursive: true });
-  await cp(join("dist/apps", name), destination, { recursive: true });
+  await cp(source, destination, { recursive: true });
 }

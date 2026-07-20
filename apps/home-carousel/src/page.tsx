@@ -1,6 +1,21 @@
 import { homeContent, readPaneState } from "@site/data-access";
 import { useEffect, useState } from "react";
 
+function useCarousel(length: number, enabled: boolean) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    if (!enabled) return;
+    const timer = window.setInterval(
+      () => setActive((current) => (current + 1) % length),
+      5000,
+    );
+    return () => window.clearInterval(timer);
+  }, [enabled, length]);
+  const move = (offset: number) =>
+    setActive((current) => (current + offset + length) % length);
+  return { active, move };
+}
+
 function StateMessage({ state }: { state: "empty" | "loading" | "error" }) {
   const messages = {
     empty: "No featured stories are available yet.",
@@ -12,23 +27,12 @@ function StateMessage({ state }: { state: "empty" | "loading" | "error" }) {
 
 export default function HomeCarouselPage() {
   const state = readPaneState(window.location.search);
-  const [active, setActive] = useState(0);
-  useEffect(() => {
-    if (state !== "happy") return;
-    const timer = window.setInterval(
-      () => setActive((current) => (current + 1) % homeContent.carousel.length),
-      5000,
-    );
-    return () => window.clearInterval(timer);
-  }, [state]);
+  const { active, move } = useCarousel(
+    homeContent.carousel.length,
+    state === "happy",
+  );
   if (state !== "happy") return <StateMessage state={state} />;
   const slide = homeContent.carousel[active] ?? homeContent.carousel[0];
-  const move = (offset: number) =>
-    setActive(
-      (current) =>
-        (current + offset + homeContent.carousel.length) %
-        homeContent.carousel.length,
-    );
   return (
     <section
       className="pane home-carousel"

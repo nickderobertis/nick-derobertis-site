@@ -89,6 +89,20 @@ for (const path of renderPaths)
     ).toBeVisible();
   });
 
+for (const path of renderPaths)
+  for (const state of ["empty", "loading", "error"] as const)
+    test(`HOME composition exposes its ${state} state ${path.name}`, async ({
+      page,
+    }) => {
+      const url = path.name === "standalone" ? "remotes/home/" : "";
+      await page.goto(`${url}?state=${state}`);
+      await expect(page.getByRole("status")).toHaveCount(4);
+      for (const pane of panes)
+        await expect(
+          page.getByRole("status").filter({ hasText: pane.states[state] }),
+        ).toBeVisible();
+    });
+
 const viewports = [
   { name: "mobile", width: 375, height: 812 },
   { name: "tablet", width: 768, height: 1024 },
