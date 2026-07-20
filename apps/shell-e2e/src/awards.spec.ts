@@ -36,11 +36,10 @@ for (const renderPath of renderPaths) {
       ).toBeVisible();
       const pane = page.getByRole("region", { name: "Awards & honors" });
       await expect(pane.getByRole("article")).toHaveCount(7);
-      const stats = pane.getByRole("term").locator("..");
-      await expect(stats).toContainText([
-        "Awards7",
-        "Years2010–2019",
-        "With details4",
+      await expect(pane.getByRole("definition")).toHaveText([
+        "7",
+        "2010–2019",
+        "4",
       ]);
       await expect(
         pane.getByRole("article", {
@@ -73,7 +72,11 @@ for (const renderPath of renderPaths) {
             .getByRole(state.role)
             .getByRole("heading", { name: state.heading }),
         ).toBeVisible();
-        await expect(page.locator(".award-card")).toHaveCount(0);
+        await expect(
+          page.getByRole("article", {
+            name: /GMAT Score|Finance Student of the Year/,
+          }),
+        ).toHaveCount(0);
       });
     }
 
