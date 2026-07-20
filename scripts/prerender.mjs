@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { z } from "zod";
 import routeInput from "../apps/shell/src/routes.json" with { type: "json" };
 
-const routes = z
+const routeResult = z
   .array(
     z
       .object({
@@ -17,7 +17,12 @@ const routes = z
       })
       .strict(),
   )
-  .parse(routeInput);
+  .safeParse(routeInput);
+if (!routeResult.success)
+  throw new Error(
+    `Invalid apps/shell/src/routes.json. Correct each route's path, label, heading, description, and optional remote fields, then rerun the shell prerender. Details: ${z.prettifyError(routeResult.error)}`,
+  );
+const routes = routeResult.data;
 
 const output = "dist/apps/shell";
 const base = "/nick-derobertis-site";
@@ -154,11 +159,10 @@ for (const name of [
     await mkdir(dirname(destination), { recursive: true });
     await cp(join("dist/apps", name), destination, { recursive: true });
   } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    console.error(
-      `Could not stage the ${name} remote: ${detail}\nRun 'just check' to rebuild and verify all remote artifacts.`,
+    throw new Error(
+      `Could not copy the ${name} remote. Build and verify repository artifacts with: just check-all`,
+      { cause: error },
     );
-    throw error;
   }
   // llmlint: ignore-end[changed_behavior_has_e2e]
 }

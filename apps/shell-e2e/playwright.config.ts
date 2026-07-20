@@ -6,7 +6,7 @@ if (!Number.isInteger(portNumber) || portNumber < 1024 || portNumber > 65_535)
   throw new Error(
     `Invalid E2E_PORT ${JSON.stringify(port)}. Set it to an available numeric port from 1024 to 65535`,
   );
-const baseURL = `http://127.0.0.1:${port}/nick-derobertis-site/`;
+const baseURL = `http://127.0.0.1:${portNumber}/nick-derobertis-site/`;
 
 export default defineConfig({
   testDir: "./src",
