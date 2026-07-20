@@ -23,8 +23,16 @@
     },
     "prerender": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
-      "options": { "command": "node scripts/prerender.mjs" }
+      "dependsOn": [
+        "build",
+        {
+          "target": "build",
+          "projects": ["bio", "research", "software", "courses"]
+        }
+      ],
+      "options": {
+        "command": "node scripts/prerender.mjs && node scripts/check-static-artifact.mjs"
+      }
     },
     "lint": {
       "executor": "nx:run-commands",

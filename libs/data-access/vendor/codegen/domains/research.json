@@ -1,0 +1,1043 @@
+{
+  "categories": [
+    {
+      "id": "alternative-assets",
+      "name": "Alternative Assets"
+    },
+    {
+      "id": "crypto-assets",
+      "name": "Crypto-assets"
+    },
+    {
+      "id": "asset-pricing",
+      "name": "Asset Pricing"
+    },
+    {
+      "id": "portfolio-analysis",
+      "name": "Portfolio Analysis"
+    },
+    {
+      "id": "investor-attention",
+      "name": "Investor Attention"
+    },
+    {
+      "id": "investor-sentiment",
+      "name": "Investor Sentiment"
+    },
+    {
+      "id": "market-intervention",
+      "name": "Market Intervention"
+    },
+    {
+      "id": "monetary-policy",
+      "name": "Monetary Policy"
+    },
+    {
+      "id": "international-finance",
+      "name": "International Finance"
+    },
+    {
+      "id": "behavioral-finance",
+      "name": "Behavioral Finance"
+    },
+    {
+      "id": "options",
+      "name": "Options"
+    },
+    {
+      "id": "volatility",
+      "name": "Volatility"
+    },
+    {
+      "id": "informed-trading",
+      "name": "Informed Trading"
+    },
+    {
+      "id": "liquidity",
+      "name": "Liquidity"
+    },
+    {
+      "id": "corporate-financing",
+      "name": "Corporate Financing"
+    },
+    {
+      "id": "equity",
+      "name": "Equity"
+    },
+    {
+      "id": "debt",
+      "name": "Debt"
+    },
+    {
+      "id": "executive-compensation",
+      "name": "Executive Compensation"
+    },
+    {
+      "id": "investor-scrutiny",
+      "name": "Investor Scrutiny"
+    },
+    {
+      "id": "regulation",
+      "name": "Regulation"
+    },
+    {
+      "id": "insider-trading",
+      "name": "Insider Trading"
+    },
+    {
+      "id": "short-sales",
+      "name": "Short Sales"
+    },
+    {
+      "id": "information-transmission",
+      "name": "Information Transmission"
+    }
+  ],
+  "coauthors": [
+    {
+      "id": "andy-naranjo",
+      "name": "Andy Naranjo"
+    },
+    {
+      "id": "mahendrarajah-nimalendran",
+      "name": "Mahendrarajah Nimalendran"
+    },
+    {
+      "id": "yong-jin",
+      "name": "Yong Jin"
+    },
+    {
+      "id": "sugata-ray",
+      "name": "Sugata Ray"
+    },
+    {
+      "id": "corbin-fox",
+      "name": "Corbin Fox"
+    }
+  ],
+  "projects": [
+    {
+      "category_ids": [
+        "alternative-assets",
+        "crypto-assets",
+        "asset-pricing",
+        "portfolio-analysis",
+        "investor-attention",
+        "investor-sentiment"
+      ],
+      "coauthor_ids": [],
+      "description": "\n    Cryptoassets represent a novel asset class in which tokens are generated and transacted\n    using cryptography through blockchains. To date, few studies have attempted to derive a\n    fundamental valuation for a cryptocurrency. I developed a model based on the Quantity\n    Theory of Money (QTM) that informs us about fundamental value of a currency, and applied it \n    to understand cryptocurrency valuation. For most cryptocurrencies, an expectation\n    of future use as a currency drives the valuation. I analyzed attention, sentiment, and R&D\n    measures as proxies that form this expectation, and found that they are all significantly\n    related to cryptocurrency returns. A portfolio that was long high attention cryptocurrencies\n    with weekly rebalancing would have earned a 0.58% daily alpha from mid-2017 to the end\n    of 2019. The portfolio which is long high attention cryptocurrencies and short low attention \n    cryptocurrencies has an even higher daily alpha of 0.72%, though it is not currently a\n    tradeable strategy due to short-sale constraints. A portfolio formed from cryptocurrencies\n    with high investor sentiment would have yielded a 0.33% daily alpha. R&D does not show\n    as strong effects, but is still significantly related, and all the proxies for future usage remain\n    significant with a variety of analyses and controls including other crypto market factors such\n    as MKT, SMB, and UMD, and dual portfolio sorts on maturity, size, and momentum.\n    ",
+      "id": "valuation-without-cash-flows-what-are-cryptoasset-fundamentals",
+      "notes": [
+        {
+          "children": [],
+          "kind": "text",
+          "text": "\n                My job market paper is an empirical asset pricing paper with a theory component that studies \n                how we can value cryptocurrencies. Using a Quantity Theory of Money-based model in a \n                portfolio framework, I find that expected future transaction volume is the most important\n                factor in the current price, and that it can be proxied by current investor attention and sentiment.\n                This is important because these assets have the potential to revolutionize payments, but their usage \n                is low in part due to volatility arising from the difficulty of valuation. The prior literature has \n                not come up with an empirical valuation approach tied to a theoretical model other than simply using \n                historical transaction volume. I also further the behavioral finance literature by analyzing the \n                interaction between investor attention and investor sentiment, and exploring novel proxies for those\n                as well as R&D.\n                "
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Develop model based on QTM"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Value of cryptocurrency is based on both size of economy and percentage of economic transactions which are conducted in the cryptocurrency"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Supply of cryptocurrency is driven primarily by the cost of electricity"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "For relative valuation, the size of the economy, price of electricity, and velocity of money is constant so transaction volume is the driver"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Expected transaction volume is what matters, not current"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Attention, sentiment, R\\&D - drivers of expectation"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Returns are driven by the growth in expected transaction volume"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Model"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "300M hourly observations of 33k trading pairs involving 3.4k cryptocurrencies on 230 exchanges collected from CryptoCompare API"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Social information - Twitter, Facebook, Reddit, CryptoCompare, and Github - also collected from CryptoCompare API and supplemented via Github API and the Github Archive project"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "News articles also from CryptoCompare API, calculated count and polarity"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Calculated attention (twitter followers, CC followers, CC posts), sentiment (twitter favorites/trans, code repo stars/trans, news polarity), and R\\&D (commits, LOC added, LOC changed) factors using SEM"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Calculated MKT, SMB, UMD following FF"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Returns calculation was complicated - aggregate across exchanges with data errors, convert all to same base currency, often through multiple conversions"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Data"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Atention, sentiment, and R\\&D are all related to cryptocurrency returns in a non-linear fashion"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Attention and sentiment are positively related after controlling for other factors such as size, maturity, and momentum"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Results are robust to excluding Bitcoin and to returns in BTC"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Results"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "230 exchanges, top exchange has only 499 pairs - very fragmented"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "The vast majority of trades in these markets is between cryptocurrencies, usually BTC or ETH on one side"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "BTC is 60-80\\% of the market cap depending on the time period"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Stylistic Facts"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Released three open source packages in conjuction with this project"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "children": [],
+                          "kind": "text",
+                          "text": "cryptocompare-py: Easily collect information from CryptoCompare APIs in Python"
+                        }
+                      ],
+                      "kind": "list_item"
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [],
+                          "kind": "text",
+                          "text": "project-report: Collect time-series Github information"
+                        }
+                      ],
+                      "kind": "list_item"
+                    },
+                    {
+                      "children": [
+                        {
+                          "children": [],
+                          "kind": "text",
+                          "text": "py-gh-archive: Easily collect time-series data from the Github Archive project"
+                        }
+                      ],
+                      "kind": "list_item"
+                    }
+                  ],
+                  "kind": "list"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Other Mentions"
+        }
+      ],
+      "resources": [
+        {
+          "author": "Nick DeRobertis",
+          "children": [],
+          "description": "3-minute video overview of the paper",
+          "name": "Overview Video",
+          "url": "https://youtu.be/8mMqLpFPK7M"
+        }
+      ],
+      "status": "working_paper",
+      "title": "Valuation without Cash Flows: What are Cryptoasset Fundamentals?"
+    },
+    {
+      "category_ids": [
+        "asset-pricing",
+        "portfolio-analysis",
+        "market-intervention",
+        "monetary-policy",
+        "international-finance"
+      ],
+      "coauthor_ids": ["andy-naranjo", "mahendrarajah-nimalendran"],
+      "description": "\n            As part of their market intervention strategy, the Bank of Japan (BOJ) has been purchasing \n            shares of ETFs tracking Japan’s major stock indices, reaching as much as ¥16.3 trillion\n            in holdings by December of 2017. We show that firms that end up with high BOJ ownership\n            have 1.78% higher daily returns and alpha of 0.29% in the window of (-1, 1) around BOJ purchase \n            days compared to firms with no ownership. We further show that there are significant\n            price distortion effects as the BOJ purchases assets proportionally to their index weighting\n            and not their market value. We analyze the Nikkei 225 as a price-weighted target index,\n            and provide evidence that firms with high price-weightings but low market capitalization\n            out-perform by 9.12% annually compared to the average firm. We show evidence that this\n            out-performance is due to higher Bank of Japan ownership.\n            ",
+      "id": "government-equity-capital-market-intervention-and-stock-returns",
+      "notes": [
+        {
+          "children": [],
+          "kind": "text",
+          "text": "\n                I also have a joint working paper with my advisors Andy Naranjo and Nimal Nimalendran,\n                an empirical asset pricing working paper on the effects of government equity capital \n                market intervention, with a focus on the Bank of Japan's purchasing of equity ETFs. \n                Using a portfolio analysis and event study framework, we exploit the fact that since the bank\n                has targeted the Nikkei 225, a price-weighted index, there is substantial \n                cross-sectional variation in the ownership percentage, to show that higher Bank of Japan ownership\n                is associated with higher stock returns. This study is important for monetary policy-makers to \n                understand the effects of intervening in equity markets, and to avoid the pitfalls of targeting \n                price-weighted indices. At the time we developed the research, there were no published papers \n                on the topic, and since then none have analyzed as comprehensively the stock performance\n                in response to these strategies.\n                "
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Difference of opinion framework grounded in Ed Miller (1977 JF) - investors with higher opinion about a stock set the price due to limited supply. Viewing BOJ purchase as an investor with high price opinion so will raise stock price"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "ETF price increase leads to APs creating more shares which leads to buying underlying firms"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Potential negative governance effects due to large passive shareholder, follow up study"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Cost of debt should decrease as this has been shown for other government-backed firms, follow up study"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Hypothesis"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Stock prices, industries from TR Datastream"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Corporate financials from Capital IQ"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "BOJ purchases from BOJ"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "FF from Ken French"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "ETF holdings from Morningstar - required a complicated process to match holdings to identifiers (name matching with machine learning)"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "FF portfolio formation on PVD"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Data"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Both BOJ ownership and PVD positively related to returns and alphas"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "9.12\\% VW LS PVD"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Results hold controlling for FF 5 fac"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Alphas were greatest at the time BOJ was expanding purchase program in 2015/2016"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Event study: 1\\% increase in BOJ ownership is associated with 0.29\\% daily alpha in window if -1 to 1 and significant effects persist for 20 trading days"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Empirically confirmed that BOJ purchases when price is dropping and is paying attention to only the targeted firms"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Results"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "The BOJ owns 72\\% of the equity index ETF market"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "More than 20 years of deflation and stagnant economy after 1989 asset bubble peak, even as the bank kept interest rates close to zero"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "25\\% stake in Fast Retailing (high price, lower mkt cap)"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Stylistic Facts"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Implemented machine learning for name matching, achieving a prediction accuracy of 98.3\\%"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Other Mentions"
+        }
+      ],
+      "resources": [],
+      "status": "working_paper",
+      "title": "Government Equity Capital Market Intervention and Stock Returns"
+    },
+    {
+      "category_ids": [
+        "asset-pricing",
+        "portfolio-analysis",
+        "investor-attention",
+        "behavioral-finance"
+      ],
+      "coauthor_ids": [],
+      "description": "\n            I examine the informativeness of investor attention on pricing of\n            assets by using a new proxy based on Google search data. In contrast to prior\n            studies using Google data, my new proxy contains cross-sectional firm attention information\n            in addition to time-series information. I focus on firms that consistently \n            receive high or low attention, rather than attention-grabbing events.\n            I find that firms with low attention outperform firms with high attention by\n            8.16% annually, and after isolating the unique information in search volume\n            and removing the impact of attention-grabbing events, the outperformance is\n            still statistically and economically significant at 6.36% annually.\n            ",
+      "id": "are-investors-paying-for-attention",
+      "notes": [],
+      "resources": [],
+      "status": "working_paper",
+      "title": "Are Investors Paying (for) Attention?"
+    },
+    {
+      "category_ids": [
+        "options",
+        "volatility",
+        "informed-trading",
+        "liquidity"
+      ],
+      "coauthor_ids": ["yong-jin", "mahendrarajah-nimalendran", "sugata-ray"],
+      "description": "\n            To gain a better understanding of the role of information in the price discovery\n            of stock and option markets,  \n            we propose and estimate a joint structural model of trading in both markets, yielding\n            correlated directional informed trading in both markets, informed\n            volatility trading in the option market, and correlated (buy/sell) liquidity trades in both\n            markets. The model parameters and the probabilities of informed and liquidity trading in\n            both markets are estimated using signed high frequency stock and options trading data for\n            different option contracts. We find that moneyness and maturity play an important role in\n            informed trading and on the microstructure price discovery of the stock and options markets.\n            Further, we find the high frequency informed trading measures in the options market spike just \n            before earnings announcements and remain high for a few days after the announcement.\n            ",
+      "id": "ospin-informed-trading-in-options-and-stock-markets",
+      "notes": [
+        {
+          "children": [],
+          "kind": "text",
+          "text": "\n                I also have a joint working paper with Nimal Nimalendran, Sugata Ray, and Yong Jin,\n                a microstructure paper on the role of information in the price discovery of stock\n                and option markets. Using transaction-level data on both stocks and options, we extend the \n                Easley et al (1996) probability of informed trading model which focused only on \n                stocks to include both stock and option information. We find that the information in \n                the option markets leads that of stock markets, and that analyzing option markets allows\n                extraction of volatility information in a addition to the usual direction and liquidity \n                trading information. This study is important for researchers analyzing the information\n                structure and price discovery in markets, and it advances the literature by providing \n                a model which extracts more and more timely information on informed trading.  \n                "
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "The world can be in one of 18 states at a time in the model based on H/L/No directional info, H/L/No volatility info, and High/Normal liquidity trading"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Uninformed, informed volatility, informed directional, and liquidity traders arrive according to independent Poisson processes"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "We form the likelihood function based on these independent Poisson processes and 18 states of the world"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Checked the model in three ways: Monte Carlo simulation of the trades, in which we were able to recover the theory parameters, model-implied moments shown to be similar to sample moments, and PIN measures from the model are signficiantly related to bid-ask spreads, price impact, and cross-market price impact measures"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Model"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Options transaction-level data from Option Price Reporting Authority (OPRA) Option Database"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Stock transation-level data from TAQ"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Greeks, implied volatility, realized volatility - OptionMetrics"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Daily stock data - CRSP"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Lee and Ready (1991) algorithm for signing trades"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Aggregated into 30 minute periods"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Split by option moneyness and maturity for subsample analyses"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Data"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "OPIN measures are related to bid-ask spreads, price impact, and cross-market price impact measures and have more explanatory power than stock-based measures"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Probability of informed trading in options markets is more than double than that of stock markets for directional info"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "7\\% direction up, 6\\% direction down, 15\\% volatility up, 6\\% volatility down (selling straddle/strangle/options requires more margin)"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "66\\% uninformed trading, 21\\% liquidity trading"
+                    }
+                  ],
+                  "kind": "list_item"
+                },
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Most trades are ATM but also lowest probability of informed trading"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Results"
+        },
+        {
+          "children": [
+            {
+              "children": [
+                {
+                  "children": [
+                    {
+                      "children": [],
+                      "kind": "text",
+                      "text": "Implemented model using a computer symbolic algebra system and both ML and GMM approaches"
+                    }
+                  ],
+                  "kind": "list_item"
+                }
+              ],
+              "kind": "list"
+            }
+          ],
+          "kind": "section",
+          "title": "Other Mentions"
+        }
+      ],
+      "resources": [],
+      "status": "working_paper",
+      "title": "OSPIN: Informed Trading in Options and Stock Markets"
+    },
+    {
+      "category_ids": [
+        "alternative-assets",
+        "crypto-assets",
+        "asset-pricing",
+        "portfolio-analysis"
+      ],
+      "coauthor_ids": [],
+      "description": "\n            There are thousands of cryptocurrencies, but no model to explain their price movements.\n            One cryptocurrency stands out in terms of its public awareness and market capitalization: Bitcoin.\n            Anecdotal evidence suggests that cryptocurrency returns are related to Bitcoin returns. This study\n            seeks to determine a pricing model which relates individual cryptocurrency returns to Bitcoin returns.\n            ",
+      "id": "explaining-the-cross-section-of-cryptocurrency-returns",
+      "notes": [],
+      "resources": [],
+      "status": "work_in_progress",
+      "title": "Explaining the Cross-Section of Cryptocurrency Returns"
+    },
+    {
+      "category_ids": [
+        "market-intervention",
+        "monetary-policy",
+        "international-finance",
+        "volatility"
+      ],
+      "coauthor_ids": ["andy-naranjo", "mahendrarajah-nimalendran"],
+      "description": "\n            Bank of Japan (BOJ) ETF purchases have resulted in the BOJ owning more than 60% of total outstanding \n            ETFs by December of 2017. Considering such a large volume of purchases, we focus on liquidity effects in \n            both the ETF market and the market for the\n            underlying shares. Further, as the BOJ is only purchasing \n            and not selling, we examine how downside volatility decreases.\n            ",
+      "id": "does-government-equity-market-intervention-affect-liquidity-and-volatility",
+      "notes": [],
+      "resources": [],
+      "status": "work_in_progress",
+      "title": "Does Government Equity Market Intervention Affect Liquidity and Volatility?"
+    },
+    {
+      "category_ids": [
+        "market-intervention",
+        "monetary-policy",
+        "international-finance",
+        "corporate-financing",
+        "equity",
+        "debt"
+      ],
+      "coauthor_ids": ["andy-naranjo", "mahendrarajah-nimalendran"],
+      "description": "\n            We show in prior work that\n            stock prices of the underlying firms increase in response to Bank of Japan (BOJ) purchases of ETFs of major\n            stock indices. Considering a higher share value, firms should\n            be more likely to choose equity than debt when raising capital. This effect may be mediated by the low\n            cost of debt during this time period.\n            ",
+      "id": "the-effect-of-equity-market-intervention-on-corporate-financing",
+      "notes": [],
+      "resources": [],
+      "status": "work_in_progress",
+      "title": "The Effect of Equity Market Intervention on Corporate Financing"
+    },
+    {
+      "category_ids": [
+        "executive-compensation",
+        "investor-scrutiny",
+        "regulation"
+      ],
+      "coauthor_ids": ["corbin-fox"],
+      "description": "\n            In the United States, there has been a trend towards increased public scrutiny of CEO pay, in both the \n            press and in regulation. As far as regulation, first companies had to release a summary table of \n            compensation, then \"Say on Pay\" legislation was introduced so that shareholders vote to approve the CEO\n            compensation. We examine the quantity and quality of CEOs that move from the public sector to the \n            private sector, using regulatory changes as exogenous shocks. \n            ",
+      "id": "how-do-ceos-respond-to-public-and-investor-scrutiny",
+      "notes": [],
+      "resources": [],
+      "status": "work_in_progress",
+      "title": "How do CEOs Respond to Public and Investor Scrutiny?"
+    },
+    {
+      "category_ids": [
+        "insider-trading",
+        "short-sales",
+        "information-transmission"
+      ],
+      "coauthor_ids": ["corbin-fox"],
+      "description": "\n            Differing groups of investors, such as insiders, short-sellers, and analysts, have different information \n            sets on which to trade. While the use and transmission of information by insiders has been extensively \n            studied, there is a lack of research on how insiders learn from external investors such as short-sellers.\n            We examine the response of insider trading to surprises in short interest.\n            ",
+      "id": "do-insiders-learn-from-short-sellers",
+      "notes": [],
+      "resources": [],
+      "status": "work_in_progress",
+      "title": "Do Insiders Learn From Short Sellers?"
+    }
+  ]
+}

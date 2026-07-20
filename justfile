@@ -1,5 +1,8 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
+# Bun is explicitly ruled out: Nx's rspack Module Federation executor supports
+# this workspace through pnpm's linker. pnpm is the documented fallback in
+# AGENTS.md and the composed Stack-and-composition record.
 bootstrap:
     corepack enable
     pnpm install --frozen-lockfile
@@ -7,10 +10,15 @@ bootstrap:
 
 check: test
     pnpm exec biome check .
-    pnpm exec nx affected -t lint,typecheck,test,build,e2e --base="${NX_BASE:-HEAD~1}" --head="${NX_HEAD:-HEAD}" --parallel=3
+    pnpm exec nx affected -t lint,typecheck,test,build,prerender,e2e --base="${NX_BASE:-HEAD~1}" --head="${NX_HEAD:-HEAD}" --parallel=3
+
+# CI runs this non-PR safety sweep so affected detection is never the only gate.
+check-all:
+    pnpm exec biome check .
+    pnpm exec nx run-many -t lint,typecheck,test,build,prerender,e2e --all --parallel=3
 
 test:
-    pnpm exec nx run-many -t test,e2e --all
+    pnpm exec nx affected -t test,e2e --base="${NX_BASE:-HEAD~1}" --head="${NX_HEAD:-HEAD}" --parallel=3
 
 lint:
     pnpm exec nx run-many -t lint,typecheck --all

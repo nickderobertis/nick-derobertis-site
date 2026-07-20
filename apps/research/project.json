@@ -1,0 +1,33 @@
+{
+  "name": "research",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/research/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:research"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/research/rspack.config.ts",
+        "outputPath": "dist/apps/research",
+        "main": "apps/research/src/main.tsx",
+        "tsConfig": "apps/research/tsconfig.app.json",
+        "index": "apps/research/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/research" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/research/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --passWithNoTests apps/research/src" }
+    }
+  }
+}

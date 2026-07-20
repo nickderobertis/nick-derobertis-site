@@ -1,0 +1,1440 @@
+{
+  "$defs": {
+    "AcademicEmployment": {
+      "additionalProperties": false,
+      "properties": {
+        "course_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Course Ids",
+          "type": "array"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "highlights": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Highlights",
+          "type": "array"
+        },
+        "hours_per_week": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hours Per Week"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "academic_employment",
+          "default": "academic_employment",
+          "title": "Kind",
+          "type": "string"
+        },
+        "location": {
+          "title": "Location",
+          "type": "string"
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string"
+        },
+        "organization_short": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organization Short"
+        },
+        "start": {
+          "format": "date",
+          "title": "Start",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "title_short": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title Short"
+        }
+      },
+      "required": ["id", "organization", "location", "start", "title"],
+      "title": "AcademicEmployment",
+      "type": "object"
+    },
+    "Award": {
+      "additionalProperties": false,
+      "properties": {
+        "category_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Category Id"
+        },
+        "details": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Details"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "organization_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organization Id"
+        },
+        "received_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Received Date"
+        },
+        "received_label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Received Label"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": ["id", "title"],
+      "title": "Award",
+      "type": "object"
+    },
+    "Course": {
+      "additionalProperties": false,
+      "properties": {
+        "current_period": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Period"
+        },
+        "current_time": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Current Time"
+        },
+        "daily_prep": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Daily Prep"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "evaluation_max_score": {
+          "default": 5,
+          "title": "Evaluation Max Score",
+          "type": "integer"
+        },
+        "evaluation_score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evaluation Score"
+        },
+        "grading": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Grading"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "highlight_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Highlight Description"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "instructor": {
+          "default": "Nick DeRobertis",
+          "title": "Instructor",
+          "type": "string"
+        },
+        "instructor_email": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Instructor Email"
+        },
+        "long_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Long Description"
+        },
+        "office_hours": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Office Hours"
+        },
+        "office_location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Office Location"
+        },
+        "periods_taught": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Periods Taught",
+          "type": "array"
+        },
+        "prerequisites": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Prerequisites"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "resources": {
+          "items": {
+            "$ref": "#/$defs/Resource"
+          },
+          "title": "Resources",
+          "type": "array"
+        },
+        "software_project_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Software Project Ids",
+          "type": "array"
+        },
+        "textbook": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Textbook"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "topics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Topics",
+          "type": "array"
+        },
+        "university_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "University Id"
+        },
+        "university_location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "University Location"
+        },
+        "university_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "University Name"
+        },
+        "website_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Website Url"
+        }
+      },
+      "required": ["id", "title"],
+      "title": "Course",
+      "type": "object"
+    },
+    "DisplayCase": {
+      "enum": ["standard", "preserve_first_word", "preserve"],
+      "title": "DisplayCase",
+      "type": "string"
+    },
+    "Education": {
+      "additionalProperties": false,
+      "properties": {
+        "degree": {
+          "title": "Degree",
+          "type": "string"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "gpa": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Gpa"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "education",
+          "default": "education",
+          "title": "Kind",
+          "type": "string"
+        },
+        "location": {
+          "title": "Location",
+          "type": "string"
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string"
+        },
+        "short_degree": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Short Degree"
+        },
+        "start": {
+          "format": "date",
+          "title": "Start",
+          "type": "string"
+        }
+      },
+      "required": ["id", "organization", "location", "start", "degree"],
+      "title": "Education",
+      "type": "object"
+    },
+    "ExperiencePeriod": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "hours_per_week": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Hours Per Week",
+          "type": "number"
+        },
+        "one_time_hours": {
+          "default": 0,
+          "minimum": 0,
+          "title": "One Time Hours",
+          "type": "number"
+        },
+        "start": {
+          "format": "date",
+          "title": "Start",
+          "type": "string"
+        }
+      },
+      "required": ["start"],
+      "title": "ExperiencePeriod",
+      "type": "object"
+    },
+    "GradeRange": {
+      "additionalProperties": false,
+      "properties": {
+        "maximum": {
+          "title": "Maximum",
+          "type": "number"
+        },
+        "minimum": {
+          "title": "Minimum",
+          "type": "number"
+        }
+      },
+      "required": ["minimum", "maximum"],
+      "title": "GradeRange",
+      "type": "object"
+    },
+    "Grading": {
+      "additionalProperties": false,
+      "properties": {
+        "categories": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Categories",
+          "type": "object"
+        },
+        "scale": {
+          "additionalProperties": {
+            "$ref": "#/$defs/GradeRange"
+          },
+          "title": "Scale",
+          "type": "object"
+        }
+      },
+      "required": ["categories"],
+      "title": "Grading",
+      "type": "object"
+    },
+    "Person": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": ["id", "name"],
+      "title": "Person",
+      "type": "object"
+    },
+    "Prerequisites": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "recommended_course_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Recommended Course Ids",
+          "type": "array"
+        },
+        "required_course_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Course Ids",
+          "type": "array"
+        },
+        "technical_skills": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Technical Skills",
+          "type": "array"
+        },
+        "technical_skills_description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Technical Skills Description"
+        }
+      },
+      "title": "Prerequisites",
+      "type": "object"
+    },
+    "ProfessionalEmployment": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "highlights": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Highlights",
+          "type": "array"
+        },
+        "hours_per_week": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hours Per Week"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "professional_employment",
+          "default": "professional_employment",
+          "title": "Kind",
+          "type": "string"
+        },
+        "location": {
+          "title": "Location",
+          "type": "string"
+        },
+        "organization": {
+          "title": "Organization",
+          "type": "string"
+        },
+        "organization_short": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organization Short"
+        },
+        "start": {
+          "format": "date",
+          "title": "Start",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "title_short": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title Short"
+        }
+      },
+      "required": ["id", "organization", "location", "start", "title"],
+      "title": "ProfessionalEmployment",
+      "type": "object"
+    },
+    "Research": {
+      "additionalProperties": false,
+      "properties": {
+        "categories": {
+          "items": {
+            "$ref": "#/$defs/ResearchCategory"
+          },
+          "title": "Categories",
+          "type": "array"
+        },
+        "coauthors": {
+          "items": {
+            "$ref": "#/$defs/Person"
+          },
+          "title": "Coauthors",
+          "type": "array"
+        },
+        "projects": {
+          "items": {
+            "$ref": "#/$defs/ResearchProject"
+          },
+          "title": "Projects",
+          "type": "array"
+        }
+      },
+      "title": "Research",
+      "type": "object"
+    },
+    "ResearchCategory": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": ["id", "name"],
+      "title": "ResearchCategory",
+      "type": "object"
+    },
+    "ResearchProject": {
+      "additionalProperties": false,
+      "properties": {
+        "canonical_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Canonical Url"
+        },
+        "category_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Category Ids",
+          "type": "array"
+        },
+        "coauthor_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Coauthor Ids",
+          "type": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "notes": {
+          "items": {
+            "$ref": "#/$defs/RichTextNode"
+          },
+          "title": "Notes",
+          "type": "array"
+        },
+        "resources": {
+          "items": {
+            "$ref": "#/$defs/Resource"
+          },
+          "title": "Resources",
+          "type": "array"
+        },
+        "status": {
+          "$ref": "#/$defs/ResearchStatus"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": ["id", "title", "status"],
+      "title": "ResearchProject",
+      "type": "object"
+    },
+    "ResearchStatus": {
+      "enum": ["working_paper", "work_in_progress"],
+      "title": "ResearchStatus",
+      "type": "string"
+    },
+    "Resource": {
+      "additionalProperties": false,
+      "properties": {
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Author"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/Resource"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": ["name"],
+      "title": "Resource",
+      "type": "object"
+    },
+    "RichTextNode": {
+      "additionalProperties": false,
+      "properties": {
+        "children": {
+          "items": {
+            "$ref": "#/$defs/RichTextNode"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "kind": {
+          "enum": ["text", "section", "list", "list_item"],
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        }
+      },
+      "required": ["kind"],
+      "title": "RichTextNode",
+      "type": "object"
+    },
+    "Skill": {
+      "additionalProperties": false,
+      "properties": {
+        "children": {
+          "items": {
+            "$ref": "#/$defs/Skill"
+          },
+          "title": "Children",
+          "type": "array"
+        },
+        "display_case": {
+          "$ref": "#/$defs/DisplayCase",
+          "default": "standard"
+        },
+        "experience": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SkillExperience"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "level": {
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Level",
+          "type": "integer"
+        },
+        "listed": {
+          "default": true,
+          "title": "Listed",
+          "type": "boolean"
+        },
+        "logo_asset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logo Asset Id"
+        },
+        "logo_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logo Url"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "primary_category_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary Category Id"
+        },
+        "priority": {
+          "default": 3,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "priority_overrides": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Priority Overrides",
+          "type": "object"
+        },
+        "related_skill_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Related Skill Ids",
+          "type": "array"
+        }
+      },
+      "required": ["id", "name", "level"],
+      "title": "Skill",
+      "type": "object"
+    },
+    "SkillExperience": {
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "As Of"
+        },
+        "periods": {
+          "items": {
+            "$ref": "#/$defs/ExperiencePeriod"
+          },
+          "title": "Periods",
+          "type": "array"
+        },
+        "total_hours": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Hours"
+        }
+      },
+      "title": "SkillExperience",
+      "type": "object"
+    },
+    "SoftwareProject": {
+      "additionalProperties": false,
+      "properties": {
+        "commits": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commits"
+        },
+        "created": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Created"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        },
+        "docs_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Docs Url"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "loc": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Loc"
+        },
+        "logo_base64": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logo Base64"
+        },
+        "logo_fa_icon_class_str": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logo Fa Icon Class Str"
+        },
+        "logo_svg_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logo Svg Text"
+        },
+        "logo_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Logo Url"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "package_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Package Name"
+        },
+        "repository_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repository Url"
+        },
+        "site_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Site Url"
+        },
+        "technology_tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Technology Tags",
+          "type": "array"
+        },
+        "updated": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updated"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Version"
+        }
+      },
+      "required": ["id", "name"],
+      "title": "SoftwareProject",
+      "type": "object"
+    },
+    "Textbook": {
+      "additionalProperties": false,
+      "properties": {
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "publisher_details": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publisher Details"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": ["title", "author"],
+      "title": "Textbook",
+      "type": "object"
+    }
+  },
+  "$id": "https://nickderobertis.github.io/derobertis-cv/cv.schema.json",
+  "additionalProperties": false,
+  "properties": {
+    "awards": {
+      "items": {
+        "$ref": "#/$defs/Award"
+      },
+      "title": "Awards",
+      "type": "array"
+    },
+    "courses": {
+      "items": {
+        "$ref": "#/$defs/Course"
+      },
+      "title": "Courses",
+      "type": "array"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "research": {
+      "$ref": "#/$defs/Research"
+    },
+    "schema_version": {
+      "minimum": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "skills": {
+      "items": {
+        "$ref": "#/$defs/Skill"
+      },
+      "title": "Skills",
+      "type": "array"
+    },
+    "software_projects": {
+      "items": {
+        "$ref": "#/$defs/SoftwareProject"
+      },
+      "title": "Software Projects",
+      "type": "array"
+    },
+    "timeline": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "academic_employment": "#/$defs/AcademicEmployment",
+            "education": "#/$defs/Education",
+            "professional_employment": "#/$defs/ProfessionalEmployment"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/Education"
+          },
+          {
+            "$ref": "#/$defs/ProfessionalEmployment"
+          },
+          {
+            "$ref": "#/$defs/AcademicEmployment"
+          }
+        ]
+      },
+      "title": "Timeline",
+      "type": "array"
+    }
+  },
+  "required": ["schema_version", "generated_at"],
+  "title": "CvData",
+  "type": "object"
+}

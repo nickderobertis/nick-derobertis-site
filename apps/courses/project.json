@@ -1,0 +1,33 @@
+{
+  "name": "courses",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/courses/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:courses"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/courses/rspack.config.ts",
+        "outputPath": "dist/apps/courses",
+        "main": "apps/courses/src/main.tsx",
+        "tsConfig": "apps/courses/tsconfig.app.json",
+        "index": "apps/courses/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/courses" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/courses/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --passWithNoTests apps/courses/src" }
+    }
+  }
+}

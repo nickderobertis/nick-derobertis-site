@@ -24,6 +24,10 @@ export default [
               sourceTag: "type:app",
               onlyDependOnLibsWithTags: ["type:shared", "type:layout"],
             },
+            {
+              sourceTag: "type:remote",
+              onlyDependOnLibsWithTags: ["type:shared"],
+            },
             { sourceTag: "type:e2e", onlyDependOnLibsWithTags: ["type:app"] },
           ],
         },

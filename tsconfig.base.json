@@ -8,6 +8,7 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
@@ -15,7 +16,8 @@
       "@site/data-access": ["libs/data-access/src/index.ts"],
       "@site/analytics": ["libs/analytics/src/index.ts"],
       "@site/layout": ["libs/layout/src/index.ts"],
-      "@site/ui": ["libs/ui/src/index.ts"]
+      "@site/ui": ["libs/ui/src/index.ts"],
+      "@site/build-config": ["libs/build-config/src/index.ts"]
     }
   }
 }

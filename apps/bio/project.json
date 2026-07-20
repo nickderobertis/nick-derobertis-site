@@ -1,0 +1,33 @@
+{
+  "name": "bio",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/bio/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:bio"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/bio/rspack.config.ts",
+        "outputPath": "dist/apps/bio",
+        "main": "apps/bio/src/main.tsx",
+        "tsConfig": "apps/bio/tsconfig.app.json",
+        "index": "apps/bio/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/bio" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/bio/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --passWithNoTests apps/bio/src" }
+    }
+  }
+}

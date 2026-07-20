@@ -1,0 +1,5530 @@
+[
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 30.0,
+          "one_time_hours": 0.0,
+          "start": "2012-09-01"
+        }
+      ],
+      "total_hours": 21724.285714285714
+    },
+    "id": "programming",
+    "level": 5,
+    "listed": true,
+    "name": "Programming",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": []
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2011-05-01"
+        }
+      ],
+      "total_hours": 1588.0
+    },
+    "id": "data-analysis",
+    "level": 5,
+    "listed": true,
+    "name": "Data Analysis",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5
+    },
+    "related_skill_ids": ["data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 3.0,
+          "one_time_hours": 0.0,
+          "start": "2013-04-01"
+        }
+      ],
+      "total_hours": 2081.5714285714284
+    },
+    "id": "data-munging",
+    "level": 5,
+    "listed": true,
+    "name": "data munging",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5
+    },
+    "related_skill_ids": ["data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2012-09-01"
+        },
+        {
+          "hours_per_week": 30.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 17231.428571428572
+    },
+    "id": "software-development",
+    "level": 5,
+    "listed": true,
+    "name": "software development",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2012-09-01"
+        },
+        {
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 9990.0
+    },
+    "id": "back-end-development",
+    "level": 5,
+    "listed": true,
+    "name": "Back-end Development",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "software-development",
+      "software-architecture",
+      "programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "frameworks",
+    "level": 5,
+    "listed": true,
+    "name": "Frameworks",
+    "priority": 3,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2012-09-01"
+        }
+      ],
+      "total_hours": 1448.2857142857142
+    },
+    "id": "automation",
+    "level": 5,
+    "listed": true,
+    "name": "automation",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "communication",
+    "level": 5,
+    "listed": true,
+    "name": "Communication",
+    "priority": 3,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "critical-thinking",
+    "level": 5,
+    "listed": true,
+    "name": "critical thinking",
+    "priority": 2,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "multitasking",
+    "level": 5,
+    "listed": true,
+    "name": "multitasking",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "work-ethic",
+    "level": 5,
+    "listed": true,
+    "name": "work ethic",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "teaching",
+    "level": 5,
+    "listed": true,
+    "name": "teaching",
+    "priority": 2,
+    "priority_overrides": {
+      "academic": 5
+    },
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "attention-to-detail",
+    "level": 5,
+    "listed": true,
+    "name": "attention to detail",
+    "priority": 3,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "research",
+    "level": 5,
+    "listed": true,
+    "name": "Research",
+    "priority": 4,
+    "priority_overrides": {},
+    "related_skill_ids": []
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 3.0,
+          "one_time_hours": 0.0,
+          "start": "2012-04-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 1440.9142857142858
+    },
+    "id": "statistics",
+    "level": 5,
+    "listed": true,
+    "name": "Statistics",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "economist": 4
+    },
+    "related_skill_ids": ["data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "collaboration",
+    "level": 5,
+    "listed": true,
+    "name": "Collaboration",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "entrepreneurship",
+    "level": 5,
+    "listed": true,
+    "name": "Entrepreneurship",
+    "priority": 2,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 519.8571428571429
+    },
+    "id": "templating",
+    "level": 5,
+    "listed": true,
+    "name": "templating",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming", "presentation", "typesetting"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2015-09-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        }
+      ],
+      "total_hours": 1286.3999999999999
+    },
+    "id": "open-source-development",
+    "level": 5,
+    "listed": true,
+    "name": "Open-Source Development",
+    "priority": 4,
+    "priority_overrides": {
+      "academic": 3
+    },
+    "related_skill_ids": ["programming", "collaboration"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2012-04-01"
+        },
+        {
+          "hours_per_week": 0.2,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 4766.400000000001
+    },
+    "id": "data-science",
+    "level": 5,
+    "listed": true,
+    "name": "Data Science",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming", "research"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 25.0,
+          "one_time_hours": 0.0,
+          "start": "2015-03-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        },
+        {
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 12290.0
+    },
+    "id": "python",
+    "level": 5,
+    "listed": true,
+    "name": "Python",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 259.92857142857144
+    },
+    "id": "migrations",
+    "level": 5,
+    "listed": true,
+    "name": "migrations",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["databases", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2012-04-01"
+        },
+        {
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 10797.142857142857
+    },
+    "id": "empirical-research",
+    "level": 5,
+    "listed": true,
+    "name": "empirical research",
+    "primary_category_id": "data-science",
+    "priority": 4,
+    "priority_overrides": {
+      "asset management company": 5,
+      "data science": 5,
+      "economist": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "research",
+      "statistics",
+      "data-analysis",
+      "data-munging",
+      "data-science"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2015-05-01"
+        },
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 3.0,
+          "one_time_hours": 0.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 2207.571428571429
+    },
+    "id": "pandas",
+    "level": 5,
+    "listed": true,
+    "name": "pandas",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "data-science",
+      "data-analysis",
+      "data-munging"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 1225.0
+    },
+    "id": "flask",
+    "level": 5,
+    "listed": true,
+    "name": "Flask",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 1362.4285714285713
+    },
+    "id": "sqlalchemy",
+    "level": 5,
+    "listed": true,
+    "name": "SQLAlchemy",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2019-06-01"
+        },
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 234.71428571428572
+    },
+    "id": "pydantic",
+    "level": 5,
+    "listed": true,
+    "name": "pydantic",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 3.0,
+          "one_time_hours": 30.0,
+          "start": "2020-06-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        },
+        {
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 3136.142857142857
+    },
+    "id": "fastapi",
+    "level": 5,
+    "listed": true,
+    "name": "FastAPI",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 4.0,
+          "one_time_hours": 0.0,
+          "start": "2012-09-01"
+        },
+        {
+          "hours_per_week": 8.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 3996.0
+    },
+    "id": "software-architecture",
+    "level": 4,
+    "listed": true,
+    "name": "software architecture",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 3973.5714285714284
+    },
+    "id": "front-end-development",
+    "level": 4,
+    "listed": true,
+    "name": "Front-end Development",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "software-development",
+      "software-architecture",
+      "programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2013-04-01"
+        }
+      ],
+      "total_hours": 1387.7142857142858
+    },
+    "id": "databases",
+    "level": 4,
+    "listed": true,
+    "name": "Databases",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 1039.7142857142858
+    },
+    "id": "dev-ops",
+    "level": 4,
+    "listed": true,
+    "name": "Dev-Ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 6572.857142857142
+    },
+    "id": "web-development",
+    "level": 4,
+    "listed": true,
+    "name": "Web Development",
+    "primary_category_id": "programming",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "software-development",
+      "software-architecture",
+      "remote-development",
+      "security",
+      "programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2013-04-01"
+        }
+      ],
+      "total_hours": 693.8571428571429
+    },
+    "id": "etl",
+    "level": 4,
+    "listed": true,
+    "name": "ETL",
+    "primary_category_id": "programming",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "software-development",
+      "software-architecture",
+      "programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 519.8571428571429
+    },
+    "id": "css",
+    "level": 4,
+    "listed": true,
+    "name": "CSS",
+    "primary_category_id": "presentation",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "web-development",
+      "front-end-development",
+      "presentation"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2012-09-01"
+        }
+      ],
+      "total_hours": 1448.2857142857142
+    },
+    "id": "debugging",
+    "level": 4,
+    "listed": true,
+    "name": "Debugging",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        },
+        {
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 5076.285714285714
+    },
+    "id": "automated-testing",
+    "level": 4,
+    "listed": true,
+    "name": "Automated testing",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2015-09-01"
+        }
+      ],
+      "total_hours": 283.85714285714283
+    },
+    "id": "parallelism",
+    "level": 4,
+    "listed": true,
+    "name": "Parallelism",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 1.5,
+          "one_time_hours": 0.0,
+          "start": "2017-06-01"
+        },
+        {
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 1676.642857142857
+    },
+    "id": "asynchronous-programming",
+    "level": 4,
+    "listed": true,
+    "name": "Asynchronous Programming",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2015-09-01"
+        }
+      ],
+      "total_hours": 283.85714285714283
+    },
+    "id": "distributed-computing",
+    "level": 4,
+    "listed": true,
+    "name": "Distributed Computing",
+    "primary_category_id": "programming",
+    "priority": 4,
+    "priority_overrides": {
+      "asset management company": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": ["remote-development", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2005-09-01"
+        }
+      ],
+      "total_hours": 1089.4285714285713
+    },
+    "id": "excel",
+    "level": 4,
+    "listed": true,
+    "name": "Excel",
+    "primary_category_id": "other",
+    "priority": 3,
+    "priority_overrides": {},
+    "related_skill_ids": ["other"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 2.0,
+          "one_time_hours": 40.0,
+          "start": "2022-08-01"
+        },
+        {
+          "hours_per_week": 3.0,
+          "one_time_hours": 40.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 840.5
+    },
+    "id": "browser-automation",
+    "level": 4,
+    "listed": true,
+    "name": "Browser automation",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming", "automation", "automated-testing"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 149.9857142857143
+    },
+    "id": "server-administration",
+    "level": 4,
+    "listed": true,
+    "name": "server administration",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["dev-ops", "web-development"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 519.8571428571429
+    },
+    "id": "ci-cd",
+    "level": 4,
+    "listed": true,
+    "name": "CI/CD",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2008-01-01",
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2004-01-01"
+        },
+        {
+          "end": "2020-06-01",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 40.0,
+          "one_time_hours": 0.0,
+          "start": "2020-06-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        },
+        {
+          "hours_per_week": 30.0,
+          "one_time_hours": 0.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 13271.428571428572
+    },
+    "id": "linux",
+    "level": 4,
+    "listed": true,
+    "name": "Linux",
+    "primary_category_id": "other",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": ["operating-systems", "other"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2020-06-01",
+          "hours_per_week": 30.0,
+          "one_time_hours": 0.0,
+          "start": "2000-01-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2020-06-01"
+        },
+        {
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        }
+      ],
+      "total_hours": 35626.42857142857
+    },
+    "id": "windows",
+    "level": 4,
+    "listed": true,
+    "name": "Windows",
+    "primary_category_id": "other",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": ["operating-systems", "other"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "presentation",
+    "level": 4,
+    "listed": true,
+    "name": "presentation",
+    "priority": 3,
+    "priority_overrides": {},
+    "related_skill_ids": []
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "typesetting",
+    "level": 4,
+    "listed": true,
+    "name": "Typesetting",
+    "priority": 2,
+    "priority_overrides": {},
+    "related_skill_ids": ["presentation", "soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "leadership",
+    "level": 4,
+    "listed": true,
+    "name": "leadership",
+    "priority": 2,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "organization",
+    "level": 4,
+    "listed": true,
+    "name": "organization",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "writing",
+    "level": 4,
+    "listed": true,
+    "name": "Writing",
+    "priority": 2,
+    "priority_overrides": {},
+    "related_skill_ids": ["presentation", "soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2012-04-01",
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2010-08-01"
+        },
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 3.0,
+          "one_time_hours": 0.0,
+          "start": "2012-04-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 1614.9142857142858
+    },
+    "id": "modeling",
+    "level": 4,
+    "listed": true,
+    "name": "Modeling",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": ["data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-03-01"
+        }
+      ],
+      "total_hours": 541.7142857142857
+    },
+    "id": "version-control",
+    "level": 4,
+    "listed": true,
+    "name": "Version Control",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "product-management",
+    "level": 4,
+    "listed": true,
+    "name": "Product Management",
+    "priority": 4,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": ["soft-skills"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2015-03-01"
+        }
+      ],
+      "total_hours": 594.0
+    },
+    "id": "parsing",
+    "level": 4,
+    "listed": true,
+    "name": "Parsing",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2015-08-01"
+        }
+      ],
+      "total_hours": 572.1428571428571
+    },
+    "id": "web-scraping",
+    "level": 4,
+    "listed": true,
+    "name": "Web-scraping",
+    "priority": 5,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming", "automation"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 519.8571428571429
+    },
+    "id": "documentation",
+    "level": 4,
+    "listed": true,
+    "name": "documentation",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming", "presentation", "typesetting"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 500.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 1294.7142857142858
+    },
+    "id": "performance-optimization",
+    "level": 4,
+    "listed": true,
+    "name": "performance optimization",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2011-05-01"
+        }
+      ],
+      "total_hours": 397.0
+    },
+    "id": "plotting",
+    "level": 4,
+    "listed": true,
+    "name": "plotting",
+    "primary_category_id": "presentation",
+    "priority": 1,
+    "priority_overrides": {
+      "data science": 2,
+      "economist": 2
+    },
+    "related_skill_ids": [
+      "programming",
+      "presentation",
+      "visualization",
+      "presentation"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 4.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 5102.857142857142
+    },
+    "id": "javascript",
+    "level": 4,
+    "listed": true,
+    "name": "JavaScript",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 4.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        }
+      ],
+      "total_hours": 6137.142857142857
+    },
+    "id": "typescript",
+    "level": 4,
+    "listed": true,
+    "name": "TypeScript",
+    "primary_category_id": "programming",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["javascript", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-12-20",
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-12-20"
+        }
+      ],
+      "total_hours": 1554.2857142857142
+    },
+    "id": "scala",
+    "level": 4,
+    "listed": true,
+    "name": "Scala",
+    "primary_category_id": "programming",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming", "java", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.5,
+          "one_time_hours": 100.0,
+          "start": "2016-08-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 0.25,
+          "one_time_hours": 100.0,
+          "start": "2021-04-12"
+        },
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 0.5,
+          "one_time_hours": 40.0,
+          "start": "2022-08-01"
+        },
+        {
+          "hours_per_week": 0.75,
+          "one_time_hours": 100.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 630.5
+    },
+    "id": "access-control",
+    "level": 4,
+    "listed": true,
+    "name": "access control",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["dev-ops", "web-development"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        },
+        {
+          "hours_per_week": 0.05,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 99.24285714285715
+    },
+    "id": "cms",
+    "level": 4,
+    "listed": true,
+    "name": "CMS",
+    "primary_category_id": "programming",
+    "priority": 1,
+    "priority_overrides": {
+      "data science": 2,
+      "tech company": 3
+    },
+    "related_skill_ids": ["web-development", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2016-01-01"
+        },
+        {
+          "hours_per_week": 35.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 15128.57142857143
+    },
+    "id": "ides",
+    "level": 4,
+    "listed": true,
+    "name": "IDEs",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2011-05-01"
+        }
+      ],
+      "total_hours": 397.0
+    },
+    "id": "visualization",
+    "level": 4,
+    "listed": true,
+    "name": "visualization",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "economist": 4
+    },
+    "related_skill_ids": ["data-science", "presentation"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2015-02-01"
+        }
+      ],
+      "total_hours": 598.0
+    },
+    "id": "sql",
+    "level": 4,
+    "listed": true,
+    "name": "SQL",
+    "primary_category_id": "programming",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["databases", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.2,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        }
+      ],
+      "total_hours": 89.17142857142858
+    },
+    "id": "redis",
+    "level": 4,
+    "listed": true,
+    "name": "Redis",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "economist": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": ["databases", "frameworks"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 1.5,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        },
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 718.4285714285714
+    },
+    "id": "postgresql",
+    "level": 4,
+    "listed": true,
+    "name": "PostgreSQL",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["databases", "frameworks"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 3.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 735.0
+    },
+    "id": "angular",
+    "level": 4,
+    "listed": true,
+    "name": "Angular",
+    "primary_category_id": "frameworks",
+    "priority": 4,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.0,
+          "one_time_hours": 30.0,
+          "start": "2020-05-14"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 10.0,
+          "one_time_hours": 100.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        }
+      ],
+      "total_hours": 3912.857142857143
+    },
+    "id": "react",
+    "level": 4,
+    "listed": true,
+    "name": "React",
+    "primary_category_id": "frameworks",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 4122.857142857142
+    },
+    "id": "react-native",
+    "level": 4,
+    "listed": true,
+    "name": "React Native",
+    "primary_category_id": "frameworks",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "mobile-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2023-09-01",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        },
+        {
+          "end": "2023-11-01",
+          "hours_per_week": 40.0,
+          "one_time_hours": 0.0,
+          "start": "2023-09-01"
+        },
+        {
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2023-11-01"
+        }
+      ],
+      "total_hours": 2047.142857142857
+    },
+    "id": "nextjs",
+    "level": 4,
+    "listed": true,
+    "name": "NextJS",
+    "primary_category_id": "frameworks",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 0.0,
+          "one_time_hours": 80.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 20.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 119.02857142857142
+    },
+    "id": "monorepo-tooling",
+    "level": 4,
+    "listed": true,
+    "name": "Monorepo Tooling",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "dev-ops"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 1374.2857142857142
+    },
+    "id": "jest",
+    "level": 4,
+    "listed": true,
+    "name": "Jest",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 400.0,
+          "start": "2023-01-15"
+        }
+      ],
+      "total_hours": 583.0
+    },
+    "id": "stripe",
+    "level": 4,
+    "listed": true,
+    "name": "Stripe",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": ["dev-ops", "web-development"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 1039.7142857142858
+    },
+    "id": "docker",
+    "level": 4,
+    "listed": true,
+    "name": "Docker",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 15.0,
+          "start": "2022-04-01"
+        }
+      ],
+      "total_hours": 37.42857142857143
+    },
+    "id": "semantic-release",
+    "level": 4,
+    "listed": true,
+    "name": "semantic-release",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2015-02-01"
+        }
+      ],
+      "total_hours": 598.0
+    },
+    "id": "latex",
+    "level": 4,
+    "listed": true,
+    "name": "LaTeX",
+    "primary_category_id": "presentation",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["typesetting", "research", "presentation"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 800.0,
+          "start": "2012-09-01"
+        }
+      ],
+      "total_hours": 800.0
+    },
+    "id": "stata",
+    "level": 4,
+    "listed": true,
+    "name": "Stata",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-03-01"
+        }
+      ],
+      "total_hours": 541.7142857142857
+    },
+    "id": "git",
+    "level": 4,
+    "listed": true,
+    "name": "Git",
+    "primary_category_id": "programming",
+    "priority": 4,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": ["version-control", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 149.9857142857143
+    },
+    "id": "ec2",
+    "level": 4,
+    "listed": true,
+    "name": "EC2",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "server-administration", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 627.4285714285714
+    },
+    "id": "jira",
+    "level": 4,
+    "listed": true,
+    "name": "JIRA",
+    "primary_category_id": "other",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 4
+    },
+    "related_skill_ids": ["web-development", "collaboration", "other"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2016-01-01"
+        },
+        {
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 6882.857142857143
+    },
+    "id": "pycharm",
+    "level": 4,
+    "listed": true,
+    "name": "PyCharm",
+    "primary_category_id": "programming",
+    "priority": 1,
+    "priority_overrides": {
+      "data science": 2,
+      "tech company": 3
+    },
+    "related_skill_ids": ["ides", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 10.0,
+          "one_time_hours": 0.0,
+          "start": "2019-01-01"
+        }
+      ],
+      "total_hours": 3937.1428571428573
+    },
+    "id": "vs-code",
+    "level": 4,
+    "listed": true,
+    "name": "VS Code",
+    "primary_category_id": "programming",
+    "priority": 1,
+    "priority_overrides": {
+      "data science": 2,
+      "tech company": 3
+    },
+    "related_skill_ids": ["ides", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 4122.857142857142
+    },
+    "id": "idea",
+    "level": 4,
+    "listed": true,
+    "name": "IDEA",
+    "primary_category_id": "programming",
+    "priority": 1,
+    "priority_overrides": {
+      "data science": 2,
+      "tech company": 3
+    },
+    "related_skill_ids": ["ides", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 549.7142857142857
+    },
+    "id": "technical-specifications",
+    "level": 4,
+    "listed": true,
+    "name": "technical specifications",
+    "primary_category_id": "other",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "research",
+      "writing",
+      "software-architecture",
+      "other"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2019-12-20"
+        }
+      ],
+      "total_hours": 171.64285714285714
+    },
+    "id": "github-actions",
+    "level": 4,
+    "listed": true,
+    "name": "Github Actions",
+    "primary_category_id": "dev-ops",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["ci-cd", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2012-09-01"
+        }
+      ],
+      "total_hours": 1448.2857142857142
+    },
+    "id": "econometrics",
+    "level": 4,
+    "listed": true,
+    "name": "econometrics",
+    "primary_category_id": "data-science",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": ["statistics", "data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "project-management",
+    "level": 4,
+    "listed": true,
+    "name": "project management",
+    "primary_category_id": "other",
+    "priority": 2,
+    "priority_overrides": {},
+    "related_skill_ids": ["other"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "release-management",
+    "level": 4,
+    "listed": true,
+    "name": "release management",
+    "primary_category_id": "other",
+    "priority": 2,
+    "priority_overrides": {},
+    "related_skill_ids": ["other"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 1039.7142857142858
+    },
+    "id": "html",
+    "level": 4,
+    "listed": true,
+    "name": "HTML",
+    "primary_category_id": "presentation",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "web-development",
+      "front-end-development",
+      "typesetting",
+      "presentation"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2015-05-01"
+        },
+        {
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 379.14285714285717
+    },
+    "id": "numpy",
+    "level": 4,
+    "listed": true,
+    "name": "NumPy",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "data-science",
+      "data-analysis",
+      "data-munging"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-03-01"
+        }
+      ],
+      "total_hours": 135.42857142857142
+    },
+    "id": "sympy",
+    "level": 4,
+    "listed": true,
+    "name": "SymPy",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "economist": 4,
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "data-science",
+      "data-analysis"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2015-03-01"
+        },
+        {
+          "end": "2022-08-01",
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2022-08-01"
+        }
+      ],
+      "total_hours": 1835.142857142857
+    },
+    "id": "jupyter",
+    "level": 4,
+    "listed": true,
+    "name": "Jupyter",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 4,
+      "tech company": 4
+    },
+    "related_skill_ids": ["frameworks", "python", "data-science", "ides"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.4,
+          "one_time_hours": 0.0,
+          "start": "2015-05-01"
+        }
+      ],
+      "total_hours": 234.11428571428576
+    },
+    "id": "matplotlib",
+    "level": 4,
+    "listed": true,
+    "name": "Matplotlib",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 4,
+      "tech company": 4
+    },
+    "related_skill_ids": ["frameworks", "python", "data-science", "plotting"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 60.0,
+          "start": "2020-06-01"
+        }
+      ],
+      "total_hours": 60.0
+    },
+    "id": "geopandas",
+    "level": 4,
+    "listed": true,
+    "name": "GeoPandas",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "economist": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "data-science",
+      "data-analysis",
+      "data-munging",
+      "geovisualization"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 7.0,
+          "one_time_hours": 0.0,
+          "start": "2021-12-20"
+        }
+      ],
+      "total_hours": 1672.0
+    },
+    "id": "graphql",
+    "level": 4,
+    "listed": true,
+    "name": "GraphQL",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "kotlin",
+      "java"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        },
+        {
+          "hours_per_week": 0.2,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 396.9714285714286
+    },
+    "id": "celery",
+    "level": 4,
+    "listed": true,
+    "name": "Celery",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["frameworks", "python", "asynchronous-programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 3.0,
+          "one_time_hours": 100.0,
+          "start": "2023-02-01"
+        }
+      ],
+      "total_hours": 641.7142857142858
+    },
+    "id": "airflow",
+    "level": 4,
+    "listed": true,
+    "name": "Airflow",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "frameworks",
+      "python",
+      "asynchronous-programming",
+      "etl"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 259.92857142857144
+    },
+    "id": "requests",
+    "level": 4,
+    "listed": true,
+    "name": "Requests",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["frameworks", "web-scraping", "python"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2015-09-01"
+        }
+      ],
+      "total_hours": 292.85714285714283
+    },
+    "id": "selenium",
+    "level": 4,
+    "listed": true,
+    "name": "Selenium",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "web-scraping",
+      "python",
+      "automated-testing",
+      "browser-automation"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 2.0,
+          "one_time_hours": 40.0,
+          "start": "2022-08-01"
+        },
+        {
+          "hours_per_week": 3.0,
+          "one_time_hours": 40.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 684.0
+    },
+    "id": "playwright",
+    "level": 4,
+    "listed": true,
+    "name": "Playwright",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "web-scraping",
+      "python",
+      "automated-testing",
+      "browser-automation"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2015-09-01"
+        }
+      ],
+      "total_hours": 141.92857142857142
+    },
+    "id": "lxml",
+    "level": 4,
+    "listed": true,
+    "name": "lxml",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["frameworks", "parsing", "python"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 0.5,
+          "one_time_hours": 100.0,
+          "start": "2020-06-01"
+        },
+        {
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 1116.2142857142856
+    },
+    "id": "panel",
+    "level": 4,
+    "listed": true,
+    "name": "Panel",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "front-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 100.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 290.2857142857143
+    },
+    "id": "streamlit",
+    "level": 4,
+    "listed": true,
+    "name": "Streamlit",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "front-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2019-06-01"
+        }
+      ],
+      "total_hours": 186.07142857142858
+    },
+    "id": "sphinx",
+    "level": 4,
+    "listed": true,
+    "name": "Sphinx",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "front-end-development",
+      "documentation"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 259.92857142857144
+    },
+    "id": "jinja2",
+    "level": 4,
+    "listed": true,
+    "name": "Jinja2",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["frameworks", "python", "templating"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        }
+      ],
+      "total_hours": 445.85714285714283
+    },
+    "id": "pytest",
+    "level": 4,
+    "listed": true,
+    "name": "pytest",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["frameworks", "python", "automated-testing"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 40.0,
+          "start": "2019-08-01"
+        }
+      ],
+      "total_hours": 40.0
+    },
+    "id": "xlwings",
+    "level": 4,
+    "listed": true,
+    "name": "xlwings",
+    "priority": 1,
+    "priority_overrides": {
+      "data science": 2,
+      "tech company": 2
+    },
+    "related_skill_ids": ["frameworks", "python", "excel", "automation"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "operating-systems",
+    "level": 3,
+    "listed": true,
+    "name": "operating systems",
+    "primary_category_id": "other",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["other"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve_first_word",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 519.8571428571429
+    },
+    "id": "cli-development",
+    "level": 3,
+    "listed": true,
+    "name": "CLI Development",
+    "primary_category_id": "programming",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "software-development",
+      "software-architecture",
+      "programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 259.92857142857144
+    },
+    "id": "remote-development",
+    "level": 3,
+    "listed": true,
+    "name": "Remote development",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 1039.7142857142858
+    },
+    "id": "security",
+    "level": 3,
+    "listed": true,
+    "name": "Security",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming", "software-architecture"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 15.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 4122.857142857142
+    },
+    "id": "mobile-development",
+    "level": 3,
+    "listed": true,
+    "name": "Mobile Development",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "software-development",
+      "software-architecture",
+      "remote-development",
+      "security",
+      "programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2024-01-15",
+          "hours_per_week": 20.0,
+          "one_time_hours": 0.0,
+          "start": "2023-11-15"
+        }
+      ],
+      "total_hours": 174.28571428571428
+    },
+    "id": "browser-extension-development",
+    "level": 3,
+    "listed": true,
+    "name": "Browser Extension Development",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "software-development",
+      "software-architecture",
+      "remote-development",
+      "security",
+      "programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.15,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 77.97857142857143
+    },
+    "id": "cryptography",
+    "level": 3,
+    "listed": true,
+    "name": "Cryptography",
+    "priority": 2,
+    "priority_overrides": {
+      "academic": 3,
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["programming", "security"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.05,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 74.99285714285715
+    },
+    "id": "networking",
+    "level": 3,
+    "listed": true,
+    "name": "networking",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": ["dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2022-11-25",
+          "hours_per_week": 40.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 60.0,
+          "one_time_hours": 0.0,
+          "start": "2022-11-25"
+        }
+      ],
+      "total_hours": 14800.0
+    },
+    "id": "mac",
+    "level": 3,
+    "listed": true,
+    "name": "Mac",
+    "primary_category_id": "other",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["operating-systems", "other"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2013-09-01"
+        }
+      ],
+      "total_hours": 672.0
+    },
+    "id": "time-series",
+    "level": 3,
+    "listed": true,
+    "name": "Time-Series",
+    "primary_category_id": "data-science",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5
+    },
+    "related_skill_ids": ["statistics", "data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2013-09-01"
+        }
+      ],
+      "total_hours": 672.0
+    },
+    "id": "forecasting",
+    "level": 3,
+    "listed": true,
+    "name": "Forecasting",
+    "primary_category_id": "data-science",
+    "priority": 4,
+    "priority_overrides": {
+      "academic": 2,
+      "asset management company": 3
+    },
+    "related_skill_ids": ["time-series", "data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-01-01"
+        }
+      ],
+      "total_hours": 275.14285714285717
+    },
+    "id": "machine-learning",
+    "level": 3,
+    "listed": true,
+    "name": "machine learning",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-12-20",
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        },
+        {
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-12-20"
+        }
+      ],
+      "total_hours": 1212.2857142857142
+    },
+    "id": "kotlin",
+    "level": 3,
+    "listed": true,
+    "name": "Kotlin",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming", "java", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.2,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 299.9714285714286
+    },
+    "id": "aws",
+    "level": 3,
+    "listed": true,
+    "name": "AWS",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": ["dev-ops", "web-development", "remote-development"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 549.7142857142857
+    },
+    "id": "microservices",
+    "level": 3,
+    "listed": true,
+    "name": "microservices",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "computer-hardware",
+    "level": 3,
+    "listed": true,
+    "name": "computer hardware",
+    "primary_category_id": "other",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["other"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.2,
+          "one_time_hours": 50.0,
+          "start": "2020-03-01"
+        }
+      ],
+      "total_hours": 116.60000000000001
+    },
+    "id": "geovisualization",
+    "level": 3,
+    "listed": true,
+    "name": "geovisualization",
+    "primary_category_id": "data-science",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 4,
+      "economist": 3
+    },
+    "related_skill_ids": ["visualization", "data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-11-01",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-06-01"
+        }
+      ],
+      "total_hours": 109.28571428571429
+    },
+    "id": "iot",
+    "level": 3,
+    "listed": true,
+    "name": "IoT",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": []
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 24.5
+    },
+    "id": "compodoc",
+    "level": 3,
+    "listed": true,
+    "name": "Compodoc",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2023-09-01",
+          "hours_per_week": 0.5,
+          "one_time_hours": 10.0,
+          "start": "2022-08-01"
+        },
+        {
+          "end": "2023-11-01",
+          "hours_per_week": 40.0,
+          "one_time_hours": 0.0,
+          "start": "2023-09-01"
+        },
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2023-11-01"
+        }
+      ],
+      "total_hours": 528.4285714285714
+    },
+    "id": "vercel",
+    "level": 3,
+    "listed": true,
+    "name": "Vercel",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "server-administration",
+      "dev-ops"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.0,
+          "one_time_hours": 10.0,
+          "start": "2021-02-01"
+        },
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 147.42857142857142
+    },
+    "id": "storybook",
+    "level": 3,
+    "listed": true,
+    "name": "Storybook",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 40.0,
+          "start": "2021-01-15"
+        }
+      ],
+      "total_hours": 40.0
+    },
+    "id": "svelte",
+    "level": 3,
+    "listed": true,
+    "name": "Svelte",
+    "primary_category_id": "frameworks",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2020-10-01"
+        }
+      ],
+      "total_hours": 30.242857142857147
+    },
+    "id": "webpack",
+    "level": 3,
+    "listed": true,
+    "name": "Webpack",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 10.0,
+          "start": "2022-05-01"
+        }
+      ],
+      "total_hours": 32.0
+    },
+    "id": "vitest",
+    "level": 3,
+    "listed": true,
+    "name": "vitest",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 27.485714285714284
+    },
+    "id": "eslint",
+    "level": 3,
+    "listed": true,
+    "name": "ESLint",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2021-12-20"
+        }
+      ],
+      "total_hours": 477.7142857142857
+    },
+    "id": "grpc-protobuf",
+    "level": 3,
+    "listed": true,
+    "name": "gRPC/protobuf",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "dev-ops",
+      "back-end-development",
+      "web-development",
+      "programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 400.0,
+          "start": "2015-02-01"
+        }
+      ],
+      "total_hours": 400.0
+    },
+    "id": "sas",
+    "level": 3,
+    "listed": true,
+    "name": "SAS",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 259.92857142857144
+    },
+    "id": "bash",
+    "level": 3,
+    "listed": true,
+    "name": "Bash",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 88.73571428571428
+    },
+    "id": "rds",
+    "level": 3,
+    "listed": true,
+    "name": "RDS",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "databases", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 88.73571428571428
+    },
+    "id": "vpc",
+    "level": 3,
+    "listed": true,
+    "name": "VPC",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "networking", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.01,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 27.248571428571427
+    },
+    "id": "route53",
+    "level": 3,
+    "listed": true,
+    "name": "Route53",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "networking", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 88.73571428571428
+    },
+    "id": "s3",
+    "level": 3,
+    "listed": true,
+    "name": "S3",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "databases", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.05,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 136.24285714285713
+    },
+    "id": "elasticache",
+    "level": 3,
+    "listed": true,
+    "name": "ElastiCache",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "databases", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.01,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 63.99857142857143
+    },
+    "id": "iam",
+    "level": 3,
+    "listed": true,
+    "name": "IAM",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "collaboration", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 88.73571428571428
+    },
+    "id": "cloudwatch",
+    "level": 3,
+    "listed": true,
+    "name": "CloudWatch",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "application-monitoring", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 20.0,
+          "start": "2020-06-01"
+        },
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 58.73571428571428
+    },
+    "id": "ecs",
+    "level": 3,
+    "listed": true,
+    "name": "ECS",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "server-administration", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 50.0,
+          "start": "2023-05-01"
+        }
+      ],
+      "total_hours": 133.92857142857144
+    },
+    "id": "cognito",
+    "level": 3,
+    "listed": true,
+    "name": "Cognito",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "access-control", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 50.0,
+          "start": "2023-05-01"
+        }
+      ],
+      "total_hours": 133.92857142857144
+    },
+    "id": "api-gateway",
+    "level": 3,
+    "listed": true,
+    "name": "API Gateway",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["aws", "access-control", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.1,
+          "one_time_hours": 30.0,
+          "start": "2020-06-01"
+        },
+        {
+          "hours_per_week": 0.02,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 39.997142857142855
+    },
+    "id": "cdk",
+    "level": 3,
+    "listed": true,
+    "name": "CDK",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "aws",
+      "server-administration",
+      "networking",
+      "dev-ops"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 100.0,
+          "start": "2022-08-01"
+        }
+      ],
+      "total_hours": 203.42857142857144
+    },
+    "id": "terraform",
+    "level": 3,
+    "listed": true,
+    "name": "Terraform",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "aws",
+      "server-administration",
+      "networking",
+      "dev-ops"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 100.0,
+          "start": "2022-08-01"
+        }
+      ],
+      "total_hours": 203.42857142857144
+    },
+    "id": "terragrunt",
+    "level": 3,
+    "listed": true,
+    "name": "Terragrunt",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "aws",
+      "server-administration",
+      "networking",
+      "dev-ops"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.05,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 74.99285714285715
+    },
+    "id": "nginx",
+    "level": 3,
+    "listed": true,
+    "name": "Nginx",
+    "primary_category_id": "dev-ops",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["server-administration", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.5,
+          "one_time_hours": 75.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 197.5
+    },
+    "id": "gitlab-ci",
+    "level": 3,
+    "listed": true,
+    "name": "Gitlab CI",
+    "primary_category_id": "dev-ops",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 5
+    },
+    "related_skill_ids": ["ci-cd", "dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.3,
+          "one_time_hours": 0.0,
+          "start": "2016-01-01"
+        }
+      ],
+      "total_hours": 165.0857142857143
+    },
+    "id": "supervised-learning",
+    "level": 3,
+    "listed": true,
+    "name": "supervised learning",
+    "primary_category_id": "data-science",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 4,
+      "tech company": 4
+    },
+    "related_skill_ids": ["machine-learning", "data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2016-01-01"
+        }
+      ],
+      "total_hours": 55.02857142857144
+    },
+    "id": "dimensionality-reduction",
+    "level": 3,
+    "listed": true,
+    "name": "dimensionality reduction",
+    "primary_category_id": "data-science",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 4,
+      "tech company": 4
+    },
+    "related_skill_ids": ["machine-learning", "data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 3.0,
+          "one_time_hours": 0.0,
+          "start": "2017-02-01"
+        },
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 931.0
+    },
+    "id": "quality-assurance",
+    "level": 3,
+    "listed": true,
+    "name": "Quality assurance",
+    "primary_category_id": "other",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["other"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2020-06-01"
+        }
+      ],
+      "total_hours": 319.85714285714283
+    },
+    "id": "sass",
+    "level": 3,
+    "listed": true,
+    "name": "Sass",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": ["css", "frameworks"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.2,
+          "one_time_hours": 60.0,
+          "start": "2020-06-01"
+        }
+      ],
+      "total_hours": 123.97142857142856
+    },
+    "id": "bootstrap",
+    "level": 3,
+    "listed": true,
+    "name": "Bootstrap",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": ["css", "javascript", "frameworks", "frameworks"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2015-05-01"
+        },
+        {
+          "hours_per_week": 0.05,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 91.35000000000001
+    },
+    "id": "scipy",
+    "level": 3,
+    "listed": true,
+    "name": "SciPy",
+    "priority": 4,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5,
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "data-science",
+      "data-analysis"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-01-01"
+        }
+      ],
+      "total_hours": 137.57142857142858
+    },
+    "id": "scikit-learn",
+    "level": 3,
+    "listed": true,
+    "name": "scikit-learn",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 5,
+      "tech company": 5
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "data-science",
+      "machine-learning",
+      "data-analysis"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2019-06-01"
+        }
+      ],
+      "total_hours": 37.214285714285715
+    },
+    "id": "holoviews",
+    "level": 3,
+    "listed": true,
+    "name": "HoloViews",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "economist": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["frameworks", "python", "data-science", "plotting"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 30.0,
+          "start": "2020-06-01"
+        }
+      ],
+      "total_hours": 61.98571428571428
+    },
+    "id": "google-charts",
+    "level": 3,
+    "listed": true,
+    "name": "Google Charts",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "economist": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["frameworks", "python", "data-science", "plotting"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 30.0,
+          "start": "2020-06-01"
+        }
+      ],
+      "total_hours": 61.98571428571428
+    },
+    "id": "plotly",
+    "level": 3,
+    "listed": true,
+    "name": "Plotly",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "economist": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": ["frameworks", "python", "data-science", "plotting"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 100.0,
+          "start": "2020-03-01"
+        }
+      ],
+      "total_hours": 133.3
+    },
+    "id": "google-maps-api",
+    "level": 3,
+    "listed": true,
+    "name": "Google Maps API",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "economist": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "data-science",
+      "plotting",
+      "geovisualization"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2021-12-20"
+        }
+      ],
+      "total_hours": 238.85714285714286
+    },
+    "id": "graphql-codegen",
+    "level": 3,
+    "listed": true,
+    "name": "@graphql-codegen",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 4.0,
+          "one_time_hours": 0.0,
+          "start": "2021-12-20"
+        }
+      ],
+      "total_hours": 955.4285714285714
+    },
+    "id": "dgs",
+    "level": 3,
+    "listed": true,
+    "name": "DGS",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "java",
+      "web-development",
+      "back-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 10.0,
+          "start": "2020-06-01"
+        }
+      ],
+      "total_hours": 41.98571428571428
+    },
+    "id": "uvicorn",
+    "level": 3,
+    "listed": true,
+    "name": "Uvicorn",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "frameworks",
+      "python",
+      "asynchronous-programming"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 10.0,
+          "start": "2023-10-01"
+        }
+      ],
+      "total_hours": 83.0
+    },
+    "id": "cypress",
+    "level": 3,
+    "listed": true,
+    "name": "Cypress",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "web-scraping",
+      "python",
+      "automated-testing",
+      "browser-automation"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 30.0,
+          "start": "2019-06-01"
+        }
+      ],
+      "total_hours": 30.0
+    },
+    "id": "pelican",
+    "level": 3,
+    "listed": true,
+    "name": "Pelican",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "front-end-development",
+      "cms"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2020-01-01",
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        }
+      ],
+      "total_hours": 10.42857142857143
+    },
+    "id": "fire",
+    "level": 3,
+    "listed": true,
+    "name": "fire",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": ["frameworks", "python", "cli-development"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2020-01-01"
+        }
+      ],
+      "total_hours": 34.15714285714286
+    },
+    "id": "typer",
+    "level": 3,
+    "listed": true,
+    "name": "typer",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": ["frameworks", "python", "cli-development"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 100.0,
+          "start": "2013-08-01"
+        }
+      ],
+      "total_hours": 100.0
+    },
+    "id": "numerical-optimization",
+    "level": 3,
+    "listed": true,
+    "name": "numerical optimization",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 4
+    },
+    "related_skill_ids": ["data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-11-01",
+          "hours_per_week": 3.0,
+          "one_time_hours": 0.0,
+          "start": "2021-06-01"
+        }
+      ],
+      "total_hours": 65.57142857142857
+    },
+    "id": "circuit-python",
+    "level": 3,
+    "listed": true,
+    "name": "Circuit Python",
+    "primary_category_id": "iot",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["iot", "iot"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-11-01",
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2021-06-01"
+        }
+      ],
+      "total_hours": 43.714285714285715
+    },
+    "id": "embedded-devices",
+    "level": 3,
+    "listed": true,
+    "name": "embedded devices",
+    "primary_category_id": "iot",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["iot", "iot"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-11-01",
+          "hours_per_week": 2.0,
+          "one_time_hours": 0.0,
+          "start": "2021-06-01"
+        }
+      ],
+      "total_hours": 43.714285714285715
+    },
+    "id": "sensors",
+    "level": 3,
+    "listed": true,
+    "name": "sensors",
+    "primary_category_id": "iot",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["iot", "iot"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-11-01",
+          "hours_per_week": 5.0,
+          "one_time_hours": 0.0,
+          "start": "2021-06-01"
+        }
+      ],
+      "total_hours": 109.28571428571429
+    },
+    "id": "smart-home-automation",
+    "level": 3,
+    "listed": true,
+    "name": "smart home automation",
+    "primary_category_id": "iot",
+    "priority": 1,
+    "priority_overrides": {},
+    "related_skill_ids": ["iot", "iot"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 129.96428571428572
+    },
+    "id": "application-monitoring",
+    "level": 2,
+    "listed": true,
+    "name": "application monitoring",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 5
+    },
+    "related_skill_ids": ["dev-ops"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 137.42857142857142
+    },
+    "id": "java",
+    "level": 2,
+    "listed": true,
+    "name": "Java",
+    "primary_category_id": "programming",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["programming", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.5,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        }
+      ],
+      "total_hours": 85.5
+    },
+    "id": "seo",
+    "level": 2,
+    "listed": true,
+    "name": "SEO",
+    "primary_category_id": "programming",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": ["web-development", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 5.0,
+          "start": "2022-05-01"
+        }
+      ],
+      "total_hours": 27.0
+    },
+    "id": "vite",
+    "level": 2,
+    "listed": true,
+    "name": "Vite",
+    "primary_category_id": "frameworks",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.01,
+          "one_time_hours": 0.0,
+          "start": "2020-10-01"
+        }
+      ],
+      "total_hours": 3.0242857142857145
+    },
+    "id": "babel",
+    "level": 2,
+    "listed": true,
+    "name": "Babel",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "typescript",
+      "web-development",
+      "front-end-development",
+      "frameworks"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 10.0,
+          "start": "2021-02-12"
+        }
+      ],
+      "total_hours": 10.0
+    },
+    "id": "qt",
+    "level": 2,
+    "listed": true,
+    "name": "Qt",
+    "primary_category_id": "frameworks",
+    "priority": 3,
+    "priority_overrides": {
+      "tech company": 5
+    },
+    "related_skill_ids": ["frameworks", "front-end-development", "frameworks"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 30.0,
+          "start": "2015-10-01"
+        }
+      ],
+      "total_hours": 30.0
+    },
+    "id": "r",
+    "level": 2,
+    "listed": true,
+    "name": "R",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 129.96428571428572
+    },
+    "id": "nosql",
+    "level": 2,
+    "listed": true,
+    "name": "NoSQL",
+    "primary_category_id": "programming",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["databases", "programming"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.15,
+          "one_time_hours": 0.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.05,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 50.49285714285714
+    },
+    "id": "cloudformation",
+    "level": 2,
+    "listed": true,
+    "name": "CloudFormation",
+    "primary_category_id": "dev-ops",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "aws",
+      "server-administration",
+      "networking",
+      "dev-ops"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.2,
+          "one_time_hours": 0.0,
+          "start": "2016-01-01"
+        }
+      ],
+      "total_hours": 110.05714285714288
+    },
+    "id": "deep-learning",
+    "level": 2,
+    "listed": true,
+    "name": "deep learning",
+    "primary_category_id": "data-science",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 5,
+      "economist": 4,
+      "tech company": 4
+    },
+    "related_skill_ids": ["machine-learning", "data-science"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.2,
+          "one_time_hours": 10.0,
+          "start": "2020-06-01"
+        }
+      ],
+      "total_hours": 73.97142857142856
+    },
+    "id": "material-design",
+    "level": 2,
+    "listed": true,
+    "name": "Material Design",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 4
+    },
+    "related_skill_ids": ["css", "javascript", "frameworks", "frameworks"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 25.0,
+          "start": "2016-08-01"
+        }
+      ],
+      "total_hours": 25.0
+    },
+    "id": "jquery",
+    "level": 2,
+    "listed": true,
+    "name": "jQuery",
+    "primary_category_id": "frameworks",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 3,
+      "tech company": 4
+    },
+    "related_skill_ids": ["javascript", "frameworks", "frameworks"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.1,
+          "one_time_hours": 20.0,
+          "start": "2016-08-01"
+        },
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 0.0,
+          "start": "2021-04-12"
+        }
+      ],
+      "total_hours": 44.5
+    },
+    "id": "django",
+    "level": 2,
+    "listed": true,
+    "name": "Django",
+    "priority": 3,
+    "priority_overrides": {
+      "data science": 4,
+      "economist": 4,
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2021-12-20"
+        }
+      ],
+      "total_hours": 238.85714285714286
+    },
+    "id": "spring-boot",
+    "level": 2,
+    "listed": true,
+    "name": "Spring Boot",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 4
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "java",
+      "web-development",
+      "back-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 1.0,
+          "one_time_hours": 0.0,
+          "start": "2021-12-20"
+        }
+      ],
+      "total_hours": 238.85714285714286
+    },
+    "id": "detekt",
+    "level": 2,
+    "listed": true,
+    "name": "Detekt",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": ["frameworks", "kotlin"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.25,
+          "one_time_hours": 0.0,
+          "start": "2015-09-01"
+        }
+      ],
+      "total_hours": 73.21428571428571
+    },
+    "id": "beautiful-soup",
+    "level": 2,
+    "listed": true,
+    "name": "Beautiful Soup",
+    "priority": 2,
+    "priority_overrides": {
+      "tech company": 3
+    },
+    "related_skill_ids": ["frameworks", "parsing", "python"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 30.0,
+          "start": "2019-12-20"
+        }
+      ],
+      "total_hours": 30.0
+    },
+    "id": "dash",
+    "level": 2,
+    "listed": true,
+    "name": "Dash",
+    "priority": 2,
+    "priority_overrides": {
+      "data science": 4,
+      "tech company": 3
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "front-end-development"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "end": "2021-04-12",
+          "hours_per_week": 0.2,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        }
+      ],
+      "total_hours": 34.2
+    },
+    "id": "wagtail",
+    "level": 2,
+    "listed": true,
+    "name": "Wagtail",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": [
+      "frameworks",
+      "python",
+      "web-development",
+      "back-end-development",
+      "front-end-development",
+      "cms"
+    ]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        }
+      ],
+      "total_hours": 44.58571428571429
+    },
+    "id": "grafana",
+    "level": 2,
+    "listed": true,
+    "name": "Grafana",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": ["frameworks", "application-monitoring"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.1,
+          "one_time_hours": 0.0,
+          "start": "2018-01-01"
+        }
+      ],
+      "total_hours": 44.58571428571429
+    },
+    "id": "prometheus",
+    "level": 2,
+    "listed": true,
+    "name": "Prometheus",
+    "priority": 1,
+    "priority_overrides": {
+      "tech company": 2
+    },
+    "related_skill_ids": ["frameworks", "application-monitoring", "databases"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve_first_word",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 40.0,
+          "start": "2011-05-01"
+        }
+      ],
+      "total_hours": 40.0
+    },
+    "id": "bloomberg-terminal",
+    "level": 2,
+    "listed": true,
+    "name": "Bloomberg terminal",
+    "primary_category_id": "other",
+    "priority": 1,
+    "priority_overrides": {
+      "academic": 3,
+      "asset management company": 4
+    },
+    "related_skill_ids": ["other"]
+  },
+  {
+    "children": [],
+    "display_case": "preserve",
+    "experience": {
+      "as_of": "2026-07-19",
+      "periods": [
+        {
+          "hours_per_week": 0.0,
+          "one_time_hours": 20.0,
+          "start": "2013-02-01"
+        }
+      ],
+      "total_hours": 20.0
+    },
+    "id": "matlab",
+    "level": 1,
+    "listed": true,
+    "name": "MATLAB",
+    "priority": 5,
+    "priority_overrides": {},
+    "related_skill_ids": ["programming"]
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "other",
+    "level": 3,
+    "listed": false,
+    "name": "Other",
+    "priority": 3,
+    "priority_overrides": {},
+    "related_skill_ids": []
+  },
+  {
+    "children": [],
+    "display_case": "standard",
+    "id": "soft-skills",
+    "level": 5,
+    "listed": false,
+    "name": "Soft Skills",
+    "priority": 3,
+    "priority_overrides": {},
+    "related_skill_ids": []
+  }
+]

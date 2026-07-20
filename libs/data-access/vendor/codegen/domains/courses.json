@@ -1,0 +1,272 @@
+[
+  {
+    "current_period": "Fall 2020",
+    "current_time": "Fully Online, Asynchronous",
+    "daily_prep": "Have a computer with Microsoft Excel 2007 or newer ready. We will be installing Python on this machine as well.",
+    "description": "Financial modeling course which focuses on using Python and Excel to understand\npersonal finance and valuation problems.",
+    "evaluation_max_score": 5,
+    "evaluation_score": 4.5,
+    "grading": {
+      "categories": {
+        "Lab Exercises": 0.2,
+        "Projects": 0.8
+      },
+      "scale": {
+        "A": {
+          "maximum": 100.0,
+          "minimum": 93.0
+        },
+        "A-": {
+          "maximum": 92.0,
+          "minimum": 90.0
+        },
+        "B": {
+          "maximum": 86.0,
+          "minimum": 83.0
+        },
+        "B+": {
+          "maximum": 89.0,
+          "minimum": 87.0
+        },
+        "B-": {
+          "maximum": 82.0,
+          "minimum": 80.0
+        },
+        "C": {
+          "maximum": 76.0,
+          "minimum": 73.0
+        },
+        "C+": {
+          "maximum": 79.0,
+          "minimum": 77.0
+        },
+        "C-": {
+          "maximum": 72.0,
+          "minimum": 70.0
+        },
+        "D": {
+          "maximum": 66.0,
+          "minimum": 63.0
+        },
+        "D+": {
+          "maximum": 69.0,
+          "minimum": 67.0
+        },
+        "D-": {
+          "maximum": 62.0,
+          "minimum": 60.0
+        },
+        "F": {
+          "maximum": 59.0,
+          "minimum": 0.0
+        }
+      }
+    },
+    "highlight_description": "senior capstone Python and Excel-based course",
+    "id": "FIN-4934",
+    "instructor": "Nick DeRobertis",
+    "instructor_email": "derobertisna@ufl.edu",
+    "long_description": "This course covers the full financial modeling workflow using both Excel and Python. I will try to teach you\nhow to build a model in general, all the way from concept and data collection to the result and visualization,\nand how to complete the various steps in either Excel or Python. My goal is to give you tangible skills which\nwould be applicable in a finance job, and more so than any other course you’ve ever taken. This course will\nbe very challenging for the less technically inclined, but I will try to help everyone succeed.",
+    "office_hours": "TBD",
+    "office_location": "Stuzin 301A",
+    "periods_taught": ["Fall 2019", "Spring 2020", "Fall 2020"],
+    "prerequisites": {
+      "description": "FIN 3403 (Business Finance) is the minimum requirement. It is highly recommended that you have also taken\nFIN 4243 (Debt and Money Markets) and FIN 4504 (Equity and Capital Markets) as we will build models\nbased on the concepts in these courses without a thorough treatment of them. We have a lot to cover already\nin the course and so the finance concepts are not the focus. I can recommend textbooks for any concepts\nwhich you haven’t covered in prior courses, but then you will have a large learning curve.",
+      "recommended_course_ids": ["FIN-4243", "FIN-4504"],
+      "required_course_ids": ["FIN-3403"],
+      "technical_skills": [
+        "Algebra",
+        "Excel",
+        "Data entry, editing",
+        "Number and cell formatting",
+        "How to work with formulas, and knowledge of common math formulas",
+        "Cell references - fixed and relative, when to use each and why",
+        "Managing worksheets and workbooks",
+        "Graphs, charts"
+      ],
+      "technical_skills_description": "\nUnderstanding of algebra is necessary to work with equations in the models. Introductory Excel capabilities\nare required. Any experience with Python is a plus. It will be assumed that most students have introductory to\nintermediate skills in Excel and no experience with Python. Ensure that you have the Excel skills mentioned here.\nIf you have no Excel experience or some gaps in your experience but still want to\ntake the course, take a look at the free Excel resources at the end of the syllabus and contact me if\nyou have questions as you go through the resources.\n        "
+    },
+    "resources": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "author": "University of Waterloo",
+                "children": [],
+                "name": "Python from Scratch",
+                "url": "https://open.cs.uwaterloo.ca/python-from-scratch/"
+              }
+            ],
+            "name": "Interactive + Video tutorials"
+          },
+          {
+            "children": [
+              {
+                "author": "University of Waterloo",
+                "children": [],
+                "name": "Computer Science Circles",
+                "url": "https://cscircles.cemc.uwaterloo.ca/"
+              },
+              {
+                "author": "codecademy",
+                "children": [],
+                "description": "This one teaches Python 2, which is outdated, but the main difference in the covered material\nis just that the print function doesn't use parentheses in Python 2. So if you do this one then \njust adjust how you call print for the class. There is also a Python 3 course but it requires the Pro plan.",
+                "name": "Learn Python 2",
+                "url": "https://www.codecademy.com/learn/learn-python"
+              },
+              {
+                "children": [],
+                "description": "This is more fast paced",
+                "name": "learnpython.org",
+                "url": "https://www.learnpython.org/"
+              }
+            ],
+            "name": "interactive tutorials"
+          },
+          {
+            "children": [
+              {
+                "author": "CS Dojo",
+                "children": [],
+                "name": "YouTube Video Series",
+                "url": "https://www.youtube.com/watch?v=Z1Yd7upQsXY&list=PLBZBJbE_rGRWeh5mIBhD-hhDwSEDxogDg&ab_channel=CSDojo"
+              },
+              {
+                "author": "Jayanam",
+                "children": [],
+                "name": "YouTube Video Series",
+                "url": "https://www.youtube.com/watch?v=9DVK2Khx8Ys&list=PLboXykqtm8dy_DNg1NZiS08Dnyj35PWXw&index=4"
+              }
+            ],
+            "name": "video tutorials"
+          },
+          {
+            "children": [
+              {
+                "author": "Wikibooks",
+                "children": [],
+                "description": "Fairly detailed and approachable",
+                "name": "Non-Programmer's Tutorial for Python 3",
+                "url": "https://en.wikibooks.org/wiki/Non-Programmer%27s_Tutorial_for_Python_3"
+              },
+              {
+                "author": "Dr. Andrew N. Harrington",
+                "children": [],
+                "description": "Very detailed and a bit faster paced",
+                "name": "Hands-on Python 3 Tutorial",
+                "url": "http://anh.cs.luc.edu//python/hands-on/3.1/handsonHtml/index.html"
+              },
+              {
+                "children": [],
+                "description": "Fast paced, this one would be good for those who already know programming but not Python",
+                "name": "The Python Guru",
+                "url": "https://thepythonguru.com/"
+              }
+            ],
+            "name": "Text (non-interactive) tutorials"
+          }
+        ],
+        "name": "Python"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "name": "Trump Excel",
+                "url": "https://trumpexcel.com/learn-excel/"
+              },
+              {
+                "author": "GCF Global",
+                "children": [],
+                "name": "Excel 2016 Tutorial",
+                "url": "https://edu.gcfglobal.org/en/excel2016/"
+              },
+              {
+                "author": "Ben Currier",
+                "children": [],
+                "name": "Excel Exposure",
+                "url": "https://excelexposure.com/lesson-guide/"
+              }
+            ],
+            "name": "Video Tutorials"
+          }
+        ],
+        "name": "Excel"
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "author": "Kahn Academy",
+                "children": [],
+                "name": "Finance and Capital Markets",
+                "url": "https://www.khanacademy.org/economics-finance-domain/core-finance"
+              },
+              {
+                "author": "James Weston",
+                "children": [],
+                "name": "Finance for Non-Finance Professionals - Coursera",
+                "url": "https://www.coursera.org/learn/finance-for-non-finance"
+              }
+            ],
+            "name": "Introductory Finance Courses"
+          }
+        ],
+        "name": "Finance"
+      }
+    ],
+    "software_project_ids": ["fin-model-course", "py-finstmt", "sensitivity"],
+    "textbook": {
+      "author": "Simon Benninga",
+      "description": "Textbook is only recommended. This book is very focused on Excel and we will be using both Excel\nand Python in the course. It is however useful as a reference for the Excel material and generally how\nto build the models.",
+      "publisher_details": "Fourth Edition, MIT Press",
+      "required": false,
+      "title": "Financial Modeling"
+    },
+    "title": "Financial Modeling",
+    "topics": ["Introduction to Financial Modeling", "Corporate Valuation"],
+    "university_id": "uf",
+    "university_location": "Gainesville, FL",
+    "university_name": "University of Florida",
+    "website_url": "https://nickderobertis.github.io/fin-model-course"
+  },
+  {
+    "description": "A fixed income course focusing on debt analysis and debt portfolio management, also covering the use of derivatives for risk management in fixed income portfolios.",
+    "evaluation_max_score": 5,
+    "evaluation_score": 4.8,
+    "highlight_description": "fixed income course",
+    "id": "FIN-4243",
+    "instructor": "Nick DeRobertis",
+    "instructor_email": "derobertisna@ufl.edu",
+    "office_location": "Stuzin 301A",
+    "periods_taught": ["Fall 2016", "Spring 2018"],
+    "resources": [],
+    "software_project_ids": [],
+    "title": "Debt and Money Markets",
+    "topics": ["Debt Analysis", "Debt Portfolio Management"],
+    "university_id": "uf",
+    "university_location": "Gainesville, FL",
+    "university_name": "University of Florida"
+  },
+  {
+    "description": "A lab taught as part of a financial management course which focuses on using Excel to solve case problems.",
+    "evaluation_max_score": 5,
+    "highlight_description": "Excel skills course",
+    "id": "FIRE-311",
+    "instructor": "Nick DeRobertis",
+    "instructor_email": "derobertisna@ufl.edu",
+    "office_location": "Stuzin 301A",
+    "periods_taught": ["Spring 2014"],
+    "resources": [],
+    "software_project_ids": [],
+    "title": "Financial Management Lab",
+    "topics": ["Excel"],
+    "university_id": "vcu",
+    "university_location": "Richmond, VA",
+    "university_name": "Virginia Commonwealth University"
+  }
+]

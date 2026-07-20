@@ -21,7 +21,14 @@ export default {
       name: "shell",
       filename: "remoteEntry.js",
       exposes: { "./App": "./src/app.tsx" },
-      remotes: {},
+      remotes: {
+        bio: "bio@/nick-derobertis-site/remotes/bio/remoteEntry.js",
+        research:
+          "research@/nick-derobertis-site/remotes/research/remoteEntry.js",
+        software:
+          "software@/nick-derobertis-site/remotes/software/remoteEntry.js",
+        courses: "courses@/nick-derobertis-site/remotes/courses/remoteEntry.js",
+      },
       shared: {
         react: { singleton: true, requiredVersion: false, eager: true },
         "react-dom": { singleton: true, requiredVersion: false, eager: true },
