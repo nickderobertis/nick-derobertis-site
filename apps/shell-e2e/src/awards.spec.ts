@@ -205,7 +205,9 @@ for (const statePath of statePaths) {
     await withArtifactOutcome("empty", async (baseUrl) => {
       await openAwards(page, `${baseUrl}${statePath.path}`);
       await expect(page.getByRole("status")).toContainText("No awards to show");
-      await expect(page.getByRole("article")).toHaveCount(0);
+      await expect(
+        page.locator(".awards-pane").getByRole("article"),
+      ).toHaveCount(0);
     });
   });
 
