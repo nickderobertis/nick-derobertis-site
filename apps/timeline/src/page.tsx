@@ -47,7 +47,7 @@ function organization(entry: Entry, short = false) {
       : entry.organization;
 }
 
-export function TimelineChart({ entries }: { entries: Timeline }) {
+function useTimelineModel(entries: Timeline) {
   const employmentId = useId();
   const educationId = useId();
   const [employment, setEmployment] = useState(true);
@@ -72,8 +72,33 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
   );
   const years: number[] = [];
   for (let year = 2011; year <= finalYear; year += 1) years.push(year);
+  return {
+    education,
+    educationId,
+    employment,
+    employmentId,
+    finalYear,
+    groups,
+    setEducation,
+    setEmployment,
+    years,
+  };
+}
+
+export function TimelineChart({ entries }: { entries: Timeline }) {
+  const {
+    education,
+    educationId,
+    employment,
+    employmentId,
+    finalYear,
+    groups,
+    setEducation,
+    setEmployment,
+    years,
+  } = useTimelineModel(entries);
   return (
-    <div className="timeline-card">
+    <section className="timeline-card" aria-label="Timeline visualization">
       <fieldset className="timeline-filters">
         <legend>Filters:</legend>
         <label htmlFor={employmentId}>
@@ -151,7 +176,7 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
           </div>
         </section>
       )}
-    </div>
+    </section>
   );
 }
 

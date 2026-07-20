@@ -92,7 +92,7 @@ for (const renderPath of renderPaths) {
     await openTimeline(page, renderPath.url);
     await expect(page.getByText("UF", { exact: true })).toBeVisible();
     await expect(page.getByText("Ph.D.", { exact: true })).toBeVisible();
-    const card = page.locator(".timeline-card");
+    const card = page.getByRole("region", { name: "Timeline visualization" });
     const box = await card.boundingBox();
     expect(box?.width).toBeLessThanOrEqual(375);
   });
