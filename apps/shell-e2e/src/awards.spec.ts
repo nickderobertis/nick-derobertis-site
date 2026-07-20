@@ -1,9 +1,41 @@
+import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
+import type { AddressInfo } from "node:net";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+import { createStaticSiteServer } from "../../../scripts/static-site-server.mjs";
 
 const allAwardsPaths = [
   { name: "host-composed", path: "awards" },
   { name: "standalone remote", path: "remotes/awards/" },
 ] as const;
+const statePaths = [
+  { name: "home selected awards", path: "" },
+  ...allAwardsPaths,
+] as const;
+const artifactPath = "cv-data/domains/awards.json";
+
+async function withArtifactOutcome(
+  outcome: "empty" | "error",
+  run: (baseUrl: string, root: string) => Promise<void>,
+) {
+  const root = await mkdtemp(join(tmpdir(), "awards-e2e-"));
+  await cp("dist/apps/shell", root, { recursive: true });
+  const artifact = join(root, artifactPath);
+  if (outcome === "empty") await writeFile(artifact, "[]");
+  else await rm(artifact);
+  const server = createStaticSiteServer(root);
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address() as AddressInfo;
+  try {
+    await run(`http://127.0.0.1:${address.port}/nick-derobertis-site/`, root);
+  } finally {
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
+    await rm(root, { recursive: true });
+  }
+}
 
 async function openAwards(page: Page, path: string) {
   await page.goto(path);
@@ -74,33 +106,6 @@ for (const renderPath of allAwardsPaths) {
     await expect(withoutInfo.getByLabel("Award parts")).toHaveCount(0);
   });
 
-  test(`${renderPath.name} exposes genuine loading and empty data outcomes`, async ({
-    page,
-  }) => {
-    await page.setExtraHTTPHeaders({ "x-awards-outcome": "delay" });
-    await page.goto(renderPath.path);
-    await expect(page.getByRole("status")).toHaveText("Loading awards…");
-    await expect(page.getByLabel("Awards list")).toBeVisible();
-
-    await page.setExtraHTTPHeaders({ "x-awards-outcome": "empty" });
-    await openAwards(page, renderPath.path);
-    await expect(page.getByRole("status")).toContainText("No awards to show");
-    await expect(page.getByRole("article")).toHaveCount(0);
-  });
-
-  test(`${renderPath.name} surfaces and recovers from a genuine data error`, async ({
-    page,
-  }) => {
-    await page.setExtraHTTPHeaders({ "x-awards-outcome": "error" });
-    await openAwards(page, renderPath.path);
-    await expect(page.getByRole("alert")).toContainText(
-      "Awards are unavailable",
-    );
-    await page.setExtraHTTPHeaders({});
-    await page.getByRole("button", { name: "Try again" }).click();
-    await expect(page.getByLabel("Awards list")).toBeVisible();
-  });
-
   test(`${renderPath.name} awards grid responds from mobile through desktop`, async ({
     page,
   }) => {
@@ -131,5 +136,47 @@ for (const renderPath of allAwardsPaths) {
       `${renderPath.name.replace(" ", "-")}-awards.png`,
       { animations: "disabled", fullPage: true },
     );
+  });
+}
+
+for (const statePath of statePaths) {
+  test(`${statePath.name} exposes a genuine slow-network loading state`, async ({
+    page,
+  }) => {
+    const session = await page.context().newCDPSession(page);
+    await session.send("Network.enable");
+    await session.send("Network.emulateNetworkConditions", {
+      offline: false,
+      latency: 1_200,
+      downloadThroughput: 500_000,
+      uploadThroughput: 500_000,
+    });
+    await page.goto(statePath.path);
+    await expect(page.getByRole("status")).toHaveText("Loading awards…");
+    await expect(page.getByLabel("Awards list")).toBeVisible();
+  });
+
+  test(`${statePath.name} renders an actually empty awards artifact`, async ({
+    page,
+  }) => {
+    await withArtifactOutcome("empty", async (baseUrl) => {
+      await openAwards(page, `${baseUrl}${statePath.path}`);
+      await expect(page.getByRole("status")).toContainText("No awards to show");
+      await expect(page.getByRole("article")).toHaveCount(0);
+    });
+  });
+
+  test(`${statePath.name} recovers after a missing artifact is restored`, async ({
+    page,
+  }) => {
+    await withArtifactOutcome("error", async (baseUrl, root) => {
+      await openAwards(page, `${baseUrl}${statePath.path}`);
+      await expect(page.getByRole("alert")).toContainText(
+        "Awards are unavailable",
+      );
+      await cp(join("dist/apps/shell", artifactPath), join(root, artifactPath));
+      await page.getByRole("button", { name: "Try again" }).click();
+      await expect(page.getByLabel("Awards list")).toBeVisible();
+    });
   });
 }
