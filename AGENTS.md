@@ -23,6 +23,13 @@ them; `just upgrade` deliberately opts into testing latest releases.
 
 E2E visits all five routes at the Pages base path, verifies shared layout and route content, keyboard navigation, direct deep links, and the 404 fallback.
 
+The repository's LLM lint bar additionally requires every route and substantial
+feature scenario to cover happy, empty, loading, and error states in a real
+browser through both standalone-remote and host-composed paths. Its
+microfrontend architecture rule requires one Nx-bounded Module Federation
+remote per feature domain, exposed only at the app/routes boundary without
+cross-remote internal access or unrelated domains sharing a remote.
+
 ## Commits, releases, and merging
 
 Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override.
