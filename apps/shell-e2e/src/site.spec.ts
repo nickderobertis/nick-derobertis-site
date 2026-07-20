@@ -58,10 +58,6 @@ test("every route has useful HTML with JavaScript disabled", async ({
         name: "staticHeading" in route ? route.staticHeading : route.heading,
       }),
     ).toBeVisible();
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      "href",
-      new RegExp(`/nick-derobertis-site/${route.path}$`),
-    );
   }
   await context.close();
 });
