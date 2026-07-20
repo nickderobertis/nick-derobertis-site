@@ -1,0 +1,36 @@
+{
+  "name": "shell-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/shell-e2e/src",
+  "projectType": "application",
+  "tags": ["type:e2e", "scope:shell"],
+  "implicitDependencies": ["shell"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
+      "options": {
+        "config": "apps/shell-e2e/playwright.config.ts",
+        "skipInstall": true
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/shell-e2e" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/shell-e2e/tsconfig.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --passWithNoTests apps/shell-e2e/src/unit"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/shell-e2e/tsconfig.json" }
+    }
+  }
+}

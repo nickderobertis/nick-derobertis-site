@@ -1,0 +1,55 @@
+{
+  "name": "shell",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/shell/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:shell"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/shell/rspack.config.ts",
+        "outputPath": "dist/apps/shell",
+        "index": "apps/shell/src/index.html",
+        "main": "apps/shell/src/main.tsx",
+        "tsConfig": "apps/shell/tsconfig.app.json",
+        "assets": []
+      }
+    },
+    "serve": {
+      "executor": "@nx/rspack:dev-server",
+      "options": { "buildTarget": "shell:build", "port": 4200 }
+    },
+    "prerender": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build",
+        {
+          "target": "build",
+          "projects": ["bio", "research", "software", "courses"]
+        }
+      ],
+      "options": {
+        "command": "node scripts/prerender.mjs && node scripts/check-static-artifact.mjs"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint . --max-warnings=0 && biome lint apps/shell"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/shell/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/apps/shell"],
+      "options": {
+        "command": "vitest run --config apps/shell/vite.config.ts --coverage"
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "software",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/software/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:software"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/software/rspack.config.ts",
+        "outputPath": "dist/apps/software",
+        "main": "apps/software/src/main.tsx",
+        "tsConfig": "apps/software/tsconfig.app.json",
+        "index": "apps/software/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/software" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/software/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --passWithNoTests apps/software/src" }
+    }
+  }
+}

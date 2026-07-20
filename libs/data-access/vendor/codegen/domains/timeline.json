@@ -1,0 +1,236 @@
+[
+  {
+    "degree": "Ph.D. in Business Administration - Finance and Real Estate",
+    "end": "2021-05-15",
+    "id": "uf-ph-d-in-business-administration-finance-and-real-estate",
+    "kind": "education",
+    "location": "Gainesville, FL",
+    "organization": "University of Florida",
+    "short_degree": "Ph.D.",
+    "start": "2014-08-15"
+  },
+  {
+    "degree": "Master of Science in Business, Concentration in Finance",
+    "end": "2014-05-15",
+    "id": "vcu-master-of-science-in-business-concentration-in-finance",
+    "kind": "education",
+    "location": "Richmond, VA",
+    "organization": "Virginia Commonwealth University",
+    "short_degree": "MSF",
+    "start": "2013-08-15"
+  },
+  {
+    "degree": "Bachelor of Science in Business, Concentration in Finance",
+    "end": "2013-05-15",
+    "id": "vcu-bachelor-of-science-in-business-concentration-in-finance",
+    "kind": "education",
+    "location": "Richmond, VA",
+    "organization": "Virginia Commonwealth University",
+    "short_degree": "BSF",
+    "start": "2010-08-15"
+  },
+  {
+    "highlights": [
+      "Architect a web application with a Python FastAPI back-end and a TypeScript NextJS front-end to assist companies with managing their software spending",
+      "Manage 2 software developers, providing technical guidance and tracking progress, using a custom management system designed based on agile practices",
+      "Design and implement data pipelines that regularly sync SSO and financial data into a 3NF schema in a PosgreSQL database hosted in AWS RDS",
+      "Develop the full-stack application and deployed it using Terraform on AWS Fargate and Vercel",
+      "Secure, monitor, and manage the application by developing encryption, rate limiting, active monitoring services, user analytics, and operator interfaces",
+      "Automate testing, data pipelines, and deployment using Python, Airflow, Terraform, and Github Actions",
+      "Strategize about product development to improve user experience (UX) and monetization",
+      "Assess and refine product-market fit by developing detailed financial models and updating them with information learned from user analytics and user feedback"
+    ],
+    "hours_per_week": 10.0,
+    "id": "spendoso_cto",
+    "kind": "professional_employment",
+    "location": "Sheridan, WY",
+    "organization": "Spendoso, LLC",
+    "organization_short": "Spendoso",
+    "start": "2022-08-01",
+    "title": "Co-Founder and Chief Technology Officer",
+    "title_short": "CTO"
+  },
+  {
+    "highlights": [
+      "Analyze complex problems and create workflows involving humans and automation",
+      "Design and implement software to automate workflows and improve efficiency",
+      "Contribute to overall product strategy and technical platform"
+    ],
+    "hours_per_week": 20.0,
+    "id": "covariance_pm_eng",
+    "kind": "professional_employment",
+    "location": "New York, NY",
+    "organization": "Stealth Mode Startup",
+    "organization_short": "Stealth",
+    "start": "2022-11-25",
+    "title": "Lead Product Manager and Engineer",
+    "title_short": "PM & Eng"
+  },
+  {
+    "highlights": [
+      "Collaborate with product, design, data science, and other engineers to release features that improve the productivity of clinicians and support staff",
+      "Architect, execute, and direct others through large projects to improve the Scala monolith, Kotlin microservices, and React Native mobile and web applications",
+      "Introduce technical approaches and patterns, anticipating and responding to the organization's needs",
+      "Optimize performance of existing product features by implementing caching, query optimization, reducing component renders, and re-architecting with GraphQL and NextJS to minimize client data transfer",
+      "Establish new applications and application monitoring infrastructure",
+      "Refine organizational engineering practices by contributing to discussions and documentation",
+      "Assist in training and hiring of new engineers"
+    ],
+    "hours_per_week": 40.0,
+    "id": "carbon_health_staff",
+    "kind": "professional_employment",
+    "location": "San Francisco, CA",
+    "organization": "Carbon Health Technologies",
+    "organization_short": "CH",
+    "start": "2022-09-01",
+    "title": "Staff Software Engineer",
+    "title_short": "Staff Eng"
+  },
+  {
+    "end": "2022-12-31",
+    "highlights": [
+      "Created the business that ultimately grew to 15 employees, raised $1.75M, and was acquired by Carbon Health Technologies, with only one co-founder",
+      "Managed up to 10 software developers, providing technical guidance and tracking progress, using a custom management system designed based on agile practices",
+      "Architected a web application with a Python Flask back-end API and a TypeScript Angular front-end to assist individuals in claiming lost money",
+      "Designed and implemented data pipelines that clean and aggregate state unclaimed property data into a 3NF schema in a PosgreSQL database hosted in AWS RDS",
+      "Developed the full-stack prototype of the application and deployed it using Docker Swarm on AWS EC2 instances",
+      "Secured, monitored, and managed the application by developing encryption, rate limiting, active monitoring services, user analytics, and operator interfaces",
+      "Optimized consumer funnel by analyzing conversions in an A/B testing framework",
+      "Automated testing, data pipelines, and deployment using Python and Bash scripts, AWS CLI, and Gitlab CI/CD",
+      "Strategized about product development to improve user experience (UX) and monetization while appeasing regulatory concerns",
+      "Assessed and refined product-market fit by developing detailed financial models and updating them with information learned from user analytics, user feedback, and regulatory response"
+    ],
+    "hours_per_week": 40.0,
+    "id": "claimfound_cto",
+    "kind": "professional_employment",
+    "location": "Gainesville, FL",
+    "organization": "Claimfound, Inc.",
+    "organization_short": "CF",
+    "start": "2016-08-15",
+    "title": "Co-Founder and Chief Technology Officer",
+    "title_short": "CTO"
+  },
+  {
+    "end": "2022-08-31",
+    "highlights": [
+      "Collaborated with product, design, data science, and other engineers to release features that improve the productivity of clinicians and support staff",
+      "Architected and executed large projects to improve the Scala monolith, Kotlin microservices, and React Native mobile and web applications",
+      "Optimized performance of existing product features by implementing caching, query optimization, reducing component renders, and re-architecting with GraphQL to minimize data transfer",
+      "Refined organizational engineering practices by contributing to discussions and documentation",
+      "Assisted in training and hiring of new engineers"
+    ],
+    "hours_per_week": 40.0,
+    "id": "carbon_health_senior",
+    "kind": "professional_employment",
+    "location": "San Francisco, CA",
+    "organization": "Carbon Health Technologies",
+    "organization_short": "CH",
+    "start": "2021-04-12",
+    "title": "Senior Software Engineer",
+    "title_short": "Senior Eng"
+  },
+  {
+    "end": "2021-04-12",
+    "highlights": [
+      "Assisted students with homework, projects, test preparation, papers, research in master's and undergraduate finance courses",
+      "Taught skills to improve academic performance, including study strategies, note-taking skills and approaches to answering test questions"
+    ],
+    "hours_per_week": 3.0,
+    "id": "parliament_tutor",
+    "kind": "professional_employment",
+    "location": "Gainesville, FL",
+    "organization": "Parliament Tutors",
+    "organization_short": "PT",
+    "start": "2017-09-01",
+    "title": "Tutor",
+    "title_short": "Tutor"
+  },
+  {
+    "end": "2014-08-15",
+    "highlights": [
+      "Analyzed financial information obtained from clients to determine strategies for meeting their financial objectives",
+      "Gathered data on market conditions to inform clients of threats and opportunities",
+      "Recommended to clients financial strategies in cash management, investment planning, or other areas to help them achieve their financial goals"
+    ],
+    "hours_per_week": 5.0,
+    "id": "cnc_managing_partner",
+    "kind": "professional_employment",
+    "location": "Richmond, VA",
+    "organization": "CNC Partners",
+    "organization_short": "CNC",
+    "start": "2013-05-15",
+    "title": "Managing Partner",
+    "title_short": "MP"
+  },
+  {
+    "end": "2013-08-15",
+    "highlights": [
+      "Rebuilt Allowance for Loan and Lease Losses (ALLL) models, ultimately saving $5.4 million for the bank",
+      "Developed probability of default (PD) and loss given default (LGD) statistics for over 10,000 commercial and consumer loans by internal risk grade, delinquency status, and FFIEC code using migration analysis",
+      "Designed and implemented stress testing methodologies"
+    ],
+    "hours_per_week": 30.0,
+    "id": "evb_portfolio_analyst",
+    "kind": "professional_employment",
+    "location": "Atlee, VA",
+    "organization": "Eastern Virginia Bankshares",
+    "organization_short": "EVB",
+    "start": "2012-08-15",
+    "title": "Portfolio Analyst, Portfolio Management",
+    "title_short": "Analyst"
+  },
+  {
+    "end": "2011-08-15",
+    "highlights": [
+      "Created a regulatory scale which standardizes the largest banks' internal ratings",
+      "Analyzed the Shared National Credit (SNC) program to reduce inefficiencies and implemented a data pipeline to improve usability of data"
+    ],
+    "hours_per_week": 40.0,
+    "id": "frb_intern",
+    "kind": "professional_employment",
+    "location": "Washington, D.C.",
+    "organization": "Federal Reserve Board of Governors",
+    "organization_short": "FRBG",
+    "start": "2011-05-15",
+    "title": "Credit Risk Intern, Banking Supervision & Regulation",
+    "title_short": "Intern"
+  },
+  {
+    "course_ids": ["FIN-4934", "FIN-4243"],
+    "end": "2021-05-31",
+    "highlights": [
+      "Conduct full research projects, including project development, data collection, and analysis",
+      "Analyze billions of data points of panel- and time-series data using econometric models and techniques such as OLS, Logit, Probit, Fama-MacBeth, ARIMA, vector autoregression, Granger causality, hazard, quantile, PCA, LDA, EFA, CFA, SEM, difference-in-differences, and propensity score matching",
+      "Predict and classify outcomes using machine learning models such as deep learning (multilayer perceptron), SVM, K-nearest neighbors, K-means, decision trees, ridge, LASSO, naive Bayes, and ensemble methods",
+      "Collect data using web-scraping, APIs, and databases",
+      "Clean, aggregate, and merge data from multiple sources with outliers and errors at different frequencies and levels of aggregation"
+    ],
+    "hours_per_week": 30.0,
+    "id": "uf_ga",
+    "kind": "academic_employment",
+    "location": "Gainesville, FL",
+    "organization": "University of Florida",
+    "organization_short": "UF",
+    "start": "2014-08-15",
+    "title": "Graduate Assistant",
+    "title_short": "GA"
+  },
+  {
+    "course_ids": ["FIRE-311"],
+    "end": "2014-08-15",
+    "highlights": [
+      "Perform multivariate linear and non-linear analyses on collected data to answer research questions",
+      "Assist professors in teaching responsibilities, such as teaching class sections and grading student assignments and examinations",
+      "Present research findings in an effective manner"
+    ],
+    "hours_per_week": 30.0,
+    "id": "vcu_ga",
+    "kind": "academic_employment",
+    "location": "Richmond, VA",
+    "organization": "Virginia Commonwealth University",
+    "organization_short": "VCU",
+    "start": "2013-09-01",
+    "title": "Graduate Assistant",
+    "title_short": "GA"
+  }
+]

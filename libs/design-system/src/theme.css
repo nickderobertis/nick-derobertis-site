@@ -1,0 +1,116 @@
+:root {
+  color-scheme: light;
+  --navy: #12324a;
+  --blue: #2878a8;
+  --sky: #e9f3f8;
+  --ink: #26343e;
+  --muted: #61717c;
+  --paper: #fff;
+  --line: #d6e0e6;
+  --space: clamp(1rem, 3vw, 2rem);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+a {
+  color: inherit;
+}
+.site-header {
+  background: var(--navy);
+  color: #fff;
+}
+.header-inner,
+.main,
+.footer-inner {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: auto;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 5rem;
+  gap: 1.5rem;
+}
+.brand {
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.nav-list {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+.nav-link {
+  display: block;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+.nav-link:hover,
+.nav-link:focus-visible,
+.nav-link[aria-current="page"] {
+  background: var(--blue);
+  outline-offset: 3px;
+}
+.main {
+  min-height: calc(100vh - 11rem);
+  padding: clamp(3rem, 8vw, 7rem) 0;
+}
+.hero {
+  max-width: 760px;
+}
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--blue);
+  font-weight: 700;
+}
+.hero h1 {
+  font-family: Georgia, serif;
+  color: var(--navy);
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  line-height: 1;
+  margin: 0.25em 0;
+}
+.hero > p:not(.eyebrow) {
+  font-size: 1.25rem;
+  color: var(--muted);
+}
+.placeholder {
+  margin-top: 2rem;
+  padding: 1rem;
+  border-left: 4px solid var(--blue);
+  background: var(--sky);
+}
+.site-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+.footer-inner {
+  padding: 1.5rem 0;
+}
+@media (max-width: 700px) {
+  .header-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1rem 0;
+  }
+  .nav-list {
+    gap: 0;
+  }
+  .nav-link {
+    padding: 0.5rem;
+  }
+}

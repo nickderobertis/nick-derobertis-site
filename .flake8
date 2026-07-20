@@ -1,2 +1,0 @@
-[flake8]
-exclude = .git,__pycache__,dist,build,docs,docsrc/source/conf.py,lib,.venv,.venvs,deploy,node_modules
