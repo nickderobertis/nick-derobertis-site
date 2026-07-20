@@ -1,0 +1,103 @@
+.bio-page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  margin: calc(-1 * clamp(3rem, 8vw, 7rem)) calc(50% - 50vw);
+  overflow: hidden;
+  color: #fff;
+  background: #28111f;
+}
+
+.bio-cover {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: 0.68;
+  background:
+    linear-gradient(135deg, transparent 75%, rgb(124 32 22 / 65%) 0) 0 0 / 18rem
+    18rem,
+    linear-gradient(45deg, transparent 75%, rgb(34 62 50 / 55%) 0) 0 0 / 18rem
+    18rem,
+    linear-gradient(225deg, transparent 75%, rgb(104 79 13 / 55%) 0) 0 / 18rem
+    18rem,
+    linear-gradient(315deg, transparent 75%, rgb(74 11 53 / 75%) 0) 0 / 18rem
+    18rem,
+    linear-gradient(120deg, #28111f, #451b18 48%, #171324);
+}
+
+.bio-content {
+  width: min(69rem, calc(100% - 2 * var(--space)));
+  margin: auto;
+  padding: clamp(4rem, 8vw, 7rem) 0 clamp(3rem, 7vw, 6rem);
+  font-size: clamp(1rem, 1.45vw, 1.27rem);
+  line-height: 1.5;
+}
+
+.bio-content h1 {
+  margin: 0 0 1.35rem;
+  text-align: center;
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 400;
+}
+
+.bio-content h2 {
+  margin: 1rem 0 0.75rem;
+  font-size: 1.45em;
+  font-weight: 500;
+}
+
+.bio-content h3 {
+  margin: 1.3rem 0 0.75rem;
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+.bio-content h4 {
+  margin: 1.3rem 0 0.75rem;
+  font-size: 1em;
+  font-weight: 400;
+}
+
+.bio-content p {
+  margin: 0 0 1rem;
+}
+
+.bio-content a,
+.bio-problem {
+  color: #ee4f52;
+}
+
+.bio-solution {
+  color: #44b74b;
+}
+
+.bio-content a:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.bio-state {
+  min-height: 60vh;
+  display: grid;
+  align-content: center;
+}
+
+.bio-state h1 {
+  margin-bottom: 0;
+  color: var(--navy);
+  font:
+    700 clamp(2rem, 5vw, 3.5rem) / 1.1 Georgia,
+    serif;
+}
+
+@media (max-width: 520px) {
+  .bio-content {
+    padding-block: 4.5rem 3rem;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+
+  .bio-content h1 {
+    text-align: left;
+  }
+}

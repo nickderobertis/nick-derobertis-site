@@ -22,6 +22,12 @@ const awardsContract = [
   ["libs/build-config/src/remotes.json", '"awards": "awards"'],
 ] as const;
 
+const bioContract = [
+  ["apps/bio/src/page.tsx", 'id="bio-heading">Optimizing Life'],
+  ["apps/shell-e2e/src/bio.spec.ts", 'name: "Optimizing Life"'],
+  ["apps/shell-e2e/src/site.spec.ts", 'heading: "Optimizing Life"'],
+] as const;
+
 async function expectContract(
   contract: readonly (readonly [path: string, expected: string])[],
 ) {
@@ -47,5 +53,11 @@ describe("timeline federation contract", () => {
 describe("awards federation contract", () => {
   it("keeps every required Nx, host, and federation declaration in sync", async () => {
     await expectContract(awardsContract);
+  });
+});
+
+describe("bio content contract", () => {
+  it("keeps the remote and browser heading expectations in sync", async () => {
+    await expectContract(bioContract);
   });
 });
