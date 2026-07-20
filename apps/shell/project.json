@@ -38,7 +38,7 @@
         }
       ],
       "options": {
-        "command": "node scripts/prerender.mjs && node scripts/check-static-artifact.mjs"
+        "command": "node scripts/check-remote-contracts.mjs && node scripts/prerender.mjs && node scripts/check-static-artifact.mjs"
       }
     },
     "lint": {

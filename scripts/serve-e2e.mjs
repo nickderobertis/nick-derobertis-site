@@ -7,7 +7,11 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../dist/apps/shell", import.meta.url));
 const base = "/nick-derobertis-site";
 const port = process.env.E2E_PORT ?? "4200";
-if (!/^\d{2,5}$/.test(port)) throw new Error("E2E_PORT must be a valid port");
+const portNumber = Number(port);
+if (!Number.isInteger(portNumber) || portNumber < 1024 || portNumber > 65_535)
+  throw new Error(
+    "Set E2E_PORT to an available numeric port from 1024 to 65535",
+  );
 const types = {
   ".css": "text/css",
   ".html": "text/html",
@@ -33,4 +37,4 @@ createServer(async (request, response) => {
     types[extname(file)] ?? "application/octet-stream",
   );
   createReadStream(file).pipe(response);
-}).listen(Number(port), "127.0.0.1");
+}).listen(portNumber, "127.0.0.1");

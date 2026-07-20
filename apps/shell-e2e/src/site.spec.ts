@@ -120,16 +120,9 @@ for (const renderPath of skillsPaths) {
       name: "Interactive skills sunburst",
     });
     await expect(chart).toBeVisible();
-    await chart
-      .getByRole("treeitem", { name: /Programming/ })
-      .locator("path")
-      .first()
-      .hover();
-    await chart
-      .getByRole("treeitem", { name: /Programming/ })
-      .locator("path")
-      .first()
-      .click();
+    const programming = chart.getByRole("treeitem", { name: /Programming/ });
+    await programming.hover();
+    await programming.press("Enter");
     await expect(
       page.getByRole("button", { name: "Show all categories" }),
     ).toBeVisible();

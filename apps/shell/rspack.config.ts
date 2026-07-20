@@ -3,6 +3,14 @@ import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
 
 const base = "/nick-derobertis-site/";
+const remotes = Object.fromEntries(
+  routes
+    .filter((route) => "remote" in route)
+    .map((route) => [
+      route.remote,
+      `${route.remote}@${base}remotes/${route.remote}/remoteEntry.js`,
+    ]),
+);
 export default {
   entry: "./apps/shell/src/main.tsx",
   output: { publicPath: base, uniqueName: "shell", clean: true },

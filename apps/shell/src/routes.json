@@ -3,7 +3,8 @@
     "path": "/",
     "label": "Home",
     "heading": "Skilled in…",
-    "description": "Explore Nick DeRobertis's skills, experience, and areas of expertise."
+    "description": "Explore Nick DeRobertis's skills, experience, and areas of expertise.",
+    "remote": "skills"
   },
   {
     "path": "/bio",
