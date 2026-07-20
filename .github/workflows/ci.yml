@@ -1,0 +1,36 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: pnpm/action-setup@v4
+        with: {version: 10.13.1}
+      - uses: actions/setup-node@v4
+        with: {node-version: 26.5.0, cache: pnpm}
+      - uses: extractions/setup-just@v2
+      - run: just bootstrap
+      - name: Derive affected range
+        run: echo "NX_BASE=$(git merge-base origin/main HEAD)" >> "$GITHUB_ENV"
+      - run: just check
+  llmlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: astral-sh/setup-uv@v6
+      - uses: extractions/setup-just@v2
+      - run: just setup-llmlint
+      - run: just lint-llm-validate --diff-base origin/main
+      - name: Require harness credential
+        env: {OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"}
+        run: test -n "$OPENAI_API_KEY" || { echo 'OPENAI_API_KEY is required for llmlint'; exit 1; }
+      - env: {OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"}
+        run: just lint-llm-diff

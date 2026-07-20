@@ -1,28 +1,46 @@
 {
-  "name": "local-development",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "nick-derobertis-site",
+  "private": true,
+  "packageManager": "pnpm@10.13.1",
   "scripts": {
-    "just": "./scripts/bin/just",
-    "screenshots": "node scripts/screenshots.js",
-    "prepare": "husky install && cat global-requirements.txt | xargs -n1 pipx install || true"
+    "nx": "nx"
   },
-  "author": "",
-  "license": "MIT",
+  "dependencies": {
+    "@module-federation/enhanced": "2.8.0",
+    "@nickderobertis/cv-data": "git+https://github.com/nickderobertis/derobertis-cv.git",
+    "@rspack/core": "1.7.12",
+    "@rspack/plugin-react-refresh": "1.6.2",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-router-dom": "7.18.1",
+    "zod": "4.4.3"
+  },
   "devDependencies": {
-    "@commitlint/cli": "^16.2.3",
-    "@commitlint/config-conventional": "^16.2.1",
-    "husky": "^7.0.4",
-    "json-schema-to-typescript": "^13.1.1",
-    "lint-staged": "^12.4.1",
-    "playwright": "1.61.1",
-    "pngjs": "7.0.0"
-  },
-  "lint-staged": {
-    "*.py": [
-      "npm run just format ",
-      "npm run just strip "
-    ]
+    "@biomejs/biome": "2.5.4",
+    "@nx/eslint": "23.1.0",
+    "@nx/eslint-plugin": "23.1.0",
+    "@nx/js": "23.1.0",
+    "@nx/playwright": "23.1.0",
+    "@nx/react": "23.1.0",
+    "@nx/rspack": "23.1.0",
+    "@nx/vite": "23.1.0",
+    "@nx/workspace": "23.1.0",
+    "@playwright/test": "1.61.1",
+    "@swc-node/register": "1.12.1",
+    "@swc/core": "1.15.46",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@typescript-eslint/parser": "8.64.0",
+    "@vitejs/plugin-react": "6.0.3",
+    "@vitest/coverage-v8": "4.1.10",
+    "eslint": "10.7.0",
+    "jsdom": "29.1.1",
+    "nx": "23.1.0",
+    "typescript": "5.9.3",
+    "vite": "8.1.5",
+    "vitest": "4.1.10"
   }
 }

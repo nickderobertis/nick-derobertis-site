@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(just *)",
+      "Bash(pnpm *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(uv run --script *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "./scripts/session-setup.sh" }
+        ]
+      }
+    ]
+  }
+}
