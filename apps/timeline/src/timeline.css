@@ -132,6 +132,9 @@ body:has(.timeline-pane) {
   #root > .timeline-pane {
     margin-inline: 0;
   }
+  .home-main .timeline-pane {
+    margin-inline: 0;
+  }
   .timeline-pane > header {
     margin-inline: 1rem;
   }
