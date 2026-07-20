@@ -11,8 +11,8 @@
   text-align: center;
   color: #fff;
   background:
-    linear-gradient(rgb(18 50 74 / 82%), rgb(18 50 74 / 82%)),
-    radial-gradient(circle at 20% 10%, var(--blue), var(--navy));
+    linear-gradient(rgb(18 30 38 / 62%), rgb(18 30 38 / 62%)),
+    url("./assets/research-bookshelf.png") center 48% / cover;
 }
 .research-banner h1 {
   margin: 0.15em 0;
@@ -112,12 +112,21 @@
   padding: 1rem 0.65rem;
   display: grid;
   place-items: center;
-  border: 1px solid currentColor;
+  gap: 0.45rem;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-size: 0.67rem;
   font-weight: 800;
+}
+.category-icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .project-resources {
   margin-top: 1.5rem;

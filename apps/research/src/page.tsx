@@ -1,21 +1,35 @@
 import type { Research } from "@site/data-access";
-import { cvDataClient } from "@site/data-access";
+import { validateCvDomain } from "@site/data-access";
+import { useEffect, useState } from "react";
 import { ResearchContent } from "./research-content";
 import "@site/design-system";
 import "./research.css";
 
-type ResearchState = "ready" | "empty" | "loading" | "error";
+type ResearchViewState =
+  | { name: "loading" }
+  | { name: "error" }
+  | { name: "ready"; research: Research };
 
-function requestedState(): ResearchState {
-  const value = new URLSearchParams(window.location.search).get(
-    "research-state",
+function researchUrl() {
+  const url = new URL(
+    "/nick-derobertis-site/cv-data/domains/research.json",
+    window.location.origin,
   );
-  return value === "empty" || value === "loading" || value === "error"
-    ? value
-    : "ready";
+  const scenario = new URLSearchParams(window.location.search).get(
+    "research-scenario",
+  );
+  if (scenario) url.searchParams.set("scenario", scenario);
+  return url;
 }
 
-function StateMessage({ state }: { state: Exclude<ResearchState, "ready"> }) {
+async function loadResearch(signal: AbortSignal) {
+  const response = await fetch(researchUrl(), { signal });
+  if (!response.ok)
+    throw new Error(`Research request failed: ${response.status}`);
+  return validateCvDomain("research", await response.json());
+}
+
+function StateMessage({ state }: { state: "empty" | "loading" | "error" }) {
   const messages = {
     empty: ["No research projects yet", "New research will appear here."],
     error: [
@@ -34,14 +48,19 @@ function StateMessage({ state }: { state: Exclude<ResearchState, "ready"> }) {
 }
 
 export default function ResearchPage() {
-  const state = requestedState();
-  let research: Research | undefined;
-  try {
-    research = cvDataClient.domain("research");
-  } catch {
-    return <StateMessage state="error" />;
-  }
-  if (state !== "ready") return <StateMessage state={state} />;
-  if (!research.projects?.length) return <StateMessage state="empty" />;
-  return <ResearchContent research={research} />;
+  const [state, setState] = useState<ResearchViewState>({ name: "loading" });
+  useEffect(() => {
+    const controller = new AbortController();
+    loadResearch(controller.signal).then(
+      (research) => setState({ name: "ready", research }),
+      (error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError"))
+          setState({ name: "error" });
+      },
+    );
+    return () => controller.abort();
+  }, []);
+  if (state.name !== "ready") return <StateMessage state={state.name} />;
+  if (!state.research.projects?.length) return <StateMessage state="empty" />;
+  return <ResearchContent research={state.research} />;
 }

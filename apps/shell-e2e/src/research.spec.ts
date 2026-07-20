@@ -59,18 +59,40 @@ for (const renderPath of renderPaths) {
     });
 
     for (const state of [
-      { query: "loading", heading: "Loading research" },
-      { query: "empty", heading: "No research projects yet" },
-      { query: "error", heading: "Research is unavailable" },
+      { scenario: "empty", heading: "No research projects yet" },
+      { scenario: "error", heading: "Research is unavailable" },
     ]) {
-      test(`shows its ${state.query} state`, async ({ page }) => {
-        await page.goto(`${renderPath.path}?research-state=${state.query}`);
+      test(`shows its ${state.scenario} state from the data boundary`, async ({
+        page,
+      }) => {
+        const responsePromise = page.waitForResponse(
+          (response) =>
+            response.url().includes("/cv-data/domains/research.json") &&
+            response.url().includes(`scenario=${state.scenario}`),
+        );
+        await page.goto(
+          `${renderPath.path}?research-scenario=${state.scenario}`,
+        );
+        const response = await responsePromise;
+        expect(response.status()).toBe(state.scenario === "error" ? 503 : 200);
         await expect(
           page.getByRole("heading", { name: state.heading }),
         ).toBeVisible();
         await expect(page.getByRole("article")).toHaveCount(0);
       });
     }
+
+    test("shows loading while the data boundary is pending, then renders", async ({
+      page,
+    }) => {
+      await page.goto(`${renderPath.path}?research-scenario=loading`);
+      await expect(
+        page.getByRole("heading", { name: "Loading research" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Research Works" }),
+      ).toBeVisible();
+    });
 
     test("reflows project panes on a narrow viewport", async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 812 });
@@ -92,5 +114,32 @@ for (const renderPath of renderPaths) {
         page.getByRole("link", { name: "View research" }),
       ).toBeVisible();
     });
+
+    for (const viewport of [
+      { name: "desktop", width: 1455, height: 900 },
+      { name: "tablet", width: 783, height: 1024 },
+      { name: "mobile", width: 390, height: 844 },
+    ]) {
+      test(`matches the ${viewport.name} research design`, async ({ page }) => {
+        await page.setViewportSize({
+          width: viewport.width,
+          height: viewport.height,
+        });
+        await page.goto(renderPath.path);
+        await expect(
+          page.getByRole("heading", { name: "Research Works" }),
+        ).toBeVisible();
+        expect(await page.screenshot()).toMatchSnapshot(
+          `research-${renderPath.label}-${viewport.name}.png`,
+        );
+        const firstProject = page.getByRole("article", {
+          name: /Valuation without Cash Flows/,
+        });
+        await firstProject.scrollIntoViewIfNeeded();
+        expect(await firstProject.screenshot()).toMatchSnapshot(
+          `research-project-${renderPath.label}-${viewport.name}.png`,
+        );
+      });
+    }
   });
 }

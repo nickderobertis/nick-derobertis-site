@@ -1,5 +1,5 @@
 import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,6 +14,27 @@ const types = {
 };
 createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
+  if (url.pathname === `${base}/cv-data/domains/research.json`) {
+    const scenario = url.searchParams.get("scenario");
+    if (scenario === "loading")
+      await new Promise((resolve) => setTimeout(resolve, 750));
+    if (scenario === "error") {
+      response.writeHead(503, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "research unavailable" }));
+      return;
+    }
+    if (scenario === "empty") {
+      response.setHeader("Content-Type", "application/json");
+      response.end(JSON.stringify({ projects: [] }));
+      return;
+    }
+    const research = await readFile(
+      join(root, "cv-data/domains/research.json"),
+    );
+    response.setHeader("Content-Type", "application/json");
+    response.end(research);
+    return;
+  }
   const relative = normalize(
     url.pathname.startsWith(base)
       ? url.pathname.slice(base.length)
