@@ -94,6 +94,131 @@ a {
   border-left: 4px solid var(--blue);
   background: var(--sky);
 }
+.bio-story {
+  margin: calc(-1 * clamp(3rem, 8vw, 7rem)) calc(50% - 50vw);
+  background: #f8f5f2;
+}
+.bio-cover {
+  position: relative;
+  display: grid;
+  min-height: clamp(28rem, 66vh, 42rem);
+  place-items: center;
+  overflow: hidden;
+  padding: clamp(4rem, 10vw, 8rem) var(--space);
+  color: #fff;
+  background-color: #251428;
+  background-image:
+    linear-gradient(135deg, rgb(23 9 28 / 48%), rgb(69 20 25 / 42%)),
+    linear-gradient(
+      45deg,
+      transparent 25%,
+      rgb(209 57 64 / 22%) 25% 50%,
+      transparent 50%
+    ),
+    linear-gradient(
+      -45deg,
+      transparent 25%,
+      rgb(40 120 168 / 18%) 25% 50%,
+      transparent 50%
+    );
+  background-size:
+    auto,
+    18rem 18rem,
+    22rem 22rem;
+}
+.bio-cover::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 45%, rgb(12 8 14 / 38%));
+  content: "";
+}
+.bio-cover-content {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  text-align: center;
+}
+.bio-cover .eyebrow {
+  color: #f38589;
+}
+.bio-cover h1 {
+  margin: 0.2em 0;
+  font:
+    700 clamp(3rem, 9vw, 6.5rem) / 0.95 Georgia,
+    serif;
+}
+.bio-cover-content > p:last-of-type {
+  max-width: 650px;
+  margin: 1.5rem auto 2.5rem;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  line-height: 1.6;
+}
+.bio-facts {
+  display: flex;
+  justify-content: center;
+  gap: clamp(2rem, 8vw, 6rem);
+  margin: 0;
+}
+.bio-facts div {
+  min-width: 9rem;
+}
+.bio-facts dt {
+  color: #f38589;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.bio-facts dd {
+  margin: 0.4rem 0 0;
+  font:
+    700 1.1rem / 1.3 Georgia,
+    serif;
+}
+.bio-prose {
+  width: min(820px, calc(100% - 2 * var(--space)));
+  margin: auto;
+  padding: clamp(3rem, 8vw, 7rem) 0;
+}
+.bio-prose section + section {
+  margin-top: clamp(2.5rem, 6vw, 4.5rem);
+}
+.bio-prose h2 {
+  margin: 0 0 1rem;
+  color: var(--navy);
+  font:
+    700 clamp(1.8rem, 4vw, 2.5rem) / 1.2 Georgia,
+    serif;
+}
+.bio-prose h3 {
+  margin: 2rem 0 0.75rem;
+  color: var(--navy);
+  font-size: 1.15rem;
+}
+.bio-prose p {
+  margin: 0.75rem 0;
+  font-size: clamp(1rem, 1.6vw, 1.12rem);
+  line-height: 1.8;
+}
+.bio-prose .bio-problem {
+  color: #b4373d;
+}
+.bio-prose .bio-solution {
+  color: #268744;
+}
+.bio-state {
+  padding: clamp(3rem, 9vw, 8rem);
+  border: 1px solid var(--line);
+  text-align: center;
+  background: var(--sky);
+}
+.bio-state h1 {
+  color: var(--navy);
+}
+.bio-state-error {
+  border-color: #ba5b5b;
+  background: #fff3f3;
+}
 .software-page {
   display: grid;
   gap: clamp(2rem, 5vw, 4rem);
@@ -552,6 +677,18 @@ a {
   }
   .nav-link {
     padding: 0.5rem;
+  }
+  .bio-cover {
+    min-height: 32rem;
+    background-size:
+      auto,
+      12rem 12rem,
+      15rem 15rem;
+  }
+  .bio-facts {
+    align-items: center;
+    flex-direction: column;
+    gap: 1.25rem;
   }
   .software-grid {
     grid-template-columns: 1fr;

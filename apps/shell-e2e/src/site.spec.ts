@@ -6,7 +6,6 @@ const pages = [
     link: "Bio",
     heading: "Biography",
     path: "bio",
-    remote: /Biography remote loaded/,
   },
   {
     link: "Research",

@@ -40,6 +40,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/bio" element={<BioPage />} />
+          <Route path="/story" element={<Navigate to="/bio" replace />} />
           <Route path="/research" element={<ResearchPage />} />
           <Route path="/software" element={<SoftwarePage />} />
           <Route path="/courses" element={<CoursesPage />} />
