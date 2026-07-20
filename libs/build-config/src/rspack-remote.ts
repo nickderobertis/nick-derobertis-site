@@ -1,6 +1,22 @@
+import { createRequire } from "node:module";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
+
+const remoteManifest = createRequire(import.meta.url)(
+  "./remotes.json",
+) as typeof import("./remotes.json");
+
+export type RemoteProject = keyof typeof remoteManifest;
+
+export function remoteMap(names: readonly RemoteProject[]) {
+  return Object.fromEntries(
+    names.map((name) => [
+      remoteManifest[name],
+      `${remoteManifest[name]}@/nick-derobertis-site/remotes/${name}/remoteEntry.js`,
+    ]),
+  );
+}
 
 interface RemoteOptions {
   federationName?: string;

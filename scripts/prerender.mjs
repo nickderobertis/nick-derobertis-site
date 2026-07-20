@@ -3,8 +3,12 @@ import { dirname, join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import remoteManifest from "../libs/build-config/src/remotes.json" with {
+  type: "json",
+};
 
-const output = "dist/apps/shell";
+const output = process.env.PRERENDER_OUTPUT ?? "dist/apps/shell";
+const remoteBuildRoot = process.env.REMOTE_BUILD_ROOT ?? "dist/apps";
 const base = "/nick-derobertis-site";
 const builtDocument = await readFile(join(output, "index.html"), "utf8");
 // Nx may restore a previously prerendered output from cache. Normalize it back
@@ -125,18 +129,8 @@ await cp("libs/data-access/vendor/codegen", join(output, "cv-data"), {
 });
 
 await rm(join(output, "remotes"), { recursive: true, force: true });
-for (const name of [
-  "home",
-  "home-carousel",
-  "home-cards",
-  "home-story",
-  "home-contact",
-  "bio",
-  "research",
-  "software",
-  "courses",
-]) {
-  const source = join("dist/apps", name);
+for (const name of Object.keys(remoteManifest)) {
+  const source = join(remoteBuildRoot, name);
   const destination = join(output, "remotes", name);
   try {
     await stat(source);

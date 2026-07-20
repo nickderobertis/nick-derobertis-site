@@ -1,1 +1,1 @@
-export { remoteConfig } from "./rspack-remote";
+export { type RemoteProject, remoteConfig, remoteMap } from "./rspack-remote";
