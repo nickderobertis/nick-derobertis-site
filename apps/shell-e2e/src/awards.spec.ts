@@ -13,27 +13,38 @@ for (const renderPath of renderPaths) {
       await page.goto(renderPath.path);
       await expect(
         page.getByRole("heading", { name: "Selected awards" }),
-      ).toBeVisible();
+      ).toBeAttached();
       const pane = page.getByRole("region", { name: "Selected awards" });
       await expect(pane.getByRole("article")).toHaveCount(4);
-      const detailed = pane.getByRole("article", { name: "GMAT Score" });
+      const detailed = pane.getByRole("article", {
+        name: "Graduate Management Admission Test (GMAT)",
+      });
       await expect(detailed).toContainText("2014");
-      await expect(detailed).toContainText("780 · 99.6 percentile");
+      expect(await detailed.ariaSnapshot()).toContain("2014");
+      await expect(detailed.getByRole("listitem")).toHaveText([
+        "780 score",
+        "99.6 percentile",
+      ]);
       await expect(
-        detailed.getByRole("list", { name: "Award parts" }),
-      ).toContainText("99.6 percentile");
+        detailed.getByText("780 score", { exact: true }),
+      ).toHaveCount(1);
+      await expect(
+        detailed.getByText("99.6 percentile", { exact: true }),
+      ).toHaveCount(1);
       const simple = pane.getByRole("article", {
         name: "Finance Student of the Year",
       });
       await expect(simple).toContainText("2013");
-      await expect(simple.getByRole("list")).toHaveCount(0);
+      await expect(simple.getByRole("listitem")).toHaveText([
+        "Virginia Commonwealth University",
+      ]);
     });
 
     test("renders all awards and their statistics", async ({ page }) => {
       await page.goto(`${renderPath.path}?awards-view=all`);
       await expect(
         page.getByRole("heading", { name: "Awards & honors" }),
-      ).toBeVisible();
+      ).toBeAttached();
       const pane = page.getByRole("region", { name: "Awards & honors" });
       await expect(pane.getByRole("article")).toHaveCount(7);
       await expect(pane.getByRole("definition")).toHaveText([
@@ -46,6 +57,9 @@ for (const renderPath of renderPaths) {
           name: "Warrington Finance Ph.D. Research Grants",
         }),
       ).toContainText("$2000/yr");
+      expect(await pane.screenshot()).toMatchSnapshot(
+        `awards-${renderPath.label}-all.png`,
+      );
     });
 
     for (const state of [
@@ -67,16 +81,18 @@ for (const renderPath of renderPaths) {
         await page.goto(`${renderPath.path}?awards-scenario=${state.scenario}`);
         const response = await responsePromise;
         expect(response.status()).toBe(state.scenario === "error" ? 503 : 200);
+        const statePanel = page.getByRole(state.role);
         await expect(
-          page
-            .getByRole(state.role)
-            .getByRole("heading", { name: state.heading }),
+          statePanel.getByRole("heading", { name: state.heading }),
         ).toBeVisible();
         await expect(
           page.getByRole("article", {
             name: /GMAT Score|Finance Student of the Year/,
           }),
         ).toHaveCount(0);
+        expect(await statePanel.screenshot()).toMatchSnapshot(
+          `awards-${renderPath.label}-${state.scenario}.png`,
+        );
       });
     }
 
@@ -84,16 +100,20 @@ for (const renderPath of renderPaths) {
       page,
     }) => {
       await page.goto(`${renderPath.path}?awards-scenario=loading`);
-      await expect(page.getByRole("status")).toContainText("Loading awards…");
+      const loading = page.getByRole("status");
+      await expect(loading).toContainText("Loading awards…");
+      expect(await loading.screenshot()).toMatchSnapshot(
+        `awards-${renderPath.label}-loading.png`,
+      );
       await expect(
         page.getByRole("heading", { name: "Selected awards" }),
-      ).toBeVisible();
+      ).toBeAttached();
     });
 
     for (const viewport of [
-      { name: "desktop", width: 1440, height: 900 },
-      { name: "tablet", width: 768, height: 1024 },
-      { name: "mobile", width: 390, height: 844 },
+      { name: "desktop", width: 1110, height: 900 },
+      { name: "tablet", width: 690, height: 1024 },
+      { name: "mobile", width: 345, height: 844 },
     ]) {
       test(`matches the ${viewport.name} selected-awards design`, async ({
         page,

@@ -28,21 +28,21 @@ describe("awards view models", () => {
         id: "finance-student-of-the-year",
         title: "Finance Student of the Year",
         received: "2013",
-        extraInfo: null,
-        parts: [],
+        icon: "student",
+        parts: ["Virginia Commonwealth University"],
       },
       {
         id: "graduate-management-admission-test-gmat-score",
-        title: "GMAT Score",
+        title: "Graduate Management Admission Test (GMAT)",
         received: "2014",
-        extraInfo: "780 · 99.6 percentile",
-        parts: ["780", "99.6 percentile"],
+        icon: "gmat",
+        parts: ["780 score", "99.6 percentile"],
       },
       {
         id: "not-selected",
         title: "Another Award",
         received: "2010-2019",
-        extraInfo: null,
+        icon: "teaching",
         parts: [],
       },
     ]);
@@ -63,16 +63,17 @@ describe("awards view models", () => {
     ).toEqual([
       {
         id: "dated",
-        title: "Global Semi-Finalist",
+        title:
+          "CFA Global Investment Research Challenge – Global Semi-Finalist",
         received: "2020-01-02",
-        extraInfo: null,
+        icon: "teaching",
         parts: [],
       },
       {
         id: "undated",
-        title: "Ph.D. Student Teaching Award",
+        title: "Warrington College of Business Ph.D. Student Teaching Award",
         received: "Date not listed",
-        extraInfo: null,
+        icon: "teaching",
         parts: [],
       },
     ]);

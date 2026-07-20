@@ -1,3 +1,4 @@
+import type { AwardIcon } from "@site/design-system";
 import type { Award, Awards } from "../vendor/codegen";
 
 const SELECTED_AWARD_IDS = [
@@ -11,8 +12,8 @@ export interface AwardCardModel {
   readonly id: string;
   readonly title: string;
   readonly received: string;
-  readonly extraInfo: string | null;
   readonly parts: readonly string[];
+  readonly icon: AwardIcon;
 }
 
 export interface AwardsStats {
@@ -22,31 +23,71 @@ export interface AwardsStats {
   readonly latestYear: number | null;
 }
 
-function displayTitle(title: string) {
-  return title
-    .replace("Warrington College of Business ", "")
-    .replace("CFA Global Investment Research Challenge – ", "")
-    .replace("Graduate Management Admission Test (GMAT) Score", "GMAT Score");
+interface AwardPresentation {
+  readonly icon: AwardIcon;
+  readonly parts: readonly string[];
+  readonly title?: string;
 }
 
+const AWARD_PRESENTATION: Readonly<Record<string, AwardPresentation>> = {
+  "warrington-college-of-business-ph-d-student-teaching-award": {
+    icon: "teaching",
+    title: "Ph.D. Student Teaching Award",
+    parts: ["University of Florida", "Warrington College of Business"],
+  },
+  "cfa-global-investment-research-challenge-global-semi-finalist": {
+    icon: "cfa",
+    title: "Global Semi-Finalist",
+    parts: ["CFA Challenge", "CFA Institute"],
+  },
+  "graduate-management-admission-test-gmat-score": {
+    icon: "gmat",
+    title: "Graduate Management Admission Test (GMAT)",
+    parts: [],
+  },
+  "finance-student-of-the-year": {
+    icon: "student",
+    parts: ["Virginia Commonwealth University"],
+  },
+  "warrington-finance-ph-d-research-grants": {
+    icon: "scholarship",
+    parts: ["University of Florida", "Warrington College of Business"],
+  },
+  "alcoa-foundation-community-scholarship": {
+    icon: "scholarship",
+    parts: ["Alcoa Foundation"],
+  },
+  "vcu-school-of-business-scholarship": {
+    icon: "scholarship",
+    parts: ["Virginia Commonwealth University"],
+  },
+};
+
 function awardParts(award: Award) {
-  return (award.details ?? "")
+  const parts = (award.details ?? "")
     .replaceAll("\\$", "$")
     .split("|")
     .map((part) => part.trim())
     .filter(Boolean);
+  return award.id === "graduate-management-admission-test-gmat-score" &&
+    parts[0]
+    ? [`${parts[0]} score`, ...parts.slice(1)]
+    : parts;
 }
 
 export function buildAwardCards(awards: Awards): readonly AwardCardModel[] {
   return awards.map((award) => {
-    const parts = awardParts(award);
+    const presentation = AWARD_PRESENTATION[award.id] ?? {
+      icon: "teaching" as const,
+      parts: [],
+    };
     return {
       id: award.id,
-      title: displayTitle(award.title),
+      title: presentation.title ?? award.title,
       received:
         award.received_label ?? award.received_date ?? "Date not listed",
-      extraInfo: parts.length > 0 ? parts.join(" · ") : null,
-      parts,
+      icon: presentation.icon,
+      parts: [...awardParts(award), ...presentation.parts],
     };
   });
 }

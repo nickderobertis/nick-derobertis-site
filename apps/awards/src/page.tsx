@@ -3,6 +3,7 @@ import {
   calculateAwardsStats,
   selectedAwards,
 } from "@site/data-access";
+import { AwardEmblem } from "@site/design-system";
 import { useAwards } from "./use-awards";
 import "./awards.css";
 
@@ -37,29 +38,29 @@ export default function AwardsPage() {
   const cards = buildAwardCards(awards);
   const stats = calculateAwardsStats(awards);
   return (
-    <section className="awards-pane" aria-labelledby="awards-heading">
-      <header className="awards-intro">
-        <p className="awards-eyebrow">Recognition</p>
-        <h2 id="awards-heading">
-          {showAll ? "Awards & honors" : "Selected awards"}
-        </h2>
-        <dl className="awards-stats" aria-label="Awards statistics">
-          <div>
-            <dt>Awards</dt>
-            <dd>{stats.total}</dd>
-          </div>
-          <div>
-            <dt>Years</dt>
-            <dd>
-              {stats.firstYear}–{stats.latestYear}
-            </dd>
-          </div>
-          <div>
-            <dt>With details</dt>
-            <dd>{stats.withExtraInfo}</dd>
-          </div>
-        </dl>
-      </header>
+    <section
+      className="awards-pane"
+      aria-label={showAll ? "Awards & honors" : "Selected awards"}
+    >
+      <h2 className="visually-hidden">
+        {showAll ? "Awards & honors" : "Selected awards"}
+      </h2>
+      <dl className="visually-hidden" aria-label="Awards statistics">
+        <div>
+          <dt>Awards</dt>
+          <dd>{stats.total}</dd>
+        </div>
+        <div>
+          <dt>Years</dt>
+          <dd>
+            {stats.firstYear}–{stats.latestYear}
+          </dd>
+        </div>
+        <div>
+          <dt>With details</dt>
+          <dd>{stats.withExtraInfo}</dd>
+        </div>
+      </dl>
       <div className="award-grid">
         {cards.map((award) => (
           <article
@@ -67,16 +68,12 @@ export default function AwardsPage() {
             aria-labelledby={`${award.id}-title`}
             key={award.id}
           >
-            <div className="award-laurel" aria-hidden="true">
-              <span>❧</span>
-              <time>{award.received}</time>
-              <span>❧</span>
+            <div className="award-visual">
+              <time dateTime={award.received}>{award.received}</time>
+              <AwardEmblem icon={award.icon} />
             </div>
             <h3 id={`${award.id}-title`}>{award.title}</h3>
-            {award.extraInfo ? (
-              <p className="award-extra">{award.extraInfo}</p>
-            ) : null}
-            {award.parts.length > 1 ? (
+            {award.parts.length > 0 ? (
               <ul aria-label="Award parts">
                 {award.parts.map((part) => (
                   <li key={part}>{part}</li>
