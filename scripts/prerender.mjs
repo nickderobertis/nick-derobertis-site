@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import { siteRemoteNames as remoteNames } from "../libs/build-config/src/site-remotes.ts";
 
 const output = "dist/apps/shell";
 const base = "/nick-derobertis-site";
@@ -133,18 +134,15 @@ await cp("libs/data-access/vendor/codegen", join(output, "cv-data"), {
 });
 
 await rm(join(output, "remotes"), { recursive: true, force: true });
-for (const name of ["bio", "research", "software", "courses", "timeline", "awards"]) {
+for (const name of remoteNames) {
   const destination = join(output, "remotes", name);
-  // llmlint: ignore-block[changed_behavior_has_e2e] Build-time filesystem diagnostics are covered by deterministic artifact checks, not a browser interface.
+  await mkdir(dirname(destination), { recursive: true });
   try {
-    await mkdir(dirname(destination), { recursive: true });
     await cp(join("dist/apps", name), destination, { recursive: true });
   } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    console.error(
-      `Could not stage the ${name} remote: ${detail}\nRun 'just check' to rebuild and verify all remote artifacts.`,
+    throw new Error(
+      `Cannot stage the ${name} remote; run \`pnpm exec nx run ${name}:build\` before prerendering.`,
+      { cause: error },
     );
-    throw error;
   }
-  // llmlint: ignore-end[changed_behavior_has_e2e]
 }

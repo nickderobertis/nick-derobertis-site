@@ -1,5 +1,7 @@
 import { access, readFile } from "node:fs/promises";
+import shellProject from "../apps/shell/project.json" with { type: "json" };
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import { siteRemoteNames as remoteNames } from "../libs/build-config/src/site-remotes.ts";
 
 const root = "dist/apps/shell";
 for (const route of routes) {
@@ -19,8 +21,23 @@ for (const route of routes) {
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error("404 fallback is not intentional");
-for (const name of ["bio", "research", "software", "courses", "awards"])
-  await access(`${root}/remotes/${name}/remoteEntry.js`);
+const prerenderDependencies = shellProject.targets.prerender.dependsOn.find(
+  (dependency) => typeof dependency === "object",
+)?.projects;
+if (JSON.stringify(prerenderDependencies) !== JSON.stringify(remoteNames))
+  throw new Error(
+    "Shell prerender dependencies drifted from libs/build-config/src/site-remotes.ts; update apps/shell/project.json to match the registry.",
+  );
+for (const name of remoteNames) {
+  try {
+    await access(`${root}/remotes/${name}/remoteEntry.js`);
+  } catch (error) {
+    throw new Error(
+      `The ${name} remote is missing from the static site; run \`pnpm exec nx run shell:prerender\` to rebuild it.`,
+      { cause: error },
+    );
+  }
+}
 for (const file of [
   "cv.json",
   "cv.schema.json",

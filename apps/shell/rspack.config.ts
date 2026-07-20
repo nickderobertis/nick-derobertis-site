@@ -1,8 +1,15 @@
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
+import { siteRemoteNames } from "@site/build-config";
 
 const base = "/nick-derobertis-site/";
+const remotes = Object.fromEntries(
+  siteRemoteNames.map((name) => [
+    name,
+    `${name}@/nick-derobertis-site/remotes/${name}/remoteEntry.js`,
+  ]),
+);
 export default {
   entry: "./apps/shell/src/main.tsx",
   output: { publicPath: base, uniqueName: "shell", clean: true },
@@ -21,17 +28,7 @@ export default {
       name: "shell",
       filename: "remoteEntry.js",
       exposes: { "./App": "./src/app.tsx" },
-      remotes: {
-        bio: "bio@/nick-derobertis-site/remotes/bio/remoteEntry.js",
-        research:
-          "research@/nick-derobertis-site/remotes/research/remoteEntry.js",
-        software:
-          "software@/nick-derobertis-site/remotes/software/remoteEntry.js",
-        courses: "courses@/nick-derobertis-site/remotes/courses/remoteEntry.js",
-        timeline:
-          "timeline@/nick-derobertis-site/remotes/timeline/remoteEntry.js",
-        awards: "awards@/nick-derobertis-site/remotes/awards/remoteEntry.js",
-      },
+      remotes,
       shared: {
         react: { singleton: true, requiredVersion: false, eager: true },
         "react-dom": { singleton: true, requiredVersion: false, eager: true },
