@@ -14,6 +14,22 @@ const types = {
 };
 createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
+  const awardsArtifact = `${base}/cv-data/domains/awards.json`;
+  if (url.pathname === awardsArtifact) {
+    const outcome = request.headers["x-awards-outcome"];
+    if (outcome === "error") {
+      response.writeHead(503, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "Awards unavailable" }));
+      return;
+    }
+    if (outcome === "empty") {
+      response.writeHead(200, { "Content-Type": "application/json" });
+      response.end("[]");
+      return;
+    }
+    if (outcome === "delay")
+      await new Promise((resolve) => setTimeout(resolve, 1_200));
+  }
   const relative = normalize(
     url.pathname.startsWith(base)
       ? url.pathname.slice(base.length)

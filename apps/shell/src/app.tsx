@@ -45,6 +45,7 @@ export function App() {
           <Route path="/research" element={<ResearchPage />} />
           <Route path="/software" element={<SoftwarePage />} />
           <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/awards" element={<AwardsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

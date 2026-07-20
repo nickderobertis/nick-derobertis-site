@@ -9,7 +9,8 @@ describe("route contract", () => {
       "/research",
       "/software",
       "/courses",
+      "/awards",
     ]);
-    expect(new Set(routes.map((r) => r.label)).size).toBe(5);
+    expect(new Set(routes.map((r) => r.label)).size).toBe(6);
   });
 });

@@ -12,5 +12,8 @@ export {
   cvDomains,
   cvSchema,
   domainNames,
+  loadAwards,
+  selectAwards,
+  validateAwards,
   validateCvData,
 } from "./client";

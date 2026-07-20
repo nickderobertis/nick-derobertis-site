@@ -32,5 +32,12 @@
     "heading": "Courses",
     "description": "Course materials and teaching resources.",
     "remote": "courses"
+  },
+  {
+    "path": "/awards",
+    "label": "Awards",
+    "heading": "Awards",
+    "description": "Academic, professional, and community recognition.",
+    "remote": "awards"
   }
 ]

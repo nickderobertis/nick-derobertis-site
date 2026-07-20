@@ -24,6 +24,7 @@ const pages = [
     heading: "Courses",
     path: "courses",
   },
+  { link: "Awards", heading: "Awards", path: "awards" },
 ];
 
 for (const route of pages)

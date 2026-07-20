@@ -14,6 +14,17 @@ async function boundaryMessages(source: string) {
   );
 }
 
+async function awardsBoundaryMessages(source: string) {
+  const results = await eslint.lintText(source, {
+    filePath: "apps/awards/src/boundary-probe.ts",
+  });
+  return results.flatMap((result) =>
+    result.messages.filter(
+      (message) => message.ruleId === "@nx/enforce-module-boundaries",
+    ),
+  );
+}
+
 describe("remote module boundaries", () => {
   it("allows approved shared libraries and the declared software remote", async () => {
     await expect(
@@ -31,5 +42,16 @@ describe("remote module boundaries", () => {
     `);
     expect(messages).toHaveLength(2);
     expect(messages.every((message) => message.severity === 2)).toBe(true);
+  });
+
+  it("enforces the awards remote boundary", async () => {
+    await expect(
+      awardsBoundaryMessages('import "@site/data-access";'),
+    ).resolves.toEqual([]);
+    await expect(
+      awardsBoundaryMessages(
+        'import "@site/layout"; import "../../../software/src/page";',
+      ),
+    ).resolves.toHaveLength(2);
   });
 });

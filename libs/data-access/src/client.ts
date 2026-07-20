@@ -123,6 +123,36 @@ export interface CvDataClient {
   schema(): unknown;
 }
 
+const selectedAwardIds = new Set([
+  "warrington-college-of-business-ph-d-student-teaching-award",
+  "graduate-management-admission-test-gmat-score",
+  "cfa-global-investment-research-challenge-global-semi-finalist",
+  "finance-student-of-the-year",
+]);
+
+export function selectAwards(awards: Awards): Awards {
+  return awards.filter((award) => selectedAwardIds.has(award.id));
+}
+
+export function validateAwards(input: unknown): Awards {
+  if (!domainValidators.awards(input))
+    throw new CvDomainValidationError(
+      "awards",
+      "schema",
+      domainValidators.awards.errors,
+    );
+  return input;
+}
+
+export async function loadAwards(
+  url = "/nick-derobertis-site/cv-data/domains/awards.json",
+): Promise<Awards> {
+  const response = await fetch(url);
+  if (!response.ok)
+    throw new Error(`Awards request failed with status ${response.status}`);
+  return validateAwards(await response.json());
+}
+
 function validateDomain<Name extends CvDomain>(
   name: Name,
   input: unknown,

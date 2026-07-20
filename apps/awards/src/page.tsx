@@ -1,80 +1,39 @@
-import { type Award, cvDataClient } from "@site/data-access";
+import { type Award, loadAwards, selectAwards } from "@site/data-access";
 import "@site/design-system";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-type AwardsView = "all" | "selected" | "empty" | "error" | "loading";
+type AwardsLoadState =
+  | { status: "loading" }
+  | { status: "loaded"; awards: Award[] }
+  | { status: "error" };
 
-const selectedAwardIds = new Set([
-  "warrington-college-of-business-ph-d-student-teaching-award",
-  "graduate-management-admission-test-gmat-score",
-  "cfa-global-investment-research-challenge-global-semi-finalist",
-  "finance-student-of-the-year",
-]);
-
-function defaultView(): AwardsView {
-  return window.location.pathname.includes("/remotes/awards/")
-    ? "all"
-    : "selected";
+function useAwardsData() {
+  const [state, setState] = useState<AwardsLoadState>({ status: "loading" });
+  const refresh = useCallback(() => {
+    setState({ status: "loading" });
+    void loadAwards()
+      .then((awards) => setState({ status: "loaded", awards }))
+      .catch(() => setState({ status: "error" }));
+  }, []);
+  useEffect(refresh, [refresh]);
+  return { refresh, state };
 }
 
-function requestedView(): AwardsView {
-  const value = new URLSearchParams(window.location.search).get("awards-view");
-  if (
-    value === "all" ||
-    value === "selected" ||
-    value === "empty" ||
-    value === "error" ||
-    value === "loading"
-  )
-    return value;
-  return defaultView();
-}
-
-function useAwardsView(): AwardsView {
-  const [view, setView] = useState<AwardsView>(requestedView);
-  useEffect(() => {
-    if (view !== "loading") return;
-    const timer = window.setTimeout(() => setView(defaultView()), 1_500);
-    return () => window.clearTimeout(timer);
-  }, [view]);
-  return view;
-}
-
-const viewOptions: ReadonlyArray<{ label: string; view: AwardsView }> = [
-  { label: "Selected awards", view: "selected" },
-  { label: "All awards", view: "all" },
-  { label: "Loading state", view: "loading" },
-  { label: "Empty state", view: "empty" },
-  { label: "Unavailable state", view: "error" },
-];
-
-function AwardsViewControls({ view }: { view: AwardsView }) {
-  return (
-    <nav className="awards-view-controls" aria-label="Awards display options">
-      {viewOptions.map((option) => (
-        <a
-          key={option.view}
-          href={`?awards-view=${option.view}`}
-          aria-current={view === option.view ? "page" : undefined}
-        >
-          {option.label}
-        </a>
-      ))}
-    </nav>
-  );
-}
-
-function awardParts(award: Award): string[] {
-  return award.details
+function awardInfo(award: Award): {
+  extraInfo?: string;
+  parts: string[];
+} {
+  const [extraInfo, ...parts] = award.details
     ? award.details
         .split("|")
         .map((part) => part.trim().replaceAll("\\$", "$"))
         .filter(Boolean)
     : [];
+  return { extraInfo, parts };
 }
 
 function AwardCard({ award }: { award: Award }) {
-  const parts = awardParts(award);
+  const { extraInfo, parts } = awardInfo(award);
   return (
     <article className="award-card">
       <p className="award-date">{award.received_label ?? "Date unavailable"}</p>
@@ -82,8 +41,9 @@ function AwardCard({ award }: { award: Award }) {
         ★
       </div>
       <h3>{award.title}</h3>
+      {extraInfo ? <p className="award-extra-info">{extraInfo}</p> : null}
       {parts.length > 0 ? (
-        <ul className="award-parts" aria-label="Award details">
+        <ul className="award-parts" aria-label="Award parts">
           {parts.map((part) => (
             <li key={part}>{part}</li>
           ))}
@@ -94,7 +54,9 @@ function AwardCard({ award }: { award: Award }) {
 }
 
 function AwardsStats({ awards }: { awards: Award[] }) {
-  const detailedAwards = awards.filter((award) => awardParts(award).length > 0);
+  const detailedAwards = awards.filter(
+    (award) => awardInfo(award).extraInfo !== undefined,
+  );
   const receivedLabels = new Set(
     awards.map((award) => award.received_label).filter(Boolean),
   );
@@ -129,33 +91,42 @@ function AwardsCollection({ awards }: { awards: Award[] }) {
   );
 }
 
+function isSelectedAwardsPane(): boolean {
+  return /\/nick-derobertis-site\/?$/.test(window.location.pathname);
+}
+
 export default function AwardsPage() {
-  const view = useAwardsView();
-  const allAwards = cvDataClient.domain("awards");
+  const { refresh, state } = useAwardsData();
+  const selected = isSelectedAwardsPane();
+  const Heading = selected ? "h2" : "h1";
   const awards =
-    view === "selected"
-      ? allAwards.filter((award) => selectedAwardIds.has(award.id))
-      : allAwards;
+    state.status === "loaded" && selected
+      ? selectAwards(state.awards)
+      : state.status === "loaded"
+        ? state.awards
+        : [];
   return (
     <section className="awards-pane" aria-labelledby="awards-heading">
       <header className="awards-heading">
         <p className="eyebrow">Recognition</p>
-        <h2 id="awards-heading">Awards</h2>
+        <Heading id="awards-heading">Awards</Heading>
         <p>Academic, professional, and community recognition.</p>
       </header>
-      <AwardsViewControls view={view} />
-      {view === "loading" ? (
+      {state.status === "loading" ? (
         <div className="awards-state" role="status">
           Loading awards…
         </div>
-      ) : view === "error" ? (
+      ) : state.status === "error" ? (
         <div className="awards-state awards-state-error" role="alert">
-          <h3>Awards are unavailable</h3>
+          <h2>Awards are unavailable</h2>
           <p>Please try again later.</p>
+          <button type="button" onClick={refresh}>
+            Try again
+          </button>
         </div>
-      ) : view === "empty" ? (
+      ) : awards.length === 0 ? (
         <div className="awards-state" role="status">
-          <h3>No awards to show</h3>
+          <h2>No awards to show</h2>
           <p>New recognition will appear here.</p>
         </div>
       ) : (

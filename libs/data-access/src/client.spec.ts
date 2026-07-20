@@ -7,6 +7,9 @@ import {
   cvDataClient,
   cvDomains,
   domainNames,
+  loadAwards,
+  selectAwards,
+  validateAwards,
   validateCvData,
 } from "./client";
 
@@ -76,4 +79,43 @@ describe("vendored CV data boundary", () => {
       expect(error.issues).toEqual([]);
     }
   });
+
+  it("owns and validates the selected awards subset", () => {
+    const awards = cvDataClient.domain("awards");
+    expect(selectAwards(awards).map((award) => award.id)).toEqual([
+      "warrington-college-of-business-ph-d-student-teaching-award",
+      "graduate-management-admission-test-gmat-score",
+      "cfa-global-investment-research-challenge-global-semi-finalist",
+      "finance-student-of-the-year",
+    ]);
+    expect(validateAwards([])).toEqual([]);
+    expect(() => validateAwards([{ id: 42 }])).toThrow(CvDomainValidationError);
+  });
+
+  it("loads awards through the validated HTTP boundary", async () => {
+    const server = createServer((request, response) => {
+      if (request.url === "/awards.json") {
+        response.setHeader("Content-Type", "application/json");
+        response.end(JSON.stringify(cvDataClient.domain("awards")));
+        return;
+      }
+      response.writeHead(503).end();
+    });
+    await new Promise<void>((resolve) =>
+      server.listen(0, "127.0.0.1", resolve),
+    );
+    const address = server.address();
+    if (!address || typeof address === "string")
+      throw new Error("Expected a TCP test server address");
+    const origin = `http://127.0.0.1:${address.port}`;
+    await expect(loadAwards(`${origin}/awards.json`)).resolves.toHaveLength(7);
+    await expect(loadAwards(`${origin}/unavailable`)).rejects.toThrow(
+      "status 503",
+    );
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
+  });
 });
+
+import { createServer } from "node:http";
