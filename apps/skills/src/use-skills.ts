@@ -6,8 +6,12 @@ type SkillsState =
   | { status: "ready"; skills: Skills }
   | { status: "error"; message: string };
 
-function requestedScenario(): string | null {
-  return new URLSearchParams(window.location.search).get("skills-state");
+type SkillsScenario = "empty" | "error" | "loading" | null;
+function requestedScenario(): SkillsScenario {
+  const value = new URLSearchParams(window.location.search).get("skills-state");
+  return value === "empty" || value === "error" || value === "loading"
+    ? value
+    : null;
 }
 
 export function useSkills(): SkillsState {

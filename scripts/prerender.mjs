@@ -2,7 +2,22 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import { z } from "zod";
+import routeInput from "../apps/shell/src/routes.json" with { type: "json" };
+
+const routes = z
+  .array(
+    z
+      .object({
+        path: z.string(),
+        label: z.string(),
+        heading: z.string(),
+        description: z.string(),
+        remote: z.string().min(1).optional(),
+      })
+      .strict(),
+  )
+  .parse(routeInput);
 
 const output = "dist/apps/shell";
 const base = "/nick-derobertis-site";

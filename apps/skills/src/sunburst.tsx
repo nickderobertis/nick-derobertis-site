@@ -12,6 +12,12 @@ const colors = [
 ];
 const TAU = Math.PI * 2;
 
+function useSunburstFocus(tree: SkillNode[]) {
+  const [focusId, setFocusId] = useState<string | null>(null);
+  const focused = tree.find((node) => node.skill.id === focusId);
+  return { focused, setFocusId, visible: focused ? [focused] : tree };
+}
+
 function point(radius: number, angle: number): [number, number] {
   return [
     160 + radius * Math.cos(angle - Math.PI / 2),
@@ -41,9 +47,7 @@ export function Sunburst({
   tree: SkillNode[];
   onSelect: (node: SkillNode) => void;
 }) {
-  const [focusId, setFocusId] = useState<string | null>(null);
-  const focused = tree.find((node) => node.skill.id === focusId);
-  const visible = focused ? [focused] : tree;
+  const { focused, setFocusId, visible } = useSunburstFocus(tree);
   const total = visible.reduce(
     (sum, node) => sum + Math.max(node.children.length, 1),
     0,

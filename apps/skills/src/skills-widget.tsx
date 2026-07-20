@@ -2,6 +2,22 @@ import { useState } from "react";
 import { formatHours, type SkillNode } from "./skill-tree";
 import { Sunburst } from "./sunburst";
 
+function useSkillSelection(tree: SkillNode[]) {
+  const [selected, setSelected] = useState<SkillNode | undefined>(
+    () => tree[0],
+  );
+  const first = tree[0];
+  const selectedCategory =
+    first && selected
+      ? (tree.find((node) => node.skill.id === selected.skill.id) ??
+        tree.find((node) =>
+          node.children.some((child) => child.skill.id === selected.skill.id),
+        ) ??
+        first)
+      : undefined;
+  return { first, selected, selectedCategory, setSelected };
+}
+
 export function SkillsWidget({
   tree,
   count,
@@ -10,17 +26,9 @@ export function SkillsWidget({
   count: number;
 }) {
   const [mode, setMode] = useState<"chart" | "dropdowns">("chart");
-  const [selected, setSelected] = useState<SkillNode | undefined>(
-    () => tree[0],
-  );
-  const first = tree[0];
-  if (!first || !selected) return null;
-  const selectedCategory =
-    tree.find((node) => node.skill.id === selected.skill.id) ??
-    tree.find((node) =>
-      node.children.some((child) => child.skill.id === selected.skill.id),
-    ) ??
-    first;
+  const { first, selected, selectedCategory, setSelected } =
+    useSkillSelection(tree);
+  if (!first || !selected || !selectedCategory) return null;
   return (
     <section className="skills-pane" aria-labelledby="skills-title">
       <div className="skills-intro">
