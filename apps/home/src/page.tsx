@@ -6,6 +6,7 @@ const Story = lazy(() => import("homeStory/Page"));
 const Contact = lazy(() => import("homeContact/Page"));
 const Timeline = lazy(() => import("timeline/Page"));
 const Skills = lazy(() => import("skills/Page"));
+const Awards = lazy(() => import("awards/Page"));
 
 export default function HomePage() {
   return (
@@ -17,6 +18,7 @@ export default function HomePage() {
         <Cards />
         <Story />
         <Skills />
+        <Awards />
         <Contact />
         <Timeline />
       </Suspense>

@@ -1,5 +1,12 @@
 export type * from "../vendor/codegen";
 export {
+  type AwardCardModel,
+  type AwardsStats,
+  buildAwardCards,
+  calculateAwardsStats,
+  selectedAwards,
+} from "./awards";
+export {
   type CvDataClient,
   CvDataValidationError,
   type CvDomain,

@@ -33,35 +33,42 @@ const types = {
 };
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
-  if (url.pathname === `${base}/cv-data/domains/research.json`) {
+  const dataDomain = ["research", "awards"].find(
+    (domain) => url.pathname === `${base}/cv-data/domains/${domain}.json`,
+  );
+  if (dataDomain) {
     const scenario = url.searchParams.get("scenario");
     if (scenario === "loading")
       await new Promise((resolve) => setTimeout(resolve, 750));
     if (scenario === "error") {
       response.writeHead(503, { "Content-Type": "application/json" });
-      response.end(JSON.stringify({ error: "research unavailable" }));
+      response.end(JSON.stringify({ error: `${dataDomain} unavailable` }));
       return;
     }
     if (scenario === "empty") {
       response.setHeader("Content-Type", "application/json");
-      response.end(JSON.stringify({ projects: [] }));
+      response.end(
+        JSON.stringify(dataDomain === "research" ? { projects: [] } : []),
+      );
       return;
     }
-    const researchPath = join(root, "cv-data/domains/research.json");
-    let research;
+    const domainPath = join(root, `cv-data/domains/${dataDomain}.json`);
+    let domainData;
     try {
-      research = await readFile(researchPath);
+      domainData = await readFile(domainPath);
     } catch (error) {
       console.error(
-        `Unable to read ${researchPath}. Run \`just build\` before starting the e2e server.`,
+        `Unable to read ${domainPath}. Run \`just build\` before starting the e2e server.`,
         error,
       );
       response.writeHead(500, { "Content-Type": "application/json" });
-      response.end(JSON.stringify({ error: "research fixture unavailable" }));
+      response.end(
+        JSON.stringify({ error: `${dataDomain} fixture unavailable` }),
+      );
       return;
     }
     response.setHeader("Content-Type", "application/json");
-    response.end(research);
+    response.end(domainData);
     return;
   }
   const relative = normalize(
