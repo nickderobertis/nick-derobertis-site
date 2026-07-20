@@ -3,7 +3,7 @@ import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import { createStaticSiteServer } from "../../../scripts/static-site-server.mjs";
+import { createStaticSiteServer } from "@site/static-site-server";
 
 const allAwardsPaths = [
   { name: "host-composed", path: "awards" },

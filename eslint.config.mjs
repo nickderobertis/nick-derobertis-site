@@ -52,7 +52,10 @@ export default [
               sourceTag: "scope:timeline",
               onlyDependOnLibsWithTags: ["type:shared"],
             },
-            { sourceTag: "type:e2e", onlyDependOnLibsWithTags: ["type:app"] },
+            {
+              sourceTag: "type:e2e",
+              onlyDependOnLibsWithTags: ["type:app", "type:shared"],
+            },
           ],
         },
       ],

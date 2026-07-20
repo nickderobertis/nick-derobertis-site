@@ -17,7 +17,8 @@
       "@site/analytics": ["libs/analytics/src/index.ts"],
       "@site/layout": ["libs/layout/src/index.ts"],
       "@site/ui": ["libs/ui/src/index.ts"],
-      "@site/build-config": ["libs/build-config/src/index.ts"]
+      "@site/build-config": ["libs/build-config/src/index.ts"],
+      "@site/static-site-server": ["scripts/static-site-server.mjs"]
     }
   }
 }

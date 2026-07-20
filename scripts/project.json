@@ -1,0 +1,7 @@
+{
+  "name": "site-tooling",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts",
+  "projectType": "library",
+  "tags": ["type:shared"]
+}
