@@ -2,7 +2,36 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import { z } from "zod";
+import remoteInput from "../apps/shell/src/remotes.json" with { type: "json" };
+import routeInput from "../apps/shell/src/routes.json" with { type: "json" };
+
+// llmlint: ignore-block[changed_behavior_has_e2e] These build-time input diagnostics have no browser interface; the successful artifacts are exercised by every production Playwright journey.
+const routeResult = z
+  .array(
+    z
+      .object({
+        path: z.string(),
+        label: z.string(),
+        heading: z.string(),
+        description: z.string(),
+        remote: z.string().min(1).optional(),
+      })
+      .strict(),
+  )
+  .safeParse(routeInput);
+if (!routeResult.success)
+  throw new Error(
+    `Invalid apps/shell/src/routes.json. Correct each route's path, label, heading, description, and optional remote fields, then rerun the shell prerender. Details: ${z.prettifyError(routeResult.error)}`,
+  );
+const routes = routeResult.data;
+const remoteResult = z.array(z.string().min(1)).safeParse(remoteInput);
+if (!remoteResult.success)
+  throw new Error(
+    `Invalid apps/shell/src/remotes.json. Set it to an array of non-empty remote project names, then rerun just check. Details: ${z.prettifyError(remoteResult.error)}`,
+  );
+const remoteNames = remoteResult.data;
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 const output = "dist/apps/shell";
 const base = "/nick-derobertis-site";
@@ -125,18 +154,17 @@ await cp("libs/data-access/vendor/codegen", join(output, "cv-data"), {
 });
 
 await rm(join(output, "remotes"), { recursive: true, force: true });
-for (const name of ["bio", "research", "software", "courses", "timeline"]) {
+for (const name of remoteNames) {
   const destination = join(output, "remotes", name);
   // llmlint: ignore-block[changed_behavior_has_e2e] Build-time filesystem diagnostics are covered by deterministic artifact checks, not a browser interface.
   try {
     await mkdir(dirname(destination), { recursive: true });
     await cp(join("dist/apps", name), destination, { recursive: true });
   } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    console.error(
-      `Could not stage the ${name} remote: ${detail}\nRun 'just check' to rebuild and verify all remote artifacts.`,
+    throw new Error(
+      `Could not copy the ${name} remote. Build and verify repository artifacts with: just check`,
+      { cause: error },
     );
-    throw error;
   }
   // llmlint: ignore-end[changed_behavior_has_e2e]
 }

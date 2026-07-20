@@ -22,8 +22,14 @@ declare module "courses/Page" {
   const Page: ComponentType;
   export default Page;
 }
-
 declare module "timeline/Page" {
+  import type { ComponentType } from "react";
+
+  const Page: ComponentType;
+  export default Page;
+}
+
+declare module "skills/Page" {
   import type { ComponentType } from "react";
 
   const Page: ComponentType;

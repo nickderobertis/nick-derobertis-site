@@ -6,6 +6,13 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../dist/apps/shell", import.meta.url));
 const base = "/nick-derobertis-site";
+const port = process.env.E2E_PORT ?? "4200";
+const portNumber = Number(port);
+// llmlint: ignore[changed_behavior_has_e2e] This process-start validation has no browser interface; successful serving is exercised by every Playwright journey.
+if (!Number.isInteger(portNumber) || portNumber < 1024 || portNumber > 65_535)
+  throw new Error(
+    `Invalid E2E_PORT ${JSON.stringify(port)}. Set it to an available numeric port from 1024 to 65535`,
+  );
 const types = {
   ".css": "text/css",
   ".html": "text/html",
@@ -31,4 +38,4 @@ createServer(async (request, response) => {
     types[extname(file)] ?? "application/octet-stream",
   );
   createReadStream(file).pipe(response);
-}).listen(4200, "127.0.0.1");
+}).listen(portNumber, "127.0.0.1");

@@ -2,8 +2,9 @@
   {
     "path": "/",
     "label": "Home",
-    "heading": "Finance, research, and software",
-    "description": "Welcome to the professional site of Nick DeRobertis."
+    "heading": "Skilled in…",
+    "description": "Explore Nick DeRobertis's skills, experience, and areas of expertise.",
+    "remote": "skills"
   },
   {
     "path": "/bio",
