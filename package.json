@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "just": "./scripts/bin/just",
+    "screenshots": "node scripts/screenshots.js",
     "prepare": "husky install && cat global-requirements.txt | xargs -n1 pipx install || true"
   },
   "author": "",
@@ -14,7 +15,8 @@
     "@commitlint/config-conventional": "^16.2.1",
     "husky": "^7.0.4",
     "json-schema-to-typescript": "^13.1.1",
-    "lint-staged": "^12.4.1"
+    "lint-staged": "^12.4.1",
+    "playwright": "1.61.1"
   },
   "lint-staged": {
     "*.py": [

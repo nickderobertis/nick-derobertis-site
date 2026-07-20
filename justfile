@@ -150,5 +150,9 @@ run-docker:
 qa:
     just build-docker run-docker
 
+# Capture the deployed site's visual-regression reference images.
+screenshots:
+    @node scripts/screenshots.js
+
 create-task-def:
     just poetry run root python -m deploy.create_task_def
