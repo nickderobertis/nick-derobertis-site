@@ -23,7 +23,6 @@ const pages = [
     link: "Courses",
     heading: "Courses",
     path: "courses",
-    remote: /Courses remote loaded/,
   },
 ];
 
