@@ -1,0 +1,187 @@
+.skills-pane,
+.skills-pane * {
+  box-sizing: border-box;
+}
+body:has(.skills-pane) {
+  margin: 0;
+}
+.skills-pane {
+  align-items: center;
+  background: #f5eded;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.75fr) minmax(500px, 2.25fr);
+  min-height: 43rem;
+  overflow: hidden;
+}
+.skills-intro {
+  padding-left: max(var(--space, 1rem), calc((100vw - 1100px) / 2));
+  position: relative;
+  z-index: 2;
+}
+.skills-intro h2 {
+  font:
+    400 clamp(2.2rem, 4vw, 3.25rem) / 1.1 Arial,
+    sans-serif;
+  margin: 0 0 0.5rem;
+}
+.skills-intro > p {
+  font-size: 1.25rem;
+  line-height: 1.5;
+  margin: 0 0 1.6rem;
+}
+.skills-widget {
+  background: #f2c9c9;
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 15px #0002;
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  text-align: center;
+  width: 16rem;
+}
+.skills-widget h3 {
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin: 0.25rem 0 0.75rem;
+}
+.skills-widget button {
+  background: #eb4f53;
+  border: 0;
+  border-radius: 0.15rem;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.75rem;
+  text-transform: uppercase;
+}
+.skills-widget button:focus-visible,
+.skill-sector:focus-visible,
+.skills-dropdowns select:focus-visible {
+  outline: 3px solid #12324a;
+  outline-offset: 3px;
+}
+.chart-wrap {
+  min-width: 0;
+  position: relative;
+}
+.chart-keyboard-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  justify-content: center;
+}
+.chart-keyboard-controls button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #3f4144;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.25rem;
+}
+.chart-keyboard-controls button:focus-visible {
+  border-color: #12324a;
+  outline: 2px solid #12324a;
+}
+.skills-chart {
+  display: block;
+  height: min(43rem, 70vw);
+  margin: auto;
+  max-width: 100%;
+  overflow: visible;
+}
+.skill-sector {
+  cursor: pointer;
+  stroke: #fff;
+  stroke-width: 1;
+  transition:
+    filter 120ms ease,
+    opacity 120ms ease;
+}
+.skill-sector:hover,
+.skill-sector:focus-visible {
+  filter: brightness(1.08);
+  opacity: 1;
+}
+.chart-label {
+  fill: #20252a;
+  font-size: 15px;
+  pointer-events: none;
+}
+.skill-details {
+  background: #fff;
+  border: 1px solid #777;
+  box-shadow: 0 2px 4px #0003;
+  display: grid;
+  left: 0.5rem;
+  line-height: 1.25;
+  padding: 0.5rem 0.75rem;
+  position: absolute;
+  top: 45%;
+  z-index: 3;
+}
+.chart-instruction {
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+  text-align: center;
+  width: 100%;
+}
+.skills-dropdowns {
+  align-content: center;
+  display: grid;
+  gap: 0.55rem;
+  justify-self: center;
+  min-height: 30rem;
+  padding: 2rem;
+  position: relative;
+  width: min(32rem, 100%);
+}
+.skills-dropdowns select {
+  background: #fff;
+  border: 1px solid #9c8d8d;
+  font: inherit;
+  padding: 0.8rem;
+}
+.skills-dropdowns .skill-details {
+  margin-top: 1rem;
+  position: static;
+}
+.skills-state {
+  background: var(--sky, #e9f3f8);
+  border-left: 4px solid var(--blue, #2878a8);
+  margin: 4rem auto;
+  padding: 1rem;
+  width: min(1100px, calc(100% - 2rem));
+}
+@media (max-width: 700px) {
+  .skills-pane {
+    display: flex;
+    flex-direction: column;
+    min-height: 43rem;
+  }
+  .skills-intro {
+    padding: 0 1rem;
+    width: 100%;
+  }
+  .skills-intro h2 {
+    font-size: 2rem;
+  }
+  .skills-intro > p {
+    font-size: 1.15rem;
+  }
+  .skills-widget {
+    margin: 0 auto 2rem;
+    width: 15rem;
+  }
+  .chart-wrap {
+    width: 100%;
+  }
+  .skills-chart {
+    height: auto;
+    width: min(22rem, 92vw);
+  }
+  .skill-details {
+    font-size: 0.75rem;
+    left: 0.25rem;
+    top: 38%;
+  }
+}

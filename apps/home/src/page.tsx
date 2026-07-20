@@ -5,6 +5,7 @@ const Cards = lazy(() => import("homeCards/Page"));
 const Story = lazy(() => import("homeStory/Page"));
 const Contact = lazy(() => import("homeContact/Page"));
 const Timeline = lazy(() => import("timeline/Page"));
+const Skills = lazy(() => import("skills/Page"));
 
 export default function HomePage() {
   return (
@@ -15,6 +16,7 @@ export default function HomePage() {
         <Carousel />
         <Cards />
         <Story />
+        <Skills />
         <Contact />
         <Timeline />
       </Suspense>
