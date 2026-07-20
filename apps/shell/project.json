@@ -44,7 +44,7 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "eslint . --max-warnings=0 && biome lint apps/shell"
+        "command": "eslint apps/shell --max-warnings=0 && biome lint apps/shell"
       }
     },
     "typecheck": {
