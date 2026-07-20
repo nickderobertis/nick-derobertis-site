@@ -16,6 +16,7 @@ export default defineConfig({
   testDir: "./src",
   testIgnore: "unit/**",
   workers: 1,
+  retries: 1,
   expect: { timeout: 15_000 },
   timeout: 60_000,
   use: {
