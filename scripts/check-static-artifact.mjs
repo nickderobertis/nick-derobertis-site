@@ -56,7 +56,14 @@ for (const name of remoteNames) {
     );
   }
 }
-await access(`${root}/remotes/awards/selected/index.html`);
+try {
+  await access(`${root}/remotes/awards/selected/index.html`);
+} catch (error) {
+  throw new Error(
+    "The selected-awards entry is missing from the static site; run `just check` to rebuild and verify it.",
+    { cause: error },
+  );
+}
 for (const file of [
   "cv.json",
   "cv.schema.json",

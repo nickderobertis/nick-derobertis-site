@@ -1,5 +1,4 @@
 import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
-import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
@@ -30,7 +29,9 @@ async function withArtifactOutcome(
   else await rm(artifact);
   const server = createStaticSiteServer(root);
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-  const address = server.address() as AddressInfo;
+  const address = server.address();
+  if (!address || typeof address === "string")
+    throw new Error("Expected a TCP awards test server address");
   try {
     await run(`http://127.0.0.1:${address.port}/nick-derobertis-site/`, root);
   } finally {
