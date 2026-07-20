@@ -1,6 +1,7 @@
 import { type Award, loadAwards, selectAwards } from "@site/data-access";
 import "@site/design-system";
 import { useCallback, useEffect, useState } from "react";
+import { parseAwardsRoute } from "./route";
 
 type AwardsLoadState =
   | { status: "loading" }
@@ -140,6 +141,6 @@ export function AwardsPage({ selected = false }: { selected?: boolean }) {
 }
 
 export default function ShellAwardsPage() {
-  const selected = /\/nick-derobertis-site\/?$/.test(window.location.pathname);
+  const selected = parseAwardsRoute(window.location.pathname) === "selected";
   return <AwardsPage selected={selected} />;
 }

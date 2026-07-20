@@ -54,7 +54,7 @@ export default [
             },
             {
               sourceTag: "type:e2e",
-              onlyDependOnLibsWithTags: ["type:app", "type:shared"],
+              onlyDependOnLibsWithTags: ["type:app", "scope:test-support"],
             },
           ],
         },
