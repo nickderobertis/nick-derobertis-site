@@ -1,10 +1,12 @@
 import { access, readFile } from "node:fs/promises";
 import { z } from "zod";
 import shellProject from "../apps/shell/project.json" with { type: "json" };
-import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import routeInput from "../apps/shell/src/routes.json" with { type: "json" };
 import { siteRemoteNames as remoteNames } from "../libs/build-config/src/site-remotes.ts";
+import { parseSiteRoutes } from "./site-contracts.mjs";
 
 const root = "dist/apps/shell";
+const routes = parseSiteRoutes(routeInput);
 const parsedShellProject = z
   .object({
     targets: z.object({

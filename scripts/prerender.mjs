@@ -2,11 +2,13 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import routeInput from "../apps/shell/src/routes.json" with { type: "json" };
 import { siteRemoteNames as remoteNames } from "../libs/build-config/src/site-remotes.ts";
+import { parseSiteRoutes } from "./site-contracts.mjs";
 
 const output = "dist/apps/shell";
 const base = "/nick-derobertis-site";
+const routes = parseSiteRoutes(routeInput);
 const builtDocument = await readFile(join(output, "index.html"), "utf8");
 // Nx may restore a previously prerendered output from cache. Normalize it back
 // to the rspack template so this target is idempotent as well as parallel-safe.
