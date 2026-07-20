@@ -1,0 +1,35 @@
+{
+  "name": "home-carousel",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/home-carousel/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:home-carousel"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/home-carousel/rspack.config.ts",
+        "outputPath": "dist/apps/home-carousel",
+        "main": "apps/home-carousel/src/main.tsx",
+        "tsConfig": "apps/home-carousel/tsconfig.app.json",
+        "index": "apps/home-carousel/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/home-carousel" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/home-carousel/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --passWithNoTests apps/home-carousel/src"
+      }
+    }
+  }
+}

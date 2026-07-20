@@ -1,6 +1,7 @@
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
+import { remoteMap } from "@site/build-config";
 
 const base = "/nick-derobertis-site/";
 export default {
@@ -21,16 +22,7 @@ export default {
       name: "shell",
       filename: "remoteEntry.js",
       exposes: { "./App": "./src/app.tsx" },
-      remotes: {
-        bio: "bio@/nick-derobertis-site/remotes/bio/remoteEntry.js",
-        research:
-          "research@/nick-derobertis-site/remotes/research/remoteEntry.js",
-        software:
-          "software@/nick-derobertis-site/remotes/software/remoteEntry.js",
-        courses: "courses@/nick-derobertis-site/remotes/courses/remoteEntry.js",
-        timeline:
-          "timeline@/nick-derobertis-site/remotes/timeline/remoteEntry.js",
-      },
+      remotes: remoteMap(["home", "bio", "research", "software", "courses"]),
       shared: {
         react: { singleton: true, requiredVersion: false, eager: true },
         "react-dom": { singleton: true, requiredVersion: false, eager: true },

@@ -27,7 +27,18 @@
         "build",
         {
           "target": "build",
-          "projects": ["bio", "research", "software", "courses", "timeline"]
+          "projects": [
+            "home",
+            "home-carousel",
+            "home-cards",
+            "home-story",
+            "home-contact",
+            "bio",
+            "research",
+            "software",
+            "courses",
+            "timeline"
+          ]
         }
       ],
       "options": {
