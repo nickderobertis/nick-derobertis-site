@@ -113,6 +113,15 @@ for (const renderPath of renderPaths) {
     });
   }
 
+  test(`${renderPath.name} rejects an invalid timeline state`, async ({
+    page,
+  }) => {
+    await openTimeline(page, renderPath.url, "not-a-timeline-state");
+    await expect(
+      page.getByLabel("Education and employment by year"),
+    ).toBeVisible();
+  });
+
   test(`${renderPath.name} uses compact labels at a mobile viewport`, async ({
     page,
   }) => {
@@ -130,14 +139,16 @@ test("standalone remote loads the shared design-system foundation", async ({
   page,
 }) => {
   await openTimeline(page, "remotes/timeline/");
-  const rootStyles = await page.locator("html").evaluate((element) => {
-    const styles = getComputedStyle(element);
-    return {
-      fontFamily: styles.fontFamily,
-      navy: styles.getPropertyValue("--navy").trim(),
-      paper: styles.getPropertyValue("--paper").trim(),
-    };
-  });
+  const rootStyles = await page
+    .getByRole("region", { name: "Educated and Experienced" })
+    .evaluate((element) => {
+      const styles = getComputedStyle(element.ownerDocument.documentElement);
+      return {
+        fontFamily: styles.fontFamily,
+        navy: styles.getPropertyValue("--navy").trim(),
+        paper: styles.getPropertyValue("--paper").trim(),
+      };
+    });
   expect(rootStyles.fontFamily).toMatch(/^Inter, system-ui, -apple-system/);
   expect(rootStyles.fontFamily).toContain('"Segoe UI"');
   expect(rootStyles.navy).toBe("#12324a");

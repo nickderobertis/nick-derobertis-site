@@ -3,6 +3,13 @@ import { type CSSProperties, useId, useMemo, useState } from "react";
 import "./timeline.css";
 
 type Entry = Timeline[number];
+type TimelineState = "empty" | "error" | "loading" | "ready";
+const TIMELINE_STATES: ReadonlySet<string> = new Set([
+  "empty",
+  "error",
+  "loading",
+  "ready",
+]);
 const ENTRY_COLORS: Readonly<Record<string, string>> = {
   carbon_health_senior: "#ac7410",
   carbon_health_staff: "#bba5ed",
@@ -20,9 +27,17 @@ const ENTRY_COLORS: Readonly<Record<string, string>> = {
   vcu_ga: "#dd3434",
 };
 
-function previewState() {
+function parseTimelineState(input: unknown): TimelineState {
+  return typeof input === "string" && TIMELINE_STATES.has(input)
+    ? (input as TimelineState)
+    : "ready";
+}
+
+function previewState(): TimelineState {
   if (typeof window === "undefined") return "ready";
-  return new URLSearchParams(window.location.search).get("timeline-state");
+  return parseTimelineState(
+    new URLSearchParams(window.location.search).get("timeline-state"),
+  );
 }
 function position(date: string, finalYear: number) {
   const value = new Date(`${date}T00:00:00Z`);
