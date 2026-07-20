@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const pages = [
-  { link: "Home", heading: "Finance, research, and software", path: "" },
+  { link: "Home", heading: "Skilled in…", path: "" },
   {
     link: "Bio",
     heading: "Biography",
@@ -99,6 +99,103 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
   await page.goto("missing");
   await expect(page).toHaveURL(/nick-derobertis-site\/?$/);
   await expect(
-    page.getByRole("heading", { name: "Finance, research, and software" }),
+    page.getByRole("heading", { name: "Skilled in…" }),
   ).toBeVisible();
 });
+
+const skillsPaths = [
+  { name: "host-composed", path: "" },
+  { name: "standalone", path: "remotes/skills/" },
+];
+
+for (const renderPath of skillsPaths) {
+  test(`${renderPath.name} skills renders the recursive tree and supports drill-down`, async ({
+    page,
+  }) => {
+    await page.goto(renderPath.path);
+    await expect(
+      page.getByText("Browse 198 skills in 7 categories"),
+    ).toBeVisible();
+    const chart = page.getByRole("tree", {
+      name: "Interactive skills sunburst",
+    });
+    await expect(chart).toBeVisible();
+    await chart
+      .getByRole("treeitem", { name: /Programming/ })
+      .locator("path")
+      .first()
+      .hover();
+    await chart
+      .getByRole("treeitem", { name: /Programming/ })
+      .locator("path")
+      .first()
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Show all categories" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Programming", { exact: true }).last(),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Show all categories" }).click();
+    await expect(page.getByText("7 categories", { exact: true })).toBeVisible();
+  });
+
+  test(`${renderPath.name} skills dropdown and statistics are keyboard accessible`, async ({
+    page,
+  }) => {
+    await page.goto(renderPath.path);
+    await page.getByRole("button", { name: "View dropdowns" }).focus();
+    await page.keyboard.press("Enter");
+    await page.getByLabel("Category").selectOption("programming");
+    await page.getByLabel("Skill", { exact: true }).selectOption("typescript");
+    await expect(
+      page.getByRole("definition").filter({ hasText: "TypeScript" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("definition").filter({ hasText: /hours/ }),
+    ).toBeVisible();
+  });
+
+  for (const state of ["empty", "error"] as const) {
+    test(`${renderPath.name} skills exposes its ${state} state`, async ({
+      page,
+    }) => {
+      await page.goto(`${renderPath.path}?skills-state=${state}`);
+      await expect(
+        page.getByText(
+          state === "empty"
+            ? "No skills are available yet."
+            : "Skills could not be loaded. Please try again later.",
+        ),
+      ).toBeVisible();
+    });
+  }
+
+  test(`${renderPath.name} skills exposes and resolves its loading state`, async ({
+    page,
+  }) => {
+    await page.goto(`${renderPath.path}?skills-state=loading`);
+    await expect(page.getByRole("status")).toHaveText("Loading skills…");
+    await expect(
+      page.getByRole("tree", { name: "Interactive skills sunburst" }),
+    ).toBeVisible();
+  });
+
+  test(`${renderPath.name} skills stays usable on a narrow viewport`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 740 });
+    await page.goto(renderPath.path);
+    await expect(
+      page.getByRole("heading", { name: "Skilled in…" }),
+    ).toBeVisible();
+    const responsiveChart = page.getByRole("tree", {
+      name: "Interactive skills sunburst",
+    });
+    await responsiveChart.scrollIntoViewIfNeeded();
+    await expect(responsiveChart).toBeInViewport();
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth),
+    ).toBe(360);
+  });
+}

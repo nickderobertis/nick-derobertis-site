@@ -1,28 +1,19 @@
 import { SiteLayout } from "@site/layout";
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { routes, type SiteRoute } from "./routes";
+import { routes } from "./routes";
 
 const BioPage = lazy(() => import("bio/Page"));
 const ResearchPage = lazy(() => import("research/Page"));
 const SoftwarePage = lazy(() => import("software/Page"));
 const CoursesPage = lazy(() => import("courses/Page"));
 const TimelinePage = lazy(() => import("timeline/Page"));
-function requireRoute(path: string): SiteRoute {
-  const route = routes.find((candidate) => candidate.path === path);
-  if (!route) throw new Error(`Route ${path} is required`);
-  return route;
-}
-const homeRoute = requireRoute("/");
+const SkillsPage = lazy(() => import("skills/Page"));
 
 function HomePage() {
   return (
     <>
-      <section className="hero">
-        <p className="eyebrow">Nick DeRobertis</p>
-        <h1>{homeRoute.heading}</h1>
-        <p>{homeRoute.description}</p>
-      </section>
+      <SkillsPage />
       <TimelinePage />
     </>
   );

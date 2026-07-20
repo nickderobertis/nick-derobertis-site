@@ -125,7 +125,14 @@ await cp("libs/data-access/vendor/codegen", join(output, "cv-data"), {
 });
 
 await rm(join(output, "remotes"), { recursive: true, force: true });
-for (const name of ["bio", "research", "software", "courses", "timeline"]) {
+for (const name of [
+  "bio",
+  "research",
+  "software",
+  "courses",
+  "timeline",
+  "skills",
+]) {
   const destination = join(output, "remotes", name);
   // llmlint: ignore-block[changed_behavior_has_e2e] Build-time filesystem diagnostics are covered by deterministic artifact checks, not a browser interface.
   try {

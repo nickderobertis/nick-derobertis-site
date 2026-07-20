@@ -1,0 +1,33 @@
+{
+  "name": "skills",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/skills/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:skills"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/skills/rspack.config.ts",
+        "outputPath": "dist/apps/skills",
+        "main": "apps/skills/src/main.tsx",
+        "tsConfig": "apps/skills/tsconfig.app.json",
+        "index": "apps/skills/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/skills" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/skills/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --passWithNoTests apps/skills/src" }
+    }
+  }
+}
