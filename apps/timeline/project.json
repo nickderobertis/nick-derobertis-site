@@ -1,0 +1,33 @@
+{
+  "name": "timeline",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/timeline/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:timeline"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/timeline/rspack.config.ts",
+        "outputPath": "dist/apps/timeline",
+        "main": "apps/timeline/src/main.tsx",
+        "tsConfig": "apps/timeline/tsconfig.app.json",
+        "index": "apps/timeline/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/timeline" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/timeline/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vitest run --passWithNoTests apps/timeline/src" }
+    }
+  }
+}

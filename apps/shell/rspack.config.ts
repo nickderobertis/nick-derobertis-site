@@ -28,6 +28,8 @@ export default {
         software:
           "software@/nick-derobertis-site/remotes/software/remoteEntry.js",
         courses: "courses@/nick-derobertis-site/remotes/courses/remoteEntry.js",
+        timeline:
+          "timeline@/nick-derobertis-site/remotes/timeline/remoteEntry.js",
       },
       shared: {
         react: { singleton: true, requiredVersion: false, eager: true },

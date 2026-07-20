@@ -7,6 +7,7 @@ const BioPage = lazy(() => import("bio/Page"));
 const ResearchPage = lazy(() => import("research/Page"));
 const SoftwarePage = lazy(() => import("software/Page"));
 const CoursesPage = lazy(() => import("courses/Page"));
+const TimelinePage = lazy(() => import("timeline/Page"));
 function requireRoute(path: string): SiteRoute {
   const route = routes.find((candidate) => candidate.path === path);
   if (!route) throw new Error(`Route ${path} is required`);
@@ -16,11 +17,14 @@ const homeRoute = requireRoute("/");
 
 function HomePage() {
   return (
-    <section className="hero">
-      <p className="eyebrow">Nick DeRobertis</p>
-      <h1>{homeRoute.heading}</h1>
-      <p>{homeRoute.description}</p>
-    </section>
+    <>
+      <section className="hero">
+        <p className="eyebrow">Nick DeRobertis</p>
+        <h1>{homeRoute.heading}</h1>
+        <p>{homeRoute.description}</p>
+      </section>
+      <TimelinePage />
+    </>
   );
 }
 

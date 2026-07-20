@@ -125,7 +125,7 @@ await cp("libs/data-access/vendor/codegen", join(output, "cv-data"), {
 });
 
 await rm(join(output, "remotes"), { recursive: true, force: true });
-for (const name of ["bio", "research", "software", "courses"]) {
+for (const name of ["bio", "research", "software", "courses", "timeline"]) {
   const destination = join(output, "remotes", name);
   await mkdir(dirname(destination), { recursive: true });
   await cp(join("dist/apps", name), destination, { recursive: true });

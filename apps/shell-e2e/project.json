@@ -4,7 +4,7 @@
   "sourceRoot": "apps/shell-e2e/src",
   "projectType": "application",
   "tags": ["type:e2e", "scope:shell"],
-  "implicitDependencies": ["shell"],
+  "implicitDependencies": ["shell", "timeline"],
   "targets": {
     "e2e": {
       "executor": "@nx/playwright:playwright",
