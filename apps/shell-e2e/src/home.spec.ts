@@ -91,6 +91,9 @@ for (const path of renderPaths)
     await expect(
       page.getByRole("heading", { name: "Let’s build something useful." }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Timeline visualization" }),
+    ).toBeVisible();
   });
 
 for (const path of renderPaths)
@@ -105,6 +108,23 @@ for (const path of renderPaths)
         await expect(
           page.getByRole("status").filter({ hasText: pane.states[state] }),
         ).toBeVisible();
+    });
+
+for (const path of renderPaths)
+  for (const state of ["empty", "loading", "error"] as const)
+    test(`HOME composition exposes the timeline ${state} state ${path.name}`, async ({
+      page,
+    }) => {
+      const url = path.name === "standalone" ? "remotes/home/" : "";
+      await page.goto(`${url}?timeline-state=${state}`);
+      const role = state === "error" ? "alert" : "status";
+      const message =
+        state === "empty"
+          ? "No education or employment entries are available."
+          : state === "loading"
+            ? "Loading timeline…"
+            : "Timeline unavailable";
+      await expect(page.getByRole(role)).toContainText(message);
     });
 
 const viewports = [
