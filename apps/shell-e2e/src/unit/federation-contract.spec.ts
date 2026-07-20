@@ -3,14 +3,12 @@ import { describe, expect, it } from "vitest";
 
 const timelineContract = [
   ["apps/shell/project.json", '"timeline"'],
-  [
-    "apps/shell/rspack.config.ts",
-    "timeline@/nick-derobertis-site/remotes/timeline/remoteEntry.js",
-  ],
-  ["apps/shell/src/remotes.d.ts", 'declare module "timeline/Page"'],
+  ["libs/build-config/src/remotes.json", '"timeline": "timeline"'],
+  ["apps/home/rspack.config.ts", '"timeline"'],
+  ["apps/home/src/remotes.d.ts", 'declare module "timeline/Page"'],
   ["apps/shell-e2e/project.json", '"timeline"'],
   ["eslint.config.mjs", 'sourceTag: "scope:timeline"'],
-  ["scripts/prerender.mjs", '"timeline"'],
+  ["scripts/prerender.mjs", "Object.keys(remoteManifest)"],
 ] as const;
 
 describe("timeline federation contract", () => {

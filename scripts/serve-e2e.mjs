@@ -3,9 +3,26 @@ import { stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import siteConfig from "../libs/data-access/src/site.config.json" with {
+  type: "json",
+};
 
 const root = fileURLToPath(new URL("../dist/apps/shell", import.meta.url));
-const base = "/nick-derobertis-site";
+if (
+  !siteConfig ||
+  typeof siteConfig.pagesBase !== "string" ||
+  !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase)
+)
+  throw new Error(
+    `site.config.json pagesBase must match /[a-z0-9-]+; received ${JSON.stringify(siteConfig?.pagesBase)}. Fix it and run just test-e2e again.`,
+  );
+const base = siteConfig.pagesBase;
+const portValue = process.env.PORT ?? "4200";
+const port = Number(portValue);
+if (!Number.isInteger(port) || port < 1 || port > 65_535)
+  throw new Error(
+    `PORT must be an integer from 1 to 65535; received ${JSON.stringify(portValue)}. Set a valid PORT and run just test-e2e again.`,
+  );
 const types = {
   ".css": "text/css",
   ".html": "text/html",
@@ -31,4 +48,4 @@ createServer(async (request, response) => {
     types[extname(file)] ?? "application/octet-stream",
   );
   createReadStream(file).pipe(response);
-}).listen(4200, "127.0.0.1");
+}).listen(port, "127.0.0.1");

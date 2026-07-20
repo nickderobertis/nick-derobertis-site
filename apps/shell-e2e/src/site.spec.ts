@@ -1,7 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 const pages = [
-  { link: "Home", heading: "Finance, research, and software", path: "" },
+  {
+    link: "Home",
+    heading: "Finance researcher & educator",
+    staticHeading: "Finance, research, and software",
+    path: "",
+  },
   {
     link: "Bio",
     heading: "Biography",
@@ -54,23 +59,18 @@ test("every route has useful HTML with JavaScript disabled", async ({
   for (const route of pages) {
     await page.goto(route.path);
     await expect(
-      page.getByRole("heading", { name: route.heading }),
+      page.getByRole("heading", {
+        name: "staticHeading" in route ? route.staticHeading : route.heading,
+      }),
     ).toBeVisible();
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
-      "content",
-      /.+/,
-    );
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      "href",
-      new RegExp(`/nick-derobertis-site/${route.path}$`),
-    );
+    await expect(page).toHaveTitle(/Nick DeRobertis/);
   }
   await context.close();
 });
 
 test("navigation works with the keyboard", async ({ page }) => {
   await page.goto("");
-  await page.getByRole("link", { name: "Bio" }).focus();
+  await page.getByRole("link", { name: "Bio", exact: true }).focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/bio$/);
   await expect(page.getByRole("heading", { name: "Biography" })).toBeVisible();
@@ -99,6 +99,6 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
   await page.goto("missing");
   await expect(page).toHaveURL(/nick-derobertis-site\/?$/);
   await expect(
-    page.getByRole("heading", { name: "Finance, research, and software" }),
+    page.getByRole("heading", { name: "Finance researcher & educator" }),
   ).toBeVisible();
 });

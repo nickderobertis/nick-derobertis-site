@@ -1,0 +1,35 @@
+{
+  "name": "home-contact",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/home-contact/src",
+  "projectType": "application",
+  "tags": ["type:remote", "scope:home-contact"],
+  "targets": {
+    "build": {
+      "executor": "@nx/rspack:rspack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "rspackConfig": "apps/home-contact/rspack.config.ts",
+        "outputPath": "dist/apps/home-contact",
+        "main": "apps/home-contact/src/main.tsx",
+        "tsConfig": "apps/home-contact/tsconfig.app.json",
+        "index": "apps/home-contact/src/index.html",
+        "assets": []
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint apps/home-contact" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p apps/home-contact/tsconfig.app.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --passWithNoTests apps/home-contact/src"
+      }
+    }
+  }
+}

@@ -1,11 +1,51 @@
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import remoteManifest from "../libs/build-config/src/remotes.json" with {
+  type: "json",
+};
+import siteConfig from "../libs/data-access/src/site.config.json" with {
+  type: "json",
+};
 
-const output = "dist/apps/shell";
-const base = "/nick-derobertis-site";
+function requirePath(value, fallback, name) {
+  const path = value ?? fallback;
+  if (typeof path !== "string" || path.length === 0 || path.includes("\0"))
+    throw new Error(
+      `${name} must be a non-empty filesystem path. Set ${name} to a valid path and run just check again.`,
+    );
+  return path;
+}
+if (
+  Object.entries(remoteManifest).some(
+    ([name, alias]) =>
+      !/^[a-z][a-z-]+$/.test(name) || typeof alias !== "string",
+  )
+)
+  throw new Error(
+    "remotes.json must contain string remote-name mappings. Fix libs/build-config/src/remotes.json and run just check again.",
+  );
+const output = requirePath(
+  process.env.PRERENDER_OUTPUT,
+  "dist/apps/shell",
+  "PRERENDER_OUTPUT",
+);
+const remoteBuildRoot = requirePath(
+  process.env.REMOTE_BUILD_ROOT,
+  "dist/apps",
+  "REMOTE_BUILD_ROOT",
+);
+if (
+  !siteConfig ||
+  typeof siteConfig.pagesBase !== "string" ||
+  !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase)
+)
+  throw new Error(
+    `site.config.json pagesBase must match /[a-z0-9-]+; received ${JSON.stringify(siteConfig?.pagesBase)}. Fix it and run just check again.`,
+  );
+const base = siteConfig.pagesBase;
 const builtDocument = await readFile(join(output, "index.html"), "utf8");
 // Nx may restore a previously prerendered output from cache. Normalize it back
 // to the rspack template so this target is idempotent as well as parallel-safe.
@@ -125,18 +165,22 @@ await cp("libs/data-access/vendor/codegen", join(output, "cv-data"), {
 });
 
 await rm(join(output, "remotes"), { recursive: true, force: true });
-for (const name of ["bio", "research", "software", "courses", "timeline"]) {
+for (const name of Object.keys(remoteManifest)) {
+  const source = join(remoteBuildRoot, name);
   const destination = join(output, "remotes", name);
-  // llmlint: ignore-block[changed_behavior_has_e2e] Build-time filesystem diagnostics are covered by deterministic artifact checks, not a browser interface.
   try {
-    await mkdir(dirname(destination), { recursive: true });
-    await cp(join("dist/apps", name), destination, { recursive: true });
+    await stat(source);
   } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    console.error(
-      `Could not stage the ${name} remote: ${detail}\nRun 'just check' to rebuild and verify all remote artifacts.`,
+    if (
+      !(error instanceof Error) ||
+      !("code" in error) ||
+      error.code !== "ENOENT"
+    )
+      throw error;
+    throw new Error(
+      `Missing built remote at ${source}. Run just check to build every required remote before prerendering.`,
     );
-    throw error;
   }
-  // llmlint: ignore-end[changed_behavior_has_e2e]
+  await mkdir(dirname(destination), { recursive: true });
+  await cp(source, destination, { recursive: true });
 }

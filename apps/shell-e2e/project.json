@@ -25,7 +25,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vitest run --passWithNoTests apps/shell-e2e/src/unit"
+        "command": "vitest run --maxWorkers=1 --passWithNoTests apps/shell-e2e/src/unit"
       }
     },
     "build": {
