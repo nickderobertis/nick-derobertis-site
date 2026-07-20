@@ -28,9 +28,19 @@ createServer(async (request, response) => {
       response.end(JSON.stringify({ projects: [] }));
       return;
     }
-    const research = await readFile(
-      join(root, "cv-data/domains/research.json"),
-    );
+    const researchPath = join(root, "cv-data/domains/research.json");
+    let research;
+    try {
+      research = await readFile(researchPath);
+    } catch (error) {
+      console.error(
+        `Unable to read ${researchPath}. Run \`just build\` before starting the e2e server.`,
+        error,
+      );
+      response.writeHead(500, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ error: "research fixture unavailable" }));
+      return;
+    }
     response.setHeader("Content-Type", "application/json");
     response.end(research);
     return;
