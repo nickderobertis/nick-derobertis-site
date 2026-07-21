@@ -31,7 +31,7 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
+      "dependsOn": ["build", { "target": "prerender", "projects": ["shell"] }],
       "options": { "command": "scripts/visual-project.sh skills" }
     }
   }

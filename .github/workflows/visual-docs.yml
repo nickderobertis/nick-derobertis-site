@@ -4,8 +4,7 @@ on:
   push:
     branches: [master]
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 concurrency:
   group: visual-docs-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -25,6 +24,7 @@ jobs:
           NX_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           NX_HEAD: ${{ github.sha }}
           SCREENCOMP_CAPTURE_CONTAINER: "1"
+          SCREENCOMP_DEFER_DRIFT: "1"
         run: |
           pnpm exec nx show projects --affected --with-target screenshot --base="$NX_BASE" --head="$NX_HEAD" > affected-visual-projects.txt
           pnpm exec nx affected -t screenshot --base="$NX_BASE" --head="$NX_HEAD" --parallel=3
@@ -35,10 +35,14 @@ jobs:
             affected-visual-projects.txt
             apps/*/visual/current
             apps/*/visual/verify
+            apps/*/visual/drift
           if-no-files-found: error
   publish:
     needs: capture
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
@@ -55,12 +59,20 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p site
+          rm -f .visual-drift
           marker='<!-- screencomp -->'
           printf '%s\n## Visual changes\n\n' "$marker" > comment.md
           while IFS= read -r project; do
             [ -n "$project" ] || continue
             current="apps/$project/visual/current"
             manifest="apps/$project/visual/baseline/x86_64.json"
+            status=0
+            screencomp classify --baseline-manifest "$manifest" --current "$current" --arch x86_64 --exit-code || status=$?
+            if [ "$status" -eq 3 ]; then
+              touch .visual-drift
+            elif [ "$status" -ne 0 ]; then
+              exit "$status"
+            fi
             screencomp gallery --input "$current" --arch x86_64 --output "site/$project" --title "$project visual docs"
             if [ "$EVENT_NAME" = pull_request ] && git show "origin/$BASE_REF:$manifest" > base.json 2>/dev/null; then
               screencomp comment --baseline-manifest base.json --current "$current" --arch x86_64 --marker "screencomp-$project" --gallery-url "https://${REPOSITORY%/*}.github.io/${REPOSITORY#*/}/pr-$PR_NUMBER/$project" --output project-comment.md
@@ -68,14 +80,22 @@ jobs:
               printf '\n' >> comment.md
             fi
           done < affected-visual-projects.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-galleries
+          path: |
+            site
+            comment.md
+          if-no-files-found: error
       - uses: peaceiris/actions-gh-pages@v4
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         with:
           github_token: ${{ github.token }}
           publish_dir: site
           destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || '' }}
           keep_files: true
       - name: Upsert visual diff comment
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -84,4 +104,10 @@ jobs:
             gh api --method PATCH "repos/${{ github.repository }}/issues/comments/$existing" -F body=@comment.md
           else
             gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md
+          fi
+      - name: Enforce visual drift gate after publishing review artifacts
+        run: |
+          if [ -f .visual-drift ]; then
+            echo "Visual drift detected; galleries and any permitted PR comment were published first." >&2
+            exit 3
           fi

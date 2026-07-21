@@ -4,23 +4,29 @@
     {
       "name": "home",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "desktop"
       },
-      "hash": "1745a4b7571611f0bbdd9d62c64dc0e149e6b93732b901fce75b6a7c5028846c"
+      "hash": "31801dfb9e122c8c50ce7f00b9a6cae5eae6fc98e39f1e7d0eb45d16de2ed759"
     },
     {
       "name": "home",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "mobile"
       },
-      "hash": "e76002653b7e2a18695e4a2f37137995875a81a9cfbc07b6a7ef72073f5b0e80"
+      "hash": "3f31130a0abaa34cf7786b73b2f65d1cb4c55ba242ac1d7d9f5e58bf00f6e941"
     },
     {
       "name": "home",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "tablet"
       },
-      "hash": "97f15db0318410287e8610886c4167115fe037a1e85da02bde3fdc50ce1f2ad9"
+      "hash": "52dee528b1d4c7575c12bd564546f6e7668f6c45e165c0009a6af1ed31f31ebf"
     }
   ]
 }

@@ -4,6 +4,8 @@
     {
       "name": "home-contact",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "desktop"
       },
       "hash": "52a4133113a59bca25b56a3bbe46ad150081c1e6c1c1031ba1506a5641748c12"
@@ -11,6 +13,8 @@
     {
       "name": "home-contact",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "mobile"
       },
       "hash": "13930a37b3b7b1c735be82c2fbbf5c811a56467e6a3538fd14f86d8e45c3b893"
@@ -18,6 +22,8 @@
     {
       "name": "home-contact",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "tablet"
       },
       "hash": "5760914cc10d13cc56d212d23b2bf3de5abac859f248715586e3abca440f89d7"

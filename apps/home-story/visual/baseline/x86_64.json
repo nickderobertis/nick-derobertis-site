@@ -4,6 +4,8 @@
     {
       "name": "home-story",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "desktop"
       },
       "hash": "81022a485f65258605d023c5a744afac86b50be7ad33a799330523ac2e2857ad"
@@ -11,6 +13,8 @@
     {
       "name": "home-story",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "mobile"
       },
       "hash": "8fb652382488375065698e286b432e6e8bab1a0a3519bffc771101bbb010fe21"
@@ -18,6 +22,8 @@
     {
       "name": "home-story",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "tablet"
       },
       "hash": "fb67d3446125f3bdb57e7f34d5679ceb217f46b4cbe18039ab34b077571b1386"

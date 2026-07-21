@@ -4,23 +4,128 @@
     {
       "name": "timeline",
       "toggles": {
+        "render": "host-composed",
+        "state": "employment-only",
         "viewport": "desktop"
       },
-      "hash": "997f452f5f80328d136a552735a44b91a7863b9108110eec753969879b977a7a"
+      "hash": "fc3180ae8ba53427f61d3de7ad7342388acee0df3305264d2086597e8a724ca6"
     },
     {
       "name": "timeline",
       "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "6aeb694ff11197bb99953db5236db6e72bf052f7cd1a93c9ef16d0374dab1332"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "753f4cf70d1d36a695285400137bd689374b62930a718467d63b4e7bd684de4f"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "0f119dfa93c2f0910adc84ced24a05110cb03ddd673407015abd618d5e2cfb75"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
         "viewport": "mobile"
       },
-      "hash": "067260556e8e0e60a88f53db87578f02e7a32b411f4d6b3b98c1db4860548266"
+      "hash": "cb08ce9da901c895caa4ca30903c3bd562c0bb77c85efe9fa2b9f9a38f390541"
     },
     {
       "name": "timeline",
       "toggles": {
+        "render": "host-composed",
+        "state": "happy",
         "viewport": "tablet"
       },
-      "hash": "ee1e291c1da1a1036bdb953246ba631782db90ddc6431ce0144a46a90e3dcebb"
+      "hash": "4aef740889c4530c0b815af2a47f284a6fc36bd26e10a6ea0bbc56f126e49ec0"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "c79353c5ecf6264c8e043d35d2297806f91a4d0e5f2b840fbe3b9bc9418d8566"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "employment-only",
+        "viewport": "desktop"
+      },
+      "hash": "03871eeba6217541874c850c72337d8e585151eff24fe8209e1be3ef095b81da"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "af89443cd46ea8bcea1a2382b947231c08d0026449fda5e6170e8fc9eb39b830"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "70eb6458cbc895fe77ea1ac2ad7fbc56c4b53ad7edee506cd28ed5534319bfab"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "615ecb9ca00a16760ebf81b864d17f031027c9a95150d5fdebf0ba444835288e"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "f3638fc52198fac3796f7b9295591237f7be14fd9f66ccc578af541de9b4c39a"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "c3f10ba62144f3e9cb5b8ccda1537fd740f0891f947488734a5e347dbec75b78"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "68e190da48aa5b8b75ec2f02e57019e655236bc93e5acfbf898328e7ef12d69d"
     }
   ]
 }

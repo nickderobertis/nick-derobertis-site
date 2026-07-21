@@ -1,6 +1,7 @@
 node_modules/
 apps/*/visual/current/
 apps/*/visual/verify/
+apps/*/visual/drift
 dist/
 coverage/
 .nx/

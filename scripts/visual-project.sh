@@ -27,4 +27,10 @@ if [[ ! -f "$baseline" ]]; then
   printf 'visual-project: missing baseline %s; seed it with screencomp manifest\n' "$baseline" >&2
   exit 1
 fi
-screencomp classify --baseline-manifest "$baseline" --current "apps/$project/visual/current" --arch "$arch" --exit-code
+status=0
+screencomp classify --baseline-manifest "$baseline" --current "apps/$project/visual/current" --arch "$arch" --exit-code || status=$?
+if [[ "$status" -eq 3 && "${SCREENCOMP_DEFER_DRIFT:-}" == "1" ]]; then
+  printf '%s\n' "$project" > "apps/$project/visual/drift"
+  exit 0
+fi
+exit "$status"

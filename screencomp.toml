@@ -10,3 +10,13 @@ embed_limit = 10
 key = "viewport"
 label = "Viewport"
 values = ["desktop", "tablet", "mobile"]
+
+[[toggle]]
+key = "render"
+label = "Rendering path"
+values = ["standalone", "host-composed"]
+
+[[toggle]]
+key = "state"
+label = "State"
+values = ["happy", "all", "empty", "loading", "error", "expanded", "employment-only"]

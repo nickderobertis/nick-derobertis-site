@@ -4,23 +4,29 @@
     {
       "name": "courses",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "desktop"
       },
-      "hash": "640f5e22b9c4d92b219927d010d8681d3b2caf1c96231005bea2cb33a7496e46"
+      "hash": "a5096914f54b7ed55e31aaa2897357f4487441fbad528bb2870908530ed00408"
     },
     {
       "name": "courses",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "mobile"
       },
-      "hash": "362c85c180db61078e6a066f4632be2549b5cea43d27082cb79ea7f115e6ae05"
+      "hash": "4423f314ccc46da6d4f798b8c155a87d0979349abe8d8e02e2b3bd5eb1808e7d"
     },
     {
       "name": "courses",
       "toggles": {
+        "render": "standalone",
+        "state": "happy",
         "viewport": "tablet"
       },
-      "hash": "ff9ac0dc69e0cd1148ca2f4dcb7458272e685a7f84d5b9ed8cb12d49b63ed046"
+      "hash": "370de7a1fadde5f39fd83c3e6e9d5c286393293e5daac16f1dffa1ef0c4e0cb6"
     }
   ]
 }
