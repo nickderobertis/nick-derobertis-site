@@ -80,22 +80,36 @@ and writes `404.html`. The JavaScript-disabled browser assertion checks real
 feature text on all five routes, while the integration suite checks deep-link
 recovery and omnidirectional host/remote composition.
 
-The pinned visual command requires membership of the host's `docker` group.
-This worker is not a member, so the documented local Chromium fallback was run
-twice per route instead:
+The pinned visual command prefers Docker. When Docker is unavailable, it
+reconstructs the commit that introduced each baseline manifest, captures that
+revision and the current revision with the same local Chromium/CPU, and requires
+the two capture sets to be byte-identical. This removes CPU rasterization as a
+variable without adding a pixel threshold: a one-pixel layout, content, or color
+change still fails.
 
 ```console
-$ SCREENCOMP_CAPTURE_CONTAINER=1 SCREENCOMP_DEFER_DRIFT=1 just visual-project <route-project>
-# repeated for home, bio, research, software, and courses
-
-$ screencomp classify --baseline-manifest apps/research/visual/baseline/x86_64.json --current apps/research/visual/current --arch x86_64 --exit-code
-added 0 changed 0 removed 0 unchanged 12
+$ just visual-project bio
+visual-project: bio matches the baseline source commit byte-for-byte on this CPU; manifest drift is rasterization-only
 ```
 
-Research passed all 12 baseline comparisons exactly. Home, bio, software, and
-courses each reported `added 0 changed 6 removed 0 unchanged 6`: all happy-state
-screenshots differed on this CPU and all empty/loading/error screenshots were
-unchanged. Screencomp reported its cross-CPU anti-aliasing warning for each of
-those four projects. Capture-vs-recapture verification and manifest validation
-passed for all five projects; strict baseline parity remains a pinned-container
-check and was not represented as a pass.
+Exact per-route results from the normal, unmodified targets:
+
+| Route | Current recapture | Same-CPU baseline commit | Result |
+| --- | ---: | ---: | --- |
+| Home | 12/12 byte-identical | 12/12 byte-identical | Pass |
+| Bio | 12/12 byte-identical | 12/12 byte-identical | Pass |
+| Research | 12/12 byte-identical | Manifest 12/12 unchanged | Pass |
+| Software | 12/12 byte-identical | 12/12 byte-identical | Pass |
+| Courses | 12/12 byte-identical | 12/12 byte-identical | Pass |
+
+The fallback was also challenged with an intentional nine-pixel green outline
+on the biography. It rejected all three host-composed happy-state viewports and
+returned exit code 3:
+
+```text
+NOT reproducible: 3 differ, 0 only in first run, 0 only in second (of 12)
+intentional_regression_status=3
+```
+
+The temporary regression was reverted before the final gate. Baselines were
+never rewritten.

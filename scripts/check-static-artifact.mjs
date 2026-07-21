@@ -62,8 +62,16 @@ for (const route of routes) {
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error("404 fallback is not intentional");
-for (const name of Object.keys(remoteManifest))
-  await access(`${root}/remotes/${name}/remoteEntry.js`);
+for (const name of Object.keys(remoteManifest)) {
+  const remoteEntry = `${root}/remotes/${name}/remoteEntry.js`;
+  try {
+    await access(remoteEntry);
+  } catch {
+    throw new Error(
+      `${remoteEntry} is missing; rebuild the ${name} remote and rerun just prerender.`,
+    );
+  }
+}
 for (const file of [
   "cv.json",
   "cv.schema.json",

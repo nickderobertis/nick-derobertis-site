@@ -12,7 +12,8 @@ if (
 )
   throw new Error("site.config.json must define pagesBase");
 const port = process.env.E2E_PORT ?? "4301";
-if (!/^\d{4,5}$/.test(port)) throw new Error("E2E_PORT must be a TCP port");
+if (!/^\d{1,5}$/.test(port) || Number(port) < 1 || Number(port) > 65_535)
+  throw new Error("E2E_PORT must be an integer from 1 to 65535");
 const testBaseUrl = `http://127.0.0.1:${port}${siteConfig.pagesBase}/`;
 export default defineConfig({
   testDir: "./src",
