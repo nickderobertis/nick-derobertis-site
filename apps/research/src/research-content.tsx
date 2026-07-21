@@ -1,27 +1,18 @@
-import type {
-  Person,
-  Research,
-  ResearchCategory,
-  ResearchProject,
-} from "@site/data-access";
+import type { Research } from "@site/data-access-core";
+import {
+  buildResearchProjectModels,
+  type ResearchProjectModel,
+} from "@site/data-access-research";
 import { ResearchProjectPane } from "./research-project-pane";
 
-function byId<Item extends { id: string }>(items: Item[] | undefined) {
-  return new Map(items?.map((item) => [item.id, item]));
-}
-
 function ProjectSection({
-  categories,
-  coauthors,
   heading,
   id,
   projects,
 }: {
-  categories: Map<string, ResearchCategory>;
-  coauthors: Map<string, Person>;
   heading: string;
   id: string;
-  projects: ResearchProject[];
+  projects: ResearchProjectModel[];
 }) {
   return (
     <section
@@ -34,16 +25,10 @@ function ProjectSection({
         <h2 id={`${id}-heading`}>{heading}</h2>
       </div>
       <div className="research-projects">
-        {projects.map((project, index) => (
+        {projects.map(({ categories, coauthors, project }, index) => (
           <ResearchProjectPane
-            categories={project.category_ids?.flatMap((categoryId) => {
-              const category = categories.get(categoryId);
-              return category ? [category] : [];
-            })}
-            coauthors={project.coauthor_ids?.flatMap((coauthorId) => {
-              const coauthor = coauthors.get(coauthorId);
-              return coauthor ? [coauthor] : [];
-            })}
+            categories={categories}
+            coauthors={coauthors}
             index={index}
             key={project.id}
             project={project}
@@ -55,9 +40,6 @@ function ProjectSection({
 }
 
 export function ResearchContent({ research }: { research: Research }) {
-  const projects = research.projects ?? [];
-  const categories = byId(research.categories);
-  const coauthors = byId(research.coauthors);
   return (
     <article className="research-page">
       <header className="research-banner">
@@ -72,20 +54,14 @@ export function ResearchContent({ research }: { research: Research }) {
         </a>
       </header>
       <ProjectSection
-        categories={categories}
-        coauthors={coauthors}
         heading="Working Papers"
         id="working-papers"
-        projects={projects.filter(({ status }) => status === "working_paper")}
+        projects={buildResearchProjectModels(research, "working_paper")}
       />
       <ProjectSection
-        categories={categories}
-        coauthors={coauthors}
         heading="Works in Progress"
         id="works-in-progress"
-        projects={projects.filter(
-          ({ status }) => status === "work_in_progress",
-        )}
+        projects={buildResearchProjectModels(research, "work_in_progress")}
       />
     </article>
   );

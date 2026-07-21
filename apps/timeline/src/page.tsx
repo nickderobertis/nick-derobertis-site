@@ -1,8 +1,15 @@
-import { cvDataClient, type Timeline } from "@site/data-access";
+import { cvDataClient, type Timeline } from "@site/data-access-core";
+import {
+  groupTimelineEntries,
+  type TimelineEntry,
+  timelineFinalYear,
+  timelineLabel,
+  timelineOrganization,
+  timelinePosition,
+} from "@site/data-access-timeline";
 import { type CSSProperties, useId, useMemo, useState } from "react";
 import "./timeline.css";
 
-type Entry = Timeline[number];
 type TimelineState = "empty" | "error" | "loading" | "ready";
 const TIMELINE_STATES: ReadonlySet<string> = new Set([
   "empty",
@@ -39,37 +46,6 @@ function previewState(): TimelineState {
     new URLSearchParams(window.location.search).get("timeline-state"),
   );
 }
-function position(date: string, finalYear: number) {
-  const value = new Date(`${date}T00:00:00Z`);
-  return Math.max(
-    0,
-    Math.min(
-      100,
-      ((value.getUTCFullYear() - 2011 + value.getUTCMonth() / 12) /
-        (finalYear + 1 - 2011)) *
-        100,
-    ),
-  );
-}
-function label(entry: Entry, short = false) {
-  return "degree" in entry
-    ? short
-      ? (entry.short_degree ?? entry.degree)
-      : entry.degree
-    : short
-      ? (entry.title_short ?? entry.title)
-      : entry.title;
-}
-function organization(entry: Entry, short = false) {
-  if (!short) return entry.organization;
-  if ("title" in entry) return entry.organization_short ?? entry.organization;
-  return entry.organization === "University of Florida"
-    ? "UF"
-    : entry.organization === "Virginia Commonwealth University"
-      ? "VCU"
-      : entry.organization;
-}
-
 function useTimelineModel(entries: Timeline) {
   const employmentId = useId();
   const educationId = useId();
@@ -78,21 +54,8 @@ function useTimelineModel(entries: Timeline) {
   const filtered = entries.filter((entry) =>
     entry.kind === "education" ? education : employment,
   );
-  const groups = useMemo(() => {
-    const result = new Map<string, Entry[]>();
-    for (const entry of filtered)
-      result.set(entry.organization, [
-        ...(result.get(entry.organization) ?? []),
-        entry,
-      ]);
-    return [...result.entries()];
-  }, [filtered]);
-  const finalYear = Math.max(
-    new Date().getUTCFullYear(),
-    ...entries.map((entry) =>
-      new Date(`${entry.end ?? entry.start}T00:00:00Z`).getUTCFullYear(),
-    ),
-  );
+  const groups = useMemo(() => groupTimelineEntries(filtered), [filtered]);
+  const finalYear = timelineFinalYear(entries, new Date().getUTCFullYear());
   const years: number[] = [];
   for (let year = 2011; year <= finalYear; year += 1) years.push(year);
   return {
@@ -156,16 +119,18 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
             <div className="timeline-row" key={name}>
               <span className="timeline-organization">
                 <span className="timeline-wide">
-                  {organization(group[0] as Entry)}
+                  {timelineOrganization(group[0] as TimelineEntry)}
                 </span>
                 <span className="timeline-compact">
-                  {organization(group[0] as Entry, true)}
+                  {timelineOrganization(group[0] as TimelineEntry, true)}
                 </span>
               </span>
               <div className="timeline-periods">
                 {group.map((entry) => {
-                  const start = position(entry.start, finalYear);
-                  const end = entry.end ? position(entry.end, finalYear) : 100;
+                  const start = timelinePosition(entry.start, finalYear);
+                  const end = entry.end
+                    ? timelinePosition(entry.end, finalYear)
+                    : 100;
                   return (
                     <article
                       className="timeline-period"
@@ -177,11 +142,13 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
                           width: `${Math.max(2, end - start)}%`,
                         } as CSSProperties
                       }
-                      aria-label={`${label(entry)} at ${entry.organization}, ${entry.start} to ${entry.end ?? "present"}`}
+                      aria-label={`${timelineLabel(entry)} at ${entry.organization}, ${entry.start} to ${entry.end ?? "present"}`}
                     >
-                      <span className="timeline-wide">{label(entry)}</span>
+                      <span className="timeline-wide">
+                        {timelineLabel(entry)}
+                      </span>
                       <span className="timeline-compact">
-                        {label(entry, true)}
+                        {timelineLabel(entry, true)}
                       </span>
                     </article>
                   );

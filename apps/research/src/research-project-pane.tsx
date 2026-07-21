@@ -2,7 +2,7 @@ import type {
   Person,
   ResearchCategory,
   ResearchProject,
-} from "@site/data-access";
+} from "@site/data-access-core";
 
 function CategoryIcon({ id }: { id: string }) {
   const variant = id.length % 4;

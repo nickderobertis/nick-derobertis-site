@@ -1,5 +1,6 @@
-import type { AwardIcon } from "@site/design-system";
-import type { Award, Awards } from "../vendor/codegen";
+import type { Award, Awards } from "@site/data-access-core";
+
+type AwardIcon = "cfa" | "gmat" | "scholarship" | "student" | "teaching";
 
 const SELECTED_AWARD_IDS = [
   "warrington-college-of-business-ph-d-student-teaching-award",

@@ -1,4 +1,4 @@
-import { homeContent, readPaneState } from "@site/data-access";
+import { homeContent, readPaneState } from "@site/data-access-home";
 
 export default function HomeContactPage() {
   const state = readPaneState(window.location.search);

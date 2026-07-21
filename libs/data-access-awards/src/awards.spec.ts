@@ -1,5 +1,5 @@
+import type { Awards } from "@site/data-access-core";
 import { describe, expect, it } from "vitest";
-import type { Awards } from "../vendor/codegen";
 import {
   buildAwardCards,
   calculateAwardsStats,

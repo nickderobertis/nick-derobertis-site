@@ -1,0 +1,27 @@
+{
+  "name": "data-access-home",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/data-access-home/src",
+  "projectType": "library",
+  "tags": ["type:data-domain", "data:home"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint libs/data-access-home" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/data-access-home/tsconfig.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/data-access-home/vite.config.ts --coverage"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/data-access-home/tsconfig.json" }
+    }
+  }
+}

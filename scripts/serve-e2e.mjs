@@ -3,7 +3,7 @@ import { stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
-import siteConfig from "../libs/data-access/src/site.config.json" with {
+import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
 import { handleE2eDataRequest } from "./e2e-data-provider.mjs";

@@ -1,0 +1,27 @@
+{
+  "name": "data-access-research",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/data-access-research/src",
+  "projectType": "library",
+  "tags": ["type:data-domain", "data:research"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint libs/data-access-research" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/data-access-research/tsconfig.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/data-access-research/vite.config.ts --coverage"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/data-access-research/tsconfig.json" }
+    }
+  }
+}

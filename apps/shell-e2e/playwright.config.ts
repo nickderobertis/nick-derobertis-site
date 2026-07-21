@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
 
 const siteConfig: unknown = JSON.parse(
-  readFileSync("libs/data-access/src/site.config.json", "utf8"),
+  readFileSync("libs/data-access-core/src/site.config.json", "utf8"),
 );
 if (
   typeof siteConfig !== "object" ||

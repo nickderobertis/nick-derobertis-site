@@ -18,9 +18,18 @@ describe("remote module boundaries", () => {
   it("allows approved shared libraries", async () => {
     await expect(
       boundaryMessages(`
-        import "@site/data-access";
+        import "@site/data-access-core";
+        import "@site/data-access-research";
       `),
     ).resolves.toEqual([]);
+  }, 15_000);
+
+  it("rejects another feature's data library", async () => {
+    const messages = await boundaryMessages(`
+      import "@site/data-access-software";
+    `);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]?.severity).toBe(2);
   }, 15_000);
 
   it("rejects layout and all cross-remote dependencies", async () => {

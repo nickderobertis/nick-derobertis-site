@@ -1,6 +1,6 @@
+import { siteBase } from "@site/data-access-core";
 import { describe, expect, it } from "vitest";
 import { homeContent, readPaneState } from "./home";
-import { siteBase } from "./site";
 
 describe("HOME content boundary", () => {
   it("defaults to happy and accepts every supported state", () => {

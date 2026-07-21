@@ -1,5 +1,5 @@
-import type { Research } from "@site/data-access";
-import { validateCvDomain } from "@site/data-access";
+import type { Research } from "@site/data-access-core";
+import { validateCvDomain } from "@site/data-access-core";
 import { useEffect, useState } from "react";
 
 export type ResearchViewState =

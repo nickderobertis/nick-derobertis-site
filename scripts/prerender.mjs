@@ -6,16 +6,16 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
-import siteConfig from "../libs/data-access/src/site.config.json" with {
+import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import courses from "../libs/data-access/vendor/codegen/domains/courses.json" with {
+import courses from "../libs/data-access-core/vendor/codegen/domains/courses.json" with {
   type: "json",
 };
-import research from "../libs/data-access/vendor/codegen/domains/research.json" with {
+import research from "../libs/data-access-core/vendor/codegen/domains/research.json" with {
   type: "json",
 };
-import software from "../libs/data-access/vendor/codegen/domains/software_projects.json" with {
+import software from "../libs/data-access-core/vendor/codegen/domains/software_projects.json" with {
   type: "json",
 };
 
@@ -222,7 +222,7 @@ const fallback = template.replace(
 await writeFile(join(output, "404.html"), fallback);
 
 await rm(join(output, "cv-data"), { recursive: true, force: true });
-await cp("libs/data-access/vendor/codegen", join(output, "cv-data"), {
+await cp("libs/data-access-core/vendor/codegen", join(output, "cv-data"), {
   recursive: true,
 });
 

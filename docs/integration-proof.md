@@ -60,17 +60,21 @@ Running 25 tests using 1 worker
 The dependent tasks are the fixed static-site build and prerender prerequisites;
 the only executed e2e target is `skills:e2e`.
 
-## Data-access dependency example
+## Split data-access dependency economics
 
 ```console
-$ just e2e-affected-files libs/data-access/src/site.ts
-["home-carousel","home-contact","home-cards","home-story","research","software","timeline","courses","awards","skills"]
+$ pnpm exec nx show projects --affected --files=libs/data-access-awards/src/awards.ts --with-target=build --json
+["data-access-awards","awards"]
+
+$ pnpm exec nx show projects --affected --files=libs/data-access-core/src/client.ts --with-target=build --json
+["data-access-core","data-access-research","research","data-access-software","software","data-access-timeline","timeline","data-access-courses","courses","data-access-awards","awards","data-access-skills","skills","data-access-home","home","home-carousel","home-contact","home-cards","home-story"]
 ```
 
-`home` and `bio` are correctly absent because they do not import data-access.
+An awards shaping change selects only the awards library and remote. A core
+client change fans out to every CV-backed feature and all Home composition
+remotes. Bio is correctly absent because it has no CV or site-config dependency.
 The shell-wide route, keyboard, fallback, and state matrix remains the explicit
-`shell-e2e:integration` target run by `just check`; it is deliberately separate
-from affected remote ownership.
+`shell-e2e:integration` target run by `just check`.
 
 ## Static Pages and visual evidence
 

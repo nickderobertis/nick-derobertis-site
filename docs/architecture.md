@@ -28,17 +28,20 @@ shared libraries -> layout -> shell
         +---------> feature remotes -> declared child remotes
 ```
 
-`data-access` owns schema validation and data shaping, `design-system` owns the
-visual foundation, `ui` owns reusable components, `analytics` owns browser
-analytics, and `build-config` owns federation build configuration. Feature data
-hooks may read the staged same-origin JSON, but they validate it through
-`data-access` before rendering.
+`data-access-core` owns schema validation, generated CV contracts, and site
+configuration. Each `data-access-<domain>` library owns only its feature's data
+shaping and depends only on the core. Nx module boundaries allow remotes to
+import core plus their own domain library and reject cross-domain imports.
+`design-system` owns the visual foundation, `ui` owns reusable components,
+`analytics` owns browser analytics, and `build-config` owns federation build
+configuration. Feature data hooks may read the staged same-origin JSON, but
+they validate it through `data-access-core` before rendering.
 
 ## Static hosting and data
 
 The former API is intentionally gone: there is no backend or runtime API. CV data is generated outside this
-repository, committed under `libs/data-access/vendor/codegen`, and validated at
-the data-access and prerender boundaries. Prerender copies the validated files
+repository, committed under `libs/data-access-core/vendor/codegen`, and validated at
+the core and prerender boundaries. Prerender copies the validated files
 to `cv-data/` in the artifact; browser data requests therefore remain static
 same-origin file reads.
 
@@ -61,8 +64,8 @@ optimization rather than the only safety net.
 The measured integration review is recorded in
 [integration-proof.md](integration-proof.md). Its `nx affected --files` proof
 showed that a design-system change selected all 12 dependent remotes, a Skills
-page change selected only `skills:e2e`, and a data-access change selected the
-10 consumers while excluding `home` and `bio`. In the Skills case, 25 browser
+page change selected only `skills:e2e`, and domain/core data changes preserve
+the isolation documented there. In the Skills case, 25 browser
 tests passed and only one e2e target ran; the remaining 14 tasks were required
 static build/prerender dependencies. The shell integration target separately
 protects navigation, direct routes, static markup, fallback recovery, and the

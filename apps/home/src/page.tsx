@@ -1,3 +1,5 @@
+import { siteBase } from "@site/data-access-core";
+import { homeContent } from "@site/data-access-home";
 import { lazy, Suspense } from "react";
 
 const Carousel = lazy(() => import("homeCarousel/Page"));
@@ -10,7 +12,11 @@ const Awards = lazy(() => import("awards/Page"));
 
 export default function HomePage() {
   return (
-    <div className="home-main">
+    <div
+      className="home-main"
+      data-card-count={homeContent.cards.length}
+      data-site-base={siteBase}
+    >
       <Suspense
         fallback={<output className="pane-state">Loading HOME page…</output>}
       >
