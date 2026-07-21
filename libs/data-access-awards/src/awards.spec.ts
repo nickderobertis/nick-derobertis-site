@@ -1,9 +1,10 @@
-import type { Awards } from "@site/data-access-core";
+import { type Awards, cvDataClient } from "@site/data-access-core";
 import { describe, expect, it } from "vitest";
 import {
   buildAwardCards,
   calculateAwardsStats,
   selectedAwards,
+  validateAwardsPresentation,
 } from "./awards";
 
 const awards: Awards = [
@@ -107,5 +108,14 @@ describe("awards view models", () => {
       firstYear: 2020,
       latestYear: 2020,
     });
+  });
+
+  it("keeps presentation identifiers aligned with the real CV domain", () => {
+    const domain = cvDataClient.domain("awards");
+    expect(() => validateAwardsPresentation(domain)).not.toThrow();
+    expect(selectedAwards(domain)).toHaveLength(4);
+    expect(() => validateAwardsPresentation([])).toThrow(
+      "Awards presentation references missing IDs",
+    );
   });
 });

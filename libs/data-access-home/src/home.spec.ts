@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { siteBase } from "@site/data-access-core";
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { homeContent, readPaneState } from "./home";
 
 describe("HOME content boundary", () => {
@@ -23,5 +25,18 @@ describe("HOME content boundary", () => {
     ]);
     expect(homeContent.story.link).toBe("/bio");
     expect(homeContent.contact.links).toHaveLength(3);
+  });
+
+  it("keeps internal links aligned with the shell route contract", () => {
+    const routes = z
+      .array(z.object({ path: z.string() }))
+      .parse(JSON.parse(readFileSync("apps/shell/src/routes.json", "utf8")));
+    const routePaths = new Set(routes.map(({ path }) => path));
+    const links = [
+      ...homeContent.carousel.map(({ link }) => link),
+      ...homeContent.cards.map(({ link }) => link),
+      homeContent.story.link,
+    ];
+    expect(links.every((link) => routePaths.has(link))).toBe(true);
   });
 });

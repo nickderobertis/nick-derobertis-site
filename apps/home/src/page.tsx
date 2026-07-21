@@ -10,13 +10,13 @@ const Timeline = lazy(() => import("timeline/Page"));
 const Skills = lazy(() => import("skills/Page"));
 const Awards = lazy(() => import("awards/Page"));
 
+// Keep the Home host in both shared data dependency graphs; panes own rendering.
+void siteBase;
+void homeContent;
+
 export default function HomePage() {
   return (
-    <div
-      className="home-main"
-      data-card-count={homeContent.cards.length}
-      data-site-base={siteBase}
-    >
+    <div className="home-main">
       <Suspense
         fallback={<output className="pane-state">Loading HOME page…</output>}
       >

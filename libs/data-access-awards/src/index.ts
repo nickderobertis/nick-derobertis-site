@@ -4,4 +4,5 @@ export {
   buildAwardCards,
   calculateAwardsStats,
   selectedAwards,
+  validateAwardsPresentation,
 } from "./awards";

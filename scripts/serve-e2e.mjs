@@ -8,16 +8,21 @@ import siteConfig from "../libs/data-access-core/src/site.config.json" with {
 };
 import { handleE2eDataRequest } from "./e2e-data-provider.mjs";
 
+function validateSiteConfig(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    typeof value.pagesBase !== "string" ||
+    !/^\/[a-z0-9-]+$/.test(value.pagesBase)
+  )
+    throw new Error(
+      `site.config.json pagesBase must match /[a-z0-9-]+; received ${JSON.stringify(value?.pagesBase)}. Fix it and run just test-e2e again.`,
+    );
+  return value;
+}
+
 const root = fileURLToPath(new URL("../dist/apps/shell", import.meta.url));
-if (
-  !siteConfig ||
-  typeof siteConfig.pagesBase !== "string" ||
-  !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase)
-)
-  throw new Error(
-    `site.config.json pagesBase must match /[a-z0-9-]+; received ${JSON.stringify(siteConfig?.pagesBase)}. Fix it and run just test-e2e again.`,
-  );
-const base = siteConfig.pagesBase;
+const base = validateSiteConfig(siteConfig).pagesBase;
 // llmlint: ignore-block[changed_behavior_has_e2e] Server startup validation is exercised through the real serve-e2e subprocess in home.spec.ts; it occurs before a browser interface exists.
 const portValue = process.env.PORT ?? "4200";
 const port = Number(portValue);

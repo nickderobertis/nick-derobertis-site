@@ -19,6 +19,43 @@ import software from "../libs/data-access-core/vendor/codegen/domains/software_p
   type: "json",
 };
 
+function validateSiteConfig(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    typeof value.pagesBase !== "string" ||
+    !/^\/[a-z0-9-]+$/.test(value.pagesBase)
+  )
+    throw new Error(
+      `site.config.json pagesBase must match /[a-z0-9-]+; received ${JSON.stringify(value?.pagesBase)}. Fix it and run just check again.`,
+    );
+  return value;
+}
+
+function validateRouteData({ courses, research, software }) {
+  if (
+    !research ||
+    typeof research !== "object" ||
+    !Array.isArray(research.projects) ||
+    !research.projects.every((project) => typeof project?.title === "string") ||
+    !Array.isArray(software) ||
+    !software.every(
+      (project) =>
+        typeof project?.display_name === "string" ||
+        typeof project?.name === "string",
+    ) ||
+    !Array.isArray(courses) ||
+    !courses.every((course) => typeof course?.title === "string")
+  )
+    throw new Error(
+      "CV route data is invalid; regenerate the validated CV domains and rerun just check.",
+    );
+  return { courses, research, software };
+}
+
+const validatedSiteConfig = validateSiteConfig(siteConfig);
+const routeData = validateRouteData({ courses, research, software });
+
 // llmlint: ignore-block[changed_behavior_has_e2e] Command startup failures are covered through the real subprocess boundary in home.spec.ts; they have no browser interface.
 function requirePath(value, fallback, name) {
   const path = value ?? fallback;
@@ -48,15 +85,7 @@ const remoteBuildRoot = requirePath(
   "REMOTE_BUILD_ROOT",
 );
 // llmlint: ignore-end[changed_behavior_has_e2e]
-if (
-  !siteConfig ||
-  typeof siteConfig.pagesBase !== "string" ||
-  !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase)
-)
-  throw new Error(
-    `site.config.json pagesBase must match /[a-z0-9-]+; received ${JSON.stringify(siteConfig?.pagesBase)}. Fix it and run just check again.`,
-  );
-const base = siteConfig.pagesBase;
+const base = validatedSiteConfig.pagesBase;
 const builtDocument = await readFile(join(output, "index.html"), "utf8");
 // Nx may restore a previously prerendered output from cache. Normalize it back
 // to the rspack template so this target is idempotent as well as parallel-safe.
@@ -69,23 +98,7 @@ const template = builtDocument
 
 function pageMarkup(route) {
   // llmlint: ignore-block[changed_behavior_has_e2e] CV validation occurs before a browser artifact exists; route-specific Playwright journeys exercise all data states through both rendering paths.
-  if (
-    !research ||
-    typeof research !== "object" ||
-    !Array.isArray(research.projects) ||
-    !research.projects.every((project) => typeof project?.title === "string") ||
-    !Array.isArray(software) ||
-    !software.every(
-      (project) =>
-        typeof project?.display_name === "string" ||
-        typeof project?.name === "string",
-    ) ||
-    !Array.isArray(courses) ||
-    !courses.every((course) => typeof course?.title === "string")
-  )
-    throw new Error(
-      "CV route data is invalid; regenerate the validated CV domains and rerun just check.",
-    );
+  const { courses, research, software } = routeData;
   // llmlint: ignore-end[changed_behavior_has_e2e]
   // llmlint: ignore-block[changed_behavior_has_e2e] Existing route-specific Playwright journeys exercise happy, empty, loading, and error states through host-composed and standalone paths; site.spec.ts additionally disables JavaScript to verify this static happy-state representation.
   const substantiveContent = {
