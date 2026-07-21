@@ -27,12 +27,24 @@ if (
   );
 const sources = [
   ["workflow", readFileSync(".github/workflows/visual-docs.yml", "utf8")],
+  [
+    "publish workflow",
+    readFileSync(".github/workflows/visual-docs-publish.yml", "utf8"),
+  ],
   ["visual runner", readFileSync("scripts/visual-project.sh", "utf8")],
   ["bootstrap", readFileSync("justfile", "utf8")],
   ["screencomp config", readFileSync("screencomp.toml", "utf8")],
 ];
 const captureSource = readFileSync("scripts/capture-visual.mjs", "utf8");
 const visualProjects = JSON.parse(readFileSync("visual-projects.json", "utf8"));
+const allowedProjectStates = new Set([
+  "all",
+  "empty",
+  "loading",
+  "error",
+  "expanded",
+  "employment-only",
+]);
 if (typeof visualProjects !== "object" || visualProjects === null)
   throw new Error("visual-projects.json must be an object");
 for (const [project, config] of Object.entries(visualProjects)) {
@@ -42,7 +54,7 @@ for (const [project, config] of Object.entries(visualProjects)) {
     config === null ||
     typeof config.hostPath !== "string" ||
     !Array.isArray(config.states) ||
-    !config.states.every((state) => typeof state === "string")
+    !config.states.every((state) => allowedProjectStates.has(state))
   )
     throw new Error(`Invalid visual project contract for ${project}`);
   const projectConfig = JSON.parse(
@@ -77,9 +89,9 @@ for (const [project, config] of Object.entries(visualProjects)) {
       throw new Error(`Visual project ${project} baseline is missing ${state}`);
 }
 const expectedConsumers = {
-  architecture: ["workflow", "visual runner", "screencomp config"],
+  architecture: ["visual runner", "screencomp config"],
   playwrightContainer: ["workflow", "visual runner"],
-  screencompVersion: ["workflow", "bootstrap"],
+  screencompVersion: ["workflow", "publish workflow", "bootstrap"],
 };
 for (const [key, value] of Object.entries(contract)) {
   const matches = sources

@@ -26,119 +26,18 @@ jobs:
           SCREENCOMP_CAPTURE_CONTAINER: "1"
           SCREENCOMP_DEFER_DRIFT: "1"
         run: just visual-affected
+      - name: Record affected-project signal
+        env:
+          CAPTURE_HEAD_SHA: ${{ github.sha }}
+          CAPTURE_REPOSITORY: ${{ github.repository }}
+        run: node scripts/write-visual-capture-signal.mjs
       - uses: actions/upload-artifact@v4
         with:
           name: visual-captures
           path: |
             affected-visual-projects.txt
+            visual-capture.json
             apps/*/visual/current
             apps/*/visual/verify
             apps/*/visual/drift
           if-no-files-found: error
-  publish:
-    needs: capture
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
-      - uses: nickderobertis/screencomp@v0.4.2
-      - uses: actions/download-artifact@v4
-        with: {name: visual-captures}
-      - name: Build affected galleries and PR comment
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          BASE_REF: ${{ github.base_ref }}
-          REPOSITORY: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          mkdir -p site
-          rm -f .visual-drift
-          marker='<!-- screencomp -->'
-          printf '%s\n## Visual changes\n\n' "$marker" > comment.md
-          [[ "$REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || { echo "Invalid GitHub repository context" >&2; exit 2; }
-          gallery_prefix="https://${REPOSITORY%/*}.github.io/${REPOSITORY#*/}"
-          if [ "$EVENT_NAME" = pull_request ]; then
-            [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid pull-request number context" >&2; exit 2; }
-            git check-ref-format --branch "$BASE_REF" >/dev/null || { echo "Invalid pull-request base ref" >&2; exit 2; }
-            gallery_prefix="$gallery_prefix/pr-$PR_NUMBER"
-          fi
-          while IFS= read -r project; do
-            [ -n "$project" ] || continue
-            if [[ ! "$project" =~ ^[a-z][a-z0-9-]*$ ]] || [ ! -f "apps/$project/project.json" ]; then
-              echo "Invalid affected visual project '$project'; regenerate affected-visual-projects.txt with just visual-affected." >&2
-              exit 2
-            fi
-            current="apps/$project/visual/current"
-            manifest="apps/$project/visual/baseline/x86_64.json"
-            comparison="$manifest"
-            if [ "$EVENT_NAME" = pull_request ] && git show "origin/$BASE_REF:$manifest" > base.json 2>/dev/null; then
-              comparison=base.json
-            fi
-            status=0
-            just visual-publish-project "$comparison" "$current" "site/$project" project-comment.md "$gallery_prefix/$project" || status=$?
-            if [ "$status" -eq 3 ]; then
-              touch .visual-drift
-            elif [ "$status" -ne 0 ]; then
-              exit "$status"
-            fi
-            if [ "$EVENT_NAME" = pull_request ]; then
-              sed '/<!-- screencomp-/d' project-comment.md >> comment.md
-              printf '\n' >> comment.md
-            fi
-          done < affected-visual-projects.txt
-      - uses: actions/upload-artifact@v4
-        with:
-          name: visual-galleries
-          path: |
-            site
-            comment.md
-          if-no-files-found: error
-      - name: Enforce visual drift gate after publishing review artifacts
-        run: |
-          if [ -f .visual-drift ]; then
-            echo "Visual drift detected; galleries and any permitted PR comment were published first." >&2
-            exit 3
-          fi
-  deploy:
-    needs: [capture, publish]
-    if: always() && needs.capture.result == 'success' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with: {name: visual-galleries}
-      - uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ github.token }}
-          publish_dir: site
-          destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || '' }}
-          keep_files: true
-  comment:
-    needs: [capture, publish]
-    if: always() && needs.capture.result == 'success' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with: {name: visual-galleries}
-      - name: Upsert visual diff comment
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPOSITORY: ${{ github.repository }}
-        run: |
-          [[ "$REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || { echo "Invalid GitHub repository context" >&2; exit 2; }
-          [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid pull-request number context" >&2; exit 2; }
-          existing=$(gh api "repos/$REPOSITORY/issues/$PR_NUMBER/comments" --jq '.[] | select(.body | contains("<!-- screencomp -->")) | .id' | head -1)
-          if [ -n "$existing" ]; then
-            [[ "$existing" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid existing comment id returned by GitHub" >&2; exit 2; }
-            gh api --method PATCH "repos/$REPOSITORY/issues/comments/$existing" -F body=@comment.md
-          else
-            gh pr comment "$PR_NUMBER" --body-file comment.md
-          fi

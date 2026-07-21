@@ -37,6 +37,139 @@ function affectedScreenshotProjects(file: string): string[] {
 }
 
 describe("visual affected selection", () => {
+  test("zero affected projects produce an explicit signal and no publication work", () => {
+    const root = mkdtempSync(path.join(process.cwd(), ".visual-zero-"));
+    try {
+      writeFileSync(path.join(root, "affected-visual-projects.txt"), "");
+      const signal = spawnSync(
+        "node",
+        [path.resolve("scripts/write-visual-capture-signal.mjs")],
+        {
+          cwd: root,
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            CAPTURE_HEAD_SHA: "a".repeat(40),
+            CAPTURE_REPOSITORY: "owner/repository",
+          },
+        },
+      );
+      expect(signal.status).toBe(0);
+      const output = path.join(root, "output.txt");
+      const inspect = spawnSync(
+        "node",
+        [
+          "scripts/inspect-visual-captures.mjs",
+          root,
+          "owner/repository",
+          "a".repeat(40),
+          output,
+        ],
+        { encoding: "utf8" },
+      );
+      expect(inspect.status).toBe(0);
+      expect(readFileSync(output, "utf8")).toBe("has_affected=false\n");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test.each(["same-repository", "fork"])(
+    "%s PR captures use the trusted publication path",
+    () => {
+      const root = mkdtempSync(path.join(process.cwd(), ".visual-pr-"));
+      try {
+        const artifact = path.join(root, "artifact");
+        const current = path.join(artifact, "apps/bio/visual/current/x86_64");
+        mkdirSync(current, { recursive: true });
+        copyFileSync(
+          "reference/screenshots/routes/home/desktop.png",
+          path.join(current, "desktop.png"),
+        );
+        const toggles = {
+          render: "standalone",
+          state: "happy",
+          viewport: "desktop",
+        };
+        writeFileSync(
+          path.join(current, "captures.json"),
+          JSON.stringify({
+            schema: 1,
+            shots: [
+              {
+                name: "bio",
+                toggles,
+                hash: "b".repeat(64),
+                image: "standalone/happy/desktop.png",
+              },
+            ],
+          }),
+        );
+        mkdirSync(path.join(current, "standalone/happy"), { recursive: true });
+        copyFileSync(
+          path.join(current, "desktop.png"),
+          path.join(current, "standalone/happy/desktop.png"),
+        );
+        writeFileSync(
+          path.join(artifact, "affected-visual-projects.txt"),
+          "bio\n",
+        );
+        writeFileSync(
+          path.join(artifact, "visual-capture.json"),
+          JSON.stringify({
+            schema: 1,
+            repository: "owner/repository",
+            headSha: "b".repeat(40),
+            affectedCount: 1,
+          }),
+        );
+        const output = path.join(root, "output.txt");
+        expect(
+          spawnSync(
+            "node",
+            [
+              "scripts/inspect-visual-captures.mjs",
+              artifact,
+              "owner/repository",
+              "b".repeat(40),
+              output,
+            ],
+            { encoding: "utf8" },
+          ).status,
+        ).toBe(0);
+        const publish = spawnSync(
+          "scripts/publish-visual-run.sh",
+          [artifact, "pull_request", "12", "master", "owner/repository", root],
+          { encoding: "utf8" },
+        );
+        expect(publish.status).toBe(0);
+        expect(
+          readFileSync(path.join(root, "site/bio/index.html"), "utf8"),
+        ).toContain("bio");
+        expect(readFileSync(path.join(root, "comment.md"), "utf8")).toContain(
+          "Visual changes",
+        );
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    },
+  );
+
+  test("trusted follow-up never executes fork code and has no fork comment guard", () => {
+    const workflow = readFileSync(
+      ".github/workflows/visual-docs-publish.yml",
+      "utf8",
+    );
+    expect(workflow).toContain("workflow_run:");
+    expect(workflow).toContain("ref: master");
+    expect(workflow).toContain(
+      "run-id: $" + "{{ github.event.workflow_run.id }}",
+    );
+    expect(workflow).not.toContain("head.repo.full_name");
+    expect(workflow).toContain("commits/$HEAD_SHA/pulls");
+    expect(workflow).toContain("needs.inspect.outputs.has_affected == 'true'");
+  });
+
   test("changed captures still produce a gallery and PR comment before the gate fails", () => {
     const root = mkdtempSync(path.join(process.cwd(), ".visual-workflow-"));
     try {
