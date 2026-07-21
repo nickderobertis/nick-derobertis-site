@@ -25,7 +25,7 @@ Rsbuild 2 requires Rspack 2, which is outside the supported Nx integration.
 | Claim | Result | Evidence | Decision impact |
 | --- | --- | --- | --- |
 | SSG provides prerendering and hydration | **Disproved / unavailable** | `pnpm view @rsbuild/plugin-ssg` returned npm `E404`; the package is also absent from the official Rsbuild plugin catalog. The Rsbuild build emitted an empty-root SPA HTML document. The existing 256-line `scripts/prerender.mjs` and 87-line `scripts/check-static-artifact.mjs` remain necessary. | No SSG or hydration benefit exists to justify migration. |
-| Configuration is simpler | **Disproved for this slice** | 34 lines of rspack build config were removed and 71 lines of Rsbuild config were added: **37 more build-config lines**. The two Nx project files changed by +10/-18 lines, but lose typed first-party executors in favor of string CLI commands and explicit output declarations. Zero scripts and zero script lines could be deleted. | The local config becomes longer and the Nx boundary less structured. |
+| Configuration is simpler | **Disproved for this slice** | 34 lines of rspack build config were removed and 71 lines of Rsbuild config were added: **37 more build-config lines**. The two Nx project files changed by +10/-14 lines, but lose typed first-party executors in favor of string CLI commands and explicit output declarations. Zero scripts and zero script lines could be deleted. | The local config becomes longer and the Nx boundary less structured. |
 | MF and affected selection still work | **Proved, with manual wiring** | The complete Pages artifact built, `dist/apps/shell/remotes/bio/remoteEntry.js` exists, and 13 real Chromium `bio` journeys passed across standalone and host-composed paths. `nx show projects --affected --files=apps/bio/rsbuild.config.ts --json` returned only `["bio"]`; the equivalent shell command returned only `["shell"]`. | Rsbuild is technically viable for MF and Nx selection, but supplies no compensating SSG benefit. |
 
 ## Hydration and CLS
@@ -76,12 +76,9 @@ construction because the shared helper is coupled to rspack plugin classes.
 
 ```sh
 pnpm view @rsbuild/plugin-ssg version
-pnpm exec nx run bio:build --skip-nx-cache
-pnpm exec nx run shell:build --skip-nx-cache
-pnpm exec nx run shell:prerender --skip-nx-cache
-pnpm exec nx run bio:e2e --skip-nx-cache
-pnpm exec nx show projects --affected --files=apps/bio/rsbuild.config.ts --json
-pnpm exec nx show projects --affected --files=apps/shell/rsbuild.config.ts --json
+just check
+just prerender
+just e2e-project bio
 ```
 
 ## What worked and what broke

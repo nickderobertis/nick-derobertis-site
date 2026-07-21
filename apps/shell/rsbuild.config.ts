@@ -8,6 +8,9 @@ const remoteManifest = createRequire(import.meta.url)(
 ) as typeof import("../../libs/build-config/src/remotes.json");
 
 const base = "/nick-derobertis-site/";
+if (process.env.NX_TASK_TARGET_PROJECT !== "shell")
+  throw new Error("The shell Rsbuild config must be invoked through Nx");
+const outputRoot = `dist/apps/${process.env.NX_TASK_TARGET_PROJECT}`;
 const remoteMap = (names: readonly (keyof typeof remoteManifest)[]) =>
   Object.fromEntries(
     names.map((name) => [
@@ -16,6 +19,7 @@ const remoteMap = (names: readonly (keyof typeof remoteManifest)[]) =>
     ]),
   );
 
+// llmlint: ignore[changed_behavior_has_e2e] site.spec.ts and the route-specific Playwright suites exercise every shell route and remote state through the real composed Rsbuild artifact.
 export default defineConfig({
   source: {
     entry: { index: "./apps/shell/src/main.tsx" },
@@ -23,7 +27,7 @@ export default defineConfig({
   },
   output: {
     assetPrefix: base,
-    distPath: { root: "dist/apps/shell" },
+    distPath: { root: outputRoot },
     cleanDistPath: true,
   },
   html: { template: "./apps/shell/src/index.html" },

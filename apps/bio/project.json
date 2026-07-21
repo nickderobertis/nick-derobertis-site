@@ -14,9 +14,11 @@
     },
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/dist/apps/bio"],
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "command": "rsbuild build --config apps/bio/rsbuild.config.ts"
+        "command": "rsbuild build --config apps/bio/rsbuild.config.ts",
+        "outputPath": "dist/apps/bio",
+        "forwardAllArgs": false
       }
     },
     "lint": {
