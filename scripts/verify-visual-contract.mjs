@@ -8,10 +8,17 @@ process.on("uncaughtException", (error) => {
 });
 
 const contract = JSON.parse(readFileSync("visual-tools.json", "utf8"));
+const contractKeys = [
+  "architecture",
+  "playwrightContainer",
+  "screencompVersion",
+];
 if (
   typeof contract !== "object" ||
   contract === null ||
-  !["architecture", "playwrightContainer", "screencompVersion"].every(
+  Object.keys(contract).length !== contractKeys.length ||
+  !Object.keys(contract).every((key) => contractKeys.includes(key)) ||
+  !contractKeys.every(
     (key) => typeof contract[key] === "string" && contract[key].length > 0,
   )
 )
