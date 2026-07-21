@@ -70,15 +70,20 @@ for (const [project, config] of Object.entries(visualProjects)) {
       throw new Error(`Visual project ${project} baseline is missing ${state}`);
 }
 const expectedConsumers = {
-  architecture: 3,
-  playwrightContainer: 2,
-  screencompVersion: 2,
+  architecture: ["workflow", "visual runner", "screencomp config"],
+  playwrightContainer: ["workflow", "visual runner"],
+  screencompVersion: ["workflow", "bootstrap"],
 };
 for (const [key, value] of Object.entries(contract)) {
-  const matches = sources.filter(([, source]) => source.includes(value));
-  if (matches.length !== expectedConsumers[key])
+  const matches = sources
+    .filter(([, source]) => source.includes(value))
+    .map(([name]) => name);
+  if (
+    matches.length !== expectedConsumers[key].length ||
+    !matches.every((name) => expectedConsumers[key].includes(name))
+  )
     throw new Error(
-      `Visual contract ${key}=${value} is not drift-checked across its consumers; update visual-tools.json and every visual consumer together`,
+      `Visual contract ${key}=${value} is consumed by [${matches.join(", ")}], expected [${expectedConsumers[key].join(", ")}]; update visual-tools.json and every visual consumer together`,
     );
 }
 const screencompSource = sources.find(

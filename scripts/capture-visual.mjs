@@ -169,14 +169,36 @@ async function prepareCaptureTarget(page, state) {
     ["home-contact", ["heading", "Let’s build something useful."]],
   ]);
   if (["empty", "loading", "error"].includes(state)) {
-    const indicator =
-      project === "research"
-        ? page.locator(".research-state")
-        : page.getByRole(
-            state === "error" && !project.startsWith("home")
-              ? "alert"
-              : "status",
-          );
+    await page.addStyleTag({
+      content:
+        "*,*::before,*::after{animation:none!important;caret-color:transparent!important;transition:none!important}",
+    });
+    const loadingText = new Map([
+      ["awards", "Loading awards…"],
+      ["bio", "Loading biography"],
+      ["courses", "Loading courses…"],
+      ["home", "Loading featured stories…"],
+      ["home-cards", "Loading areas of work…"],
+      ["home-carousel", "Loading featured stories…"],
+      ["home-contact", "Loading contact options…"],
+      ["home-story", "Loading Nick’s story…"],
+      ["skills", "Loading skills…"],
+      ["software", "Loading software projects…"],
+      ["timeline", "Loading timeline…"],
+    ]);
+    const findIndicator = () => {
+      if (project === "research") return page.locator(".research-state");
+      let locator = page.getByRole(
+        state === "error" && !project.startsWith("home") ? "alert" : "status",
+      );
+      if (project !== "home")
+        locator = locator.filter({ hasNotText: "Loading HOME page…" });
+      const expectedLoadingText = loadingText.get(project);
+      return state === "loading" && expectedLoadingText
+        ? locator.filter({ hasText: expectedLoadingText })
+        : locator;
+    };
+    const indicator = findIndicator();
     try {
       await indicator.first().waitFor({ state: "visible" });
     } catch (error) {
@@ -185,40 +207,7 @@ async function prepareCaptureTarget(page, state) {
         { cause: error },
       );
     }
-    await page.evaluate(() => {
-      window.stop();
-      const frozenDocument = document.documentElement.cloneNode(true);
-      document.replaceChild(frozenDocument, document.documentElement);
-    });
-    const frozenIndicator =
-      project === "research"
-        ? page.locator(".research-state").first()
-        : page
-            .getByRole(
-              project.startsWith("home") || state !== "error"
-                ? "status"
-                : "alert",
-            )
-            .first();
-    await frozenIndicator.evaluate((element, captureState) => {
-      element.textContent = "";
-      element.removeAttribute("class");
-      element.id = "screencomp-loading";
-      element.setAttribute(
-        "aria-label",
-        `Observed application ${captureState} state`,
-      );
-      element.setAttribute(
-        "style",
-        `all:initial;box-sizing:border-box;display:block;width:320px;height:80px;background:${captureState === "error" ? "#9b1c1c" : captureState === "empty" ? "#6b7280" : "#1d2733"};border:0;margin:0;padding:0`,
-      );
-      const style = document.createElement("style");
-      style.textContent =
-        "html,body{all:initial!important;display:block!important;margin:0!important;padding:0!important;background:#fff!important}#screencomp-loading::before,#screencomp-loading::after{display:none!important}";
-      document.head.replaceChildren(style);
-      document.body.replaceChildren(element);
-    }, state);
-    return page.locator("#screencomp-loading");
+    return indicator.first();
   }
   if (project === "awards")
     return page.getByRole("region", {
@@ -287,6 +276,16 @@ try {
           browserErrors.push(`HTTP ${response.status()}: ${response.url()}`);
       });
       await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
+      if (scenario.state === "loading")
+        await page.addInitScript(() => {
+          const nativeSetTimeout = window.setTimeout.bind(window);
+          window.setTimeout = (handler, timeout = 0, ...args) =>
+            nativeSetTimeout(
+              handler,
+              timeout >= 400 ? 2_147_483_647 : timeout,
+              ...args,
+            );
+        });
       const relative =
         scenario.render === "standalone"
           ? routePrefix
@@ -310,9 +309,10 @@ try {
       }
       const target = await prepareCaptureTarget(page, scenario.state);
       await target.waitFor({ state: "visible" });
-      await page.clock.pauseAt(
-        new Date((await page.evaluate(() => Date.now())) + 1_000),
-      );
+      if (!["empty", "loading", "error"].includes(scenario.state))
+        await page.clock.pauseAt(
+          new Date((await page.evaluate(() => Date.now())) + 1_000),
+        );
       const image = `${scenario.render}/${scenario.state}/${viewport}.png`;
       mkdirSync(path.dirname(path.join(outputRoot, image)), {
         recursive: true,

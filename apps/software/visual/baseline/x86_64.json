@@ -8,7 +8,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "485f53b18a47836f26eade8202952bd7d64a366d20ad9949cf267eec447f8f37"
+      "hash": "8eafea2b19c63efe5a1e37798e05fa492b1f5890c5fa29d7c592f52daf1a70b7"
     },
     {
       "name": "software",
@@ -17,7 +17,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "071ee818223f1e25a3f36471cc98f598d3c049e42f6f656c8fbb242928876f60"
+      "hash": "a6a8d52466bbcfca3bf654b25d31d302f86e88e2e424f8e344c1782bb98ad684"
     },
     {
       "name": "software",
@@ -53,7 +53,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7c431726deae6f7fe150608fc7a79e5c9ef27bbf4674bd15fc633297cb020d7d"
+      "hash": "f7f4e8b905d0a14e53839e8206aa078ee894886b0172a20731fd763f1b756e3a"
     },
     {
       "name": "software",
@@ -62,7 +62,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "485f53b18a47836f26eade8202952bd7d64a366d20ad9949cf267eec447f8f37"
+      "hash": "8eafea2b19c63efe5a1e37798e05fa492b1f5890c5fa29d7c592f52daf1a70b7"
     },
     {
       "name": "software",
@@ -71,7 +71,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "071ee818223f1e25a3f36471cc98f598d3c049e42f6f656c8fbb242928876f60"
+      "hash": "a6a8d52466bbcfca3bf654b25d31d302f86e88e2e424f8e344c1782bb98ad684"
     },
     {
       "name": "software",
@@ -107,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7c431726deae6f7fe150608fc7a79e5c9ef27bbf4674bd15fc633297cb020d7d"
+      "hash": "f7f4e8b905d0a14e53839e8206aa078ee894886b0172a20731fd763f1b756e3a"
     }
   ]
 }

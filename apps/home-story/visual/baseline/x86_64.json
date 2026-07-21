@@ -8,7 +8,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "485f53b18a47836f26eade8202952bd7d64a366d20ad9949cf267eec447f8f37"
+      "hash": "0e7e0b49b0a84bff63aecaf0181d721cb8d9566316b10d1076126d21d75435a7"
     },
     {
       "name": "home-story",
@@ -17,7 +17,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "071ee818223f1e25a3f36471cc98f598d3c049e42f6f656c8fbb242928876f60"
+      "hash": "63a3eafd2bd138182bcb4246bad7d2069c9854cb52a7a8cdf035b3f484808c26"
     },
     {
       "name": "home-story",
@@ -53,7 +53,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7c431726deae6f7fe150608fc7a79e5c9ef27bbf4674bd15fc633297cb020d7d"
+      "hash": "ceace935e234112161db0802a7bc3f0fe48e35c9d2df079f2fb1c5f8f9b8b892"
     },
     {
       "name": "home-story",
@@ -62,7 +62,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "485f53b18a47836f26eade8202952bd7d64a366d20ad9949cf267eec447f8f37"
+      "hash": "95f0889133ca7b54926aa9748fec1b805b88ffd4087b1964dec2f03ed69c9f73"
     },
     {
       "name": "home-story",
@@ -71,7 +71,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "071ee818223f1e25a3f36471cc98f598d3c049e42f6f656c8fbb242928876f60"
+      "hash": "079bca5111e1f65f1792176b60157e942ce35f841908534879e272dec1d6c161"
     },
     {
       "name": "home-story",
@@ -107,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7c431726deae6f7fe150608fc7a79e5c9ef27bbf4674bd15fc633297cb020d7d"
+      "hash": "48de27c72cac5a03cb1e4d3903e33c6775adcc9144009c7720c258d622c14a75"
     }
   ]
 }

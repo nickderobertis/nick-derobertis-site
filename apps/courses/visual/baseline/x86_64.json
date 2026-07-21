@@ -8,7 +8,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "485f53b18a47836f26eade8202952bd7d64a366d20ad9949cf267eec447f8f37"
+      "hash": "de5eba282a6006432f80114eb1ab25336faf251c6802d356c6dd02c56f51e01c"
     },
     {
       "name": "courses",
@@ -17,7 +17,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "071ee818223f1e25a3f36471cc98f598d3c049e42f6f656c8fbb242928876f60"
+      "hash": "60083953a668aa5ac9a0e6ea1967029473651d94a6a7152a4b8f184395477c64"
     },
     {
       "name": "courses",
@@ -53,7 +53,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7c431726deae6f7fe150608fc7a79e5c9ef27bbf4674bd15fc633297cb020d7d"
+      "hash": "8062f018291e726d270a6d46ca7a8c193239b3a0c1b9d7df204081a1987e892b"
     },
     {
       "name": "courses",
@@ -62,7 +62,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "485f53b18a47836f26eade8202952bd7d64a366d20ad9949cf267eec447f8f37"
+      "hash": "54c81d2f834a57cbe31d2fe548ae67438b0f7f562dfe102c7cfddaaabe86134e"
     },
     {
       "name": "courses",
@@ -71,7 +71,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "071ee818223f1e25a3f36471cc98f598d3c049e42f6f656c8fbb242928876f60"
+      "hash": "da6226993ab98c5517f8407d0fe900c2358be5a19b1e54ccf0d8c69b819785b3"
     },
     {
       "name": "courses",
@@ -107,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7c431726deae6f7fe150608fc7a79e5c9ef27bbf4674bd15fc633297cb020d7d"
+      "hash": "8c8b0845b35c489b7434496c76f7335a1f8703ffce62d7742ab8489b2bb1099e"
     }
   ]
 }

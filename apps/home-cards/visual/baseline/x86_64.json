@@ -8,7 +8,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "485f53b18a47836f26eade8202952bd7d64a366d20ad9949cf267eec447f8f37"
+      "hash": "0e7e0b49b0a84bff63aecaf0181d721cb8d9566316b10d1076126d21d75435a7"
     },
     {
       "name": "home-cards",
@@ -17,7 +17,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "071ee818223f1e25a3f36471cc98f598d3c049e42f6f656c8fbb242928876f60"
+      "hash": "63a3eafd2bd138182bcb4246bad7d2069c9854cb52a7a8cdf035b3f484808c26"
     },
     {
       "name": "home-cards",
@@ -53,7 +53,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7c431726deae6f7fe150608fc7a79e5c9ef27bbf4674bd15fc633297cb020d7d"
+      "hash": "94810ad8956f80c10833edbebc7f1fb56932f983a8868e9509b0da51084c4453"
     },
     {
       "name": "home-cards",
@@ -62,7 +62,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "485f53b18a47836f26eade8202952bd7d64a366d20ad9949cf267eec447f8f37"
+      "hash": "1811f6facec9a561b6bb7a24eaf6fc5d863d69e08a39c7604eb81da3e466278d"
     },
     {
       "name": "home-cards",
@@ -71,7 +71,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "071ee818223f1e25a3f36471cc98f598d3c049e42f6f656c8fbb242928876f60"
+      "hash": "96ee7de2c54bc050dcd307a39b2d72c4a2319cea9700f3d057b2c720236ee4db"
     },
     {
       "name": "home-cards",
@@ -107,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7c431726deae6f7fe150608fc7a79e5c9ef27bbf4674bd15fc633297cb020d7d"
+      "hash": "73f24eb27ffed1cfbc844875eb59ad983d72e2d8205c8ee47d127b8ca51932eb"
     }
   ]
 }
