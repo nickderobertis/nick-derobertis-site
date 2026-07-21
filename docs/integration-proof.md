@@ -68,3 +68,31 @@ $ pnpm exec nx show projects --affected --files=libs/data-access/src/site.ts --w
 The shell-wide route, keyboard, fallback, and state matrix remains the explicit
 `shell-e2e:integration` target run by `just check`; it is deliberately separate
 from affected remote ownership.
+
+## Static Pages and visual evidence
+
+`shell:prerender` writes each route beneath `/nick-derobertis-site/`, stages
+every remote from the canonical manifest beneath `remotes/<name>/remoteEntry.js`,
+and writes `404.html`. The JavaScript-disabled browser assertion checks real
+feature text on all five routes, while the integration suite checks deep-link
+recovery and omnidirectional host/remote composition.
+
+The pinned visual command requires membership of the host's `docker` group.
+This worker is not a member, so the documented local Chromium fallback was run
+twice per route instead:
+
+```console
+$ SCREENCOMP_CAPTURE_CONTAINER=1 SCREENCOMP_DEFER_DRIFT=1 just visual-project <route-project>
+# repeated for home, bio, research, software, and courses
+
+$ screencomp classify --baseline-manifest apps/research/visual/baseline/x86_64.json --current apps/research/visual/current --arch x86_64 --exit-code
+added 0 changed 0 removed 0 unchanged 12
+```
+
+Research passed all 12 baseline comparisons exactly. Home, bio, software, and
+courses each reported `added 0 changed 6 removed 0 unchanged 6`: all happy-state
+screenshots differed on this CPU and all empty/loading/error screenshots were
+unchanged. Screencomp reported its cross-CPU anti-aliasing warning for each of
+those four projects. Capture-vs-recapture verification and manifest validation
+passed for all five projects; strict baseline parity remains a pinned-container
+check and was not represented as a pass.
