@@ -1,6 +1,13 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+process.on("uncaughtException", (error) => {
+  console.error(
+    `verify-reference-migration: ${error instanceof Error ? error.message : String(error)}; repair the migration map or owned baselines and retry`,
+  );
+  process.exit(1);
+});
+
 const migration = JSON.parse(
   readFileSync("reference/screenshots/screencomp-migration.json", "utf8"),
 );

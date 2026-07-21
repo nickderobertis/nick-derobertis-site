@@ -7,11 +7,10 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
-function affectedScreenshots(file: string): string[] {
+function affectedScreenshotProjects(file: string): string[] {
   const output = execFileSync(
     "pnpm",
     [
@@ -39,7 +38,7 @@ function affectedScreenshots(file: string): string[] {
 
 describe("visual affected selection", () => {
   test("changed captures still produce a gallery and PR comment before the gate fails", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "visual-workflow-"));
+    const root = mkdtempSync(path.join(process.cwd(), ".visual-workflow-"));
     try {
       const current = path.join(root, "current", "x86_64");
       const gallery = path.join(root, "gallery");
@@ -124,12 +123,14 @@ describe("visual affected selection", () => {
   });
 
   test("a remote change recaptures only that remote", () => {
-    expect(affectedScreenshots("apps/skills/src/page.tsx")).toEqual(["skills"]);
+    expect(affectedScreenshotProjects("apps/skills/src/page.tsx")).toEqual([
+      "skills",
+    ]);
   });
 
   test("a shared design-system change recaptures exactly its dependent remotes", () => {
     expect(
-      affectedScreenshots("libs/design-system/src/theme.css").sort(),
+      affectedScreenshotProjects("libs/design-system/src/theme.css").sort(),
     ).toEqual(
       [
         "awards",

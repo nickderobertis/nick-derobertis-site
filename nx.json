@@ -24,12 +24,31 @@
     "typecheck": { "cache": true },
     "screenshot": {
       "cache": true,
+      "dependsOn": [
+        "build",
+        {
+          "target": "build",
+          "projects": [
+            "home",
+            "home-carousel",
+            "home-contact",
+            "home-cards",
+            "home-story",
+            "timeline",
+            "skills",
+            "awards"
+          ]
+        },
+        { "target": "prerender", "projects": ["shell"] }
+      ],
       "inputs": [
         "production",
         "^production",
         "{workspaceRoot}/scripts/capture-visual.mjs",
+        "{workspaceRoot}/scripts/e2e-data-provider.mjs",
         "{workspaceRoot}/scripts/visual-project.sh",
-        "{workspaceRoot}/screencomp.toml"
+        "{workspaceRoot}/screencomp.toml",
+        "{projectRoot}/visual/baseline/**/*"
       ],
       "outputs": ["{projectRoot}/visual/current", "{projectRoot}/visual/verify"]
     }

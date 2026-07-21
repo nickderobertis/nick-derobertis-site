@@ -33,7 +33,6 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build", { "target": "prerender", "projects": ["shell"] }],
       "options": { "command": "scripts/visual-project.sh home-carousel" }
     }
   }

@@ -10,6 +10,14 @@ import {
 import { createServer } from "node:http";
 import path from "node:path";
 import { chromium } from "@playwright/test";
+import { handleE2eDataRequest } from "./e2e-data-provider.mjs";
+
+process.on("uncaughtException", (error) => {
+  console.error(
+    `capture-visual: ${error instanceof Error ? error.message : String(error)}; rerun the owning just visual-project target after fixing the reported boundary`,
+  );
+  process.exit(1);
+});
 
 const [project, outputArgument] = process.argv.slice(2);
 if (!project || !outputArgument || !/^[a-z][a-z0-9-]*$/.test(project))
@@ -39,34 +47,16 @@ const routePrefix = `/nick-derobertis-site/remotes/${project}/`;
 const pagesPrefix = "/nick-derobertis-site/";
 const server = createServer(async (request, response) => {
   const requestUrl = new URL(request.url ?? "/", "http://localhost");
-  const dataDomain = ["research", "awards"].find(
-    (domain) =>
-      requestUrl.pathname === `${pagesPrefix}cv-data/domains/${domain}.json`,
-  );
-  if (dataDomain) {
-    const scenario = requestUrl.searchParams.get("scenario");
-    if (
-      scenario !== null &&
-      !["empty", "error", "loading"].includes(scenario)
-    ) {
-      response.writeHead(400).end("Unsupported visual scenario");
-      return;
-    }
-    if (scenario === "loading")
-      await new Promise((resolve) => setTimeout(resolve, 5_000));
-    if (scenario === "error") {
-      response
-        .writeHead(503, { "content-type": "application/json" })
-        .end(JSON.stringify({ error: `${dataDomain} unavailable` }));
-      return;
-    }
-    if (scenario === "empty") {
-      response
-        .writeHead(200, { "content-type": "application/json" })
-        .end(JSON.stringify(dataDomain === "research" ? { projects: [] } : []));
-      return;
-    }
-  }
+  if (
+    await handleE2eDataRequest({
+      base: pagesPrefix.slice(0, -1),
+      loadingMs: 5_000,
+      response,
+      root: path.resolve("dist/apps/shell"),
+      url: requestUrl,
+    })
+  )
+    return;
   const match = requestUrl.pathname.match(
     /^\/nick-derobertis-site\/remotes\/([a-z][a-z0-9-]*)\/(.*)$/,
   );
@@ -194,24 +184,31 @@ async function prepareCaptureTarget(page, state) {
     if (state === "loading") {
       await page.evaluate(() => {
         window.stop();
-        const frozenDocument = document.implementation.createHTMLDocument();
-        const style = frozenDocument.createElement("style");
-        style.textContent =
-          "html,body{margin:0;background:#fff}main{box-sizing:border-box;display:flex;gap:12px;min-height:180px;padding:48px}.bar{background:#1d2733;height:24px}.long{width:240px}.short{width:80px}";
-        frozenDocument.head.append(style);
-        const main = frozenDocument.createElement("main");
-        main.setAttribute("aria-label", "Observed application loading state");
-        for (const className of ["bar long", "bar short"]) {
-          const bar = frozenDocument.createElement("span");
-          bar.className = className;
-          main.append(bar);
-        }
-        frozenDocument.body.append(main);
-        document.replaceChild(
-          document.importNode(frozenDocument.documentElement, true),
-          document.documentElement,
+        const frozenDocument = document.documentElement.cloneNode(true);
+        document.replaceChild(frozenDocument, document.documentElement);
+      });
+      const frozenIndicator =
+        project === "research"
+          ? page.locator(".research-state").first()
+          : page
+              .getByRole(
+                project.startsWith("home") || state !== "error"
+                  ? "status"
+                  : "alert",
+              )
+              .first();
+      await frozenIndicator.evaluate((element) => {
+        element.textContent = "";
+        element.setAttribute(
+          "aria-label",
+          "Observed application loading state",
+        );
+        element.setAttribute(
+          "style",
+          "box-sizing:border-box;display:block;width:320px;height:80px;background:#1d2733;border:0;margin:0;padding:0",
         );
       });
+      return frozenIndicator;
     }
     return page.locator("body");
   }

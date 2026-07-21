@@ -24,14 +24,14 @@ capture() {
 }
 capture "$current"
 capture "$verify"
-if ! screencomp verify --quiet --first "apps/$project/visual/current" --second "apps/$project/visual/verify" --arch "$arch"; then
-  printf 'visual-project: capture was not reproducible; rerun just visual-project %s in the pinned container and inspect both capture trees\n' "$project" >&2
+verify_output=$(screencomp verify --first "apps/$project/visual/current" --second "apps/$project/visual/verify" --arch "$arch" 2>&1) || {
+  printf '%s\nvisual-project: capture was not reproducible; rerun just visual-project %s in the pinned container and inspect both capture trees\n' "$verify_output" "$project" >&2
   exit 1
-fi
-if ! screencomp doctor --quiet --input "apps/$project/visual/current" --arch "$arch" --exit-code; then
-  printf 'visual-project: capture metadata is invalid; inspect apps/%s/visual/current/%s/captures.json and rerun the target\n' "$project" "$arch" >&2
+}
+doctor_output=$(screencomp doctor --input "apps/$project/visual/current" --arch "$arch" --exit-code 2>&1) || {
+  printf '%s\nvisual-project: capture metadata is invalid; inspect apps/%s/visual/current/%s/captures.json and rerun the target\n' "$doctor_output" "$project" "$arch" >&2
   exit 1
-fi
+}
 if [[ ! -f "$baseline" ]]; then
   printf 'visual-project: missing baseline %s; seed it with screencomp manifest\n' "$baseline" >&2
   exit 1

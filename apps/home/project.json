@@ -31,21 +31,6 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "build",
-        {
-          "target": "build",
-          "projects": [
-            "home-carousel",
-            "home-contact",
-            "home-cards",
-            "home-story",
-            "timeline",
-            "skills"
-          ]
-        },
-        { "target": "prerender", "projects": ["shell"] }
-      ],
       "options": { "command": "scripts/visual-project.sh home" }
     }
   }
