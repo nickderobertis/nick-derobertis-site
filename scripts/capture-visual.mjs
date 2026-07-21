@@ -180,37 +180,48 @@ async function prepareCaptureTarget(page, state) {
               ? "alert"
               : "status",
           );
-    await indicator.first().waitFor({ state: "visible" });
-    if (state === "loading") {
-      await page.evaluate(() => {
-        window.stop();
-        const frozenDocument = document.documentElement.cloneNode(true);
-        document.replaceChild(frozenDocument, document.documentElement);
-      });
-      const frozenIndicator =
-        project === "research"
-          ? page.locator(".research-state").first()
-          : page
-              .getByRole(
-                project.startsWith("home") || state !== "error"
-                  ? "status"
-                  : "alert",
-              )
-              .first();
-      await frozenIndicator.evaluate((element) => {
-        element.textContent = "";
-        element.setAttribute(
-          "aria-label",
-          "Observed application loading state",
-        );
-        element.setAttribute(
-          "style",
-          "box-sizing:border-box;display:block;width:320px;height:80px;background:#1d2733;border:0;margin:0;padding:0",
-        );
-      });
-      return frozenIndicator;
+    try {
+      await indicator.first().waitFor({ state: "visible" });
+    } catch (error) {
+      throw new Error(
+        `${project} ${state} indicator did not render; verify the e2e data provider and rerun the screenshot target`,
+        { cause: error },
+      );
     }
-    return page.locator("body");
+    await page.evaluate(() => {
+      window.stop();
+      const frozenDocument = document.documentElement.cloneNode(true);
+      document.replaceChild(frozenDocument, document.documentElement);
+    });
+    const frozenIndicator =
+      project === "research"
+        ? page.locator(".research-state").first()
+        : page
+            .getByRole(
+              project.startsWith("home") || state !== "error"
+                ? "status"
+                : "alert",
+            )
+            .first();
+    await frozenIndicator.evaluate((element, captureState) => {
+      element.textContent = "";
+      element.removeAttribute("class");
+      element.id = "screencomp-loading";
+      element.setAttribute(
+        "aria-label",
+        `Observed application ${captureState} state`,
+      );
+      element.setAttribute(
+        "style",
+        `all:initial;box-sizing:border-box;display:block;width:320px;height:80px;background:${captureState === "error" ? "#9b1c1c" : captureState === "empty" ? "#6b7280" : "#1d2733"};border:0;margin:0;padding:0`,
+      );
+      const style = document.createElement("style");
+      style.textContent =
+        "html,body{all:initial!important;display:block!important;margin:0!important;padding:0!important;background:#fff!important}#screencomp-loading::before,#screencomp-loading::after{display:none!important}";
+      document.head.replaceChildren(style);
+      document.body.replaceChildren(element);
+    }, state);
+    return page.locator("#screencomp-loading");
   }
   if (project === "awards")
     return page.getByRole("region", {
