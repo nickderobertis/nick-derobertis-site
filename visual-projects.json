@@ -1,0 +1,26 @@
+{
+  "awards": { "hostPath": "", "states": ["all", "empty", "loading", "error"] },
+  "bio": { "hostPath": "bio", "states": ["empty", "loading", "error"] },
+  "courses": { "hostPath": "courses", "states": ["empty", "loading", "error"] },
+  "home": { "hostPath": "", "states": ["empty", "loading", "error"] },
+  "home-cards": { "hostPath": "", "states": ["empty", "loading", "error"] },
+  "home-carousel": { "hostPath": "", "states": ["empty", "loading", "error"] },
+  "home-contact": { "hostPath": "", "states": ["empty", "loading", "error"] },
+  "home-story": { "hostPath": "", "states": ["empty", "loading", "error"] },
+  "research": {
+    "hostPath": "research",
+    "states": ["empty", "loading", "error"]
+  },
+  "skills": {
+    "hostPath": "",
+    "states": ["empty", "loading", "error", "expanded"]
+  },
+  "software": {
+    "hostPath": "software",
+    "states": ["empty", "loading", "error"]
+  },
+  "timeline": {
+    "hostPath": "",
+    "states": ["empty", "loading", "error", "employment-only"]
+  }
+}

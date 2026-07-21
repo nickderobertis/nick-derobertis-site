@@ -39,7 +39,7 @@ jobs:
     needs: capture
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
@@ -97,19 +97,27 @@ jobs:
             site
             comment.md
           if-no-files-found: error
-      - uses: peaceiris/actions-gh-pages@v4
-        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-        with:
-          github_token: ${{ github.token }}
-          publish_dir: site
-          destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || '' }}
-          keep_files: true
       - name: Enforce visual drift gate after publishing review artifacts
         run: |
           if [ -f .visual-drift ]; then
             echo "Visual drift detected; galleries and any permitted PR comment were published first." >&2
             exit 3
           fi
+  deploy:
+    needs: [capture, publish]
+    if: always() && needs.capture.result == 'success' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with: {name: visual-galleries}
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ github.token }}
+          publish_dir: site
+          destination_dir: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || '' }}
+          keep_files: true
   comment:
     needs: [capture, publish]
     if: always() && needs.capture.result == 'success' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository

@@ -46,6 +46,7 @@
         "^production",
         "{workspaceRoot}/scripts/capture-visual.mjs",
         "{workspaceRoot}/scripts/e2e-data-provider.mjs",
+        "{workspaceRoot}/visual-projects.json",
         "{workspaceRoot}/scripts/visual-project.sh",
         "{workspaceRoot}/screencomp.toml",
         "{projectRoot}/visual/baseline/**/*"

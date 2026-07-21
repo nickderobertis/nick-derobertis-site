@@ -6,12 +6,12 @@ set positional-arguments := true
 # AGENTS.md and the composed Stack-and-composition record.
 bootstrap:
     corepack enable || { echo "bootstrap: Corepack could not be enabled; verify the Node installation, then rerun just bootstrap" >&2; exit 1; }
-    pnpm install --frozen-lockfile --reporter=silent || { echo "bootstrap: dependency install failed; check the lockfile and registry access, then rerun just bootstrap" >&2; exit 1; }
+    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: dependency install failed; check the lockfile and registry access, then rerun just bootstrap" >&2; exit 1; }
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec playwright install chromium >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: Chromium install failed; check Playwright system requirements, then rerun just bootstrap" >&2; exit 1; }
     if ! command -v screencomp >/dev/null; then log=$(mktemp); trap 'rm -f "$log"' EXIT; (curl -fsSL https://raw.githubusercontent.com/nickderobertis/screencomp/main/scripts/install.sh | sh -s -- --version v0.4.2) >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: screencomp install failed; check network access and rerun just bootstrap" >&2; exit 1; }; fi
 
 bootstrap-ci:
-    pnpm install --frozen-lockfile --reporter=silent || { echo "bootstrap-ci: dependency install failed; check the lockfile and registry access, then rerun just bootstrap-ci" >&2; exit 1; }
+    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap-ci: dependency install failed; check the lockfile and registry access, then rerun just bootstrap-ci" >&2; exit 1; }
 
 visual-affected:
     node scripts/verify-visual-contract.mjs || { echo "visual-affected: visual tool pins or toggle contracts drifted; update visual-tools.json and every named consumer together" >&2; exit 1; }
@@ -29,10 +29,13 @@ verify-visual-reference:
     node scripts/verify-reference-migration.mjs || { echo "verify-visual-reference: PR #12 migration verification failed; repair the migration map or its owned baselines and retry" >&2; exit 1; }
 
 check: test
+    # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
+    # bundler, prerender, Playwright, and screenshot executors in this workspace.
     base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender,e2e,screenshot --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
 # CI runs this non-PR safety sweep so affected detection is never the only gate.
 check-all:
+    # Keep the same CI warnings-as-errors contract during the non-affected sweep.
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx run-many -t lint --all --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx run-many -t typecheck,test,build,prerender,e2e,screenshot --all --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check-all: quality gate failed; fix warnings and errors above, then rerun just check-all" >&2; exit 1; }
 
 test:

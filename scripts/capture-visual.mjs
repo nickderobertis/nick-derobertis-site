@@ -31,6 +31,29 @@ if (!outputRoot.startsWith(`${allowedOutputRoot}${path.sep}`))
     `Output root must be inside ${allowedOutputRoot}; use the project's Nx screenshot target`,
   );
 const projectRoot = path.resolve("dist/apps", project);
+const visualProjects = JSON.parse(readFileSync("visual-projects.json", "utf8"));
+const allowedVisualStates = new Set([
+  "all",
+  "empty",
+  "loading",
+  "error",
+  "expanded",
+  "employment-only",
+]);
+if (
+  typeof visualProjects !== "object" ||
+  visualProjects === null ||
+  !Object.hasOwn(visualProjects, project) ||
+  typeof visualProjects[project].hostPath !== "string" ||
+  !/^(?:[a-z][a-z0-9-]*)?$/.test(visualProjects[project].hostPath) ||
+  !Array.isArray(visualProjects[project].states) ||
+  !visualProjects[project].states.every((state) =>
+    allowedVisualStates.has(state),
+  )
+)
+  throw new Error(
+    `Project ${project} is not configured in visual-projects.json; add a validated hostPath and states entry before capturing it`,
+  );
 if (!existsSync(path.join(projectRoot, "index.html")))
   throw new Error(
     `Built remote not found: ${projectRoot}; run pnpm exec nx build ${project} first`,
@@ -119,34 +142,8 @@ const viewports = [
   ["tablet", 768, 1024],
   ["mobile", 375, 812],
 ];
-const composedPaths = new Map([
-  ["awards", ""],
-  ["bio", "bio"],
-  ["courses", "courses"],
-  ["home", ""],
-  ["home-cards", ""],
-  ["home-carousel", ""],
-  ["home-contact", ""],
-  ["home-story", ""],
-  ["research", "research"],
-  ["skills", ""],
-  ["software", "software"],
-  ["timeline", ""],
-]);
-const stateQueries = new Map([
-  ["awards", ["all", "empty", "loading", "error"]],
-  ["bio", ["empty", "loading", "error"]],
-  ["courses", ["empty", "loading", "error"]],
-  ["home", ["empty", "loading", "error"]],
-  ["home-cards", ["empty", "loading", "error"]],
-  ["home-carousel", ["empty", "loading", "error"]],
-  ["home-contact", ["empty", "loading", "error"]],
-  ["home-story", ["empty", "loading", "error"]],
-  ["research", ["empty", "loading", "error"]],
-  ["skills", ["empty", "loading", "error", "expanded"]],
-  ["software", ["empty", "loading", "error"]],
-  ["timeline", ["empty", "loading", "error", "employment-only"]],
-]);
+const hostPath = visualProjects[project].hostPath;
+const projectStates = visualProjects[project].states;
 
 function queryFor(state) {
   if (state === "happy") return "";
@@ -251,9 +248,8 @@ async function prepareCaptureTarget(page, state) {
 const shots = [];
 try {
   const scenarios = [{ render: "standalone", state: "happy", viewports }];
-  if (composedPaths.has(project))
-    scenarios.push({ render: "host-composed", state: "happy", viewports });
-  for (const state of stateQueries.get(project) ?? []) {
+  scenarios.push({ render: "host-composed", state: "happy", viewports });
+  for (const state of projectStates) {
     for (const render of ["standalone", "host-composed"])
       scenarios.push({ render, state, viewports: [viewports[0]] });
   }
@@ -294,7 +290,7 @@ try {
       const relative =
         scenario.render === "standalone"
           ? routePrefix
-          : `${pagesPrefix}${composedPaths.get(project) ?? ""}`;
+          : `${pagesPrefix}${hostPath}`;
       if (scenario.render === "host-composed" && scenario.state !== "happy") {
         await page.goto(`http://127.0.0.1:${address.port}${routePrefix}`, {
           waitUntil: "networkidle",

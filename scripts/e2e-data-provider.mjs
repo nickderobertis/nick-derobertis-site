@@ -35,7 +35,10 @@ export async function handleE2eDataRequest({
     response
       .writeHead(200, { "Content-Type": "application/json" })
       .end(await readFile(join(root, `cv-data/domains/${dataDomain}.json`)));
-  } catch {
+  } catch (error) {
+    console.error(
+      `e2e-data-provider: unable to read ${dataDomain} fixture: ${error instanceof Error ? error.message : String(error)}; run the shell prerender target and retry`,
+    );
     response
       .writeHead(500, { "Content-Type": "application/json" })
       .end(JSON.stringify({ error: `${dataDomain} fixture unavailable` }));

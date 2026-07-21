@@ -25,6 +25,50 @@ const sources = [
   ["screencomp config", readFileSync("screencomp.toml", "utf8")],
 ];
 const captureSource = readFileSync("scripts/capture-visual.mjs", "utf8");
+const visualProjects = JSON.parse(readFileSync("visual-projects.json", "utf8"));
+if (typeof visualProjects !== "object" || visualProjects === null)
+  throw new Error("visual-projects.json must be an object");
+for (const [project, config] of Object.entries(visualProjects)) {
+  if (
+    !/^[a-z][a-z0-9-]*$/.test(project) ||
+    typeof config !== "object" ||
+    config === null ||
+    typeof config.hostPath !== "string" ||
+    !Array.isArray(config.states) ||
+    !config.states.every((state) => typeof state === "string")
+  )
+    throw new Error(`Invalid visual project contract for ${project}`);
+  const projectConfig = JSON.parse(
+    readFileSync(`apps/${project}/project.json`, "utf8"),
+  );
+  if (!projectConfig.targets?.screenshot)
+    throw new Error(`Visual project ${project} has no Nx screenshot target`);
+  const baseline = JSON.parse(
+    readFileSync(`apps/${project}/visual/baseline/x86_64.json`, "utf8"),
+  );
+  if (
+    typeof baseline !== "object" ||
+    baseline === null ||
+    !Array.isArray(baseline.shots) ||
+    !baseline.shots.every(
+      (shot) =>
+        typeof shot === "object" &&
+        shot !== null &&
+        typeof shot.toggles === "object" &&
+        shot.toggles !== null &&
+        typeof shot.toggles.state === "string",
+    )
+  )
+    throw new Error(
+      `Visual project ${project} has an invalid baseline manifest`,
+    );
+  const baselineStates = new Set(
+    baseline.shots.map((shot) => shot.toggles?.state),
+  );
+  for (const state of ["happy", ...config.states])
+    if (!baselineStates.has(state))
+      throw new Error(`Visual project ${project} baseline is missing ${state}`);
+}
 const expectedConsumers = {
   architecture: 3,
   playwrightContainer: 2,
