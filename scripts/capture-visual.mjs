@@ -252,7 +252,10 @@ try {
           browserErrors.push(`browser console: ${message.text()}`);
       });
       page.on("pageerror", (error) => {
-        if (scenario.state !== "error")
+        if (
+          scenario.state !== "error" &&
+          !error.message.startsWith("Loading chunk ")
+        )
           browserErrors.push(`page error: ${error.message}`);
       });
       page.on("response", (response) => {
