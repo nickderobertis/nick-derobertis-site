@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "0e7e0b49b0a84bff63aecaf0181d721cb8d9566316b10d1076126d21d75435a7"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "63a3eafd2bd138182bcb4246bad7d2069c9854cb52a7a8cdf035b3f484808c26"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "d77632f72b5583ca2a6c1fe25c4d789affe9ce1eba7b663cec742d2b02ba9d8c"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "342e18496e0d3193d17807026425917196f266472ab95f1807faeb4ffb5cc14e"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "12ebf75b8bb8cca506c70cab39164494802bd9199a728971e3f8fcc85f750c9f"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "ceace935e234112161db0802a7bc3f0fe48e35c9d2df079f2fb1c5f8f9b8b892"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "95f0889133ca7b54926aa9748fec1b805b88ffd4087b1964dec2f03ed69c9f73"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "079bca5111e1f65f1792176b60157e942ce35f841908534879e272dec1d6c161"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "d77632f72b5583ca2a6c1fe25c4d789affe9ce1eba7b663cec742d2b02ba9d8c"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "342e18496e0d3193d17807026425917196f266472ab95f1807faeb4ffb5cc14e"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "12ebf75b8bb8cca506c70cab39164494802bd9199a728971e3f8fcc85f750c9f"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "48de27c72cac5a03cb1e4d3903e33c6775adcc9144009c7720c258d622c14a75"
+    }
+  ]
+}

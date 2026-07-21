@@ -148,35 +148,3 @@ test("standalone skills remote loads the shared design-system", async ({
   // llmlint: ignore[tests_mirror_real_usage] Pins shared visual tokens behind browser goldens.
   expect(tokens).toEqual({ fontFamily: "Arial, sans-serif", navy: "#12324a" });
 });
-
-for (const viewport of [
-  { height: 900, name: "desktop", width: 1110 },
-  { height: 1024, name: "tablet", width: 768 },
-  { height: 812, name: "mobile", width: 375 },
-] as const) {
-  test(`standalone skills matches the ${viewport.name} visual golden`, async ({
-    page,
-  }) => {
-    await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
-    await page.setViewportSize(viewport);
-    await openSkills(page, "remotes/skills/");
-    await expect(
-      page.getByRole("region", { name: "Skilled in…" }),
-    ).toHaveScreenshot(`skills-${viewport.name}.png`, {
-      animations: "disabled",
-    });
-  });
-}
-
-test("standalone skills matches the expanded visual golden", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1110, height: 900 });
-  await openSkills(page, "remotes/skills/");
-  await page
-    .getByRole("button", { name: "Explore Programming category" })
-    .click();
-  await expect(
-    page.getByRole("region", { name: "Skilled in…" }),
-  ).toHaveScreenshot("skills-expanded.png", { animations: "disabled" });
-});

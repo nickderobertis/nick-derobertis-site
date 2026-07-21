@@ -154,39 +154,3 @@ test("standalone remote loads the shared design-system foundation", async ({
   expect(rootStyles.navy).toBe("#12324a");
   expect(rootStyles.paper).toBe("#fff");
 });
-
-for (const viewport of [
-  { height: 900, name: "desktop", width: 1110 },
-  { height: 1024, name: "tablet", width: 768 },
-  { height: 812, name: "mobile", width: 375 },
-] as const) {
-  test(`standalone timeline matches the ${viewport.name} visual golden`, async ({
-    page,
-  }) => {
-    await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
-    await page.setViewportSize({
-      width: viewport.width,
-      height: viewport.height,
-    });
-    await openTimeline(page, "remotes/timeline/");
-    await expect(
-      page.getByRole("region", { name: "Educated and Experienced" }),
-    ).toHaveScreenshot(`timeline-${viewport.name}.png`, {
-      animations: "disabled",
-    });
-  });
-}
-
-test("standalone timeline matches the employment-only visual golden", async ({
-  page,
-}) => {
-  await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
-  await page.setViewportSize({ width: 1110, height: 900 });
-  await openTimeline(page, "remotes/timeline/");
-  await page.getByRole("checkbox", { name: "Education" }).uncheck();
-  await expect(
-    page.getByRole("region", { name: "Educated and Experienced" }),
-  ).toHaveScreenshot("timeline-employment-only.png", {
-    animations: "disabled",
-  });
-});

@@ -1,0 +1,5 @@
+{
+  "architecture": "x86_64",
+  "playwrightContainer": "mcr.microsoft.com/playwright:v1.61.1-noble",
+  "screencompVersion": "v0.4.2"
+}

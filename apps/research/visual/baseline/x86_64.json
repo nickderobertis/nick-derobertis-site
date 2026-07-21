@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "f88f28edb2771a8e1e8118c07d94c0c67debb16f3edbeede1091ed7b4d10bc60"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "6ca15677b33f6005d42b677091ec0fd59cc11f132dda22117c0d5aecbc550e7b"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "ec2809dd3cb0ad58a116bc1ff1d51bc24968df4deec60b3b58e19c44e7c4b35b"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "0ddedc9f857dab5a301b601e542e806e24978d0970800c030cd21c588c38a84f"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "d4d2fb4633526ee313c37c17be76f6c7091e6fdabf337bfe9818460590b61cf6"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "7b18cb0c09c2e8043d1dad74220a140db54e4f2a30bbd1d5468d0a6108b533ba"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "592539c221ab2d9cdf50269679b195e2e92e1f72124978c5aad51b906f86328e"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "ffb07c295c6e20884121aa60f73592785e107f5f27989e9d402264c8916d53e4"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "9648f9f3b20952172d208491484142fe750f289fd77e31fe6f5808f2fb576d21"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "4a370eccc4c14bdee78e88772112411da485201cb70c9261958dd39a31c49584"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "89d6a46764c9d0999f1ca3ca11de16b5b1f6197ee7027a91adff107ce3f9fb9d"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "5e2761e80ca43f82ceefb20c2ce8452f6cd92ff369ce8c7e52e7460b3874eebf"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "8eafea2b19c63efe5a1e37798e05fa492b1f5890c5fa29d7c592f52daf1a70b7"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "a6a8d52466bbcfca3bf654b25d31d302f86e88e2e424f8e344c1782bb98ad684"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "46796c0c79fdf551310e533e87c32063ab988e44d0f8c01f9ccc51e2db6eb475"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "8e138faaf9b04fe9b587f986179c3afe24a754e61bb87a534f003ba07f118efe"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "0c1c8c4209bf53048b63821dea4787d09b5e418eba336febe73e04be139ee671"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "f7f4e8b905d0a14e53839e8206aa078ee894886b0172a20731fd763f1b756e3a"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "8eafea2b19c63efe5a1e37798e05fa492b1f5890c5fa29d7c592f52daf1a70b7"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "a6a8d52466bbcfca3bf654b25d31d302f86e88e2e424f8e344c1782bb98ad684"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "a2e06058e2d6f573fa7b69e0865e99318057ec13ac17c42c924ab621c5e7ffac"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "b59793d4f32359618cd20c96a1c3594ddc2ed93ddac8aa4b25c56d325c39d4ea"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "626cf861be79f5dceaafd4c28744d88c597795c1c743f878e429db408e3f2087"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "f7f4e8b905d0a14e53839e8206aa078ee894886b0172a20731fd763f1b756e3a"
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "0e7e0b49b0a84bff63aecaf0181d721cb8d9566316b10d1076126d21d75435a7"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "63a3eafd2bd138182bcb4246bad7d2069c9854cb52a7a8cdf035b3f484808c26"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "68e25378d6f8b971244fe0e82347993b4c0fe3642d4b334373ba6ac687ca3b2c"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "a19e4901fc8c68033e6bc316ca4de0b1b4dd53677b64c581303bcc300ba4d048"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "09cb02b586a6663d9347a0ec3f0662c4fdf519124a6fc4c86cab8b4170fd43f6"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "8f30de6ea8c6594cc05070e4e26bfd0478a7d3798ecc655477c75fb02f157e03"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "7be3d5a757f0d33d8f8c951f279aaf0723363a8f932b1c3570e281a8fa1a7d19"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "21dd72cc7460e29a34998c733da8568a8b3c182e928db5ed7a789d3029de82c5"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "05e70cb18b7196fd0b88e85d0d4719dc3de58d188d84d7e31410421750802dc4"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "8f790cb3ae54825b944c6bdc6987f65efa52f1912dc295b297d58c4990fa30e1"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "5c2c2bd0f36141d24cf3c0b899ed5ddfc3cc7abeb29601e3e4b57d4b9131ac22"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "5fb7a0daaa3aa588f9da550d8e0cba0dbe44808e1d221f035ae4af474f2f9aa6"
+    }
+  ]
+}

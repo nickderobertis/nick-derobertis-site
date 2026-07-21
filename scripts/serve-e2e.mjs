@@ -1,11 +1,12 @@
 import { createReadStream } from "node:fs";
-import { readFile, stat } from "node:fs/promises";
+import { stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import siteConfig from "../libs/data-access/src/site.config.json" with {
   type: "json",
 };
+import { handleE2eDataRequest } from "./e2e-data-provider.mjs";
 
 const root = fileURLToPath(new URL("../dist/apps/shell", import.meta.url));
 if (
@@ -33,44 +34,16 @@ const types = {
 };
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
-  const dataDomain = ["research", "awards"].find(
-    (domain) => url.pathname === `${base}/cv-data/domains/${domain}.json`,
-  );
-  if (dataDomain) {
-    const scenario = url.searchParams.get("scenario");
-    if (scenario === "loading")
-      await new Promise((resolve) => setTimeout(resolve, 750));
-    if (scenario === "error") {
-      response.writeHead(503, { "Content-Type": "application/json" });
-      response.end(JSON.stringify({ error: `${dataDomain} unavailable` }));
-      return;
-    }
-    if (scenario === "empty") {
-      response.setHeader("Content-Type", "application/json");
-      response.end(
-        JSON.stringify(dataDomain === "research" ? { projects: [] } : []),
-      );
-      return;
-    }
-    const domainPath = join(root, `cv-data/domains/${dataDomain}.json`);
-    let domainData;
-    try {
-      domainData = await readFile(domainPath);
-    } catch (error) {
-      console.error(
-        `Unable to read ${domainPath}. Run \`just build\` before starting the e2e server.`,
-        error,
-      );
-      response.writeHead(500, { "Content-Type": "application/json" });
-      response.end(
-        JSON.stringify({ error: `${dataDomain} fixture unavailable` }),
-      );
-      return;
-    }
-    response.setHeader("Content-Type", "application/json");
-    response.end(domainData);
+  if (
+    await handleE2eDataRequest({
+      base,
+      loadingMs: 750,
+      response,
+      root,
+      url,
+    })
+  )
     return;
-  }
   const relative = normalize(
     url.pathname.startsWith(base)
       ? url.pathname.slice(base.length)

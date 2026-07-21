@@ -1,0 +1,43 @@
+name: Visual docs
+on:
+  pull_request:
+  push:
+    branches: [master]
+permissions:
+  contents: read
+concurrency:
+  group: visual-docs-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.61.1-noble
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: pnpm/action-setup@v4
+        with: {version: 10.13.1}
+      - run: just bootstrap-ci
+      - uses: nickderobertis/screencomp@v0.4.2
+      - name: Capture and diff affected microfrontends
+        env:
+          NX_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          NX_HEAD: ${{ github.sha }}
+          SCREENCOMP_CAPTURE_CONTAINER: "1"
+          SCREENCOMP_DEFER_DRIFT: "1"
+        run: just visual-affected
+      - name: Record affected-project signal
+        env:
+          CAPTURE_HEAD_SHA: ${{ github.sha }}
+          CAPTURE_REPOSITORY: ${{ github.repository }}
+        run: node scripts/write-visual-capture-signal.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-captures
+          path: |
+            affected-visual-projects.txt
+            visual-capture.json
+            apps/*/visual/current
+            apps/*/visual/verify
+            apps/*/visual/drift
+          if-no-files-found: error

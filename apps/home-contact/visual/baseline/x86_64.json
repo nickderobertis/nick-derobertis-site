@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "0e7e0b49b0a84bff63aecaf0181d721cb8d9566316b10d1076126d21d75435a7"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "63a3eafd2bd138182bcb4246bad7d2069c9854cb52a7a8cdf035b3f484808c26"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "a8b218bbedbd045ccf6401009855dacfbf58e91216a2476c6c8570fb5700d2cb"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "a6f519db9c51b218dc05d4265e40e6e2553d6a55050227924aa60441db4c406b"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "869f8f98303651f85906292639a0b0680c0370336e878c854ed8cc3a50ee8079"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "a1c05cf48b5eebbb7e6375df46c9a48ec6f1ac5c5c96b77b09a8c7244b70d17d"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "4875a089ba18d836d1ee7a381ad2699248a96169e26b4b1e5a5cc15cb5c7d988"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "1677946481522e101734842dfc07e356ead47e90e25c105cc701ecceb20587ff"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "a8b218bbedbd045ccf6401009855dacfbf58e91216a2476c6c8570fb5700d2cb"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "a6f519db9c51b218dc05d4265e40e6e2553d6a55050227924aa60441db4c406b"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "dc4f33d3be427789c149334ec6ae9f8031c7c8104b0229a09b4de46e16966c4a"
+    },
+    {
+      "name": "home-contact",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "800627867531ba4c58b704f1836f76c64f9a3aae776dfe2c76c6ad98490a22c9"
+    }
+  ]
+}

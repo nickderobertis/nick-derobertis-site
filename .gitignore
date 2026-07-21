@@ -1,7 +1,11 @@
 node_modules/
+apps/*/visual/current/
+apps/*/visual/verify/
+apps/*/visual/drift
 dist/
 coverage/
 .nx/
+.tools/
 playwright-report/
 test-results/
 *.tsbuildinfo

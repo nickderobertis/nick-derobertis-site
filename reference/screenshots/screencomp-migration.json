@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "sourceCommit": "c7fe035",
+  "disposition": "reviewed-as-look-and-feel-reference",
+  "groups": {
+    "home-panes/awards": "awards",
+    "home-panes/carousel": "home-carousel",
+    "home-panes/contact": "home-contact",
+    "home-panes/home-cards": "home-cards",
+    "home-panes/skills-sunburst": "skills",
+    "home-panes/story-teaser": "home-story",
+    "home-panes/timeline": "timeline",
+    "routes/bio": "bio",
+    "routes/courses": "courses",
+    "routes/home": "home",
+    "routes/research": "research",
+    "routes/software": "software"
+  }
+}

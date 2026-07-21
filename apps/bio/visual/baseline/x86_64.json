@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "843de35626a5b3d07fa85797db8c36cb918bb900277e154b828a42c27f5aa84d"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "a5071c9e2d40a4890f9e83b4d95450eb668c486711fee7c7d402c8e367e268e7"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "898acad9560f17b6c9df4ba31800a536b8406d2963b4158d910facfcfae66d20"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "20f3bbd57730968be13b8216b9403df52abfe85fd24cf5460ba4f89841d5e0c4"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "fbb1a03ae9765bd13ed77bd244253ca57082e70543cd3a692915f06792619623"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "7ca8051fbfa47395d2900f78075d8813df58c6c4cbccc3045cbcdde965fd9dab"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "91a0b8c872443f925ee0527eb2f9b85e55be812a8f19f04c9ca8f39cf01b4c45"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "2cbf230ac3c6477ffd9538070d09361f4813ae0b7fa046ea0ff43b42320fe9cf"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "8a3705259d5f013a877f790e743f61cff9941cff62525d995a9fd4151397866f"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "68dbc39704f2bbcd0227414cec7718f411fe4b7bd7cc48ee32367efe0cff9c55"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "9788b8a62f219335bf254d17da4d5352b45743f3daa221932d97098b738f61e3"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "eb821a07bfb5f2313b4b800bb43a4b828007897d3be0ebaa40eaa1cc70a638aa"
+    }
+  ]
+}

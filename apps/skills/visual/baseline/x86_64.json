@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "05a72e676200a5018d56f4a8e527135ad0ddcc59b76c8f99d79033fa7033829e"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "810e97f01b3a86453920531f1a59b4d235a6328d0ab489e2991c04f941c0ea17"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "expanded",
+        "viewport": "desktop"
+      },
+      "hash": "ff04a3d29f5b969f7955378b04cc0e46d0f9e68d74cb1d9f0b3efee683d4f092"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "3c0b1dea3260f7b0b84072008ea56ec46e419e4f9e70e7581c6b65e57eb11508"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "83b2aa2fdf9fbe2b4a46e6d884298568de2fee62a011de700fae94de87ad9d63"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "4f9c1053497a0579cd9528eb3e794a596a2e8d4d5caf7c91fba23391eca69457"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "7fb88d8f4f6c8820d941c2cd735b1d9371bb083405443a44f3050ad4fc5d7098"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "9c2071d3f84ca7d54ef5ded638dbbb43bb6aecf1025390d138a89b280b34d4a9"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "3e7c33292b4c993318bddfdebba6ef86ae92a7d386ffccac1245ab3aed11d7df"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "expanded",
+        "viewport": "desktop"
+      },
+      "hash": "036db08a177e20df2539a1760bb1c96b52f66147a8a1309708949c6a91dd8d23"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "e7a3c8fe46a1733ba5c5feaabaf4fa7572ba13aa16703502f938e3113ed9aab4"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "640aee4aee60e6729935f0d33fac4910b74910bd858a8ee96c5d4f5ce7e8654b"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "a7a686f5448ea4fa6fd013b0b6ea9a8a0573d2ead1d7fb1efaf5e36c2a48b276"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "e106375b68233bd37cdca0abbca755530417d07ceda709f39725c6979dca8ac1"
+    }
+  ]
+}

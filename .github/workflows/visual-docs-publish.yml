@@ -1,0 +1,137 @@
+name: Publish visual docs
+on:
+  workflow_run:
+    workflows: [Visual docs]
+    types: [completed]
+permissions:
+  actions: read
+  contents: read
+jobs:
+  inspect:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      has_affected: ${{ steps.inspect.outputs.has_affected }}
+      event_name: ${{ steps.context.outputs.event_name }}
+      pr_number: ${{ steps.context.outputs.pr_number }}
+      base_ref: ${{ steps.context.outputs.base_ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          name: visual-captures
+          path: trusted-captures
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Resolve trusted source context
+        id: context
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          SOURCE_EVENT: ${{ github.event.workflow_run.event }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          if [ "$SOURCE_EVENT" = push ]; then
+            node scripts/resolve-visual-workflow-context.mjs "$SOURCE_EVENT" "$REPOSITORY" "$HEAD_SHA" </dev/null >> "$GITHUB_OUTPUT"
+          elif [ "$SOURCE_EVENT" = pull_request ]; then
+            gh api "repos/$REPOSITORY/commits/$HEAD_SHA/pulls" > "$RUNNER_TEMP/visual-pulls.json"
+            node scripts/resolve-visual-workflow-context.mjs "$SOURCE_EVENT" "$REPOSITORY" "$HEAD_SHA" < "$RUNNER_TEMP/visual-pulls.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "Unsupported source workflow event: $SOURCE_EVENT" >&2
+            exit 2
+          fi
+      - name: Validate capture provenance and affected-project signal
+        id: inspect
+        env:
+          EXPECTED_REPOSITORY: ${{ github.repository }}
+          EXPECTED_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: node scripts/inspect-visual-captures.mjs trusted-captures "$EXPECTED_REPOSITORY" "$EXPECTED_HEAD_SHA" >> "$GITHUB_OUTPUT"
+  publish:
+    needs: inspect
+    if: needs.inspect.outputs.has_affected == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: nickderobertis/screencomp@v0.4.2
+      - uses: actions/download-artifact@v4
+        with:
+          name: visual-captures
+          path: trusted-captures
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - name: Build validated galleries and comment body
+        run: scripts/publish-visual-run.sh trusted-captures "${{ needs.inspect.outputs.event_name }}" "${{ needs.inspect.outputs.pr_number }}" "${{ needs.inspect.outputs.base_ref }}" "${{ github.repository }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-galleries-${{ github.event.workflow_run.id }}
+          path: |
+            site
+            comment.md
+            .visual-drift
+          if-no-files-found: error
+  deploy:
+    needs: [inspect, publish]
+    if: needs.inspect.outputs.has_affected == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: visual-galleries-${{ github.event.workflow_run.id }}
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ github.token }}
+          publish_dir: site
+          destination_dir: ${{ needs.inspect.outputs.event_name == 'pull_request' && format('pr-{0}', needs.inspect.outputs.pr_number) || '' }}
+          keep_files: true
+  comment:
+    needs: [inspect, publish]
+    if: needs.inspect.outputs.has_affected == 'true' && needs.inspect.outputs.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: visual-galleries-${{ github.event.workflow_run.id }}
+      - name: Upsert visual diff comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ needs.inspect.outputs.pr_number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          [[ "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid pull-request number context" >&2; exit 2; }
+          existing=$(gh api "repos/$REPOSITORY/issues/$PR_NUMBER/comments" --jq '.[] | select(.body | contains("<!-- screencomp -->")) | .id' | head -1)
+          if [ -n "$existing" ]; then
+            [[ "$existing" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid existing comment id returned by GitHub" >&2; exit 2; }
+            gh api --method PATCH "repos/$REPOSITORY/issues/comments/$existing" -F body=@comment.md
+          else
+            gh pr comment "$PR_NUMBER" --body-file comment.md
+          fi
+  gate:
+    needs: [inspect, publish, deploy, comment]
+    if: always() && needs.inspect.outputs.has_affected == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: visual-galleries-${{ github.event.workflow_run.id }}
+      - name: Enforce drift after publication
+        run: |
+          if [ -f .visual-drift ]; then
+            echo "Visual drift detected; galleries and PR comments were published first." >&2
+            exit 3
+          fi

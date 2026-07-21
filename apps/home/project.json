@@ -28,6 +28,10 @@
     "test": {
       "executor": "nx:run-commands",
       "options": { "command": "vitest run --passWithNoTests apps/home/src" }
+    },
+    "screenshot": {
+      "executor": "nx:run-commands",
+      "options": { "command": "scripts/visual-project.sh home" }
     }
   }
 }

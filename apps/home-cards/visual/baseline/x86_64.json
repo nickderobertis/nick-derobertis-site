@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "0e7e0b49b0a84bff63aecaf0181d721cb8d9566316b10d1076126d21d75435a7"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "63a3eafd2bd138182bcb4246bad7d2069c9854cb52a7a8cdf035b3f484808c26"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "e0ea93724645e40a90618c8ce729452906a813139408b77de8e0cd520697b62e"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "4cfc7fa23ca7dbdf8fbfe70c2ed5d96c9cbd19f6008d0999d1cac85ae6d566f0"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "baad43d657fa139d7f9769091e246a87338f427dbe5b117cb04f9a1f255351c2"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "94810ad8956f80c10833edbebc7f1fb56932f983a8868e9509b0da51084c4453"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "1811f6facec9a561b6bb7a24eaf6fc5d863d69e08a39c7604eb81da3e466278d"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "96ee7de2c54bc050dcd307a39b2d72c4a2319cea9700f3d057b2c720236ee4db"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "221932cc1f04a42b603f354dc5646e9154a871d0c1ba4d3f7edc9a10d8cd5f0d"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "4cfc7fa23ca7dbdf8fbfe70c2ed5d96c9cbd19f6008d0999d1cac85ae6d566f0"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "1dda5edc669c8595eddaad482e6e084338a09d4be0d2e9bd841c3803d4cf7e60"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "73f24eb27ffed1cfbc844875eb59ad983d72e2d8205c8ee47d127b8ca51932eb"
+    }
+  ]
+}

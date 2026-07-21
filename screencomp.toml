@@ -1,0 +1,22 @@
+[capture]
+arches = ["x86_64"]
+
+[comment]
+title = "Nick DeRobertis site visual changes"
+marker = "screencomp"
+embed_limit = 10
+
+[[toggle]]
+key = "viewport"
+label = "Viewport"
+values = ["desktop", "tablet", "mobile"]
+
+[[toggle]]
+key = "render"
+label = "Rendering path"
+values = ["standalone", "host-composed"]
+
+[[toggle]]
+key = "state"
+label = "State"
+values = ["happy", "all", "empty", "loading", "error", "expanded", "employment-only"]

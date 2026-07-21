@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "all",
+        "viewport": "desktop"
+      },
+      "hash": "1aae1f16561242191a0cb3de8bd03b9bd9a035f110598663747d41c09be96800"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "4996ac8c27a3b120e3dbed01da2c9b80b6ed2ee70a14dfd6d94e66d36cc3e81f"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "3f6c2a0ea7c53e0b8493603ce7ba0a87b4ad7b5c9efeb006dfe2d7f6ba6c1bd2"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "a2abf5ba15f0dd0a4c9b870438c3e4005bbb288529bb177405eb4136acd742f5"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "24aee6bad55eecdcefcf9bfd8c398a792ab71a3d40021f19a789473bef408a9c"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "1c2ddc374727a011850f6cc4d91cec59b5fa436438ca6ed6daadd62bbfa27710"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "0f1845ce0201f9f8ac2a479cfe5dc0abcc2c7112fefc1747626017d8d7f8a3fe"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "all",
+        "viewport": "desktop"
+      },
+      "hash": "de9ff8a0d2cc8e17da5d081e15da5f0db5aadcba66bc17f8e7771c62efc669b3"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "8a8b52c5a1cec20342daadf651b9b015e812d354826c910055a01a835956c6c8"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "0244e035a0a018928397ac29cb87529c9fc54f8ee420461e83324f02476f7c83"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "3fff989ec4d635ea064ed0735ab42ab86950f65773ba5bee087d3dabf10ab46b"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "988eca0717085fa15e05984f9d1673a7c9e87be1a915f64e177d367501a66f0b"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "7c6714fcda16b7f9dc316bb801fbcfe6789add0586485a02d67b241454c3cc87"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "ee92065926d4090c1304e7e61718eb871537f28dee92132b9c9adca0df77ff69"
+    }
+  ]
+}
