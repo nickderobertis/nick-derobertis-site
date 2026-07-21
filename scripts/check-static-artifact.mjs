@@ -1,5 +1,16 @@
 import { access, readFile } from "node:fs/promises";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import remoteManifest from "../libs/build-config/src/remotes.json" with {
+  type: "json",
+};
+
+const substantiveRouteContent = {
+  "/": "Who am I?",
+  "/bio": "Reproducible Research",
+  "/research": "Valuation without Cash Flows",
+  "/software": "Python Tools for Working with Data",
+  "/courses": "Financial Modeling",
+};
 
 const root = "dist/apps/shell";
 for (const route of routes) {
@@ -15,11 +26,14 @@ for (const route of routes) {
     throw new Error(`${path} is not prerendered`);
   if (!html.includes("/nick-derobertis-site/"))
     throw new Error(`${path} lacks the Pages base path`);
+  const expected = substantiveRouteContent[route.path];
+  if (!expected || !html.includes(expected))
+    throw new Error(`${path} lacks substantive route content`);
 }
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error("404 fallback is not intentional");
-for (const name of ["bio", "research", "software", "courses"])
+for (const name of Object.keys(remoteManifest))
   await access(`${root}/remotes/${name}/remoteEntry.js`);
 for (const file of [
   "cv.json",
