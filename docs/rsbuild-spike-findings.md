@@ -2,6 +2,15 @@
 
 Date: 2026-07-21
 
+## Status: blocked / infeasible
+
+**This spike does not satisfy the requested SSG acceptance criteria.** The
+shell and bio build with Rsbuild, but not with `@rsbuild/plugin-ssg`. That
+package does not exist in the npm registry, and Rsbuild does not document a
+supported React SSG integration of that name or equivalent scope. The retained
+hand-written prerender and artifact-check scripts mean this is only a partial
+Rsbuild/Module Federation feasibility result, not a successful SSG migration.
+
 ## Recommendation
 
 **Do not migrate the remaining applications to Rsbuild for SSG or hydration.**
@@ -11,6 +20,35 @@ Module Federation plugin work for this repository, but the package named in
 the proposal, `@rsbuild/plugin-ssg`, is not published. Consequently, Rsbuild
 does not replace this site's prerender pipeline or provide hydration “for
 free.”
+
+Do not merge this experimental branch. A future retry is justified only if a
+supported React SSG integration is published and documented as compatible
+with Rsbuild, static hosting, and Module Federation.
+
+## Registry and documentation evidence
+
+The evidence was reproduced on 2026-07-21:
+
+```text
+$ pnpm view @rsbuild/plugin-ssg version
+npm error code E404
+npm error 404 Not Found - GET https://registry.npmjs.org/@rsbuild%2fplugin-ssg
+$ curl -o /dev/null -w '%{http_code}\n' \
+    'https://registry.npmjs.org/@rsbuild%2Fplugin-ssg'
+404
+```
+
+Primary references:
+
+- [npm registry endpoint for the requested package](https://registry.npmjs.org/@rsbuild%2Fplugin-ssg) returns `404 {"error":"Not found"}`.
+- [Rsbuild's official plugin catalog](https://rsbuild.rs/plugins/list/) contains no official SSG plugin.
+- [Rsbuild's official React guide](https://rsbuild.rs/guide/framework/react) points full-stack/SSR use cases to frameworks built on Rsbuild; it does not document built-in React SSG.
+- [Rsbuild's official ecosystem repository](https://github.com/web-infra-dev/awesome-rstack) lists a community Vue SSG plugin, but no React counterpart matching the requested integration.
+
+Substituting Modern.js, TanStack Start, Rspress, the community React Router
+framework plugin, or the Vue-only SSG plugin would change the evaluated stack
+and exceed this minimum-slice build migration. None is an implementation of
+the requested `@rsbuild/plugin-ssg` contract.
 
 ## Spike boundary
 
@@ -24,8 +62,8 @@ Rsbuild 2 requires Rspack 2, which is outside the supported Nx integration.
 
 | Claim | Result | Evidence | Decision impact |
 | --- | --- | --- | --- |
-| SSG provides prerendering and hydration | **Disproved / unavailable** | `pnpm view @rsbuild/plugin-ssg` returned npm `E404`; the package is also absent from the official Rsbuild plugin catalog. The Rsbuild build emitted an empty-root SPA HTML document. The existing 256-line `scripts/prerender.mjs` and 87-line `scripts/check-static-artifact.mjs` remain necessary. | No SSG or hydration benefit exists to justify migration. |
-| Configuration is simpler | **Disproved for this slice** | 34 lines of rspack build config were removed and 71 lines of Rsbuild config were added: **37 more build-config lines**. The two Nx project files changed by +10/-14 lines, but lose typed first-party executors in favor of string CLI commands and explicit output declarations. Zero scripts and zero script lines could be deleted. | The local config becomes longer and the Nx boundary less structured. |
+| SSG provides prerendering and hydration | **Blocked; not tested end to end** | `pnpm view @rsbuild/plugin-ssg` and the registry endpoint return `E404`; the package is absent from the official catalog. The plain Rsbuild build emitted an empty-root SPA HTML document. The existing 256-line `scripts/prerender.mjs` and 87-line `scripts/check-static-artifact.mjs` remain necessary. | The central acceptance criterion is infeasible with the specified package. This partial migration must not be presented as acceptance completion. |
+| Configuration is simpler | **Disproved for the partial slice** | 34 lines of rspack build config were removed and 83 lines of Rsbuild config were added: **49 more build-config lines**. The two Nx project files changed by +10/-14 lines, but lose typed first-party executors in favor of string CLI commands and explicit output declarations. Zero scripts and zero script lines could be deleted. | Even before adding an SSG integration, local config is longer and the Nx boundary less structured. |
 | MF and affected selection still work | **Proved, with manual wiring** | The complete Pages artifact built, `dist/apps/shell/remotes/bio/remoteEntry.js` exists, and 13 real Chromium `bio` journeys passed across standalone and host-composed paths. `nx show projects --affected --files=apps/bio/rsbuild.config.ts --json` returned only `["bio"]`; the equivalent shell command returned only `["shell"]`. | Rsbuild is technically viable for MF and Nx selection, but supplies no compensating SSG benefit. |
 
 ## Hydration and CLS
@@ -42,7 +80,9 @@ desktop viewport.
 | spike Rsbuild + hand-written prerender | 0.0625625949435764 |
 | Delta | 0 |
 
-The exact unchanged result is expected: a bundler migration does not change
+This is **not an SSG before/after comparison**. It is a repeatable control
+showing that the partial bundler migration leaves the existing behavior
+unchanged. The exact unchanged result is expected: a bundler migration does not change
 the React root API. Because the proposed SSG plugin cannot be installed, there
 is no honest “plugin after” artifact to measure. The spike therefore does not
 fix the existing layout shift. A one-line root API correction remains the
@@ -76,6 +116,8 @@ construction because the shared helper is coupled to rspack plugin classes.
 
 ```sh
 pnpm view @rsbuild/plugin-ssg version
+curl -o /dev/null -w '%{http_code}\n' \
+  'https://registry.npmjs.org/@rsbuild%2Fplugin-ssg'
 just check
 just prerender
 just e2e-project bio
@@ -83,7 +125,7 @@ just e2e-project bio
 
 ## What worked and what broke
 
-Worked: Rsbuild production builds, Rsbuild Module Federation exposure and
+Partial results that worked: Rsbuild production builds, Rsbuild Module Federation exposure and
 consumption, mixed Rsbuild/rspack Pages staging, Nx caching/affected selection,
 and all selected real-browser journeys.
 
@@ -91,3 +133,7 @@ Broke or failed the motivating claims: the requested SSG plugin cannot be
 installed, Rsbuild's generated HTML is not prerendered, no hydration is added,
 CLS is unchanged, no static-build script can be removed, configuration grew,
 and first-party Nx executor semantics were traded for shell commands.
+
+Acceptance conclusion: **blocked/infeasible, not passed**. No generated SSG
+HTML, `hydrateRoot` hydration, SSG-specific CLS improvement, or deletion of the
+legacy prerender scripts can be claimed from this branch.
