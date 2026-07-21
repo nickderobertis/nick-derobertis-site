@@ -28,6 +28,10 @@ fi
 while IFS= read -r project; do
   [[ "$project" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "publish-visual-run: invalid affected project" >&2; exit 2; }
   current="$artifact_root/apps/$project/visual/current"
+  doctor_output=$(screencomp doctor --input "$current" --arch x86_64 --exit-code 2>&1) || {
+    printf '%s\npublish-visual-run: screencomp rejected the validated captures for %s; rerun the unprivileged capture workflow\n' "$doctor_output" "$project" >&2
+    exit 2
+  }
   manifest="apps/$project/visual/baseline/x86_64.json"
   comparison="$manifest"
   if [[ "$event_name" == "pull_request" ]] && git show "origin/$base_ref:$manifest" > "$publication_root/base.json" 2>/dev/null; then

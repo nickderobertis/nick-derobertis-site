@@ -36,14 +36,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$SOURCE_EVENT" = push ]; then
-            printf 'event_name=push\npr_number=\nbase_ref=\n' >> "$GITHUB_OUTPUT"
+            node scripts/resolve-visual-workflow-context.mjs "$SOURCE_EVENT" "$REPOSITORY" "$HEAD_SHA" </dev/null >> "$GITHUB_OUTPUT"
           elif [ "$SOURCE_EVENT" = pull_request ]; then
-            pr=$(gh api "repos/$REPOSITORY/commits/$HEAD_SHA/pulls" --jq '[.[] | select(.state == "open" and .head.sha == "'"$HEAD_SHA"'")][0]')
-            number=$(jq -r '.number // empty' <<< "$pr")
-            base=$(jq -r '.base.ref // empty' <<< "$pr")
-            [[ "$number" =~ ^[1-9][0-9]*$ ]] || { echo "No open pull request matches the completed capture SHA" >&2; exit 2; }
-            git check-ref-format --branch "$base" >/dev/null || { echo "GitHub returned an invalid pull-request base ref" >&2; exit 2; }
-            printf 'event_name=pull_request\npr_number=%s\nbase_ref=%s\n' "$number" "$base" >> "$GITHUB_OUTPUT"
+            gh api "repos/$REPOSITORY/commits/$HEAD_SHA/pulls" > "$RUNNER_TEMP/visual-pulls.json"
+            node scripts/resolve-visual-workflow-context.mjs "$SOURCE_EVENT" "$REPOSITORY" "$HEAD_SHA" < "$RUNNER_TEMP/visual-pulls.json" >> "$GITHUB_OUTPUT"
           else
             echo "Unsupported source workflow event: $SOURCE_EVENT" >&2
             exit 2

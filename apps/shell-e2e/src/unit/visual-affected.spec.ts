@@ -1,10 +1,12 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   copyFileSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
@@ -34,6 +36,66 @@ function affectedScreenshotProjects(file: string): string[] {
   )
     throw new Error("Nx affected output was not a list of project names");
   return projects;
+}
+
+const fixtureHeadSha = "b".repeat(40);
+const fixtureRepository = "owner/repository";
+
+function writeJson(file: string, value: unknown): void {
+  writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function createValidVisualArtifact(root: string): {
+  artifact: string;
+  captureRoot: string;
+  manifestPath: string;
+} {
+  const artifact = path.join(root, "artifact");
+  const captureRoot = path.join(artifact, "apps/bio/visual/current/x86_64");
+  const sourceImage = readFileSync(
+    "reference/screenshots/routes/home/desktop.png",
+  );
+  const hash = createHash("sha256").update(sourceImage).digest("hex");
+  const shots = [];
+  for (const render of ["standalone", "host-composed"])
+    for (const viewport of ["desktop", "tablet", "mobile"])
+      shots.push({ render, state: "happy", viewport });
+  for (const state of ["empty", "loading", "error"])
+    for (const render of ["standalone", "host-composed"])
+      shots.push({ render, state, viewport: "desktop" });
+  const manifest = {
+    schema: 1,
+    shots: shots.map((toggles) => {
+      const image = `${toggles.render}/${toggles.state}/${toggles.viewport}.png`;
+      const imagePath = path.join(captureRoot, image);
+      mkdirSync(path.dirname(imagePath), { recursive: true });
+      writeFileSync(imagePath, sourceImage);
+      return { name: "bio", toggles, hash, image };
+    }),
+  };
+  const manifestPath = path.join(captureRoot, "captures.json");
+  writeJson(manifestPath, manifest);
+  writeFileSync(path.join(artifact, "affected-visual-projects.txt"), "bio\n");
+  writeJson(path.join(artifact, "visual-capture.json"), {
+    schema: 1,
+    repository: fixtureRepository,
+    headSha: fixtureHeadSha,
+    affectedCount: 1,
+  });
+  return { artifact, captureRoot, manifestPath };
+}
+
+function inspectArtifact(artifact: string) {
+  return spawnSync(
+    "node",
+    [
+      "scripts/inspect-visual-captures.mjs",
+      artifact,
+      fixtureRepository,
+      fixtureHeadSha,
+    ],
+    { encoding: "utf8" },
+  );
 }
 
 describe("visual affected selection", () => {
@@ -72,73 +134,45 @@ describe("visual affected selection", () => {
     }
   });
 
-  test.each(["same-repository", "fork"])(
-    "%s PR captures use the trusted publication path",
-    () => {
+  test.each([
+    ["same-repository", fixtureRepository],
+    ["fork", "contributor/site-fork"],
+  ])(
+    "resolves and publishes a %s PR through trusted context",
+    (_, headRepo) => {
       const root = mkdtempSync(path.join(process.cwd(), ".visual-pr-"));
       try {
-        const artifact = path.join(root, "artifact");
-        const current = path.join(artifact, "apps/bio/visual/current/x86_64");
-        mkdirSync(current, { recursive: true });
-        copyFileSync(
-          "reference/screenshots/routes/home/desktop.png",
-          path.join(current, "desktop.png"),
-        );
-        const toggles = {
-          render: "standalone",
-          state: "happy",
-          viewport: "desktop",
-        };
-        writeFileSync(
-          path.join(current, "captures.json"),
-          JSON.stringify({
-            schema: 1,
-            shots: [
-              {
-                name: "bio",
-                toggles,
-                hash: "b".repeat(64),
-                image: "standalone/happy/desktop.png",
-              },
-            ],
-          }),
-        );
-        mkdirSync(path.join(current, "standalone/happy"), { recursive: true });
-        copyFileSync(
-          path.join(current, "desktop.png"),
-          path.join(current, "standalone/happy/desktop.png"),
-        );
-        writeFileSync(
-          path.join(artifact, "affected-visual-projects.txt"),
-          "bio\n",
-        );
-        writeFileSync(
-          path.join(artifact, "visual-capture.json"),
-          JSON.stringify({
-            schema: 1,
-            repository: "owner/repository",
-            headSha: "b".repeat(40),
-            affectedCount: 1,
-          }),
-        );
-        const inspect = spawnSync(
+        const { artifact } = createValidVisualArtifact(root);
+        const pulls = JSON.stringify([
+          {
+            number: 12,
+            state: "open",
+            head: { sha: fixtureHeadSha, repo: { full_name: headRepo } },
+            base: { ref: "master", repo: { full_name: fixtureRepository } },
+          },
+        ]);
+        const context = spawnSync(
           "node",
           [
-            "scripts/inspect-visual-captures.mjs",
-            artifact,
-            "owner/repository",
-            "b".repeat(40),
+            "scripts/resolve-visual-workflow-context.mjs",
+            "pull_request",
+            fixtureRepository,
+            fixtureHeadSha,
           ],
-          { encoding: "utf8" },
+          { encoding: "utf8", input: pulls },
         );
-        expect(inspect.status).toBe(0);
-        expect(inspect.stdout).toBe("has_affected=true\n");
+        expect(context.status).toBe(0);
+        expect(context.stdout).toBe(
+          "event_name=pull_request\npr_number=12\nbase_ref=master\n",
+        );
+        const inspect = inspectArtifact(artifact);
+        expect(inspect.status, inspect.stderr).toBe(0);
         const publish = spawnSync(
           "scripts/publish-visual-run.sh",
-          [artifact, "pull_request", "12", "master", "owner/repository", root],
+          [artifact, "pull_request", "12", "master", fixtureRepository, root],
           { encoding: "utf8" },
         );
-        expect(publish.status).toBe(0);
+        expect(publish.status, publish.stderr).toBe(0);
         expect(
           readFileSync(path.join(root, "site/bio/index.html"), "utf8"),
         ).toContain("bio");
@@ -150,6 +184,99 @@ describe("visual affected selection", () => {
       }
     },
   );
+
+  test.each([
+    [
+      "unknown metadata",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        const manifest = JSON.parse(readFileSync(fixture.manifestPath, "utf8"));
+        manifest.shots[0].attacker = "value";
+        writeJson(fixture.manifestPath, manifest);
+      },
+    ],
+    [
+      "wrong project name",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        const manifest = JSON.parse(readFileSync(fixture.manifestPath, "utf8"));
+        manifest.shots[0].name = "attacker";
+        writeJson(fixture.manifestPath, manifest);
+      },
+    ],
+    [
+      "invalid toggles",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        const manifest = JSON.parse(readFileSync(fixture.manifestPath, "utf8"));
+        manifest.shots[0].toggles.state = "attacker-controlled";
+        writeJson(fixture.manifestPath, manifest);
+      },
+    ],
+    [
+      "hash mismatch",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        const manifest = JSON.parse(readFileSync(fixture.manifestPath, "utf8"));
+        manifest.shots[0].hash = "0".repeat(64);
+        writeJson(fixture.manifestPath, manifest);
+      },
+    ],
+    [
+      "fake PNG",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        const manifest = JSON.parse(readFileSync(fixture.manifestPath, "utf8"));
+        const image = path.join(fixture.captureRoot, manifest.shots[0].image);
+        const fake = Buffer.from("not a png");
+        writeFileSync(image, fake);
+        manifest.shots[0].hash = createHash("sha256")
+          .update(fake)
+          .digest("hex");
+        writeJson(fixture.manifestPath, manifest);
+      },
+    ],
+    [
+      "duplicate shot",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        const manifest = JSON.parse(readFileSync(fixture.manifestPath, "utf8"));
+        manifest.shots[1] = structuredClone(manifest.shots[0]);
+        writeJson(fixture.manifestPath, manifest);
+      },
+    ],
+    [
+      "extra file",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        writeFileSync(
+          path.join(fixture.captureRoot, "undeclared.txt"),
+          "attacker",
+        );
+      },
+    ],
+    [
+      "traversal",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        const manifest = JSON.parse(readFileSync(fixture.manifestPath, "utf8"));
+        manifest.shots[0].image = "../outside.png";
+        writeJson(fixture.manifestPath, manifest);
+      },
+    ],
+    [
+      "symlink",
+      (fixture: ReturnType<typeof createValidVisualArtifact>) => {
+        const manifest = JSON.parse(readFileSync(fixture.manifestPath, "utf8"));
+        const image = path.join(fixture.captureRoot, manifest.shots[0].image);
+        rmSync(image);
+        symlinkSync("/etc/passwd", image);
+      },
+    ],
+  ] as const)("rejects attacker-controlled %s artifacts", (_, mutate) => {
+    const root = mkdtempSync(path.join(process.cwd(), ".visual-invalid-"));
+    try {
+      const fixture = createValidVisualArtifact(root);
+      mutate(fixture);
+      const inspect = inspectArtifact(fixture.artifact);
+      expect(inspect.status).not.toBe(0);
+      expect(inspect.stderr).not.toBe("");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 
   test("trusted follow-up workflow passes the GitHub Actions contract", () => {
     const lint = spawnSync(
