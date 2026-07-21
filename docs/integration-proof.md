@@ -63,10 +63,10 @@ the only executed e2e target is `skills:e2e`.
 ## Split data-access dependency economics
 
 ```console
-$ pnpm exec nx show projects --affected --files=libs/data-access-awards/src/awards.ts --with-target=build --json
+$ just affected-build-projects libs/data-access-awards/src/awards.ts
 ["data-access-awards","awards"]
 
-$ pnpm exec nx show projects --affected --files=libs/data-access-core/src/client.ts --with-target=build --json
+$ just affected-build-projects libs/data-access-core/src/client.ts
 ["data-access-core","data-access-research","research","data-access-software","software","data-access-timeline","timeline","data-access-courses","courses","data-access-awards","awards","data-access-skills","skills","data-access-home","home","home-carousel","home-contact","home-cards","home-story"]
 ```
 
