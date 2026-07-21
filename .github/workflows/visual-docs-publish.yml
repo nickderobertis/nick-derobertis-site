@@ -53,7 +53,7 @@ jobs:
         env:
           EXPECTED_REPOSITORY: ${{ github.repository }}
           EXPECTED_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        run: node scripts/inspect-visual-captures.mjs trusted-captures "$EXPECTED_REPOSITORY" "$EXPECTED_HEAD_SHA" "$GITHUB_OUTPUT"
+        run: node scripts/inspect-visual-captures.mjs trusted-captures "$EXPECTED_REPOSITORY" "$EXPECTED_HEAD_SHA" >> "$GITHUB_OUTPUT"
   publish:
     needs: inspect
     if: needs.inspect.outputs.has_affected == 'true'

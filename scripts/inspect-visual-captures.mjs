@@ -1,9 +1,7 @@
-import { existsSync, lstatSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync } from "node:fs";
 
-const [root, expectedRepository, expectedHeadSha, outputFile] =
-  process.argv.slice(2);
-if (!root || !outputFile)
-  throw new Error("Expected artifact root and output file");
+const [root, expectedRepository, expectedHeadSha] = process.argv.slice(2);
+if (!root) throw new Error("Expected artifact root");
 const signalPath = `${root}/visual-capture.json`;
 const affectedPath = `${root}/affected-visual-projects.txt`;
 for (const artifactFile of [signalPath, affectedPath])
@@ -68,4 +66,4 @@ for (const project of projects) {
       throw new Error(`Invalid capture image for ${project}: ${shot.image}`);
   }
 }
-writeFileSync(outputFile, `has_affected=${projects.length > 0}\n`);
+process.stdout.write(`has_affected=${projects.length > 0}\n`);

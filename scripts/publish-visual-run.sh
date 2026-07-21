@@ -8,6 +8,12 @@ repository="${5:-}"
 publication_root="${6:-.}"
 [[ -d "$artifact_root" ]] || { echo "publish-visual-run: artifact root is missing" >&2; exit 2; }
 [[ -d "$publication_root" ]] || { echo "publish-visual-run: publication root is missing" >&2; exit 2; }
+affected_file="$artifact_root/affected-visual-projects.txt"
+affected_size=$(stat -c '%s' "$affected_file" 2>/dev/null || true)
+if [[ ! -f "$affected_file" || -L "$affected_file" || ! "$affected_size" =~ ^[0-9]+$ ]] || (( affected_size > 1048576 )); then
+  echo "publish-visual-run: affected-project control file is missing, unsafe, or oversized; rerun the capture workflow to create a validated visual-captures artifact" >&2
+  exit 2
+fi
 [[ "$event_name" == "pull_request" || "$event_name" == "push" ]] || { echo "publish-visual-run: unsupported source event" >&2; exit 2; }
 [[ "$repository" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || { echo "publish-visual-run: invalid repository" >&2; exit 2; }
 mkdir -p "$publication_root/site"
@@ -38,4 +44,4 @@ while IFS= read -r project; do
     sed '/<!-- screencomp-/d' "$publication_root/project-comment.md" >> "$publication_root/comment.md"
     printf '\n' >> "$publication_root/comment.md"
   fi
-done < "$artifact_root/affected-visual-projects.txt"
+done < "$affected_file"

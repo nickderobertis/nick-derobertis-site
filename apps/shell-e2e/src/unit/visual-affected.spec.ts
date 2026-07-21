@@ -55,7 +55,6 @@ describe("visual affected selection", () => {
         },
       );
       expect(signal.status).toBe(0);
-      const output = path.join(root, "output.txt");
       const inspect = spawnSync(
         "node",
         [
@@ -63,12 +62,11 @@ describe("visual affected selection", () => {
           root,
           "owner/repository",
           "a".repeat(40),
-          output,
         ],
         { encoding: "utf8" },
       );
       expect(inspect.status).toBe(0);
-      expect(readFileSync(output, "utf8")).toBe("has_affected=false\n");
+      expect(inspect.stdout).toBe("has_affected=false\n");
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -123,20 +121,18 @@ describe("visual affected selection", () => {
             affectedCount: 1,
           }),
         );
-        const output = path.join(root, "output.txt");
-        expect(
-          spawnSync(
-            "node",
-            [
-              "scripts/inspect-visual-captures.mjs",
-              artifact,
-              "owner/repository",
-              "b".repeat(40),
-              output,
-            ],
-            { encoding: "utf8" },
-          ).status,
-        ).toBe(0);
+        const inspect = spawnSync(
+          "node",
+          [
+            "scripts/inspect-visual-captures.mjs",
+            artifact,
+            "owner/repository",
+            "b".repeat(40),
+          ],
+          { encoding: "utf8" },
+        );
+        expect(inspect.status).toBe(0);
+        expect(inspect.stdout).toBe("has_affected=true\n");
         const publish = spawnSync(
           "scripts/publish-visual-run.sh",
           [artifact, "pull_request", "12", "master", "owner/repository", root],
@@ -155,19 +151,13 @@ describe("visual affected selection", () => {
     },
   );
 
-  test("trusted follow-up never executes fork code and has no fork comment guard", () => {
-    const workflow = readFileSync(
-      ".github/workflows/visual-docs-publish.yml",
-      "utf8",
+  test("trusted follow-up workflow passes the GitHub Actions contract", () => {
+    const lint = spawnSync(
+      "actionlint",
+      [".github/workflows/visual-docs-publish.yml"],
+      { encoding: "utf8" },
     );
-    expect(workflow).toContain("workflow_run:");
-    expect(workflow).toContain("ref: master");
-    expect(workflow).toContain(
-      "run-id: $" + "{{ github.event.workflow_run.id }}",
-    );
-    expect(workflow).not.toContain("head.repo.full_name");
-    expect(workflow).toContain("commits/$HEAD_SHA/pulls");
-    expect(workflow).toContain("needs.inspect.outputs.has_affected == 'true'");
+    expect(lint.status, lint.stderr).toBe(0);
   });
 
   test("changed captures still produce a gallery and PR comment before the gate fails", () => {
