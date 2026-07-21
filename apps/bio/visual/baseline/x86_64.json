@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "bio",
+      "toggles": {
+        "viewport": "desktop"
+      },
+      "hash": "1a63ae05e8e7426486bf50f94b5b3cfca19a28752d464dcf8a3c7a97f7116df1"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "viewport": "mobile"
+      },
+      "hash": "3433cd3198c2fd29c1f4532bf03120b785524153a7931cde9ab8e72445ae9b53"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "viewport": "tablet"
+      },
+      "hash": "edea1358da82225903e4df609bbae2cd31dd5a29a78d764b684dee9a3e02e1af"
+    }
+  ]
+}

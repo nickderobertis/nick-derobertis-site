@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "skills",
+      "toggles": {
+        "viewport": "desktop"
+      },
+      "hash": "e7a3c8fe46a1733ba5c5feaabaf4fa7572ba13aa16703502f938e3113ed9aab4"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "viewport": "mobile"
+      },
+      "hash": "640aee4aee60e6729935f0d33fac4910b74910bd858a8ee96c5d4f5ce7e8654b"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "viewport": "tablet"
+      },
+      "hash": "a7a686f5448ea4fa6fd013b0b6ea9a8a0573d2ead1d7fb1efaf5e36c2a48b276"
+    }
+  ]
+}

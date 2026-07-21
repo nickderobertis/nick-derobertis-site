@@ -21,7 +21,18 @@
     },
     "test": { "cache": true },
     "lint": { "cache": true },
-    "typecheck": { "cache": true }
+    "typecheck": { "cache": true },
+    "screenshot": {
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/scripts/capture-visual.mjs",
+        "{workspaceRoot}/scripts/visual-project.sh",
+        "{workspaceRoot}/screencomp.toml"
+      ],
+      "outputs": ["{projectRoot}/visual/current", "{projectRoot}/visual/verify"]
+    }
   },
   "plugins": []
 }

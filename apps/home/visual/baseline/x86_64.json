@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "home",
+      "toggles": {
+        "viewport": "desktop"
+      },
+      "hash": "1745a4b7571611f0bbdd9d62c64dc0e149e6b93732b901fce75b6a7c5028846c"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "viewport": "mobile"
+      },
+      "hash": "e76002653b7e2a18695e4a2f37137995875a81a9cfbc07b6a7ef72073f5b0e80"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "viewport": "tablet"
+      },
+      "hash": "97f15db0318410287e8610886c4167115fe037a1e85da02bde3fdc50ce1f2ad9"
+    }
+  ]
+}

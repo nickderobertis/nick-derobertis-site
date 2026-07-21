@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "research",
+      "toggles": {
+        "viewport": "desktop"
+      },
+      "hash": "137f5bdbb4e8d1dea48618c3465a57f3585bdf9b7a9837ea0eb1b91821211ff0"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "viewport": "mobile"
+      },
+      "hash": "90c428988952865b00ea85056c204d56d09ef0e7425ff797948b0dcb23be77e7"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "viewport": "tablet"
+      },
+      "hash": "ff11d6ab40005358ff244d0d761c198fca3b5f49d2342c106695b3f4abab7947"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "timeline",
+      "toggles": {
+        "viewport": "desktop"
+      },
+      "hash": "997f452f5f80328d136a552735a44b91a7863b9108110eec753969879b977a7a"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "viewport": "mobile"
+      },
+      "hash": "067260556e8e0e60a88f53db87578f02e7a32b411f4d6b3b98c1db4860548266"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "viewport": "tablet"
+      },
+      "hash": "ee1e291c1da1a1036bdb953246ba631782db90ddc6431ce0144a46a90e3dcebb"
+    }
+  ]
+}

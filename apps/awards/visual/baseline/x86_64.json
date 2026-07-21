@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "awards",
+      "toggles": {
+        "viewport": "desktop"
+      },
+      "hash": "5126a3da7148d9991d32f26adc4c5943a5e3bea6799687d8b69d6f725fd596ba"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "viewport": "mobile"
+      },
+      "hash": "f84e09528a25c9d03dbf7ff82cc1b0d93870fba1d52f8456e978dcdf5bfef31e"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "viewport": "tablet"
+      },
+      "hash": "1a7204efdbd418b76ba3e3c2ebccbabab43bf853edaa498a90585633dd0691fb"
+    }
+  ]
+}

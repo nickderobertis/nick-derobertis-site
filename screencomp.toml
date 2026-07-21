@@ -1,0 +1,12 @@
+[capture]
+arches = ["x86_64"]
+
+[comment]
+title = "Nick DeRobertis site visual changes"
+marker = "screencomp"
+embed_limit = 10
+
+[[toggle]]
+key = "viewport"
+label = "Viewport"
+values = ["desktop", "tablet", "mobile"]

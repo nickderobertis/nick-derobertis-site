@@ -1,4 +1,6 @@
 node_modules/
+apps/*/visual/current/
+apps/*/visual/verify/
 dist/
 coverage/
 .nx/

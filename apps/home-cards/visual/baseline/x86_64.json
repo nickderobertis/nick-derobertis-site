@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "home-cards",
+      "toggles": {
+        "viewport": "desktop"
+      },
+      "hash": "26ca5d7853cc5592660ae91ce14b30d2b1e265f52d560f4fbb8b629ff2e068eb"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "viewport": "mobile"
+      },
+      "hash": "eef16360b6d8b885f9c500afca84d5490cd2b64383c34a360919ddd569e548d0"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "viewport": "tablet"
+      },
+      "hash": "777fd142a64b950b9e6a1dde20e75b1c9e71e80659dcae9f37e3c53c6629247f"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "shots": [
+    {
+      "name": "software",
+      "toggles": {
+        "viewport": "desktop"
+      },
+      "hash": "7aa66ebdf0b344dd3ac9d836b6af1f010a9b98cbcc0d3a7b59be39e6de05fbc7"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "viewport": "mobile"
+      },
+      "hash": "4a6073dc584e12b9135ceeb315f0cd5f0a1df49c3c6e7e3e3a3e4eda40a08921"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "viewport": "tablet"
+      },
+      "hash": "c09fa658b0792cad57a52906d64617f9b44b2e3f248d28f80127dda30e05f5e3"
+    }
+  ]
+}
