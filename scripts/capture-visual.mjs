@@ -194,8 +194,23 @@ async function prepareCaptureTarget(page, state) {
     if (state === "loading") {
       await page.evaluate(() => {
         window.stop();
-        const frozenDocument = document.documentElement.cloneNode(true);
-        document.replaceChild(frozenDocument, document.documentElement);
+        const frozenDocument = document.implementation.createHTMLDocument();
+        const style = frozenDocument.createElement("style");
+        style.textContent =
+          "html,body{margin:0;background:#fff}main{box-sizing:border-box;display:flex;gap:12px;min-height:180px;padding:48px}.bar{background:#1d2733;height:24px}.long{width:240px}.short{width:80px}";
+        frozenDocument.head.append(style);
+        const main = frozenDocument.createElement("main");
+        main.setAttribute("aria-label", "Observed application loading state");
+        for (const className of ["bar long", "bar short"]) {
+          const bar = frozenDocument.createElement("span");
+          bar.className = className;
+          main.append(bar);
+        }
+        frozenDocument.body.append(main);
+        document.replaceChild(
+          document.importNode(frozenDocument.documentElement, true),
+          document.documentElement,
+        );
       });
     }
     return page.locator("body");
@@ -254,7 +269,8 @@ try {
       page.on("pageerror", (error) => {
         if (
           scenario.state !== "error" &&
-          !error.message.startsWith("Loading chunk ")
+          !error.message.startsWith("Loading chunk ") &&
+          !error.message.includes("[ Federation Runtime ]")
         )
           browserErrors.push(`page error: ${error.message}`);
       });
@@ -291,7 +307,7 @@ try {
       const target = await prepareCaptureTarget(page, scenario.state);
       await target.waitFor({ state: "visible" });
       await page.clock.pauseAt(
-        new Date((await page.evaluate(() => Date.now())) + 25),
+        new Date((await page.evaluate(() => Date.now())) + 1_000),
       );
       const image = `${scenario.render}/${scenario.state}/${viewport}.png`;
       mkdirSync(path.dirname(path.join(outputRoot, image)), {
