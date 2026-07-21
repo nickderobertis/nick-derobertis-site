@@ -14,18 +14,17 @@ pnpm workspace:
 just bootstrap
 ```
 
-Run the complete shell and federated graph through the supported local browser
-harness:
+Start the complete shell and federated graph for interactive development:
 
 ```bash
-just test-e2e
+just serve
 ```
 
-It builds and prerenders the artifact, starts the static server, and exercises
-the real site. Routes live below the project base `/nick-derobertis-site/`;
-each remote is also exercised below `/nick-derobertis-site/remotes/<remote>/`
-for standalone development and tests. Use `just e2e-project <remote>` for a
-focused iteration loop.
+Open <http://127.0.0.1:4200/nick-derobertis-site/>. The recipe rebuilds and
+prerenders the complete static artifact before serving it, so restart it after
+source changes. Press Ctrl-C in its terminal to stop the server. Standalone
+remotes are available at
+`http://127.0.0.1:4200/nick-derobertis-site/remotes/<remote>/`.
 
 ## Test and build
 
@@ -45,6 +44,7 @@ just test                 # affected unit and browser tests
 just test-e2e             # complete shell browser journeys
 just e2e-project skills   # one remote, standalone and host-composed
 just prerender            # static artifact in dist/apps/shell
+just serve                # interactive static development server
 just lint                 # all-project lint and typecheck
 just format               # apply Biome formatting
 ```

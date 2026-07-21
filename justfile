@@ -64,6 +64,10 @@ test-e2e:
 prerender:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run shell:prerender >"$log" 2>&1 || { cat "$log" >&2; echo "prerender: static Pages artifact failed; fix the build or artifact validation above and rerun just prerender" >&2; exit 1; }
 
+# Build the complete federated artifact before serving it at the Pages base path.
+serve: prerender
+    node scripts/serve-e2e.mjs
+
 e2e-affected-files file:
     # llmlint: ignore[tool_output_is_signal] This proof command intentionally preserves unedited Nx selection and execution output for docs/integration-proof.md.
     file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "e2e-affected-files: file must be a tracked workspace-relative file" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=e2e --json && pnpm exec nx affected -t e2e --files="$file" --parallel=3
