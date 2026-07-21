@@ -43,7 +43,8 @@
             "timeline",
             "skills"
           ]
-        }
+        },
+        { "target": "prerender", "projects": ["shell"] }
       ],
       "options": { "command": "scripts/visual-project.sh home" }
     }

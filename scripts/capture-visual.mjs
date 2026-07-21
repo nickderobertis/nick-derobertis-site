@@ -11,12 +11,22 @@ import { createServer } from "node:http";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
-const [project, outputRoot] = process.argv.slice(2);
-if (!project || !outputRoot || !/^[a-z][a-z0-9-]*$/.test(project))
-  throw new Error("usage: capture-visual.mjs <project> <output-root>");
+const [project, outputArgument] = process.argv.slice(2);
+if (!project || !outputArgument || !/^[a-z][a-z0-9-]*$/.test(project))
+  throw new Error(
+    "usage: capture-visual.mjs <project> <output-root>; example: capture-visual.mjs bio apps/bio/visual/current/x86_64",
+  );
+const outputRoot = path.resolve(outputArgument);
+const allowedOutputRoot = path.resolve("apps", project, "visual");
+if (!outputRoot.startsWith(`${allowedOutputRoot}${path.sep}`))
+  throw new Error(
+    `Output root must be inside ${allowedOutputRoot}; use the project's Nx screenshot target`,
+  );
 const projectRoot = path.resolve("dist/apps", project);
 if (!existsSync(path.join(projectRoot, "index.html")))
-  throw new Error(`Built remote not found: ${projectRoot}`);
+  throw new Error(
+    `Built remote not found: ${projectRoot}; run pnpm exec nx build ${project} first`,
+  );
 const contentTypes = new Map([
   [".css", "text/css; charset=utf-8"],
   [".html", "text/html; charset=utf-8"],
@@ -35,6 +45,13 @@ const server = createServer(async (request, response) => {
   );
   if (dataDomain) {
     const scenario = requestUrl.searchParams.get("scenario");
+    if (
+      scenario !== null &&
+      !["empty", "error", "loading"].includes(scenario)
+    ) {
+      response.writeHead(400).end("Unsupported visual scenario");
+      return;
+    }
     if (scenario === "loading")
       await new Promise((resolve) => setTimeout(resolve, 5_000));
     if (scenario === "error") {
@@ -53,6 +70,10 @@ const server = createServer(async (request, response) => {
   const match = requestUrl.pathname.match(
     /^\/nick-derobertis-site\/remotes\/([a-z][a-z0-9-]*)\/(.*)$/,
   );
+  if (match && !existsSync(path.join("apps", match[1], "project.json"))) {
+    response.writeHead(400).end("Unknown visual project");
+    return;
+  }
   const servedRoot = match
     ? path.resolve("dist/apps", match[1])
     : existsSync("dist/apps/shell/index.html")
@@ -85,7 +106,9 @@ const server = createServer(async (request, response) => {
 await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const address = server.address();
 if (!address || typeof address === "string")
-  throw new Error("Could not start visual capture server");
+  throw new Error(
+    `Could not start visual capture server; check local loopback availability and rerun just visual-project ${project}`,
+  );
 const browser = await chromium.launch({
   args: [
     "--disable-skia-runtime-opts",
@@ -108,14 +131,30 @@ const viewports = [
 ];
 const composedPaths = new Map([
   ["awards", ""],
+  ["bio", "bio"],
+  ["courses", "courses"],
+  ["home", ""],
+  ["home-cards", ""],
+  ["home-carousel", ""],
+  ["home-contact", ""],
+  ["home-story", ""],
   ["research", "research"],
   ["skills", ""],
+  ["software", "software"],
   ["timeline", ""],
 ]);
 const stateQueries = new Map([
   ["awards", ["all", "empty", "loading", "error"]],
+  ["bio", ["empty", "loading", "error"]],
+  ["courses", ["empty", "loading", "error"]],
+  ["home", ["empty", "loading", "error"]],
+  ["home-cards", ["empty", "loading", "error"]],
+  ["home-carousel", ["empty", "loading", "error"]],
+  ["home-contact", ["empty", "loading", "error"]],
+  ["home-story", ["empty", "loading", "error"]],
   ["research", ["empty", "loading", "error"]],
   ["skills", ["empty", "loading", "error", "expanded"]],
+  ["software", ["empty", "loading", "error"]],
   ["timeline", ["empty", "loading", "error", "employment-only"]],
 ]);
 
@@ -124,6 +163,10 @@ function queryFor(state) {
   if (project === "awards")
     return state === "all" ? "?awards-view=all" : `?awards-scenario=${state}`;
   if (project === "research") return `?research-scenario=${state}`;
+  if (project === "bio") return `?bio-view=${state}`;
+  if (project === "courses") return `?courses-view=${state}`;
+  if (project === "software") return `?software-view=${state}`;
+  if (project.startsWith("home")) return `?state=${state}`;
   if (project === "skills" && state !== "expanded")
     return `?skills-state=${state}`;
   if (project === "timeline" && state !== "employment-only")
@@ -131,12 +174,31 @@ function queryFor(state) {
   return "";
 }
 
-async function captureTarget(page, state) {
+async function prepareCaptureTarget(page, state) {
+  const homeTargets = new Map([
+    ["home-carousel", ["region", "Featured work"]],
+    ["home-cards", ["region", "Areas of work"]],
+    ["home-story", ["heading", "Who am I?"]],
+    ["home-contact", ["heading", "Let’s build something useful."]],
+  ]);
   if (["empty", "loading", "error"].includes(state)) {
-    if (project === "research") return page.locator(".research-state");
-    if (state === "loading")
-      return page.getByText(`Loading ${project}…`, { exact: true });
-    return page.getByRole(state === "error" ? "alert" : "status");
+    const indicator =
+      project === "research"
+        ? page.locator(".research-state")
+        : page.getByRole(
+            state === "error" && !project.startsWith("home")
+              ? "alert"
+              : "status",
+          );
+    await indicator.first().waitFor({ state: "visible" });
+    if (state === "loading") {
+      await page.evaluate(() => {
+        window.stop();
+        const frozenDocument = document.documentElement.cloneNode(true);
+        document.replaceChild(frozenDocument, document.documentElement);
+      });
+    }
+    return page.locator("body");
   }
   if (project === "awards")
     return page.getByRole("region", {
@@ -155,6 +217,11 @@ async function captureTarget(page, state) {
       await page.getByRole("checkbox", { name: "Education" }).uncheck();
     return page.getByRole("region", { name: "Educated and Experienced" });
   }
+  if (homeTargets.has(project)) {
+    const [role, name] = homeTargets.get(project);
+    return page.getByRole(role, { name });
+  }
+  if (project === "home") return page.locator("body");
   return page.locator("body");
 }
 
@@ -175,13 +242,26 @@ try {
         viewport: { width, height },
       });
       const page = await context.newPage();
+      const browserErrors = [];
       page.on("console", (message) => {
-        if (message.type() === "error") console.error(message.text());
+        if (
+          message.type() === "error" &&
+          scenario.state !== "error" &&
+          !message.text().startsWith("Failed to load resource:")
+        )
+          browserErrors.push(`browser console: ${message.text()}`);
       });
-      page.on("pageerror", (error) => console.error(error.message));
+      page.on("pageerror", (error) => {
+        if (scenario.state !== "error")
+          browserErrors.push(`page error: ${error.message}`);
+      });
       page.on("response", (response) => {
-        if (response.status() >= 400)
-          console.error(`${response.status()} ${response.url()}`);
+        if (
+          response.status() >= 400 &&
+          scenario.state !== "error" &&
+          !response.url().includes("/cv-data/domains/")
+        )
+          browserErrors.push(`HTTP ${response.status()}: ${response.url()}`);
       });
       await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
       const relative =
@@ -205,8 +285,11 @@ try {
           .getByText("Loading HOME page…")
           .waitFor({ state: "hidden", timeout: 30_000 });
       }
-      const target = await captureTarget(page, scenario.state);
+      const target = await prepareCaptureTarget(page, scenario.state);
       await target.waitFor({ state: "visible" });
+      await page.clock.pauseAt(
+        new Date((await page.evaluate(() => Date.now())) + 25),
+      );
       const image = `${scenario.render}/${scenario.state}/${viewport}.png`;
       mkdirSync(path.dirname(path.join(outputRoot, image)), {
         recursive: true,
@@ -215,6 +298,10 @@ try {
         animations: "disabled",
         path: path.join(outputRoot, image),
       });
+      if (browserErrors.length > 0)
+        throw new Error(
+          `Visual capture reported ${browserErrors.join("; ")}; rerun just visual-project ${project} and inspect this scenario`,
+        );
       const hash = createHash("sha256")
         .update(readFileSync(path.join(outputRoot, image)))
         .digest("hex");

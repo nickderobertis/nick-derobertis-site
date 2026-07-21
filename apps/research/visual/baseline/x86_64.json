@@ -8,7 +8,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "f88f28edb2771a8e1e8118c07d94c0c67debb16f3edbeede1091ed7b4d10bc60"
+      "hash": "94808491321a73200678e1213cdfd348c51676640869d9d11db99bd33edc2383"
     },
     {
       "name": "research",
@@ -17,7 +17,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "6ca15677b33f6005d42b677091ec0fd59cc11f132dda22117c0d5aecbc550e7b"
+      "hash": "4edf8336695eee9ace292bc60a85c13e28cf1695826fbc1f8b80273ad23e3941"
     },
     {
       "name": "research",
@@ -53,7 +53,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "7b18cb0c09c2e8043d1dad74220a140db54e4f2a30bbd1d5468d0a6108b533ba"
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
     },
     {
       "name": "research",
@@ -62,7 +62,7 @@
         "state": "empty",
         "viewport": "desktop"
       },
-      "hash": "592539c221ab2d9cdf50269679b195e2e92e1f72124978c5aad51b906f86328e"
+      "hash": "185cf6bf1c6da75eb0e55dfc104ed498827ae5be53a1a2696523b3431062b812"
     },
     {
       "name": "research",
@@ -71,7 +71,7 @@
         "state": "error",
         "viewport": "desktop"
       },
-      "hash": "ffb07c295c6e20884121aa60f73592785e107f5f27989e9d402264c8916d53e4"
+      "hash": "137f5bdbb4e8d1dea48618c3465a57f3585bdf9b7a9837ea0eb1b91821211ff0"
     },
     {
       "name": "research",
@@ -107,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "5e2761e80ca43f82ceefb20c2ce8452f6cd92ff369ce8c7e52e7460b3874eebf"
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
     }
   ]
 }

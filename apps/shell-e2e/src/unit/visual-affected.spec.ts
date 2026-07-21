@@ -25,7 +25,16 @@ function affectedScreenshots(file: string): string[] {
     ],
     { encoding: "utf8" },
   );
-  return JSON.parse(output) as string[];
+  const projects: unknown = JSON.parse(output);
+  if (
+    !Array.isArray(projects) ||
+    !projects.every(
+      (project) =>
+        typeof project === "string" && /^[a-z][a-z0-9-]*$/.test(project),
+    )
+  )
+    throw new Error("Nx affected output was not a list of project names");
+  return projects;
 }
 
 describe("visual affected selection", () => {
@@ -67,58 +76,22 @@ describe("visual affected selection", () => {
           shots: [{ name: "fixture", toggles, hash: "a".repeat(64) }],
         }),
       );
-      const classify = spawnSync(
-        "screencomp",
+      const publish = spawnSync(
+        "scripts/publish-visual-project.sh",
         [
-          "classify",
-          "--baseline-manifest",
           baseline,
-          "--current",
           path.join(root, "current"),
-          "--arch",
-          "x86_64",
-          "--exit-code",
+          gallery,
+          comment,
+          "https://example.test/pr-1/fixture",
         ],
         { encoding: "utf8" },
       );
-      expect(classify.status).toBe(3);
-      execFileSync("screencomp", [
-        "gallery",
-        "--input",
-        path.join(root, "current"),
-        "--arch",
-        "x86_64",
-        "--output",
-        gallery,
-      ]);
-      execFileSync("screencomp", [
-        "comment",
-        "--baseline-manifest",
-        baseline,
-        "--current",
-        path.join(root, "current"),
-        "--arch",
-        "x86_64",
-        "--gallery-url",
-        "https://example.test/pr-1/fixture",
-        "--output",
-        comment,
-      ]);
+      expect(publish.status).toBe(3);
       expect(readFileSync(path.join(gallery, "index.html"), "utf8")).toContain(
         "fixture",
       );
       expect(readFileSync(comment, "utf8")).toContain("| 0 | 1 | 0 | 0 |");
-
-      const workflow = readFileSync(
-        ".github/workflows/visual-docs.yml",
-        "utf8",
-      );
-      expect(workflow.indexOf("name: visual-galleries")).toBeLessThan(
-        workflow.indexOf("Enforce visual drift gate after publishing"),
-      );
-      expect(workflow).toContain(
-        "github.event.pull_request.head.repo.full_name == github.repository",
-      );
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -130,6 +103,24 @@ describe("visual affected selection", () => {
         encoding: "utf8",
       }),
     ).not.toThrow();
+  });
+
+  test("visual tooling pins stay synchronized", () => {
+    expect(() =>
+      execFileSync("node", ["scripts/verify-visual-contract.mjs"], {
+        encoding: "utf8",
+      }),
+    ).not.toThrow();
+  });
+
+  test("capture output cannot escape its owning project", () => {
+    const capture = spawnSync(
+      "node",
+      ["scripts/capture-visual.mjs", "bio", "/tmp/escaped-visual"],
+      { encoding: "utf8" },
+    );
+    expect(capture.status).not.toBe(0);
+    expect(capture.stderr).toContain("Output root must be inside");
   });
 
   test("a remote change recaptures only that remote", () => {

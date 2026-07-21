@@ -4,6 +4,78 @@
     {
       "name": "software",
       "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "1191e69d18b14f63e47f9c853a56b9540972b3568cfb2d35baedc29b290baaaa"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "f6128ee7d1032cd99b947aa17429f3386b6a62fcd2b48c75f5a13c529aee2d2c"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "46796c0c79fdf551310e533e87c32063ab988e44d0f8c01f9ccc51e2db6eb475"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "8e138faaf9b04fe9b587f986179c3afe24a754e61bb87a534f003ba07f118efe"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "0c1c8c4209bf53048b63821dea4787d09b5e418eba336febe73e04be139ee671"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "881b2410f4b4c293f335e1f1503ad6e574ec542abae2affb9fad63e5e5ea0908"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "4495a74a74f0a8021a7a0a06fda48ae2fef68447b31f16931a12c20dddf1f153"
+    },
+    {
+      "name": "software",
+      "toggles": {
         "render": "standalone",
         "state": "happy",
         "viewport": "desktop"
@@ -27,6 +99,15 @@
         "viewport": "tablet"
       },
       "hash": "626cf861be79f5dceaafd4c28744d88c597795c1c743f878e429db408e3f2087"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
     }
   ]
 }

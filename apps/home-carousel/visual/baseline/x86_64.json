@@ -4,6 +4,78 @@
     {
       "name": "home-carousel",
       "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "66dee5ca207987c8010c76ffbca58399c66d82e3a067233f316771584c177c97"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "ab1a5f882d1ef4d790cebf5fb98acb83484f1867442aafd22f2d8f70dcf136cf"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "68e25378d6f8b971244fe0e82347993b4c0fe3642d4b334373ba6ac687ca3b2c"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "a19e4901fc8c68033e6bc316ca4de0b1b4dd53677b64c581303bcc300ba4d048"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "09cb02b586a6663d9347a0ec3f0662c4fdf519124a6fc4c86cab8b4170fd43f6"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "f50cb6f966e0fe91bc31cc81b13123a2d5de232bef2caf6d6798f27bd065de4e"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "50e6ab03bf40e040f1cccf80c9e0baf0a8b08e1b17c96179810c25d20560498d"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
         "render": "standalone",
         "state": "happy",
         "viewport": "desktop"
@@ -27,6 +99,15 @@
         "viewport": "tablet"
       },
       "hash": "5c2c2bd0f36141d24cf3c0b899ed5ddfc3cc7abeb29601e3e4b57d4b9131ac22"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
     }
   ]
 }

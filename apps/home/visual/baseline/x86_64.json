@@ -4,6 +4,78 @@
     {
       "name": "home",
       "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "66dee5ca207987c8010c76ffbca58399c66d82e3a067233f316771584c177c97"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "ab1a5f882d1ef4d790cebf5fb98acb83484f1867442aafd22f2d8f70dcf136cf"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "1e521d33f8d43e8efe24ae61ae95c7f2bb07a023c46fdde27608a486c9698172"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "7a376f4bd53247c91ee76c231845fae39b75da2e80547fc3c9820e1762622cdf"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "ff7e8a892fbbaae15b8384ed5ccca48ddb54e9378eed46f7b119c903da0a440d"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "c27a90d5ae232bd2fc898f56338e5dea4fdda47dec52ed7524f1f0938ae99455"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "c7bd5111b2894e9787805490420c1b11cd6d573aa59c30eb0ac50778513579f0"
+    },
+    {
+      "name": "home",
+      "toggles": {
         "render": "standalone",
         "state": "happy",
         "viewport": "desktop"
@@ -27,6 +99,15 @@
         "viewport": "tablet"
       },
       "hash": "52dee528b1d4c7575c12bd564546f6e7668f6c45e165c0009a6af1ed31f31ebf"
+    },
+    {
+      "name": "home",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
     }
   ]
 }

@@ -4,6 +4,78 @@
     {
       "name": "courses",
       "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "d82c7a5184b027c6af2b9d20439217371134692cd5ddf9429da0570eb0a331a9"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "1fc2e8f4d8fdc2d0707f62d49b82a5adda3f1ac28390a8d0e0053230108168a8"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "e4fda6a9aee27787e6fca17ff1c61ca993fd9c68a744c3cd3a32d8fc22e0f265"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "b03b9b7c5e955b1a49adab05b499c6b8574ae5c29b7819aa72f724a20b52a36b"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "e3d6adfb83be8253eed31a266e1c2724c333ff5c2ed1f62565615f8c35044c6a"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "b3c34c5dd48b9536845b929f2ed4613497b95a1212162253dbfa73b5e2dcda69"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "23f4210ff69b81efde12002283f855918acda55dcda4387cd3cf3143d30561be"
+    },
+    {
+      "name": "courses",
+      "toggles": {
         "render": "standalone",
         "state": "happy",
         "viewport": "desktop"
@@ -27,6 +99,15 @@
         "viewport": "tablet"
       },
       "hash": "370de7a1fadde5f39fd83c3e6e9d5c286393293e5daac16f1dffa1ef0c4e0cb6"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
     }
   ]
 }

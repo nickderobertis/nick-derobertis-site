@@ -17,7 +17,7 @@ manifests under each `apps/<remote>/visual/baseline/` directory. The checked-in
 `screencomp-migration.json` records which remote owns every reference group and
 the review disposition used when seeding those manifests.
 
-`node scripts/verify-reference-migration.mjs` verifies that every recorded PR
+`just verify-visual-reference` verifies that every recorded PR
 #12 PNG is still present, every owner has a per-project screencomp baseline, and
 no reference group is left unmapped. This preserves the original images as the
 explicit fidelity reference while screencomp owns reproducible ongoing diffs.

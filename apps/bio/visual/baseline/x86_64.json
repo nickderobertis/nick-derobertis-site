@@ -4,6 +4,78 @@
     {
       "name": "bio",
       "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "e7e08112c1277cc4ebd24c04828356d62aa6acf5839f4005fe5166418468f7b4"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "c46b27dd452e8567f2c51b7fe49f15a4fe22e79991fb10cb59453d0a3e587bd4"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "desktop"
+      },
+      "hash": "898acad9560f17b6c9df4ba31800a536b8406d2963b4158d910facfcfae66d20"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "mobile"
+      },
+      "hash": "20f3bbd57730968be13b8216b9403df52abfe85fd24cf5460ba4f89841d5e0c4"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "happy",
+        "viewport": "tablet"
+      },
+      "hash": "fbb1a03ae9765bd13ed77bd244253ca57082e70543cd3a692915f06792619623"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "desktop"
+      },
+      "hash": "91a0b8c872443f925ee0527eb2f9b85e55be812a8f19f04c9ca8f39cf01b4c45"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "desktop"
+      },
+      "hash": "2cbf230ac3c6477ffd9538070d09361f4813ae0b7fa046ea0ff43b42320fe9cf"
+    },
+    {
+      "name": "bio",
+      "toggles": {
         "render": "standalone",
         "state": "happy",
         "viewport": "desktop"
@@ -27,6 +99,15 @@
         "viewport": "tablet"
       },
       "hash": "9788b8a62f219335bf254d17da4d5352b45743f3daa221932d97098b738f61e3"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "662c24746a4cbd64b50a02a8e64f8b1a68828a04a16dde68c1172dcc4148c709"
     }
   ]
 }
