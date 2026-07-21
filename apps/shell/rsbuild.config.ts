@@ -1,21 +1,66 @@
-import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
+import { basename, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { pluginModuleFederation } from "@module-federation/rsbuild-plugin";
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 
-const remoteManifest = createRequire(import.meta.url)(
-  "../../libs/build-config/src/remotes.json",
-) as typeof import("../../libs/build-config/src/remotes.json");
-
-const base = "/nick-derobertis-site/";
-if (process.env.NX_TASK_TARGET_PROJECT !== "shell")
-  throw new Error("The shell Rsbuild config must be invoked through Nx");
-const outputRoot = `dist/apps/${process.env.NX_TASK_TARGET_PROJECT}`;
-const remoteMap = (names: readonly (keyof typeof remoteManifest)[]) =>
+const siteConfig: unknown = JSON.parse(
+  readFileSync(
+    new URL("../../libs/data-access/src/site.config.json", import.meta.url),
+    "utf8",
+  ),
+);
+const remoteManifest: unknown = JSON.parse(
+  readFileSync(
+    new URL("../../libs/build-config/src/remotes.json", import.meta.url),
+    "utf8",
+  ),
+);
+const routes: unknown = JSON.parse(
+  readFileSync(new URL("./src/routes.json", import.meta.url), "utf8"),
+);
+if (
+  typeof siteConfig !== "object" ||
+  siteConfig === null ||
+  !("pagesBase" in siteConfig) ||
+  typeof siteConfig.pagesBase !== "string" ||
+  !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase) ||
+  typeof remoteManifest !== "object" ||
+  remoteManifest === null ||
+  !Object.entries(remoteManifest).every(
+    ([name, alias]) =>
+      /^[a-z][a-z0-9-]*$/.test(name) && typeof alias === "string",
+  ) ||
+  !Array.isArray(routes) ||
+  !routes.every(
+    (route) =>
+      typeof route === "object" &&
+      route !== null &&
+      "path" in route &&
+      typeof route.path === "string" &&
+      (route.path === "/" ||
+        ("remote" in route && typeof route.remote === "string")),
+  )
+)
+  throw new Error(
+    "Shell project, site, remote, or route configuration is invalid",
+  );
+const projectName = basename(dirname(fileURLToPath(import.meta.url)));
+if (process.env.NX_TASK_TARGET_PROJECT !== projectName)
+  throw new Error(`${projectName} Rsbuild config must be invoked through Nx`);
+const base = `${siteConfig.pagesBase}/`;
+const outputRoot = `dist/apps/${projectName}`;
+const routeRemotes = routes.map((route) =>
+  route.path === "/" ? "home" : (route.remote as string),
+);
+if (!routeRemotes.every((name) => name in remoteManifest))
+  throw new Error("Every shell route must reference a declared remote");
+const remoteMap = (names: readonly string[]) =>
   Object.fromEntries(
     names.map((name) => [
-      remoteManifest[name],
-      `${remoteManifest[name]}@${base}remotes/${name}/remoteEntry.js`,
+      remoteManifest[name as keyof typeof remoteManifest],
+      `${remoteManifest[name as keyof typeof remoteManifest]}@${base}remotes/${name}/remoteEntry.js`,
     ]),
   );
 
@@ -35,10 +80,10 @@ export default defineConfig({
   plugins: [
     pluginReact(),
     pluginModuleFederation({
-      name: "shell",
+      name: projectName,
       filename: "remoteEntry.js",
       exposes: { "./App": "./apps/shell/src/app.tsx" },
-      remotes: remoteMap(["home", "bio", "research", "software", "courses"]),
+      remotes: remoteMap(routeRemotes),
       shared: {
         react: { singleton: true, requiredVersion: false, eager: true },
         "react-dom": { singleton: true, requiredVersion: false, eager: true },
