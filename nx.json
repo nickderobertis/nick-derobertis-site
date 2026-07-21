@@ -19,15 +19,9 @@
       "inputs": ["production", "^production"],
       "outputs": ["{options.outputPath}"]
     },
-    "test": {
-      "cache": true
-    },
-    "lint": {
-      "cache": true
-    },
-    "typecheck": {
-      "cache": true
-    },
+    "test": { "cache": true },
+    "lint": { "cache": true },
+    "typecheck": { "cache": true },
     "screenshot": {
       "cache": true,
       "inputs": [
@@ -40,6 +34,5 @@
       "outputs": ["{projectRoot}/visual/current", "{projectRoot}/visual/verify"]
     }
   },
-  "plugins": [],
-  "analytics": false
+  "plugins": []
 }
