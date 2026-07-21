@@ -76,6 +76,8 @@ const contracts = {
 } as const;
 
 const owner = process.env.E2E_REMOTE;
+if (owner && !(owner in contracts))
+  throw new Error(`E2E_REMOTE names unknown remote ${owner}`);
 const validOwner = owner && owner in contracts;
 const contract = validOwner
   ? contracts[owner as keyof typeof contracts]

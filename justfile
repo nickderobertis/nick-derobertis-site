@@ -59,7 +59,14 @@ upgrade:
     just check
 
 test-e2e:
-    pnpm exec nx run shell-e2e:integration
+    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run shell-e2e:integration >"$log" 2>&1 || { cat "$log" >&2; echo "test-e2e: browser integration failed; fix the failing journey above and rerun just test-e2e" >&2; exit 1; }
+
+e2e-affected-files file:
+    # llmlint: ignore[tool_output_is_signal] This proof command intentionally preserves unedited Nx selection and execution output for docs/integration-proof.md.
+    file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "e2e-affected-files: file must be a tracked workspace-relative file" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=e2e --json && pnpm exec nx affected -t e2e --files="$file" --parallel=3
+
+e2e-project project:
+    project="$1"; [[ "$project" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "e2e-project: project must be a valid Nx project name" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run "$project:e2e" >"$log" 2>&1 || { cat "$log" >&2; echo "e2e-project: remote browser journey failed; fix the failure above and rerun just e2e-project $project" >&2; exit 1; }
 
 setup-llmlint:
     ./scripts/setup-llmlint.sh

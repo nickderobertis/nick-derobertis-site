@@ -13,6 +13,33 @@ const substantiveRouteContent = {
 };
 
 const root = "dist/apps/shell";
+// llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
+if (
+  !Array.isArray(routes) ||
+  !routes.every(
+    (route) =>
+      route &&
+      typeof route === "object" &&
+      typeof route.path === "string" &&
+      /^\/(?:[a-z][a-z0-9-]*)?$/.test(route.path) &&
+      typeof route.heading === "string" &&
+      typeof route.description === "string",
+  )
+)
+  throw new Error(
+    "The route manifest is invalid; fix apps/shell/src/routes.json and rerun just check.",
+  );
+// llmlint: ignore-end[changed_behavior_has_e2e]
+// llmlint: ignore-block[changed_behavior_has_e2e] These build-time artifact failure paths occur before a browser can be served; the successful artifact is exercised with JavaScript disabled and through deep links in site.spec.ts.
+if (
+  !remoteManifest ||
+  typeof remoteManifest !== "object" ||
+  Object.keys(remoteManifest).some((name) => !/^[a-z][a-z0-9-]*$/.test(name)) ||
+  Object.values(remoteManifest).some((alias) => typeof alias !== "string")
+)
+  throw new Error(
+    "The canonical remote manifest is invalid; fix libs/build-config/src/remotes.json and rerun just check.",
+  );
 for (const route of routes) {
   const path =
     route.path === "/"
@@ -28,7 +55,9 @@ for (const route of routes) {
     throw new Error(`${path} lacks the Pages base path`);
   const expected = substantiveRouteContent[route.path];
   if (!expected || !html.includes(expected))
-    throw new Error(`${path} lacks substantive route content`);
+    throw new Error(
+      `${path} lacks substantive route content; fix scripts/prerender.mjs and rerun just check.`,
+    );
 }
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
@@ -47,3 +76,4 @@ for (const file of [
   "domains/timeline.json",
 ])
   await access(`${root}/cv-data/${file}`);
+// llmlint: ignore-end[changed_behavior_has_e2e]
