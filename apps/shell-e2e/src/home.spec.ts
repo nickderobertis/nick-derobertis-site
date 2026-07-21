@@ -128,7 +128,9 @@ for (const path of renderPaths)
           : state === "loading"
             ? "Loading timeline…"
             : "Timeline unavailable";
-      await expect(page.getByRole(role)).toContainText(message);
+      await expect(
+        page.getByRole(role).filter({ hasText: message }),
+      ).toBeVisible();
     });
 
 const viewports = [

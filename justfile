@@ -38,12 +38,12 @@ verify-visual-reference:
 check: test lint-workflows
     # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
     # bundler, prerender, Playwright, and screenshot executors in this workspace.
-    base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender,e2e,screenshot --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
+    base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender,e2e,screenshot --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx run shell-e2e:integration >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
 # CI runs this non-PR safety sweep so affected detection is never the only gate.
 check-all: lint-workflows
     # Keep the same CI warnings-as-errors contract during the non-affected sweep.
-    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx run-many -t lint --all --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx run-many -t typecheck,test,build,prerender,e2e,screenshot --all --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check-all: quality gate failed; fix warnings and errors above, then rerun just check-all" >&2; exit 1; }
+    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx run-many -t lint --all --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx run-many -t typecheck,test,build,prerender,e2e,screenshot --all --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx run shell-e2e:integration >>"$log" 2>&1 || { cat "$log" >&2; echo "check-all: quality gate failed; fix warnings and errors above, then rerun just check-all" >&2; exit 1; }
 
 test:
     base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "test: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx affected -t test,e2e --base="$base" --head="$head" --parallel=3 >"$log" 2>&1 || { cat "$log" >&2; echo "test: browser or unit tests failed; fix the findings above and rerun just test" >&2; exit 1; }
@@ -59,7 +59,17 @@ upgrade:
     just check
 
 test-e2e:
-    pnpm exec nx run shell-e2e:e2e
+    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run shell-e2e:integration >"$log" 2>&1 || { cat "$log" >&2; echo "test-e2e: browser integration failed; fix the failing journey above and rerun just test-e2e" >&2; exit 1; }
+
+prerender:
+    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run shell:prerender >"$log" 2>&1 || { cat "$log" >&2; echo "prerender: static Pages artifact failed; fix the build or artifact validation above and rerun just prerender" >&2; exit 1; }
+
+e2e-affected-files file:
+    # llmlint: ignore[tool_output_is_signal] This proof command intentionally preserves unedited Nx selection and execution output for docs/integration-proof.md.
+    file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "e2e-affected-files: file must be a tracked workspace-relative file" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=e2e --json && pnpm exec nx affected -t e2e --files="$file" --parallel=3
+
+e2e-project project:
+    project="$1"; [[ "$project" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "e2e-project: project must be a valid Nx project name" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run "$project:e2e" >"$log" 2>&1 || { cat "$log" >&2; echo "e2e-project: remote browser journey failed; fix the failure above and rerun just e2e-project $project" >&2; exit 1; }
 
 setup-llmlint:
     ./scripts/setup-llmlint.sh

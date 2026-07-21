@@ -5,6 +5,13 @@
   "projectType": "application",
   "tags": ["type:remote", "scope:research"],
   "targets": {
+    "e2e": {
+      "executor": "nx:run-commands",
+      "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
+      "options": {
+        "command": "E2E_REMOTE=research E2E_PORT=4316 playwright test --config apps/shell-e2e/playwright.config.ts remote-owner.spec.ts research.spec.ts"
+      }
+    },
     "build": {
       "executor": "@nx/rspack:rspack",
       "outputs": ["{options.outputPath}"],

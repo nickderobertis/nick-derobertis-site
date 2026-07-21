@@ -8,9 +8,6 @@ test("remote manifest matches Nx build dependencies", async () => {
   const project: unknown = JSON.parse(
     await readFile("apps/shell/project.json", "utf8"),
   );
-  const e2eProject: unknown = JSON.parse(
-    await readFile("apps/shell-e2e/project.json", "utf8"),
-  );
   if (
     !manifest ||
     typeof manifest !== "object" ||
@@ -47,19 +44,21 @@ test("remote manifest matches Nx build dependencies", async () => {
   ].map((match) => match[1]);
   const manifestAliases = Object.values(remoteManifest);
   for (const alias of aliases) expect(manifestAliases).toContain(alias);
-  if (
-    !e2eProject ||
-    typeof e2eProject !== "object" ||
-    !("implicitDependencies" in e2eProject) ||
-    !Array.isArray(e2eProject.implicitDependencies)
-  )
-    throw new Error("Validated e2e implicit dependencies are required");
   const remoteNames = Object.keys(remoteManifest);
   for (const remote of remoteNames) {
     expect(declarations).toContain(`${remoteManifest[remote]}/Page`);
     expect(projects).toContain(remote);
+    const remoteProject: unknown = JSON.parse(
+      await readFile(`apps/${remote}/project.json`, "utf8"),
+    );
+    expect(remoteProject).toMatchObject({
+      targets: {
+        e2e: {
+          options: { command: expect.stringContaining(`E2E_REMOTE=${remote}`) },
+        },
+      },
+    });
   }
-  expect(e2eProject.implicitDependencies).toContain("skills");
   const boundaries = await readFile("eslint.config.mjs", "utf8");
   expect(boundaries).toContain('sourceTag: "scope:skills"');
   expect(boundaries).toContain('"scope:skills"');

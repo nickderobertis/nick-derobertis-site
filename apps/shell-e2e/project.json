@@ -4,9 +4,8 @@
   "sourceRoot": "apps/shell-e2e/src",
   "projectType": "application",
   "tags": ["type:e2e", "scope:shell"],
-  "implicitDependencies": ["shell", "bio", "timeline", "skills", "awards"],
   "targets": {
-    "e2e": {
+    "integration": {
       "executor": "@nx/playwright:playwright",
       "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {

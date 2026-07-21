@@ -109,7 +109,9 @@ for (const renderPath of renderPaths) {
             ? "Loading timeline…"
             : "Timeline unavailable";
       const role = state === "error" ? "alert" : "status";
-      await expect(page.getByRole(role)).toContainText(expected);
+      await expect(
+        page.getByRole(role).filter({ hasText: expected }),
+      ).toBeVisible();
     });
   }
 

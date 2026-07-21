@@ -66,6 +66,27 @@ test("every route has useful HTML with JavaScript disabled", async ({
   await context.close();
 });
 
+test("every prerendered route contains substantive feature content", async ({
+  browser,
+}) => {
+  const expected = [
+    ["", "Finance researcher & educator"],
+    ["bio", "Reproducible Research"],
+    ["research", "Valuation without Cash Flows"],
+    ["software", "Python Tools for Working with Data"],
+    ["courses", "Financial Modeling"],
+  ] as const;
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  for (const [path, content] of expected) {
+    await page.goto(path);
+    await expect(
+      page.getByText(content, { exact: false }).first(),
+    ).toBeVisible();
+  }
+  await context.close();
+});
+
 test("navigation works with the keyboard", async ({ page }) => {
   await page.goto("");
   await page.getByRole("link", { name: "Bio", exact: true }).focus();

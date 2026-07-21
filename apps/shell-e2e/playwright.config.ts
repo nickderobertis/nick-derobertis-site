@@ -11,7 +11,10 @@ if (
   typeof siteConfig.pagesBase !== "string"
 )
   throw new Error("site.config.json must define pagesBase");
-const testBaseUrl = `http://127.0.0.1:4301${siteConfig.pagesBase}/`;
+const port = process.env.E2E_PORT ?? "4301";
+if (!/^\d{1,5}$/.test(port) || Number(port) < 1 || Number(port) > 65_535)
+  throw new Error("E2E_PORT must be an integer from 1 to 65535");
+const testBaseUrl = `http://127.0.0.1:${port}${siteConfig.pagesBase}/`;
 export default defineConfig({
   testDir: "./src",
   testIgnore: "unit/**",
@@ -24,7 +27,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "PORT=4301 node ../../scripts/serve-e2e.mjs",
+    command: `PORT=${port} node ../../scripts/serve-e2e.mjs`,
     url: testBaseUrl,
     reuseExistingServer: !process.env.CI,
   },
