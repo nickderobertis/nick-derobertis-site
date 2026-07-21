@@ -37,6 +37,17 @@ export interface CvDomains {
 }
 export type CvDomainArtifacts = Record<CvDomain, unknown>;
 
+const schemaDomainNames = Object.keys(rootSchema.properties).filter(
+  (name) => !rootSchema.required.includes(name),
+);
+if (
+  schemaDomainNames.length !== domainNames.length ||
+  schemaDomainNames.some((name, index) => name !== domainNames[index])
+)
+  throw new Error(
+    `CV domain contract drifted from cv.schema.json: expected ${schemaDomainNames.join(", ")}; received ${domainNames.join(", ")}`,
+  );
+
 // `discriminator` is an OpenAPI annotation here; `oneOf` remains the validator.
 const ajv = new Ajv({
   allErrors: true,
@@ -206,7 +217,7 @@ const importedArtifacts = {
   skills,
   software_projects: softwareProjects,
   timeline,
-};
+} satisfies CvDomainArtifacts;
 export const cvDataClient = createCvDataClient(rootData, importedArtifacts);
 export const cvData = cvDataClient.root();
 export const cvDomains: CvDomains = {

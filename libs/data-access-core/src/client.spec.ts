@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import rootSchema from "../vendor/codegen/cv.schema.json";
 import {
   CvDataValidationError,
   type CvDomainArtifacts,
@@ -13,14 +14,10 @@ import {
 
 describe("vendored CV data boundary", () => {
   it("loads the committed root, schema, and six real domains", () => {
-    expect(domainNames).toEqual([
-      "awards",
-      "courses",
-      "research",
-      "skills",
-      "software_projects",
-      "timeline",
-    ]);
+    const schemaDomainNames = Object.keys(rootSchema.properties).filter(
+      (name) => !rootSchema.required.includes(name),
+    );
+    expect(domainNames).toEqual(schemaDomainNames);
     expect(cvDataClient.root().schema_version).toBe(3);
     expect(cvDataClient.schema()).toMatchObject({ type: "object" });
     expect(cvDataClient.domain("awards")).toHaveLength(7);
