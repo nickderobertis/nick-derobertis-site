@@ -23,6 +23,7 @@ function affectedScreenshotProjects(file: string): string[] {
       "--affected",
       `--files=${file}`,
       "--with-target=screenshot",
+      "--json",
     ],
     { encoding: "utf8" },
   );
@@ -293,7 +294,7 @@ describe("visual affected selection", () => {
       env: { PATH: `${path.dirname(process.execPath)}:/usr/bin:/bin` },
     });
     expect(verify.status, verify.stderr).toBe(0);
-    expect(verify.stdout).toBe("actionlint 1.7.12\nshellcheck 0.11.0\n");
+    expect(verify.stdout).toBe("actionlint 1.7.12, shellcheck 0.11.0\n");
   });
 
   test("changed captures still produce a gallery and PR comment before the gate fails", () => {

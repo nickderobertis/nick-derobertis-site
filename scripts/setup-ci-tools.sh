@@ -27,7 +27,7 @@ verify_tools() {
 }
 if [[ "${1:-}" == "--verify" ]]; then
   verify_tools || { echo "setup-ci-tools: pinned actionlint and shellcheck are not provisioned; run just bootstrap" >&2; exit 1; }
-  printf 'actionlint %s\nshellcheck %s\n' "$actionlint_version" "$shellcheck_version"
+  printf 'actionlint %s, shellcheck %s\n' "$actionlint_version" "$shellcheck_version"
   exit 0
 fi
 [[ "$(uname -s)" == "Linux" && "$(uname -m)" == "x86_64" ]] || {
@@ -46,12 +46,12 @@ printf '%s  %s\n' "$actionlint_sha" "$setup_tmp/$actionlint_archive" | sha256sum
 }
 tar -xzf "$setup_tmp/$actionlint_archive" -C "$setup_tmp" actionlint
 install -m 0755 "$setup_tmp/actionlint" "$tool_bin/actionlint"
-shellcheck_archive="shellcheck-v${shellcheck_version}.linux.x86_64.tar.xz"
+shellcheck_archive="shellcheck-v${shellcheck_version}.linux.x86_64.tar.gz"
 curl -fsSL "https://github.com/koalaman/shellcheck/releases/download/v${shellcheck_version}/${shellcheck_archive}" -o "$setup_tmp/$shellcheck_archive"
 printf '%s  %s\n' "$shellcheck_sha" "$setup_tmp/$shellcheck_archive" | sha256sum --check --status || {
   echo "setup-ci-tools: shellcheck archive checksum mismatch; verify ci-tools.json against the upstream release" >&2
   exit 1
 }
-tar -xJf "$setup_tmp/$shellcheck_archive" -C "$setup_tmp"
+tar -xzf "$setup_tmp/$shellcheck_archive" -C "$setup_tmp"
 install -m 0755 "$setup_tmp/shellcheck-v${shellcheck_version}/shellcheck" "$tool_bin/shellcheck"
 verify_tools || { echo "setup-ci-tools: installed tools did not report the pinned versions; remove .tools and rerun just bootstrap" >&2; exit 1; }

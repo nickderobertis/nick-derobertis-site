@@ -5,7 +5,7 @@ set positional-arguments := true
 # this workspace through pnpm's linker. pnpm is the documented fallback in
 # AGENTS.md and the composed Stack-and-composition record.
 bootstrap:
-    corepack enable || { echo "bootstrap: Corepack could not be enabled; verify the Node installation, then rerun just bootstrap" >&2; exit 1; }
+    if ! command -v pnpm >/dev/null; then pnpm_bin_dir="${XDG_BIN_HOME:-$HOME/.local/bin}"; mkdir -p "$pnpm_bin_dir"; corepack enable --install-directory "$pnpm_bin_dir" || { echo "bootstrap: pnpm is unavailable and Corepack could not install a user-scoped shim; verify the Node installation and writable XDG_BIN_HOME, then rerun just bootstrap" >&2; exit 1; }; export PATH="$pnpm_bin_dir:$PATH"; fi
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: dependency install failed; check the lockfile and registry access, then rerun just bootstrap" >&2; exit 1; }
     scripts/setup-ci-tools.sh || { echo "bootstrap: pinned CI tool installation failed; check the reported checksum or network error, then rerun just bootstrap" >&2; exit 1; }
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec playwright install chromium >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: Chromium install failed; check Playwright system requirements, then rerun just bootstrap" >&2; exit 1; }
