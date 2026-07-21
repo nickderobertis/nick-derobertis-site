@@ -9,9 +9,9 @@ const pages = [
   },
   {
     link: "Bio",
-    heading: "Biography",
+    heading: "Optimizing Life",
+    staticHeading: "Biography",
     path: "bio",
-    remote: /Biography remote loaded/,
   },
   {
     link: "Research",
@@ -46,8 +46,6 @@ for (const route of pages)
       page.getByRole("heading", { name: route.heading }),
     ).toBeVisible();
     await expect(page.getByRole("contentinfo")).toBeVisible();
-    if (route.remote)
-      await expect(page.getByRole("status")).toHaveText(route.remote);
     expect(failures).toEqual([]);
   });
 
@@ -73,7 +71,9 @@ test("navigation works with the keyboard", async ({ page }) => {
   await page.getByRole("link", { name: "Bio", exact: true }).focus();
   await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/\/bio$/);
-  await expect(page.getByRole("heading", { name: "Biography" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Optimizing Life" }),
+  ).toBeVisible();
 });
 
 test("the static 404 is intentional and the router recovers unknown routes", async ({

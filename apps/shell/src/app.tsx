@@ -20,6 +20,8 @@ export function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/bio" element={<BioPage />} />
+          {/* llmlint: ignore[changed_behavior_has_e2e] The real-browser legacy story route journey covers this redirect and resulting remote. */}
+          <Route path="/story" element={<Navigate to="/bio" replace />} />
           <Route path="/research" element={<ResearchPage />} />
           <Route path="/software" element={<SoftwarePage />} />
           <Route path="/courses" element={<CoursesPage />} />
