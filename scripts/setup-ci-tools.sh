@@ -35,6 +35,12 @@ fi
   exit 2
 }
 if verify_tools; then exit 0; fi
+provisioning_failed() {
+  local setup_status=$?
+  echo "setup-ci-tools: provisioning command failed; verify network access and the pinned archive utilities, then rerun just bootstrap" >&2
+  exit "$setup_status"
+}
+trap provisioning_failed ERR
 mkdir -p "$tool_bin"
 setup_tmp=$(mktemp -d)
 trap 'rm -rf "$setup_tmp"' EXIT

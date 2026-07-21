@@ -36,6 +36,35 @@ const sources = [
   ["screencomp config", readFileSync("screencomp.toml", "utf8")],
 ];
 const captureSource = readFileSync("scripts/capture-visual.mjs", "utf8");
+const nxConfig = JSON.parse(readFileSync("nx.json", "utf8"));
+const homeRspackSource = readFileSync("apps/home/rspack.config.ts", "utf8");
+const remoteMapMatch = homeRspackSource.match(/remoteMap\(\[([\s\S]*?)\]\)/);
+if (!remoteMapMatch)
+  throw new Error(
+    "Home composition must declare its remotes through remoteMap",
+  );
+const composedProjects = [
+  "home",
+  ...[...remoteMapMatch[1].matchAll(/"([a-z][a-z0-9-]*)"/g)].map(
+    (match) => match[1],
+  ),
+].sort();
+const screenshotBuildDependency =
+  nxConfig.targetDefaults?.screenshot?.dependsOn?.find(
+    (dependency) =>
+      typeof dependency === "object" &&
+      dependency !== null &&
+      dependency.target === "build" &&
+      Array.isArray(dependency.projects),
+  );
+if (
+  !screenshotBuildDependency ||
+  JSON.stringify([...screenshotBuildDependency.projects].sort()) !==
+    JSON.stringify(composedProjects)
+)
+  throw new Error(
+    "Nx screenshot build dependencies must match the home composition remote map",
+  );
 const visualProjects = JSON.parse(readFileSync("visual-projects.json", "utf8"));
 const allowedProjectStates = new Set([
   "all",
