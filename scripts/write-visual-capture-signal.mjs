@@ -1,5 +1,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
+process.on("uncaughtException", (error) => {
+  console.error(
+    `write-visual-capture-signal: ${error instanceof Error ? error.message : String(error)}; verify the GitHub capture context and rerun the unprivileged capture workflow`,
+  );
+  process.exit(1);
+});
+
 const repository = process.env.CAPTURE_REPOSITORY ?? "";
 const headSha = process.env.CAPTURE_HEAD_SHA ?? "";
 if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository))

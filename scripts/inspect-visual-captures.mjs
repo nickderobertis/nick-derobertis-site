@@ -2,6 +2,13 @@ import { createHash } from "node:crypto";
 import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+process.on("uncaughtException", (error) => {
+  console.error(
+    `inspect-visual-captures: ${error instanceof Error ? error.message : String(error)}; discard the artifact and rerun the unprivileged visual capture workflow`,
+  );
+  process.exit(1);
+});
+
 const [rootArgument, expectedRepository, expectedHeadSha] =
   process.argv.slice(2);
 if (!rootArgument) throw new Error("Expected artifact root");

@@ -280,11 +280,20 @@ describe("visual affected selection", () => {
 
   test("trusted follow-up workflow passes the GitHub Actions contract", () => {
     const lint = spawnSync(
-      "actionlint",
+      ".tools/bin/actionlint",
       [".github/workflows/visual-docs-publish.yml"],
       { encoding: "utf8" },
     );
     expect(lint.status, lint.stderr).toBe(0);
+  });
+
+  test("bootstrap provisions pinned workflow and shell linters without ambient tools", () => {
+    const verify = spawnSync("scripts/setup-ci-tools.sh", ["--verify"], {
+      encoding: "utf8",
+      env: { PATH: `${path.dirname(process.execPath)}:/usr/bin:/bin` },
+    });
+    expect(verify.status, verify.stderr).toBe(0);
+    expect(verify.stdout).toBe("actionlint 1.7.12\nshellcheck 0.11.0\n");
   });
 
   test("changed captures still produce a gallery and PR comment before the gate fails", () => {

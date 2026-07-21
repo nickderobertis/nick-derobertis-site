@@ -1,5 +1,12 @@
 import { readFileSync } from "node:fs";
 
+process.on("uncaughtException", (error) => {
+  console.error(
+    `resolve-visual-workflow-context: ${error instanceof Error ? error.message : String(error)}; verify the completed workflow event and GitHub pull-request response, then rerun the trusted publisher`,
+  );
+  process.exit(1);
+});
+
 const [eventName, repository, headSha] = process.argv.slice(2);
 if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository ?? ""))
   throw new Error("Repository must be an owner/repository name");
