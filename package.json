@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.4",
+    "@module-federation/rsbuild-plugin": "2.8.0",
     "@nx/eslint": "23.1.0",
     "@nx/eslint-plugin": "23.1.0",
     "@nx/js": "23.1.0",
@@ -27,6 +28,8 @@
     "@nx/vite": "23.1.0",
     "@nx/workspace": "23.1.0",
     "@playwright/test": "1.61.1",
+    "@rsbuild/core": "1.7.6",
+    "@rsbuild/plugin-react": "1.4.6",
     "@swc-node/register": "1.12.1",
     "@swc/core": "1.15.46",
     "@testing-library/jest-dom": "6.9.1",

@@ -6,20 +6,17 @@
   "tags": ["type:app", "scope:shell"],
   "targets": {
     "build": {
-      "executor": "@nx/rspack:rspack",
-      "outputs": ["{options.outputPath}"],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/shell"],
       "options": {
-        "rspackConfig": "apps/shell/rspack.config.ts",
-        "outputPath": "dist/apps/shell",
-        "index": "apps/shell/src/index.html",
-        "main": "apps/shell/src/main.tsx",
-        "tsConfig": "apps/shell/tsconfig.app.json",
-        "assets": []
+        "command": "rsbuild build --config apps/shell/rsbuild.config.ts"
       }
     },
     "serve": {
-      "executor": "@nx/rspack:dev-server",
-      "options": { "buildTarget": "shell:build", "port": 4200 }
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rsbuild dev --config apps/shell/rsbuild.config.ts"
+      }
     },
     "prerender": {
       "executor": "nx:run-commands",
