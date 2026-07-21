@@ -6,7 +6,7 @@ const timelineContract = [
   ["libs/build-config/src/remotes.json", '"timeline": "timeline"'],
   ["apps/home/rspack.config.ts", '"timeline"'],
   ["apps/home/src/remotes.d.ts", 'declare module "timeline/Page"'],
-  ["apps/shell-e2e/project.json", '"timeline"'],
+  ["apps/timeline/project.json", "E2E_REMOTE=timeline"],
   ["eslint.config.mjs", 'sourceTag: "scope:timeline"'],
   ["scripts/prerender.mjs", "Object.keys(remoteManifest)"],
 ] as const;
@@ -18,7 +18,7 @@ const awardsContract = [
   ["apps/home/src/page.tsx", 'import("awards/Page")'],
   ["apps/home/src/remotes.d.ts", 'declare module "awards/Page"'],
   ["apps/shell/project.json", '"awards"'],
-  ["apps/shell-e2e/project.json", '"awards"'],
+  ["apps/awards/project.json", "E2E_REMOTE=awards"],
   ["libs/build-config/src/remotes.json", '"awards": "awards"'],
 ] as const;
 
