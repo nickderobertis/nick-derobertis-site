@@ -7,7 +7,7 @@ Generated 2026-07-22T04:25:17.303Z with Lighthouse 12.8.2 using 5 runs per route
 ## Methodology and environment
 
 - Explicit Lighthouse preset: `desktop` (desktop form factor, `simulate` throttling)
-- Applied throttling: `{"rttMs":40,"throughputKbps":10240,"requestLatencyMs":0,"downloadThroughputKbps":0,"uploadThroughputKbps":0,"cpuSlowdownMultiplier":1}`
+- Applied throttling: `{"cpuSlowdownMultiplier":1,"rttMs":40,"throughputKbps":10240,"requestLatencyMs":0,"downloadThroughputKbps":0,"uploadThroughputKbps":0}`
 - Host: Linux 6.17.0-1019-aws x64; Intel(R) Xeon(R) Platinum 8488C; 4 logical CPUs; 15.3 GiB RAM
 - Runtime: v26.5.0; user agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36
 - New deployment: https://nickderobertis.github.io/nick-derobertis-site/
