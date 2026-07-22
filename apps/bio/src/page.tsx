@@ -122,9 +122,13 @@ function BioState({ state }: { state: "empty" | "error" | "loading" }) {
   );
 }
 
-export default function BioPage() {
+export default function BioPage({ initialView }: { initialView?: string }) {
   // llmlint: ignore-block[changed_behavior_has_e2e] bio.spec.ts drives happy, loading, empty, and error query states through both host-composed and standalone URLs.
-  const scenario = new URLSearchParams(window.location.search).get("bio-view");
+  const scenario =
+    initialView ??
+    (typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("bio-view"));
   const [loading, setLoading] = useState(scenario === "loading");
   useEffect(() => {
     if (!loading) return;

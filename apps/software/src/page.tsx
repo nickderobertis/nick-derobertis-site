@@ -6,7 +6,7 @@ import {
 import { useEffect, useState } from "react";
 import "@site/design-system";
 
-type SoftwareView = "default" | "empty" | "error" | "loading";
+export type SoftwareView = "default" | "empty" | "error" | "loading";
 
 function requestedView(): SoftwareView {
   const value = new URLSearchParams(window.location.search).get(
@@ -17,8 +17,10 @@ function requestedView(): SoftwareView {
     : "default";
 }
 
-function useSoftwareView(): SoftwareView {
-  const [view, setView] = useState<SoftwareView>(() => requestedView());
+function useSoftwareView(initialView?: SoftwareView): SoftwareView {
+  const [view, setView] = useState<SoftwareView>(
+    () => initialView ?? requestedView(),
+  );
   useEffect(() => {
     if (view !== "loading") return;
     const timer = window.setTimeout(() => setView("default"), 1_500);
@@ -109,9 +111,14 @@ function SoftwareCollection({ projects }: { projects: SoftwareProject[] }) {
   );
 }
 
-export default function SoftwarePage() {
-  const view = useSoftwareView();
-  const projects = cvDataClient.domain("software_projects");
+export default function SoftwarePage({
+  initialView,
+  projects = cvDataClient.domain("software_projects"),
+}: {
+  initialView?: SoftwareView;
+  projects?: SoftwareProject[];
+}) {
+  const view = useSoftwareView(initialView);
   return (
     <section className="software-page">
       <header className="software-banner">

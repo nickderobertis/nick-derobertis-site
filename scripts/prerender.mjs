@@ -1,7 +1,6 @@
 import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
+import { rspack } from "@rspack/core";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
@@ -9,15 +8,7 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import courses from "../libs/data-access-core/vendor/codegen/domains/courses.json" with {
-  type: "json",
-};
-import research from "../libs/data-access-core/vendor/codegen/domains/research.json" with {
-  type: "json",
-};
-import software from "../libs/data-access-core/vendor/codegen/domains/software_projects.json" with {
-  type: "json",
-};
+import renderConfig from "./rspack.prerender.config.mjs";
 
 function validateSiteConfig(value) {
   if (
@@ -32,29 +23,7 @@ function validateSiteConfig(value) {
   return value;
 }
 
-function validateRouteData({ courses, research, software }) {
-  if (
-    !research ||
-    typeof research !== "object" ||
-    !Array.isArray(research.projects) ||
-    !research.projects.every((project) => typeof project?.title === "string") ||
-    !Array.isArray(software) ||
-    !software.every(
-      (project) =>
-        typeof project?.display_name === "string" ||
-        typeof project?.name === "string",
-    ) ||
-    !Array.isArray(courses) ||
-    !courses.every((course) => typeof course?.title === "string")
-  )
-    throw new Error(
-      "CV route data is invalid; regenerate the validated CV domains and rerun just check.",
-    );
-  return { courses, research, software };
-}
-
 const validatedSiteConfig = validateSiteConfig(siteConfig);
-const routeData = validateRouteData({ courses, research, software });
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Command startup failures are covered through the real subprocess boundary in home.spec.ts; they have no browser interface.
 function requirePath(value, fallback, name) {
@@ -92,123 +61,30 @@ const builtDocument = await readFile(join(output, "index.html"), "utf8");
 const template = builtDocument
   .replace(/<link rel="canonical" href="[^"]*">/g, "")
   .replace(
-    /<div id="root">[\s\S]*<\/div><\/body>/,
+    /<div id="root"[^>]*>[\s\S]*<\/div>(?:<script id="__TSR_DEHYDRATED__"[\s\S]*?<\/script>)?<\/body>/,
     '<div id="root"></div></body>',
   );
 
-function pageMarkup(route) {
-  // llmlint: ignore-block[changed_behavior_has_e2e] CV validation occurs before a browser artifact exists; route-specific Playwright journeys exercise all data states through both rendering paths.
-  const { courses, research, software } = routeData;
-  // llmlint: ignore-end[changed_behavior_has_e2e]
-  // llmlint: ignore-block[changed_behavior_has_e2e] Existing route-specific Playwright journeys exercise happy, empty, loading, and error states through host-composed and standalone paths; site.spec.ts additionally disables JavaScript to verify this static happy-state representation.
-  const substantiveContent = {
-    "/": [
-      "Finance researcher & educator",
-      "Engineering",
-      "Teaching",
-      "Research",
-      "Who am I?",
-      "Let’s build something useful.",
-    ],
-    "/bio": [
-      "Optimizing Life",
-      "Early Days",
-      "Continuous Learning, Innovation, and Open Collaboration",
-      "Reproducible Research",
-      "Day to Day",
-    ],
-    "/research": research.projects.map((project) => project.title),
-    "/software": software.map(
-      (project) => project.display_name ?? project.name,
-    ),
-    "/courses": courses.map((course) => course.title),
-  }[route.path];
-  if (!substantiveContent?.length)
-    throw new Error(
-      `No substantive prerender content for ${route.path}; add its route content and rerun just check.`,
-    );
-  return renderToStaticMarkup(
-    React.createElement(
-      React.Fragment,
-      null,
-      React.createElement(
-        "header",
-        { className: "site-header" },
-        React.createElement(
-          "div",
-          { className: "header-inner" },
-          React.createElement(
-            "a",
-            { className: "brand", href: `${base}/` },
-            "Nick DeRobertis",
-          ),
-          React.createElement(
-            "nav",
-            { "aria-label": "Primary" },
-            React.createElement(
-              "ul",
-              { className: "nav-list" },
-              routes.map((item) =>
-                React.createElement(
-                  "li",
-                  { key: item.path },
-                  React.createElement(
-                    "a",
-                    {
-                      className: "nav-link",
-                      href: `${base}${item.path === "/" ? "/" : item.path}`,
-                      "aria-current":
-                        item.path === route.path ? "page" : undefined,
-                    },
-                    item.label,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-      React.createElement(
-        "main",
-        { className: "main" },
-        React.createElement(
-          "section",
-          { className: "hero" },
-          React.createElement("p", { className: "eyebrow" }, "Nick DeRobertis"),
-          React.createElement("h1", null, route.heading),
-          React.createElement("p", null, route.description),
-          React.createElement(
-            "section",
-            { "aria-label": `${route.label} highlights` },
-            React.createElement(
-              "ul",
-              null,
-              ...substantiveContent.map((content) =>
-                React.createElement("li", { key: content }, content),
-              ),
-            ),
-          ),
-        ),
-      ),
-      React.createElement(
-        "footer",
-        { className: "site-footer" },
-        React.createElement(
-          "div",
-          { className: "footer-inner" },
-          `© ${new Date().getUTCFullYear()} Nick DeRobertis`,
-        ),
-      ),
-    ),
-  );
-  // llmlint: ignore-end[changed_behavior_has_e2e]
-}
+await new Promise((resolve, reject) => {
+  const compiler = rspack(renderConfig);
+  compiler.run((error, stats) => {
+    compiler.close(() => {});
+    if (error) return reject(error);
+    if (stats?.hasErrors())
+      return reject(new Error(stats.toString({ colors: false })));
+    resolve();
+  });
+});
+const rendererModule = await import("../dist/prerender-renderer/render.cjs");
+const { renderRoute } = rendererModule.default ?? rendererModule;
 
-function documentFor(route) {
+async function documentFor(route) {
   const title =
     route.path === "/"
       ? "Nick DeRobertis"
       : `${route.heading} | Nick DeRobertis`;
+  const rendered = await renderRoute(route.path);
+  const dehydrated = JSON.stringify(rendered.state).replaceAll("<", "\\u003c");
   return template
     .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
     .replace(
@@ -217,7 +93,7 @@ function documentFor(route) {
     )
     .replace(
       '<div id="root"></div>',
-      `<div id="root">${pageMarkup(route)}</div>`,
+      `<div id="root" data-prerendered-route="${route.path}">${rendered.html}</div><script id="__TSR_DEHYDRATED__" type="application/json">${dehydrated}</script>`,
     );
 }
 
@@ -225,7 +101,7 @@ for (const route of routes) {
   const directory =
     route.path === "/" ? output : join(output, route.path.slice(1));
   await mkdir(directory, { recursive: true });
-  await writeFile(join(directory, "index.html"), documentFor(route));
+  await writeFile(join(directory, "index.html"), await documentFor(route));
 }
 
 const fallback = template.replace(

@@ -7,7 +7,7 @@ import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
 import { useEffect, useState } from "react";
 
-type CoursesView = "default" | "empty" | "error" | "loading";
+export type CoursesView = "default" | "empty" | "error" | "loading";
 
 function requestedView(): CoursesView {
   const value = new URLSearchParams(window.location.search).get("courses-view");
@@ -16,8 +16,10 @@ function requestedView(): CoursesView {
     : "default";
 }
 
-function useCoursesView(): CoursesView {
-  const [view, setView] = useState<CoursesView>(() => requestedView());
+function useCoursesView(initialView?: CoursesView): CoursesView {
+  const [view, setView] = useState<CoursesView>(
+    () => initialView ?? requestedView(),
+  );
   useEffect(() => {
     if (view !== "loading") return;
     const timer = window.setTimeout(() => setView("default"), 1_500);
@@ -241,9 +243,14 @@ function CourseCollection({ courses }: { courses: Course[] }) {
   );
 }
 
-export default function CoursesPage() {
-  const view = useCoursesView();
-  const courses = cvDataClient.domain("courses");
+export default function CoursesPage({
+  initialView,
+  courses = cvDataClient.domain("courses"),
+}: {
+  initialView?: CoursesView;
+  courses?: Course[];
+}) {
+  const view = useCoursesView(initialView);
   return (
     <section className="courses-page">
       <header className="courses-banner">

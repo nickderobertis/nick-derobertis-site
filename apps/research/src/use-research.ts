@@ -31,9 +31,14 @@ async function loadResearch(signal: AbortSignal) {
   return validateCvDomain("research", await response.json());
 }
 
-export function useResearch(): ResearchViewState {
-  const [state, setState] = useState<ResearchViewState>({ name: "loading" });
+export function useResearch(
+  initialState?: ResearchViewState,
+): ResearchViewState {
+  const [state, setState] = useState<ResearchViewState>(
+    initialState ?? { name: "loading" },
+  );
   useEffect(() => {
+    if (initialState) return;
     const controller = new AbortController();
     loadResearch(controller.signal).then(
       (research) => setState({ name: "ready", research }),
@@ -44,6 +49,6 @@ export function useResearch(): ResearchViewState {
       },
     );
     return () => controller.abort();
-  }, []);
+  }, [initialState]);
   return state;
 }

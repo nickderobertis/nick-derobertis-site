@@ -1,5 +1,5 @@
 import { ResearchContent } from "./research-content";
-import { useResearch } from "./use-research";
+import { type ResearchViewState, useResearch } from "./use-research";
 import "@site/design-system";
 import "./research.css";
 
@@ -21,8 +21,12 @@ function StateMessage({ state }: { state: "empty" | "loading" | "error" }) {
   );
 }
 
-export default function ResearchPage() {
-  const state = useResearch();
+export default function ResearchPage({
+  initialState,
+}: {
+  initialState?: ResearchViewState;
+}) {
+  const state = useResearch(initialState);
   if (state.name !== "ready") return <StateMessage state={state.name} />;
   if (!state.research.projects?.length) return <StateMessage state="empty" />;
   return <ResearchContent research={state.research} />;

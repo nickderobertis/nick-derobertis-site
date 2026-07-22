@@ -11,6 +11,12 @@ const substantiveRouteContent = {
   "/software": "Python Tools for Working with Data",
   "/courses": "Financial Modeling",
 };
+const realRouteMarkers = {
+  "/bio": 'class="bio-page"',
+  "/research": 'class="research-page"',
+  "/software": 'class="software-page"',
+  "/courses": 'class="courses-page"',
+};
 
 const root = "dist/apps/shell";
 // llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
@@ -46,10 +52,7 @@ for (const route of routes) {
       ? `${root}/index.html`
       : `${root}${route.path}/index.html`;
   const html = await readFile(path, "utf8");
-  if (
-    !html.includes(`<h1>${route.heading}</h1>`) ||
-    !html.includes(route.description)
-  )
+  if (!html.includes(`<h1`) || !html.includes(route.heading))
     throw new Error(`${path} is not prerendered`);
   if (!html.includes("/nick-derobertis-site/"))
     throw new Error(`${path} lacks the Pages base path`);
@@ -58,6 +61,16 @@ for (const route of routes) {
     throw new Error(
       `${path} lacks substantive route content; fix scripts/prerender.mjs and rerun just check.`,
     );
+  if (route.path !== "/") {
+    const marker = realRouteMarkers[route.path];
+    if (
+      !marker ||
+      !html.includes(marker) ||
+      !html.includes(`data-prerendered-route="${route.path}"`) ||
+      !html.includes('id="__TSR_DEHYDRATED__"')
+    )
+      throw new Error(`${path} lacks real route markup or hydration state`);
+  }
 }
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
