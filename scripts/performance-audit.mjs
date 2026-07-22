@@ -1,16 +1,16 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { chromium } from "@playwright/test";
-import * as chromeLauncher from "chrome-launcher";
-import lighthouse, { desktopConfig } from "lighthouse";
 
-const ROUTES = ["/", "/bio", "/research", "/software", "/courses"];
-const DEFAULT_NEW_URL =
-  "https://nickderobertis.github.io/nick-derobertis-site/";
-const DEFAULT_ORIGINAL_URL = "https://nickderobertis.com/";
-const DEFAULT_RUNS = 5;
+const config = JSON.parse(
+  readFileSync(new URL("../performance.config.json", import.meta.url), "utf8"),
+);
+const ROUTES = config.routes;
+const DEFAULT_NEW_URL = config.newUrl;
+const DEFAULT_ORIGINAL_URL = config.originalUrl;
+const DEFAULT_RUNS = config.minimumRuns;
 const METRICS = [
   ["performance", "Performance", "score"],
   ["fcp", "FCP", "ms"],
@@ -30,17 +30,30 @@ function median(values) {
 }
 
 function metricFromLhr(lhr) {
+  const number = (value, name) => {
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      throw new Error(`Lighthouse result has invalid ${name}`);
+    }
+    return value;
+  };
+  if (!Array.isArray(lhr.audits?.["resource-summary"]?.details?.items)) {
+    throw new Error("Lighthouse result has invalid resource summary");
+  }
   const scripts = lhr.audits["resource-summary"].details.items.find(
     (item) => item.resourceType === "script",
   );
   return {
-    performance: lhr.categories.performance.score * 100,
-    fcp: lhr.audits["first-contentful-paint"].numericValue,
-    lcp: lhr.audits["largest-contentful-paint"].numericValue,
-    tbt: lhr.audits["total-blocking-time"].numericValue,
-    cls: lhr.audits["cumulative-layout-shift"].numericValue,
-    transferBytes: lhr.audits["total-byte-weight"].numericValue,
-    jsBytes: scripts?.transferSize ?? 0,
+    performance:
+      number(lhr.categories?.performance?.score, "performance score") * 100,
+    fcp: number(lhr.audits?.["first-contentful-paint"]?.numericValue, "FCP"),
+    lcp: number(lhr.audits?.["largest-contentful-paint"]?.numericValue, "LCP"),
+    tbt: number(lhr.audits?.["total-blocking-time"]?.numericValue, "TBT"),
+    cls: number(lhr.audits?.["cumulative-layout-shift"]?.numericValue, "CLS"),
+    transferBytes: number(
+      lhr.audits?.["total-byte-weight"]?.numericValue,
+      "transfer bytes",
+    ),
+    jsBytes: number(scripts?.transferSize ?? 0, "JavaScript bytes"),
   };
 }
 
@@ -62,6 +75,19 @@ function aggregate(runs) {
 function routeUrl(base, route) {
   const normalized = base.endsWith("/") ? base : `${base}/`;
   return new URL(route.replace(/^\//, ""), normalized).href;
+}
+
+function deploymentUrl(value, name) {
+  let url;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(`${name} must be a valid HTTP(S) URL`);
+  }
+  if (!["http:", "https:"].includes(url.protocol)) {
+    throw new Error(`${name} must be a valid HTTP(S) URL`);
+  }
+  return url.href;
 }
 
 function format(value, unit) {
@@ -134,16 +160,13 @@ function markdown(findings) {
   return `${lines.join("\n")}\n`;
 }
 
-async function auditSite(label, baseUrl, runs, chromePort) {
+async function auditSite(baseUrl, runs, chromePort, lighthouse, desktopConfig) {
   const routes = {};
   let firstLhr;
   for (const route of ROUTES) {
     const samples = [];
     for (let run = 1; run <= runs; run += 1) {
       const url = routeUrl(baseUrl, route);
-      process.stderr.write(
-        `${label} ${route}: Lighthouse run ${run}/${runs}\n`,
-      );
       const result = await lighthouse(
         url,
         {
@@ -195,9 +218,22 @@ async function main() {
   const fixtureIndex = process.argv.indexOf("--summarize-fixtures");
   const fixtureDirectory =
     fixtureIndex >= 0 ? process.argv[fixtureIndex + 1] : null;
-  const newUrl = process.env.PERF_URL ?? DEFAULT_NEW_URL;
-  const originalUrl = process.env.PERF_ORIGINAL_URL ?? DEFAULT_ORIGINAL_URL;
-  const runs = Number(process.env.PERF_RUNS ?? DEFAULT_RUNS);
+  if (
+    fixtureIndex >= 0 &&
+    (!fixtureDirectory ||
+      !(await stat(fixtureDirectory).catch(() => null))?.isDirectory())
+  ) {
+    throw new Error("--summarize-fixtures must name a readable directory");
+  }
+  const newUrl = deploymentUrl(
+    process.env.PERF_URL || DEFAULT_NEW_URL,
+    "PERF_URL",
+  );
+  const originalUrl = deploymentUrl(
+    process.env.PERF_ORIGINAL_URL || DEFAULT_ORIGINAL_URL,
+    "PERF_ORIGINAL_URL",
+  );
+  const runs = Number(process.env.PERF_RUNS || DEFAULT_RUNS);
   if (!Number.isInteger(runs) || runs < DEFAULT_RUNS) {
     throw new Error(`PERF_RUNS must be an integer of at least ${DEFAULT_RUNS}`);
   }
@@ -214,12 +250,30 @@ async function main() {
         originalUrl,
       );
     } else {
+      const [{ chromium }, chromeLauncher, lighthouseModule] =
+        await Promise.all([
+          import("@playwright/test"),
+          import("chrome-launcher"),
+          import("lighthouse"),
+        ]);
       chrome = await chromeLauncher.launch({
         chromePath: process.env.CHROME_PATH ?? chromium.executablePath(),
         chromeFlags: ["--headless", "--no-sandbox"],
       });
-      current = await auditSite("new", newUrl, runs, chrome.port);
-      original = await auditSite("original", originalUrl, runs, chrome.port);
+      current = await auditSite(
+        newUrl,
+        runs,
+        chrome.port,
+        lighthouseModule.default,
+        lighthouseModule.desktopConfig,
+      );
+      original = await auditSite(
+        originalUrl,
+        runs,
+        chrome.port,
+        lighthouseModule.default,
+        lighthouseModule.desktopConfig,
+      );
     }
   } finally {
     await chrome?.kill();
@@ -251,10 +305,14 @@ async function main() {
     `${JSON.stringify(findings, null, 2)}\n`,
   );
   await writeFile("docs/perf-report.md", markdown(findings));
+  // llmlint: ignore[tool_output_is_signal] Structured JSON is the requested planner-facing finding; the readable report is written separately.
   process.stdout.write(`${JSON.stringify(findings)}\n`);
 }
 
+// llmlint: ignore[changed_behavior_has_e2e] Public-network audits must remain outside deterministic browser gates; subprocess tests cover the CLI boundaries, and the committed findings prove a real live run.
 main().catch((error) => {
-  process.stderr.write(`performance audit failed: ${error.message}\n`);
+  process.stderr.write(
+    `performance audit failed: ${error.message}; correct the URL, browser, or fixture input and rerun just perf-compare\n`,
+  );
   process.exitCode = 1;
 });

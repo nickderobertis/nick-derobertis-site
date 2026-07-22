@@ -69,7 +69,7 @@ just perf-compare https://new.example/ https://original.example/ 7
 Both recipes audit `/`, `/bio`, `/research`, `/software`, and `/courses` on the
 target and original deployments. `perf` is shorthand for comparing an
 overridden target to the default original URL; `perf-compare` overrides either
-side explicitly. At least five runs are required. The runner uses Lighthouse's
+side explicitly. At least `5` runs are required. The runner uses Lighthouse's
 explicit `desktop` preset (desktop form factor and desktop simulated
 throttling), reports median metrics, records the applied throttling and host
 environment, and writes structured findings to `docs/perf-findings.json` plus

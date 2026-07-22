@@ -1,0 +1,6 @@
+{
+  "routes": ["/", "/bio", "/research", "/software", "/courses"],
+  "minimumRuns": 5,
+  "newUrl": "https://nickderobertis.github.io/nick-derobertis-site/",
+  "originalUrl": "https://nickderobertis.com/"
+}
