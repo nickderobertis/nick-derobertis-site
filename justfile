@@ -69,6 +69,13 @@ test-e2e:
 prerender:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run shell:prerender >"$log" 2>&1 || { cat "$log" >&2; echo "prerender: static Pages artifact failed; fix the build or artifact validation above and rerun just prerender" >&2; exit 1; }
 
+# Network-dependent Lighthouse comparison; intentionally excluded from `check`.
+perf url="https://nickderobertis.github.io/nick-derobertis-site/" runs="5":
+    PERF_URL="$1" PERF_RUNS="$2" pnpm exec nx run shell:perf
+
+perf-compare new_url="https://nickderobertis.github.io/nick-derobertis-site/" original_url="https://nickderobertis.com/" runs="5":
+    PERF_URL="$1" PERF_ORIGINAL_URL="$2" PERF_RUNS="$3" pnpm exec nx run shell:perf
+
 # Build the complete federated artifact before serving it at the Pages base path.
 serve: prerender
     node scripts/serve-e2e.mjs
