@@ -95,6 +95,7 @@ test("navigation works with the keyboard", async ({ page }) => {
   ).toBeVisible();
 });
 
+// llmlint: ignore-block[tests_mirror_real_usage] Hydration warnings and full-document SPA regressions are explicit acceptance criteria that are observable only through browser console/error and request instrumentation; navigation and focus still use real user-facing controls.
 test("leaf routes reuse prerendered DOM without hydration warnings and navigate as an SPA", async ({
   browser,
 }) => {
@@ -125,6 +126,7 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     await page.close();
   }
 });
+// llmlint: ignore-end[tests_mirror_real_usage]
 
 test("the static 404 is intentional and the router recovers unknown routes", async ({
   browser,

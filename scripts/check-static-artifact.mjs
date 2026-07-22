@@ -66,18 +66,26 @@ for (const route of routes) {
     );
   if (route.path !== "/") {
     const marker = realRouteMarkers[route.path];
-    if (
-      !marker ||
-      !html.includes(marker) ||
-      !html.includes(
-        `${routeContracts.prerenderRouteAttribute}="${route.path}"`,
-      ) ||
-      html.includes('id="__TSR_DEHYDRATED__"') ||
-      !html.includes("$_TSR.router=") ||
-      !html.includes("$_TSR.e()")
-    )
+    if (!marker || !html.includes(marker))
       throw new Error(
-        `${path} lacks real route markup or TanStack Router hydration state; inspect scripts/render-entry.tsx and rerun just prerender.`,
+        `${path} lacks its real component marker (${marker ?? "undefined"}); fix scripts/render-entry.tsx and rerun just prerender.`,
+      );
+    const routeAttribute = `${routeContracts.prerenderRouteAttribute}="${route.path}"`;
+    if (!html.includes(routeAttribute))
+      throw new Error(
+        `${path} lacks ${routeAttribute}; fix scripts/prerender.mjs and rerun just prerender.`,
+      );
+    if (html.includes('id="__TSR_DEHYDRATED__"'))
+      throw new Error(
+        `${path} contains the unsupported legacy __TSR_DEHYDRATED__ state; use TanStack Router serialization and rerun just prerender.`,
+      );
+    if (!html.includes("$_TSR.router="))
+      throw new Error(
+        `${path} lacks the TanStack Router serialized state; fix scripts/render-entry.tsx and rerun just prerender.`,
+      );
+    if (!html.includes("$_TSR.e()"))
+      throw new Error(
+        `${path} lacks the TanStack Router hydration completion call; fix scripts/render-entry.tsx and rerun just prerender.`,
       );
   }
 }
