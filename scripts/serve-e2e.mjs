@@ -31,12 +31,13 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535)
     `PORT must be an integer from 1 to 65535; received ${JSON.stringify(portValue)}. Set a valid PORT and run just test-e2e again.`,
   );
 // llmlint: ignore-end[changed_behavior_has_e2e]
-const staticAssetLatencyValue = process.env.STATIC_ASSET_LATENCY_MS ?? "0";
-if (!/^\d{1,4}$/.test(staticAssetLatencyValue))
+const javaScriptAssetLatencyValue =
+  process.env.JAVASCRIPT_ASSET_LATENCY_MS ?? "0";
+if (!/^\d{1,4}$/.test(javaScriptAssetLatencyValue))
   throw new Error(
-    `STATIC_ASSET_LATENCY_MS must be an integer from 0 to 9999; received ${JSON.stringify(staticAssetLatencyValue)}. Set a valid latency and run just test-e2e again.`,
+    `JAVASCRIPT_ASSET_LATENCY_MS must be an integer from 0 to 9999; received ${JSON.stringify(javaScriptAssetLatencyValue)}. Set a valid latency and run just test-e2e again.`,
   );
-const staticAssetLatencyMs = Number(staticAssetLatencyValue);
+const javaScriptAssetLatencyMs = Number(javaScriptAssetLatencyValue);
 const types = {
   ".css": "text/css",
   ".html": "text/html",
@@ -71,8 +72,10 @@ const server = createServer(async (request, response) => {
     "Content-Type",
     types[extname(file)] ?? "application/octet-stream",
   );
-  if (staticAssetLatencyMs > 0 && extname(file) === ".js")
-    await new Promise((resolve) => setTimeout(resolve, staticAssetLatencyMs));
+  if (javaScriptAssetLatencyMs > 0 && extname(file) === ".js")
+    await new Promise((resolve) =>
+      setTimeout(resolve, javaScriptAssetLatencyMs),
+    );
   createReadStream(file).pipe(response);
 });
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.

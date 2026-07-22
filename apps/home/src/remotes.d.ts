@@ -1,3 +1,5 @@
+/// <reference path="../../../libs/build-config/src/federation-modules.d.ts" />
+
 declare module "homeCarousel/Page" {
   import type { ComponentType } from "react";
 
@@ -41,47 +43,4 @@ declare module "awards/Page" {
 
   const Page: ComponentType;
   export default Page;
-}
-
-declare module "homeCarousel/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "homeCards/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "homeStory/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "homeContact/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "timeline/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "skills/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "awards/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
 }

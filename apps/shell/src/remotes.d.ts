@@ -1,3 +1,5 @@
+/// <reference path="../../../libs/build-config/src/federation-modules.d.ts" />
+
 declare module "home/Page" {
   import type { ComponentType } from "react";
 
@@ -27,37 +29,6 @@ declare module "courses/Page" {
 
   const Page: ComponentType;
   export default Page;
-}
-
-declare module "home/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "bio/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "research/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "software/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
-}
-declare module "courses/Skeleton" {
-  import type { ComponentType } from "react";
-
-  const Skeleton: ComponentType;
-  export default Skeleton;
 }
 
 declare module "timeline/Page" {

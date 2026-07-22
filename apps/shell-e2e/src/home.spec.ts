@@ -219,13 +219,13 @@ test("script entry points reject invalid inputs with recovery actions", async ()
     process.execPath,
     ["scripts/serve-e2e.mjs"],
     {
-      env: { ...process.env, STATIC_ASSET_LATENCY_MS: "invalid" },
+      env: { ...process.env, JAVASCRIPT_ASSET_LATENCY_MS: "invalid" },
       encoding: "utf8",
     },
   );
   expect(invalidLatency.status).not.toBe(0);
   expect(invalidLatency.stderr).toContain(
-    "STATIC_ASSET_LATENCY_MS must be an integer",
+    "JAVASCRIPT_ASSET_LATENCY_MS must be an integer",
   );
   const occupiedServer = createServer();
   await new Promise<void>((resolve) =>
