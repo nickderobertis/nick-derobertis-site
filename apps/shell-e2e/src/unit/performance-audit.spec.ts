@@ -3,11 +3,35 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { z } from "zod";
 
 const workspace = path.resolve(import.meta.dirname, "../../../..");
 const script = path.join(workspace, "scripts/performance-audit.mjs");
-const performanceConfig = JSON.parse(
-  readFileSync(path.join(workspace, "performance.config.json"), "utf8"),
+const performanceConfigSchema = z.object({
+  routes: z.array(z.string()).min(1),
+  minimumRuns: z.number().int().positive(),
+  newUrl: z.string().url(),
+  originalUrl: z.string().url(),
+});
+const cliFindingsSchema = z.object({
+  runsPerRoute: z.number().int().positive(),
+  environment: z.object({
+    formFactor: z.literal("desktop"),
+    throttling: z.object({ cpuSlowdownMultiplier: z.literal(1) }),
+  }),
+  sites: z.object({
+    new: z.object({
+      routes: z.object({ "/": z.object({ fcp: z.number() }) }).passthrough(),
+    }),
+    original: z.object({
+      routes: z.object({ "/": z.object({ fcp: z.number() }) }).passthrough(),
+    }),
+  }),
+});
+const performanceConfig = performanceConfigSchema.parse(
+  JSON.parse(
+    readFileSync(path.join(workspace, "performance.config.json"), "utf8"),
+  ),
 );
 const temporaryDirectories: string[] = [];
 
@@ -80,7 +104,7 @@ describe("performance audit CLI", () => {
         env: { ...process.env, PERF_FINDINGS_STDOUT: "1" },
       },
     );
-    const findings = JSON.parse(output);
+    const findings = cliFindingsSchema.parse(JSON.parse(output));
     const report = readFileSync(
       path.join(directory, "docs/perf-report.md"),
       "utf8",
