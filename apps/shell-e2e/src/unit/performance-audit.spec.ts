@@ -74,7 +74,11 @@ describe("performance audit CLI", () => {
     const output = execFileSync(
       process.execPath,
       [script, "--summarize-fixtures", directory],
-      { cwd: directory, encoding: "utf8" },
+      {
+        cwd: directory,
+        encoding: "utf8",
+        env: { ...process.env, PERF_FINDINGS_STDOUT: "1" },
+      },
     );
     const findings = JSON.parse(output);
     const report = readFileSync(
@@ -131,4 +135,64 @@ describe("performance audit CLI", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("PERF_URL must be a valid HTTP(S) URL");
   }, 10_000);
+
+  it("rejects an invalid performance configuration at the file boundary", () => {
+    const directory = createFixtureDirectory();
+    const invalidConfig = path.join(directory, "invalid-config.json");
+    writeFileSync(invalidConfig, JSON.stringify({ routes: "all" }));
+    const result = spawnSync(
+      process.execPath,
+      [script, "--config", invalidConfig, "--summarize-fixtures", directory],
+      { cwd: directory, encoding: "utf8" },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("performance config is invalid");
+  });
+
+  it("rejects a malformed Lighthouse fixture at the report boundary", () => {
+    const directory = createFixtureDirectory();
+    writeFileSync(path.join(directory, "new-home-1.json"), "{}");
+    const result = spawnSync(
+      process.execPath,
+      [script, "--summarize-fixtures", directory],
+      { cwd: directory, encoding: "utf8" },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("fixture new-home-1.json is invalid");
+  });
+
+  it("gates the committed report against its structured findings", () => {
+    const result = spawnSync(process.execPath, [script, "--check-report"], {
+      cwd: workspace,
+      encoding: "utf8",
+    });
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).toBe(
+      "Performance report matches structured findings.\n",
+    );
+  });
+
+  it("fails the freshness gate when the readable report drifts", () => {
+    const directory = createFixtureDirectory();
+    execFileSync(
+      process.execPath,
+      [script, "--summarize-fixtures", directory],
+      {
+        cwd: directory,
+      },
+    );
+    writeFileSync(
+      path.join(directory, "docs/perf-report.md"),
+      "stale report\n",
+    );
+    const result = spawnSync(process.execPath, [script, "--check-report"], {
+      cwd: directory,
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("docs/perf-report.md is stale");
+  });
 });

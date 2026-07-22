@@ -1,12 +1,120 @@
-import { readFileSync } from "node:fs";
+import { accessSync, constants, readFileSync } from "node:fs";
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
+import { z } from "zod";
 
-const config = JSON.parse(
-  readFileSync(new URL("../performance.config.json", import.meta.url), "utf8"),
-);
+const httpUrl = z
+  .string()
+  .url()
+  .refine((value) => ["http:", "https:"].includes(new URL(value).protocol), {
+    message: "must use HTTP(S)",
+  });
+const configSchema = z.object({
+  routes: z.array(z.string().regex(/^\/(?:[a-z0-9-]+)?$/)).min(1),
+  minimumRuns: z.number().int().min(1),
+  newUrl: httpUrl,
+  originalUrl: httpUrl,
+});
+const numberSchema = z.number().finite();
+const lhrSchema = z.object({
+  lighthouseVersion: z.string().min(1),
+  userAgent: z.string().min(1),
+  configSettings: z.object({
+    formFactor: z.string(),
+    throttlingMethod: z.string(),
+    throttling: z.object({ cpuSlowdownMultiplier: numberSchema }).passthrough(),
+  }),
+  categories: z.object({
+    performance: z.object({ score: numberSchema }),
+  }),
+  audits: z.object({
+    "first-contentful-paint": z.object({ numericValue: numberSchema }),
+    "largest-contentful-paint": z.object({ numericValue: numberSchema }),
+    "total-blocking-time": z.object({ numericValue: numberSchema }),
+    "cumulative-layout-shift": z.object({ numericValue: numberSchema }),
+    "total-byte-weight": z.object({ numericValue: numberSchema }),
+    "resource-summary": z.object({
+      details: z.object({
+        items: z.array(
+          z.object({
+            resourceType: z.string(),
+            transferSize: numberSchema.optional(),
+          }),
+        ),
+      }),
+    }),
+  }),
+});
+const metricSchema = z.object({
+  performance: numberSchema,
+  fcp: numberSchema,
+  lcp: numberSchema,
+  tbt: numberSchema,
+  cls: numberSchema,
+  transferBytes: numberSchema,
+  jsBytes: numberSchema,
+});
+const findingsSchema = z.object({
+  schemaVersion: z.literal(1),
+  runsPerRoute: z.number().int().min(1),
+  environment: z.object({
+    capturedAt: z.string().datetime(),
+    host: z.string(),
+    cpu: z.string(),
+    logicalCpus: z.number().int().positive(),
+    memoryGiB: numberSchema,
+    node: z.string(),
+    lighthouse: z.string(),
+    userAgent: z.string(),
+    formFactor: z.literal("desktop"),
+    throttlingMethod: z.string(),
+    throttling: z.object({ cpuSlowdownMultiplier: z.literal(1) }).passthrough(),
+  }),
+  sites: z.object({
+    new: z.object({ url: httpUrl, routes: z.record(z.string(), metricSchema) }),
+    original: z.object({
+      url: httpUrl,
+      routes: z.record(z.string(), metricSchema),
+    }),
+  }),
+  deltas: z.record(z.string(), metricSchema),
+});
+
+function parseJsonFile(filename, schema, label) {
+  try {
+    return schema.parse(JSON.parse(readFileSync(filename, "utf8")));
+  } catch (error) {
+    throw new Error(`${label} is invalid: ${error.message}`);
+  }
+}
+
+function parseArgs(values) {
+  const parsed = {};
+  for (let index = 0; index < values.length; index += 1) {
+    const name = values[index];
+    if (["--check-report", "--refresh-report"].includes(name)) {
+      parsed[name === "--check-report" ? "checkReport" : "refreshReport"] =
+        true;
+      continue;
+    }
+    if (!["--config", "--summarize-fixtures"].includes(name)) {
+      throw new Error(`unknown argument ${name}`);
+    }
+    const value = values[index + 1];
+    if (!value || value.startsWith("--")) {
+      throw new Error(`${name} requires a path`);
+    }
+    parsed[name === "--config" ? "configPath" : "fixtureDirectory"] = value;
+    index += 1;
+  }
+  return parsed;
+}
+const cli = parseArgs(process.argv.slice(2));
+const configPath =
+  cli.configPath ?? new URL("../performance.config.json", import.meta.url);
+const config = parseJsonFile(configPath, configSchema, "performance config");
 const ROUTES = config.routes;
 const DEFAULT_NEW_URL = config.newUrl;
 const DEFAULT_ORIGINAL_URL = config.originalUrl;
@@ -30,34 +138,23 @@ function median(values) {
 }
 
 function metricFromLhr(lhr) {
-  const number = (value, name) => {
-    if (typeof value !== "number" || !Number.isFinite(value)) {
-      throw new Error(`Lighthouse result has invalid ${name}`);
-    }
-    return value;
-  };
-  if (!Array.isArray(lhr.audits?.["resource-summary"]?.details?.items)) {
-    throw new Error("Lighthouse result has invalid resource summary");
-  }
+  lhr = lhrSchema.parse(lhr);
   const scripts = lhr.audits["resource-summary"].details.items.find(
     (item) => item.resourceType === "script",
   );
   return {
-    performance:
-      number(lhr.categories?.performance?.score, "performance score") * 100,
-    fcp: number(lhr.audits?.["first-contentful-paint"]?.numericValue, "FCP"),
-    lcp: number(lhr.audits?.["largest-contentful-paint"]?.numericValue, "LCP"),
-    tbt: number(lhr.audits?.["total-blocking-time"]?.numericValue, "TBT"),
-    cls: number(lhr.audits?.["cumulative-layout-shift"]?.numericValue, "CLS"),
-    transferBytes: number(
-      lhr.audits?.["total-byte-weight"]?.numericValue,
-      "transfer bytes",
-    ),
-    jsBytes: number(scripts?.transferSize ?? 0, "JavaScript bytes"),
+    performance: lhr.categories.performance.score * 100,
+    fcp: lhr.audits["first-contentful-paint"].numericValue,
+    lcp: lhr.audits["largest-contentful-paint"].numericValue,
+    tbt: lhr.audits["total-blocking-time"].numericValue,
+    cls: lhr.audits["cumulative-layout-shift"].numericValue,
+    transferBytes: lhr.audits["total-byte-weight"].numericValue,
+    jsBytes: scripts?.transferSize ?? 0,
   };
 }
 
 function assertDesktopProfile(lhr) {
+  lhr = lhrSchema.parse(lhr);
   const { formFactor, throttling } = lhr.configSettings;
   if (formFactor !== "desktop" || throttling.cpuSlowdownMultiplier !== 1) {
     throw new Error(
@@ -160,6 +257,23 @@ function markdown(findings) {
   return `${lines.join("\n")}\n`;
 }
 
+function validateFindings(value) {
+  const findings = findingsSchema.parse(value);
+  for (const site of [findings.sites.new, findings.sites.original]) {
+    if (Object.keys(site.routes).sort().join() !== [...ROUTES].sort().join()) {
+      throw new Error(
+        "structured findings routes do not match performance config",
+      );
+    }
+  }
+  if (
+    Object.keys(findings.deltas).sort().join() !== [...ROUTES].sort().join()
+  ) {
+    throw new Error("structured delta routes do not match performance config");
+  }
+  return findings;
+}
+
 async function auditSite(baseUrl, runs, chromePort, lighthouse, desktopConfig) {
   const routes = {};
   let firstLhr;
@@ -178,9 +292,10 @@ async function auditSite(baseUrl, runs, chromePort, lighthouse, desktopConfig) {
       );
       if (!result?.lhr)
         throw new Error(`Lighthouse returned no result for ${url}`);
-      assertDesktopProfile(result.lhr);
-      firstLhr ??= result.lhr;
-      samples.push(metricFromLhr(result.lhr));
+      const lhr = lhrSchema.parse(result.lhr);
+      assertDesktopProfile(lhr);
+      firstLhr ??= lhr;
+      samples.push(metricFromLhr(lhr));
     }
     routes[route] = aggregate(samples);
   }
@@ -202,9 +317,14 @@ async function readFixtureSite(directory, label, baseUrl) {
     }
     const samples = [];
     for (const name of names.sort()) {
-      const lhr = JSON.parse(
-        await readFile(path.join(directory, name), "utf8"),
-      );
+      let lhr;
+      try {
+        lhr = lhrSchema.parse(
+          JSON.parse(await readFile(path.join(directory, name), "utf8")),
+        );
+      } catch (error) {
+        throw new Error(`fixture ${name} is invalid: ${error.message}`);
+      }
       assertDesktopProfile(lhr);
       firstLhr ??= lhr;
       samples.push(metricFromLhr(lhr));
@@ -215,15 +335,37 @@ async function readFixtureSite(directory, label, baseUrl) {
 }
 
 async function main() {
-  const fixtureIndex = process.argv.indexOf("--summarize-fixtures");
-  const fixtureDirectory =
-    fixtureIndex >= 0 ? process.argv[fixtureIndex + 1] : null;
+  const fixtureDirectory = cli.fixtureDirectory ?? null;
   if (
-    fixtureIndex >= 0 &&
+    fixtureDirectory &&
     (!fixtureDirectory ||
       !(await stat(fixtureDirectory).catch(() => null))?.isDirectory())
   ) {
     throw new Error("--summarize-fixtures must name a readable directory");
+  }
+  if (cli.checkReport || cli.refreshReport) {
+    const findings = parseJsonFile(
+      "docs/perf-findings.json",
+      findingsSchema,
+      "structured performance findings",
+    );
+    validateFindings(findings);
+    const expected = markdown(findings);
+    if (cli.refreshReport) {
+      await writeFile("docs/perf-report.md", expected);
+      process.stdout.write(
+        "Refreshed performance report from structured findings.\n",
+      );
+      return;
+    }
+    const actual = await readFile("docs/perf-report.md", "utf8");
+    if (actual !== expected) {
+      throw new Error(
+        "docs/perf-report.md is stale; regenerate it from the committed findings",
+      );
+    }
+    process.stdout.write("Performance report matches structured findings.\n");
+    return;
   }
   const newUrl = deploymentUrl(
     process.env.PERF_URL || DEFAULT_NEW_URL,
@@ -256,8 +398,16 @@ async function main() {
           import("chrome-launcher"),
           import("lighthouse"),
         ]);
+      const chromePath = process.env.CHROME_PATH ?? chromium.executablePath();
+      try {
+        accessSync(chromePath, constants.X_OK);
+      } catch {
+        throw new Error(
+          `Chrome executable is missing or not executable: ${chromePath}`,
+        );
+      }
       chrome = await chromeLauncher.launch({
-        chromePath: process.env.CHROME_PATH ?? chromium.executablePath(),
+        chromePath,
         chromeFlags: ["--headless", "--no-sandbox"],
       });
       current = await auditSite(
@@ -279,7 +429,7 @@ async function main() {
     await chrome?.kill();
   }
 
-  const findings = {
+  const findings = validateFindings({
     schemaVersion: 1,
     runsPerRoute: fixtureDirectory ? DEFAULT_RUNS : runs,
     environment: environment(current.firstLhr),
@@ -298,18 +448,24 @@ async function main() {
         ),
       ]),
     ),
-  };
+  });
   await mkdir("docs", { recursive: true });
   await writeFile(
     "docs/perf-findings.json",
     `${JSON.stringify(findings, null, 2)}\n`,
   );
   await writeFile("docs/perf-report.md", markdown(findings));
-  // llmlint: ignore[tool_output_is_signal] Structured JSON is the requested planner-facing finding; the readable report is written separately.
-  process.stdout.write(`${JSON.stringify(findings)}\n`);
+  if (process.env.PERF_FINDINGS_STDOUT === "1") {
+    process.stdout.write(`${JSON.stringify(findings)}\n`);
+  } else if (process.env.PERF_FINDINGS_STDOUT) {
+    throw new Error("PERF_FINDINGS_STDOUT must be 1 when set");
+  } else {
+    process.stdout.write(
+      `Performance comparison complete for ${ROUTES.length} routes; report: docs/perf-report.md; structured findings: docs/perf-findings.json\n`,
+    );
+  }
 }
 
-// llmlint: ignore[changed_behavior_has_e2e] Public-network audits must remain outside deterministic browser gates; subprocess tests cover the CLI boundaries, and the committed findings prove a real live run.
 main().catch((error) => {
   process.stderr.write(
     `performance audit failed: ${error.message}; correct the URL, browser, or fixture input and rerun just perf-compare\n`,
