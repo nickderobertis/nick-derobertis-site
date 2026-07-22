@@ -1,19 +1,8 @@
-import {
-  type Course,
-  cvDataClient,
-  type Resource,
-} from "@site/data-access-core";
+import type { Course, Resource } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
-
-export type CoursesView = "default" | "empty" | "error" | "loading";
-
-function requestedView(): CoursesView {
-  const value = new URLSearchParams(window.location.search).get("courses-view");
-  return value === "empty" || value === "error" || value === "loading"
-    ? value
-    : "default";
-}
+import type { RouteView } from "@site/route-state";
+import { useCoursesPage } from "./use-courses-page";
 
 function ResourceTree({ resources }: { resources: Resource[] }) {
   return (
@@ -232,12 +221,12 @@ function CourseCollection({ courses }: { courses: Course[] }) {
 
 export default function CoursesPage({
   initialView,
-  courses = cvDataClient.domain("courses"),
+  courses: initialCourses,
 }: {
-  initialView?: CoursesView;
+  initialView?: RouteView;
   courses?: Course[];
 }) {
-  const view = initialView ?? requestedView();
+  const { courses, view } = useCoursesPage(initialView, initialCourses);
   return (
     <section className="courses-page">
       <header className="courses-banner">

@@ -1,20 +1,11 @@
-import { cvDataClient, type SoftwareProject } from "@site/data-access-core";
+import type { SoftwareProject } from "@site/data-access-core";
 import {
   calculateSoftwareStats,
   softwareProjectLogo,
 } from "@site/data-access-software";
 import "@site/design-system";
-
-export type SoftwareView = "default" | "empty" | "error" | "loading";
-
-function requestedView(): SoftwareView {
-  const value = new URLSearchParams(window.location.search).get(
-    "software-view",
-  );
-  return value === "empty" || value === "error" || value === "loading"
-    ? value
-    : "default";
-}
+import type { RouteView } from "@site/route-state";
+import { useSoftwarePage } from "./use-software-page";
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-US").format(value);
@@ -100,12 +91,12 @@ function SoftwareCollection({ projects }: { projects: SoftwareProject[] }) {
 
 export default function SoftwarePage({
   initialView,
-  projects = cvDataClient.domain("software_projects"),
+  projects: initialProjects,
 }: {
-  initialView?: SoftwareView;
+  initialView?: RouteView;
   projects?: SoftwareProject[];
 }) {
-  const view = initialView ?? requestedView();
+  const { projects, view } = useSoftwarePage(initialView, initialProjects);
   return (
     <section className="software-page">
       <header className="software-banner">

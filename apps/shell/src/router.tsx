@@ -10,6 +10,11 @@ import type {
 import { validateCvDomain } from "@site/data-access-core";
 import { SiteLayout } from "@site/layout";
 import {
+  type AsyncViewState,
+  parseRouteView,
+  type RouteView,
+} from "@site/route-state";
+import {
   createRootRouteWithContext,
   createRoute,
   createRouter,
@@ -20,12 +25,9 @@ import {
 import type { ComponentType } from "react";
 import { routes } from "./routes";
 
-export type RouteView = "default" | "empty" | "error" | "loading";
 type PageProps = {
-  initialState?:
-    | { name: "ready"; research: Research }
-    | { name: "loading" | "error" };
-  initialView?: RouteView | string | null;
+  initialState?: AsyncViewState<Research>;
+  initialView?: RouteView;
   projects?: SoftwareProjects;
   courses?: Courses;
 };
@@ -47,7 +49,10 @@ interface RouterContext {
 
 const routePath = (label: string) => {
   const route = routes.find((item) => item.label === label);
-  if (!route) throw new Error(`Missing ${label} route in routes.json`);
+  if (!route)
+    throw new Error(
+      `Missing ${label} route in routes.json. Add the route to apps/shell/src/routes.json and rerun just check.`,
+    );
   return route.path;
 };
 
@@ -76,7 +81,7 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Bio"),
     loader: ({ context: ctx }) => ({
-      view: ctx.search.get("bio-view"),
+      view: parseRouteView(ctx.search.get("bio-view")),
     }),
     component: () => {
       const data = bio.useLoaderData();
@@ -108,7 +113,7 @@ export function createSiteRouter({
             data.view === "loading"
               ? { name: "loading" }
               : data.research
-                ? { name: "ready", research: data.research }
+                ? { name: "ready", value: data.research }
                 : { name: "error" }
           }
         />
@@ -120,7 +125,7 @@ export function createSiteRouter({
     path: routePath("Software"),
     loader: async ({ context: ctx }) => ({
       projects: await ctx.loadDomain("software_projects"),
-      view: (ctx.search.get("software-view") ?? "default") as RouteView,
+      view: parseRouteView(ctx.search.get("software-view")),
     }),
     component: () => {
       const data = software.useLoaderData();
@@ -134,7 +139,7 @@ export function createSiteRouter({
     path: routePath("Courses"),
     loader: async ({ context: ctx }) => ({
       courses: await ctx.loadDomain("courses"),
-      view: (ctx.search.get("courses-view") ?? "default") as RouteView,
+      view: parseRouteView(ctx.search.get("courses-view")),
     }),
     component: () => {
       const data = courses.useLoaderData();
