@@ -1,7 +1,7 @@
 import { createBrowserHistory, RouterProvider } from "@tanstack/react-router";
 import { RouterClient } from "@tanstack/react-router/ssr/client";
 import { StrictMode } from "react";
-import { hydrateRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import { createSiteRouter, loadBrowserDomain } from "./router";
 import "@site/design-system";
 
@@ -32,14 +32,16 @@ const hasStaticPayload = Boolean(
   Reflect.get(window, "$_TSR") &&
     Reflect.get(Reflect.get(window, "$_TSR") as object, "router"),
 );
-if (!hasStaticPayload || window.location.search) await router.load();
-hydrateRoot(
-  root,
+const canHydrate = hasStaticPayload && !window.location.search;
+if (!canHydrate) await router.load();
+const app = (
   <StrictMode>
-    {hasStaticPayload && !window.location.search ? (
+    {canHydrate ? (
       <RouterClient router={router} />
     ) : (
       <RouterProvider router={router} />
     )}
-  </StrictMode>,
+  </StrictMode>
 );
+if (canHydrate) hydrateRoot(root, app);
+else createRoot(root).render(app);

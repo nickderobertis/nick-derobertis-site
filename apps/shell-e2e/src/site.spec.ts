@@ -126,6 +126,24 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     await page.close();
   }
 });
+
+test("query-only route states client-mount without hydration warnings", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await page.goto("research?research-scenario=empty", {
+    waitUntil: "networkidle",
+  });
+  await expect(
+    page.getByRole("heading", { name: "No research projects yet" }),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
 // llmlint: ignore-end[tests_mirror_real_usage]
 
 test("the static 404 is intentional and the router recovers unknown routes", async ({
