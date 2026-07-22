@@ -2,7 +2,7 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-
+import { chromium } from "@playwright/test";
 import * as chromeLauncher from "chrome-launcher";
 import lighthouse from "lighthouse";
 
@@ -201,6 +201,7 @@ async function main() {
       );
     } else {
       chrome = await chromeLauncher.launch({
+        chromePath: process.env.CHROME_PATH ?? chromium.executablePath(),
         chromeFlags: ["--headless", "--no-sandbox"],
       });
       current = await auditSite("new", newUrl, runs, chrome.port);
