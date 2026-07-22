@@ -1,7 +1,7 @@
 import type { Course, Resource } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
-import type { RouteView } from "@site/route-state";
+import type { CoursesPageProps } from "@site/route-state";
 import { useCoursesPage } from "./use-courses-page";
 
 function ResourceTree({ resources }: { resources: Resource[] }) {
@@ -222,10 +222,7 @@ function CourseCollection({ courses }: { courses: Course[] }) {
 export default function CoursesPage({
   initialView,
   courses: initialCourses,
-}: {
-  initialView?: RouteView;
-  courses?: Course[];
-}) {
+}: CoursesPageProps<Course[]>) {
   const { courses, view } = useCoursesPage(initialView, initialCourses);
   return (
     <section className="courses-page">

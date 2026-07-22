@@ -10,9 +10,11 @@ import type {
 import { validateCvDomain } from "@site/data-access-core";
 import { SiteLayout } from "@site/layout";
 import {
-  type AsyncViewState,
+  type BioPageProps,
+  type CoursesPageProps,
   parseRouteView,
-  type RouteView,
+  type ResearchPageProps,
+  type SoftwarePageProps,
 } from "@site/route-state";
 import {
   createRootRouteWithContext,
@@ -25,19 +27,12 @@ import {
 import type { ComponentType } from "react";
 import { routes } from "./routes";
 
-type PageProps = {
-  initialState?: AsyncViewState<Research>;
-  initialView?: RouteView;
-  projects?: SoftwareProjects;
-  courses?: Courses;
-};
-
 export interface RoutePages {
   home: ComponentType;
-  bio: ComponentType<PageProps>;
-  research: ComponentType<PageProps>;
-  software: ComponentType<PageProps>;
-  courses: ComponentType<PageProps>;
+  bio: ComponentType<BioPageProps>;
+  research: ComponentType<ResearchPageProps<Research>>;
+  software: ComponentType<SoftwarePageProps<SoftwareProjects>>;
+  courses: ComponentType<CoursesPageProps<Courses>>;
 }
 
 interface RouterContext {
@@ -92,7 +87,7 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Research"),
     loader: async ({ context: ctx }) => {
-      const view = ctx.search.get("research-scenario");
+      const view = parseRouteView(ctx.search.get("research-scenario"));
       if (view === "loading" || view === "error")
         return { research: null, view };
       try {

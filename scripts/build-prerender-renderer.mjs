@@ -27,11 +27,11 @@ await new Promise((resolve, reject) => {
       );
       return;
     }
-    if (stats?.hasErrors()) {
+    if (stats?.hasErrors() || stats?.hasWarnings()) {
       finish(() =>
         reject(
           new Error(
-            `${stats.toString({ colors: false })}\nFix the reported prerender renderer errors, then rerun just build-prerender-renderer.`,
+            `${stats.toString({ colors: false })}\nFix the reported prerender renderer errors or warnings, then rerun just build-prerender-renderer.`,
           ),
         ),
       );

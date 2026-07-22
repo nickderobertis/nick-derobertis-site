@@ -1,7 +1,6 @@
 import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { JSDOM } from "jsdom";
-import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
@@ -64,8 +63,16 @@ const template = builtDocument
     '<div id="root"></div></body>',
   );
 
-const rendererModule = await import("../dist/prerender-renderer/render.cjs");
-const { renderRoute } = rendererModule.default ?? rendererModule;
+let rendererModule;
+try {
+  rendererModule = await import("../dist/prerender-renderer/render.cjs");
+} catch (error) {
+  throw new Error(
+    `The prerender renderer is missing or invalid: ${error instanceof Error ? error.message : String(error)}. Run just build-prerender-renderer, then rerun just prerender.`,
+  );
+}
+const { prerenderRoutes: routes, renderRoute } =
+  rendererModule.default ?? rendererModule;
 
 function finalizeReactPrerender(html) {
   const dom = new JSDOM(`<body>${html}</body>`);

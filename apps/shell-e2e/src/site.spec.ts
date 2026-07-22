@@ -101,22 +101,12 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
   for (const route of pages.filter(({ path }) => path)) {
     const page = await browser.newPage();
     const errors: string[] = [];
-    await page.addInitScript(() => {
-      const observer = new MutationObserver(() => {
-        const main = document.getElementsByTagName("main").item(0);
-        if (main) {
-          main.focus();
-          observer.disconnect();
-        }
-      });
-      observer.observe(document, { childList: true, subtree: true });
-    });
     page.on("console", (message) => {
       if (message.type() === "error") errors.push(message.text());
     });
     page.on("pageerror", (error) => errors.push(error.message));
 
-    await page.goto(route.path, { waitUntil: "networkidle" });
+    await page.goto(`${route.path}#main-content`, { waitUntil: "networkidle" });
     await expect(
       page.getByRole("heading", { name: route.heading }),
     ).toBeVisible();

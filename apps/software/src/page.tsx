@@ -4,7 +4,7 @@ import {
   softwareProjectLogo,
 } from "@site/data-access-software";
 import "@site/design-system";
-import type { RouteView } from "@site/route-state";
+import type { SoftwarePageProps } from "@site/route-state";
 import { useSoftwarePage } from "./use-software-page";
 
 function formatNumber(value: number): string {
@@ -92,10 +92,7 @@ function SoftwareCollection({ projects }: { projects: SoftwareProject[] }) {
 export default function SoftwarePage({
   initialView,
   projects: initialProjects,
-}: {
-  initialView?: RouteView;
-  projects?: SoftwareProject[];
-}) {
+}: SoftwarePageProps<SoftwareProject[]>) {
   const { projects, view } = useSoftwarePage(initialView, initialProjects);
   return (
     <section className="software-page">

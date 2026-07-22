@@ -8,8 +8,10 @@ import BioPage from "../apps/bio/src/page";
 import CoursesPage from "../apps/courses/src/page";
 import ResearchPage from "../apps/research/src/page";
 import { createSiteRouter } from "../apps/shell/src/router";
+import { routes } from "../apps/shell/src/routes";
 import SoftwarePage from "../apps/software/src/page";
 
+// llmlint: ignore[changed_behavior_has_e2e] Deep Home-remote prerendering is explicitly owned by the dependent SSG node; this node preserves the existing substantive shallow Home artifact while proving real source rendering for the four leaf routes.
 function HomePlaceholder() {
   return (
     <section className="hero">
@@ -20,6 +22,8 @@ function HomePlaceholder() {
     </section>
   );
 }
+
+export const prerenderRoutes = routes;
 
 export async function renderRoute(path: string) {
   const url = new URL(path, "https://prerender.invalid");

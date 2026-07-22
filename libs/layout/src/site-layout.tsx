@@ -32,7 +32,7 @@ export function SiteLayout({
           </nav>
         </div>
       </header>
-      <main className="main" tabIndex={-1}>
+      <main className="main" id="main-content" tabIndex={-1}>
         {children}
       </main>
       <footer className="site-footer">

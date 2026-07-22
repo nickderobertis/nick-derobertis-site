@@ -1,6 +1,6 @@
 import "@site/design-system";
 import "./bio.css";
-import type { RouteView } from "@site/route-state";
+import type { BioPageProps } from "@site/route-state";
 import { useBioView } from "./use-bio-view";
 
 function Marker({ children }: { children: string }) {
@@ -123,7 +123,7 @@ function BioState({ state }: { state: "empty" | "error" | "loading" }) {
   );
 }
 
-export default function BioPage({ initialView }: { initialView?: RouteView }) {
+export default function BioPage({ initialView }: BioPageProps) {
   // llmlint: ignore-block[changed_behavior_has_e2e] bio.spec.ts drives happy, loading, empty, and error query states through both host-composed and standalone URLs.
   const scenario = useBioView(initialView);
   if (scenario === "loading") return <BioState state="loading" />;
