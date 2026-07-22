@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import rootSchema from "../vendor/codegen/cv.schema.json";
 import {
   CvDataValidationError,
   type CvDomainArtifacts,
@@ -6,6 +7,7 @@ import {
   createCvDataClient,
   cvDataClient,
   cvDomains,
+  deriveSchemaDomainNames,
   domainNames,
   validateCvData,
   validateCvDomain,
@@ -13,14 +15,10 @@ import {
 
 describe("vendored CV data boundary", () => {
   it("loads the committed root, schema, and six real domains", () => {
-    expect(domainNames).toEqual([
-      "awards",
-      "courses",
-      "research",
-      "skills",
-      "software_projects",
-      "timeline",
-    ]);
+    const schemaDomainNames = Object.keys(rootSchema.properties).filter(
+      (name) => !rootSchema.required.includes(name),
+    );
+    expect(domainNames).toEqual(schemaDomainNames);
     expect(cvDataClient.root().schema_version).toBe(3);
     expect(cvDataClient.schema()).toMatchObject({ type: "object" });
     expect(cvDataClient.domain("awards")).toHaveLength(7);
@@ -42,6 +40,17 @@ describe("vendored CV data boundary", () => {
       expect((error as CvDataValidationError).issues.length).toBeGreaterThan(0);
     }
     expect(new CvDataValidationError().issues).toEqual([]);
+  });
+
+  it("rejects a malformed schema before reading its domain contract", () => {
+    expect(() => deriveSchemaDomainNames({ properties: [] })).toThrow(
+      "cv.schema.json must define object properties and a string required list",
+    );
+    expect(() =>
+      deriveSchemaDomainNames({ properties: {}, required: [42] }),
+    ).toThrow(
+      "cv.schema.json must define object properties and a string required list",
+    );
   });
 
   it("rejects a malformed imported domain through the client boundary", () => {

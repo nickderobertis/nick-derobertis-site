@@ -1,4 +1,8 @@
-import { cvDataClient, type SoftwareProject } from "@site/data-access";
+import { cvDataClient, type SoftwareProject } from "@site/data-access-core";
+import {
+  calculateSoftwareStats,
+  softwareProjectLogo,
+} from "@site/data-access-software";
 import { useEffect, useState } from "react";
 import "@site/design-system";
 
@@ -23,17 +27,13 @@ function useSoftwareView(): SoftwareView {
   return view;
 }
 
-function projectLogo(project: SoftwareProject): string | undefined {
-  return project.logo_base64 ?? project.logo_url ?? undefined;
-}
-
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
 function ProjectCard({ project }: { project: SoftwareProject }) {
   const title = project.display_name ?? project.name;
-  const logo = projectLogo(project);
+  const logo = softwareProjectLogo(project);
   return (
     <article className="software-card">
       <div className="software-card-heading">
@@ -83,28 +83,21 @@ function ProjectCard({ project }: { project: SoftwareProject }) {
 }
 
 function SoftwareCollection({ projects }: { projects: SoftwareProject[] }) {
-  const totalLoc = projects.reduce(
-    (total, project) => total + (project.loc ?? 0),
-    0,
-  );
-  const totalCommits = projects.reduce(
-    (total, project) => total + (project.commits ?? 0),
-    0,
-  );
+  const stats = calculateSoftwareStats(projects);
   return (
     <>
       <dl className="software-stats" aria-label="Software statistics">
         <div>
           <dt>Open-source projects</dt>
-          <dd>{formatNumber(projects.length)}</dd>
+          <dd>{formatNumber(stats.projects)}</dd>
         </div>
         <div>
           <dt>Lines of code</dt>
-          <dd>{formatNumber(totalLoc)}</dd>
+          <dd>{formatNumber(stats.linesOfCode)}</dd>
         </div>
         <div>
           <dt>Commits</dt>
-          <dd>{formatNumber(totalCommits)}</dd>
+          <dd>{formatNumber(stats.commits)}</dd>
         </div>
       </dl>
       <section className="software-grid" aria-label="Software projects">

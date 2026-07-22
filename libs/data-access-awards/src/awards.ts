@@ -1,5 +1,6 @@
-import type { AwardIcon } from "@site/design-system";
-import type { Award, Awards } from "../vendor/codegen";
+import type { Award, Awards } from "@site/data-access-core";
+
+type AwardIcon = "cfa" | "gmat" | "scholarship" | "student" | "teaching";
 
 const SELECTED_AWARD_IDS = [
   "warrington-college-of-business-ph-d-student-teaching-award",
@@ -98,6 +99,19 @@ export function selectedAwards(awards: Awards): Awards {
     const award = awardsById.get(id);
     return award ? [award] : [];
   });
+}
+
+/** Fails when presentation identifiers drift from the validated awards domain. */
+export function validateAwardsPresentation(awards: Awards): void {
+  const ids = new Set(awards.map(({ id }) => id));
+  const missing = [
+    ...SELECTED_AWARD_IDS,
+    ...Object.keys(AWARD_PRESENTATION),
+  ].filter((id) => !ids.has(id));
+  if (missing.length > 0)
+    throw new Error(
+      `Awards presentation references missing IDs: ${missing.join(", ")}`,
+    );
 }
 
 export function calculateAwardsStats(awards: Awards): AwardsStats {

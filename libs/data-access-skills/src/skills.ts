@@ -1,4 +1,4 @@
-import type { Skill, Skills } from "../vendor/codegen";
+import type { Skill, Skills } from "@site/data-access-core";
 
 const CATEGORY_IDS = [
   "frameworks",

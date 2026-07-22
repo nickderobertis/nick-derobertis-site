@@ -1,0 +1,27 @@
+{
+  "name": "data-access-courses",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/data-access-courses/src",
+  "projectType": "library",
+  "tags": ["type:data-domain", "data:courses"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint libs/data-access-courses" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/data-access-courses/tsconfig.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/data-access-courses/vite.config.ts --coverage"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/data-access-courses/tsconfig.json" }
+    }
+  }
+}

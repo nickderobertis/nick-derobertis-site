@@ -1,4 +1,5 @@
-import { homeContent, readPaneState, siteBase } from "@site/data-access";
+import { siteBase } from "@site/data-access-core";
+import { homeContent, readPaneState } from "@site/data-access-home";
 
 export default function HomeStoryPage() {
   const state = readPaneState(window.location.search);

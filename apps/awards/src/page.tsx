@@ -2,7 +2,7 @@ import {
   buildAwardCards,
   calculateAwardsStats,
   selectedAwards,
-} from "@site/data-access";
+} from "@site/data-access-awards";
 import { AwardEmblem } from "@site/design-system";
 import { useAwards } from "./use-awards";
 import "./awards.css";

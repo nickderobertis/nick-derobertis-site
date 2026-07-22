@@ -1,4 +1,5 @@
-import { homeContent, readPaneState, siteBase } from "@site/data-access";
+import { siteBase } from "@site/data-access-core";
+import { homeContent, readPaneState } from "@site/data-access-home";
 import { useEffect, useState } from "react";
 
 function useCarousel(length: number, enabled: boolean) {

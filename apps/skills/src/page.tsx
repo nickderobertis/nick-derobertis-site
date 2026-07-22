@@ -1,9 +1,9 @@
+import { cvDataClient } from "@site/data-access-core";
 import {
   buildSkillTree,
-  cvDataClient,
   type SkillTree,
   type SkillTreeNode,
-} from "@site/data-access";
+} from "@site/data-access-skills";
 import { useId, useState } from "react";
 import "./skills.css";
 

@@ -1,5 +1,5 @@
+import { cvDataClient } from "@site/data-access-core";
 import { describe, expect, it } from "vitest";
-import { cvDataClient } from "./client";
 import { buildSkillTree } from "./skills";
 
 describe("skill tree boundary", () => {
@@ -26,7 +26,11 @@ describe("skill tree boundary", () => {
   });
 
   it("turns the validated CV domain into the complete recursive model", () => {
-    const tree = buildSkillTree(cvDataClient.domain("skills"));
+    const skills = cvDataClient.domain("skills");
+    const withoutRelatedSkills = skills.map((skill, index) =>
+      index === 7 ? { ...skill, related_skill_ids: undefined } : skill,
+    );
+    const tree = buildSkillTree(withoutRelatedSkills);
 
     expect(tree.title).toBe("Skills");
     expect(tree.skillCount).toBe(198);

@@ -1,4 +1,9 @@
-import { type Course, cvDataClient, type Resource } from "@site/data-access";
+import {
+  type Course,
+  cvDataClient,
+  type Resource,
+} from "@site/data-access-core";
+import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
 import { useEffect, useState } from "react";
 
@@ -45,8 +50,7 @@ function ResourceTree({ resources }: { resources: Resource[] }) {
 }
 
 function CourseDetails({ course }: { course: Course }) {
-  const gradingCategories = Object.entries(course.grading?.categories ?? {});
-  const gradeScale = Object.entries(course.grading?.scale ?? {});
+  const { gradingCategories, gradeScale } = buildCourseDetails(course);
   return (
     <div className="course-details">
       {course.long_description ? (
@@ -160,6 +164,7 @@ function CourseDetails({ course }: { course: Course }) {
 
 function CoursePane({ course, index }: { course: Course; index: number }) {
   const detailsId = `course-${course.id}-details`;
+  const { hasDetails } = buildCourseDetails(course);
   return (
     <article className={`course-card ${index % 2 ? "course-card-dark" : ""}`}>
       <div className="course-summary">
@@ -216,11 +221,7 @@ function CoursePane({ course, index }: { course: Course; index: number }) {
           </section>
         ) : null}
       </div>
-      {course.long_description ||
-      course.textbook ||
-      course.prerequisites ||
-      course.grading ||
-      course.resources?.length ? (
+      {hasDetails ? (
         <details className="course-more" id={detailsId}>
           <summary>Explore {course.title} details</summary>
           <CourseDetails course={course} />

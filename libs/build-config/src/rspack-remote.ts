@@ -7,7 +7,7 @@ const remoteManifest = createRequire(import.meta.url)(
   "./remotes.json",
 ) as typeof import("./remotes.json");
 const siteConfig: unknown = createRequire(import.meta.url)(
-  "../../data-access/src/site.config.json",
+  "../../data-access-core/src/site.config.json",
 );
 if (
   Object.entries(remoteManifest).some(

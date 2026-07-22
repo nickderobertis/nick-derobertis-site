@@ -37,6 +37,41 @@ export interface CvDomains {
 }
 export type CvDomainArtifacts = Record<CvDomain, unknown>;
 
+interface CvRootSchemaContract {
+  properties: Record<string, unknown>;
+  required: string[];
+}
+
+export function deriveSchemaDomainNames(input: unknown): string[] {
+  if (
+    !input ||
+    typeof input !== "object" ||
+    !("properties" in input) ||
+    !input.properties ||
+    typeof input.properties !== "object" ||
+    Array.isArray(input.properties) ||
+    !("required" in input) ||
+    !Array.isArray(input.required) ||
+    !input.required.every((name) => typeof name === "string")
+  )
+    throw new Error(
+      "cv.schema.json must define object properties and a string required list",
+    );
+  const schema = input as CvRootSchemaContract;
+  return Object.keys(schema.properties).filter(
+    (name) => !schema.required.includes(name),
+  );
+}
+
+const schemaDomainNames = deriveSchemaDomainNames(rootSchema);
+if (
+  schemaDomainNames.length !== domainNames.length ||
+  schemaDomainNames.some((name, index) => name !== domainNames[index])
+)
+  throw new Error(
+    `CV domain contract drifted from cv.schema.json: expected ${schemaDomainNames.join(", ")}; received ${domainNames.join(", ")}`,
+  );
+
 // `discriminator` is an OpenAPI annotation here; `oneOf` remains the validator.
 const ajv = new Ajv({
   allErrors: true,
@@ -206,7 +241,7 @@ const importedArtifacts = {
   skills,
   software_projects: softwareProjects,
   timeline,
-};
+} satisfies CvDomainArtifacts;
 export const cvDataClient = createCvDataClient(rootData, importedArtifacts);
 export const cvData = cvDataClient.root();
 export const cvDomains: CvDomains = {
