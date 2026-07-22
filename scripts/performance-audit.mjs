@@ -12,7 +12,7 @@ const httpUrl = z
     message: "must use HTTP(S)",
   });
 const configSchema = z.object({
-  routes: z.array(z.string().regex(/^\/(?:[a-z0-9-]+)?$/)).min(1),
+  routes: z.array(z.string().regex(/^\/(?:[a-z0-9-]+\/?)*$/)).min(1),
   minimumRuns: z.number().int().min(1),
   newUrl: httpUrl,
   originalUrl: httpUrl,
@@ -467,8 +467,13 @@ async function main() {
 }
 
 main().catch((error) => {
+  const recovery = cli.checkReport
+    ? "run node scripts/performance-audit.mjs --refresh-report, review the diff, then rerun --check-report"
+    : cli.refreshReport
+      ? "correct docs/perf-findings.json, then rerun --refresh-report"
+      : "correct the URL, browser, or fixture input and rerun just perf-compare";
   process.stderr.write(
-    `performance audit failed: ${error.message}; correct the URL, browser, or fixture input and rerun just perf-compare\n`,
+    `performance audit failed: ${error.message}; ${recovery}\n`,
   );
   process.exitCode = 1;
 });
