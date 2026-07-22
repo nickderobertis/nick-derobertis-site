@@ -62,7 +62,7 @@ const findingsSchema = z.object({
   }),
 });
 
-async function localSite() {
+async function startLocalSite() {
   const reservation = createServer();
   await new Promise<void>((resolve) =>
     reservation.listen(0, "127.0.0.1", resolve),
@@ -94,7 +94,7 @@ async function localSite() {
   throw new Error(`real application server did not become ready at ${url}`);
 }
 
-async function localConfig(url: string, routes = localRoutes) {
+async function createLocalConfig(url: string, routes = localRoutes) {
   const directory = await mkdtemp(path.join(tmpdir(), "perf-browser."));
   directories.push(directory);
   const filename = path.join(directory, "config.json");
@@ -128,8 +128,8 @@ afterEach(async () => {
 
 describe("performance audit real-browser e2e CLI", () => {
   it("drives every audit and report mode from real local browser results", async () => {
-    const url = await localSite();
-    const { directory, filename } = await localConfig(url);
+    const url = await startLocalSite();
+    const { directory, filename } = await createLocalConfig(url);
     const rawDirectory = path.join(directory, "raw-lighthouse");
     const result = await execFileAsync(
       process.execPath,
@@ -205,8 +205,8 @@ describe("performance audit real-browser e2e CLI", () => {
   }, 600_000);
 
   it("reports actionable browser startup failure through the real CLI", async () => {
-    const url = await localSite();
-    const { directory, filename } = await localConfig(url);
+    const url = await startLocalSite();
+    const { directory, filename } = await createLocalConfig(url);
     const result = spawnSync(
       process.execPath,
       [auditScript, "--config", filename],
@@ -227,8 +227,8 @@ describe("performance audit real-browser e2e CLI", () => {
   });
 
   it("drives concise success and actionable failure through both just recipes", async () => {
-    const url = await localSite();
-    const { directory, filename } = await localConfig(url, ["/"]);
+    const url = await startLocalSite();
+    const { directory, filename } = await createLocalConfig(url, ["/"]);
     const outputDirectory = path.join(directory, "recipe-output");
     const environment = {
       ...process.env,
