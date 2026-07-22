@@ -73,7 +73,8 @@ side explicitly. At least five runs are required. The runner uses Lighthouse's
 explicit `desktop` preset (desktop form factor and desktop simulated
 throttling), reports median metrics, records the applied throttling and host
 environment, and writes structured findings to `docs/perf-findings.json` plus
-the readable `docs/perf-report.md`.
+the readable `docs/perf-report.md`. It uses the pinned Playwright Chromium by
+default; set `CHROME_PATH` to audit with another representative Chrome binary.
 
 Absolute timings depend on the machine and live network path, so use the same
 representative host for meaningful timing comparisons. Transfer-byte and CLS
