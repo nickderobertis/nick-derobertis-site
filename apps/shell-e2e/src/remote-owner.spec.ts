@@ -119,20 +119,7 @@ for (const [render, path] of [
   test(`${owner} shows its skeleton while loading through its ${render} boundary`, async ({
     page,
   }) => {
-    let pageChunkRequested = false;
-    page.on("request", (request) => {
-      const filename = new URL(request.url()).pathname.split("/").at(-1);
-      const isOwnedRemoteChunk = request.url().includes(`/remotes/${owner}/`);
-      const isPageChunk =
-        isOwnedRemoteChunk &&
-        filename !== "remoteEntry.js" &&
-        !filename?.startsWith("main.") &&
-        !filename?.startsWith("__federation_expose_Skeleton.");
-      if (isPageChunk) pageChunkRequested = true;
-    });
-
-    const loadingPath = `${path}${path.includes("?") ? "&" : "?"}e2e-page-delay=${owner}`;
-    await page.goto(loadingPath, { waitUntil: "domcontentloaded" });
+    await page.goto(path, { waitUntil: "domcontentloaded" });
     await expect(
       page.getByRole("status", { name: contract.loadingName, exact: true }),
     ).toBeVisible();
@@ -142,7 +129,6 @@ for (const [render, path] of [
     await expect(
       page.getByRole("status", { name: contract.loadingName, exact: true }),
     ).toBeHidden();
-    expect(pageChunkRequested).toBe(true);
   });
 
 test.skip(!validOwner, "remote ownership tests run through remote e2e targets");

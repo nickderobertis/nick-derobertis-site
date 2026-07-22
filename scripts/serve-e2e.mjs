@@ -31,13 +31,18 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535)
     `PORT must be an integer from 1 to 65535; received ${JSON.stringify(portValue)}. Set a valid PORT and run just test-e2e again.`,
   );
 // llmlint: ignore-end[changed_behavior_has_e2e]
+const staticAssetLatencyValue = process.env.STATIC_ASSET_LATENCY_MS ?? "0";
+if (!/^\d{1,4}$/.test(staticAssetLatencyValue))
+  throw new Error(
+    `STATIC_ASSET_LATENCY_MS must be an integer from 0 to 9999; received ${JSON.stringify(staticAssetLatencyValue)}. Set a valid latency and run just test-e2e again.`,
+  );
+const staticAssetLatencyMs = Number(staticAssetLatencyValue);
 const types = {
   ".css": "text/css",
   ".html": "text/html",
   ".js": "text/javascript",
   ".json": "application/json",
 };
-const remoteNamePattern = /^[a-z][a-z0-9-]*$/;
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
   if (
@@ -66,21 +71,8 @@ const server = createServer(async (request, response) => {
     "Content-Type",
     types[extname(file)] ?? "application/octet-stream",
   );
-  const referer = request.headers.referer
-    ? new URL(request.headers.referer)
-    : null;
-  const delayedRemote = referer?.searchParams.get("e2e-page-delay");
-  const filename = relative.split("/").at(-1);
-  const isDelayedPageChunk =
-    delayedRemote !== null &&
-    remoteNamePattern.test(delayedRemote) &&
-    relative.includes(`/remotes/${delayedRemote}/`) &&
-    extname(relative) === ".js" &&
-    filename !== "remoteEntry.js" &&
-    !filename?.startsWith("main.") &&
-    !filename?.startsWith("__federation_expose_Skeleton.");
-  if (isDelayedPageChunk)
-    await new Promise((resolve) => setTimeout(resolve, 1_000));
+  if (staticAssetLatencyMs > 0 && extname(file) === ".js")
+    await new Promise((resolve) => setTimeout(resolve, staticAssetLatencyMs));
   createReadStream(file).pipe(response);
 });
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.

@@ -27,7 +27,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: `PORT=${port} node ../../scripts/serve-e2e.mjs`,
+    command: `PORT=${port} STATIC_ASSET_LATENCY_MS=500 node ../../scripts/serve-e2e.mjs`,
     url: testBaseUrl,
     reuseExistingServer: !process.env.CI,
   },

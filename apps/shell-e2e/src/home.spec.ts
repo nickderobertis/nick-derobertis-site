@@ -215,6 +215,18 @@ test("script entry points reject invalid inputs with recovery actions", async ()
   });
   expect(invalidPort.status).not.toBe(0);
   expect(invalidPort.stderr).toContain("run just test-e2e again");
+  const invalidLatency = spawnSync(
+    process.execPath,
+    ["scripts/serve-e2e.mjs"],
+    {
+      env: { ...process.env, STATIC_ASSET_LATENCY_MS: "invalid" },
+      encoding: "utf8",
+    },
+  );
+  expect(invalidLatency.status).not.toBe(0);
+  expect(invalidLatency.stderr).toContain(
+    "STATIC_ASSET_LATENCY_MS must be an integer",
+  );
   const occupiedServer = createServer();
   await new Promise<void>((resolve) =>
     occupiedServer.listen(0, "127.0.0.1", resolve),
@@ -249,4 +261,14 @@ test("script entry points reject invalid inputs with recovery actions", async ()
   } finally {
     await rm(fixture, { recursive: true, force: true });
   }
+});
+
+test("static routes tolerate malformed Referer headers", async ({
+  request,
+}) => {
+  const response = await request.get("", {
+    headers: { referer: "not a valid URL" },
+  });
+  expect(response.status()).toBe(200);
+  await expect(response.text()).resolves.toContain("<html");
 });

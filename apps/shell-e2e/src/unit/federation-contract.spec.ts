@@ -1,6 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
+const remoteManifest = JSON.parse(
+  await readFile("libs/build-config/src/remotes.json", "utf8"),
+) as Record<string, string>;
+
 const timelineContract = [
   ["apps/shell/project.json", '"timeline"'],
   ["libs/build-config/src/remotes.json", '"timeline": "timeline"'],
@@ -59,5 +63,58 @@ describe("awards federation contract", () => {
 describe("bio content contract", () => {
   it("keeps the remote and browser heading expectations in sync", async () => {
     await expectContract(bioContract);
+  });
+});
+
+function configuredRemotes(contents: string) {
+  const match = contents.match(/remoteMap\(\[([\s\S]*?)\]\)/);
+  const configuredList = match?.[1];
+  if (!configuredList)
+    throw new Error("Expected a remoteMap array in host configuration");
+  return [...configuredList.matchAll(/"([a-z][a-z0-9-]*)"/g)].map(
+    (remoteMatch) => {
+      const remote = remoteMatch[1];
+      const federationName = remote ? remoteManifest[remote] : undefined;
+      if (!federationName)
+        throw new Error(
+          `Configured remote ${String(remote)} has no manifest entry`,
+        );
+      return federationName;
+    },
+  );
+}
+
+function declaredSkeletons(contents: string) {
+  return [
+    ...contents.matchAll(/declare module "([A-Za-z][A-Za-z0-9]*)\/Skeleton"/g),
+  ]
+    .map((match) => {
+      const remote = match[1];
+      if (!remote) throw new Error("Skeleton declaration has no remote name");
+      return remote;
+    })
+    .sort();
+}
+
+describe("skeleton federation contract", () => {
+  it("keeps host ambient modules aligned with configured federation remotes", async () => {
+    const remoteConfig = await readFile(
+      "libs/build-config/src/rspack-remote.ts",
+      "utf8",
+    );
+    expect(remoteConfig).toContain('"./Skeleton": "./src/skeleton.tsx"');
+
+    for (const [hostConfigPath, declarationsPath] of [
+      ["apps/shell/rspack.config.ts", "apps/shell/src/remotes.d.ts"],
+      ["apps/home/rspack.config.ts", "apps/home/src/remotes.d.ts"],
+    ] as const) {
+      const [hostConfig, declarations] = await Promise.all([
+        readFile(hostConfigPath, "utf8"),
+        readFile(declarationsPath, "utf8"),
+      ]);
+      expect(declaredSkeletons(declarations), declarationsPath).toEqual(
+        configuredRemotes(hostConfig).sort(),
+      );
+    }
   });
 });
