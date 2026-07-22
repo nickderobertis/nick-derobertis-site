@@ -250,3 +250,13 @@ test("script entry points reject invalid inputs with recovery actions", async ()
     await rm(fixture, { recursive: true, force: true });
   }
 });
+
+test("static routes tolerate malformed Referer headers", async ({
+  request,
+}) => {
+  const response = await request.get("", {
+    headers: { referer: "not a valid URL" },
+  });
+  expect(response.status()).toBe(200);
+  await expect(response.text()).resolves.toContain("<html");
+});

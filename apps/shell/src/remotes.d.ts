@@ -1,3 +1,5 @@
+/// <reference path="../../../libs/build-config/src/federation-modules.d.ts" />
+
 declare module "home/Page" {
   import type { ComponentType } from "react";
 

@@ -1,7 +1,7 @@
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { createServer } from "node:http";
-import { extname, join, normalize } from "node:path";
+import { basename, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
@@ -31,6 +31,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535)
     `PORT must be an integer from 1 to 65535; received ${JSON.stringify(portValue)}. Set a valid PORT and run just test-e2e again.`,
   );
 // llmlint: ignore-end[changed_behavior_has_e2e]
+const remoteLazyAssetLatencyMs = 300;
 const types = {
   ".css": "text/css",
   ".html": "text/html",
@@ -65,6 +66,21 @@ const server = createServer(async (request, response) => {
     "Content-Type",
     types[extname(file)] ?? "application/octet-stream",
   );
+  const assetName = basename(file);
+  const isEagerRemoteAsset =
+    assetName.startsWith("main.") ||
+    assetName === "remoteEntry.js" ||
+    assetName.startsWith("common.") ||
+    assetName.startsWith("__federation_expose_Skeleton.");
+  if (
+    remoteLazyAssetLatencyMs > 0 &&
+    url.pathname.includes("/remotes/") &&
+    extname(file) === ".js" &&
+    !isEagerRemoteAsset
+  )
+    await new Promise((resolve) =>
+      setTimeout(resolve, remoteLazyAssetLatencyMs),
+    );
   createReadStream(file).pipe(response);
 });
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.
