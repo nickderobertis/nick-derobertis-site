@@ -75,8 +75,8 @@ throttling), reports median metrics, records the applied throttling and host
 environment, and writes structured findings to `docs/perf-findings.json` plus
 the readable `docs/perf-report.md`. It uses the pinned Playwright Chromium by
 default; set `CHROME_PATH` to audit with another representative Chrome binary.
-Successful recipes print one summary line; set `PERF_FINDINGS_STDOUT=1` when a
-caller needs the complete structured findings on standard output as well.
+Successful recipes print one summary line and leave the complete planner-facing
+structured findings in `docs/perf-findings.json`.
 
 `performance.config.json` is the source of truth for routes, defaults, and the
 minimum sample count. The deterministic test gate validates both Lighthouse

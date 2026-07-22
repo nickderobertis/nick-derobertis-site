@@ -94,13 +94,14 @@ describe("performance audit CLI", () => {
     const output = execFileSync(
       process.execPath,
       [script, "--summarize-fixtures", directory],
-      {
-        cwd: directory,
-        encoding: "utf8",
-        env: { ...process.env, PERF_FINDINGS_STDOUT: "1" },
-      },
+      { cwd: directory, encoding: "utf8" },
     );
-    const findings = cliFindingsSchema.parse(JSON.parse(output));
+    expect(output).toContain("Performance comparison complete");
+    const findings = cliFindingsSchema.parse(
+      JSON.parse(
+        readFileSync(path.join(directory, "docs/perf-findings.json"), "utf8"),
+      ),
+    );
     const report = readFileSync(
       path.join(directory, "docs/perf-report.md"),
       "utf8",
