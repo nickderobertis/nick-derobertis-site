@@ -1,4 +1,4 @@
-import { createBrowserHistory } from "@tanstack/react-router";
+import { createBrowserHistory, RouterProvider } from "@tanstack/react-router";
 import { RouterClient } from "@tanstack/react-router/ssr/client";
 import { StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
@@ -28,9 +28,18 @@ const router = createSiteRouter({
     search: new URLSearchParams(window.location.search),
   },
 });
+const hasStaticPayload = Boolean(
+  Reflect.get(window, "$_TSR") &&
+    Reflect.get(Reflect.get(window, "$_TSR") as object, "router"),
+);
+if (!hasStaticPayload || window.location.search) await router.load();
 hydrateRoot(
   root,
   <StrictMode>
-    <RouterClient router={router} />
+    {hasStaticPayload && !window.location.search ? (
+      <RouterClient router={router} />
+    ) : (
+      <RouterProvider router={router} />
+    )}
   </StrictMode>,
 );
