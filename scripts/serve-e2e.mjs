@@ -74,5 +74,21 @@ server.on("error", (error) => {
   );
   process.exitCode = 1;
 });
-// llmlint: ignore-end[changed_behavior_has_e2e]
 server.listen(port, "127.0.0.1");
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
+let shuttingDown = false;
+function shutDown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  server.close((error) => {
+    if (error) {
+      console.error(`Could not stop the e2e server cleanly: ${error.message}`);
+      process.exitCode = 1;
+    }
+  });
+  server.closeAllConnections();
+}
+
+process.on("SIGINT", shutDown);
+process.on("SIGTERM", shutDown);

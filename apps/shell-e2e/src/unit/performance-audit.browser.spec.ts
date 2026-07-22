@@ -4,6 +4,7 @@ import {
   spawn,
   spawnSync,
 } from "node:child_process";
+import { once } from "node:events";
 import { readFileSync, writeFileSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -110,7 +111,14 @@ async function localConfig(url: string, routes = localRoutes) {
 }
 
 afterEach(async () => {
-  for (const child of children.splice(0)) child.kill("SIGTERM");
+  await Promise.all(
+    children.splice(0).map(async (child) => {
+      if (child.exitCode !== null) return;
+      const exited = once(child, "exit");
+      child.kill("SIGTERM");
+      await exited;
+    }),
+  );
   await Promise.all(
     directories
       .splice(0)
