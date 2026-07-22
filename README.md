@@ -54,6 +54,32 @@ and `just test`. CI runs `just check-all` on `master` as a non-affected safety
 sweep. See [the architecture](docs/architecture.md) for project boundaries,
 hosting, and affected-test behavior.
 
+## Deployment performance
+
+Run the network-dependent Lighthouse comparison separately from the deterministic
+quality gate:
+
+```bash
+just perf
+just perf https://representative-host.example/ 5
+just perf-compare
+just perf-compare https://new.example/ https://original.example/ 7
+```
+
+Both recipes audit `/`, `/bio`, `/research`, `/software`, and `/courses` on the
+target and original deployments. `perf` is shorthand for comparing an
+overridden target to the default original URL; `perf-compare` overrides either
+side explicitly. At least five runs are required. The runner uses Lighthouse's
+explicit `desktop` preset (desktop form factor and desktop simulated
+throttling), reports median metrics, records the applied throttling and host
+environment, and writes structured findings to `docs/perf-findings.json` plus
+the readable `docs/perf-report.md`.
+
+Absolute timings depend on the machine and live network path, so use the same
+representative host for meaningful timing comparisons. Transfer-byte and CLS
+deltas are less environment-sensitive. These recipes are intentionally absent
+from `just check` because they contact public deployments.
+
 ## Deploy
 
 Pushes to `master` run the full CI gate and the `pages.yml` workflow. That

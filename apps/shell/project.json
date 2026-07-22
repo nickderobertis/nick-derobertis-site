@@ -47,6 +47,13 @@
         "command": "node scripts/prerender.mjs && node scripts/check-static-artifact.mjs"
       }
     },
+    "perf": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node scripts/performance-audit.mjs"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
