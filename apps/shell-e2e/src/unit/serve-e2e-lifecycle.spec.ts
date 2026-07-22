@@ -2,6 +2,7 @@ import { type ChildProcess, spawn } from "node:child_process";
 import { once } from "node:events";
 import { createServer } from "node:http";
 import path from "node:path";
+import { chromium } from "@playwright/test";
 import { afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -58,6 +59,14 @@ describe("serve-e2e lifecycle", () => {
     children.push(child);
     const url = `http://127.0.0.1:${port}/nick-derobertis-site/`;
     await waitUntilReady(url);
+    const browser = await chromium.launch();
+    try {
+      const page = await browser.newPage();
+      await page.goto(url);
+      expect(await page.locator("header").isVisible()).toBe(true);
+    } finally {
+      await browser.close();
+    }
     const exited = once(child, "exit");
     expect(child.kill("SIGTERM")).toBe(true);
     const [exitCode, signal] = await exited;

@@ -83,7 +83,9 @@ function shutDown() {
   shuttingDown = true;
   server.close((error) => {
     if (error) {
-      console.error(`Could not stop the e2e server cleanly: ${error.message}`);
+      console.error(
+        `Could not stop the e2e server cleanly: ${error.message}. Ensure no requests are stuck, then rerun just test-e2e.`,
+      );
       process.exitCode = 1;
     }
   });
