@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -61,11 +61,7 @@ function fixture(value: number) {
 }
 
 function createFixtureDirectory(runs = performanceConfig.minimumRuns) {
-  const directory = execFileSync(
-    "mktemp",
-    ["-d", path.join(tmpdir(), "perf-audit.XXXXXX")],
-    { encoding: "utf8" },
-  ).trim();
+  const directory = mkdtempSync(path.join(tmpdir(), "perf-audit."));
   temporaryDirectories.push(directory);
   const routes = performanceConfig.routes.map((route: string) =>
     route === "/" ? "home" : route.slice(1),
