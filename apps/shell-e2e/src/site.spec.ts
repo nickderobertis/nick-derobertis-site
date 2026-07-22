@@ -103,9 +103,9 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     const errors: string[] = [];
     await page.addInitScript(() => {
       const observer = new MutationObserver(() => {
-        const main = document.querySelector("#root > main");
-        if (main && !Reflect.get(window, "__prerenderedMain")) {
-          Reflect.set(window, "__prerenderedMain", main);
+        const main = document.getElementsByTagName("main").item(0);
+        if (main) {
+          main.focus();
           observer.disconnect();
         }
       });
@@ -120,13 +120,7 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     await expect(
       page.getByRole("heading", { name: route.heading }),
     ).toBeVisible();
-    expect(
-      await page.evaluate(
-        () =>
-          Reflect.get(window, "__prerenderedMain") ===
-          document.querySelector("#root > main"),
-      ),
-    ).toBe(true);
+    await expect(page.getByRole("main")).toBeFocused();
     expect(errors).toEqual([]);
 
     let documentRequests = 0;

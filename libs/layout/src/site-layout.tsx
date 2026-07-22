@@ -32,7 +32,9 @@ export function SiteLayout({
           </nav>
         </div>
       </header>
-      <main className="main">{children}</main>
+      <main className="main" tabIndex={-1}>
+        {children}
+      </main>
       <footer className="site-footer">
         <div className="footer-inner">
           © {new Date().getFullYear()} Nick DeRobertis

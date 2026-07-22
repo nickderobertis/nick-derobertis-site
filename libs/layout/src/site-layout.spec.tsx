@@ -28,6 +28,7 @@ describe("SiteLayout", () => {
     await router.load();
     render(<RouterProvider router={router} />);
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeTruthy();
+    expect(screen.getByRole("main").getAttribute("tabindex")).toBe("-1");
     expect(screen.getByRole("heading", { name: "Page" })).toBeTruthy();
     expect(screen.getByRole("contentinfo").textContent).toContain(
       "Nick DeRobertis",
