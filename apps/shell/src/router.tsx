@@ -1,8 +1,12 @@
+// The shell owns route loaders, so this route-boundary import is the deliberate
+// exception to the normal app-to-data-library dependency rule.
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import type {
   Courses,
   Research,
   SoftwareProjects,
 } from "@site/data-access-core";
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import { validateCvDomain } from "@site/data-access-core";
 import { SiteLayout } from "@site/layout";
 import {
