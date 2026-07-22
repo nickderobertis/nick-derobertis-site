@@ -9,6 +9,15 @@ function runAffectedBuildProjects(file: string) {
 }
 
 describe("affected build economics proof", () => {
+  it("limits an awards emblem edit to the awards remote", () => {
+    const result = runAffectedBuildProjects("apps/awards/src/award-emblem.tsx");
+
+    expect(result.status).toBe(0);
+    expect(
+      JSON.parse(result.stdout.trim().split("\n").at(-1) ?? "null"),
+    ).toEqual(["awards"]);
+  });
+
   it("reports the real Nx build graph for a shared data contract", () => {
     const result = runAffectedBuildProjects(
       "libs/data-access-core/src/client.ts",
