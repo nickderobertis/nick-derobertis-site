@@ -78,6 +78,8 @@ describe("performance audit CLI", () => {
     );
 
     expect(findings.runsPerRoute).toBe(5);
+    expect(findings.environment.formFactor).toBe("desktop");
+    expect(findings.environment.throttling.cpuSlowdownMultiplier).toBe(1);
     expect(findings.sites.new.routes["/"].fcp).toBe(130);
     expect(findings.sites.original.routes["/"].fcp).toBe(230);
     expect(report).toContain("| FCP | 130 ms | 230 ms | -100 ms |");

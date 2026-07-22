@@ -4,7 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import { chromium } from "@playwright/test";
 import * as chromeLauncher from "chrome-launcher";
-import lighthouse from "lighthouse";
+import lighthouse, { desktopConfig } from "lighthouse";
 
 const ROUTES = ["/", "/bio", "/research", "/software", "/courses"];
 const DEFAULT_NEW_URL =
@@ -42,6 +42,15 @@ function metricFromLhr(lhr) {
     transferBytes: lhr.audits["total-byte-weight"].numericValue,
     jsBytes: scripts?.transferSize ?? 0,
   };
+}
+
+function assertDesktopProfile(lhr) {
+  const { formFactor, throttling } = lhr.configSettings;
+  if (formFactor !== "desktop" || throttling.cpuSlowdownMultiplier !== 1) {
+    throw new Error(
+      `Lighthouse profile mismatch: expected desktop with 1x CPU throttling, recorded ${formFactor} with ${throttling.cpuSlowdownMultiplier}x`,
+    );
+  }
 }
 
 function aggregate(runs) {
@@ -135,14 +144,18 @@ async function auditSite(label, baseUrl, runs, chromePort) {
       process.stderr.write(
         `${label} ${route}: Lighthouse run ${run}/${runs}\n`,
       );
-      const result = await lighthouse(url, {
-        port: chromePort,
-        output: "json",
-        logLevel: "error",
-        preset: "desktop",
-      });
+      const result = await lighthouse(
+        url,
+        {
+          port: chromePort,
+          output: "json",
+          logLevel: "error",
+        },
+        desktopConfig,
+      );
       if (!result?.lhr)
         throw new Error(`Lighthouse returned no result for ${url}`);
+      assertDesktopProfile(result.lhr);
       firstLhr ??= result.lhr;
       samples.push(metricFromLhr(result.lhr));
     }
@@ -169,6 +182,7 @@ async function readFixtureSite(directory, label, baseUrl) {
       const lhr = JSON.parse(
         await readFile(path.join(directory, name), "utf8"),
       );
+      assertDesktopProfile(lhr);
       firstLhr ??= lhr;
       samples.push(metricFromLhr(lhr));
     }
