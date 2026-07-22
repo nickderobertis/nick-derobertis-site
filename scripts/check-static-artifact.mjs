@@ -3,9 +3,7 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
-import routeContracts from "../libs/route-state/src/contracts.json" with {
-  type: "json",
-};
+import { routeContracts } from "./route-contracts.mjs";
 
 const substantiveRouteContent = {
   "/": "Who am I?",

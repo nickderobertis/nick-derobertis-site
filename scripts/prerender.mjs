@@ -7,9 +7,7 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import routeContracts from "../libs/route-state/src/contracts.json" with {
-  type: "json",
-};
+import { routeContracts } from "./route-contracts.mjs";
 
 function validateSiteConfig(value) {
   if (
