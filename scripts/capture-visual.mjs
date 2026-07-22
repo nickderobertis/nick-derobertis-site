@@ -275,7 +275,6 @@ try {
         )
           browserErrors.push(`HTTP ${response.status()}: ${response.url()}`);
       });
-      await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
       if (scenario.state === "loading")
         await page.addInitScript(() => {
           const nativeSetTimeout = window.setTimeout.bind(window);
@@ -309,10 +308,9 @@ try {
       }
       const target = await prepareCaptureTarget(page, scenario.state);
       await target.waitFor({ state: "visible" });
+      await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
       if (!["empty", "loading", "error"].includes(scenario.state))
-        await page.clock.pauseAt(
-          new Date((await page.evaluate(() => Date.now())) + 1_000),
-        );
+        await page.clock.pauseAt(new Date("2026-07-20T12:00:01Z"));
       const image = `${scenario.render}/${scenario.state}/${viewport}.png`;
       mkdirSync(path.dirname(path.join(outputRoot, image)), {
         recursive: true,
