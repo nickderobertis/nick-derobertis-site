@@ -1,15 +1,3 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import { App } from "./app";
-import "@site/design-system";
-
-const root = document.getElementById("root");
-if (!root) throw new Error("Missing application root");
-createRoot(root).render(
-  <StrictMode>
-    <BrowserRouter basename="/nick-derobertis-site">
-      <App />
-    </BrowserRouter>
-  </StrictMode>,
-);
+// Module Federation resolves the statically imported remote skeletons from the
+// asynchronous bootstrap chunk before React renders the shell.
+void import("./bootstrap");

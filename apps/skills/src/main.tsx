@@ -1,7 +1,14 @@
 import "@site/design-system";
+import { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import SkillsPage from "./page";
+import Skeleton from "./skeleton";
+
+const SkillsPage = lazy(() => import("./page"));
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing remote root");
-createRoot(root).render(<SkillsPage />);
+createRoot(root).render(
+  <Suspense fallback={<Skeleton />}>
+    <SkillsPage />
+  </Suspense>,
+);

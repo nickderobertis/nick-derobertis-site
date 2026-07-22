@@ -67,7 +67,10 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
       new ModuleFederationPlugin({
         name: federationName,
         filename: "remoteEntry.js",
-        exposes: { "./Page": "./src/page.tsx" },
+        exposes: {
+          "./Page": "./src/page.tsx",
+          "./Skeleton": "./src/skeleton.tsx",
+        },
         remotes: options.remotes ?? {},
         shared: {
           react: { singleton: true, requiredVersion: false, eager: true },

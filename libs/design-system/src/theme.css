@@ -276,6 +276,139 @@ a {
   border-left: 4px solid var(--blue);
   background: var(--sky);
 }
+
+.remote-skeleton {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+}
+.remote-skeleton :is(i, b, div) {
+  border-radius: 0.75rem;
+}
+.remote-skeleton :is(i, b),
+.skeleton-heading,
+.skeleton-banner,
+.skeleton-hero,
+.skeleton-cover,
+.skeleton-portrait,
+.skeleton-circle,
+.skeleton-stats {
+  display: block;
+  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+.skeleton-hero,
+.skeleton-banner {
+  min-height: 16rem;
+}
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.skeleton-grid > i {
+  min-height: 12rem;
+}
+.skeleton-heading {
+  width: min(28rem, 70%);
+  height: 4rem;
+}
+.skeleton-list {
+  display: grid;
+  gap: 1rem;
+}
+.skeleton-list > i {
+  height: 7rem;
+}
+.skeleton-bio {
+  grid-template-columns: minmax(12rem, 35%) 1fr;
+}
+.skeleton-cover {
+  min-height: 38rem;
+}
+.skeleton-copy {
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+}
+.skeleton-copy > b {
+  width: 65%;
+  height: 3rem;
+}
+.skeleton-copy > i {
+  height: 1rem;
+}
+.skeleton-stats {
+  height: 6rem;
+}
+.skeleton-course {
+  height: 18rem;
+  background: #e5e7eb;
+}
+.skeleton-story,
+.skeleton-contact {
+  grid-template-columns: minmax(10rem, 35%) 1fr;
+}
+.skeleton-portrait {
+  min-height: 22rem;
+}
+.skeleton-links {
+  display: grid;
+  gap: 1rem;
+}
+.skeleton-links > i {
+  height: 3rem;
+}
+.skeleton-chart {
+  display: grid;
+  gap: 0.75rem;
+  padding: 2rem;
+  border: 1px solid #e5e7eb;
+}
+.skeleton-chart > i {
+  height: 2rem;
+}
+.skeleton-circle {
+  width: min(25rem, 80vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  justify-self: center;
+}
+.skeleton-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.skeleton-controls > i {
+  width: 8rem;
+  height: 2.5rem;
+}
+@keyframes skeleton-pulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote-skeleton :is(i, b, div) {
+    animation: none;
+  }
+}
+@media (max-width: 48rem) {
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+  .skeleton-bio,
+  .skeleton-story,
+  .skeleton-contact {
+    grid-template-columns: 1fr;
+  }
+  .skeleton-cover {
+    min-height: 16rem;
+  }
+}
 .software-page {
   display: grid;
   gap: clamp(2rem, 5vw, 4rem);
