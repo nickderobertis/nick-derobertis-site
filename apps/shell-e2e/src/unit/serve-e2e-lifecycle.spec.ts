@@ -49,37 +49,41 @@ describe("serve-e2e lifecycle", () => {
     );
   });
 
-  it("releases its listening port after SIGTERM", async () => {
-    const port = await availablePort();
-    const child = spawn(process.execPath, [serverScript], {
-      cwd: workspace,
-      env: { ...process.env, PORT: String(port) },
-      stdio: "ignore",
-    });
-    children.push(child);
-    const url = `http://127.0.0.1:${port}/nick-derobertis-site/`;
-    await waitUntilReady(url);
-    const browser = await chromium.launch();
-    try {
-      const page = await browser.newPage();
-      await page.goto(url);
-      expect(await page.getByRole("banner").isVisible()).toBe(true);
-    } finally {
-      await browser.close();
-    }
-    const exited = once(child, "exit");
-    expect(child.kill("SIGTERM")).toBe(true);
-    const [exitCode, signal] = await exited;
-    expect(exitCode).toBe(0);
-    expect(signal).toBeNull();
+  it.each(["SIGTERM", "SIGINT"] as const)(
+    "releases its listening port after %s",
+    async (shutdownSignal) => {
+      const port = await availablePort();
+      const child = spawn(process.execPath, [serverScript], {
+        cwd: workspace,
+        env: { ...process.env, PORT: String(port) },
+        stdio: "ignore",
+      });
+      children.push(child);
+      const url = `http://127.0.0.1:${port}/nick-derobertis-site/`;
+      await waitUntilReady(url);
+      const browser = await chromium.launch();
+      try {
+        const page = await browser.newPage();
+        await page.goto(url);
+        expect(await page.getByRole("banner").isVisible()).toBe(true);
+      } finally {
+        await browser.close();
+      }
+      const exited = once(child, "exit");
+      expect(child.kill(shutdownSignal)).toBe(true);
+      const [exitCode, signal] = await exited;
+      expect(exitCode).toBe(0);
+      expect(signal).toBeNull();
 
-    const replacement = createServer();
-    await new Promise<void>((resolve, reject) => {
-      replacement.once("error", reject);
-      replacement.listen(port, "127.0.0.1", resolve);
-    });
-    await new Promise<void>((resolve, reject) =>
-      replacement.close((error) => (error ? reject(error) : resolve())),
-    );
-  }, 10_000);
+      const replacement = createServer();
+      await new Promise<void>((resolve, reject) => {
+        replacement.once("error", reject);
+        replacement.listen(port, "127.0.0.1", resolve);
+      });
+      await new Promise<void>((resolve, reject) =>
+        replacement.close((error) => (error ? reject(error) : resolve())),
+      );
+    },
+    10_000,
+  );
 });
