@@ -11,6 +11,12 @@ const httpUrl = z
   .refine((value) => ["http:", "https:"].includes(new URL(value).protocol), {
     message: "must use HTTP(S)",
   });
+const absoluteDirectory = z
+  .string()
+  .min(1)
+  .refine((value) => path.isAbsolute(value), {
+    message: "must be an absolute directory path",
+  });
 const configSchema = z.object({
   routes: z.array(z.string().regex(/^\/(?:[a-z0-9-]+\/?)*$/)).min(1),
   minimumRuns: z.number().int().min(1),
@@ -356,7 +362,9 @@ async function readFixtureSite(directory, label, baseUrl) {
 async function main() {
   cli = parseArgs(process.argv.slice(2));
   const configPath =
-    cli.configPath ?? new URL("../performance.config.json", import.meta.url);
+    cli.configPath ??
+    process.env.PERF_CONFIG ??
+    new URL("../performance.config.json", import.meta.url);
   config = parseJsonFile(configPath, configSchema, "performance config");
   ROUTES = config.routes;
   DEFAULT_NEW_URL = config.newUrl;
@@ -410,6 +418,12 @@ async function main() {
   let current;
   let original;
   let chrome;
+  const rawDirectory = process.env.PERF_RAW_DIR
+    ? absoluteDirectory.parse(process.env.PERF_RAW_DIR)
+    : null;
+  const outputDirectory = process.env.PERF_OUTPUT_DIR
+    ? absoluteDirectory.parse(process.env.PERF_OUTPUT_DIR)
+    : "docs";
   try {
     if (fixtureDirectory) {
       current = await readFixtureSite(fixtureDirectory, "new", newUrl);
@@ -444,7 +458,7 @@ async function main() {
         chrome.port,
         lighthouseModule.default,
         lighthouseModule.desktopConfig,
-        process.env.PERF_RAW_DIR || null,
+        rawDirectory,
       );
       original = await auditSite(
         "original",
@@ -453,7 +467,7 @@ async function main() {
         chrome.port,
         lighthouseModule.default,
         lighthouseModule.desktopConfig,
-        process.env.PERF_RAW_DIR || null,
+        rawDirectory,
       );
     }
   } finally {
@@ -480,19 +494,18 @@ async function main() {
       ]),
     ),
   });
-  await mkdir("docs", { recursive: true });
-  await writeFile(
-    "docs/perf-findings.json",
-    `${JSON.stringify(findings, null, 2)}\n`,
-  );
-  await writeFile("docs/perf-report.md", markdown(findings));
+  await mkdir(outputDirectory, { recursive: true });
+  const findingsPath = path.join(outputDirectory, "perf-findings.json");
+  const reportPath = path.join(outputDirectory, "perf-report.md");
+  await writeFile(findingsPath, `${JSON.stringify(findings, null, 2)}\n`);
+  await writeFile(reportPath, markdown(findings));
   if (process.env.PERF_FINDINGS_STDOUT === "1") {
     process.stdout.write(`${JSON.stringify(findings)}\n`);
   } else if (process.env.PERF_FINDINGS_STDOUT) {
     throw new Error("PERF_FINDINGS_STDOUT must be 1 when set");
   } else {
     process.stdout.write(
-      `Performance comparison complete for ${ROUTES.length} routes; report: docs/perf-report.md; structured findings: docs/perf-findings.json\n`,
+      `Performance comparison complete for ${ROUTES.length} routes; report: ${reportPath}; structured findings: ${findingsPath}\n`,
     );
   }
 }
@@ -502,7 +515,7 @@ main().catch((error) => {
     ? "run node scripts/performance-audit.mjs --refresh-report, review the diff, then rerun --check-report"
     : cli.refreshReport
       ? "correct docs/perf-findings.json, then rerun --refresh-report"
-      : "correct the URL, browser, or fixture input and rerun just perf-compare";
+      : "correct the reported input or environment and rerun the same performance command";
   process.stderr.write(
     `performance audit failed: ${error.message}; ${recovery}\n`,
   );
