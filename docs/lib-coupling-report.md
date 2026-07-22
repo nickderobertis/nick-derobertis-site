@@ -21,7 +21,7 @@ component from the research remote and proves the cross-domain edge is
 rejected.
 
 Before the move, running
-`nx show projects --affected --files=libs/design-system/src/award-emblem.tsx --with-target=build --json`
+`just affected-build-projects libs/design-system/src/award-emblem.tsx`
 selected `design-system` plus thirteen application builds: `home-carousel`,
 `home-contact`, `home-cards`, `home-story`, `research`, `software`, `timeline`,
 `courses`, `awards`, `skills`, `shell`, `home`, and `bio`.
