@@ -19,6 +19,15 @@ Dependency freshness is checked with `pnpm outdated`; every dependency's
 updates remain outside those constraints until their Nx integrations support
 them; `just upgrade` deliberately opts into testing latest releases.
 
+The `justfile` defaults `NX_CACHE_DIRECTORY` to the repo-scoped
+`$XDG_CACHE_HOME/nx/nick-derobertis-site` (or
+`$HOME/.cache/nx/nick-derobertis-site`) so disposable worktrees reuse Nx's
+content-addressed local cache. An existing `NX_CACHE_DIRECTORY` overrides the
+default. Use this shared local cache only when Nx dispatch concurrency is 1:
+parallel Nx processes sharing its cache database can encounter SQLite lock or
+foreign-key contention. Higher-concurrency dispatches require Nx's supported
+cache locking or a remote cache.
+
 ## Journeys
 
 This numbered inventory is the browser-test contract; extend it with every new route, feature, or state.

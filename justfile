@@ -1,6 +1,10 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 set positional-arguments := true
 
+# Keep Nx's content-addressed cache across disposable git worktrees. Callers can
+# override this when they need an isolated cache.
+export NX_CACHE_DIRECTORY := env_var_or_default("NX_CACHE_DIRECTORY", env_var_or_default("XDG_CACHE_HOME", env_var("HOME") + "/.cache") + "/nx/nick-derobertis-site")
+
 # Bun is explicitly ruled out: Nx's rspack Module Federation executor supports
 # this workspace through pnpm's linker. pnpm is the documented fallback in
 # AGENTS.md and the composed Stack-and-composition record.
