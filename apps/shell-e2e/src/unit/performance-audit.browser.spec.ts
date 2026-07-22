@@ -32,6 +32,11 @@ const productionConfig = productionConfigSchema.parse(
 );
 const localRoutes = [
   ...productionConfig.routes,
+  "/remotes/home/",
+  ...["loading", "empty", "error"].flatMap((state) => [
+    `/?state=${state}`,
+    `/remotes/home/?state=${state}`,
+  ]),
   ...["bio", "research", "software", "courses"].flatMap((route) => [
     `/remotes/${route}/`,
     ...["loading", "empty", "error"].flatMap((state) => [
