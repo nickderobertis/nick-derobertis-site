@@ -6,6 +6,9 @@ import { afterEach, describe, expect, it } from "vitest";
 
 const workspace = path.resolve(import.meta.dirname, "../../../..");
 const script = path.join(workspace, "scripts/performance-audit.mjs");
+const performanceConfig = JSON.parse(
+  readFileSync(path.join(workspace, "performance.config.json"), "utf8"),
+);
 const temporaryDirectories: string[] = [];
 
 function fixture(value: number) {
@@ -33,14 +36,16 @@ function fixture(value: number) {
   };
 }
 
-function createFixtureDirectory(runs = 5) {
+function createFixtureDirectory(runs = performanceConfig.minimumRuns) {
   const directory = execFileSync(
     "mktemp",
     ["-d", path.join(tmpdir(), "perf-audit.XXXXXX")],
     { encoding: "utf8" },
   ).trim();
   temporaryDirectories.push(directory);
-  const routes = ["home", "bio", "research", "software", "courses"];
+  const routes = performanceConfig.routes.map((route: string) =>
+    route === "/" ? "home" : route.slice(1),
+  );
   for (const [site, offset] of [
     ["new", 10],
     ["original", 20],
@@ -77,7 +82,7 @@ describe("performance audit CLI", () => {
       "utf8",
     );
 
-    expect(findings.runsPerRoute).toBe(5);
+    expect(findings.runsPerRoute).toBe(performanceConfig.minimumRuns);
     expect(findings.environment.formFactor).toBe("desktop");
     expect(findings.environment.throttling.cpuSlowdownMultiplier).toBe(1);
     expect(findings.sites.new.routes["/"].fcp).toBe(130);
@@ -90,7 +95,7 @@ describe("performance audit CLI", () => {
   });
 
   it("fails clearly when a route has fewer than five runs", () => {
-    const directory = createFixtureDirectory(4);
+    const directory = createFixtureDirectory(performanceConfig.minimumRuns - 1);
     const result = spawnSync(
       process.execPath,
       [script, "--summarize-fixtures", directory],
@@ -99,5 +104,31 @@ describe("performance audit CLI", () => {
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("at least 5 are required");
+  }, 10_000);
+
+  it("keeps the documented route and run contract synchronized", () => {
+    const readme = readFileSync(path.join(workspace, "README.md"), "utf8");
+    for (const route of performanceConfig.routes) {
+      expect(readme).toContain(`\`${route}\``);
+    }
+    expect(readme).toContain(
+      `At least \`${performanceConfig.minimumRuns}\` runs`,
+    );
   });
+
+  it("rejects a non-HTTP deployment URL at the CLI boundary", () => {
+    const directory = createFixtureDirectory();
+    const result = spawnSync(
+      process.execPath,
+      [script, "--summarize-fixtures", directory],
+      {
+        cwd: directory,
+        encoding: "utf8",
+        env: { ...process.env, PERF_URL: "file:///tmp/site" },
+      },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("PERF_URL must be a valid HTTP(S) URL");
+  }, 10_000);
 });
