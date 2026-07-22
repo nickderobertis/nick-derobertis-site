@@ -1,3 +1,5 @@
+import "./carousel.css";
+
 export default function HomeCarouselSkeleton() {
   return (
     <section

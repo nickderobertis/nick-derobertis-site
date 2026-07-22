@@ -1,3 +1,5 @@
+import "./story.css";
+
 export default function HomeStorySkeleton() {
   return (
     <section

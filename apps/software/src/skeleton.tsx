@@ -1,3 +1,5 @@
+import "./software.css";
+
 export default function SoftwareSkeleton() {
   return (
     <section

@@ -1,3 +1,5 @@
+import "./skills.css";
+
 export default function SkillsSkeleton() {
   return (
     <section

@@ -1,0 +1,115 @@
+.pane {
+  position: relative;
+}
+.pane-state {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: 3rem auto;
+  min-height: 10rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 1rem;
+  color: var(--muted);
+}
+.action {
+  display: inline-block;
+  border: 2px solid var(--coral);
+  border-radius: 0.2rem;
+  padding: 0.65rem 1rem;
+  background: var(--coral);
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+.action:focus-visible,
+.carousel-control:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+.home-carousel {
+  min-height: 31rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: white;
+  text-align: center;
+  background:
+    radial-gradient(circle at 30% 30%, #24638a99, transparent 35%),
+    linear-gradient(115deg, #071727, #123b58 55%, #08121d);
+}
+.home-carousel[data-tone="research"] {
+  background:
+    radial-gradient(circle at 70% 25%, #b8754a88, transparent 35%),
+    linear-gradient(115deg, #172337, #3e2c45 55%, #111b29);
+}
+.carousel-copy {
+  width: min(900px, calc(100% - 6rem));
+}
+.carousel-copy h1 {
+  font-family: Georgia, serif;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  margin: 0 0 1rem;
+}
+.carousel-copy p {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  line-height: 1.6;
+}
+.carousel-control {
+  position: absolute;
+  top: 50%;
+  border: 0;
+  background: transparent;
+  color: white;
+  font-size: 2.5rem;
+  cursor: pointer;
+}
+.carousel-control.previous {
+  left: 1rem;
+}
+.carousel-control.next {
+  right: 1rem;
+}
+.carousel-position {
+  position: absolute;
+  bottom: 1.5rem;
+}
+.remote-skeleton {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+}
+.remote-skeleton :is(i, b, div) {
+  border-radius: 0.75rem;
+}
+.remote-skeleton :is(i, b),
+.skeleton-heading,
+.skeleton-banner,
+.skeleton-hero,
+.skeleton-cover,
+.skeleton-portrait,
+.skeleton-circle,
+.skeleton-stats {
+  display: block;
+  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote-skeleton :is(i, b, div) {
+    animation: none;
+  }
+}
+.skeleton-hero,
+.skeleton-banner {
+  min-height: 16rem;
+}

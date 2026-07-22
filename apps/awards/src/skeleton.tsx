@@ -1,3 +1,5 @@
+import "./awards.css";
+
 export default function AwardsSkeleton() {
   return (
     <section

@@ -1,3 +1,5 @@
+import "./timeline.css";
+
 export default function TimelineSkeleton() {
   return (
     <section

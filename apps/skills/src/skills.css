@@ -185,3 +185,55 @@ body:has(.skills-pane) {
     top: 38%;
   }
 }
+.remote-skeleton {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+}
+.remote-skeleton :is(i, b, div) {
+  border-radius: 0.75rem;
+}
+.remote-skeleton :is(i, b),
+.skeleton-heading,
+.skeleton-banner,
+.skeleton-hero,
+.skeleton-cover,
+.skeleton-portrait,
+.skeleton-circle,
+.skeleton-stats {
+  display: block;
+  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote-skeleton :is(i, b, div) {
+    animation: none;
+  }
+}
+.skeleton-heading {
+  width: min(28rem, 70%);
+  height: 4rem;
+}
+.skeleton-circle {
+  width: min(25rem, 80vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  justify-self: center;
+}
+.skeleton-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.skeleton-controls > i {
+  width: 8rem;
+  height: 2.5rem;
+}

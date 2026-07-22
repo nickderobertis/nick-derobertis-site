@@ -2,6 +2,12 @@
   margin: calc(-1 * clamp(3rem, 8vw, 7rem)) calc(50% - 50vw);
   color: var(--ink);
 }
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--blue);
+  font-weight: 700;
+}
 .research-banner {
   min-height: 20rem;
   padding: 4.5rem max(var(--space), calc((100vw - 68.75rem) / 2));
@@ -173,4 +179,48 @@
   .project-categories {
     grid-row: 1;
   }
+}
+.remote-skeleton {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+}
+.remote-skeleton :is(i, b, div) {
+  border-radius: 0.75rem;
+}
+.remote-skeleton :is(i, b),
+.skeleton-heading,
+.skeleton-banner,
+.skeleton-hero,
+.skeleton-cover,
+.skeleton-portrait,
+.skeleton-circle,
+.skeleton-stats {
+  display: block;
+  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote-skeleton :is(i, b, div) {
+    animation: none;
+  }
+}
+.skeleton-heading {
+  width: min(28rem, 70%);
+  height: 4rem;
+}
+.skeleton-list {
+  display: grid;
+  gap: 1rem;
+}
+.skeleton-list > i {
+  height: 7rem;
 }

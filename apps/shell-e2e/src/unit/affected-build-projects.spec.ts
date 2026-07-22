@@ -18,6 +18,18 @@ describe("affected build economics proof", () => {
     ).toEqual(["awards"]);
   });
 
+  it.each([
+    ["apps/software/src/software.css", ["software"]],
+    ["apps/home-carousel/src/carousel.css", ["home-carousel"]],
+  ])("limits an owned style edit: %s", (file, expected) => {
+    const result = runAffectedBuildProjects(file);
+
+    expect(result.status).toBe(0);
+    expect(
+      JSON.parse(result.stdout.trim().split("\n").at(-1) ?? "null"),
+    ).toEqual(expected);
+  });
+
   it("reports the real Nx build graph for a shared data contract", () => {
     const result = runAffectedBuildProjects(
       "libs/data-access-core/src/client.ts",

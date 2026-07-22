@@ -32,10 +32,14 @@ shared libraries -> layout -> shell
 configuration. Each `data-access-<domain>` library owns only its feature's data
 shaping and depends only on the core. Nx module boundaries allow remotes to
 import core plus their own domain library and reject cross-domain imports.
-`design-system` owns the visual foundation, `ui` owns reusable components,
-`analytics` owns browser analytics, and `build-config` owns federation build
-configuration. Feature data hooks may read the staged same-origin JSON, but
-they validate it through `data-access-core` before rendering.
+`design-system` owns only cross-cutting tokens, the reset, the `.main`
+container used by every standalone and host route, and accessibility
+primitives. `layout` owns shell header/footer/navigation presentation. Each remote
+owns its page and loading-skeleton CSS, so feature styling does not create a
+shared dependency edge. The former unused `ui` and `analytics` placeholders
+were removed. `build-config` owns federation build configuration. Feature data
+hooks may read the staged same-origin JSON, but they validate it through
+`data-access-core` before rendering.
 
 ## Static hosting and data
 

@@ -1,0 +1,112 @@
+.pane {
+  position: relative;
+}
+.pane-state {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: 3rem auto;
+  min-height: 10rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 1rem;
+  color: var(--muted);
+}
+.action {
+  display: inline-block;
+  border: 2px solid var(--coral);
+  border-radius: 0.2rem;
+  padding: 0.65rem 1rem;
+  background: var(--coral);
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+.action:focus-visible,
+.carousel-control:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+.home-cards,
+.story-pane,
+.contact-pane {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: auto;
+}
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+.marketing-card {
+  text-align: center;
+}
+.card-icon {
+  color: var(--navy);
+  font-size: 4rem;
+  line-height: 1;
+}
+.marketing-card h2 {
+  font-family: Georgia, serif;
+  font-size: 2rem;
+}
+.marketing-card p {
+  line-height: 1.65;
+  min-height: 5.5rem;
+}
+.remote-skeleton {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+}
+.remote-skeleton :is(i, b, div) {
+  border-radius: 0.75rem;
+}
+.remote-skeleton :is(i, b),
+.skeleton-heading,
+.skeleton-banner,
+.skeleton-hero,
+.skeleton-cover,
+.skeleton-portrait,
+.skeleton-circle,
+.skeleton-stats {
+  display: block;
+  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote-skeleton :is(i, b, div) {
+    animation: none;
+  }
+}
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.skeleton-grid > i {
+  min-height: 12rem;
+}
+@media (max-width: 700px) {
+  .home-cards {
+    grid-template-columns: 1fr;
+  }
+  .marketing-card p {
+    min-height: auto;
+  }
+}
+@media (max-width: 48rem) {
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+}
