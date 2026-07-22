@@ -60,14 +60,14 @@ async function localSite() {
   return localUrlSchema.parse(chunk.toString().trim());
 }
 
-async function localConfig(url: string) {
+async function localConfig(url: string, routes = localRoutes) {
   const directory = await mkdtemp(path.join(tmpdir(), "perf-browser."));
   directories.push(directory);
   const filename = path.join(directory, "config.json");
   writeFileSync(
     filename,
     JSON.stringify({
-      routes: localRoutes,
+      routes,
       minimumRuns: 1,
       newUrl: url,
       originalUrl: url,
@@ -177,8 +177,53 @@ describe("performance audit real-browser e2e CLI", () => {
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(
-      "correct the URL, browser, or fixture input",
+      "correct the reported input or environment",
     );
-    expect(result.stderr).toContain("rerun just perf-compare");
   });
+
+  it("drives concise success and actionable failure through both just recipes", async () => {
+    const url = await localSite();
+    const { directory, filename } = await localConfig(url, ["/"]);
+    const outputDirectory = path.join(directory, "recipe-output");
+    const environment = {
+      ...process.env,
+      PERF_CONFIG: filename,
+      PERF_OUTPUT_DIR: outputDirectory,
+    };
+    const perf = await execFileAsync("just", ["perf", url, "1"], {
+      cwd: workspace,
+      env: environment,
+      timeout: 120_000,
+    });
+    expect(perf.stdout.trim().split("\n")).toHaveLength(1);
+    expect(perf.stdout).toContain(
+      "Performance comparison complete for 1 routes",
+    );
+
+    const compare = await execFileAsync(
+      "just",
+      ["perf-compare", url, url, "1"],
+      { cwd: workspace, env: environment, timeout: 120_000 },
+    );
+    expect(compare.stdout.trim().split("\n")).toHaveLength(1);
+    expect(compare.stdout).toContain(
+      "Performance comparison complete for 1 routes",
+    );
+
+    const perfFailure = spawnSync("just", ["perf", "file:///invalid", "1"], {
+      cwd: workspace,
+      env: environment,
+      encoding: "utf8",
+    });
+    expect(perfFailure.status).toBe(1);
+    expect(perfFailure.stderr).toContain("rerun just perf");
+
+    const compareFailure = spawnSync(
+      "just",
+      ["perf-compare", url, "file:///invalid", "1"],
+      { cwd: workspace, env: environment, encoding: "utf8" },
+    );
+    expect(compareFailure.status).toBe(1);
+    expect(compareFailure.stderr).toContain("rerun just perf-compare");
+  }, 180_000);
 });
