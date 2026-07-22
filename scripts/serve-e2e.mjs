@@ -37,6 +37,7 @@ const types = {
   ".js": "text/javascript",
   ".json": "application/json",
 };
+const remoteNamePattern = /^[a-z][a-z0-9-]*$/;
 const server = createServer(async (request, response) => {
   const url = new URL(request.url ?? "/", "http://localhost");
   if (
@@ -65,6 +66,21 @@ const server = createServer(async (request, response) => {
     "Content-Type",
     types[extname(file)] ?? "application/octet-stream",
   );
+  const referer = request.headers.referer
+    ? new URL(request.headers.referer)
+    : null;
+  const delayedRemote = referer?.searchParams.get("e2e-page-delay");
+  const filename = relative.split("/").at(-1);
+  const isDelayedPageChunk =
+    delayedRemote !== null &&
+    remoteNamePattern.test(delayedRemote) &&
+    relative.includes(`/remotes/${delayedRemote}/`) &&
+    extname(relative) === ".js" &&
+    filename !== "remoteEntry.js" &&
+    !filename?.startsWith("main.") &&
+    !filename?.startsWith("__federation_expose_Skeleton.");
+  if (isDelayedPageChunk)
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
   createReadStream(file).pipe(response);
 });
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.

@@ -120,22 +120,19 @@ for (const [render, path] of [
     page,
   }) => {
     let pageChunkRequested = false;
-    await page.route(`**/remotes/${owner}/*.js`, async (route) => {
-      const filename = new URL(route.request().url()).pathname
-        .split("/")
-        .at(-1);
+    page.on("request", (request) => {
+      const filename = new URL(request.url()).pathname.split("/").at(-1);
+      const isOwnedRemoteChunk = request.url().includes(`/remotes/${owner}/`);
       const isPageChunk =
+        isOwnedRemoteChunk &&
         filename !== "remoteEntry.js" &&
         !filename?.startsWith("main.") &&
         !filename?.startsWith("__federation_expose_Skeleton.");
-      if (isPageChunk) {
-        pageChunkRequested = true;
-        await new Promise((resolve) => setTimeout(resolve, 1_000));
-      }
-      await route.continue();
+      if (isPageChunk) pageChunkRequested = true;
     });
 
-    await page.goto(path, { waitUntil: "domcontentloaded" });
+    const loadingPath = `${path}${path.includes("?") ? "&" : "?"}e2e-page-delay=${owner}`;
+    await page.goto(loadingPath, { waitUntil: "domcontentloaded" });
     await expect(
       page.getByRole("status", { name: contract.loadingName, exact: true }),
     ).toBeVisible();

@@ -98,8 +98,10 @@ for (const renderPath of renderPaths) {
             ? "Loading skills…"
             : "Skills unavailable";
       await expect(
-        page.getByRole(state === "error" ? "alert" : "status"),
-      ).toContainText(expected);
+        page
+          .getByRole(state === "error" ? "alert" : "status")
+          .filter({ hasText: expected }),
+      ).toBeVisible();
     });
   }
 
