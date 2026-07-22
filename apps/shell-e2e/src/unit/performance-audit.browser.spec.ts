@@ -22,6 +22,18 @@ const serverScript = path.join(
 );
 const children: ChildProcess[] = [];
 const directories: string[] = [];
+const productionConfigSchema = z.object({
+  routes: z.array(z.string()).min(1),
+  minimumRuns: z.number().int().positive(),
+  newUrl: z.string().url(),
+  originalUrl: z.string().url(),
+});
+const productionConfig = productionConfigSchema.parse(
+  JSON.parse(
+    readFileSync(path.join(workspace, "performance.config.json"), "utf8"),
+  ),
+);
+const localRoutes = [...productionConfig.routes, "/remotes/bio/"];
 const localUrlSchema = z
   .string()
   .url()
@@ -30,14 +42,10 @@ const findingsSchema = z.object({
   environment: z.object({ formFactor: z.literal("desktop") }),
   sites: z.object({
     new: z.object({
-      routes: z.object({
-        "/nick-derobertis-site/": z.object({
-          performance: z.number().finite(),
-        }),
-        "/nick-derobertis-site/remotes/bio/": z.object({
-          performance: z.number().finite(),
-        }),
-      }),
+      routes: z.record(
+        z.string(),
+        z.object({ performance: z.number().finite() }),
+      ),
     }),
   }),
 });
@@ -59,7 +67,7 @@ async function localConfig(url: string) {
   writeFileSync(
     filename,
     JSON.stringify({
-      routes: ["/nick-derobertis-site/", "/nick-derobertis-site/remotes/bio/"],
+      routes: localRoutes,
       minimumRuns: 1,
       newUrl: url,
       originalUrl: url,
@@ -78,20 +86,22 @@ afterEach(async () => {
 });
 
 describe("performance audit real-browser e2e CLI", () => {
-  it("audits host-composed and standalone local routes with pinned Chromium", async () => {
+  it("drives every audit and report mode from real local browser results", async () => {
     const url = await localSite();
     const { directory, filename } = await localConfig(url);
+    const rawDirectory = path.join(directory, "raw-lighthouse");
     const result = await execFileAsync(
       process.execPath,
       [auditScript, "--config", filename],
       {
         cwd: directory,
-        timeout: 120_000,
+        timeout: 240_000,
+        env: { ...process.env, PERF_RAW_DIR: rawDirectory },
       },
     );
 
     expect(result.stdout).toContain(
-      "Performance comparison complete for 2 routes",
+      `Performance comparison complete for ${localRoutes.length} routes`,
     );
     expect(result.stdout).not.toContain('"schemaVersion"');
     const findings = findingsSchema.parse(
@@ -99,15 +109,55 @@ describe("performance audit real-browser e2e CLI", () => {
         readFileSync(path.join(directory, "docs/perf-findings.json"), "utf8"),
       ),
     );
-    expect(
-      findings.sites.new.routes["/nick-derobertis-site/"].performance,
-    ).toBeGreaterThan(0);
-    expect(
-      findings.sites.new.routes["/nick-derobertis-site/remotes/bio/"]
-        .performance,
-    ).toBeGreaterThan(0);
+    expect(Object.keys(findings.sites.new.routes).sort()).toEqual(
+      [...localRoutes].sort(),
+    );
+    for (const route of localRoutes) {
+      expect(findings.sites.new.routes[route]?.performance).toBeGreaterThan(0);
+    }
     expect(findings.environment.formFactor).toBe("desktop");
-  }, 120_000);
+
+    const summarized = await execFileAsync(
+      process.execPath,
+      [auditScript, "--config", filename, "--summarize-fixtures", rawDirectory],
+      { cwd: directory },
+    );
+    expect(summarized.stdout).toContain(
+      `Performance comparison complete for ${localRoutes.length} routes`,
+    );
+
+    const fresh = spawnSync(
+      process.execPath,
+      [auditScript, "--config", filename, "--check-report"],
+      { cwd: directory, encoding: "utf8" },
+    );
+    expect(fresh.status, fresh.stderr).toBe(0);
+    writeFileSync(path.join(directory, "docs/perf-report.md"), "stale\n");
+    const stale = spawnSync(
+      process.execPath,
+      [auditScript, "--config", filename, "--check-report"],
+      { cwd: directory, encoding: "utf8" },
+    );
+    expect(stale.status).toBe(1);
+    expect(stale.stderr).toContain("--refresh-report");
+
+    const refreshed = spawnSync(
+      process.execPath,
+      [auditScript, "--config", filename, "--refresh-report"],
+      { cwd: directory, encoding: "utf8" },
+    );
+    expect(refreshed.status, refreshed.stderr).toBe(0);
+
+    const rawHome = path.join(rawDirectory, "new-home-1.json");
+    writeFileSync(rawHome, "{}");
+    const malformed = spawnSync(
+      process.execPath,
+      [auditScript, "--config", filename, "--summarize-fixtures", rawDirectory],
+      { cwd: directory, encoding: "utf8" },
+    );
+    expect(malformed.status).toBe(1);
+    expect(malformed.stderr).toContain("fixture new-home-1.json is invalid");
+  }, 240_000);
 
   it("reports actionable browser startup failure through the real CLI", async () => {
     const url = await localSite();

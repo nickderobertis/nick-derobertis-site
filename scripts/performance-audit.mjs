@@ -111,14 +111,12 @@ function parseArgs(values) {
   }
   return parsed;
 }
-const cli = parseArgs(process.argv.slice(2));
-const configPath =
-  cli.configPath ?? new URL("../performance.config.json", import.meta.url);
-const config = parseJsonFile(configPath, configSchema, "performance config");
-const ROUTES = config.routes;
-const DEFAULT_NEW_URL = config.newUrl;
-const DEFAULT_ORIGINAL_URL = config.originalUrl;
-const DEFAULT_RUNS = config.minimumRuns;
+let cli = {};
+let config;
+let ROUTES;
+let DEFAULT_NEW_URL;
+let DEFAULT_ORIGINAL_URL;
+let DEFAULT_RUNS;
 const METRICS = [
   ["performance", "Performance", "score"],
   ["fcp", "FCP", "ms"],
@@ -274,7 +272,21 @@ function validateFindings(value) {
   return findings;
 }
 
-async function auditSite(baseUrl, runs, chromePort, lighthouse, desktopConfig) {
+function routeName(route) {
+  return route === "/"
+    ? "home"
+    : route.replace(/^\//, "").replace(/\/$/, "").replaceAll("/", "-");
+}
+
+async function auditSite(
+  label,
+  baseUrl,
+  runs,
+  chromePort,
+  lighthouse,
+  desktopConfig,
+  rawDirectory,
+) {
   const routes = {};
   let firstLhr;
   for (const route of ROUTES) {
@@ -294,6 +306,13 @@ async function auditSite(baseUrl, runs, chromePort, lighthouse, desktopConfig) {
         throw new Error(`Lighthouse returned no result for ${url}`);
       const lhr = lhrSchema.parse(result.lhr);
       assertDesktopProfile(lhr);
+      if (rawDirectory) {
+        await mkdir(rawDirectory, { recursive: true });
+        await writeFile(
+          path.join(rawDirectory, `${label}-${routeName(route)}-${run}.json`),
+          `${JSON.stringify(lhr)}\n`,
+        );
+      }
       firstLhr ??= lhr;
       samples.push(metricFromLhr(lhr));
     }
@@ -306,9 +325,9 @@ async function readFixtureSite(directory, label, baseUrl) {
   const routes = {};
   let firstLhr;
   for (const route of ROUTES) {
-    const routeName = route === "/" ? "home" : route.slice(1);
-    const names = (await readdir(directory)).filter((name) =>
-      name.startsWith(`${label}-${routeName}-`),
+    const routeSlug = routeName(route);
+    const names = (await readdir(directory)).filter((filename) =>
+      filename.startsWith(`${label}-${routeSlug}-`),
     );
     if (names.length < DEFAULT_RUNS) {
       throw new Error(
@@ -335,6 +354,14 @@ async function readFixtureSite(directory, label, baseUrl) {
 }
 
 async function main() {
+  cli = parseArgs(process.argv.slice(2));
+  const configPath =
+    cli.configPath ?? new URL("../performance.config.json", import.meta.url);
+  config = parseJsonFile(configPath, configSchema, "performance config");
+  ROUTES = config.routes;
+  DEFAULT_NEW_URL = config.newUrl;
+  DEFAULT_ORIGINAL_URL = config.originalUrl;
+  DEFAULT_RUNS = config.minimumRuns;
   const fixtureDirectory = cli.fixtureDirectory ?? null;
   if (
     fixtureDirectory &&
@@ -411,18 +438,22 @@ async function main() {
         chromeFlags: ["--headless", "--no-sandbox"],
       });
       current = await auditSite(
+        "new",
         newUrl,
         runs,
         chrome.port,
         lighthouseModule.default,
         lighthouseModule.desktopConfig,
+        process.env.PERF_RAW_DIR || null,
       );
       original = await auditSite(
+        "original",
         originalUrl,
         runs,
         chrome.port,
         lighthouseModule.default,
         lighthouseModule.desktopConfig,
+        process.env.PERF_RAW_DIR || null,
       );
     }
   } finally {
