@@ -63,7 +63,7 @@ describe("serve-e2e lifecycle", () => {
     try {
       const page = await browser.newPage();
       await page.goto(url);
-      expect(await page.locator("header").isVisible()).toBe(true);
+      expect(await page.getByRole("banner").isVisible()).toBe(true);
     } finally {
       await browser.close();
     }
