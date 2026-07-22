@@ -1,7 +1,7 @@
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { createServer } from "node:http";
-import { extname, join, normalize } from "node:path";
+import { basename, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
@@ -31,13 +31,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535)
     `PORT must be an integer from 1 to 65535; received ${JSON.stringify(portValue)}. Set a valid PORT and run just test-e2e again.`,
   );
 // llmlint: ignore-end[changed_behavior_has_e2e]
-const javaScriptAssetLatencyValue =
-  process.env.JAVASCRIPT_ASSET_LATENCY_MS ?? "0";
-if (!/^\d{1,4}$/.test(javaScriptAssetLatencyValue))
-  throw new Error(
-    `JAVASCRIPT_ASSET_LATENCY_MS must be an integer from 0 to 9999; received ${JSON.stringify(javaScriptAssetLatencyValue)}. Set a valid latency and run just test-e2e again.`,
-  );
-const javaScriptAssetLatencyMs = Number(javaScriptAssetLatencyValue);
+const remoteLazyAssetLatencyMs = 300;
 const types = {
   ".css": "text/css",
   ".html": "text/html",
@@ -72,9 +66,20 @@ const server = createServer(async (request, response) => {
     "Content-Type",
     types[extname(file)] ?? "application/octet-stream",
   );
-  if (javaScriptAssetLatencyMs > 0 && extname(file) === ".js")
+  const assetName = basename(file);
+  const isEagerRemoteAsset =
+    assetName.startsWith("main.") ||
+    assetName === "remoteEntry.js" ||
+    assetName.startsWith("common.") ||
+    assetName.startsWith("__federation_expose_Skeleton.");
+  if (
+    remoteLazyAssetLatencyMs > 0 &&
+    url.pathname.includes("/remotes/") &&
+    extname(file) === ".js" &&
+    !isEagerRemoteAsset
+  )
     await new Promise((resolve) =>
-      setTimeout(resolve, javaScriptAssetLatencyMs),
+      setTimeout(resolve, remoteLazyAssetLatencyMs),
     );
   createReadStream(file).pipe(response);
 });

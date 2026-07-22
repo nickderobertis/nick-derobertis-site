@@ -94,7 +94,9 @@ for (const renderPath of renderPaths) {
       page,
     }) => {
       await page.goto(`${renderPath.path}?awards-scenario=loading`);
-      const loading = page.getByRole("status");
+      const loading = page
+        .getByRole("status")
+        .filter({ hasText: "Loading awards…" });
       await expect(loading).toContainText("Loading awards…");
       await expect(
         page.getByRole("heading", { name: "Selected awards" }),

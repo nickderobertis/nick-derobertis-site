@@ -215,18 +215,6 @@ test("script entry points reject invalid inputs with recovery actions", async ()
   });
   expect(invalidPort.status).not.toBe(0);
   expect(invalidPort.stderr).toContain("run just test-e2e again");
-  const invalidLatency = spawnSync(
-    process.execPath,
-    ["scripts/serve-e2e.mjs"],
-    {
-      env: { ...process.env, JAVASCRIPT_ASSET_LATENCY_MS: "invalid" },
-      encoding: "utf8",
-    },
-  );
-  expect(invalidLatency.status).not.toBe(0);
-  expect(invalidLatency.stderr).toContain(
-    "JAVASCRIPT_ASSET_LATENCY_MS must be an integer",
-  );
   const occupiedServer = createServer();
   await new Promise<void>((resolve) =>
     occupiedServer.listen(0, "127.0.0.1", resolve),
