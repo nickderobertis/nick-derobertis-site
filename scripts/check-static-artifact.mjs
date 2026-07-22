@@ -3,6 +3,9 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
+import routeContracts from "../libs/route-state/src/contracts.json" with {
+  type: "json",
+};
 
 const substantiveRouteContent = {
   "/": "Who am I?",
@@ -53,7 +56,9 @@ for (const route of routes) {
       : `${root}${route.path}/index.html`;
   const html = await readFile(path, "utf8");
   if (!html.includes(`<h1`) || !html.includes(route.heading))
-    throw new Error(`${path} is not prerendered`);
+    throw new Error(
+      `${path} lacks its expected h1 (${route.heading}); fix the route renderer and rerun just prerender.`,
+    );
   if (!html.includes("/nick-derobertis-site/"))
     throw new Error(`${path} lacks the Pages base path`);
   const expected = substantiveRouteContent[route.path];
@@ -66,7 +71,9 @@ for (const route of routes) {
     if (
       !marker ||
       !html.includes(marker) ||
-      !html.includes(`data-prerendered-route="${route.path}"`) ||
+      !html.includes(
+        `${routeContracts.prerenderRouteAttribute}="${route.path}"`,
+      ) ||
       html.includes('id="__TSR_DEHYDRATED__"') ||
       !html.includes("$_TSR.router=") ||
       !html.includes("$_TSR.e()")

@@ -1,4 +1,8 @@
 import { z } from "zod";
+import contracts from "./contracts.json";
+
+export const routeStateQueryKeys = contracts.queryKeys;
+export const prerenderRouteAttribute = contracts.prerenderRouteAttribute;
 
 export type AsyncViewState<T> =
   | { name: "loading" }

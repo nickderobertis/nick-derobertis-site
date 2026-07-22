@@ -7,13 +7,14 @@ import type {
   SoftwareProjects,
 } from "@site/data-access-core";
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { validateCvDomain } from "@site/data-access-core";
+import { siteBase, validateCvDomain } from "@site/data-access-core";
 import { SiteLayout } from "@site/layout";
 import {
   type BioPageProps,
   type CoursesPageProps,
   parseRouteView,
   type ResearchPageProps,
+  routeStateQueryKeys,
   type SoftwarePageProps,
 } from "@site/route-state";
 import {
@@ -76,7 +77,7 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Bio"),
     loader: ({ context: ctx }) => ({
-      view: parseRouteView(ctx.search.get("bio-view")),
+      view: parseRouteView(ctx.search.get(routeStateQueryKeys.bio)),
     }),
     component: () => {
       const data = bio.useLoaderData();
@@ -87,7 +88,7 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Research"),
     loader: async ({ context: ctx }) => {
-      const view = parseRouteView(ctx.search.get("research-scenario"));
+      const view = parseRouteView(ctx.search.get(routeStateQueryKeys.research));
       if (view === "loading" || view === "error")
         return { research: null, view };
       try {
@@ -120,7 +121,7 @@ export function createSiteRouter({
     path: routePath("Software"),
     loader: async ({ context: ctx }) => ({
       projects: await ctx.loadDomain("software_projects"),
-      view: parseRouteView(ctx.search.get("software-view")),
+      view: parseRouteView(ctx.search.get(routeStateQueryKeys.software)),
     }),
     component: () => {
       const data = software.useLoaderData();
@@ -134,7 +135,7 @@ export function createSiteRouter({
     path: routePath("Courses"),
     loader: async ({ context: ctx }) => ({
       courses: await ctx.loadDomain("courses"),
-      view: parseRouteView(ctx.search.get("courses-view")),
+      view: parseRouteView(ctx.search.get(routeStateQueryKeys.courses)),
     }),
     component: () => {
       const data = courses.useLoaderData();
@@ -168,7 +169,7 @@ export function createSiteRouter({
     routeTree,
     ...(history ? { history } : {}),
     context,
-    basepath: "/nick-derobertis-site",
+    basepath: siteBase,
     defaultPreload: "intent",
   });
 }
@@ -176,9 +177,7 @@ export function createSiteRouter({
 export async function loadBrowserDomain<
   Name extends "research" | "software_projects" | "courses",
 >(name: Name) {
-  const response = await fetch(
-    `/nick-derobertis-site/cv-data/domains/${name}.json`,
-  );
+  const response = await fetch(`${siteBase}/cv-data/domains/${name}.json`);
   if (!response.ok)
     throw new Error(`${name} request failed: ${response.status}`);
   return validateCvDomain(name, await response.json());

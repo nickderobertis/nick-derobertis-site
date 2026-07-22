@@ -7,6 +7,9 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
+import routeContracts from "../libs/route-state/src/contracts.json" with {
+  type: "json",
+};
 
 function validateSiteConfig(value) {
   if (
@@ -73,6 +76,10 @@ try {
 }
 const { prerenderRoutes: routes, renderRoute } =
   rendererModule.default ?? rendererModule;
+if (!Array.isArray(routes) || typeof renderRoute !== "function")
+  throw new Error(
+    "The prerender renderer must export prerenderRoutes and renderRoute; fix scripts/render-entry.tsx, run just build-prerender-renderer, then rerun just prerender.",
+  );
 
 function finalizeReactPrerender(html) {
   const dom = new JSDOM(`<body>${html}</body>`);
@@ -113,7 +120,7 @@ async function documentFor(route) {
     )
     .replace(
       '<div id="root"></div>',
-      `<div id="root" data-prerendered-route="${route.path}">${routeHtml}</div>${rendered.hydration}`,
+      `<div id="root" ${routeContracts.prerenderRouteAttribute}="${route.path}">${routeHtml}</div>${rendered.hydration}`,
     );
 }
 
