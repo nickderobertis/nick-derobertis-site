@@ -536,15 +536,9 @@ async function main() {
   const reportPath = path.join(outputDirectory, "perf-report.md");
   await writeFile(findingsPath, `${JSON.stringify(findings, null, 2)}\n`);
   await writeFile(reportPath, markdown(findings));
-  if (process.env.PERF_FINDINGS_STDOUT === "1") {
-    process.stdout.write(`${JSON.stringify(findings)}\n`);
-  } else if (process.env.PERF_FINDINGS_STDOUT) {
-    throw new Error("PERF_FINDINGS_STDOUT must be 1 when set");
-  } else {
-    process.stdout.write(
-      `Performance comparison complete for ${ROUTES.length} routes; report: ${reportPath}; structured findings: ${findingsPath}\n`,
-    );
-  }
+  process.stdout.write(
+    `Performance comparison complete for ${ROUTES.length} routes; report: ${reportPath}; structured findings: ${findingsPath}\n`,
+  );
 }
 
 main().catch((error) => {
