@@ -60,6 +60,9 @@ export async function renderRoute(path: string) {
     };
     return new Response(rendered.html);
   });
-  if (!rendered) throw new Error(`TanStack Router did not render ${path}`);
+  if (!rendered)
+    throw new Error(
+      `TanStack Router did not render ${path}. Verify the static route tree and loader in apps/shell/src/router.tsx, then rerun just prerender.`,
+    );
   return rendered;
 }

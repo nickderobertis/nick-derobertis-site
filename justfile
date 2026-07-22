@@ -72,6 +72,10 @@ test-e2e:
 prerender:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run shell:prerender >"$log" 2>&1 || { cat "$log" >&2; echo "prerender: static Pages artifact failed; fix the build or artifact validation above and rerun just prerender" >&2; exit 1; }
 
+# Compile the source-based React renderer consumed by the prerender target.
+build-prerender-renderer:
+    node scripts/build-prerender-renderer.mjs || { echo "build-prerender-renderer: compilation failed; fix the diagnostic above, then rerun just build-prerender-renderer" >&2; exit 1; }
+
 # Build the complete federated artifact before serving it at the Pages base path.
 serve: prerender
     node scripts/serve-e2e.mjs

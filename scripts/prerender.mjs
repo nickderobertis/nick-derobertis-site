@@ -1,6 +1,5 @@
 import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { rspack } from "@rspack/core";
 import { JSDOM } from "jsdom";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
@@ -9,7 +8,6 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import renderConfig from "./rspack.prerender.config.mjs";
 
 function validateSiteConfig(value) {
   if (
@@ -66,16 +64,6 @@ const template = builtDocument
     '<div id="root"></div></body>',
   );
 
-await new Promise((resolve, reject) => {
-  const compiler = rspack(renderConfig);
-  compiler.run((error, stats) => {
-    compiler.close(() => {});
-    if (error) return reject(error);
-    if (stats?.hasErrors())
-      return reject(new Error(stats.toString({ colors: false })));
-    resolve();
-  });
-});
 const rendererModule = await import("../dist/prerender-renderer/render.cjs");
 const { renderRoute } = rendererModule.default ?? rendererModule;
 

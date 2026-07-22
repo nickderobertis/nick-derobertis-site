@@ -72,7 +72,7 @@ for (const route of routes) {
       !html.includes("$_TSR.e()")
     )
       throw new Error(
-        `${path} lacks real route markup or TanStack Router hydration state`,
+        `${path} lacks real route markup or TanStack Router hydration state; inspect scripts/render-entry.tsx and rerun just prerender.`,
       );
   }
 }
