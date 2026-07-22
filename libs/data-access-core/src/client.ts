@@ -37,9 +37,33 @@ export interface CvDomains {
 }
 export type CvDomainArtifacts = Record<CvDomain, unknown>;
 
-const schemaDomainNames = Object.keys(rootSchema.properties).filter(
-  (name) => !rootSchema.required.includes(name),
-);
+interface CvRootSchemaContract {
+  properties: Record<string, unknown>;
+  required: string[];
+}
+
+export function deriveSchemaDomainNames(input: unknown): string[] {
+  if (
+    !input ||
+    typeof input !== "object" ||
+    !("properties" in input) ||
+    !input.properties ||
+    typeof input.properties !== "object" ||
+    Array.isArray(input.properties) ||
+    !("required" in input) ||
+    !Array.isArray(input.required) ||
+    !input.required.every((name) => typeof name === "string")
+  )
+    throw new Error(
+      "cv.schema.json must define object properties and a string required list",
+    );
+  const schema = input as CvRootSchemaContract;
+  return Object.keys(schema.properties).filter(
+    (name) => !schema.required.includes(name),
+  );
+}
+
+const schemaDomainNames = deriveSchemaDomainNames(rootSchema);
 if (
   schemaDomainNames.length !== domainNames.length ||
   schemaDomainNames.some((name, index) => name !== domainNames[index])

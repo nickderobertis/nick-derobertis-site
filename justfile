@@ -73,6 +73,7 @@ e2e-affected-files file:
     file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "e2e-affected-files: file must be a tracked workspace-relative file" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=e2e --json && pnpm exec nx affected -t e2e --files="$file" --parallel=3
 
 # Print the build projects selected by a prospective single-file edit.
+# llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; affected-build-projects.spec.ts drives its real `just` subprocess through success and validation failures.
 affected-build-projects file:
     file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "affected-build-projects: file must be a workspace-relative file" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=build --json
 

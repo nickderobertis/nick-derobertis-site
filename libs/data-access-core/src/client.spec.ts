@@ -7,6 +7,7 @@ import {
   createCvDataClient,
   cvDataClient,
   cvDomains,
+  deriveSchemaDomainNames,
   domainNames,
   validateCvData,
   validateCvDomain,
@@ -39,6 +40,17 @@ describe("vendored CV data boundary", () => {
       expect((error as CvDataValidationError).issues.length).toBeGreaterThan(0);
     }
     expect(new CvDataValidationError().issues).toEqual([]);
+  });
+
+  it("rejects a malformed schema before reading its domain contract", () => {
+    expect(() => deriveSchemaDomainNames({ properties: [] })).toThrow(
+      "cv.schema.json must define object properties and a string required list",
+    );
+    expect(() =>
+      deriveSchemaDomainNames({ properties: {}, required: [42] }),
+    ).toThrow(
+      "cv.schema.json must define object properties and a string required list",
+    );
   });
 
   it("rejects a malformed imported domain through the client boundary", () => {
