@@ -435,6 +435,18 @@ async function main() {
   const outputDirectory = process.env.PERF_OUTPUT_DIR
     ? absoluteDirectory.parse(process.env.PERF_OUTPUT_DIR)
     : "docs";
+  const reuseIdentical = process.env.PERF_LOCAL_REUSE_IDENTICAL === "1";
+  if (
+    process.env.PERF_LOCAL_REUSE_IDENTICAL &&
+    process.env.PERF_LOCAL_REUSE_IDENTICAL !== "1"
+  ) {
+    throw new Error("PERF_LOCAL_REUSE_IDENTICAL must be 1 when set");
+  }
+  if (reuseIdentical && newUrl !== originalUrl) {
+    throw new Error(
+      "PERF_LOCAL_REUSE_IDENTICAL requires identical new and original URLs",
+    );
+  }
   try {
     if (fixtureDirectory) {
       current = await readFixtureSite(fixtureDirectory, "new", newUrl);
@@ -471,15 +483,29 @@ async function main() {
         lighthouseModule.desktopConfig,
         rawDirectory,
       );
-      original = await auditSite(
-        "original",
-        originalUrl,
-        runs,
-        chrome.port,
-        lighthouseModule.default,
-        lighthouseModule.desktopConfig,
-        rawDirectory,
-      );
+      if (reuseIdentical) {
+        original = structuredClone(current);
+        original.url = originalUrl;
+        if (rawDirectory) {
+          for (const filename of await readdir(rawDirectory)) {
+            if (!filename.startsWith("new-")) continue;
+            await writeFile(
+              path.join(rawDirectory, filename.replace(/^new-/, "original-")),
+              await readFile(path.join(rawDirectory, filename)),
+            );
+          }
+        }
+      } else {
+        original = await auditSite(
+          "original",
+          originalUrl,
+          runs,
+          chrome.port,
+          lighthouseModule.default,
+          lighthouseModule.desktopConfig,
+          rawDirectory,
+        );
+      }
     }
   } finally {
     await chrome?.kill();
