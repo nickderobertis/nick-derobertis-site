@@ -45,6 +45,9 @@ check: test lint-workflows
     # bundler, prerender, Playwright, and screenshot executors in this workspace.
     base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender,e2e,screenshot --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx run shell-e2e:integration >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
+# Canonical full pre-push gate used by orchestration and contributors.
+gate: check
+
 # CI runs this non-PR safety sweep so affected detection is never the only gate.
 check-all: lint-workflows
     # Keep the same CI warnings-as-errors contract during the non-affected sweep.
@@ -68,6 +71,10 @@ test-e2e:
 
 prerender:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run shell:prerender >"$log" 2>&1 || { cat "$log" >&2; echo "prerender: static Pages artifact failed; fix the build or artifact validation above and rerun just prerender" >&2; exit 1; }
+
+# Compile the source-based React renderer consumed by the prerender target.
+build-prerender-renderer:
+    node scripts/build-prerender-renderer.mjs || { echo "build-prerender-renderer: compilation failed; fix the diagnostic above, then rerun just build-prerender-renderer" >&2; exit 1; }
 
 # Build the complete federated artifact before serving it at the Pages base path.
 serve: prerender

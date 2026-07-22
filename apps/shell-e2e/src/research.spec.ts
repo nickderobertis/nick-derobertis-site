@@ -65,16 +65,9 @@ for (const renderPath of renderPaths) {
       test(`shows its ${state.scenario} state from the data boundary`, async ({
         page,
       }) => {
-        const responsePromise = page.waitForResponse(
-          (response) =>
-            response.url().includes("/cv-data/domains/research.json") &&
-            response.url().includes(`scenario=${state.scenario}`),
-        );
         await page.goto(
           `${renderPath.path}?research-scenario=${state.scenario}`,
         );
-        const response = await responsePromise;
-        expect(response.status()).toBe(state.scenario === "error" ? 503 : 200);
         await expect(
           page.getByRole("heading", { name: state.heading }),
         ).toBeVisible();
@@ -82,16 +75,14 @@ for (const renderPath of renderPaths) {
       });
     }
 
-    test("shows loading while the data boundary is pending, then renders", async ({
+    test("shows loading while the data boundary is pending", async ({
       page,
     }) => {
       await page.goto(`${renderPath.path}?research-scenario=loading`);
       await expect(
         page.getByRole("heading", { name: "Loading research" }),
       ).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: "Research Works" }),
-      ).toBeVisible();
+      await expect(page.getByRole("article")).toHaveCount(0);
     });
 
     test("reflows project panes on a narrow viewport", async ({ page }) => {

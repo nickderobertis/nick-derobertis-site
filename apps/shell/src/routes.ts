@@ -1,9 +1,5 @@
+import { parseSiteRoutes, type SiteRoute } from "@site/route-state";
 import routeData from "./routes.json";
-export interface SiteRoute {
-  path: string;
-  label: string;
-  heading: string;
-  description: string;
-  remote?: string;
-}
-export const routes = routeData satisfies SiteRoute[];
+
+export type { SiteRoute };
+export const routes = parseSiteRoutes(routeData);
