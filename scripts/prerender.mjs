@@ -74,7 +74,19 @@ try {
 }
 const { prerenderRoutes: routes, renderRoute } =
   rendererModule.default ?? rendererModule;
-if (!Array.isArray(routes) || typeof renderRoute !== "function")
+if (
+  !Array.isArray(routes) ||
+  !routes.every(
+    (route) =>
+      route &&
+      typeof route === "object" &&
+      typeof route.path === "string" &&
+      /^\/(?:[a-z0-9-]+)?$/.test(route.path) &&
+      typeof route.heading === "string" &&
+      typeof route.description === "string",
+  ) ||
+  typeof renderRoute !== "function"
+)
   throw new Error(
     "The prerender renderer must export prerenderRoutes and renderRoute; fix scripts/render-entry.tsx, run just build-prerender-renderer, then rerun just prerender.",
   );
@@ -109,6 +121,15 @@ async function documentFor(route) {
       ? "Nick DeRobertis"
       : `${route.heading} | Nick DeRobertis`;
   const rendered = await renderRoute(route.path);
+  if (
+    !rendered ||
+    typeof rendered !== "object" ||
+    typeof rendered.html !== "string" ||
+    typeof rendered.hydration !== "string"
+  )
+    throw new Error(
+      `The prerender renderer returned an invalid result for ${route.path}; fix renderRoute in scripts/render-entry.tsx, run just build-prerender-renderer, then rerun just prerender.`,
+    );
   const routeHtml = finalizeReactPrerender(rendered.html);
   return template
     .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
