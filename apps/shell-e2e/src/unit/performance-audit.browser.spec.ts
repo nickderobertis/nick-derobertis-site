@@ -4,9 +4,9 @@ import {
   spawn,
   spawnSync,
 } from "node:child_process";
-import { once } from "node:events";
 import { readFileSync, writeFileSync } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
+import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -16,10 +16,7 @@ import { z } from "zod";
 const execFileAsync = promisify(execFile);
 const workspace = path.resolve(import.meta.dirname, "../../../..");
 const auditScript = path.join(workspace, "scripts/performance-audit.mjs");
-const serverScript = path.join(
-  workspace,
-  "apps/shell-e2e/src/unit/fixtures/performance-site.mjs",
-);
+const serverScript = path.join(workspace, "scripts/serve-e2e.mjs");
 const children: ChildProcess[] = [];
 const directories: string[] = [];
 const productionConfigSchema = z.object({
@@ -33,7 +30,14 @@ const productionConfig = productionConfigSchema.parse(
     readFileSync(path.join(workspace, "performance.config.json"), "utf8"),
   ),
 );
-const localRoutes = [...productionConfig.routes, "/remotes/bio/"];
+const localRoutes = [
+  ...productionConfig.routes,
+  "/remotes/bio/",
+  ...["loading", "empty", "error"].flatMap((state) => [
+    `/bio?bio-view=${state}`,
+    `/remotes/bio/?bio-view=${state}`,
+  ]),
+];
 const localUrlSchema = z
   .string()
   .url()
@@ -51,13 +55,35 @@ const findingsSchema = z.object({
 });
 
 async function localSite() {
+  const reservation = createServer();
+  await new Promise<void>((resolve) =>
+    reservation.listen(0, "127.0.0.1", resolve),
+  );
+  const address = z
+    .object({ port: z.number().int().min(1).max(65_535) })
+    .parse(reservation.address());
+  await new Promise<void>((resolve, reject) =>
+    reservation.close((error) => (error ? reject(error) : resolve())),
+  );
   const child = spawn(process.execPath, [serverScript], {
-    stdio: ["ignore", "pipe", "inherit"],
+    cwd: workspace,
+    env: { ...process.env, PORT: String(address.port) },
+    stdio: ["ignore", "ignore", "inherit"],
   });
   children.push(child);
-  if (!child.stdout) throw new Error("local performance server has no stdout");
-  const [chunk] = (await once(child.stdout, "data")) as [Buffer];
-  return localUrlSchema.parse(chunk.toString().trim());
+  const url = localUrlSchema.parse(
+    `http://127.0.0.1:${address.port}/nick-derobertis-site/`,
+  );
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    try {
+      const response = await fetch(url);
+      if (response.ok) return url;
+    } catch {
+      // The child process is still starting.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(`real application server did not become ready at ${url}`);
 }
 
 async function localConfig(url: string, routes = localRoutes) {
@@ -157,7 +183,7 @@ describe("performance audit real-browser e2e CLI", () => {
     );
     expect(malformed.status).toBe(1);
     expect(malformed.stderr).toContain("fixture new-home-1.json is invalid");
-  }, 240_000);
+  }, 360_000);
 
   it("reports actionable browser startup failure through the real CLI", async () => {
     const url = await localSite();

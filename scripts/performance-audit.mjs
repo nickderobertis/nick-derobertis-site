@@ -18,7 +18,15 @@ const absoluteDirectory = z
     message: "must be an absolute directory path",
   });
 const configSchema = z.object({
-  routes: z.array(z.string().regex(/^\/(?:[a-z0-9-]+\/?)*$/)).min(1),
+  routes: z
+    .array(
+      z
+        .string()
+        .regex(
+          /^\/(?:[a-z0-9-]+\/?)*(?:\?[a-z0-9-]+=(?:loading|empty|error))?$/,
+        ),
+    )
+    .min(1),
   minimumRuns: z.number().int().min(1),
   newUrl: httpUrl,
   originalUrl: httpUrl,
@@ -281,7 +289,10 @@ function validateFindings(value) {
 function routeName(route) {
   return route === "/"
     ? "home"
-    : route.replace(/^\//, "").replace(/\/$/, "").replaceAll("/", "-");
+    : route
+        .replace(/^\//, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/-$/, "");
 }
 
 async function auditSite(

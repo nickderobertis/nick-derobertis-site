@@ -23,6 +23,7 @@
     },
     "test": {
       "executor": "nx:run-commands",
+      "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {
         "command": "vitest run --maxWorkers=1 --passWithNoTests apps/shell-e2e/src/unit"
       }
