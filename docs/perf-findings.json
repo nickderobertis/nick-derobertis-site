@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "runsPerRoute": 5,
+  "environment": {
+    "capturedAt": "2026-07-22T04:25:17.303Z",
+    "host": "Linux 6.17.0-1019-aws x64",
+    "cpu": "Intel(R) Xeon(R) Platinum 8488C",
+    "logicalCpus": 4,
+    "memoryGiB": 15.3,
+    "node": "v26.5.0",
+    "lighthouse": "12.8.2",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36",
+    "formFactor": "desktop",
+    "throttlingMethod": "simulate",
+    "throttling": {
+      "rttMs": 40,
+      "throughputKbps": 10240,
+      "requestLatencyMs": 0,
+      "downloadThroughputKbps": 0,
+      "uploadThroughputKbps": 0,
+      "cpuSlowdownMultiplier": 1
+    }
+  },
+  "sites": {
+    "new": {
+      "url": "https://nickderobertis.github.io/nick-derobertis-site/",
+      "routes": {
+        "/": {
+          "performance": 41,
+          "fcp": 230.0287,
+          "lcp": 3927.9916000000003,
+          "tbt": 1894.5000000000002,
+          "cls": 0.1418479560124313,
+          "transferBytes": 3638364,
+          "jsBytes": 3630161
+        },
+        "/bio": {
+          "performance": 80,
+          "fcp": 217.68236404418946,
+          "lcp": 792.6689,
+          "tbt": 1,
+          "cls": 0.4417406726540958,
+          "transferBytes": 459644,
+          "jsBytes": 454334
+        },
+        "/research": {
+          "performance": 35,
+          "fcp": 258.807,
+          "lcp": 3068.177,
+          "tbt": 587,
+          "cls": 0.9852292742180383,
+          "transferBytes": 3212971,
+          "jsBytes": 904567
+        },
+        "/software": {
+          "performance": 30,
+          "fcp": 266.6948,
+          "lcp": 2216.9798,
+          "tbt": 1163.5,
+          "cls": 0.8825354792995243,
+          "transferBytes": 942288,
+          "jsBytes": 903080
+        },
+        "/courses": {
+          "performance": 43,
+          "fcp": 236.3329,
+          "lcp": 1857.229,
+          "tbt": 648,
+          "cls": 0.9852292742180383,
+          "transferBytes": 908703,
+          "jsBytes": 903785
+        }
+      }
+    },
+    "original": {
+      "url": "https://nickderobertis.com/",
+      "routes": {
+        "/": {
+          "performance": 41,
+          "fcp": 1914.0342000000003,
+          "lcp": 2527.75785,
+          "tbt": 4588.000000000002,
+          "cls": 0.000786985662271312,
+          "transferBytes": 4056429,
+          "jsBytes": 1734627
+        },
+        "/bio": {
+          "performance": 80,
+          "fcp": 1722.9636,
+          "lcp": 2067.9293,
+          "tbt": 120.5,
+          "cls": 0,
+          "transferBytes": 2162395,
+          "jsBytes": 1396917
+        },
+        "/research": {
+          "performance": 66,
+          "fcp": 1779.6410999999998,
+          "lcp": 2100.0403,
+          "tbt": 142,
+          "cls": 0.23974911741479019,
+          "transferBytes": 2081690,
+          "jsBytes": 1397127
+        },
+        "/software": {
+          "performance": 40,
+          "fcp": 1815.3024000000005,
+          "lcp": 2466.1112999999996,
+          "tbt": 339.00000000000045,
+          "cls": 0.5283112569514021,
+          "transferBytes": 2480854,
+          "jsBytes": 1397116
+        },
+        "/courses": {
+          "performance": 72,
+          "fcp": 1737.3136,
+          "lcp": 2309.7933999999996,
+          "tbt": 108.5,
+          "cls": 0.1581233564427444,
+          "transferBytes": 2736964,
+          "jsBytes": 1397143
+        }
+      }
+    }
+  },
+  "deltas": {
+    "/": {
+      "performance": 0,
+      "fcp": -1684.0055000000002,
+      "lcp": 1400.2337500000003,
+      "tbt": -2693.500000000002,
+      "cls": 0.14106097035016,
+      "transferBytes": -418065,
+      "jsBytes": 1895534
+    },
+    "/bio": {
+      "performance": 0,
+      "fcp": -1505.2812359558106,
+      "lcp": -1275.2603999999997,
+      "tbt": -119.5,
+      "cls": 0.4417406726540958,
+      "transferBytes": -1702751,
+      "jsBytes": -942583
+    },
+    "/research": {
+      "performance": -31,
+      "fcp": -1520.8340999999998,
+      "lcp": 968.1367,
+      "tbt": 445,
+      "cls": 0.7454801568032481,
+      "transferBytes": 1131281,
+      "jsBytes": -492560
+    },
+    "/software": {
+      "performance": -10,
+      "fcp": -1548.6076000000005,
+      "lcp": -249.1314999999995,
+      "tbt": 824.4999999999995,
+      "cls": 0.3542242223481221,
+      "transferBytes": -1538566,
+      "jsBytes": -494036
+    },
+    "/courses": {
+      "performance": -29,
+      "fcp": -1500.9807,
+      "lcp": -452.5643999999995,
+      "tbt": 539.5,
+      "cls": 0.827105917775294,
+      "transferBytes": -1828261,
+      "jsBytes": -493358
+    }
+  }
+}
