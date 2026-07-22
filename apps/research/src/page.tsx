@@ -1,5 +1,5 @@
+import { cvDataClient, type Research } from "@site/data-access-core";
 import { ResearchContent } from "./research-content";
-import { type ResearchViewState, useResearch } from "./use-research";
 import "@site/design-system";
 import "./research.css";
 
@@ -26,8 +26,23 @@ export default function ResearchPage({
 }: {
   initialState?: ResearchViewState;
 }) {
-  const state = useResearch(initialState);
+  const state = initialState ?? standaloneState();
   if (state.name !== "ready") return <StateMessage state={state.name} />;
   if (!state.research.projects?.length) return <StateMessage state="empty" />;
   return <ResearchContent research={state.research} />;
+}
+export type ResearchViewState =
+  | { name: "loading" }
+  | { name: "error" }
+  | { name: "ready"; research: Research };
+
+function standaloneState(): ResearchViewState {
+  const scenario =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("research-scenario");
+  if (scenario === "loading" || scenario === "error") return { name: scenario };
+  if (scenario === "empty")
+    return { name: "ready", research: { projects: [] } };
+  return { name: "ready", research: cvDataClient.domain("research") };
 }

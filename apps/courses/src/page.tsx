@@ -5,7 +5,6 @@ import {
 } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
-import { useEffect, useState } from "react";
 
 export type CoursesView = "default" | "empty" | "error" | "loading";
 
@@ -14,18 +13,6 @@ function requestedView(): CoursesView {
   return value === "empty" || value === "error" || value === "loading"
     ? value
     : "default";
-}
-
-function useCoursesView(initialView?: CoursesView): CoursesView {
-  const [view, setView] = useState<CoursesView>(
-    () => initialView ?? requestedView(),
-  );
-  useEffect(() => {
-    if (view !== "loading") return;
-    const timer = window.setTimeout(() => setView("default"), 1_500);
-    return () => window.clearTimeout(timer);
-  }, [view]);
-  return view;
 }
 
 function ResourceTree({ resources }: { resources: Resource[] }) {
@@ -250,7 +237,7 @@ export default function CoursesPage({
   initialView?: CoursesView;
   courses?: Course[];
 }) {
-  const view = useCoursesView(initialView);
+  const view = initialView ?? requestedView();
   return (
     <section className="courses-page">
       <header className="courses-banner">

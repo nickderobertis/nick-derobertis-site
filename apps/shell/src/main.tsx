@@ -1,7 +1,7 @@
 import { createBrowserHistory } from "@tanstack/react-router";
+import { RouterClient } from "@tanstack/react-router/ssr/client";
 import { StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
-import { App } from "./app";
 import { createSiteRouter, loadBrowserDomain } from "./router";
 import "@site/design-system";
 
@@ -24,22 +24,13 @@ const router = createSiteRouter({
     courses: courses.default,
   },
   context: {
-    loadDomain: async (name) => {
-      const dehydrated =
-        document.getElementById("__TSR_DEHYDRATED__")?.textContent;
-      if (dehydrated) {
-        const domains = JSON.parse(dehydrated) as Record<string, unknown>;
-        if (name in domains) return domains[name] as never;
-      }
-      return loadBrowserDomain(name) as never;
-    },
+    loadDomain: async (name) => loadBrowserDomain(name) as never,
     search: new URLSearchParams(window.location.search),
   },
 });
-await router.load();
 hydrateRoot(
   root,
   <StrictMode>
-    <App router={router} />
+    <RouterClient router={router} />
   </StrictMode>,
 );

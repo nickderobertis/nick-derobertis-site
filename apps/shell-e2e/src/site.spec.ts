@@ -10,13 +10,11 @@ const pages = [
   {
     link: "Bio",
     heading: "Optimizing Life",
-    staticHeading: "Biography",
     path: "bio",
   },
   {
     link: "Research",
     heading: "Research Works",
-    staticHeading: "Research",
     path: "research",
   },
   {
@@ -95,6 +93,53 @@ test("navigation works with the keyboard", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Optimizing Life" }),
   ).toBeVisible();
+});
+
+test("leaf routes reuse prerendered DOM without hydration warnings and navigate as an SPA", async ({
+  browser,
+}) => {
+  for (const route of pages.filter(({ path }) => path)) {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    await page.addInitScript(() => {
+      const observer = new MutationObserver(() => {
+        const main = document.querySelector("#root > main");
+        if (main && !Reflect.get(window, "__prerenderedMain")) {
+          Reflect.set(window, "__prerenderedMain", main);
+          observer.disconnect();
+        }
+      });
+      observer.observe(document, { childList: true, subtree: true });
+    });
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.goto(route.path, { waitUntil: "networkidle" });
+    await expect(
+      page.getByRole("heading", { name: route.heading }),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(
+        () =>
+          Reflect.get(window, "__prerenderedMain") ===
+          document.querySelector("#root > main"),
+      ),
+    ).toBe(true);
+    expect(errors).toEqual([]);
+
+    let documentRequests = 0;
+    page.on("request", (request) => {
+      if (request.isNavigationRequest()) documentRequests += 1;
+    });
+    await page.getByRole("link", { name: "Home", exact: true }).click();
+    await expect(page).toHaveURL(/nick-derobertis-site\/$/);
+    await page.getByRole("link", { name: route.link, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/${route.path}$`));
+    expect(documentRequests).toBe(0);
+    await page.close();
+  }
 });
 
 test("the static 404 is intentional and the router recovers unknown routes", async ({

@@ -67,9 +67,13 @@ for (const route of routes) {
       !marker ||
       !html.includes(marker) ||
       !html.includes(`data-prerendered-route="${route.path}"`) ||
-      !html.includes('id="__TSR_DEHYDRATED__"')
+      html.includes('id="__TSR_DEHYDRATED__"') ||
+      !html.includes("$_TSR.router=") ||
+      !html.includes("$_TSR.e()")
     )
-      throw new Error(`${path} lacks real route markup or hydration state`);
+      throw new Error(
+        `${path} lacks real route markup or TanStack Router hydration state`,
+      );
   }
 }
 const fallback = await readFile(`${root}/404.html`, "utf8");

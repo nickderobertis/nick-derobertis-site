@@ -18,12 +18,13 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import type { ComponentType } from "react";
-import { Suspense } from "react";
 import { routes } from "./routes";
 
 export type RouteView = "default" | "empty" | "error" | "loading";
 type PageProps = {
-  initialState?: { name: "ready"; research: Research } | { name: "error" };
+  initialState?:
+    | { name: "ready"; research: Research }
+    | { name: "loading" | "error" };
   initialView?: RouteView | string | null;
   projects?: SoftwareProjects;
   courses?: Courses;
@@ -55,18 +56,14 @@ export function createSiteRouter({
   pages,
   context,
 }: {
-  history: RouterHistory;
+  history?: RouterHistory;
   pages: RoutePages;
   context: RouterContext;
 }) {
   const Root = createRootRouteWithContext<RouterContext>()({
     component: () => (
       <SiteLayout routes={routes.map(({ path, label }) => ({ path, label }))}>
-        <Suspense
-          fallback={<output className="placeholder">Loading page…</output>}
-        >
-          <Outlet />
-        </Suspense>
+        <Outlet />
       </SiteLayout>
     ),
   });
@@ -90,10 +87,17 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Research"),
     loader: async ({ context: ctx }) => {
+      const view = ctx.search.get("research-scenario");
+      if (view === "loading" || view === "error")
+        return { research: null, view };
       try {
-        return { research: await ctx.loadDomain("research") };
+        const loaded = await ctx.loadDomain("research");
+        return {
+          research: view === "empty" ? { ...loaded, projects: [] } : loaded,
+          view,
+        };
       } catch {
-        return { research: null };
+        return { research: null, view: "error" };
       }
     },
     component: () => {
@@ -101,9 +105,11 @@ export function createSiteRouter({
       return (
         <pages.research
           initialState={
-            data.research
-              ? { name: "ready", research: data.research }
-              : { name: "error" }
+            data.view === "loading"
+              ? { name: "loading" }
+              : data.research
+                ? { name: "ready", research: data.research }
+                : { name: "error" }
           }
         />
       );
@@ -160,7 +166,7 @@ export function createSiteRouter({
   ]);
   return createRouter({
     routeTree,
-    history,
+    ...(history ? { history } : {}),
     context,
     basepath: "/nick-derobertis-site",
     defaultPreload: "intent",

@@ -1,5 +1,4 @@
 import "@site/design-system";
-import { useEffect, useState } from "react";
 import "./bio.css";
 
 function Marker({ children }: { children: string }) {
@@ -129,13 +128,7 @@ export default function BioPage({ initialView }: { initialView?: string }) {
     (typeof window === "undefined"
       ? null
       : new URLSearchParams(window.location.search).get("bio-view"));
-  const [loading, setLoading] = useState(scenario === "loading");
-  useEffect(() => {
-    if (!loading) return;
-    const timer = window.setTimeout(() => setLoading(false), 500);
-    return () => window.clearTimeout(timer);
-  }, [loading]);
-  if (loading) return <BioState state="loading" />;
+  if (scenario === "loading") return <BioState state="loading" />;
   if (scenario === "empty" || scenario === "error")
     return <BioState state={scenario} />;
   // llmlint: ignore-end[changed_behavior_has_e2e]

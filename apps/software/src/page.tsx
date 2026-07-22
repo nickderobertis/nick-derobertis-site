@@ -3,7 +3,6 @@ import {
   calculateSoftwareStats,
   softwareProjectLogo,
 } from "@site/data-access-software";
-import { useEffect, useState } from "react";
 import "@site/design-system";
 
 export type SoftwareView = "default" | "empty" | "error" | "loading";
@@ -15,18 +14,6 @@ function requestedView(): SoftwareView {
   return value === "empty" || value === "error" || value === "loading"
     ? value
     : "default";
-}
-
-function useSoftwareView(initialView?: SoftwareView): SoftwareView {
-  const [view, setView] = useState<SoftwareView>(
-    () => initialView ?? requestedView(),
-  );
-  useEffect(() => {
-    if (view !== "loading") return;
-    const timer = window.setTimeout(() => setView("default"), 1_500);
-    return () => window.clearTimeout(timer);
-  }, [view]);
-  return view;
 }
 
 function formatNumber(value: number): string {
@@ -118,7 +105,7 @@ export default function SoftwarePage({
   initialView?: SoftwareView;
   projects?: SoftwareProject[];
 }) {
-  const view = useSoftwareView(initialView);
+  const view = initialView ?? requestedView();
   return (
     <section className="software-page">
       <header className="software-banner">

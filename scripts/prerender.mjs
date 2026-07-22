@@ -1,6 +1,7 @@
 import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { rspack } from "@rspack/core";
+import { JSDOM } from "jsdom";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
@@ -61,7 +62,7 @@ const builtDocument = await readFile(join(output, "index.html"), "utf8");
 const template = builtDocument
   .replace(/<link rel="canonical" href="[^"]*">/g, "")
   .replace(
-    /<div id="root"[^>]*>[\s\S]*<\/div>(?:<script id="__TSR_DEHYDRATED__"[\s\S]*?<\/script>)?<\/body>/,
+    /<div id="root"[^>]*>[\s\S]*<\/body>/,
     '<div id="root"></div></body>',
   );
 
@@ -78,13 +79,37 @@ await new Promise((resolve, reject) => {
 const rendererModule = await import("../dist/prerender-renderer/render.cjs");
 const { renderRoute } = rendererModule.default ?? rendererModule;
 
+function finalizeReactPrerender(html) {
+  const dom = new JSDOM(`<body>${html}</body>`);
+  const { document, Node } = dom.window;
+  for (const template of document.querySelectorAll('template[id^="B:"]')) {
+    const boundaryId = template.id;
+    const contentId = boundaryId.replace("B:", "S:");
+    const content = document.getElementById(contentId);
+    if (!content) continue;
+    const opening = template.previousSibling;
+    if (opening?.nodeType === Node.COMMENT_NODE) opening.nodeValue = "$";
+    while (content.firstChild)
+      template.parentNode?.insertBefore(content.firstChild, template);
+    template.remove();
+    const instruction = content.nextElementSibling;
+    content.remove();
+    if (
+      instruction?.tagName === "SCRIPT" &&
+      instruction.textContent?.includes(`$RC("${boundaryId}","${contentId}")`)
+    )
+      instruction.remove();
+  }
+  return document.body.innerHTML;
+}
+
 async function documentFor(route) {
   const title =
     route.path === "/"
       ? "Nick DeRobertis"
       : `${route.heading} | Nick DeRobertis`;
   const rendered = await renderRoute(route.path);
-  const dehydrated = JSON.stringify(rendered.state).replaceAll("<", "\\u003c");
+  const routeHtml = finalizeReactPrerender(rendered.html);
   return template
     .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
     .replace(
@@ -93,7 +118,7 @@ async function documentFor(route) {
     )
     .replace(
       '<div id="root"></div>',
-      `<div id="root" data-prerendered-route="${route.path}">${rendered.html}</div><script id="__TSR_DEHYDRATED__" type="application/json">${dehydrated}</script>`,
+      `<div id="root" data-prerendered-route="${route.path}">${routeHtml}</div>${rendered.hydration}`,
     );
 }
 
