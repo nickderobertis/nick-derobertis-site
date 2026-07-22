@@ -32,10 +32,12 @@ const productionConfig = productionConfigSchema.parse(
 );
 const localRoutes = [
   ...productionConfig.routes,
-  "/remotes/bio/",
-  ...["loading", "empty", "error"].flatMap((state) => [
-    `/bio?bio-view=${state}`,
-    `/remotes/bio/?bio-view=${state}`,
+  ...["bio", "research", "software", "courses"].flatMap((route) => [
+    `/remotes/${route}/`,
+    ...["loading", "empty", "error"].flatMap((state) => [
+      `/${route}?${route}-view=${state}`,
+      `/remotes/${route}/?${route}-view=${state}`,
+    ]),
   ]),
 ];
 const localUrlSchema = z
@@ -121,8 +123,12 @@ describe("performance audit real-browser e2e CLI", () => {
       [auditScript, "--config", filename],
       {
         cwd: directory,
-        timeout: 240_000,
-        env: { ...process.env, PERF_RAW_DIR: rawDirectory },
+        timeout: 600_000,
+        env: {
+          ...process.env,
+          PERF_RAW_DIR: rawDirectory,
+          PERF_LOCAL_REUSE_IDENTICAL: "1",
+        },
       },
     );
 
@@ -183,7 +189,7 @@ describe("performance audit real-browser e2e CLI", () => {
     );
     expect(malformed.status).toBe(1);
     expect(malformed.stderr).toContain("fixture new-home-1.json is invalid");
-  }, 360_000);
+  }, 600_000);
 
   it("reports actionable browser startup failure through the real CLI", async () => {
     const url = await localSite();
@@ -215,6 +221,7 @@ describe("performance audit real-browser e2e CLI", () => {
       ...process.env,
       PERF_CONFIG: filename,
       PERF_OUTPUT_DIR: outputDirectory,
+      NX_CACHE_DIRECTORY: path.join(directory, "nx-cache"),
     };
     const perf = await execFileAsync("just", ["perf", url, "1"], {
       cwd: workspace,
