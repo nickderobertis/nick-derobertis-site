@@ -68,7 +68,7 @@ test("every prerendered route contains substantive feature content", async ({
   browser,
 }) => {
   const expected = [
-    ["", "Finance researcher & educator"],
+    ["", "Who am I?"],
     ["bio", "Reproducible Research"],
     ["research", "Valuation without Cash Flows"],
     ["software", "Python Tools for Working with Data"],
