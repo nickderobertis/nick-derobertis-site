@@ -13,15 +13,12 @@
       }
     },
     "build": {
-      "executor": "@nx/rspack:rspack",
+      "executor": "nx:run-commands",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "rspackConfig": "apps/bio/rspack.config.ts",
+        "command": "rsbuild build --config apps/bio/rsbuild.config.ts",
         "outputPath": "dist/apps/bio",
-        "main": "apps/bio/src/main.tsx",
-        "tsConfig": "apps/bio/tsconfig.app.json",
-        "index": "apps/bio/src/index.html",
-        "assets": []
+        "forwardAllArgs": false
       }
     },
     "lint": {
