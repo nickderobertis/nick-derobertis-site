@@ -1,5 +1,6 @@
 import { siteBase } from "@site/data-access-core";
 import { homeContent, readPaneState } from "@site/data-access-home";
+import "./cards.css";
 
 export default function HomeCardsPage() {
   const state = readPaneState(window.location.search);

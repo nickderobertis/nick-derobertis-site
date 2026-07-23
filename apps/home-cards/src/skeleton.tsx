@@ -1,3 +1,5 @@
+import "./cards.css";
+
 export default function HomeCardsSkeleton() {
   return (
     <section

@@ -21,9 +21,7 @@
       "@site/data-access-research": ["libs/data-access-research/src/index.ts"],
       "@site/data-access-software": ["libs/data-access-software/src/index.ts"],
       "@site/data-access-courses": ["libs/data-access-courses/src/index.ts"],
-      "@site/analytics": ["libs/analytics/src/index.ts"],
       "@site/layout": ["libs/layout/src/index.ts"],
-      "@site/ui": ["libs/ui/src/index.ts"],
       "@site/build-config": ["libs/build-config/src/index.ts"]
     }
   }

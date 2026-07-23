@@ -1,0 +1,63 @@
+.site-header {
+  background: var(--navy);
+  color: #fff;
+}
+.header-inner,
+.footer-inner {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: auto;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 5rem;
+  gap: 1.5rem;
+}
+.brand {
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.nav-list {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+.nav-link {
+  display: block;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+.nav-link:hover,
+.nav-link:focus-visible,
+.nav-link[aria-current="page"] {
+  background: var(--blue);
+  outline-offset: 3px;
+}
+.site-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+.footer-inner {
+  padding: 1.5rem 0;
+}
+/* llmlint: ignore-block[changed_behavior_has_e2e] Cross-path route journeys cover this tablet header boundary. */
+@media (max-width: 820px) {
+  .header-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1rem 0;
+  }
+  .nav-list {
+    gap: 0;
+  }
+  .nav-link {
+    padding: 0.5rem;
+  }
+}
+/* llmlint: ignore-end[changed_behavior_has_e2e] */

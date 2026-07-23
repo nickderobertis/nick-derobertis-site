@@ -1,3 +1,5 @@
+import "./bio.css";
+
 export default function BioSkeleton() {
   return (
     <article

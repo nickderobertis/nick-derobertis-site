@@ -3,7 +3,7 @@ import {
   calculateAwardsStats,
   selectedAwards,
 } from "@site/data-access-awards";
-import { AwardEmblem } from "@site/design-system";
+import { AwardEmblem } from "./award-emblem";
 import { useAwards } from "./use-awards";
 import "./awards.css";
 

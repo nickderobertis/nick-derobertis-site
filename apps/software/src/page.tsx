@@ -5,6 +5,7 @@ import {
 } from "@site/data-access-software";
 import { useEffect, useState } from "react";
 import "@site/design-system";
+import "./software.css";
 
 type SoftwareView = "default" | "empty" | "error" | "loading";
 

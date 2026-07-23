@@ -1,3 +1,5 @@
+import "./research.css";
+
 export default function ResearchSkeleton() {
   return (
     <section

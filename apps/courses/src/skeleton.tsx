@@ -1,3 +1,5 @@
+import "./courses.css";
+
 export default function CoursesSkeleton() {
   return (
     <section

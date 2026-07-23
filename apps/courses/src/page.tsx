@@ -6,6 +6,7 @@ import {
 import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
 import { useEffect, useState } from "react";
+import "./courses.css";
 
 type CoursesView = "default" | "empty" | "error" | "loading";
 

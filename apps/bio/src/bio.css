@@ -101,3 +101,62 @@
     text-align: left;
   }
 }
+.remote-skeleton {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+}
+.remote-skeleton :is(i, b, div) {
+  border-radius: 0.75rem;
+}
+.remote-skeleton :is(i, b),
+.skeleton-heading,
+.skeleton-banner,
+.skeleton-hero,
+.skeleton-cover,
+.skeleton-portrait,
+.skeleton-circle,
+.skeleton-stats {
+  display: block;
+  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote-skeleton :is(i, b, div) {
+    animation: none;
+  }
+}
+.skeleton-bio {
+  grid-template-columns: minmax(12rem, 35%) 1fr;
+}
+.skeleton-cover {
+  min-height: 38rem;
+}
+.skeleton-copy {
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+}
+.skeleton-copy > b {
+  width: 65%;
+  height: 3rem;
+}
+.skeleton-copy > i {
+  height: 1rem;
+}
+@media (max-width: 48rem) {
+  .skeleton-bio {
+    grid-template-columns: 1fr;
+  }
+  .skeleton-cover {
+    min-height: 16rem;
+  }
+}

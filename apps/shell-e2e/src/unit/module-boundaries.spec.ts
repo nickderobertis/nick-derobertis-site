@@ -37,8 +37,10 @@ describe("remote module boundaries", () => {
       import "@site/layout";
       import "../../../software/src/page";
       import "../../../bio/src/page";
+      import "../../../awards/src/award-emblem";
+      import "../../../software/src/software.css";
     `);
-    expect(messages).toHaveLength(3);
+    expect(messages).toHaveLength(5);
     expect(messages.every((message) => message.severity === 2)).toBe(true);
   }, 15_000);
 });

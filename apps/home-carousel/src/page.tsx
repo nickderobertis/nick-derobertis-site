@@ -1,6 +1,7 @@
 import { siteBase } from "@site/data-access-core";
 import { homeContent, readPaneState } from "@site/data-access-home";
 import { useEffect, useState } from "react";
+import "./carousel.css";
 
 function useCarousel(length: number, enabled: boolean) {
   const [active, setActive] = useState(0);

@@ -4,7 +4,6 @@
   "sourceRoot": "libs/layout/src",
   "projectType": "library",
   "tags": ["type:layout", "scope:layout"],
-  "implicitDependencies": ["design-system", "ui"],
   "targets": {
     "lint": {
       "executor": "nx:run-commands",

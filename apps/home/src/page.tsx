@@ -8,6 +8,7 @@ import AwardsSkeleton from "awards/Skeleton";
 import { lazy, Suspense } from "react";
 import SkillsSkeleton from "skills/Skeleton";
 import TimelineSkeleton from "timeline/Skeleton";
+import "./home.css";
 
 // Home eagerly resolves each pane's lightweight skeleton while its Page stays
 // behind a dynamic import, preserving an app-shaped fallback per pane.

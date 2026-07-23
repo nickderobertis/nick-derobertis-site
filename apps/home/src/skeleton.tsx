@@ -1,3 +1,5 @@
+import "./home.css";
+
 export default function HomeSkeleton() {
   return (
     <section
