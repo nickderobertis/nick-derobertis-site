@@ -71,10 +71,10 @@ prerender:
 
 # Network-dependent Lighthouse comparison; intentionally excluded from `check`.
 perf url="" runs="":
-    @log=$(mktemp); trap 'rm -f "$log"' EXIT; PERF_URL="$1" PERF_RUNS="$2" pnpm exec nx run shell:perf >"$log" 2>&1 || { cat "$log" >&2; echo "perf: audit failed; correct the reported URL/browser issue and rerun just perf" >&2; exit 1; }; rg -m1 '^Performance comparison complete' "$log"
+    @log=$(mktemp); trap 'rm -f "$log"' EXIT; PERF_URL="$1" PERF_RUNS="$2" pnpm exec nx run shell:perf >"$log" 2>&1 || { cat "$log" >&2; echo "perf: audit failed; correct the reported URL/browser issue and rerun just perf" >&2; exit 1; }; grep -m1 '^Performance comparison complete' "$log"
 
 perf-compare new_url="" original_url="" runs="":
-    @log=$(mktemp); trap 'rm -f "$log"' EXIT; PERF_URL="$1" PERF_ORIGINAL_URL="$2" PERF_RUNS="$3" pnpm exec nx run shell:perf >"$log" 2>&1 || { cat "$log" >&2; echo "perf-compare: audit failed; correct the reported URL/browser issue and rerun just perf-compare" >&2; exit 1; }; rg -m1 '^Performance comparison complete' "$log"
+    @log=$(mktemp); trap 'rm -f "$log"' EXIT; PERF_URL="$1" PERF_ORIGINAL_URL="$2" PERF_RUNS="$3" pnpm exec nx run shell:perf >"$log" 2>&1 || { cat "$log" >&2; echo "perf-compare: audit failed; correct the reported URL/browser issue and rerun just perf-compare" >&2; exit 1; }; grep -m1 '^Performance comparison complete' "$log"
 
 # Build the complete federated artifact before serving it at the Pages base path.
 serve: prerender
