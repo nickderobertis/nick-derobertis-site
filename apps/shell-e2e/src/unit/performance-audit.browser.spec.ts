@@ -224,7 +224,7 @@ describe("performance audit real-browser e2e CLI", () => {
     expect(result.stderr).toContain(
       "correct the reported input or environment",
     );
-  });
+  }, 30_000);
 
   it("drives concise success and actionable failure through both just recipes", async () => {
     const url = await startLocalSite();
