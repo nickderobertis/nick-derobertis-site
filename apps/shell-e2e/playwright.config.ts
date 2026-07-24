@@ -27,9 +27,11 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: `PORT=${port} node ../../scripts/serve-e2e.mjs`,
+    command: "exec node ../../scripts/serve-e2e.mjs",
+    env: { PORT: port },
     url: testBaseUrl,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
+    gracefulShutdown: { signal: "SIGTERM", timeout: 5_000 },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
 });
