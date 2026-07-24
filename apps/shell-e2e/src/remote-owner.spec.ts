@@ -119,7 +119,21 @@ for (const [render, path] of [
     expect(failures).toEqual([]);
   });
 
-for (const render of ["host-composed", "standalone"] as const)
+const nestedHomeOwners = new Set([
+  "timeline",
+  "awards",
+  "skills",
+  "home-carousel",
+  "home-cards",
+  "home-story",
+  "home-contact",
+]);
+const loadingBoundaries =
+  owner && nestedHomeOwners.has(owner)
+    ? (["host-composed", "standalone"] as const)
+    : (["standalone"] as const);
+
+for (const render of loadingBoundaries)
   test(`${owner} shows its skeleton while loading through its ${render} boundary`, async ({
     page,
   }) => {

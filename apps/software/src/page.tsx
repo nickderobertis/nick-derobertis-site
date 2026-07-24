@@ -5,6 +5,7 @@ import {
 } from "@site/data-access-software";
 import "@site/design-system";
 import type { SoftwarePageProps } from "@site/route-state";
+import "./software.css";
 import { useSoftwarePage } from "./use-software-page";
 
 function formatNumber(value: number): string {

@@ -2,6 +2,7 @@ import type { Course, Resource } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
 import type { CoursesPageProps } from "@site/route-state";
+import "./courses.css";
 import { useCoursesPage } from "./use-courses-page";
 
 function ResourceTree({ resources }: { resources: Resource[] }) {
