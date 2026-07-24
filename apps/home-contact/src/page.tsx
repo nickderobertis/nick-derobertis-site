@@ -2,7 +2,9 @@ import { homeContent, readPaneState } from "@site/data-access-home";
 import "./contact.css";
 
 export default function HomeContactPage() {
-  const state = readPaneState(window.location.search);
+  const state = readPaneState(
+    typeof window === "undefined" ? "" : window.location.search,
+  );
   if (state === "loading")
     return <output className="pane-state">Loading contact options…</output>;
   if (state === "error")

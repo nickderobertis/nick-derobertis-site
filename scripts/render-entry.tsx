@@ -4,22 +4,31 @@ import {
   RouterServer,
 } from "@tanstack/react-router/ssr/server";
 import { prerender } from "react-dom/static";
+import AwardsPage from "../apps/awards/src/page";
 import BioPage from "../apps/bio/src/page";
 import CoursesPage from "../apps/courses/src/page";
+import HomeCardsPage from "../apps/home-cards/src/page";
+import HomeCarouselPage from "../apps/home-carousel/src/page";
+import HomeContactPage from "../apps/home-contact/src/page";
+import HomeStoryPage from "../apps/home-story/src/page";
 import ResearchPage from "../apps/research/src/page";
 import { createSiteRouter } from "../apps/shell/src/router";
 import { routes } from "../apps/shell/src/routes";
+import SkillsPage from "../apps/skills/src/page";
 import SoftwarePage from "../apps/software/src/page";
+import TimelinePage from "../apps/timeline/src/page";
 
-// llmlint: ignore[changed_behavior_has_e2e] Deep Home-remote prerendering is explicitly owned by the dependent SSG node; this node preserves the existing substantive shallow Home artifact while proving real source rendering for the four leaf routes.
-function HomePlaceholder() {
+function HomePage() {
   return (
-    <section className="hero">
-      <p className="eyebrow">Nick DeRobertis</p>
-      <h1>Finance, research, and software</h1>
-      <p>Welcome to the professional site of Nick DeRobertis.</p>
-      <p>Who am I?</p>
-    </section>
+    <div className="home-main">
+      <HomeCarouselPage />
+      <HomeCardsPage />
+      <HomeStoryPage />
+      <SkillsPage />
+      <AwardsPage />
+      <HomeContactPage />
+      <TimelinePage />
+    </div>
   );
 }
 
@@ -40,7 +49,7 @@ export async function renderRoute(path: string) {
     createRouter: () =>
       createSiteRouter({
         pages: {
-          home: HomePlaceholder,
+          home: HomePage,
           bio: BioPage,
           research: ResearchPage,
           software: SoftwarePage,

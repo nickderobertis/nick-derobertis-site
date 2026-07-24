@@ -3,7 +3,9 @@ import { homeContent, readPaneState } from "@site/data-access-home";
 import "./story.css";
 
 export default function HomeStoryPage() {
-  const state = readPaneState(window.location.search);
+  const state = readPaneState(
+    typeof window === "undefined" ? "" : window.location.search,
+  );
   if (state === "loading")
     return <output className="pane-state">Loading Nick’s story…</output>;
   if (state === "error")
