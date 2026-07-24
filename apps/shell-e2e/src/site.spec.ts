@@ -4,7 +4,6 @@ const pages = [
   {
     link: "Home",
     heading: "Finance researcher & educator",
-    staticHeading: "Finance, research, and software",
     path: "",
   },
   {
@@ -56,7 +55,7 @@ test("every route has useful HTML with JavaScript disabled", async ({
     await page.goto(route.path);
     await expect(
       page.getByRole("heading", {
-        name: "staticHeading" in route ? route.staticHeading : route.heading,
+        name: route.heading,
       }),
     ).toBeVisible();
     await expect(page).toHaveTitle(/Nick DeRobertis/);
