@@ -1,5 +1,7 @@
+import type { Research } from "@site/data-access-core";
+import type { ResearchPageProps } from "@site/route-state";
 import { ResearchContent } from "./research-content";
-import { useResearch } from "./use-research";
+import { useResearchPage } from "./use-research-page";
 import "@site/design-system";
 import "./research.css";
 
@@ -21,9 +23,11 @@ function StateMessage({ state }: { state: "empty" | "loading" | "error" }) {
   );
 }
 
-export default function ResearchPage() {
-  const state = useResearch();
+export default function ResearchPage({
+  initialState,
+}: ResearchPageProps<Research>) {
+  const state = useResearchPage(initialState);
   if (state.name !== "ready") return <StateMessage state={state.name} />;
-  if (!state.research.projects?.length) return <StateMessage state="empty" />;
-  return <ResearchContent research={state.research} />;
+  if (!state.value.projects?.length) return <StateMessage state="empty" />;
+  return <ResearchContent research={state.value} />;
 }

@@ -23,7 +23,7 @@
     "lint": { "cache": true },
     "typecheck": { "cache": true },
     "screenshot": {
-      "cache": true,
+      "cache": false,
       "dependsOn": [
         "build",
         {

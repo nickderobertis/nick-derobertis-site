@@ -2,12 +2,14 @@ import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
 import { remoteMap } from "@site/build-config";
+import { TanStackRouterGeneratorRspack } from "@tanstack/router-plugin/rspack";
 
 const base = "/nick-derobertis-site/";
 export default {
   entry: "./apps/shell/src/main.tsx",
   output: { publicPath: base, uniqueName: "shell", clean: true },
   plugins: [
+    TanStackRouterGeneratorRspack({ enableRouteGeneration: false }),
     new NxAppRspackPlugin({
       tsConfig: "apps/shell/tsconfig.app.json",
       main: "apps/shell/src/main.tsx",
