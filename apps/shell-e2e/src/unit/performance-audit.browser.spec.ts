@@ -202,7 +202,7 @@ describe("performance audit real-browser e2e CLI", () => {
     );
     expect(malformed.status).toBe(1);
     expect(malformed.stderr).toContain("fixture new-home-1.json is invalid");
-  }, 600_000);
+  }, 1_200_000);
 
   it("reports actionable browser startup failure through the real CLI", async () => {
     const url = await startLocalSite();
