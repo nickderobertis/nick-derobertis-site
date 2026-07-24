@@ -38,7 +38,9 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "options": { "command": "scripts/visual-project.sh timeline" }
+      "options": {
+        "command": "node scripts/capture-visual.mjs timeline \"${SHOTS_OUT:-shots/current/timeline/x86_64}\""
+      }
     }
   }
 }

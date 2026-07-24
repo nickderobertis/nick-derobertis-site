@@ -40,7 +40,9 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "options": { "command": "scripts/visual-project.sh home-carousel" }
+      "options": {
+        "command": "node scripts/capture-visual.mjs home-carousel \"${SHOTS_OUT:-shots/current/home-carousel/x86_64}\""
+      }
     }
   }
 }

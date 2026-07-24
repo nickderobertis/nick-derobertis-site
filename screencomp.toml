@@ -1,6 +1,24 @@
 [capture]
 arches = ["x86_64"]
 
+# Local pre-push guard: which changed paths make .githooks/pre-push re-capture the
+# affected microfrontends. Screenshot-relevant source and the capture harness;
+# baselines are the guard's output, so they are deliberately excluded.
+[guard]
+paths = [
+  "apps/**/*.ts",
+  "apps/**/*.tsx",
+  "apps/**/*.css",
+  "apps/**/*.html",
+  "libs/**/*.ts",
+  "libs/**/*.tsx",
+  "libs/**/*.css",
+  "scripts/capture-visual.mjs",
+  "scripts/e2e-data-provider.mjs",
+  "visual-projects.json",
+  "screencomp.toml",
+]
+
 [comment]
 title = "Nick DeRobertis site visual changes"
 marker = "screencomp"

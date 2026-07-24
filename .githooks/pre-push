@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+# screencomp local pre-push guard — the strict gate's local half, adapted for
+# this affected-only Nx monorepo.
+#
+# CI (.github/workflows/visual-docs.yml) hard-fails when a microfrontend's
+# capture drifts from its committed baseline manifest. This hook lets you
+# regenerate and COMMIT the new baseline before pushing, so CI stays green on
+# intended changes and goes red only on ones you missed. It re-captures ONLY when
+# screenshot-relevant files change (see [guard].paths in screencomp.toml), and
+# only the microfrontends Nx reports affected — matching CI's affected matrix.
+#
+# The loop when you change something visual: edit, then `git push`. If nothing
+# screenshot-relevant changed the hook is a no-op; if it did, it captures the
+# affected apps in the SAME pinned container CI uses and, on drift, regenerates
+# each drifted app's baseline manifest, builds a review gallery, and BLOCKS —
+# then you review the gallery, `git add` the manifest(s), commit, and push again.
+# It never auto-commits. `git push --no-verify` bypasses it; under CI it no-ops.
+#
+# Enable once per clone:  git config core.hooksPath .githooks
+
+set -euo pipefail
+
+# Captures always run in a Linux container, so only the CPU arch varies. This
+# repo maintains x86_64 (screencomp.toml [capture].arches); the container capture
+# reproduces those bytes regardless of the host CPU.
+ARCH="x86_64"
+CONTAINER="mcr.microsoft.com/playwright:v1.61.1-noble"
+CONFIG="${SCREENCOMP_CONFIG:-screencomp.toml}"
+
+# No-op under CI: the visual-docs workflow already captures and classifies there.
+if [ -n "${CI:-}" ]; then
+  exit 0
+fi
+
+# Without the CLI the guard cannot evaluate the push. Warn loudly and skip rather
+# than pass silently; set SCREENCOMP_GUARD_REQUIRE=1 to make it a hard failure.
+if ! command -v screencomp >/dev/null 2>&1; then
+  {
+    echo "pre-push: screencomp is NOT on PATH — the visual guard cannot run."
+    echo "          Install it, then: git config core.hooksPath .githooks"
+    echo "          CI still gates this. Set SCREENCOMP_GUARD_REQUIRE=1 to fail here instead."
+  } >&2
+  [ -n "${SCREENCOMP_GUARD_REQUIRE:-}" ] && exit 1
+  exit 0
+fi
+
+# --- 1. Compute the push range(s) from git's stdin ---------------------------
+ranges=()
+if [ -n "${SCREENCOMP_GUARD_RANGE:-}" ]; then
+  ranges+=("$SCREENCOMP_GUARD_RANGE") # test/override hook: diff this range directly
+else
+  zero='^0+$'
+  while read -r _local_ref local_sha _remote_ref remote_sha; do
+    [ -z "${local_sha:-}" ] && continue
+    if [[ "$local_sha" =~ $zero ]]; then
+      continue # branch deletion
+    elif [[ "$remote_sha" =~ $zero ]]; then
+      base="$(git merge-base origin/HEAD "$local_sha" 2>/dev/null || true)"
+      if [ -n "$base" ]; then ranges+=("${base}..${local_sha}"); else ranges+=("$local_sha"); fi
+    else
+      ranges+=("${remote_sha}..${local_sha}")
+    fi
+  done
+fi
+if [ "${#ranges[@]}" -eq 0 ]; then
+  exit 0
+fi
+changed="$(for r in "${ranges[@]}"; do git diff --name-only "$r"; done | sort -u)"
+
+# --- 2. Cheap path: is anything screenshot-relevant? -------------------------
+set +e
+printf '%s\n' "$changed" | screencomp scope --config "$CONFIG" --changed-from - --exit-code --quiet
+scope_status=$?
+set -e
+case "$scope_status" in
+  0) exit 0 ;; # nothing relevant: pass silently, no capture
+  3) : ;;      # relevant path matched: fall through
+  *)
+    echo "pre-push: 'screencomp scope' failed (exit $scope_status); skipping the visual guard. CI still gates this." >&2
+    exit 0
+    ;;
+esac
+
+# --- 3. Which microfrontends are affected? (mirrors CI's affected matrix) -----
+range_base="${ranges[0]%%..*}"
+range_head="${ranges[0]##*..}"
+if [ "$range_base" = "$range_head" ]; then
+  echo "pre-push: cannot derive an affected range from '$range_head'; capturing all screenshot projects." >&2
+  affected_json="$(pnpm exec nx show projects --with-target screenshot --json)"
+else
+  affected_json="$(pnpm exec nx show projects --affected --with-target screenshot --base="$range_base" --head="$range_head" --json)"
+fi
+mapfile -t apps < <(printf '%s' "$affected_json" | node -e '
+  const a = JSON.parse(require("node:fs").readFileSync(0, "utf8"));
+  if (!Array.isArray(a) || !a.every((x) => typeof x === "string" && /^[a-z][a-z0-9-]*$/.test(x))) process.exit(2);
+  process.stdout.write([...new Set(a)].sort().join("\n"));
+')
+if [ "${#apps[@]}" -eq 0 ]; then
+  echo "pre-push: screenshot-relevant files changed, but no microfrontend was affected — ok to push"
+  exit 0
+fi
+
+# --- 4. Capture requires Docker ----------------------------------------------
+if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+  {
+    echo
+    echo "############################################################################"
+    echo "# screencomp pre-push guard: screenshot-relevant files changed, but Docker  #"
+    echo "# is not available to re-capture them. Refusing to push (a pass here would  #"
+    echo "# be false assurance). Start Docker and retry, or: git push --no-verify      #"
+    echo "############################################################################"
+    echo
+  } >&2
+  exit 1
+fi
+
+# Pass the host CA bundle into the container so a TLS-intercepting proxy does not
+# break `pnpm install`; no-op when none is configured.
+ca_args=()
+host_ca="${NODE_EXTRA_CA_CERTS:-${SSL_CERT_FILE:-}}"
+if [ -n "$host_ca" ] && [ -f "$host_ca" ]; then
+  ca_args+=(-v "$host_ca:/host-ca.crt:ro" -e NODE_EXTRA_CA_CERTS=/host-ca.crt -e SSL_CERT_FILE=/host-ca.crt)
+fi
+
+# Capture every affected app into shots/current/<app>/<arch> using the SAME
+# container and Nx screenshot target as CI, so local bytes match. One install,
+# then loop; the `-v /work/node_modules` volume masks the host tree for a clean
+# install matching CI's fresh checkout.
+echo "pre-push: capturing affected microfrontends (${apps[*]}) in $CONTAINER…" >&2
+docker run --rm --platform="linux/amd64" --ipc=host --shm-size=2g \
+  -v "$PWD:/work" -v /work/node_modules -w /work \
+  -e "SCREENCOMP_APPS=${apps[*]}" -e "ARCH=$ARCH" \
+  ${ca_args[@]+"${ca_args[@]}"} \
+  "$CONTAINER" \
+  bash -lc '
+    set -euo pipefail
+    corepack enable
+    pnpm install --frozen-lockfile
+    for app in $SCREENCOMP_APPS; do
+      echo "::capture $app::"
+      SHOTS_OUT="shots/current/$app/$ARCH" pnpm exec nx run "$app:screenshot"
+    done
+  '
+
+# --- 5. Classify each affected app against its committed baseline manifest -----
+drifted=()
+for app in "${apps[@]}"; do
+  manifest="apps/$app/visual/baseline/$ARCH.json"
+  set +e
+  screencomp classify --baseline-manifest "$manifest" --current "shots/current/$app" --arch "$ARCH" --exit-code --quiet
+  status=$?
+  set -e
+  case "$status" in
+    0) echo "pre-push: $app unchanged against $manifest" ;;
+    3)
+      drifted+=("$app")
+      # Regenerate the drifted app's manifest and a review gallery. Never commit.
+      screencomp manifest --input "shots/current/$app" --arch "$ARCH" --output "$manifest"
+      screencomp gallery --input "shots/current/$app" --arch "$ARCH" \
+        --output "shots/review/$app" --title "Pre-push review: $app" >/dev/null
+      ;;
+    *)
+      echo "pre-push: screencomp classify failed for $app (exit $status)" >&2
+      exit "$status"
+      ;;
+  esac
+done
+
+if [ "${#drifted[@]}" -eq 0 ]; then
+  echo "pre-push: all affected microfrontends match their baselines — ok to push"
+  exit 0
+fi
+
+{
+  echo
+  echo "############################################################################"
+  echo "#  SCREENSHOTS CHANGED — push blocked for review                            #"
+  echo "############################################################################"
+  echo "#"
+  echo "#  Drifted microfrontend(s): ${drifted[*]}"
+  echo "#"
+  echo "#  Review each rendered gallery to confirm the change is intended:"
+  for app in "${drifted[@]}"; do
+    echo "#      shots/review/$app/index.html"
+  done
+  echo "#"
+  echo "#  If intended, commit the regenerated baseline manifest(s) and push again:"
+  for app in "${drifted[@]}"; do
+    echo "#      git add apps/$app/visual/baseline/$ARCH.json"
+  done
+  echo "#      git commit -m 'chore(visual): update screenshot baselines'"
+  echo "#      git push"
+  echo "#"
+  echo "#  If NOT intended: investigate the diff. To bypass: git push --no-verify"
+  echo "#"
+  echo "############################################################################"
+  echo
+} >&2
+exit 1

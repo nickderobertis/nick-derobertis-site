@@ -38,7 +38,9 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "options": { "command": "scripts/visual-project.sh bio" }
+      "options": {
+        "command": "node scripts/capture-visual.mjs bio \"${SHOTS_OUT:-shots/current/bio/x86_64}\""
+      }
     }
   }
 }

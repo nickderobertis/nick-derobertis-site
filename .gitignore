@@ -1,7 +1,6 @@
 node_modules/
-apps/*/visual/current/
-apps/*/visual/verify/
-apps/*/visual/drift
+.pnpm-store/
+shots/
 dist/
 coverage/
 .nx/

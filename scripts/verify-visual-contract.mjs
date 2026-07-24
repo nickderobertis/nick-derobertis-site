@@ -25,15 +25,21 @@ if (
   throw new Error(
     "visual-tools.json must contain non-empty architecture, playwrightContainer, and screencompVersion strings",
   );
+
+// Visual regression is screencomp's canonical reusable workflow now, so the pins
+// live in a few named consumers. Every value in visual-tools.json must appear in
+// exactly its declared consumers — no more, no less — so a bump can never land in
+// one file and drift in another (e.g. the reusable-workflow ref, the installed
+// CLI, and the capture container must all move together).
 const sources = [
   ["workflow", readFileSync(".github/workflows/visual-docs.yml", "utf8")],
-  [
-    "publish workflow",
-    readFileSync(".github/workflows/visual-docs-publish.yml", "utf8"),
-  ],
-  ["visual runner", readFileSync("scripts/visual-project.sh", "utf8")],
   ["bootstrap", readFileSync("justfile", "utf8")],
+  ["pre-push guard", readFileSync(".githooks/pre-push", "utf8")],
   ["screencomp config", readFileSync("screencomp.toml", "utf8")],
+  [
+    "affected selector",
+    readFileSync("scripts/affected-visual-projects.mjs", "utf8"),
+  ],
 ];
 const captureSource = readFileSync("scripts/capture-visual.mjs", "utf8");
 const nxConfig = JSON.parse(readFileSync("nx.json", "utf8"));
@@ -64,6 +70,10 @@ if (
 )
   throw new Error(
     "Nx screenshot build dependencies must match the home composition remote map",
+  );
+if (nxConfig.targetDefaults?.screenshot?.cache !== false)
+  throw new Error(
+    "Nx screenshot target must not cache: its output path depends on SHOTS_OUT, and the reusable workflow re-runs it into a second tree for the reproducibility gate",
   );
 const visualProjects = JSON.parse(readFileSync("visual-projects.json", "utf8"));
 const allowedProjectStates = new Set([
@@ -118,9 +128,14 @@ for (const [project, config] of Object.entries(visualProjects)) {
       throw new Error(`Visual project ${project} baseline is missing ${state}`);
 }
 const expectedConsumers = {
-  architecture: ["visual runner", "screencomp config"],
-  playwrightContainer: ["workflow", "visual runner"],
-  screencompVersion: ["workflow", "publish workflow", "bootstrap"],
+  architecture: [
+    "workflow",
+    "screencomp config",
+    "affected selector",
+    "pre-push guard",
+  ],
+  playwrightContainer: ["workflow", "pre-push guard"],
+  screencompVersion: ["workflow", "bootstrap"],
 };
 for (const [key, value] of Object.entries(contract)) {
   const matches = sources
@@ -178,5 +193,5 @@ for (const value of [
     );
 }
 console.log(
-  "visual tool contract matches workflow, runner, and screencomp config",
+  "visual tool contract matches workflow, pre-push guard, and screencomp config",
 );

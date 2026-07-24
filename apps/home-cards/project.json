@@ -40,7 +40,9 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "options": { "command": "scripts/visual-project.sh home-cards" }
+      "options": {
+        "command": "node scripts/capture-visual.mjs home-cards \"${SHOTS_OUT:-shots/current/home-cards/x86_64}\""
+      }
     }
   }
 }

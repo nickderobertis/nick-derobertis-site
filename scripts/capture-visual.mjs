@@ -14,7 +14,7 @@ import { handleE2eDataRequest } from "./e2e-data-provider.mjs";
 
 process.on("uncaughtException", (error) => {
   console.error(
-    `capture-visual: ${error instanceof Error ? error.message : String(error)}; rerun the owning just visual-project target after fixing the reported boundary`,
+    `capture-visual: ${error instanceof Error ? error.message : String(error)}; rerun the owning nx screenshot target after fixing the reported boundary`,
   );
   process.exit(1);
 });
@@ -22,13 +22,25 @@ process.on("uncaughtException", (error) => {
 const [project, outputArgument] = process.argv.slice(2);
 if (!project || !outputArgument || !/^[a-z][a-z0-9-]*$/.test(project))
   throw new Error(
-    "usage: capture-visual.mjs <project> <output-root>; example: capture-visual.mjs bio apps/bio/visual/current/x86_64",
+    "usage: capture-visual.mjs <project> <output-root>; example: capture-visual.mjs bio shots/current/bio/x86_64",
   );
 const outputRoot = path.resolve(outputArgument);
-const allowedOutputRoot = path.resolve("apps", project, "visual");
-if (!outputRoot.startsWith(`${allowedOutputRoot}${path.sep}`))
+// The reusable visual-docs workflow hands the capture a per-project/arch
+// SHOTS_OUT beneath shots/ (shots/current/<project>/<arch> and its verify twin).
+// Confine writes to this project's own capture roots so a mistyped SHOTS_OUT can
+// never clobber another project's tree or escape the workspace.
+const allowedOutputRoots = [
+  path.resolve("shots", "current", project),
+  path.resolve("shots", "verify", project),
+];
+if (
+  !allowedOutputRoots.some(
+    (root) =>
+      outputRoot === root || outputRoot.startsWith(`${root}${path.sep}`),
+  )
+)
   throw new Error(
-    `Output root must be inside ${allowedOutputRoot}; use the project's Nx screenshot target`,
+    `Output root must be inside shots/current/${project} or shots/verify/${project}; the visual-docs workflow sets SHOTS_OUT for you`,
   );
 const projectRoot = path.resolve("dist/apps", project);
 const visualProjects = JSON.parse(readFileSync("visual-projects.json", "utf8"));
@@ -120,7 +132,7 @@ await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const address = server.address();
 if (!address || typeof address === "string")
   throw new Error(
-    `Could not start visual capture server; check local loopback availability and rerun just visual-project ${project}`,
+    `Could not start visual capture server; check local loopback availability and rerun the ${project} screenshot target`,
   );
 const browser = await chromium.launch({
   args: [
@@ -323,7 +335,7 @@ try {
       });
       if (browserErrors.length > 0)
         throw new Error(
-          `Visual capture reported ${browserErrors.join("; ")}; rerun just visual-project ${project} and inspect this scenario`,
+          `Visual capture reported ${browserErrors.join("; ")}; rerun the ${project} screenshot target and inspect this scenario`,
         );
       const hash = createHash("sha256")
         .update(readFileSync(path.join(outputRoot, image)))
