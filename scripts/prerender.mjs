@@ -72,8 +72,12 @@ try {
     `The prerender renderer is missing or invalid: ${error instanceof Error ? error.message : String(error)}. Run just build-prerender-renderer, then rerun just prerender.`,
   );
 }
-const { prerenderRoutes: routes, renderRoute } =
-  rendererModule.default ?? rendererModule;
+const {
+  prerenderRoutes: routes,
+  prerenderRemotes = [],
+  renderRoute,
+  renderRemote,
+} = rendererModule.default ?? rendererModule;
 if (
   !Array.isArray(routes) ||
   !routes.every(
@@ -89,6 +93,14 @@ if (
 )
   throw new Error(
     "The prerender renderer must export prerenderRoutes and renderRoute; fix scripts/render-entry.tsx, run just build-prerender-renderer, then rerun just prerender.",
+  );
+if (
+  !Array.isArray(prerenderRemotes) ||
+  !prerenderRemotes.every((name) => /^[a-z][a-z-]+$/.test(name)) ||
+  typeof renderRemote !== "function"
+)
+  throw new Error(
+    "The prerender renderer must export valid prerenderRemotes and renderRemote; fix scripts/render-entry.tsx, run just build-prerender-renderer, then rerun just prerender.",
   );
 
 function finalizeReactPrerender(html) {
@@ -187,5 +199,21 @@ for (const name of Object.keys(remoteManifest)) {
       `Could not stage built remote from ${source} to ${destination}: ${detail}. Verify both build directories are writable, then run just check again.`,
     );
   }
+}
+for (const name of prerenderRemotes) {
+  if (!(name in remoteManifest))
+    throw new Error(
+      `Prerender remote ${name} is absent from remotes.json; update both contracts and rerun just prerender.`,
+    );
+  const path = join(output, "remotes", name, "index.html");
+  const remoteDocument = await readFile(path, "utf8");
+  const html = await renderRemote(name);
+  await writeFile(
+    path,
+    remoteDocument.replace(
+      '<div id="root"></div>',
+      `<div id="root" data-prerendered-remote="${name}">${html}</div>`,
+    ),
+  );
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]

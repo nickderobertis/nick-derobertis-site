@@ -3,6 +3,7 @@ import {
   createRequestHandler,
   RouterServer,
 } from "@tanstack/react-router/ssr/server";
+import type { ReactNode } from "react";
 import { prerender } from "react-dom/static";
 import AwardsPage from "../apps/awards/src/page";
 import BioPage from "../apps/bio/src/page";
@@ -33,6 +34,28 @@ function HomePage() {
 }
 
 export const prerenderRoutes = routes;
+
+const standaloneRemotes: Record<string, () => ReactNode> = {
+  timeline: () => <TimelinePage />,
+  awards: () => <AwardsPage />,
+  skills: () => <SkillsPage />,
+  "home-carousel": () => <HomeCarouselPage />,
+  "home-cards": () => <HomeCardsPage />,
+  "home-story": () => <HomeStoryPage />,
+  "home-contact": () => <HomeContactPage />,
+};
+
+export const prerenderRemotes = Object.keys(standaloneRemotes);
+
+export async function renderRemote(name: string) {
+  const render = standaloneRemotes[name];
+  if (!render)
+    throw new Error(
+      `Unknown standalone remote ${JSON.stringify(name)}. Add it to standaloneRemotes in scripts/render-entry.tsx and rerun just prerender.`,
+    );
+  const { prelude } = await prerender(render());
+  return new Response(prelude).text();
+}
 
 export async function renderRoute(path: string) {
   const url = new URL(path, "https://prerender.invalid");

@@ -101,6 +101,13 @@ for (const [render, path] of [
 ] as const)
   test(`${owner} renders through its ${render} boundary`, async ({ page }) => {
     const failures: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error")
+        failures.push(`console: ${message.text()}`);
+    });
+    page.on("pageerror", (error) => {
+      failures.push(`page: ${error.message}`);
+    });
     page.on("response", (response) => {
       if (response.status() >= 400)
         failures.push(`${response.status()} ${response.url()}`);
@@ -112,14 +119,18 @@ for (const [render, path] of [
     expect(failures).toEqual([]);
   });
 
-for (const [render, path] of [
-  ["host-composed", contract.host],
-  ["standalone", contract.standalone],
-] as const)
+for (const render of ["host-composed", "standalone"] as const)
   test(`${owner} shows its skeleton while loading through its ${render} boundary`, async ({
     page,
   }) => {
-    await page.goto(path, { waitUntil: "domcontentloaded" });
+    if (render === "host-composed") {
+      await page.goto("bio");
+      await page.getByRole("link", { name: "Home", exact: true }).click();
+    } else {
+      await page.goto(`${contract.standalone}?client-render=1`, {
+        waitUntil: "domcontentloaded",
+      });
+    }
     await expect(
       page.getByRole("status", { name: contract.loadingName, exact: true }),
     ).toBeVisible();
