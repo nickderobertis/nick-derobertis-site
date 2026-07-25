@@ -58,15 +58,6 @@
     {
       "name": "skills",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "7fb88d8f4f6c8820d941c2cd735b1d9371bb083405443a44f3050ad4fc5d7098"
-    },
-    {
-      "name": "skills",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"

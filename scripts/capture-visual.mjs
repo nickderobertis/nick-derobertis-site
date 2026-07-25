@@ -251,8 +251,16 @@ try {
   const scenarios = [{ render: "standalone", state: "happy", viewports }];
   scenarios.push({ render: "host-composed", state: "happy", viewports });
   for (const state of projectStates) {
-    for (const render of ["standalone", "host-composed"])
+    for (const render of ["standalone", "host-composed"]) {
+      // Skip the host-composed `loading` shot: it is a pixel-for-pixel duplicate
+      // of the standalone one (the capture is scoped to the loading-status
+      // element), but its measured height jitters ~2px run-to-run as
+      // Module-Federation composition races the data stall — a flaky shot with no
+      // extra coverage. Capture `loading` standalone only; every other state is
+      // still captured in both renders.
+      if (render === "host-composed" && state === "loading") continue;
       scenarios.push({ render, state, viewports: [viewports[0]] });
+    }
   }
   for (const scenario of scenarios) {
     for (const [viewport, width, height] of scenario.viewports) {

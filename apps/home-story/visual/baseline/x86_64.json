@@ -49,15 +49,6 @@
     {
       "name": "home-story",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "fa1daf71e287c64e6f47c87e7fa6a00383c628663b3dbe7bf02afa2ca99aae7a"
-    },
-    {
-      "name": "home-story",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"

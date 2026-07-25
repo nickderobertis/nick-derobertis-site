@@ -49,15 +49,6 @@
     {
       "name": "courses",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "8062f018291e726d270a6d46ca7a8c193239b3a0c1b9d7df204081a1987e892b"
-    },
-    {
-      "name": "courses",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"

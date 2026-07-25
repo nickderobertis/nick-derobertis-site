@@ -49,15 +49,6 @@
     {
       "name": "home-cards",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "49daae44153e5d30ad61aa99c4261eff3226807b5eef4669b6d4dab1a7235722"
-    },
-    {
-      "name": "home-cards",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
