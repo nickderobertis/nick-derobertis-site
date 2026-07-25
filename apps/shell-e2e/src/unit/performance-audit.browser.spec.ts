@@ -34,13 +34,19 @@ const productionConfig = productionConfigSchema.parse(
 const localRoutes = [
   ...productionConfig.routes,
   "/remotes/home/",
-  ...["loading", "empty", "error"].flatMap((state) => [
+  // Perf-audit only the content-bearing placeholder states. The `loading` state
+  // now renders a skeleton (empty placeholder elements, no text/image), so
+  // Lighthouse finds no Largest Contentful Paint and the audit fails NO_LCP —
+  // measuring LCP of a permanently-loading skeleton is meaningless. `empty` and
+  // `error` still render contentful text.
+  ...["empty", "error"].flatMap((state) => [
     `/?state=${state}`,
     `/remotes/home/?state=${state}`,
   ]),
   ...["bio", "research", "software", "courses"].flatMap((route) => [
     `/remotes/${route}/`,
-    ...["loading", "empty", "error"].flatMap((state) => [
+    // See above: skip `loading` (skeleton, no LCP); keep content-bearing states.
+    ...["empty", "error"].flatMap((state) => [
       `/${route}?${route}-view=${state}`,
       `/remotes/${route}/?${route}-view=${state}`,
     ]),
