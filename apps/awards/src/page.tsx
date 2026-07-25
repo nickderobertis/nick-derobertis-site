@@ -4,19 +4,18 @@ import {
   selectedAwards,
 } from "@site/data-access-awards";
 import { AwardEmblem } from "./award-emblem";
+import Skeleton from "./skeleton";
 import { useAwards } from "./use-awards";
 import "./awards.css";
 
-function State({ name }: { name: "loading" | "error" | "empty" }) {
+function State({ name }: { name: "error" | "empty" }) {
   const copy =
-    name === "loading"
-      ? ["Loading awards…", "Gathering honors and achievements."]
-      : name === "error"
-        ? [
-            "Awards unavailable",
-            "Awards could not be loaded. Please try again later.",
-          ]
-        : ["No awards yet", "New honors and achievements will appear here."];
+    name === "error"
+      ? [
+          "Awards unavailable",
+          "Awards could not be loaded. Please try again later.",
+        ]
+      : ["No awards yet", "New honors and achievements will appear here."];
   return (
     <section
       className="awards-state"
@@ -30,6 +29,7 @@ function State({ name }: { name: "loading" | "error" | "empty" }) {
 
 export default function AwardsPage() {
   const state = useAwards();
+  if (state.name === "loading") return <Skeleton />;
   if (state.name !== "ready") return <State name={state.name} />;
   if (state.awards.length === 0) return <State name="empty" />;
   const showAll =

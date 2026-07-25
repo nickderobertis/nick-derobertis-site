@@ -1,5 +1,6 @@
 import "@site/design-system";
 import { useEffect, useState } from "react";
+import Skeleton from "./skeleton";
 import "./bio.css";
 
 function Marker({ children }: { children: string }) {
@@ -104,11 +105,10 @@ function Biography() {
   );
 }
 
-function BioState({ state }: { state: "empty" | "error" | "loading" }) {
+function BioState({ state }: { state: "empty" | "error" }) {
   const content = {
     empty: ["Biography coming soon", "There is no biography to show yet."],
     error: ["Biography unavailable", "The biography could not be displayed."],
-    loading: ["Loading biography", "Preparing Nick's story…"],
   } as const;
   const [heading, detail] = content[state];
   return (
@@ -131,7 +131,7 @@ export default function BioPage() {
     const timer = window.setTimeout(() => setLoading(false), 500);
     return () => window.clearTimeout(timer);
   }, [loading]);
-  if (loading) return <BioState state="loading" />;
+  if (loading) return <Skeleton />;
   if (scenario === "empty" || scenario === "error")
     return <BioState state={scenario} />;
   // llmlint: ignore-end[changed_behavior_has_e2e]

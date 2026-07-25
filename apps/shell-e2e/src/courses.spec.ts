@@ -83,8 +83,15 @@ for (const renderPath of renderPaths) {
   test(`${renderPath.name} exposes loading, empty, and error states`, async ({
     page,
   }) => {
-    await openCourses(page, renderPath.path, "loading");
-    await expect(page.getByRole("status")).toHaveText("Loading courses…");
+    await page.goto(`${renderPath.path}?courses-view=loading`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(
+      page.getByRole("status", { name: "Loading courses", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Courses", exact: true }),
+    ).toBeVisible();
 
     await openCourses(page, renderPath.path, "empty");
     await expect(page.getByRole("status")).toContainText("No courses to show");

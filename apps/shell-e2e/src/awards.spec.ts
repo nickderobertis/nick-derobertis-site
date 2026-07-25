@@ -90,14 +90,13 @@ for (const renderPath of renderPaths) {
       });
     }
 
-    test("renders loading while the awards boundary is pending", async ({
+    test("renders its skeleton while the awards boundary is pending", async ({
       page,
     }) => {
       await page.goto(`${renderPath.path}?awards-scenario=loading`);
-      const loading = page
-        .getByRole("status")
-        .filter({ hasText: "Loading awards…" });
-      await expect(loading).toContainText("Loading awards…");
+      await expect(
+        page.getByRole("status", { name: "Loading awards", exact: true }),
+      ).toBeVisible();
       await expect(
         page.getByRole("heading", { name: "Selected awards" }),
       ).toBeAttached();

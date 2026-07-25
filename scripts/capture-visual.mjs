@@ -185,30 +185,41 @@ async function prepareCaptureTarget(page, state) {
       content:
         "*,*::before,*::after{animation:none!important;caret-color:transparent!important;transition:none!important}",
     });
-    const loadingText = new Map([
-      ["awards", "Loading awards…"],
+    // The data-loading state now renders each app's own `<Skeleton>` — the same
+    // component the shell/host uses as its lazy fallback — so the loading capture
+    // targets that skeleton by its accessible name (role=status + aria-label).
+    // The skeleton has fixed CSS dimensions, so its element screenshot is stable
+    // host-composed too, unlike the former text status that reflowed ~2px.
+    const skeletonLabel = new Map([
+      ["awards", "Loading awards"],
       ["bio", "Loading biography"],
-      ["courses", "Loading courses…"],
-      ["home", "Loading featured stories…"],
-      ["home-cards", "Loading areas of work…"],
-      ["home-carousel", "Loading featured stories…"],
-      ["home-contact", "Loading contact options…"],
-      ["home-story", "Loading Nick’s story…"],
-      ["skills", "Loading skills…"],
-      ["software", "Loading software projects…"],
-      ["timeline", "Loading timeline…"],
+      ["courses", "Loading courses"],
+      ["home-cards", "Loading areas of work"],
+      ["home-carousel", "Loading featured work"],
+      ["home-contact", "Loading contact options"],
+      ["home-story", "Loading story"],
+      ["research", "Loading research"],
+      ["skills", "Loading skills"],
+      ["software", "Loading software"],
+      ["timeline", "Loading timeline"],
     ]);
     const findIndicator = () => {
+      if (state === "loading") {
+        // Home has no data-loading skeleton of its own; its composed page shows
+        // each pane's skeleton, so fall back to the first status region there.
+        const label = skeletonLabel.get(project);
+        return page.getByRole(
+          "status",
+          label ? { name: label, exact: true } : {},
+        );
+      }
       if (project === "research") return page.locator(".research-state");
       let locator = page.getByRole(
         state === "error" && !project.startsWith("home") ? "alert" : "status",
       );
       if (project !== "home")
         locator = locator.filter({ hasNotText: "Loading HOME page…" });
-      const expectedLoadingText = loadingText.get(project);
-      return state === "loading" && expectedLoadingText
-        ? locator.filter({ hasText: expectedLoadingText })
-        : locator;
+      return locator;
     };
     const indicator = findIndicator();
     try {
@@ -252,12 +263,11 @@ try {
   scenarios.push({ render: "host-composed", state: "happy", viewports });
   for (const state of projectStates) {
     for (const render of ["standalone", "host-composed"]) {
-      // Skip the host-composed `loading` shot: it is a pixel-for-pixel duplicate
-      // of the standalone one (the capture is scoped to the loading-status
-      // element), but its measured height jitters ~2px run-to-run as
-      // Module-Federation composition races the data stall — a flaky shot with no
-      // extra coverage. Capture `loading` standalone only; every other state is
-      // still captured in both renders.
+      // Skip host-composed `loading`: even as a fixed-dimension skeleton, the
+      // host-composed capture still jitters ~2px run-to-run (a host-composition
+      // layout-timing effect, not a content one — CI drift confirmed it), while
+      // the standalone loading shot already covers the same skeleton
+      // deterministically. Every other state stays in both renders.
       if (render === "host-composed" && state === "loading") continue;
       scenarios.push({ render, state, viewports: [viewports[0]] });
     }

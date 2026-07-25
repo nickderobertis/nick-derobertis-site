@@ -5,6 +5,7 @@ import {
   type SkillTreeNode,
 } from "@site/data-access-skills";
 import { useId, useState } from "react";
+import Skeleton from "./skeleton";
 import "./skills.css";
 
 const COLORS = [
@@ -245,8 +246,7 @@ function SkillsExperience({ tree }: { tree: SkillTree }) {
 
 export default function SkillsPage() {
   const state = previewState();
-  if (state === "loading")
-    return <output className="skills-state">Loading skills…</output>;
+  if (state === "loading") return <Skeleton />;
   if (state === "error")
     return (
       <section className="skills-state" role="alert">

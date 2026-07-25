@@ -5,6 +5,7 @@ import {
 } from "@site/data-access-software";
 import { useEffect, useState } from "react";
 import "@site/design-system";
+import Skeleton from "./skeleton";
 import "./software.css";
 
 type SoftwareView = "default" | "empty" | "error" | "loading";
@@ -113,6 +114,7 @@ function SoftwareCollection({ projects }: { projects: SoftwareProject[] }) {
 export default function SoftwarePage() {
   const view = useSoftwareView();
   const projects = cvDataClient.domain("software_projects");
+  if (view === "loading") return <Skeleton />;
   return (
     <section className="software-page">
       <header className="software-banner">
@@ -123,11 +125,7 @@ export default function SoftwarePage() {
           projects for finance, research, data, and Python.
         </p>
       </header>
-      {view === "loading" ? (
-        <div className="software-state" role="status">
-          Loading software projects…
-        </div>
-      ) : view === "error" ? (
+      {view === "error" ? (
         <div className="software-state software-state-error" role="alert">
           <h2>Software projects are unavailable</h2>
           <p>Please try again later.</p>

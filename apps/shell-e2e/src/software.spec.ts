@@ -62,10 +62,12 @@ for (const renderPath of renderPaths) {
   test(`${renderPath.name} exposes loading, empty, and error states`, async ({
     page,
   }) => {
-    await openSoftware(page, renderPath.path, "loading");
-    await expect(page.getByRole("status")).toHaveText(
-      "Loading software projects…",
-    );
+    await page.goto(`${renderPath.path}?software-view=loading`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(
+      page.getByRole("status", { name: "Loading software", exact: true }),
+    ).toBeVisible();
     await expect(page.getByLabel("Software projects")).toBeVisible();
 
     await openSoftware(page, renderPath.path, "empty");

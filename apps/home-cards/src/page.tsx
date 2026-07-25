@@ -1,11 +1,11 @@
 import { siteBase } from "@site/data-access-core";
 import { homeContent, readPaneState } from "@site/data-access-home";
+import Skeleton from "./skeleton";
 import "./cards.css";
 
 export default function HomeCardsPage() {
   const state = readPaneState(window.location.search);
-  if (state === "loading")
-    return <output className="pane-state">Loading areas of work…</output>;
+  if (state === "loading") return <Skeleton />;
   if (state === "error")
     return (
       <output className="pane-state">Areas of work could not be loaded.</output>

@@ -1,11 +1,11 @@
 import { siteBase } from "@site/data-access-core";
 import { homeContent, readPaneState } from "@site/data-access-home";
+import Skeleton from "./skeleton";
 import "./story.css";
 
 export default function HomeStoryPage() {
   const state = readPaneState(window.location.search);
-  if (state === "loading")
-    return <output className="pane-state">Loading Nick’s story…</output>;
+  if (state === "loading") return <Skeleton />;
   if (state === "error")
     return (
       <output className="pane-state">Nick’s story could not be loaded.</output>
