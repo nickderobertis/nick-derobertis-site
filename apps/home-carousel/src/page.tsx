@@ -1,6 +1,7 @@
 import { siteBase } from "@site/data-access-core";
 import { homeContent, readPaneState } from "@site/data-access-home";
 import { useEffect, useState } from "react";
+import Skeleton from "./skeleton";
 import "./carousel.css";
 
 function useCarousel(length: number, enabled: boolean) {
@@ -18,10 +19,9 @@ function useCarousel(length: number, enabled: boolean) {
   return { active, move };
 }
 
-function StateMessage({ state }: { state: "empty" | "loading" | "error" }) {
+function StateMessage({ state }: { state: "empty" | "error" }) {
   const messages = {
     empty: "No featured stories are available yet.",
-    loading: "Loading featured stories…",
     error: "Featured stories could not be loaded.",
   };
   return <output className="pane-state">{messages[state]}</output>;
@@ -33,6 +33,7 @@ export default function HomeCarouselPage() {
     homeContent.carousel.length,
     state === "happy",
   );
+  if (state === "loading") return <Skeleton />;
   if (state !== "happy") return <StateMessage state={state} />;
   const slide = homeContent.carousel[active] ?? homeContent.carousel[0];
   return (

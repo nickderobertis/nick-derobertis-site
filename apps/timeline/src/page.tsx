@@ -8,6 +8,7 @@ import {
   timelinePosition,
 } from "@site/data-access-timeline";
 import { type CSSProperties, useId, useMemo, useState } from "react";
+import Skeleton from "./skeleton";
 import "./timeline.css";
 
 type TimelineState = "empty" | "error" | "loading" | "ready";
@@ -169,8 +170,7 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
 
 export default function TimelinePage() {
   const state = previewState();
-  if (state === "loading")
-    return <output className="timeline-state">Loading timeline…</output>;
+  if (state === "loading") return <Skeleton />;
   if (state === "error")
     return (
       <section className="timeline-state" role="alert">

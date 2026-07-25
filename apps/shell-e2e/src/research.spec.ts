@@ -82,12 +82,12 @@ for (const renderPath of renderPaths) {
       });
     }
 
-    test("shows loading while the data boundary is pending, then renders", async ({
+    test("shows its skeleton while the data boundary is pending, then renders", async ({
       page,
     }) => {
       await page.goto(`${renderPath.path}?research-scenario=loading`);
       await expect(
-        page.getByRole("heading", { name: "Loading research" }),
+        page.getByRole("status", { name: "Loading research", exact: true }),
       ).toBeVisible();
       await expect(
         page.getByRole("heading", { name: "Research Works" }),

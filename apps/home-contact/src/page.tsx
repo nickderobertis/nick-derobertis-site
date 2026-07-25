@@ -1,10 +1,10 @@
 import { homeContent, readPaneState } from "@site/data-access-home";
+import Skeleton from "./skeleton";
 import "./contact.css";
 
 export default function HomeContactPage() {
   const state = readPaneState(window.location.search);
-  if (state === "loading")
-    return <output className="pane-state">Loading contact options…</output>;
+  if (state === "loading") return <Skeleton />;
   if (state === "error")
     return (
       <output className="pane-state">

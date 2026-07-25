@@ -91,12 +91,14 @@ for (const renderPath of renderPaths) {
   for (const state of ["empty", "loading", "error"] as const) {
     test(`${renderPath.name} presents its ${state} state`, async ({ page }) => {
       await openSkills(page, renderPath.url, state);
+      if (state === "loading") {
+        await expect(
+          page.getByRole("status", { name: "Loading skills", exact: true }),
+        ).toBeVisible();
+        return;
+      }
       const expected =
-        state === "empty"
-          ? "No skills are available."
-          : state === "loading"
-            ? "Loading skills…"
-            : "Skills unavailable";
+        state === "empty" ? "No skills are available." : "Skills unavailable";
       await expect(
         page
           .getByRole(state === "error" ? "alert" : "status")

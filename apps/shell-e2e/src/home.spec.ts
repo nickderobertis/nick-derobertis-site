@@ -9,27 +9,27 @@ const panes = [
   {
     remote: "home-carousel",
     happy: { role: "region" as const, name: "Featured work" },
+    loadingName: "Loading featured work",
     states: {
       empty: "No featured stories are available yet.",
-      loading: "Loading featured stories…",
       error: "Featured stories could not be loaded.",
     },
   },
   {
     remote: "home-cards",
     happy: { role: "region" as const, name: "Areas of work" },
+    loadingName: "Loading areas of work",
     states: {
       empty: "No areas of work are available yet.",
-      loading: "Loading areas of work…",
       error: "Areas of work could not be loaded.",
     },
   },
   {
     remote: "home-story",
     happy: { role: "heading" as const, name: "Who am I?" },
+    loadingName: "Loading story",
     states: {
       empty: "No story is available yet.",
-      loading: "Loading Nick’s story…",
       error: "Nick’s story could not be loaded.",
     },
   },
@@ -39,9 +39,9 @@ const panes = [
       role: "heading" as const,
       name: "Let’s build something useful.",
     },
+    loadingName: "Loading contact options",
     states: {
       empty: "No contact options are available.",
-      loading: "Loading contact options…",
       error: "Contact options could not be loaded.",
     },
   },
@@ -60,6 +60,15 @@ for (const pane of panes) {
       await page.goto(path.url(pane.remote));
       await expect(
         page.getByRole(pane.happy.role, { name: pane.happy.name }),
+      ).toBeVisible();
+    });
+
+    test(`${pane.remote} loading state shows its skeleton ${path.name}`, async ({
+      page,
+    }) => {
+      await page.goto(`${path.url(pane.remote)}?state=loading`);
+      await expect(
+        page.getByRole("status", { name: pane.loadingName, exact: true }),
       ).toBeVisible();
     });
 
@@ -109,9 +118,14 @@ for (const path of renderPaths)
       await page.goto(`${url}?state=${state}`);
       await expect(page.getByRole("status")).toHaveCount(4);
       for (const pane of panes)
-        await expect(
-          page.getByRole("status").filter({ hasText: pane.states[state] }),
-        ).toBeVisible();
+        if (state === "loading")
+          await expect(
+            page.getByRole("status", { name: pane.loadingName, exact: true }),
+          ).toBeVisible();
+        else
+          await expect(
+            page.getByRole("status").filter({ hasText: pane.states[state] }),
+          ).toBeVisible();
     });
 
 for (const path of renderPaths)
@@ -121,13 +135,17 @@ for (const path of renderPaths)
     }) => {
       const url = path.name === "standalone" ? "remotes/home/" : "";
       await page.goto(`${url}?timeline-state=${state}`);
+      if (state === "loading") {
+        await expect(
+          page.getByRole("status", { name: "Loading timeline", exact: true }),
+        ).toBeVisible();
+        return;
+      }
       const role = state === "error" ? "alert" : "status";
       const message =
         state === "empty"
           ? "No education or employment entries are available."
-          : state === "loading"
-            ? "Loading timeline…"
-            : "Timeline unavailable";
+          : "Timeline unavailable";
       await expect(
         page.getByRole(role).filter({ hasText: message }),
       ).toBeVisible();

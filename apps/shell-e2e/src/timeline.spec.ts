@@ -102,12 +102,16 @@ for (const renderPath of renderPaths) {
   for (const state of ["empty", "loading", "error"] as const) {
     test(`${renderPath.name} presents its ${state} state`, async ({ page }) => {
       await openTimeline(page, renderPath.url, state);
+      if (state === "loading") {
+        await expect(
+          page.getByRole("status", { name: "Loading timeline", exact: true }),
+        ).toBeVisible();
+        return;
+      }
       const expected =
         state === "empty"
           ? "No education or employment entries are available."
-          : state === "loading"
-            ? "Loading timeline…"
-            : "Timeline unavailable";
+          : "Timeline unavailable";
       const role = state === "error" ? "alert" : "status";
       await expect(
         page.getByRole(role).filter({ hasText: expected }),

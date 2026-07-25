@@ -6,6 +6,7 @@ import {
 import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
 import { useEffect, useState } from "react";
+import Skeleton from "./skeleton";
 import "./courses.css";
 
 type CoursesView = "default" | "empty" | "error" | "loading";
@@ -245,6 +246,7 @@ function CourseCollection({ courses }: { courses: Course[] }) {
 export default function CoursesPage() {
   const view = useCoursesView();
   const courses = cvDataClient.domain("courses");
+  if (view === "loading") return <Skeleton />;
   return (
     <section className="courses-page">
       <header className="courses-banner">
@@ -255,11 +257,7 @@ export default function CoursesPage() {
           courses, topics, and teaching resources below.
         </p>
       </header>
-      {view === "loading" ? (
-        <div className="courses-state" role="status">
-          Loading courses…
-        </div>
-      ) : view === "error" ? (
+      {view === "error" ? (
         <div className="courses-state courses-state-error" role="alert">
           <h2>Courses are unavailable</h2>
           <p>Please try again later.</p>
