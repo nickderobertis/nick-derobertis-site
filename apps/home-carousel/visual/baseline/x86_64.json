@@ -49,15 +49,6 @@
     {
       "name": "home-carousel",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "0dadf10549a9953b0b1251fc14a8e14f6b4c6e73ad9411ee85d5adf5c29b79e5"
-    },
-    {
-      "name": "home-carousel",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"

@@ -58,15 +58,6 @@
     {
       "name": "timeline",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "d9aed17dd4347529c907821b037721b64d38de2cf2e5802ae9d7260cec9085ac"
-    },
-    {
-      "name": "timeline",
-      "toggles": {
         "render": "standalone",
         "state": "employment-only",
         "viewport": "desktop"

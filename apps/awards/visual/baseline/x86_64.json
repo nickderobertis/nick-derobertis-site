@@ -58,15 +58,6 @@
     {
       "name": "awards",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "039677df1a83beac3a7173b5c2058918e28bf103c463ec032b594b005cb16834"
-    },
-    {
-      "name": "awards",
-      "toggles": {
         "render": "standalone",
         "state": "all",
         "viewport": "desktop"

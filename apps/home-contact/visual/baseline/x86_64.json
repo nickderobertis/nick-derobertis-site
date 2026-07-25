@@ -49,15 +49,6 @@
     {
       "name": "home-contact",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "3c7dd2422ab858efcb02392b7d22159b61fa554636fd66ffb093436294689f8a"
-    },
-    {
-      "name": "home-contact",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"

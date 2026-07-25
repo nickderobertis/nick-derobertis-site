@@ -49,15 +49,6 @@
     {
       "name": "research",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "3855d432c4a1887969a82b348e50e49545041db9ae9829ede1d63d735fbedb98"
-    },
-    {
-      "name": "research",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
