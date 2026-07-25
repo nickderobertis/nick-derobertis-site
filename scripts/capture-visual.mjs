@@ -280,6 +280,10 @@ try {
         viewport: { width, height },
       });
       const page = await context.newPage();
+      // Install the canonical clock before any application code runs. Installing
+      // it after navigation can replace React's timing primitives while a busy
+      // worker is still hydrating, producing a false structural mismatch.
+      await page.clock.install({ time: new Date("2026-07-20T12:00:01Z") });
       const browserErrors = [];
       page.on("console", (message) => {
         if (
@@ -331,9 +335,6 @@ try {
           .getByText("Loading HOME page…")
           .waitFor({ state: "hidden", timeout: 30_000 });
       }
-      await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
-      if (!["empty", "loading", "error"].includes(scenario.state))
-        await page.clock.pauseAt(new Date("2026-07-20T12:00:01Z"));
       const image = `${scenario.render}/${scenario.state}/${viewport}.png`;
       mkdirSync(path.dirname(path.join(outputRoot, image)), {
         recursive: true,
