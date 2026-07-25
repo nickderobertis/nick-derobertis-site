@@ -3,6 +3,7 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
+import { routeContracts } from "./route-contracts.mjs";
 
 const substantiveRouteContent = {
   "/": "Who am I?",
@@ -10,6 +11,12 @@ const substantiveRouteContent = {
   "/research": "Valuation without Cash Flows",
   "/software": "Python Tools for Working with Data",
   "/courses": "Financial Modeling",
+};
+const realRouteMarkers = {
+  "/bio": 'class="bio-page"',
+  "/research": 'class="research-page"',
+  "/software": 'class="software-page"',
+  "/courses": 'class="courses-page"',
 };
 
 const root = "dist/apps/shell";
@@ -46,11 +53,10 @@ for (const route of routes) {
       ? `${root}/index.html`
       : `${root}${route.path}/index.html`;
   const html = await readFile(path, "utf8");
-  if (
-    !html.includes(`<h1>${route.heading}</h1>`) ||
-    !html.includes(route.description)
-  )
-    throw new Error(`${path} is not prerendered`);
+  if (!html.includes(`<h1`) || !html.includes(route.heading))
+    throw new Error(
+      `${path} lacks its expected h1 (${route.heading}); fix the route renderer and rerun just prerender.`,
+    );
   if (!html.includes("/nick-derobertis-site/"))
     throw new Error(`${path} lacks the Pages base path`);
   const expected = substantiveRouteContent[route.path];
@@ -58,6 +64,30 @@ for (const route of routes) {
     throw new Error(
       `${path} lacks substantive route content; fix scripts/prerender.mjs and rerun just check.`,
     );
+  if (route.path !== "/") {
+    const marker = realRouteMarkers[route.path];
+    if (!marker || !html.includes(marker))
+      throw new Error(
+        `${path} lacks its real component marker (${marker ?? "undefined"}); fix scripts/render-entry.tsx and rerun just prerender.`,
+      );
+    const routeAttribute = `${routeContracts.prerenderRouteAttribute}="${route.path}"`;
+    if (!html.includes(routeAttribute))
+      throw new Error(
+        `${path} lacks ${routeAttribute}; fix scripts/prerender.mjs and rerun just prerender.`,
+      );
+    if (html.includes('id="__TSR_DEHYDRATED__"'))
+      throw new Error(
+        `${path} contains the unsupported legacy __TSR_DEHYDRATED__ state; use TanStack Router serialization and rerun just prerender.`,
+      );
+    if (!html.includes("$_TSR.router="))
+      throw new Error(
+        `${path} lacks the TanStack Router serialized state; fix scripts/render-entry.tsx and rerun just prerender.`,
+      );
+    if (!html.includes("$_TSR.e()"))
+      throw new Error(
+        `${path} lacks the TanStack Router hydration completion call; fix scripts/render-entry.tsx and rerun just prerender.`,
+      );
+  }
 }
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))

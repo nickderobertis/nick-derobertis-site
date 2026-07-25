@@ -28,7 +28,9 @@ function StateMessage({ state }: { state: "empty" | "error" }) {
 }
 
 export default function HomeCarouselPage() {
-  const state = readPaneState(window.location.search);
+  const state = readPaneState(
+    typeof window === "undefined" ? "" : window.location.search,
+  );
   const { active, move } = useCarousel(
     homeContent.carousel.length,
     state === "happy",

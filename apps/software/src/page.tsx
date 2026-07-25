@@ -1,33 +1,13 @@
-import { cvDataClient, type SoftwareProject } from "@site/data-access-core";
+import type { SoftwareProject } from "@site/data-access-core";
 import {
   calculateSoftwareStats,
   softwareProjectLogo,
 } from "@site/data-access-software";
-import { useEffect, useState } from "react";
 import "@site/design-system";
-import Skeleton from "./skeleton";
+import type { SoftwarePageProps } from "@site/route-state";
 import "./software.css";
-
-type SoftwareView = "default" | "empty" | "error" | "loading";
-
-function requestedView(): SoftwareView {
-  const value = new URLSearchParams(window.location.search).get(
-    "software-view",
-  );
-  return value === "empty" || value === "error" || value === "loading"
-    ? value
-    : "default";
-}
-
-function useSoftwareView(): SoftwareView {
-  const [view, setView] = useState<SoftwareView>(() => requestedView());
-  useEffect(() => {
-    if (view !== "loading") return;
-    const timer = window.setTimeout(() => setView("default"), 1_500);
-    return () => window.clearTimeout(timer);
-  }, [view]);
-  return view;
-}
+import Skeleton from "./skeleton";
+import { useSoftwarePage } from "./use-software-page";
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-US").format(value);
@@ -111,10 +91,11 @@ function SoftwareCollection({ projects }: { projects: SoftwareProject[] }) {
   );
 }
 
-export default function SoftwarePage() {
-  const view = useSoftwareView();
-  const projects = cvDataClient.domain("software_projects");
-  if (view === "loading") return <Skeleton />;
+export default function SoftwarePage({
+  initialView,
+  projects: initialProjects,
+}: SoftwarePageProps<SoftwareProject[]>) {
+  const { projects, view } = useSoftwarePage(initialView, initialProjects);
   return (
     <section className="software-page">
       <header className="software-banner">
@@ -125,7 +106,9 @@ export default function SoftwarePage() {
           projects for finance, research, data, and Python.
         </p>
       </header>
-      {view === "error" ? (
+      {view === "loading" ? (
+        <Skeleton />
+      ) : view === "error" ? (
         <div className="software-state software-state-error" role="alert">
           <h2>Software projects are unavailable</h2>
           <p>Please try again later.</p>

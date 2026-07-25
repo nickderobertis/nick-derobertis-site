@@ -1,0 +1,28 @@
+{
+  "name": "route-state",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/route-state/src",
+  "projectType": "library",
+  "tags": ["type:shared", "scope:routing"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint libs/route-state" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/route-state/tsconfig.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/libs/route-state"],
+      "options": {
+        "command": "vitest run --config libs/route-state/vite.config.ts --coverage"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/route-state/tsconfig.json" }
+    }
+  }
+}

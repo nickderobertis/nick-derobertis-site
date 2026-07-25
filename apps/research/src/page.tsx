@@ -1,16 +1,19 @@
+import type { Research } from "@site/data-access-core";
+import type { ResearchPageProps } from "@site/route-state";
 import { ResearchContent } from "./research-content";
 import Skeleton from "./skeleton";
-import { useResearch } from "./use-research";
+import { useResearchPage } from "./use-research-page";
 import "@site/design-system";
 import "./research.css";
 
-function StateMessage({ state }: { state: "empty" | "error" }) {
+function StateMessage({ state }: { state: "empty" | "loading" | "error" }) {
   const messages = {
     empty: ["No research projects yet", "New research will appear here."],
     error: [
       "Research is unavailable",
       "The research collection could not be loaded. Please try again later.",
     ],
+    loading: ["Loading research", "Gathering working papers and projects…"],
   } as const;
   const [heading, detail] = messages[state];
   return (
@@ -21,10 +24,12 @@ function StateMessage({ state }: { state: "empty" | "error" }) {
   );
 }
 
-export default function ResearchPage() {
-  const state = useResearch();
+export default function ResearchPage({
+  initialState,
+}: ResearchPageProps<Research>) {
+  const state = useResearchPage(initialState);
   if (state.name === "loading") return <Skeleton />;
   if (state.name !== "ready") return <StateMessage state={state.name} />;
-  if (!state.research.projects?.length) return <StateMessage state="empty" />;
-  return <ResearchContent research={state.research} />;
+  if (!state.value.projects?.length) return <StateMessage state="empty" />;
+  return <ResearchContent research={state.value} />;
 }

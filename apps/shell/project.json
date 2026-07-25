@@ -54,6 +54,11 @@
         "command": "node scripts/performance-audit.mjs"
       }
     },
+    "build-prerender-renderer": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/prerender-renderer"],
+      "options": { "command": "just build-prerender-renderer" }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
