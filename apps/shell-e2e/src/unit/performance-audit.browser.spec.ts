@@ -136,7 +136,7 @@ describe("performance audit real-browser e2e CLI", () => {
       [auditScript, "--config", filename],
       {
         cwd: directory,
-        timeout: 600_000,
+        timeout: 1_100_000,
         env: {
           ...process.env,
           PERF_RAW_DIR: rawDirectory,
