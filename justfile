@@ -14,7 +14,7 @@ bootstrap:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: dependency install failed; check the lockfile and registry access, then rerun just bootstrap" >&2; exit 1; }
     scripts/setup-ci-tools.sh || { echo "bootstrap: pinned CI tool installation failed; check the reported checksum or network error, then rerun just bootstrap" >&2; exit 1; }
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec playwright install chromium >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: Chromium install failed; check Playwright system requirements, then rerun just bootstrap" >&2; exit 1; }
-    if ! command -v screencomp >/dev/null; then log=$(mktemp); trap 'rm -f "$log"' EXIT; (curl -fsSL https://raw.githubusercontent.com/nickderobertis/screencomp/main/scripts/install.sh | sh -s -- --version v0.4.3) >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: screencomp install failed; check network access and rerun just bootstrap" >&2; exit 1; }; fi
+    if ! command -v screencomp >/dev/null; then log=$(mktemp); trap 'rm -f "$log"' EXIT; (curl -fsSL https://raw.githubusercontent.com/nickderobertis/screencomp/main/scripts/install.sh | sh -s -- --version v0.4.4) >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: screencomp install failed; check network access and rerun just bootstrap" >&2; exit 1; }; fi
 
 bootstrap-ci:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap-ci: dependency install failed; check the lockfile and registry access, then rerun just bootstrap-ci" >&2; exit 1; }

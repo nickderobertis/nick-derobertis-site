@@ -78,13 +78,17 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.3
+    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.4
     with:
       projects: ${{ needs.affected.outputs.projects || '[]' }}
       container: mcr.microsoft.com/playwright:v1.61.1-noble
-      screencomp-version: v0.4.3
+      screencomp-version: v0.4.4
       gallery-title: Nick DeRobertis site visual docs
       fail-on-drift: true
+      # One aggregated PR comment covering all affected microfrontends, instead of
+      # one sticky comment per app (12 apps -> 1 comment). Galleries and Pages
+      # output are unchanged; only the PR-comment surface consolidates.
+      comment-mode: aggregated
       # Each affected app is built (with the composed shell + home remotes its
       # host-composed shots need, via the Nx screenshot target's dependsOn) and
       # captured to $SHOTS_OUT. Runs twice for screencomp's reproducibility gate.
