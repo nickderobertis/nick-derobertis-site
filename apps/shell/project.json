@@ -25,6 +25,7 @@
       "executor": "nx:run-commands",
       "dependsOn": [
         "build",
+        "build-prerender-renderer",
         {
           "target": "build",
           "projects": [
