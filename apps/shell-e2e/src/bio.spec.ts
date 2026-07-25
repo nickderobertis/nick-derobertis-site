@@ -34,7 +34,7 @@ for (const renderPath of renderPaths) {
   }) => {
     await page.goto(`${renderPath.path}?bio-view=loading`);
     await expect(page.getByRole("status")).toContainText("Loading biography");
-    await expectBiography(page);
+    await expect(page.getByRole("article")).toHaveCount(0);
 
     await page.goto(`${renderPath.path}?bio-view=empty`);
     await expect(page.getByRole("status")).toContainText(

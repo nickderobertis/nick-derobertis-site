@@ -66,7 +66,7 @@ for (const renderPath of renderPaths) {
     await expect(page.getByRole("status")).toHaveText(
       "Loading software projects…",
     );
-    await expect(page.getByLabel("Software projects")).toBeVisible();
+    await expect(page.getByLabel("Software projects")).toHaveCount(0);
 
     await openSoftware(page, renderPath.path, "empty");
     await expect(page.getByRole("status")).toContainText(

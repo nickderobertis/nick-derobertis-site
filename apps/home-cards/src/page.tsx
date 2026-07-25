@@ -3,7 +3,9 @@ import { homeContent, readPaneState } from "@site/data-access-home";
 import "./cards.css";
 
 export default function HomeCardsPage() {
-  const state = readPaneState(window.location.search);
+  const state = readPaneState(
+    typeof window === "undefined" ? "" : window.location.search,
+  );
   if (state === "loading")
     return <output className="pane-state">Loading areas of work…</output>;
   if (state === "error")
