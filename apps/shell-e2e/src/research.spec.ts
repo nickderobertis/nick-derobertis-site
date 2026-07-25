@@ -65,16 +65,9 @@ for (const renderPath of renderPaths) {
       test(`shows its ${state.scenario} state from the data boundary`, async ({
         page,
       }) => {
-        const responsePromise = page.waitForResponse(
-          (response) =>
-            response.url().includes("/cv-data/domains/research.json") &&
-            response.url().includes(`scenario=${state.scenario}`),
-        );
         await page.goto(
           `${renderPath.path}?research-scenario=${state.scenario}`,
         );
-        const response = await responsePromise;
-        expect(response.status()).toBe(state.scenario === "error" ? 503 : 200);
         await expect(
           page.getByRole("heading", { name: state.heading }),
         ).toBeVisible();

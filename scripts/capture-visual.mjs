@@ -336,8 +336,6 @@ try {
           .getByText("Loading HOME page…")
           .waitFor({ state: "hidden", timeout: 30_000 });
       }
-      const target = await prepareCaptureTarget(page, scenario.state);
-      await target.waitFor({ state: "visible" });
       await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
       if (!["empty", "loading", "error"].includes(scenario.state))
         await page.clock.pauseAt(new Date("2026-07-20T12:00:01Z"));
@@ -345,16 +343,32 @@ try {
       mkdirSync(path.dirname(path.join(outputRoot, image)), {
         recursive: true,
       });
-      await target.screenshot({
-        animations: "disabled",
-        path: path.join(outputRoot, image),
-      });
+      const capturePath = path.join(outputRoot, image);
+      let captured = false;
+      for (let attempt = 0; attempt < 2 && !captured; attempt += 1) {
+        const target = await prepareCaptureTarget(page, scenario.state);
+        await target.waitFor({ state: "visible" });
+        try {
+          await target.screenshot({
+            animations: "disabled",
+            path: capturePath,
+          });
+          captured = true;
+        } catch (error) {
+          if (
+            attempt > 0 ||
+            !(error instanceof Error) ||
+            !error.message.includes("Element is not attached to the DOM")
+          )
+            throw error;
+        }
+      }
       if (browserErrors.length > 0)
         throw new Error(
           `Visual capture reported ${browserErrors.join("; ")}; rerun the ${project} screenshot target and inspect this scenario`,
         );
       const hash = createHash("sha256")
-        .update(readFileSync(path.join(outputRoot, image)))
+        .update(readFileSync(capturePath))
         .digest("hex");
       shots.push({
         name: project,
