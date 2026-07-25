@@ -58,6 +58,15 @@
     {
       "name": "skills",
       "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "e62ca81b2006795df1a610f0c59b0fd0f11fc1c468dab7d516410b9a08e569a8"
+    },
+    {
+      "name": "skills",
+      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
@@ -116,7 +125,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "e106375b68233bd37cdca0abbca755530417d07ceda709f39725c6979dca8ac1"
+      "hash": "9c955b95f6c144df52ed60163274fd76d996ab20ad5b3069d368bd6f59ada5ec"
     }
   ]
 }

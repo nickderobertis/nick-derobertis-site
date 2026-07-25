@@ -49,6 +49,15 @@
     {
       "name": "courses",
       "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "6b29566d6b86fe038cfb489ae79acddd4f9233df79a136e48a6ef2d9417cb2cc"
+    },
+    {
+      "name": "courses",
+      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
@@ -98,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "8c8b0845b35c489b7434496c76f7335a1f8703ffce62d7742ab8489b2bb1099e"
+      "hash": "415925300e15768c50191e08fa56d66bd0d1c596dc2365ab0b7a2ff96e968140"
     }
   ]
 }

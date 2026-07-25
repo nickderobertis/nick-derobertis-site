@@ -49,6 +49,15 @@
     {
       "name": "home-carousel",
       "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "0dadf10549a9953b0b1251fc14a8e14f6b4c6e73ad9411ee85d5adf5c29b79e5"
+    },
+    {
+      "name": "home-carousel",
+      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
@@ -98,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "5fb7a0daaa3aa588f9da550d8e0cba0dbe44808e1d221f035ae4af474f2f9aa6"
+      "hash": "1e857bd0c664ecca1639ed3a21823df4955fee2e73c5a5de0c67fc9d85b47443"
     }
   ]
 }

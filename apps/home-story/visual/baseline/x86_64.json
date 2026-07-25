@@ -49,6 +49,15 @@
     {
       "name": "home-story",
       "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "466ae17872b24a5a6a8ec7a3acb0186b5a94f7c77261c913d83ab16b8b200e75"
+    },
+    {
+      "name": "home-story",
+      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
@@ -98,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "48de27c72cac5a03cb1e4d3903e33c6775adcc9144009c7720c258d622c14a75"
+      "hash": "4591783259647e47852121175553e755c8b7eba5bf2c22cf50ab85d59813415a"
     }
   ]
 }

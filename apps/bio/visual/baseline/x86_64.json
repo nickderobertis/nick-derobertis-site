@@ -49,6 +49,15 @@
     {
       "name": "bio",
       "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "c7b3e3c10ba3a481f2b40402dd5d9c3daa225f4d50bde8c11f7ed5911544276a"
+    },
+    {
+      "name": "bio",
+      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
@@ -98,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "eb821a07bfb5f2313b4b800bb43a4b828007897d3be0ebaa40eaa1cc70a638aa"
+      "hash": "04081ee2eb3cea13c70c2e0e9cd4c00eae3b0258e3bf1f7ba345863b5d3b5932"
     }
   ]
 }

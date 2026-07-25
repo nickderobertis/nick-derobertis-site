@@ -58,6 +58,15 @@
     {
       "name": "timeline",
       "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "d9aed17dd4347529c907821b037721b64d38de2cf2e5802ae9d7260cec9085ac"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
         "render": "standalone",
         "state": "employment-only",
         "viewport": "desktop"
@@ -116,7 +125,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "68e190da48aa5b8b75ec2f02e57019e655236bc93e5acfbf898328e7ef12d69d"
+      "hash": "bda068f45dedc319c3d9aa3e314b88f66729f6fde4fab26234443dfa23571dc7"
     }
   ]
 }

@@ -49,6 +49,15 @@
     {
       "name": "home-cards",
       "toggles": {
+        "render": "host-composed",
+        "state": "loading",
+        "viewport": "desktop"
+      },
+      "hash": "7990c7c982de121caf5612a9ffc93a22818d2f45c411e1398e9f149fbd3d44d4"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
@@ -98,7 +107,7 @@
         "state": "loading",
         "viewport": "desktop"
       },
-      "hash": "73f24eb27ffed1cfbc844875eb59ad983d72e2d8205c8ee47d127b8ca51932eb"
+      "hash": "9adb3b72a382b66f0dd851e81588c5b51f1f6e7b337d0f1336f14eb7da2a34a4"
     }
   ]
 }
