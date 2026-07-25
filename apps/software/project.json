@@ -38,7 +38,9 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "options": { "command": "scripts/visual-project.sh software" }
+      "options": {
+        "command": "node scripts/capture-visual.mjs software \"${SHOTS_OUT:-shots/current/software/x86_64}\""
+      }
     }
   }
 }

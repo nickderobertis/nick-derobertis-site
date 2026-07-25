@@ -40,7 +40,9 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "options": { "command": "scripts/visual-project.sh home-contact" }
+      "options": {
+        "command": "node scripts/capture-visual.mjs home-contact \"${SHOTS_OUT:-shots/current/home-contact/x86_64}\""
+      }
     }
   }
 }

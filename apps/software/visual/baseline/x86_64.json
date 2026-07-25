@@ -49,15 +49,6 @@
     {
       "name": "software",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "f7f4e8b905d0a14e53839e8206aa078ee894886b0172a20731fd763f1b756e3a"
-    },
-    {
-      "name": "software",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"

@@ -38,7 +38,9 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "options": { "command": "scripts/visual-project.sh awards" }
+      "options": {
+        "command": "node scripts/capture-visual.mjs awards \"${SHOTS_OUT:-shots/current/awards/x86_64}\""
+      }
     }
   }
 }

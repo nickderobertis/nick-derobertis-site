@@ -38,7 +38,9 @@
     },
     "screenshot": {
       "executor": "nx:run-commands",
-      "options": { "command": "scripts/visual-project.sh research" }
+      "options": {
+        "command": "node scripts/capture-visual.mjs research \"${SHOTS_OUT:-shots/current/research/x86_64}\""
+      }
     }
   }
 }

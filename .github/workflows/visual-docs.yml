@@ -1,43 +1,123 @@
+# Visual regression via screencomp's canonical reusable workflow.
+#
+# This repo owns ONLY capture (the pinned Linux container below) and the
+# affected-project selection; screencomp owns everything downstream — the
+# reproducibility gate, the classify drift gate, the per-app galleries, the
+# GitHub Pages deploy, and the sticky PR comment. See docs and AGENTS.md.
+#
+# Affected-only economics: the upstream `affected` job turns
+# `nx affected --with-target screenshot` into the reusable workflow's dynamic
+# `projects` matrix (one lane per affected microfrontend, each with its own
+# committed baseline manifest and gallery), so an unaffected app is never
+# captured or classified — never reported as removed.
 name: Visual docs
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   push:
     branches: [master]
-permissions:
-  contents: read
-concurrency:
-  group: visual-docs-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Forwarded so screencomp's gh-pages-maintenance jobs (preview cleanup on PR
+  # close, history prune on schedule) can fire; a reusable workflow cannot add
+  # its own triggers.
+  schedule:
+    - cron: "37 4 * * 1"
+permissions: {}
 jobs:
-  capture:
+  # Select which microfrontends changed and emit the reusable workflow's
+  # dynamic per-project matrix. Runs on the host (Nx needs the workspace);
+  # capture itself happens later inside the pinned container.
+  affected:
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed') }}
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/playwright:v1.61.1-noble
+    permissions:
+      contents: read
+    outputs:
+      projects: ${{ steps.projects.outputs.projects }}
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with: { fetch-depth: 0 }
       - uses: pnpm/action-setup@v4
-        with: {version: 10.13.1}
-      - run: just bootstrap-ci
-      - uses: nickderobertis/screencomp@v0.4.2
-      - name: Capture and diff affected microfrontends
+        with: { version: 10.13.1 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 26.5.0, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Resolve affected range
+        id: range
         env:
-          NX_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
-          NX_HEAD: ${{ github.sha }}
-          SCREENCOMP_CAPTURE_CONTAINER: "1"
-          SCREENCOMP_DEFER_DRIFT: "1"
-        run: just visual-affected
-      - name: Record affected-project signal
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_HEAD: ${{ github.sha }}
+        run: |
+          if [ "$EVENT_NAME" = pull_request ]; then
+            base="$PR_BASE_SHA"; head="$PR_HEAD_SHA"
+          else
+            base="$PUSH_BEFORE"; head="$PUSH_HEAD"
+            # New branches report an all-zero "before"; fall back to the parent.
+            git rev-parse --verify "$base^{commit}" >/dev/null 2>&1 || base="$(git rev-parse "$head~1")"
+          fi
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "head=$head" >> "$GITHUB_OUTPUT"
+      - name: Compute affected visual projects
+        id: projects
         env:
-          CAPTURE_HEAD_SHA: ${{ github.sha }}
-          CAPTURE_REPOSITORY: ${{ github.repository }}
-        run: node scripts/write-visual-capture-signal.mjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: visual-captures
-          path: |
-            affected-visual-projects.txt
-            visual-capture.json
-            apps/*/visual/current
-            apps/*/visual/verify
-            apps/*/visual/drift
-          if-no-files-found: error
+          NX_BASE: ${{ steps.range.outputs.base }}
+          NX_HEAD: ${{ steps.range.outputs.head }}
+        run: |
+          affected="$(pnpm exec nx show projects --affected --with-target screenshot --base="$NX_BASE" --head="$NX_HEAD" --json)"
+          projects="$(printf '%s' "$affected" | node scripts/affected-visual-projects.mjs)"
+          echo "projects=$projects" >> "$GITHUB_OUTPUT"
+          echo "Affected visual projects: $projects"
+
+  # Canonical screencomp pipeline. Runs when a visual project is affected, and on
+  # PR-close / schedule so gh-pages-maintenance can prune previews and history.
+  visual-docs:
+    needs: affected
+    if: ${{ always() && (github.event.action == 'closed' || github.event_name == 'schedule' || (needs.affected.result == 'success' && needs.affected.outputs.projects != '[]')) }}
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.3
+    with:
+      projects: ${{ needs.affected.outputs.projects || '[]' }}
+      container: mcr.microsoft.com/playwright:v1.61.1-noble
+      screencomp-version: v0.4.3
+      gallery-title: Nick DeRobertis site visual docs
+      fail-on-drift: true
+      # Each affected app is built (with the composed shell + home remotes its
+      # host-composed shots need, via the Nx screenshot target's dependsOn) and
+      # captured to $SHOTS_OUT. Runs twice for screencomp's reproducibility gate.
+      capture-command: |
+        corepack enable
+        pnpm install --frozen-lockfile
+        pnpm exec nx run "$SCREENCOMP_PROJECT:screenshot"
+
+  # Stable, always-present status check to require in branch protection. The
+  # reusable workflow's own classify runs in per-project matrix legs
+  # (`visual-docs / report (x86_64, <app>, …)`), whose context names vary with
+  # the affected set; this job collapses them into one requirable context that
+  # passes when classify is clean or when no visual project was affected.
+  classify-gate:
+    needs: [affected, visual-docs]
+    if: ${{ always() && github.event.action != 'closed' && github.event_name != 'schedule' }}
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Enforce the visual drift gate
+        env:
+          AFFECTED_RESULT: ${{ needs.affected.result }}
+          VISUAL_DOCS_RESULT: ${{ needs.visual-docs.result }}
+        run: |
+          if [ "$AFFECTED_RESULT" != success ]; then
+            echo "classify-gate: affected selection did not succeed ($AFFECTED_RESULT)" >&2
+            exit 1
+          fi
+          case "$VISUAL_DOCS_RESULT" in
+            success) echo "classify-gate: screencomp classified the affected microfrontends clean" ;;
+            skipped) echo "classify-gate: no visual microfrontend affected; nothing to classify" ;;
+            *)
+              echo "classify-gate: screencomp reported visual drift or failed ($VISUAL_DOCS_RESULT); review the per-app gallery and PR comment, regenerate the baseline locally with the pre-push guard, and commit it" >&2
+              exit 1
+              ;;
+          esac

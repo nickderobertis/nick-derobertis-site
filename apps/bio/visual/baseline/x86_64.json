@@ -49,15 +49,6 @@
     {
       "name": "bio",
       "toggles": {
-        "render": "host-composed",
-        "state": "loading",
-        "viewport": "desktop"
-      },
-      "hash": "7ca8051fbfa47395d2900f78075d8813df58c6c4cbccc3045cbcdde965fd9dab"
-    },
-    {
-      "name": "bio",
-      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"

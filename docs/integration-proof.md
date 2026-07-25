@@ -84,36 +84,46 @@ and writes `404.html`. The JavaScript-disabled browser assertion checks real
 feature text on all five routes, while the integration suite checks deep-link
 recovery and omnidirectional host/remote composition.
 
-The pinned visual command prefers Docker. When Docker is unavailable, it
-reconstructs the commit that introduced each baseline manifest, captures that
-revision and the current revision with the same local Chromium/CPU, and requires
-the two capture sets to be byte-identical. This removes CPU rasterization as a
-variable without adding a pixel threshold: a one-pixel layout, content, or color
-change still fails.
+Visual regression is now screencomp's canonical reusable workflow
+(`.github/workflows/visual-docs.yml`). Capture runs inside the pinned Linux
+container the reusable workflow uses; the Nx `screenshot` target builds each
+microfrontend with its composed shell/home remotes and writes
+`$SHOTS_OUT/captures.json` plus its PNGs. Determinism is proven by capturing an
+affected app fresh in that container and classifying it against the committed,
+image-free baseline manifest — a byte-digest comparison, so a one-pixel layout,
+content, or color change fails:
 
 ```console
-$ just visual-project bio
-visual-project: bio matches the baseline source commit byte-for-byte on this CPU; manifest drift is rasterization-only
+$ docker run --rm --platform=linux/amd64 --ipc=host --shm-size=2g \
+    -v "$PWD:/work" -v /work/node_modules -w /work \
+    -e SCREENCOMP_PROJECT=bio -e SHOTS_OUT=shots/current/bio/x86_64 \
+    mcr.microsoft.com/playwright:v1.61.1-noble \
+    bash -lc 'corepack enable && pnpm install --frozen-lockfile && pnpm exec nx run bio:screenshot'
+$ screencomp classify --baseline-manifest apps/bio/visual/baseline/x86_64.json \
+    --current shots/current/bio --arch x86_64 --exit-code
+added 0 changed 0 removed 0 unchanged 12
 ```
 
-Exact per-route results from the normal, unmodified targets:
+A fresh container capture matching the previously committed baseline
+byte-for-byte demonstrates cross-environment reproducibility directly (the
+baseline and this capture were produced by different runs), so no same-CPU
+baseline reconstruction is needed. In CI the reusable workflow re-runs the
+capture into a second tree for the reproducibility gate, then classifies each
+affected app against its own baseline; drift fails the `classify-gate` check.
 
-| Route | Current recapture | Same-CPU baseline commit | Result |
-| --- | ---: | ---: | --- |
-| Home | 12/12 byte-identical | 12/12 byte-identical | Pass |
-| Bio | 12/12 byte-identical | 12/12 byte-identical | Pass |
-| Research | 12/12 byte-identical | Manifest 12/12 unchanged | Pass |
-| Software | 12/12 byte-identical | 12/12 byte-identical | Pass |
-| Courses | 12/12 byte-identical | 12/12 byte-identical | Pass |
+Affected-only economics are preserved by the upstream `affected` job. A
+single-remote edit selects only that microfrontend, and a shared design-system
+edit selects exactly its dependents, each becoming one `projects` lane:
 
-The fallback was also challenged with an intentional nine-pixel green outline
-on the biography. It rejected all three host-composed happy-state viewports and
-returned exit code 3:
+```console
+$ nx show projects --affected --files apps/skills/src/page.tsx --with-target screenshot --json \
+    | node scripts/affected-visual-projects.mjs
+[{"id":"skills","current":"shots/current/skills","verify":"shots/verify/skills","manifest":"apps/skills/visual/baseline/x86_64.json","gallery-title":"skills"}]
 
-```text
-NOT reproducible: 3 differ, 0 only in first run, 0 only in second (of 12)
-intentional_regression_status=3
+$ nx show projects --affected --files libs/design-system/src/theme.css --with-target screenshot --json \
+    | node scripts/affected-visual-projects.mjs
+# → 12 lanes: awards, bio, courses, home, home-cards, home-carousel,
+#   home-contact, home-story, research, skills, software, timeline
 ```
 
-The temporary regression was reverted before the final gate. Baselines were
-never rewritten.
+`apps/shell-e2e/src/unit/visual-affected.spec.ts` locks both cases in.
