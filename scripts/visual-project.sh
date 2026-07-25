@@ -6,6 +6,12 @@ if [[ ! "$project" =~ ^[a-z][a-z0-9-]*$ ]] || [[ ! -f "apps/$project/project.jso
   printf 'visual-project: expected a valid Nx project name; try: just visual-project bio\n' >&2
   exit 2
 fi
+# Every capture reads the shared prerendered shell artifact and drives a local
+# browser. Keep that stateful section exclusive even when Nx dispatches
+# screenshot targets in parallel.
+visual_lock="${TMPDIR:-/tmp}/nick-derobertis-site-visual.lock"
+exec 9>"$visual_lock"
+flock 9
 arch="x86_64"
 current="apps/$project/visual/current/$arch"
 verify="apps/$project/visual/verify/$arch"
