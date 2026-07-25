@@ -13,6 +13,7 @@ if (canHydrate) {
   const { default: HydratedPage } = await pageModule;
   hydrateRoot(root, <HydratedPage />);
 } else {
+  root.replaceChildren();
   createRoot(root).render(
     <Suspense fallback={<Skeleton />}>
       <Page />

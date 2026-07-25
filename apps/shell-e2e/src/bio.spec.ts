@@ -32,7 +32,9 @@ for (const renderPath of renderPaths) {
   test(`${renderPath.name} exposes loading, empty, and error states`, async ({
     page,
   }) => {
-    await page.goto(`${renderPath.path}?bio-view=loading`);
+    await page.goto(`${renderPath.path}?bio-view=loading`, {
+      waitUntil: "domcontentloaded",
+    });
     await expect(
       page.getByRole("status", { name: "Loading biography", exact: true }),
     ).toBeVisible();

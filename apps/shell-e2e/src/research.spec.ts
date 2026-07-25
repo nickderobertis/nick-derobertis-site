@@ -78,7 +78,9 @@ for (const renderPath of renderPaths) {
     test("shows its skeleton while the data boundary is pending, then renders", async ({
       page,
     }) => {
-      await page.goto(`${renderPath.path}?research-scenario=loading`);
+      await page.goto(`${renderPath.path}?research-scenario=loading`, {
+        waitUntil: "domcontentloaded",
+      });
       await expect(
         page.getByRole("status", { name: "Loading research", exact: true }),
       ).toBeVisible();

@@ -44,4 +44,7 @@ const app = (
   </StrictMode>
 );
 if (canHydrate) hydrateRoot(root, app);
-else createRoot(root).render(app);
+else {
+  root.replaceChildren();
+  createRoot(root).render(app);
+}

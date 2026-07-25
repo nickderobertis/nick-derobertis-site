@@ -319,11 +319,6 @@ try {
         scenario.render === "standalone"
           ? routePrefix
           : `${pagesPrefix}${hostPath}`;
-      if (scenario.render === "host-composed" && scenario.state !== "happy") {
-        await page.goto(`http://127.0.0.1:${address.port}${routePrefix}`, {
-          waitUntil: "networkidle",
-        });
-      }
       await page.goto(
         `http://127.0.0.1:${address.port}${relative}${queryFor(scenario.state)}`,
         {
@@ -365,7 +360,7 @@ try {
       }
       if (browserErrors.length > 0)
         throw new Error(
-          `Visual capture reported ${browserErrors.join("; ")}; rerun the ${project} screenshot target and inspect this scenario`,
+          `Visual capture reported ${browserErrors.join("; ")} in ${scenario.render}/${scenario.state}/${viewport}; rerun the ${project} screenshot target and inspect this scenario`,
         );
       const hash = createHash("sha256")
         .update(readFileSync(capturePath))
