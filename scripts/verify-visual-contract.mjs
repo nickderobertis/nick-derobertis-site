@@ -154,7 +154,9 @@ for (const [key, value] of Object.entries(contract)) {
     );
 }
 if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(contract.pagesRepository))
-  throw new Error("Visual pagesRepository must be an owner/name");
+  throw new Error(
+    "Visual pagesRepository must be an owner/name; correct pagesRepository in visual-tools.json and rerun just lint-workflows",
+  );
 const pagesUrl = `https://${contract.pagesRepository.split("/")[0]}.github.io/${contract.pagesRepository.split("/")[1]}/`;
 for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"])
   if (!readFileSync(path, "utf8").includes(pagesUrl))

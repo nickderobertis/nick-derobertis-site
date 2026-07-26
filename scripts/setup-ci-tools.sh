@@ -7,7 +7,7 @@ read_contract() {
   node -e '
     const contract = require("./ci-tools.json");
     const keys = ["schema", "actionlint", "shellcheck", "codex"];
-    if (!contract || Object.keys(contract).length !== keys.length || !keys.every((key) => Object.hasOwn(contract, key)) || contract.schema !== 2) throw new Error("invalid CI tool contract");
+    if (!contract || Object.keys(contract).length !== keys.length || !keys.every((key) => Object.hasOwn(contract, key)) || contract.schema !== 2) throw new Error("invalid CI tool contract; restore ci-tools.json schema 2 with exactly the actionlint, shellcheck, and codex pins");
     for (const name of ["actionlint", "shellcheck"]) {
       const tool = contract[name];
       if (!tool || Object.keys(tool).length !== 2 || !/^\d+\.\d+\.\d+$/.test(tool.version) || !/^[0-9a-f]{64}$/.test(tool.sha256)) throw new Error("invalid " + name + " contract");
