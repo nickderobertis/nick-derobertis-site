@@ -143,6 +143,25 @@ test("query-only route states client-mount without hydration warnings", async ({
   ).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("Home reuses prerendered content without hydration warnings", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await page.goto("", { waitUntil: "networkidle" });
+  await expect(
+    page.getByRole("heading", { name: "Finance researcher & educator" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Who am I?", { exact: false }).first(),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
 // llmlint: ignore-end[tests_mirror_real_usage]
 
 test("the static 404 is intentional and the router recovers unknown routes", async ({

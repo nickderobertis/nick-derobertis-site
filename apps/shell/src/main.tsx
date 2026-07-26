@@ -28,10 +28,14 @@ const router = createSiteRouter({
     search: new URLSearchParams(window.location.search),
   },
 });
-const hasStaticPayload = Boolean(
-  Reflect.get(window, "$_TSR") &&
-    Reflect.get(Reflect.get(window, "$_TSR") as object, "router"),
-);
+function hasSerializedRouter(value: unknown): value is {
+  router: Record<string, unknown>;
+} {
+  if (!value || typeof value !== "object") return false;
+  const serializedRouter = Reflect.get(value, "router");
+  return Boolean(serializedRouter && typeof serializedRouter === "object");
+}
+const hasStaticPayload = hasSerializedRouter(Reflect.get(window, "$_TSR"));
 const canHydrate = hasStaticPayload && !window.location.search;
 if (!canHydrate) await router.load();
 const app = (

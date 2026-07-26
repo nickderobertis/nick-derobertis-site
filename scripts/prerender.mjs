@@ -25,6 +25,22 @@ function validateSiteConfig(value) {
 const validatedSiteConfig = validateSiteConfig(siteConfig);
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Command startup failures are covered through the real subprocess boundary in home.spec.ts; they have no browser interface.
+function validateRemoteManifest(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    Object.entries(value).some(
+      ([name, alias]) =>
+        !/^[a-z][a-z-]+$/.test(name) || typeof alias !== "string",
+    )
+  )
+    throw new Error(
+      "remotes.json must contain string remote-name mappings. Fix libs/build-config/src/remotes.json and run just check again.",
+    );
+  return value;
+}
+
 function requirePath(value, fallback, name) {
   const path = value ?? fallback;
   if (typeof path !== "string" || path.length === 0 || path.includes("\0"))
@@ -33,15 +49,7 @@ function requirePath(value, fallback, name) {
     );
   return path;
 }
-if (
-  Object.entries(remoteManifest).some(
-    ([name, alias]) =>
-      !/^[a-z][a-z-]+$/.test(name) || typeof alias !== "string",
-  )
-)
-  throw new Error(
-    "remotes.json must contain string remote-name mappings. Fix libs/build-config/src/remotes.json and run just check again.",
-  );
+const validatedRemoteManifest = validateRemoteManifest(remoteManifest);
 const output = requirePath(
   process.env.PRERENDER_OUTPUT,
   "dist/apps/shell",
@@ -175,7 +183,7 @@ await cp("libs/data-access-core/vendor/codegen", join(output, "cv-data"), {
 
 await rm(join(output, "remotes"), { recursive: true, force: true });
 // llmlint: ignore-block[changed_behavior_has_e2e] Remote staging diagnostics are exercised through the real prerender subprocess in home.spec.ts, before a browser can be served.
-for (const name of Object.keys(remoteManifest)) {
+for (const name of Object.keys(validatedRemoteManifest)) {
   const source = join(remoteBuildRoot, name);
   const destination = join(output, "remotes", name);
   try {
@@ -201,7 +209,7 @@ for (const name of Object.keys(remoteManifest)) {
   }
 }
 for (const name of prerenderRemotes) {
-  if (!(name in remoteManifest))
+  if (!(name in validatedRemoteManifest))
     throw new Error(
       `Prerender remote ${name} is absent from remotes.json; update both contracts and rerun just prerender.`,
     );

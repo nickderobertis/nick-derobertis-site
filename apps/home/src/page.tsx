@@ -4,6 +4,7 @@ import ContactSkeleton from "homeContact/Skeleton";
 import StorySkeleton from "homeStory/Skeleton";
 import { siteBase } from "@site/data-access-core";
 import { homeContent } from "@site/data-access-home";
+import { prerenderRouteAttribute } from "@site/route-state";
 import AwardsSkeleton from "awards/Skeleton";
 import { type ComponentType, lazy, Suspense } from "react";
 import SkillsSkeleton from "skills/Skeleton";
@@ -32,7 +33,7 @@ const skillsModule = import("skills/Page");
 const awardsModule = import("awards/Page");
 const hydrateFromSource =
   typeof document !== "undefined" &&
-  document.getElementById("root")?.getAttribute("data-prerendered-route") ===
+  document.getElementById("root")?.getAttribute(prerenderRouteAttribute) ===
     "/" &&
   !window.location.search;
 type HydratedPanes = [

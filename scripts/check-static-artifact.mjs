@@ -21,33 +21,42 @@ const realRouteMarkers = {
 
 const root = "dist/apps/shell";
 // llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
-if (
-  !Array.isArray(routes) ||
-  !routes.every(
-    (route) =>
-      route &&
-      typeof route === "object" &&
-      typeof route.path === "string" &&
-      /^\/(?:[a-z][a-z0-9-]*)?$/.test(route.path) &&
-      typeof route.heading === "string" &&
-      typeof route.description === "string",
+function parseRoutes(value) {
+  if (
+    !Array.isArray(value) ||
+    !value.every(
+      (route) =>
+        route &&
+        typeof route === "object" &&
+        typeof route.path === "string" &&
+        /^\/(?:[a-z][a-z0-9-]*)?$/.test(route.path) &&
+        typeof route.heading === "string" &&
+        typeof route.description === "string",
+    )
   )
-)
-  throw new Error(
-    "The route manifest is invalid; fix apps/shell/src/routes.json and rerun just check.",
-  );
+    throw new Error(
+      "The route manifest is invalid; fix apps/shell/src/routes.json and rerun just check.",
+    );
+  return value;
+}
 // llmlint: ignore-end[changed_behavior_has_e2e]
 // llmlint: ignore-block[changed_behavior_has_e2e] These build-time artifact failure paths occur before a browser can be served; the successful artifact is exercised with JavaScript disabled and through deep links in site.spec.ts.
-if (
-  !remoteManifest ||
-  typeof remoteManifest !== "object" ||
-  Object.keys(remoteManifest).some((name) => !/^[a-z][a-z0-9-]*$/.test(name)) ||
-  Object.values(remoteManifest).some((alias) => typeof alias !== "string")
-)
-  throw new Error(
-    "The canonical remote manifest is invalid; fix libs/build-config/src/remotes.json and rerun just check.",
-  );
-for (const route of routes) {
+function parseRemoteManifest(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    Object.keys(value).some((name) => !/^[a-z][a-z0-9-]*$/.test(name)) ||
+    Object.values(value).some((alias) => typeof alias !== "string")
+  )
+    throw new Error(
+      "The canonical remote manifest is invalid; fix libs/build-config/src/remotes.json and rerun just check.",
+    );
+  return value;
+}
+const validatedRoutes = parseRoutes(routes);
+const validatedRemoteManifest = parseRemoteManifest(remoteManifest);
+for (const route of validatedRoutes) {
   const path =
     route.path === "/"
       ? `${root}/index.html`
@@ -92,7 +101,7 @@ for (const route of routes) {
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error("404 fallback is not intentional");
-for (const name of Object.keys(remoteManifest)) {
+for (const name of Object.keys(validatedRemoteManifest)) {
   const remoteEntry = `${root}/remotes/${name}/remoteEntry.js`;
   try {
     await access(remoteEntry);
