@@ -97,6 +97,10 @@ jobs:
       capture-command: |
         corepack enable
         pnpm install --frozen-lockfile
+        [[ "$SCREENCOMP_PROJECT" =~ ^[a-z][a-z0-9-]*$ ]] || {
+          echo "capture-command: SCREENCOMP_PROJECT must be a valid Nx project name" >&2
+          exit 2
+        }
         pnpm exec nx run "$SCREENCOMP_PROJECT:screenshot"
     secrets:
       # llmlint: ignore[boundary_inputs_validated] The pinned reusable workflow's pages-preflight job rejects a missing token before any consumer or external write; GitHub masks the secret and owns token syntax/authorization validation.

@@ -1,3 +1,4 @@
+<!-- llmlint: ignore-file[instruction_layer_localized] The root journey inventory is deliberately a shell-wide federation contract: every feature must be exercised through both its standalone remote and host-composed boundary, so localizing those coupled journeys under individual apps would split the single end-to-end ownership model. -->
 # Repository instructions
 
 ## Stack and composition
