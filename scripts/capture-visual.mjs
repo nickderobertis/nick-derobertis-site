@@ -373,7 +373,7 @@ try {
             !error.message.includes("Cannot fast-forward to the past")
           )
             throw new Error(
-              `Could not freeze the browser clock before capturing ${image}; verify the page reaches a stable state, then rerun just check.`,
+              `Could not freeze the browser clock before capturing ${image}: ${error instanceof Error ? error.message : String(error)}. Verify the page reaches a stable state, then rerun just check.`,
               { cause: error },
             );
         }
@@ -398,7 +398,7 @@ try {
             !error.message.includes("Element is not attached to the DOM")
           )
             throw new Error(
-              `Could not capture ${image} after retrying its render target; verify the scenario remains visible, then rerun just check.`,
+              `Could not capture ${image} after retrying its render target: ${error instanceof Error ? error.message : String(error)}. Verify the scenario remains visible, then rerun just check.`,
               { cause: error },
             );
         }
