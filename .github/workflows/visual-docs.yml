@@ -1,5 +1,5 @@
 # Visual regression via screencomp's canonical reusable workflow.
-# llmlint: ignore-file[changed_behavior_has_e2e] This CI-only caller wires screencomp's externally tested reusable workflow and has no browser interface of its own; actionlint and the visual-contract verifier exercise its input, secret, and capture-command wiring.
+# llmlint: ignore-file[changed_behavior_has_e2e,work_goes_through_command_surface] This CI-only caller has no browser interface and its capture block is screencomp's required injected container callback, which must use SCREENCOMP_PROJECT and SHOTS_OUT; actionlint and the visual-contract verifier exercise its input, secret, and callback wiring.
 #
 # This repo owns ONLY capture (the pinned Linux container below) and the
 # affected-project selection; screencomp owns everything downstream — the
@@ -94,7 +94,6 @@ jobs:
       # Each affected app is built (with the composed shell + home remotes its
       # host-composed shots need, via the Nx screenshot target's dependsOn) and
       # captured to $SHOTS_OUT. Runs twice for screencomp's reproducibility gate.
-      # llmlint: ignore[work_goes_through_command_surface] This is screencomp's injected container callback, not a repository CI command: it must use SCREENCOMP_PROJECT and SHOTS_OUT to dispatch the selected Nx screenshot target inside screencomp's pinned container.
       capture-command: |
         corepack enable
         pnpm install --frozen-lockfile
