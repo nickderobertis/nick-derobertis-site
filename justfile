@@ -93,6 +93,11 @@ e2e-project project:
 setup-llmlint:
     ./scripts/setup-llmlint.sh
 
+# llmlint: ignore[changed_behavior_has_e2e] This command-only recipe has no browser interface and delegates to the real registry/integrity installer.
+setup-llm-harness:
+    # llmlint: ignore[changed_behavior_has_e2e] This command-only delegation has no browser interface; the script exercises the real npm boundary.
+    ./scripts/setup-llm-harness.sh
+
 lint-llm:
     llmlint
 

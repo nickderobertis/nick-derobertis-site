@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
+# llmlint: ignore-file[changed_behavior_has_e2e] This CI/developer installer has no browser interface; its checksum and executable verification paths exercise the real downloaded tools.
 set -euo pipefail
 tool_root="$(pwd)/.tools"
 tool_bin="$tool_root/bin"
 read_contract() {
   node -e '
     const contract = require("./ci-tools.json");
-    const keys = ["schema", "actionlint", "shellcheck"];
-    if (!contract || Object.keys(contract).length !== keys.length || !keys.every((key) => Object.hasOwn(contract, key)) || contract.schema !== 1) throw new Error("invalid CI tool contract");
+    const keys = ["schema", "actionlint", "shellcheck", "codex"];
+    if (!contract || Object.keys(contract).length !== keys.length || !keys.every((key) => Object.hasOwn(contract, key)) || contract.schema !== 2) throw new Error("invalid CI tool contract");
     for (const name of ["actionlint", "shellcheck"]) {
       const tool = contract[name];
       if (!tool || Object.keys(tool).length !== 2 || !/^\d+\.\d+\.\d+$/.test(tool.version) || !/^[0-9a-f]{64}$/.test(tool.sha256)) throw new Error("invalid " + name + " contract");
     }
+    const codex = contract.codex;
+    if (!codex || Object.keys(codex).length !== 3 || codex.package !== "@openai/codex" || !/^\d+\.\d+\.\d+$/.test(codex.version) || !/^sha512-[A-Za-z0-9+/]+={0,2}$/.test(codex.integrity)) throw new Error("invalid codex contract; update ci-tools.json with the exact @openai/codex npm version and sha512 integrity");
     process.stdout.write([contract.actionlint.version, contract.actionlint.sha256, contract.shellcheck.version, contract.shellcheck.sha256].join("\n"));
   '
 }
