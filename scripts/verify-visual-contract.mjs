@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+
 // llmlint: ignore-file[changed_behavior_has_e2e] This CLI/filesystem quality-gate validator has no browser interface; lint-workflows executes its real boundary against committed workflow, configuration, baselines, and documentation.
 
 process.on("uncaughtException", (error) => {
