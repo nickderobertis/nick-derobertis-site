@@ -40,7 +40,11 @@ jobs:
       # the judge. Fork PRs receive no secret, so they stop after static validation
       # without downloading a harness or making a model call.
       - name: Run llmlint judge when credentialed
-        env: {OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"}
+        env:
+          OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
+          # Codex exec consumes CODEX_API_KEY non-interactively; llmlint uses
+          # OPENAI_API_KEY above as its credential-presence contract.
+          CODEX_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
         run: |
           # llmlint: ignore[live_tier_compiles_and_requires_credential] GitHub withholds repository secrets from fork PRs; those runs must remain merge-testable and still complete lint-llm-validate above without claiming that the model judge ran.
           if [ -n "$OPENAI_API_KEY" ]; then
