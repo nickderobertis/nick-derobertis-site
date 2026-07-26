@@ -1,4 +1,5 @@
 # Visual regression via screencomp's canonical reusable workflow.
+# llmlint: ignore-file[changed_behavior_has_e2e] This CI-only caller wires screencomp's externally tested reusable workflow and has no browser interface of its own; actionlint and the visual-contract verifier exercise its input, secret, and capture-command wiring.
 #
 # This repo owns ONLY capture (the pinned Linux container below) and the
 # affected-project selection; screencomp owns everything downstream — the
