@@ -55,9 +55,11 @@
         "command": "node scripts/performance-audit.mjs"
       }
     },
-    // llmlint: ignore[changed_behavior_has_e2e] This build-only Nx target has no browser interface; its output is consumed by shell:prerender and exercised through the real shell browser journeys.
     "build-prerender-renderer": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] This build-only Nx target has no browser interface; its output is consumed by shell:prerender and exercised through the real shell browser journeys."
+      },
       "outputs": ["{workspaceRoot}/dist/prerender-renderer"],
       "options": { "command": "node scripts/build-prerender-renderer.mjs" }
     },
