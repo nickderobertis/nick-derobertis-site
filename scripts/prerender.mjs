@@ -47,6 +47,13 @@ const remoteBuildRoot = requirePath(
 // llmlint: ignore-end[changed_behavior_has_e2e]
 const base = validatedSiteConfig.pagesBase;
 const builtDocument = await readFile(join(output, "index.html"), "utf8");
+if (
+  !builtDocument.includes('<div id="root"') ||
+  !builtDocument.includes("</body>")
+)
+  throw new Error(
+    `The built shell at ${join(output, "index.html")} lacks its root document structure; rebuild the shell, then rerun just prerender.`,
+  );
 // Nx may restore a previously prerendered output from cache. Normalize it back
 // to the rspack template so this target is idempotent as well as parallel-safe.
 const template = builtDocument
@@ -54,6 +61,10 @@ const template = builtDocument
   .replace(
     /<div id="root"[^>]*>[\s\S]*<\/body>/,
     '<div id="root"></div></body>',
+  );
+if (!template.includes('<div id="root"></div>'))
+  throw new Error(
+    `The built shell at ${join(output, "index.html")} could not be normalized to its root placeholder; rebuild the shell, then rerun just prerender.`,
   );
 
 let rendererModule;
@@ -201,6 +212,10 @@ for (const name of prerenderRemotes) {
     );
   const path = join(output, "remotes", name, "index.html");
   const remoteDocument = await readFile(path, "utf8");
+  if (!remoteDocument.includes('<div id="root"></div>'))
+    throw new Error(
+      `The built ${name} remote at ${path} lacks its root placeholder; rebuild the remote, then rerun just prerender.`,
+    );
   const html = await renderRemote(name);
   if (typeof html !== "string")
     throw new Error(
