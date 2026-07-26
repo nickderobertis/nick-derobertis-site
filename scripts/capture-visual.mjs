@@ -348,7 +348,10 @@ try {
       await page.clock.pauseAt(new Date("2026-07-20T12:01:00Z"));
       let captured = false;
       for (let attempt = 0; attempt < 2 && !captured; attempt += 1) {
-        const target = await prepareCaptureTarget(page, scenario.state);
+        const target =
+          attempt === 0
+            ? initialTarget
+            : await prepareCaptureTarget(page, scenario.state);
         await target.waitFor({ state: "visible" });
         try {
           await target.screenshot({
