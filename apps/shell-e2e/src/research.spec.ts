@@ -60,7 +60,6 @@ for (const renderPath of renderPaths) {
 
     for (const state of [
       { scenario: "empty", heading: "No research projects yet" },
-      { scenario: "error", heading: "Research is unavailable" },
     ]) {
       test(`shows its ${state.scenario} state from the data boundary`, async ({
         page,
@@ -74,6 +73,27 @@ for (const renderPath of renderPaths) {
         await expect(page.getByRole("article")).toHaveCount(0);
       });
     }
+
+    test("shows its error state when the data boundary fails", async ({
+      page,
+    }) => {
+      if (renderPath.label === "host-composed") {
+        await page.route("**/cv-data/domains/research.json", (route) =>
+          route.fulfill({
+            status: 503,
+            contentType: "application/json",
+            body: '{"error":"temporarily unavailable"}',
+          }),
+        );
+        await page.goto(`${renderPath.path}?client-render=1`);
+      } else {
+        await page.goto(`${renderPath.path}?research-scenario=error`);
+      }
+      await expect(
+        page.getByRole("heading", { name: "Research is unavailable" }),
+      ).toBeVisible();
+      await expect(page.getByRole("article")).toHaveCount(0);
+    });
 
     test("shows its skeleton while the data boundary is pending, then renders", async ({
       page,
