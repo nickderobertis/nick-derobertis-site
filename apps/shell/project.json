@@ -58,7 +58,7 @@
     "build-prerender-renderer": {
       "executor": "nx:run-commands",
       "outputs": ["{workspaceRoot}/dist/prerender-renderer"],
-      "options": { "command": "just build-prerender-renderer" }
+      "options": { "command": "node scripts/build-prerender-renderer.mjs" }
     },
     "lint": {
       "executor": "nx:run-commands",
