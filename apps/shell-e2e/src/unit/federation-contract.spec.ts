@@ -8,7 +8,7 @@ const timelineContract = [
   ["apps/home/src/remotes.d.ts", 'declare module "timeline/Page"'],
   ["apps/timeline/project.json", "E2E_REMOTE=timeline"],
   ["eslint.config.mjs", 'sourceTag: "scope:timeline"'],
-  ["scripts/prerender.mjs", "Object.keys(remoteManifest)"],
+  ["scripts/prerender.mjs", "Object.keys(validatedRemoteManifest)"],
 ] as const;
 
 const awardsContract = [

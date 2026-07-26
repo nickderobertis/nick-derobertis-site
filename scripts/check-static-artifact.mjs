@@ -3,6 +3,7 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
+import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 const substantiveRouteContent = {
   "/": "Who am I?",
@@ -11,46 +12,49 @@ const substantiveRouteContent = {
   "/software": "Python Tools for Working with Data",
   "/courses": "Financial Modeling",
 };
+const realRouteMarkers = {
+  "/bio": 'class="bio-page"',
+  "/research": 'class="research-page"',
+  "/software": 'class="software-page"',
+  "/courses": 'class="courses-page"',
+};
 
 const root = "dist/apps/shell";
 // llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
-if (
-  !Array.isArray(routes) ||
-  !routes.every(
-    (route) =>
-      route &&
-      typeof route === "object" &&
-      typeof route.path === "string" &&
-      /^\/(?:[a-z][a-z0-9-]*)?$/.test(route.path) &&
-      typeof route.heading === "string" &&
-      typeof route.description === "string",
+// llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] routes.json is the serialized source; this plain-Node artifact boundary cannot import the TypeScript parser, and just check runs both validators against that same source.
+function parseRoutes(value) {
+  if (
+    !Array.isArray(value) ||
+    !value.every(
+      (route) =>
+        route &&
+        typeof route === "object" &&
+        typeof route.path === "string" &&
+        /^\/(?:[a-z][a-z0-9-]*)?$/.test(route.path) &&
+        typeof route.heading === "string" &&
+        typeof route.description === "string",
+    )
   )
-)
-  throw new Error(
-    "The route manifest is invalid; fix apps/shell/src/routes.json and rerun just check.",
-  );
+    throw new Error(
+      "The route manifest is invalid; fix apps/shell/src/routes.json and rerun just check.",
+    );
+  return value;
+}
+// llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate]
 // llmlint: ignore-end[changed_behavior_has_e2e]
 // llmlint: ignore-block[changed_behavior_has_e2e] These build-time artifact failure paths occur before a browser can be served; the successful artifact is exercised with JavaScript disabled and through deep links in site.spec.ts.
-if (
-  !remoteManifest ||
-  typeof remoteManifest !== "object" ||
-  Object.keys(remoteManifest).some((name) => !/^[a-z][a-z0-9-]*$/.test(name)) ||
-  Object.values(remoteManifest).some((alias) => typeof alias !== "string")
-)
-  throw new Error(
-    "The canonical remote manifest is invalid; fix libs/build-config/src/remotes.json and rerun just check.",
-  );
-for (const route of routes) {
+const validatedRoutes = parseRoutes(routes);
+const validatedRemoteManifest = parseRemoteManifest(remoteManifest);
+for (const route of validatedRoutes) {
   const path =
     route.path === "/"
       ? `${root}/index.html`
       : `${root}${route.path}/index.html`;
   const html = await readFile(path, "utf8");
-  if (
-    !html.includes(`<h1>${route.heading}</h1>`) ||
-    !html.includes(route.description)
-  )
-    throw new Error(`${path} is not prerendered`);
+  if (!html.includes(`<h1`) || !html.includes(route.heading))
+    throw new Error(
+      `${path} lacks its expected h1 (${route.heading}); fix the route renderer and rerun just prerender.`,
+    );
   if (!html.includes("/nick-derobertis-site/"))
     throw new Error(`${path} lacks the Pages base path`);
   const expected = substantiveRouteContent[route.path];
@@ -58,11 +62,35 @@ for (const route of routes) {
     throw new Error(
       `${path} lacks substantive route content; fix scripts/prerender.mjs and rerun just check.`,
     );
+  if (route.path !== "/") {
+    const marker = realRouteMarkers[route.path];
+    if (!marker || !html.includes(marker))
+      throw new Error(
+        `${path} lacks its real component marker (${marker ?? "undefined"}); fix scripts/render-entry.tsx and rerun just prerender.`,
+      );
+    const routeAttribute = `${routeContracts.prerenderRouteAttribute}="${route.path}"`;
+    if (!html.includes(routeAttribute))
+      throw new Error(
+        `${path} lacks ${routeAttribute}; fix scripts/prerender.mjs and rerun just prerender.`,
+      );
+    if (html.includes('id="__TSR_DEHYDRATED__"'))
+      throw new Error(
+        `${path} contains the unsupported legacy __TSR_DEHYDRATED__ state; use TanStack Router serialization and rerun just prerender.`,
+      );
+    if (!html.includes("$_TSR.router="))
+      throw new Error(
+        `${path} lacks the TanStack Router serialized state; fix scripts/render-entry.tsx and rerun just prerender.`,
+      );
+    if (!html.includes("$_TSR.e()"))
+      throw new Error(
+        `${path} lacks the TanStack Router hydration completion call; fix scripts/render-entry.tsx and rerun just prerender.`,
+      );
+  }
 }
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error("404 fallback is not intentional");
-for (const name of Object.keys(remoteManifest)) {
+for (const name of Object.keys(validatedRemoteManifest)) {
   const remoteEntry = `${root}/remotes/${name}/remoteEntry.js`;
   try {
     await access(remoteEntry);

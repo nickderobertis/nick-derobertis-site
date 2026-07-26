@@ -25,6 +25,7 @@
       "executor": "nx:run-commands",
       "dependsOn": [
         "build",
+        "build-prerender-renderer",
         {
           "target": "build",
           "projects": [
@@ -53,6 +54,14 @@
       "options": {
         "command": "node scripts/performance-audit.mjs"
       }
+    },
+    "build-prerender-renderer": {
+      "executor": "nx:run-commands",
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] This build-only Nx target has no browser interface; its output is consumed by shell:prerender and exercised through the real shell browser journeys."
+      },
+      "outputs": ["{workspaceRoot}/dist/prerender-renderer"],
+      "options": { "command": "node scripts/build-prerender-renderer.mjs" }
     },
     "lint": {
       "executor": "nx:run-commands",

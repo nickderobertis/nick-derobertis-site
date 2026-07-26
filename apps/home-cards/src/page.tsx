@@ -4,7 +4,9 @@ import Skeleton from "./skeleton";
 import "./cards.css";
 
 export default function HomeCardsPage() {
-  const state = readPaneState(window.location.search);
+  const state = readPaneState(
+    typeof window === "undefined" ? "" : window.location.search,
+  );
   if (state === "loading") return <Skeleton />;
   if (state === "error")
     return (

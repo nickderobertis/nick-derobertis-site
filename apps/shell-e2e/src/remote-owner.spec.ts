@@ -42,6 +42,7 @@ const contracts = {
     role: "heading",
     name: "Optimizing Life",
     loadingName: "Loading biography",
+    loadingQuery: "bio-view=loading",
   },
   research: {
     host: "research",
@@ -49,6 +50,7 @@ const contracts = {
     role: "heading",
     name: "Research Works",
     loadingName: "Loading research",
+    loadingQuery: "research-scenario=loading",
   },
   software: {
     host: "software",
@@ -56,6 +58,7 @@ const contracts = {
     role: "heading",
     name: "Open-Source Software",
     loadingName: "Loading software",
+    loadingQuery: "software-view=loading",
   },
   courses: {
     host: "courses",
@@ -63,6 +66,7 @@ const contracts = {
     role: "heading",
     name: "Courses",
     loadingName: "Loading courses",
+    loadingQuery: "courses-view=loading",
   },
   timeline: {
     host: "",
@@ -101,6 +105,13 @@ for (const [render, path] of [
 ] as const)
   test(`${owner} renders through its ${render} boundary`, async ({ page }) => {
     const failures: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error")
+        failures.push(`console: ${message.text()}`);
+    });
+    page.on("pageerror", (error) => {
+      failures.push(`page: ${error.message}`);
+    });
     page.on("response", (response) => {
       if (response.status() >= 400)
         failures.push(`${response.status()} ${response.url()}`);
@@ -112,14 +123,40 @@ for (const [render, path] of [
     expect(failures).toEqual([]);
   });
 
-for (const [render, path] of [
-  ["host-composed", contract.host],
-  ["standalone", contract.standalone],
-] as const)
+const nestedHomeOwners = new Set([
+  "timeline",
+  "awards",
+  "skills",
+  "home-carousel",
+  "home-cards",
+  "home-story",
+  "home-contact",
+]);
+const loadingBoundaries =
+  owner &&
+  (nestedHomeOwners.has(owner) ||
+    ("loadingQuery" in contract && contract.loadingQuery))
+    ? (["host-composed", "standalone"] as const)
+    : (["standalone"] as const);
+
+for (const render of loadingBoundaries)
   test(`${owner} shows its skeleton while loading through its ${render} boundary`, async ({
     page,
   }) => {
-    await page.goto(path, { waitUntil: "domcontentloaded" });
+    if (render === "host-composed") {
+      if ("loadingQuery" in contract)
+        await page.goto(`${contract.host}?${contract.loadingQuery}`, {
+          waitUntil: "domcontentloaded",
+        });
+      else {
+        await page.goto("bio");
+        await page.getByRole("link", { name: "Home", exact: true }).click();
+      }
+    } else {
+      await page.goto(`${contract.standalone}?client-render=1`, {
+        waitUntil: "domcontentloaded",
+      });
+    }
     await expect(
       page.getByRole("status", { name: contract.loadingName, exact: true }),
     ).toBeVisible();

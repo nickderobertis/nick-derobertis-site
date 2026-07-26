@@ -203,6 +203,20 @@ async function prepareCaptureTarget(page, state) {
       ["software", "Loading software"],
       ["timeline", "Loading timeline"],
     ]);
+    const stateSelector = new Map([
+      ["awards", ".awards-state"],
+      ["bio", ".bio-state"],
+      ["courses", ".courses-state"],
+      ["home", ".pane-state"],
+      ["home-cards", ".pane-state"],
+      ["home-carousel", ".pane-state"],
+      ["home-contact", ".pane-state"],
+      ["home-story", ".pane-state"],
+      ["research", ".research-state"],
+      ["skills", ".skills-state"],
+      ["software", ".software-state"],
+      ["timeline", ".timeline-state"],
+    ]);
     const findIndicator = () => {
       if (state === "loading") {
         // Home has no data-loading skeleton of its own; its composed page shows
@@ -213,7 +227,8 @@ async function prepareCaptureTarget(page, state) {
           label ? { name: label, exact: true } : {},
         );
       }
-      if (project === "research") return page.locator(".research-state");
+      const selector = stateSelector.get(project);
+      if (selector) return page.locator(selector);
       let locator = page.getByRole(
         state === "error" && !project.startsWith("home") ? "alert" : "status",
       );
@@ -280,6 +295,10 @@ try {
         viewport: { width, height },
       });
       const page = await context.newPage();
+      // Install the canonical clock before any application code runs. Installing
+      // it after navigation can replace React's timing primitives while a busy
+      // worker is still hydrating, producing a false structural mismatch.
+      await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
       const browserErrors = [];
       page.on("console", (message) => {
         if (
@@ -305,7 +324,6 @@ try {
         )
           browserErrors.push(`HTTP ${response.status()}: ${response.url()}`);
       });
-      await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
       if (scenario.state === "loading")
         await page.addInitScript(() => {
           const nativeSetTimeout = window.setTimeout.bind(window);
@@ -320,11 +338,6 @@ try {
         scenario.render === "standalone"
           ? routePrefix
           : `${pagesPrefix}${hostPath}`;
-      if (scenario.render === "host-composed" && scenario.state !== "happy") {
-        await page.goto(`http://127.0.0.1:${address.port}${routePrefix}`, {
-          waitUntil: "networkidle",
-        });
-      }
       await page.goto(
         `http://127.0.0.1:${address.port}${relative}${queryFor(scenario.state)}`,
         {
@@ -337,26 +350,65 @@ try {
           .getByText("Loading HOME page…")
           .waitFor({ state: "hidden", timeout: 30_000 });
       }
-      const target = await prepareCaptureTarget(page, scenario.state);
-      await target.waitFor({ state: "visible" });
-      if (!["empty", "loading", "error"].includes(scenario.state))
-        await page.clock.pauseAt(
-          new Date((await page.evaluate(() => Date.now())) + 1_000),
-        );
       const image = `${scenario.render}/${scenario.state}/${viewport}.png`;
       mkdirSync(path.dirname(path.join(outputRoot, image)), {
         recursive: true,
       });
-      await target.screenshot({
-        animations: "disabled",
-        path: path.join(outputRoot, image),
-      });
+      const capturePath = path.join(outputRoot, image);
+      const initialTarget = await prepareCaptureTarget(page, scenario.state);
+      await initialTarget.waitFor({ state: "visible" });
+      // Freeze only after the scenario has rendered. Reading the emulated time
+      // immediately before pausing avoids travel-to-the-past races without
+      // fast-forwarding long enough to advance carousel application state.
+      let clockPaused = false;
+      for (let attempt = 0; attempt < 5 && !clockPaused; attempt += 1) {
+        const pauseTime = await page.evaluate(() => Date.now() + 1_000);
+        try {
+          await page.clock.pauseAt(pauseTime);
+          clockPaused = true;
+        } catch (error) {
+          if (
+            attempt === 4 ||
+            !(error instanceof Error) ||
+            !error.message.includes("Cannot fast-forward to the past")
+          )
+            throw new Error(
+              `Could not freeze the browser clock before capturing ${image}: ${error instanceof Error ? error.message : String(error)}. Verify the page reaches a stable state, then rerun just check.`,
+              { cause: error },
+            );
+        }
+      }
+      let captured = false;
+      for (let attempt = 0; attempt < 2 && !captured; attempt += 1) {
+        const target =
+          attempt === 0
+            ? initialTarget
+            : await prepareCaptureTarget(page, scenario.state);
+        await target.waitFor({ state: "visible" });
+        try {
+          await target.screenshot({
+            animations: "disabled",
+            path: capturePath,
+          });
+          captured = true;
+        } catch (error) {
+          if (
+            attempt > 0 ||
+            !(error instanceof Error) ||
+            !error.message.includes("Element is not attached to the DOM")
+          )
+            throw new Error(
+              `Could not capture ${image} after retrying its render target: ${error instanceof Error ? error.message : String(error)}. Verify the scenario remains visible, then rerun just check.`,
+              { cause: error },
+            );
+        }
+      }
       if (browserErrors.length > 0)
         throw new Error(
-          `Visual capture reported ${browserErrors.join("; ")}; rerun the ${project} screenshot target and inspect this scenario`,
+          `Visual capture reported ${browserErrors.join("; ")} in ${scenario.render}/${scenario.state}/${viewport}; rerun the ${project} screenshot target and inspect this scenario`,
         );
       const hash = createHash("sha256")
-        .update(readFileSync(path.join(outputRoot, image)))
+        .update(readFileSync(capturePath))
         .digest("hex");
       shots.push({
         name: project,

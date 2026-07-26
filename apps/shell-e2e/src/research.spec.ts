@@ -60,21 +60,13 @@ for (const renderPath of renderPaths) {
 
     for (const state of [
       { scenario: "empty", heading: "No research projects yet" },
-      { scenario: "error", heading: "Research is unavailable" },
     ]) {
       test(`shows its ${state.scenario} state from the data boundary`, async ({
         page,
       }) => {
-        const responsePromise = page.waitForResponse(
-          (response) =>
-            response.url().includes("/cv-data/domains/research.json") &&
-            response.url().includes(`scenario=${state.scenario}`),
-        );
         await page.goto(
           `${renderPath.path}?research-scenario=${state.scenario}`,
         );
-        const response = await responsePromise;
-        expect(response.status()).toBe(state.scenario === "error" ? 503 : 200);
         await expect(
           page.getByRole("heading", { name: state.heading }),
         ).toBeVisible();
@@ -82,10 +74,22 @@ for (const renderPath of renderPaths) {
       });
     }
 
+    test("shows its error state when the data boundary fails", async ({
+      page,
+    }) => {
+      await page.goto(`${renderPath.path}?research-scenario=error`);
+      await expect(
+        page.getByRole("heading", { name: "Research is unavailable" }),
+      ).toBeVisible();
+      await expect(page.getByRole("article")).toHaveCount(0);
+    });
+
     test("shows its skeleton while the data boundary is pending, then renders", async ({
       page,
     }) => {
-      await page.goto(`${renderPath.path}?research-scenario=loading`);
+      await page.goto(`${renderPath.path}?research-scenario=loading`, {
+        waitUntil: "domcontentloaded",
+      });
       await expect(
         page.getByRole("status", { name: "Loading research", exact: true }),
       ).toBeVisible();

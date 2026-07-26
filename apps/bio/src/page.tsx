@@ -1,7 +1,8 @@
 import "@site/design-system";
-import { useEffect, useState } from "react";
-import Skeleton from "./skeleton";
 import "./bio.css";
+import type { BioPageProps } from "@site/route-state";
+import Skeleton from "./skeleton";
+import { useBioView } from "./use-bio-view";
 
 function Marker({ children }: { children: string }) {
   return <span aria-hidden="true">{children}</span>;
@@ -105,10 +106,11 @@ function Biography() {
   );
 }
 
-function BioState({ state }: { state: "empty" | "error" }) {
+function BioState({ state }: { state: "empty" | "error" | "loading" }) {
   const content = {
     empty: ["Biography coming soon", "There is no biography to show yet."],
     error: ["Biography unavailable", "The biography could not be displayed."],
+    loading: ["Loading biography", "Preparing Nick's story…"],
   } as const;
   const [heading, detail] = content[state];
   return (
@@ -122,16 +124,10 @@ function BioState({ state }: { state: "empty" | "error" }) {
   );
 }
 
-export default function BioPage() {
+export default function BioPage({ initialView }: BioPageProps) {
   // llmlint: ignore-block[changed_behavior_has_e2e] bio.spec.ts drives happy, loading, empty, and error query states through both host-composed and standalone URLs.
-  const scenario = new URLSearchParams(window.location.search).get("bio-view");
-  const [loading, setLoading] = useState(scenario === "loading");
-  useEffect(() => {
-    if (!loading) return;
-    const timer = window.setTimeout(() => setLoading(false), 500);
-    return () => window.clearTimeout(timer);
-  }, [loading]);
-  if (loading) return <Skeleton />;
+  const scenario = useBioView(initialView);
+  if (scenario === "loading") return <Skeleton />;
   if (scenario === "empty" || scenario === "error")
     return <BioState state={scenario} />;
   // llmlint: ignore-end[changed_behavior_has_e2e]

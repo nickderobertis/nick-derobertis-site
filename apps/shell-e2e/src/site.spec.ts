@@ -4,19 +4,16 @@ const pages = [
   {
     link: "Home",
     heading: "Finance researcher & educator",
-    staticHeading: "Finance, research, and software",
     path: "",
   },
   {
     link: "Bio",
     heading: "Optimizing Life",
-    staticHeading: "Biography",
     path: "bio",
   },
   {
     link: "Research",
     heading: "Research Works",
-    staticHeading: "Research",
     path: "research",
   },
   {
@@ -58,7 +55,7 @@ test("every route has useful HTML with JavaScript disabled", async ({
     await page.goto(route.path);
     await expect(
       page.getByRole("heading", {
-        name: "staticHeading" in route ? route.staticHeading : route.heading,
+        name: route.heading,
       }),
     ).toBeVisible();
     await expect(page).toHaveTitle(/Nick DeRobertis/);
@@ -70,7 +67,7 @@ test("every prerendered route contains substantive feature content", async ({
   browser,
 }) => {
   const expected = [
-    ["", "Finance researcher & educator"],
+    ["", "Who am I?"],
     ["bio", "Reproducible Research"],
     ["research", "Valuation without Cash Flows"],
     ["software", "Python Tools for Working with Data"],
@@ -96,6 +93,76 @@ test("navigation works with the keyboard", async ({ page }) => {
     page.getByRole("heading", { name: "Optimizing Life" }),
   ).toBeVisible();
 });
+
+// llmlint: ignore-block[tests_mirror_real_usage] Hydration warnings and full-document SPA regressions are explicit acceptance criteria that are observable only through browser console/error and request instrumentation; navigation and focus still use real user-facing controls.
+test("leaf routes reuse prerendered DOM without hydration warnings and navigate as an SPA", async ({
+  browser,
+}) => {
+  for (const route of pages.filter(({ path }) => path)) {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.goto(`${route.path}#main-content`, { waitUntil: "networkidle" });
+    await expect(
+      page.getByRole("heading", { name: route.heading }),
+    ).toBeVisible();
+    await expect(page.getByRole("main")).toBeFocused();
+    expect(errors).toEqual([]);
+
+    let documentRequests = 0;
+    page.on("request", (request) => {
+      if (request.isNavigationRequest()) documentRequests += 1;
+    });
+    await page.getByRole("link", { name: "Home", exact: true }).click();
+    await expect(page).toHaveURL(/nick-derobertis-site\/$/);
+    await page.getByRole("link", { name: route.link, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/${route.path}$`));
+    expect(documentRequests).toBe(0);
+    await page.close();
+  }
+});
+
+test("query-only route states client-mount without hydration warnings", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await page.goto("research?research-scenario=empty", {
+    waitUntil: "networkidle",
+  });
+  await expect(
+    page.getByRole("heading", { name: "No research projects yet" }),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("Home reuses prerendered content without hydration warnings", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  await page.goto("", { waitUntil: "networkidle" });
+  await expect(
+    page.getByRole("heading", { name: "Finance researcher & educator" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Who am I?", { exact: false }).first(),
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
+// llmlint: ignore-end[tests_mirror_real_usage]
 
 test("the static 404 is intentional and the router recovers unknown routes", async ({
   browser,

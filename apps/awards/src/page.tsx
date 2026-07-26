@@ -33,7 +33,9 @@ export default function AwardsPage() {
   if (state.name !== "ready") return <State name={state.name} />;
   if (state.awards.length === 0) return <State name="empty" />;
   const showAll =
-    new URLSearchParams(window.location.search).get("awards-view") === "all";
+    new URLSearchParams(
+      typeof window === "undefined" ? "" : window.location.search,
+    ).get("awards-view") === "all";
   const awards = showAll ? state.awards : selectedAwards(state.awards);
   const cards = buildAwardCards(awards);
   const stats = calculateAwardsStats(awards);

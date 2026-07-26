@@ -1,32 +1,10 @@
-import {
-  type Course,
-  cvDataClient,
-  type Resource,
-} from "@site/data-access-core";
+import type { Course, Resource } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
 import "@site/design-system";
-import { useEffect, useState } from "react";
-import Skeleton from "./skeleton";
+import type { CoursesPageProps } from "@site/route-state";
 import "./courses.css";
-
-type CoursesView = "default" | "empty" | "error" | "loading";
-
-function requestedView(): CoursesView {
-  const value = new URLSearchParams(window.location.search).get("courses-view");
-  return value === "empty" || value === "error" || value === "loading"
-    ? value
-    : "default";
-}
-
-function useCoursesView(): CoursesView {
-  const [view, setView] = useState<CoursesView>(() => requestedView());
-  useEffect(() => {
-    if (view !== "loading") return;
-    const timer = window.setTimeout(() => setView("default"), 1_500);
-    return () => window.clearTimeout(timer);
-  }, [view]);
-  return view;
-}
+import Skeleton from "./skeleton";
+import { useCoursesPage } from "./use-courses-page";
 
 function ResourceTree({ resources }: { resources: Resource[] }) {
   return (
@@ -243,10 +221,11 @@ function CourseCollection({ courses }: { courses: Course[] }) {
   );
 }
 
-export default function CoursesPage() {
-  const view = useCoursesView();
-  const courses = cvDataClient.domain("courses");
-  if (view === "loading") return <Skeleton />;
+export default function CoursesPage({
+  initialView,
+  courses: initialCourses,
+}: CoursesPageProps<Course[]>) {
+  const { courses, view } = useCoursesPage(initialView, initialCourses);
   return (
     <section className="courses-page">
       <header className="courses-banner">
@@ -257,7 +236,9 @@ export default function CoursesPage() {
           courses, topics, and teaching resources below.
         </p>
       </header>
-      {view === "error" ? (
+      {view === "loading" ? (
+        <Skeleton />
+      ) : view === "error" ? (
         <div className="courses-state courses-state-error" role="alert">
           <h2>Courses are unavailable</h2>
           <p>Please try again later.</p>
