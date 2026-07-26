@@ -284,10 +284,6 @@ try {
       // it after navigation can replace React's timing primitives while a busy
       // worker is still hydrating, producing a false structural mismatch.
       await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
-      // Advance before the document exists, then keep time frozen throughout
-      // navigation and hydration. The generous gap avoids pauseAt racing real
-      // setup time, while no application timers exist yet to fast-forward.
-      await page.clock.pauseAt(new Date("2026-07-20T12:01:00Z"));
       const browserErrors = [];
       page.on("console", (message) => {
         if (
@@ -344,6 +340,12 @@ try {
         recursive: true,
       });
       const capturePath = path.join(outputRoot, image);
+      const initialTarget = await prepareCaptureTarget(page, scenario.state);
+      await initialTarget.waitFor({ state: "visible" });
+      // Freeze only after the scenario has rendered. A full minute of headroom
+      // prevents travel-to-the-past races, while installing before navigation
+      // keeps React's timing primitives stable throughout hydration.
+      await page.clock.pauseAt(new Date("2026-07-20T12:01:00Z"));
       let captured = false;
       for (let attempt = 0; attempt < 2 && !captured; attempt += 1) {
         const target = await prepareCaptureTarget(page, scenario.state);
