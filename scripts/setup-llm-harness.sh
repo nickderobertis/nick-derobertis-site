@@ -2,6 +2,22 @@
 # llmlint: ignore-file[changed_behavior_has_e2e] This CI/developer installer has no browser interface; it exercises the real npm registry, verifies package integrity, and validates the installed CLI executable.
 set -euo pipefail
 
+mode="install"
+case "$#" in
+  0) ;;
+  1)
+    [[ "$1" == "--verify" ]] || {
+      echo "setup-llm-harness: unknown argument '$1'; use no arguments to install or --verify to check the installed CLI" >&2
+      exit 2
+    }
+    mode="verify"
+    ;;
+  *)
+    echo "setup-llm-harness: expected no arguments or exactly --verify" >&2
+    exit 2
+    ;;
+esac
+
 if ! contract_output=$(
   node -e '
     const { codex } = require("./ci-tools.json");
@@ -23,7 +39,7 @@ package_name="${contract[0]:-}"
 version="${contract[1]:-}"
 expected_integrity="${contract[2]:-}"
 
-if [[ "${1:-}" == "--verify" ]]; then
+if [[ "$mode" == "verify" ]]; then
   command -v codex >/dev/null || {
     echo "setup-llm-harness: codex is not installed; run just setup-llm-harness" >&2
     exit 1

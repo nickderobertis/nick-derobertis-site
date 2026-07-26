@@ -37,6 +37,7 @@ if (
 const sources = [
   ["workflow", readFileSync(".github/workflows/visual-docs.yml", "utf8")],
   ["bootstrap", readFileSync("justfile", "utf8")],
+  ["repository instructions", readFileSync("AGENTS.md", "utf8")],
   ["pre-push guard", readFileSync(".githooks/pre-push", "utf8")],
   ["screencomp config", readFileSync("screencomp.toml", "utf8")],
   [
@@ -133,13 +134,14 @@ for (const [project, config] of Object.entries(visualProjects)) {
 const expectedConsumers = {
   architecture: [
     "workflow",
+    "repository instructions",
     "screencomp config",
     "affected selector",
     "pre-push guard",
   ],
   pagesRepository: ["workflow"],
   playwrightContainer: ["workflow", "pre-push guard"],
-  screencompVersion: ["workflow", "bootstrap"],
+  screencompVersion: ["workflow", "bootstrap", "repository instructions"],
 };
 for (const [key, value] of Object.entries(contract)) {
   const matches = sources
