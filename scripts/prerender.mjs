@@ -216,6 +216,10 @@ for (const name of prerenderRemotes) {
   const path = join(output, "remotes", name, "index.html");
   const remoteDocument = await readFile(path, "utf8");
   const html = await renderRemote(name);
+  if (typeof html !== "string")
+    throw new Error(
+      `The prerender renderer returned invalid HTML for ${name}; fix scripts/render-entry.tsx, run just build-prerender-renderer, then rerun just prerender.`,
+    );
   await writeFile(
     path,
     remoteDocument.replace(

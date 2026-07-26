@@ -30,6 +30,7 @@ lint-workflows:
 check: test lint-workflows
     # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
     # bundler, prerender, Playwright, and screenshot executors in this workspace.
+    # llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
     base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t e2e,screenshot --base="$base" --head="$head" --parallel=3 --skip-nx-cache >>"$log" 2>&1 && CI=1 pnpm exec nx run shell-e2e:integration --skip-nx-cache >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
 # Canonical full pre-push gate used by orchestration and contributors.
