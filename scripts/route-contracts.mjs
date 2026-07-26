@@ -23,3 +23,17 @@ if (
 
 export const routeContracts = contractInput;
 // llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate]
+
+export function parseRemoteManifest(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    Object.keys(value).some((name) => !/^[a-z][a-z0-9-]*$/.test(name)) ||
+    Object.values(value).some((alias) => typeof alias !== "string")
+  )
+    throw new Error(
+      "The canonical remote manifest must contain valid string mappings; fix libs/build-config/src/remotes.json and rerun just check.",
+    );
+  return value;
+}

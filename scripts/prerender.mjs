@@ -7,7 +7,7 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import { routeContracts } from "./route-contracts.mjs";
+import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 function validateSiteConfig(value) {
   if (
@@ -25,22 +25,6 @@ function validateSiteConfig(value) {
 const validatedSiteConfig = validateSiteConfig(siteConfig);
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Command startup failures are covered through the real subprocess boundary in home.spec.ts; they have no browser interface.
-function validateRemoteManifest(value) {
-  if (
-    !value ||
-    typeof value !== "object" ||
-    Array.isArray(value) ||
-    Object.entries(value).some(
-      ([name, alias]) =>
-        !/^[a-z][a-z-]+$/.test(name) || typeof alias !== "string",
-    )
-  )
-    throw new Error(
-      "remotes.json must contain string remote-name mappings. Fix libs/build-config/src/remotes.json and run just check again.",
-    );
-  return value;
-}
-
 function requirePath(value, fallback, name) {
   const path = value ?? fallback;
   if (typeof path !== "string" || path.length === 0 || path.includes("\0"))
@@ -49,7 +33,7 @@ function requirePath(value, fallback, name) {
     );
   return path;
 }
-const validatedRemoteManifest = validateRemoteManifest(remoteManifest);
+const validatedRemoteManifest = parseRemoteManifest(remoteManifest);
 const output = requirePath(
   process.env.PRERENDER_OUTPUT,
   "dist/apps/shell",

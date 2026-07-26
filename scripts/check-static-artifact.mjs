@@ -3,7 +3,7 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
-import { routeContracts } from "./route-contracts.mjs";
+import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 const substantiveRouteContent = {
   "/": "Who am I?",
@@ -43,19 +43,6 @@ function parseRoutes(value) {
 // llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate]
 // llmlint: ignore-end[changed_behavior_has_e2e]
 // llmlint: ignore-block[changed_behavior_has_e2e] These build-time artifact failure paths occur before a browser can be served; the successful artifact is exercised with JavaScript disabled and through deep links in site.spec.ts.
-function parseRemoteManifest(value) {
-  if (
-    !value ||
-    typeof value !== "object" ||
-    Array.isArray(value) ||
-    Object.keys(value).some((name) => !/^[a-z][a-z0-9-]*$/.test(name)) ||
-    Object.values(value).some((alias) => typeof alias !== "string")
-  )
-    throw new Error(
-      "The canonical remote manifest is invalid; fix libs/build-config/src/remotes.json and rerun just check.",
-    );
-  return value;
-}
 const validatedRoutes = parseRoutes(routes);
 const validatedRemoteManifest = parseRemoteManifest(remoteManifest);
 for (const route of validatedRoutes) {
