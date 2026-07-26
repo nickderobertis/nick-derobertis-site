@@ -155,6 +155,7 @@ if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(contract.pagesRepository))
   throw new Error("Visual pagesRepository must be an owner/name");
 // llmlint: ignore[changed_behavior_has_e2e] This repository contract validator has no browser interface; lint-workflows executes its real filesystem boundary against the committed workflow and documentation.
 const pagesUrl = `https://${contract.pagesRepository.split("/")[0]}.github.io/${contract.pagesRepository.split("/")[1]}/`;
+// llmlint: ignore[changed_behavior_has_e2e] Documentation-link enforcement is a filesystem quality-gate contract exercised directly by lint-workflows, not site behavior reachable through a browser.
 for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"])
   if (!readFileSync(path, "utf8").includes(pagesUrl))
     throw new Error(
