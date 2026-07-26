@@ -203,6 +203,20 @@ async function prepareCaptureTarget(page, state) {
       ["software", "Loading software"],
       ["timeline", "Loading timeline"],
     ]);
+    const stateSelector = new Map([
+      ["awards", ".awards-state"],
+      ["bio", ".bio-state"],
+      ["courses", ".courses-state"],
+      ["home", ".pane-state"],
+      ["home-cards", ".pane-state"],
+      ["home-carousel", ".pane-state"],
+      ["home-contact", ".pane-state"],
+      ["home-story", ".pane-state"],
+      ["research", ".research-state"],
+      ["skills", ".skills-state"],
+      ["software", ".software-state"],
+      ["timeline", ".timeline-state"],
+    ]);
     const findIndicator = () => {
       if (state === "loading") {
         // Home has no data-loading skeleton of its own; its composed page shows
@@ -213,7 +227,8 @@ async function prepareCaptureTarget(page, state) {
           label ? { name: label, exact: true } : {},
         );
       }
-      if (project === "research") return page.locator(".research-state");
+      const selector = stateSelector.get(project);
+      if (selector) return page.locator(selector);
       let locator = page.getByRole(
         state === "error" && !project.startsWith("home") ? "alert" : "status",
       );
@@ -342,10 +357,24 @@ try {
       const capturePath = path.join(outputRoot, image);
       const initialTarget = await prepareCaptureTarget(page, scenario.state);
       await initialTarget.waitFor({ state: "visible" });
-      // Freeze only after the scenario has rendered. A full minute of headroom
-      // prevents travel-to-the-past races, while installing before navigation
-      // keeps React's timing primitives stable throughout hydration.
-      await page.clock.pauseAt(new Date("2026-07-20T12:01:00Z"));
+      // Freeze only after the scenario has rendered. Reading the emulated time
+      // immediately before pausing avoids travel-to-the-past races without
+      // fast-forwarding long enough to advance carousel application state.
+      let clockPaused = false;
+      for (let attempt = 0; attempt < 5 && !clockPaused; attempt += 1) {
+        const pauseTime = await page.evaluate(() => Date.now() + 1_000);
+        try {
+          await page.clock.pauseAt(pauseTime);
+          clockPaused = true;
+        } catch (error) {
+          if (
+            attempt === 4 ||
+            !(error instanceof Error) ||
+            !error.message.includes("Cannot fast-forward to the past")
+          )
+            throw error;
+        }
+      }
       let captured = false;
       for (let attempt = 0; attempt < 2 && !captured; attempt += 1) {
         const target =
