@@ -45,6 +45,7 @@ jobs:
           OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
           # Codex exec consumes CODEX_API_KEY non-interactively; llmlint uses
           # OPENAI_API_KEY above as its credential-presence contract.
+          # llmlint: ignore[changed_behavior_has_e2e] This CI-only credential alias has no browser interface; PR #49 exercises the real installed harness and judge path.
           CODEX_API_KEY: "${{ secrets.OPENAI_API_KEY }}"
         run: |
           # llmlint: ignore[live_tier_compiles_and_requires_credential] GitHub withholds repository secrets from fork PRs; those runs must remain merge-testable and still complete lint-llm-validate above without claiming that the model judge ran.
