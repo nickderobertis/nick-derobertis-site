@@ -119,27 +119,53 @@ export function createSiteRouter({
   const software = createRoute({
     getParentRoute: () => Root,
     path: routePath("Software"),
-    loader: async ({ context: ctx }) => ({
-      projects: await ctx.loadDomain("software_projects"),
-      view: parseRouteView(ctx.search.get(routeStateQueryKeys.software)),
-    }),
+    loader: async ({ context: ctx }) => {
+      const view = parseRouteView(ctx.search.get(routeStateQueryKeys.software));
+      if (view === "loading" || view === "error")
+        return { projects: null, view };
+      try {
+        return {
+          projects: await ctx.loadDomain("software_projects"),
+          view,
+        };
+      } catch {
+        return { projects: null, view: "error" as const };
+      }
+    },
     component: () => {
       const data = software.useLoaderData();
       return (
-        <pages.software initialView={data.view} projects={data.projects} />
+        <pages.software
+          initialView={data.view}
+          projects={data.projects ?? undefined}
+        />
       );
     },
   });
   const courses = createRoute({
     getParentRoute: () => Root,
     path: routePath("Courses"),
-    loader: async ({ context: ctx }) => ({
-      courses: await ctx.loadDomain("courses"),
-      view: parseRouteView(ctx.search.get(routeStateQueryKeys.courses)),
-    }),
+    loader: async ({ context: ctx }) => {
+      const view = parseRouteView(ctx.search.get(routeStateQueryKeys.courses));
+      if (view === "loading" || view === "error")
+        return { courses: null, view };
+      try {
+        return {
+          courses: await ctx.loadDomain("courses"),
+          view,
+        };
+      } catch {
+        return { courses: null, view: "error" as const };
+      }
+    },
     component: () => {
       const data = courses.useLoaderData();
-      return <pages.courses initialView={data.view} courses={data.courses} />;
+      return (
+        <pages.courses
+          initialView={data.view}
+          courses={data.courses ?? undefined}
+        />
+      );
     },
   });
   const story = createRoute({
