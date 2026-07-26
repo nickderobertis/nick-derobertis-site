@@ -78,13 +78,14 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.4
+    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5
     with:
       projects: ${{ needs.affected.outputs.projects || '[]' }}
       container: mcr.microsoft.com/playwright:v1.61.1-noble
-      screencomp-version: v0.4.4
+      screencomp-version: v0.4.5
       gallery-title: Nick DeRobertis site visual docs
       fail-on-drift: true
+      pages-repository: nickderobertis/nick-derobertis-site-visual-docs
       # One aggregated PR comment covering all affected microfrontends, instead of
       # one sticky comment per app (12 apps -> 1 comment). Galleries and Pages
       # output are unchanged; only the PR-comment surface consolidates.
@@ -96,6 +97,8 @@ jobs:
         corepack enable
         pnpm install --frozen-lockfile
         pnpm exec nx run "$SCREENCOMP_PROJECT:screenshot"
+    secrets:
+      pages-token: ${{ secrets.GH_TOKEN }}
 
   # Stable, always-present status check to require in branch protection. The
   # reusable workflow's own classify runs in per-project matrix legs

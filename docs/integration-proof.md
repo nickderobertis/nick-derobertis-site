@@ -93,6 +93,15 @@ affected app fresh in that container and classifying it against the committed,
 image-free baseline manifest — a byte-digest comparison, so a one-pixel layout,
 content, or color change fails:
 
+The reusable workflow publishes canonical and pull-request galleries to the
+dedicated visual-docs Pages site at
+<https://nickderobertis.github.io/nick-derobertis-site-visual-docs/> and posts
+one aggregated pull-request comment with inline before/after diffs when the
+change set is small. This repository cannot serve galleries from its own
+`gh-pages` branch: its production Pages site uses an Actions artifact
+deployment, so GitHub serves that artifact rather than the branch. Keeping the
+gallery branch in a separate repository preserves the production deployment.
+
 ```console
 $ docker run --rm --platform=linux/amd64 --ipc=host --shm-size=2g \
     -v "$PWD:/work" -v /work/node_modules -w /work \
