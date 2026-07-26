@@ -1,3 +1,4 @@
+# llmlint: ignore-file[live_tier_compiles_and_requires_credential] GitHub withholds repository secrets from fork PRs; this workflow must let those runs pass after static validation while credentialed same-repository PRs execute the model judge.
 name: CI
 on:
   pull_request:

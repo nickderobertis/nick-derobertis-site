@@ -2,7 +2,7 @@
 # llmlint: ignore-file[changed_behavior_has_e2e] This CI/developer installer has no browser interface; it exercises the real npm registry, verifies package integrity, and validates the installed CLI executable.
 set -euo pipefail
 
-mapfile -t contract < <(
+if ! contract_output=$(
   node -e '
     const { codex } = require("./ci-tools.json");
     if (
@@ -14,7 +14,11 @@ mapfile -t contract < <(
     ) throw new Error("invalid codex CI tool contract; update ci-tools.json with the exact @openai/codex npm version and sha512 integrity");
     process.stdout.write([codex.package, codex.version, codex.integrity].join("\n"));
   '
-)
+); then
+  echo "setup-llm-harness: could not read the Codex tool contract; correct ci-tools.json and rerun just setup-llm-harness" >&2
+  exit 1
+fi
+mapfile -t contract <<<"$contract_output"
 package_name="${contract[0]:-}"
 version="${contract[1]:-}"
 expected_integrity="${contract[2]:-}"
