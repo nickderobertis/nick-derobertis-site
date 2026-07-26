@@ -76,7 +76,7 @@ jobs:
     needs: affected
     if: ${{ always() && (github.event.action == 'closed' || github.event_name == 'schedule' || (needs.affected.result == 'success' && needs.affected.outputs.projects != '[]')) }}
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
     uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5
     with:

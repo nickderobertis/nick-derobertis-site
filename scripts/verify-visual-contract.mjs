@@ -10,6 +10,7 @@ process.on("uncaughtException", (error) => {
 const contract = JSON.parse(readFileSync("visual-tools.json", "utf8"));
 const contractKeys = [
   "architecture",
+  "pagesRepository",
   "playwrightContainer",
   "screencompVersion",
 ];
@@ -23,7 +24,7 @@ if (
   )
 )
   throw new Error(
-    "visual-tools.json must contain non-empty architecture, playwrightContainer, and screencompVersion strings",
+    "visual-tools.json must contain non-empty architecture, pagesRepository, playwrightContainer, and screencompVersion strings",
   );
 
 // Visual regression is screencomp's canonical reusable workflow now, so the pins
@@ -134,6 +135,7 @@ const expectedConsumers = {
     "affected selector",
     "pre-push guard",
   ],
+  pagesRepository: ["workflow"],
   playwrightContainer: ["workflow", "pre-push guard"],
   screencompVersion: ["workflow", "bootstrap"],
 };
@@ -149,6 +151,14 @@ for (const [key, value] of Object.entries(contract)) {
       `Visual contract ${key}=${value} is consumed by [${matches.join(", ")}], expected [${expectedConsumers[key].join(", ")}]; update visual-tools.json and every visual consumer together`,
     );
 }
+if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(contract.pagesRepository))
+  throw new Error("Visual pagesRepository must be an owner/name");
+const pagesUrl = `https://${contract.pagesRepository.split("/")[0]}.github.io/${contract.pagesRepository.split("/")[1]}/`;
+for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"])
+  if (!readFileSync(path, "utf8").includes(pagesUrl))
+    throw new Error(
+      `Visual gallery documentation in ${path} must link to ${pagesUrl}`,
+    );
 const screencompSource = sources.find(
   ([name]) => name === "screencomp config",
 )[1];
