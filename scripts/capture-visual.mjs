@@ -283,7 +283,11 @@ try {
       // Install the canonical clock before any application code runs. Installing
       // it after navigation can replace React's timing primitives while a busy
       // worker is still hydrating, producing a false structural mismatch.
-      await page.clock.install({ time: new Date("2026-07-20T12:00:01Z") });
+      await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
+      // Advance before the document exists, then keep time frozen throughout
+      // navigation and hydration. The generous gap avoids pauseAt racing real
+      // setup time, while no application timers exist yet to fast-forward.
+      await page.clock.pauseAt(new Date("2026-07-20T12:01:00Z"));
       const browserErrors = [];
       page.on("console", (message) => {
         if (
