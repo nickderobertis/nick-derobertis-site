@@ -7,7 +7,6 @@ import "@site/design-system";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing application root");
-// llmlint: ignore[changed_behavior_has_e2e] SSR hydration requires route components before React can attach, so module-fetch loading has no renderable boundary; each route's app-owned loading state is exercised through both host-composed and standalone paths in its feature spec.
 const [home, bio, research, software, courses] = await Promise.all([
   import("home/Page"),
   import("bio/Page"),

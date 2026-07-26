@@ -58,6 +58,10 @@ export async function renderRemote(name: string) {
 }
 
 export async function renderRoute(path: string) {
+  if (typeof path !== "string" || !routes.some((route) => route.path === path))
+    throw new Error(
+      `Unknown prerender route ${JSON.stringify(path)}. Add it to apps/shell/src/routes.json and rerun just prerender.`,
+    );
   const url = new URL(path, "https://prerender.invalid");
   const domains = {
     research: cvDataClient.domain("research"),

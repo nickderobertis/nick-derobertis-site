@@ -42,6 +42,7 @@ const contracts = {
     role: "heading",
     name: "Optimizing Life",
     loadingName: "Loading biography",
+    loadingQuery: "bio-scenario=loading",
   },
   research: {
     host: "research",
@@ -49,6 +50,7 @@ const contracts = {
     role: "heading",
     name: "Research Works",
     loadingName: "Loading research",
+    loadingQuery: "research-scenario=loading",
   },
   software: {
     host: "software",
@@ -56,6 +58,7 @@ const contracts = {
     role: "heading",
     name: "Open-Source Software",
     loadingName: "Loading software",
+    loadingQuery: "software-scenario=loading",
   },
   courses: {
     host: "courses",
@@ -63,6 +66,7 @@ const contracts = {
     role: "heading",
     name: "Courses",
     loadingName: "Loading courses",
+    loadingQuery: "courses-scenario=loading",
   },
   timeline: {
     host: "",
@@ -129,7 +133,9 @@ const nestedHomeOwners = new Set([
   "home-contact",
 ]);
 const loadingBoundaries =
-  owner && nestedHomeOwners.has(owner)
+  owner &&
+  (nestedHomeOwners.has(owner) ||
+    ("loadingQuery" in contract && contract.loadingQuery))
     ? (["host-composed", "standalone"] as const)
     : (["standalone"] as const);
 
@@ -138,8 +144,14 @@ for (const render of loadingBoundaries)
     page,
   }) => {
     if (render === "host-composed") {
-      await page.goto("bio");
-      await page.getByRole("link", { name: "Home", exact: true }).click();
+      if ("loadingQuery" in contract)
+        await page.goto(`${contract.host}?${contract.loadingQuery}`, {
+          waitUntil: "domcontentloaded",
+        });
+      else {
+        await page.goto("bio");
+        await page.getByRole("link", { name: "Home", exact: true }).click();
+      }
     } else {
       await page.goto(`${contract.standalone}?client-render=1`, {
         waitUntil: "domcontentloaded",
