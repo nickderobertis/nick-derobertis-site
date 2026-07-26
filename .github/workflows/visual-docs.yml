@@ -93,11 +93,13 @@ jobs:
       # Each affected app is built (with the composed shell + home remotes its
       # host-composed shots need, via the Nx screenshot target's dependsOn) and
       # captured to $SHOTS_OUT. Runs twice for screencomp's reproducibility gate.
+      # llmlint: ignore[work_goes_through_command_surface] This is screencomp's injected container callback, not a repository CI command: it must use SCREENCOMP_PROJECT and SHOTS_OUT to dispatch the selected Nx screenshot target inside screencomp's pinned container.
       capture-command: |
         corepack enable
         pnpm install --frozen-lockfile
         pnpm exec nx run "$SCREENCOMP_PROJECT:screenshot"
     secrets:
+      # llmlint: ignore[boundary_inputs_validated] The pinned reusable workflow's pages-preflight job rejects a missing token before any consumer or external write; GitHub masks the secret and owns token syntax/authorization validation.
       pages-token: ${{ secrets.GH_TOKEN }}
 
   # Stable, always-present status check to require in branch protection. The
