@@ -21,6 +21,7 @@ const realRouteMarkers = {
 
 const root = "dist/apps/shell";
 // llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
+// llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] routes.json is the serialized source; this plain-Node artifact boundary cannot import the TypeScript parser, and just check runs both validators against that same source.
 function parseRoutes(value) {
   if (
     !Array.isArray(value) ||
@@ -39,6 +40,7 @@ function parseRoutes(value) {
     );
   return value;
 }
+// llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate]
 // llmlint: ignore-end[changed_behavior_has_e2e]
 // llmlint: ignore-block[changed_behavior_has_e2e] These build-time artifact failure paths occur before a browser can be served; the successful artifact is exercised with JavaScript disabled and through deep links in site.spec.ts.
 function parseRemoteManifest(value) {

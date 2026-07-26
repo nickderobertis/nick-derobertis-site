@@ -2,6 +2,7 @@ import contractInput from "../libs/route-state/src/contracts.json" with {
   type: "json",
 };
 
+// llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] contracts.json is the single serialized source; this plain-Node validator and the TypeScript/Zod validator independently reject invalid boundary input because prerender tooling cannot import workspace TypeScript, and just check executes both consumers.
 const queryKeys = contractInput?.queryKeys;
 if (!queryKeys || typeof queryKeys !== "object")
   throw new Error(
@@ -21,3 +22,4 @@ if (
   );
 
 export const routeContracts = contractInput;
+// llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate]

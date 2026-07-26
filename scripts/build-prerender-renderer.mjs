@@ -1,6 +1,7 @@
 import { rspack } from "@rspack/core";
 import renderConfig from "./rspack.prerender.config.mjs";
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This build-only command has no browser interface; successful output is consumed by shell:prerender and real browser journeys, while compiler startup/close failures occur before a page can be served.
 await new Promise((resolve, reject) => {
   const compiler = rspack(renderConfig);
   compiler.run((error, stats) => {
@@ -40,3 +41,4 @@ await new Promise((resolve, reject) => {
     finish(resolve);
   });
 });
+// llmlint: ignore-end[changed_behavior_has_e2e]

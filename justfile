@@ -34,11 +34,13 @@ check: test lint-workflows
     base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t e2e,screenshot --base="$base" --head="$head" --parallel=3 --skip-nx-cache >>"$log" 2>&1 && CI=1 pnpm exec nx run shell-e2e:integration --skip-nx-cache >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
 # Canonical full pre-push gate used by orchestration and contributors.
+# llmlint: ignore[changed_behavior_has_e2e] This command-only alias has no browser interface and delegates unchanged to check, whose dispatched Playwright targets own real-browser coverage.
 gate: check
 
 # CI runs this non-PR safety sweep so affected detection is never the only gate.
 check-all: lint-workflows
     # Keep the same CI warnings-as-errors contract during the non-affected sweep.
+    # llmlint: ignore[changed_behavior_has_e2e] This CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets for every project and propagates their exit status.
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx run-many -t lint --all --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx run-many -t typecheck,test,build,prerender --all --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx run-many -t e2e,screenshot --all --parallel=3 --skip-nx-cache >>"$log" 2>&1 && CI=1 pnpm exec nx run shell-e2e:integration --skip-nx-cache >>"$log" 2>&1 || { cat "$log" >&2; echo "check-all: quality gate failed; fix warnings and errors above, then rerun just check-all" >&2; exit 1; }
 
 test:

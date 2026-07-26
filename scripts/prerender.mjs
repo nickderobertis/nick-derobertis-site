@@ -86,6 +86,7 @@ const {
   renderRoute,
   renderRemote,
 } = rendererModule.default ?? rendererModule;
+// llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] The generated renderer already parsed routes.json through @site/route-state; this second plain-Node check validates the generated module boundary before consuming it, and both execute in just check.
 if (
   !Array.isArray(routes) ||
   !routes.every(
@@ -102,6 +103,7 @@ if (
   throw new Error(
     "The prerender renderer must export prerenderRoutes and renderRoute; fix scripts/render-entry.tsx, run just build-prerender-renderer, then rerun just prerender.",
   );
+// llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate]
 if (
   !Array.isArray(prerenderRemotes) ||
   !prerenderRemotes.every((name) => /^[a-z][a-z-]+$/.test(name)) ||
