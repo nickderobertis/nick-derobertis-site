@@ -42,7 +42,7 @@ const contracts = {
     role: "heading",
     name: "Optimizing Life",
     loadingName: "Loading biography",
-    loadingQuery: "bio-scenario=loading",
+    loadingQuery: "bio-view=loading",
   },
   research: {
     host: "research",
@@ -58,7 +58,7 @@ const contracts = {
     role: "heading",
     name: "Open-Source Software",
     loadingName: "Loading software",
-    loadingQuery: "software-scenario=loading",
+    loadingQuery: "software-view=loading",
   },
   courses: {
     host: "courses",
@@ -66,7 +66,7 @@ const contracts = {
     role: "heading",
     name: "Courses",
     loadingName: "Loading courses",
-    loadingQuery: "courses-scenario=loading",
+    loadingQuery: "courses-view=loading",
   },
   timeline: {
     host: "",

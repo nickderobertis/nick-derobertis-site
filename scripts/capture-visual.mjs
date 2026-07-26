@@ -372,7 +372,10 @@ try {
             !(error instanceof Error) ||
             !error.message.includes("Cannot fast-forward to the past")
           )
-            throw error;
+            throw new Error(
+              `Could not freeze the browser clock before capturing ${image}; verify the page reaches a stable state, then rerun just check.`,
+              { cause: error },
+            );
         }
       }
       let captured = false;
@@ -394,7 +397,10 @@ try {
             !(error instanceof Error) ||
             !error.message.includes("Element is not attached to the DOM")
           )
-            throw error;
+            throw new Error(
+              `Could not capture ${image} after retrying its render target; verify the scenario remains visible, then rerun just check.`,
+              { cause: error },
+            );
         }
       }
       if (browserErrors.length > 0)
