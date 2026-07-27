@@ -22,6 +22,17 @@ const awardsContract = [
   ["libs/build-config/src/remotes.json", '"awards": "awards"'],
 ] as const;
 
+// The shell declares home/Page ambiently, so the remote's preload export, the
+// host's declaration of it, and the router wiring have to move together. The
+// `as const` narrows the entries to the readonly path/expected tuples
+// expectContract takes, the same way every contract above does.
+const homePreloadContract = [
+  ["apps/home/src/page.tsx", "export function preload(): Promise<void>"],
+  ["apps/shell/src/remotes.d.ts", "export function preload(): Promise<void>;"],
+  ["apps/shell/src/main.tsx", "homePreload: home.preload"],
+  ["apps/shell/src/router.tsx", "homePreload?: () => Promise<void>"],
+] as const;
+
 const bioContract = [
   ["apps/bio/src/page.tsx", 'id="bio-heading">Optimizing Life'],
   ["apps/shell-e2e/src/bio.spec.ts", 'name: "Optimizing Life"'],
@@ -53,6 +64,12 @@ describe("timeline federation contract", () => {
 describe("awards federation contract", () => {
   it("keeps every required Nx, host, and federation declaration in sync", async () => {
     await expectContract(awardsContract);
+  });
+});
+
+describe("home preload federation contract", () => {
+  it("keeps the remote export, host declaration, and router wiring in sync", async () => {
+    await expectContract(homePreloadContract);
   });
 });
 

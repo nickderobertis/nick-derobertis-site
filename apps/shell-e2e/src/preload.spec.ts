@@ -1,23 +1,27 @@
 import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
+import { z } from "zod";
 
 // llmlint: ignore-block[tests_mirror_real_usage] "Hover a link, then click, and the switch is instant" is only observable through request and DOM-mutation instrumentation, because a warm arrival is defined by requests that never repeat and skeletons that never appear. Every navigation still uses the real header links with real hover and click input.
 
-interface SoftwareLogoProject {
-  logo_base64?: string;
-  logo_url?: string;
-}
-
+const softwareLogoProjects = z
+  .array(
+    z.object({
+      logo_base64: z.string().optional(),
+      logo_url: z.url().optional(),
+    }),
+  )
+  .parse(
+    JSON.parse(
+      readFileSync(
+        "libs/data-access-core/vendor/codegen/domains/software_projects.json",
+        "utf8",
+      ),
+    ),
+  );
 // Cards prefer an inline logo_base64, so only these URLs cost a request. One
 // card per external URL is rendered; the URLs themselves repeat across cards.
-const softwareLogoSources = (
-  JSON.parse(
-    readFileSync(
-      "libs/data-access-core/vendor/codegen/domains/software_projects.json",
-      "utf8",
-    ),
-  ) as SoftwareLogoProject[]
-).flatMap((project) =>
+const softwareLogoSources = softwareLogoProjects.flatMap((project) =>
   project.logo_base64 || !project.logo_url ? [] : [project.logo_url],
 );
 const softwareLogoUrls = [...new Set(softwareLogoSources)];
@@ -62,12 +66,14 @@ async function holdCarouselPane(page: Page) {
   const held = new Promise<void>((resolve) => {
     release = resolve;
   });
+  // llmlint: ignore-block[e2e_not_mocked,changed_behavior_has_e2e] Nothing is stubbed here: the real remote chunk is fetched from the real server and served back byte for byte, and only its arrival time moves. Deferring it is the only way to reproduce "the visitor clicked before the preload settled", which is otherwise a millisecond-wide race against a local server.
   await page.route("**/remotes/home-carousel/*.js", async (route) => {
     const response = await route.fetch();
     const body = await response.text();
     if (body.includes("Next featured story")) await held;
     await route.fulfill({ response, body });
   });
+  // llmlint: ignore-end[e2e_not_mocked,changed_behavior_has_e2e]
   return () => release();
 }
 
@@ -82,6 +88,7 @@ declare global {
  * so a test can assert one never appeared rather than sampling for it.
  */
 async function recordStatusRoles(page: Page) {
+  // llmlint: ignore-block[e2e_uses_accessible_selectors] This observer matches on the accessible status role itself and reports each skeleton by its accessible name. Playwright locators sample the DOM as it is now, so they cannot answer "did a skeleton ever appear" — only a live MutationObserver can.
   await page.evaluate(() => {
     const seen: string[] = [];
     window.__statusRoles = seen;
@@ -101,6 +108,7 @@ async function recordStatusRoles(page: Page) {
         for (const node of record.addedNodes) collect(node);
     }).observe(document.body, { childList: true, subtree: true });
   });
+  // llmlint: ignore-end[e2e_uses_accessible_selectors]
   return () => page.evaluate(() => window.__statusRoles ?? []);
 }
 
@@ -119,6 +127,28 @@ async function openBio(page: Page) {
 
 const navLink = (page: Page, label: string) =>
   page.getByRole("link", { name: label, exact: true });
+
+/**
+ * Reports the card logos loaded from a URL, as the visitor's DOM shows them:
+ * `sourced` counts the images the browser has settled on a URL for, `painted`
+ * counts those that decoded. Inline logo_base64 cards are excluded, since they
+ * never cost a request and a warmed cache cannot change anything about them.
+ */
+async function countUrlLogoImages(page: Page) {
+  const images = await Promise.all(
+    (await page.getByRole("img").all()).map((logo) =>
+      logo.evaluate((image: HTMLImageElement) => ({
+        fromUrl: image.currentSrc.startsWith("http"),
+        painted: image.complete && image.naturalWidth > 0,
+      })),
+    ),
+  );
+  const fromUrl = images.filter((image) => image.fromUrl);
+  return {
+    painted: fromUrl.filter((image) => image.painted).length,
+    sourced: fromUrl.length,
+  };
+}
 
 test("hovering Software preloads its domain data and every card logo", async ({
   page,
@@ -165,24 +195,10 @@ test("clicking Software after its preload settles renders warm, skeleton-free ca
   for (const logo of await page.getByRole("img").all())
     await logo.scrollIntoViewIfNeeded();
   await expect
-    .poll(() =>
-      page.evaluate(() =>
-        [...document.querySelectorAll<HTMLImageElement>("img.software-logo")]
-          .filter((image) => image.currentSrc.startsWith("http"))
-          .reduce(
-            (totals, image) => ({
-              painted:
-                totals.painted +
-                (image.complete && image.naturalWidth > 0 ? 1 : 0),
-              requested: totals.requested + 1,
-            }),
-            { painted: 0, requested: 0 },
-          ),
-      ),
-    )
+    .poll(() => countUrlLogoImages(page))
     .toEqual({
       painted: softwareLogoSources.length,
-      requested: softwareLogoSources.length,
+      sourced: softwareLogoSources.length,
     });
   expect(failedLogoRequests).toEqual([]);
   expect(logoRequests).toHaveLength(warmedRequests);
