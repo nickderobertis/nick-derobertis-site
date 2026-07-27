@@ -76,8 +76,15 @@ jobs:
   visual-docs:
     needs: affected
     if: ${{ always() && (github.event.action == 'closed' || github.event_name == 'schedule' || (needs.affected.result == 'success' && needs.affected.outputs.projects != '[]')) }}
+    # `contents: write` is required even though galleries now deploy to the
+    # dedicated Pages repository with their own token: the reusable workflow's
+    # `report` job still pushes the regenerated baseline manifest to this PR's
+    # branch, so its jobs declare `contents: write`. A caller must grant at least
+    # what the called workflow requests, and GitHub rejects the run at startup
+    # otherwise — with no log, no annotation, and no `classify-gate` context, so
+    # branch protection blocks on a required check that never appears.
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5
     with:
