@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 const pages = [
   {
@@ -84,26 +84,65 @@ test("every prerendered route contains substantive feature content", async ({
   await context.close();
 });
 
-test("prerendered routes paint remote styling with JavaScript disabled", async ({
+// Each probe asserts a style that only the route's own remote stylesheet
+// declares, so it can only pass when that CSS is inline in the static document.
+const firstPaintStyling = [
+  {
+    path: "",
+    locate: (page: Page) => page.getByRole("region", { name: "Areas of work" }),
+    styles: { display: "grid" },
+  },
+  {
+    path: "",
+    locate: (page: Page) =>
+      page
+        .getByRole("region", { name: "Areas of work" })
+        .getByRole("article")
+        .first(),
+    styles: { "text-align": "center" },
+  },
+  {
+    path: "bio",
+    locate: (page: Page) =>
+      page.getByRole("heading", { name: "Optimizing Life" }),
+    styles: { "text-align": "center", "font-weight": "400" },
+  },
+  {
+    path: "research",
+    locate: (page: Page) =>
+      page.getByRole("heading", { name: "Research Works" }),
+    styles: { "font-family": "Georgia, serif", color: "rgb(255, 255, 255)" },
+  },
+  {
+    path: "software",
+    locate: (page: Page) =>
+      page
+        .getByRole("img", { name: "Python Tools for Working with Data logo" })
+        .first(),
+    styles: { width: "40px", "flex-basis": "40px" },
+  },
+  {
+    path: "courses",
+    locate: (page: Page) => page.getByRole("heading", { name: "Courses" }),
+    styles: { "font-family": "Georgia, serif" },
+  },
+] as const;
+
+test("every prerendered route paints its remote styling with JavaScript disabled", async ({
   browser,
 }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-
-  await page.goto("");
-  const cards = page.getByRole("region", { name: "Areas of work" });
-  await expect(cards).toBeVisible();
-  await expect(cards).toHaveCSS("display", "grid");
-  const card = cards.getByRole("article").first();
-  await expect(card).toHaveCSS("text-align", "center");
-
-  await page.goto("software");
-  const logo = page
-    .getByRole("img", { name: "Python Tools for Working with Data logo" })
-    .first();
-  await expect(logo).toHaveCSS("width", "40px");
-  await expect(logo).toHaveCSS("flex-basis", "40px");
-
+  for (const probe of firstPaintStyling) {
+    await page.goto(probe.path);
+    const target = probe.locate(page);
+    await expect(target).toBeVisible();
+    for (const [property, value] of Object.entries(probe.styles))
+      await expect(target, `${probe.path || "/"} ${property}`).toHaveCSS(
+        property,
+        value,
+      );
+  }
   await context.close();
 });
 
