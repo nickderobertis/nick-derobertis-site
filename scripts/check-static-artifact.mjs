@@ -119,9 +119,16 @@ for (const route of validatedRoutes) {
 // The home document prerenders every pane the home host composes, so its
 // inlined CSS set has to track home's own built federation manifest instead of a
 // hand-kept list that a new pane could silently outgrow.
-const homeManifest = JSON.parse(
-  await readFile(`${root}/remotes/home/mf-manifest.json`, "utf8"),
-);
+const homeManifestPath = `${root}/remotes/home/mf-manifest.json`;
+let homeManifest;
+try {
+  homeManifest = JSON.parse(await readFile(homeManifestPath, "utf8"));
+} catch (error) {
+  const detail = error instanceof Error ? error.message : String(error);
+  throw new Error(
+    `Could not read the home federation manifest at ${homeManifestPath}: ${detail}. Rebuild the home remote, then rerun just prerender.`,
+  );
+}
 const composedByHome = new Set();
 for (const remote of Array.isArray(homeManifest?.remotes)
   ? homeManifest.remotes
@@ -131,13 +138,13 @@ for (const remote of Array.isArray(homeManifest?.remotes)
   )?.[1];
   if (!name)
     throw new Error(
-      `${root}/remotes/home/mf-manifest.json declares a remote without a project-path entry; rebuild the home remote and rerun just prerender.`,
+      `${homeManifestPath} declares a remote without a project-path entry; rebuild the home remote and rerun just prerender.`,
     );
   composedByHome.add(name);
 }
 if (composedByHome.size === 0)
   throw new Error(
-    `${root}/remotes/home/mf-manifest.json declares no composed remotes; rebuild the home remote and rerun just prerender.`,
+    `${homeManifestPath} declares no composed remotes; rebuild the home remote and rerun just prerender.`,
   );
 const declaredForHome = remotesForRoute("/");
 const uncoveredPanes = ["home", ...composedByHome].filter(
