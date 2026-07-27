@@ -101,13 +101,21 @@ jobs:
       # Each affected app is built (with the composed shell + home remotes its
       # host-composed shots need, via the Nx screenshot target's dependsOn) and
       # captured to $SHOTS_OUT. Runs twice for screencomp's reproducibility gate.
+      # POSIX sh only. The reusable workflow injects this string into `run:` with
+      # no `shell:` key, so it runs under the container's /bin/sh (dash), where
+      # `[[ ... =~ ... ]]` is not a builtin: it exits 127, takes the failure
+      # branch, and reports every project name as invalid. The three patterns
+      # below spell out the old ^[a-z][a-z0-9-]*$ — empty, a first character that
+      # is not a lowercase letter, or any later character outside [a-z0-9-].
       capture-command: |
         corepack enable
         pnpm install --frozen-lockfile
-        [[ "$SCREENCOMP_PROJECT" =~ ^[a-z][a-z0-9-]*$ ]] || {
-          echo "capture-command: SCREENCOMP_PROJECT must be a valid Nx project name" >&2
-          exit 2
-        }
+        case "$SCREENCOMP_PROJECT" in
+          "" | [!a-z]* | [a-z]*[!a-z0-9-]*)
+            echo "capture-command: SCREENCOMP_PROJECT must be a valid Nx project name" >&2
+            exit 2
+            ;;
+        esac
         pnpm exec nx run "$SCREENCOMP_PROJECT:screenshot"
     secrets:
       # llmlint: ignore[boundary_inputs_validated] The pinned reusable workflow's pages-preflight job rejects a missing token before any consumer or external write; GitHub masks the secret and owns token syntax/authorization validation.
