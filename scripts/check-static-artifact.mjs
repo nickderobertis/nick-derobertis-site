@@ -3,6 +3,10 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
+import siteConfig from "../libs/data-access-core/src/site.config.json" with {
+  type: "json",
+};
+import { readRouteRemoteStyles, remotesForRoute } from "./remote-css.mjs";
 import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 const substantiveRouteContent = {
@@ -32,7 +36,10 @@ function parseRoutes(value) {
         typeof route.path === "string" &&
         /^\/(?:[a-z][a-z0-9-]*)?$/.test(route.path) &&
         typeof route.heading === "string" &&
-        typeof route.description === "string",
+        typeof route.description === "string" &&
+        (route.remote === undefined ||
+          (typeof route.remote === "string" &&
+            /^[a-z][a-z0-9-]*$/.test(route.remote))),
     )
   )
     throw new Error(
@@ -62,7 +69,29 @@ for (const route of validatedRoutes) {
     throw new Error(
       `${path} lacks substantive route content; fix scripts/prerender.mjs and rerun just check.`,
     );
+  // The prerendered markup only paints styled at first load when every remote
+  // it renders has its page CSS inline ahead of the deferred federation scripts.
+  const deferredScripts = html.indexOf("<script defer");
+  for (const { css, names } of await readRouteRemoteStyles({
+    remoteRoot: `${root}/remotes`,
+    pagesBase: siteConfig?.pagesBase,
+    routePath: route.path,
+  })) {
+    const inlined = html.indexOf(css);
+    if (inlined === -1)
+      throw new Error(
+        `${path} lacks the inlined ${names.join(", ")} page CSS; fix scripts/prerender.mjs and rerun just prerender.`,
+      );
+    if (deferredScripts === -1 || inlined > deferredScripts)
+      throw new Error(
+        `${path} inlines the ${names.join(", ")} page CSS after its deferred scripts; fix scripts/prerender.mjs and rerun just prerender.`,
+      );
+  }
   if (route.path !== "/") {
+    if (!route.remote || !remotesForRoute(route.path).includes(route.remote))
+      throw new Error(
+        `${path} does not inline the page CSS of its own ${route.remote ?? "route"} remote; align scripts/remote-css.mjs with apps/shell/src/routes.json and rerun just prerender.`,
+      );
     const marker = realRouteMarkers[route.path];
     if (!marker || !html.includes(marker))
       throw new Error(
@@ -87,6 +116,44 @@ for (const route of validatedRoutes) {
       );
   }
 }
+// The home document prerenders every pane the home host composes, so its
+// inlined CSS set has to track home's own built federation manifest instead of a
+// hand-kept list that a new pane could silently outgrow.
+const homeManifestPath = `${root}/remotes/home/mf-manifest.json`;
+let homeManifest;
+try {
+  homeManifest = JSON.parse(await readFile(homeManifestPath, "utf8"));
+} catch (error) {
+  const detail = error instanceof Error ? error.message : String(error);
+  throw new Error(
+    `Could not read the home federation manifest at ${homeManifestPath}: ${detail}. Rebuild the home remote, then rerun just prerender.`,
+  );
+}
+const composedByHome = new Set();
+for (const remote of Array.isArray(homeManifest?.remotes)
+  ? homeManifest.remotes
+  : []) {
+  const name = /\/remotes\/([a-z][a-z0-9-]*)\/remoteEntry\.js$/.exec(
+    typeof remote?.entry === "string" ? remote.entry : "",
+  )?.[1];
+  if (!name)
+    throw new Error(
+      `${homeManifestPath} declares a remote without a project-path entry; rebuild the home remote and rerun just prerender.`,
+    );
+  composedByHome.add(name);
+}
+if (composedByHome.size === 0)
+  throw new Error(
+    `${homeManifestPath} declares no composed remotes; rebuild the home remote and rerun just prerender.`,
+  );
+const declaredForHome = remotesForRoute("/");
+const uncoveredPanes = ["home", ...composedByHome].filter(
+  (name) => !declaredForHome.includes(name),
+);
+if (uncoveredPanes.length > 0)
+  throw new Error(
+    `${root}/index.html does not inline the page CSS of every remote the home host composes (missing ${uncoveredPanes.join(", ")}); add them to scripts/remote-css.mjs and rerun just prerender.`,
+  );
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error("404 fallback is not intentional");

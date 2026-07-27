@@ -7,6 +7,11 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
+import {
+  inlineRemoteCssPattern,
+  readRouteRemoteStyles,
+  renderInlineRemoteCss,
+} from "./remote-css.mjs";
 import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 function validateSiteConfig(value) {
@@ -57,6 +62,7 @@ if (
 // Nx may restore a previously prerendered output from cache. Normalize it back
 // to the rspack template so this target is idempotent as well as parallel-safe.
 const template = builtDocument
+  .replace(inlineRemoteCssPattern, "")
   .replace(/<link rel="canonical" href="[^"]*">/g, "")
   .replace(
     /<div id="root"[^>]*>[\s\S]*<\/body>/,
@@ -65,6 +71,13 @@ const template = builtDocument
 if (!template.includes('<div id="root"></div>'))
   throw new Error(
     `The built shell at ${join(output, "index.html")} could not be normalized to its root placeholder; rebuild the shell, then rerun just prerender.`,
+  );
+// Inlined page CSS goes ahead of the bundler's own deferred scripts so the
+// static document paints fully styled before any federated JavaScript runs.
+const deferredScriptAnchor = "<script defer";
+if (!template.includes(deferredScriptAnchor))
+  throw new Error(
+    `The built shell at ${join(output, "index.html")} lacks the deferred script tags that anchor its inlined page CSS; rebuild the shell, then rerun just prerender.`,
   );
 
 let rendererModule;
@@ -148,7 +161,14 @@ async function documentFor(route) {
       `The prerender renderer returned an invalid result for ${route.path}; fix renderRoute in scripts/render-entry.tsx, run just build-prerender-renderer, then rerun just prerender.`,
     );
   const routeHtml = finalizeReactPrerender(rendered.html);
-  return template
+  const inlineCss = renderInlineRemoteCss(
+    await readRouteRemoteStyles({
+      remoteRoot: remoteBuildRoot,
+      pagesBase: base,
+      routePath: route.path,
+    }),
+  );
+  const routeDocument = template
     .replace(/<title>.*?<\/title>/, `<title>${title}</title>`)
     .replace(
       /<meta name="description" content="[^"]*">/,
@@ -158,6 +178,10 @@ async function documentFor(route) {
       '<div id="root"></div>',
       `<div id="root" ${routeContracts.prerenderRouteAttribute}="${route.path}">${routeHtml}</div>${rendered.hydration}`,
     );
+  return routeDocument.replace(
+    deferredScriptAnchor,
+    () => `${inlineCss}${deferredScriptAnchor}`,
+  );
 }
 
 for (const route of routes) {
