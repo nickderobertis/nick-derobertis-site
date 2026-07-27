@@ -84,6 +84,29 @@ test("every prerendered route contains substantive feature content", async ({
   await context.close();
 });
 
+test("prerendered routes paint remote styling with JavaScript disabled", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+
+  await page.goto("");
+  const cards = page.getByRole("region", { name: "Areas of work" });
+  await expect(cards).toBeVisible();
+  await expect(cards).toHaveCSS("display", "grid");
+  const card = cards.getByRole("article").first();
+  await expect(card).toHaveCSS("text-align", "center");
+
+  await page.goto("software");
+  const logo = page
+    .getByRole("img", { name: "Python Tools for Working with Data logo" })
+    .first();
+  await expect(logo).toHaveCSS("width", "40px");
+  await expect(logo).toHaveCSS("flex-basis", "40px");
+
+  await context.close();
+});
+
 test("navigation works with the keyboard", async ({ page }) => {
   await page.goto("");
   await page.getByRole("link", { name: "Bio", exact: true }).focus();

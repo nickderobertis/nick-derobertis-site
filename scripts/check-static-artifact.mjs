@@ -3,6 +3,10 @@ import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
+import siteConfig from "../libs/data-access-core/src/site.config.json" with {
+  type: "json",
+};
+import { readRouteRemoteStyles } from "./remote-css.mjs";
 import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 const substantiveRouteContent = {
@@ -62,6 +66,24 @@ for (const route of validatedRoutes) {
     throw new Error(
       `${path} lacks substantive route content; fix scripts/prerender.mjs and rerun just check.`,
     );
+  // The prerendered markup only paints styled at first load when every remote
+  // it renders has its page CSS inline ahead of the deferred federation scripts.
+  const deferredScripts = html.indexOf("<script defer");
+  for (const { css, names } of await readRouteRemoteStyles({
+    remoteRoot: `${root}/remotes`,
+    pagesBase: siteConfig?.pagesBase,
+    routePath: route.path,
+  })) {
+    const inlined = html.indexOf(css);
+    if (inlined === -1)
+      throw new Error(
+        `${path} lacks the inlined ${names.join(", ")} page CSS; fix scripts/prerender.mjs and rerun just prerender.`,
+      );
+    if (deferredScripts === -1 || inlined > deferredScripts)
+      throw new Error(
+        `${path} inlines the ${names.join(", ")} page CSS after its deferred scripts; fix scripts/prerender.mjs and rerun just prerender.`,
+      );
+  }
   if (route.path !== "/") {
     const marker = realRouteMarkers[route.path];
     if (!marker || !html.includes(marker))
