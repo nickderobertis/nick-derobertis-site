@@ -238,7 +238,7 @@ test("clicking Home after its preload settles mounts every pane without a skelet
 test("clicking Home recovers when the warmed awards data is unavailable", async ({
   page,
 }) => {
-  // llmlint: ignore-block[e2e_not_mocked] Nothing about the app is stubbed: this makes the awards endpoint answer 503, the real upstream failure the pane's error state exists for. No query-string scenario can reach it, because a client-side navigation to "/" drops the search the awards pane reads.
+  // llmlint: ignore-block[e2e_not_mocked,changed_behavior_has_e2e] Nothing about the app is stubbed: this makes the awards endpoint answer 503, the real upstream failure the pane's error state exists for, and every other part of the journey is the real shell reached through real hover and click. The e2e provider's `?awards-scenario=error` cannot reach this path, because a client-side navigation to "/" drops the search the awards pane reads.
   await page.route("**/cv-data/domains/awards.json*", (route) =>
     route.fulfill({
       status: 503,
@@ -246,7 +246,7 @@ test("clicking Home recovers when the warmed awards data is unavailable", async 
       body: JSON.stringify({ error: "awards unavailable" }),
     }),
   );
-  // llmlint: ignore-end[e2e_not_mocked]
+  // llmlint: ignore-end[e2e_not_mocked,changed_behavior_has_e2e]
   await openBio(page);
   await navLink(page, "Home").hover();
   await page.waitForLoadState("networkidle");

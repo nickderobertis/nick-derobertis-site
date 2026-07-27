@@ -7,10 +7,21 @@ export type AwardsViewState =
   | { name: "ready"; awards: Awards };
 const scenarios = new Set(["empty", "error", "loading"]);
 
-// Warmed awards keyed by the exact request URL, so a preview scenario never
-// resolves from the data warmed for the default view, or the other way round.
-const warmedAwards = new Map<string, Awards>();
+/**
+ * One awards request per URL, so a host that warms the pane and the pane's own
+ * mount share a single fetch rather than racing two. `value` is the settled
+ * response kept only so the first render can read it synchronously; nothing but
+ * the fetch below ever writes here, and a rejected request drops itself so the
+ * next mount retries.
+ */
+interface AwardsRequest {
+  promise: Promise<Awards>;
+  value?: Awards;
+}
+const awardsRequests = new Map<string, AwardsRequest>();
 
+// Keying by the exact request URL keeps a preview scenario from resolving out
+// of the response warmed for the default view, or the other way round.
 function awardsRequestUrl(): URL {
   const url = new URL(
     "/nick-derobertis-site/cv-data/domains/awards.json",
@@ -24,59 +35,68 @@ function awardsRequestUrl(): URL {
   return url;
 }
 
-async function requestAwards(url: URL, signal?: AbortSignal): Promise<Awards> {
-  const response = await fetch(url, signal ? { signal } : {});
-  if (!response.ok)
-    throw new Error(`Awards request failed: ${response.status}`);
-  return validateCvDomain("awards", await response.json());
+function awardsRequest(url: URL): AwardsRequest {
+  const existing = awardsRequests.get(url.href);
+  if (existing) return existing;
+  const request: AwardsRequest = {
+    promise: (async () => {
+      const response = await fetch(url);
+      if (!response.ok)
+        throw new Error(`Awards request failed: ${response.status}`);
+      return validateCvDomain("awards", await response.json());
+    })().then(
+      (awards) => {
+        request.value = awards;
+        return awards;
+      },
+      (error: unknown) => {
+        awardsRequests.delete(url.href);
+        throw error;
+      },
+    ),
+  };
+  awardsRequests.set(url.href, request);
+  return request;
 }
 
 /**
  * Fetches the awards this pane needs ahead of its first render, so a host that
  * preloads the pane can mount it ready instead of on its loading skeleton. A
- * failed warm is deliberately swallowed: the pane's own request still runs and
- * owns the error state, so a warm that fails changes nothing a visitor sees.
+ * failed warm is deliberately swallowed: it drops itself from the cache, the
+ * pane's own request runs on mount, and that request owns the error state.
  */
 export async function preloadAwards(): Promise<void> {
   if (typeof window === "undefined") return;
-  const url = awardsRequestUrl();
-  if (warmedAwards.has(url.href)) return;
   try {
-    warmedAwards.set(url.href, await requestAwards(url));
+    await awardsRequest(awardsRequestUrl()).promise;
   } catch {
     return;
   }
 }
 
 export function useAwards(): AwardsViewState {
-  // Seeding from the warm cache during the initial render is what removes the
+  // Reading a settled request during the initial render is what removes the
   // loading frame. Server rendering never warms, so its markup is unchanged.
   const [state, setState] = useState<AwardsViewState>(() => {
     if (typeof window === "undefined") return { name: "loading" };
-    const warmed = warmedAwards.get(awardsRequestUrl().href);
+    const warmed = awardsRequests.get(awardsRequestUrl().href)?.value;
     return warmed ? { name: "ready", awards: warmed } : { name: "loading" };
   });
   useEffect(() => {
-    const url = awardsRequestUrl();
-    // A warm that lands between this render and this effect still has to reach
-    // the pane; skipping the request without adopting it would strand the pane
-    // on its skeleton forever.
-    const warmed = warmedAwards.get(url.href);
-    if (warmed) {
-      setState((current) =>
-        current.name === "ready" ? current : { name: "ready", awards: warmed },
-      );
-      return;
-    }
-    const controller = new AbortController();
-    requestAwards(url, controller.signal).then(
-      (awards) => setState({ name: "ready", awards }),
-      (error: unknown) => {
-        if (!(error instanceof DOMException && error.name === "AbortError"))
-          setState({ name: "error" });
+    // The request is shared, so an unmount stops listening rather than
+    // aborting it out from under whoever else is waiting on the same URL.
+    let listening = true;
+    awardsRequest(awardsRequestUrl()).promise.then(
+      (awards) => {
+        if (listening) setState({ name: "ready", awards });
+      },
+      () => {
+        if (listening) setState({ name: "error" });
       },
     );
-    return () => controller.abort();
+    return () => {
+      listening = false;
+    };
   }, []);
   return state;
 }

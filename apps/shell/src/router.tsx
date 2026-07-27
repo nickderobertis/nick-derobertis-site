@@ -157,6 +157,9 @@ export function createSiteRouter({
         warmSoftwareLogos(projects);
         return { projects, view };
       } catch {
+        // `as const` keeps this branch's view a literal; without it the union
+        // with the branches above widens to string and the page loses the
+        // narrowing it renders from.
         return { projects: null, view: "error" as const };
       }
     },
