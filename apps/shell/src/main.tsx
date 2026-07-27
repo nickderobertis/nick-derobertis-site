@@ -18,6 +18,7 @@ const router = createSiteRouter({
   history: createBrowserHistory(),
   pages: {
     home: home.default,
+    homePreload: home.preload,
     bio: bio.default,
     research: research.default,
     software: software.default,

@@ -6,7 +6,7 @@ import { siteBase } from "@site/data-access-core";
 import { homeContent } from "@site/data-access-home";
 import { prerenderRouteAttribute } from "@site/route-state";
 import AwardsSkeleton from "awards/Skeleton";
-import { type ComponentType, lazy, Suspense } from "react";
+import { type ComponentType, lazy, Suspense, useState } from "react";
 import SkillsSkeleton from "skills/Skeleton";
 import TimelineSkeleton from "timeline/Skeleton";
 import "./home.css";
@@ -46,7 +46,8 @@ type HydratedPanes = [
   ComponentType,
 ];
 let hydratedPanes: HydratedPanes | undefined;
-if (hydrateFromSource) {
+
+async function resolvePanes(): Promise<HydratedPanes> {
   const [carousel, cards, story, skills, awards, contact, timeline] =
     await Promise.all([
       carouselModule,
@@ -57,7 +58,7 @@ if (hydrateFromSource) {
       contactModule,
       timelineModule,
     ]);
-  hydratedPanes = [
+  return [
     carousel.default,
     cards.default,
     story.default,
@@ -68,12 +69,32 @@ if (hydrateFromSource) {
   ];
 }
 
+if (hydrateFromSource) hydratedPanes = await resolvePanes();
+
+let panePreload: Promise<void> | undefined;
+
+// The shell's Home route loader calls this on hover intent, generalizing the
+// entry-at-"/" pane cache to client-side navigation: once it settles, Home
+// mounts the resolved panes directly instead of suspending on lazy() — which
+// flashes a skeleton on first mount even when its promise already resolved.
+// Server rendering composes the panes directly, so there is nothing to warm.
+export function preload(): Promise<void> {
+  if (typeof document === "undefined") return Promise.resolve();
+  panePreload ??= resolvePanes().then((panes) => {
+    hydratedPanes = panes;
+  });
+  return panePreload;
+}
+
 // Keep the Home host in both shared data dependency graphs; panes own rendering.
 void siteBase;
 void homeContent;
 
 export default function HomePage() {
-  if (hydratedPanes) {
+  // Settle the render path once per mount: a preload that lands mid-life must
+  // not swap pane component identity and remount every pane underneath.
+  const [panes] = useState(() => hydratedPanes);
+  if (panes) {
     const [
       HydratedCarousel,
       HydratedCards,
@@ -82,7 +103,7 @@ export default function HomePage() {
       HydratedAwards,
       HydratedContact,
       HydratedTimeline,
-    ] = hydratedPanes;
+    ] = panes;
     return (
       <div className="home-main">
         <HydratedCarousel />

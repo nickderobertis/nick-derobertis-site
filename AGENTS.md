@@ -60,7 +60,7 @@ cache locking or a remote cache.
 
 This numbered inventory is the browser-test contract; extend it with every new route, feature, or state.
 
-1. Site shell: all five Pages-base routes load directly with header, footer, route content, and no failed assets; keyboard navigation works; each route retains useful substantive prerendered HTML without JavaScript; unknown paths show the static 404 recovery document and client-side redirect home; `/story` redirects to `/bio`.
+1. Site shell: all five Pages-base routes load directly with header, footer, route content, and no failed assets; keyboard navigation works; each route retains useful substantive prerendered HTML without JavaScript; unknown paths show the static 404 recovery document and client-side redirect home; `/story` redirects to `/bio`; hover intent preloads a route's code, data, and images, so a settled hover then click mounts Home's panes and Software's warm card logos without a skeleton, while a click that beats the preload still shows skeletons and settles.
 2. Federation ownership: all 12 remotes render without failed assets through both standalone and host-composed boundaries.
 3. Home: its composed page and carousel, cards, story, contact, timeline, skills, and awards panes cover happy, empty, loading, and error states in both render paths; action links, automatic and keyboard carousel controls, responsive breakpoints, and invalid build-script inputs are covered.
 4. Bio: complete story, responsive layout, and happy, empty, loading, and error states in both render paths.
