@@ -1,5 +1,6 @@
 {
   "architecture": "x86_64",
+  "pagesRepository": "nickderobertis/nick-derobertis-site-visual-docs",
   "playwrightContainer": "mcr.microsoft.com/playwright:v1.61.1-noble",
-  "screencompVersion": "v0.4.4"
+  "screencompVersion": "v0.4.5"
 }

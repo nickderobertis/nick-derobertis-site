@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 
+// llmlint: ignore-file[changed_behavior_has_e2e] This CLI/filesystem quality-gate validator has no browser interface; lint-workflows executes its real boundary against committed workflow, configuration, baselines, and documentation.
+
 process.on("uncaughtException", (error) => {
   console.error(
     `verify-visual-contract: ${error instanceof Error ? error.message : String(error)}; update visual-tools.json and every visual consumer together`,
@@ -10,6 +12,7 @@ process.on("uncaughtException", (error) => {
 const contract = JSON.parse(readFileSync("visual-tools.json", "utf8"));
 const contractKeys = [
   "architecture",
+  "pagesRepository",
   "playwrightContainer",
   "screencompVersion",
 ];
@@ -23,7 +26,7 @@ if (
   )
 )
   throw new Error(
-    "visual-tools.json must contain non-empty architecture, playwrightContainer, and screencompVersion strings",
+    "visual-tools.json must contain non-empty architecture, pagesRepository, playwrightContainer, and screencompVersion strings",
   );
 
 // Visual regression is screencomp's canonical reusable workflow now, so the pins
@@ -34,6 +37,7 @@ if (
 const sources = [
   ["workflow", readFileSync(".github/workflows/visual-docs.yml", "utf8")],
   ["bootstrap", readFileSync("justfile", "utf8")],
+  ["repository instructions", readFileSync("AGENTS.md", "utf8")],
   ["pre-push guard", readFileSync(".githooks/pre-push", "utf8")],
   ["screencomp config", readFileSync("screencomp.toml", "utf8")],
   [
@@ -130,12 +134,14 @@ for (const [project, config] of Object.entries(visualProjects)) {
 const expectedConsumers = {
   architecture: [
     "workflow",
+    "repository instructions",
     "screencomp config",
     "affected selector",
     "pre-push guard",
   ],
+  pagesRepository: ["workflow"],
   playwrightContainer: ["workflow", "pre-push guard"],
-  screencompVersion: ["workflow", "bootstrap"],
+  screencompVersion: ["workflow", "bootstrap", "repository instructions"],
 };
 for (const [key, value] of Object.entries(contract)) {
   const matches = sources
@@ -149,6 +155,16 @@ for (const [key, value] of Object.entries(contract)) {
       `Visual contract ${key}=${value} is consumed by [${matches.join(", ")}], expected [${expectedConsumers[key].join(", ")}]; update visual-tools.json and every visual consumer together`,
     );
 }
+if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(contract.pagesRepository))
+  throw new Error(
+    "Visual pagesRepository must be an owner/name; correct pagesRepository in visual-tools.json and rerun just lint-workflows",
+  );
+const pagesUrl = `https://${contract.pagesRepository.split("/")[0]}.github.io/${contract.pagesRepository.split("/")[1]}/`;
+for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"])
+  if (!readFileSync(path, "utf8").includes(pagesUrl))
+    throw new Error(
+      `Visual gallery documentation in ${path} must link to ${pagesUrl}`,
+    );
 const screencompSource = sources.find(
   ([name]) => name === "screencomp config",
 )[1];

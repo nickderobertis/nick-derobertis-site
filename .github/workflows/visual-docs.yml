@@ -1,4 +1,5 @@
 # Visual regression via screencomp's canonical reusable workflow.
+# llmlint: ignore-file[changed_behavior_has_e2e,work_goes_through_command_surface] This CI-only caller has no browser interface and its capture block is screencomp's required injected container callback, which must use SCREENCOMP_PROJECT and SHOTS_OUT; actionlint and the visual-contract verifier exercise its input, secret, and callback wiring.
 #
 # This repo owns ONLY capture (the pinned Linux container below) and the
 # affected-project selection; screencomp owns everything downstream — the
@@ -75,16 +76,24 @@ jobs:
   visual-docs:
     needs: affected
     if: ${{ always() && (github.event.action == 'closed' || github.event_name == 'schedule' || (needs.affected.result == 'success' && needs.affected.outputs.projects != '[]')) }}
+    # `contents: write` is required even though galleries now deploy to the
+    # dedicated Pages repository with their own token: the reusable workflow's
+    # `report` job still pushes the regenerated baseline manifest to this PR's
+    # branch, so its jobs declare `contents: write`. A caller must grant at least
+    # what the called workflow requests, and GitHub rejects the run at startup
+    # otherwise — with no log, no annotation, and no `classify-gate` context, so
+    # branch protection blocks on a required check that never appears.
     permissions:
       contents: write
       pull-requests: write
-    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.4
+    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5
     with:
       projects: ${{ needs.affected.outputs.projects || '[]' }}
       container: mcr.microsoft.com/playwright:v1.61.1-noble
-      screencomp-version: v0.4.4
+      screencomp-version: v0.4.5
       gallery-title: Nick DeRobertis site visual docs
       fail-on-drift: true
+      pages-repository: nickderobertis/nick-derobertis-site-visual-docs
       # One aggregated PR comment covering all affected microfrontends, instead of
       # one sticky comment per app (12 apps -> 1 comment). Galleries and Pages
       # output are unchanged; only the PR-comment surface consolidates.
@@ -95,7 +104,14 @@ jobs:
       capture-command: |
         corepack enable
         pnpm install --frozen-lockfile
+        [[ "$SCREENCOMP_PROJECT" =~ ^[a-z][a-z0-9-]*$ ]] || {
+          echo "capture-command: SCREENCOMP_PROJECT must be a valid Nx project name" >&2
+          exit 2
+        }
         pnpm exec nx run "$SCREENCOMP_PROJECT:screenshot"
+    secrets:
+      # llmlint: ignore[boundary_inputs_validated] The pinned reusable workflow's pages-preflight job rejects a missing token before any consumer or external write; GitHub masks the secret and owns token syntax/authorization validation.
+      pages-token: ${{ secrets.GH_TOKEN }}
 
   # Stable, always-present status check to require in branch protection. The
   # reusable workflow's own classify runs in per-project matrix legs

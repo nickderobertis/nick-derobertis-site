@@ -54,6 +54,13 @@ and `just test`. CI runs `just check-all` on `master` as a non-affected safety
 sweep. See [the architecture](docs/architecture.md) for project boundaries,
 hosting, and affected-test behavior.
 
+Pull requests with affected visual projects get one aggregated screencomp
+comment with real before/after diffs and links to the galleries at
+<https://nickderobertis.github.io/nick-derobertis-site-visual-docs/>. The
+galleries use a dedicated Pages repository because this repository's production
+Pages site is deployed from an Actions artifact; GitHub therefore does not serve
+its `gh-pages` branch, even when screencomp writes galleries there.
+
 ## Deployment performance
 
 Run the network-dependent Lighthouse comparison separately from the deterministic

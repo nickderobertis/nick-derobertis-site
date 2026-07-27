@@ -1,3 +1,4 @@
+<!-- llmlint: ignore-file[instruction_layer_localized] The root journey inventory is deliberately a shell-wide federation contract: every feature must be exercised through both its standalone remote and host-composed boundary, so localizing those coupled journeys under individual apps would split the single end-to-end ownership model. -->
 # Repository instructions
 
 ## Stack and composition
@@ -11,7 +12,7 @@
 Use pnpm; never add backend or runtime API infrastructure. The shell owns routing and layout. It consumes five route remotes; Home is itself a host for seven feature remotes. Remotes expose only route pages and compose only declared child remotes. Libraries flow `shared -> layout -> shell`, enforced by Nx tags. See `docs/architecture.md`.
 
 Visual regression uses screencomp's canonical reusable workflow
-(`nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.3`)
+(`nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5`)
 via `.github/workflows/visual-docs.yml`, superseding the prior hand-rolled
 capture/classify/gallery/comment/Pages pipeline (whose host-based capture proof
 `docs/integration-proof.md` records). Capture is owned by screencomp's pinned
@@ -26,7 +27,12 @@ to `screencomp classify --include project=<app>` scoping against a shared
 baseline. The single drift gate is the reusable workflow's classify job (surfaced
 as the `Visual docs` workflow's stable `classify-gate` status check); its local
 half is `.githooks/pre-push` (enable once per clone with `git config
-core.hooksPath .githooks`). Pin screencomp `v0.4.3` consistently across the
+core.hooksPath .githooks`). Galleries are published at
+`https://nickderobertis.github.io/nick-derobertis-site-visual-docs/` from the
+dedicated visual-docs repository. They cannot be hosted on this repository's
+`gh-pages` branch because its production Pages site is served from an Actions
+artifact, so GitHub does not serve that branch. Pin screencomp `v0.4.5`
+consistently across the
 reusable-workflow ref, the `screencomp-version` input, and the bootstrap CLI
 install; `scripts/verify-visual-contract.mjs` guards that and the toggle/baseline
 contracts. Per-app baselines/galleries and the `reference/screenshots` PR #12

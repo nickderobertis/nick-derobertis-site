@@ -14,7 +14,8 @@ bootstrap:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: dependency install failed; check the lockfile and registry access, then rerun just bootstrap" >&2; exit 1; }
     scripts/setup-ci-tools.sh || { echo "bootstrap: pinned CI tool installation failed; check the reported checksum or network error, then rerun just bootstrap" >&2; exit 1; }
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec playwright install chromium >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: Chromium install failed; check Playwright system requirements, then rerun just bootstrap" >&2; exit 1; }
-    if ! command -v screencomp >/dev/null; then log=$(mktemp); trap 'rm -f "$log"' EXIT; (curl -fsSL https://raw.githubusercontent.com/nickderobertis/screencomp/main/scripts/install.sh | sh -s -- --version v0.4.4) >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: screencomp install failed; check network access and rerun just bootstrap" >&2; exit 1; }; fi
+    # llmlint: ignore[changed_behavior_has_e2e] Bootstrap is a developer CLI with no browser interface; this path verifies the installer bytes and propagates download, integrity, and installation failures directly.
+    if ! command -v screencomp >/dev/null; then installer=$(mktemp); log=$(mktemp); trap 'rm -f "$installer" "$log"' EXIT; curl -fsSL -o "$installer" https://raw.githubusercontent.com/nickderobertis/screencomp/59c45975126574f60d148b3ef3c9c5f8cef24987/scripts/install.sh 2>"$log" || { cat "$log" >&2; echo "bootstrap: screencomp installer download failed; check network access and rerun just bootstrap" >&2; exit 1; }; actual=$(node -e 'const fs = require("node:fs"); const crypto = require("node:crypto"); process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"));' "$installer"); [[ "$actual" = dd4e02daf93c3f056b84b0555c03c60b8e8bfb29ecb462e7dfa4b84fd84202b4 ]] || { echo "bootstrap: screencomp installer checksum mismatch; verify GitHub repository access and rerun just bootstrap" >&2; exit 1; }; sh "$installer" --version v0.4.5 >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: screencomp install failed; check network access and rerun just bootstrap" >&2; exit 1; }; fi
 
 bootstrap-ci:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap-ci: dependency install failed; check the lockfile and registry access, then rerun just bootstrap-ci" >&2; exit 1; }
@@ -91,6 +92,11 @@ e2e-project project:
 
 setup-llmlint:
     ./scripts/setup-llmlint.sh
+
+# llmlint: ignore[changed_behavior_has_e2e] This command-only recipe has no browser interface and delegates to the real registry/integrity installer.
+setup-llm-harness:
+    # llmlint: ignore[changed_behavior_has_e2e] This command-only delegation has no browser interface; the script exercises the real npm boundary.
+    ./scripts/setup-llm-harness.sh
 
 lint-llm:
     llmlint

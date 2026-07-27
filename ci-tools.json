@@ -1,5 +1,5 @@
 {
-  "schema": 1,
+  "schema": 2,
   "actionlint": {
     "version": "1.7.12",
     "sha256": "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
@@ -7,5 +7,10 @@
   "shellcheck": {
     "version": "0.11.0",
     "sha256": "b7af85e41cc99489dcc21d66c6d5f3685138f06d34651e6d34b42ec6d54fe6f6"
+  },
+  "codex": {
+    "package": "@openai/codex",
+    "version": "0.145.0",
+    "integrity": "sha512-/PSPSFujjjmiyVFvG2yu/grOFhsWdokTH8t2KGWhXSo/M5n/dIDsnbsnO82/7bLtIoDuzQf7ATBUMWqPWQINlQ=="
   }
 }
