@@ -4,6 +4,8 @@ declare module "home/Page" {
   import type { ComponentType } from "react";
 
   const Page: ComponentType<Record<string, unknown>>;
+  // Resolves Home's pane modules so a hovered Home link mounts them directly.
+  export function preload(): Promise<void>;
   export default Page;
 }
 declare module "bio/Page" {

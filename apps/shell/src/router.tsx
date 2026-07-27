@@ -30,6 +30,11 @@ import { routes } from "./routes";
 
 export interface RoutePages {
   home: ComponentType;
+  /**
+   * Resolves Home's pane modules so a hovered Home link mounts them without a
+   * skeleton. Server rendering composes the panes directly and omits it.
+   */
+  homePreload?: () => Promise<void>;
   bio: ComponentType<BioPageProps>;
   research: ComponentType<ResearchPageProps<Research>>;
   software: ComponentType<SoftwarePageProps<SoftwareProjects>>;
@@ -41,6 +46,24 @@ interface RouterContext {
   loadDomain(name: "software_projects"): Promise<SoftwareProjects>;
   loadDomain(name: "courses"): Promise<Courses>;
   search: URLSearchParams;
+}
+
+// Warmed logos are kept alive here so the browser cannot collect an in-flight
+// request, and so a repeated loader run never refetches an already warm URL.
+const warmedSoftwareLogos = new Map<string, HTMLImageElement>();
+
+// Software cards render `logo_base64` in preference to `logo_url`, so only the
+// external URLs cost a request. Warming them alongside the domain JSON means a
+// hovered Software link arrives with its visible card logos already decoded.
+function warmSoftwareLogos(projects: SoftwareProjects) {
+  if (typeof Image === "undefined") return;
+  for (const project of projects) {
+    const url = project.logo_base64 ? undefined : project.logo_url;
+    if (!url || warmedSoftwareLogos.has(url)) continue;
+    const image = new Image();
+    warmedSoftwareLogos.set(url, image);
+    image.src = url;
+  }
 }
 
 const routePath = (label: string) => {
@@ -71,6 +94,12 @@ export function createSiteRouter({
   const home = createRoute({
     getParentRoute: () => Root,
     path: routePath("Home"),
+    // Start the pane preload without awaiting it: hover intent gets a warm
+    // Home, while a click that lands first still mounts the pane skeletons
+    // immediately instead of stalling on the previous route.
+    loader: () => {
+      void pages.homePreload?.();
+    },
     component: () => <pages.home />,
   });
   const bio = createRoute({
@@ -124,11 +153,13 @@ export function createSiteRouter({
       if (view === "loading" || view === "error")
         return { projects: null, view };
       try {
-        return {
-          projects: await ctx.loadDomain("software_projects"),
-          view,
-        };
+        const projects = await ctx.loadDomain("software_projects");
+        warmSoftwareLogos(projects);
+        return { projects, view };
       } catch {
+        // `as const` keeps this branch's view a literal; without it the union
+        // with the branches above widens to string and the page loses the
+        // narrowing it renders from.
         return { projects: null, view: "error" as const };
       }
     },

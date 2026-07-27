@@ -25,6 +25,9 @@ lint-workflows:
     scripts/setup-ci-tools.sh --verify >/dev/null
     .tools/bin/actionlint .github/workflows/*.yml || { echo "lint-workflows: GitHub workflow validation failed; fix the actionlint findings above, then rerun just lint-workflows" >&2; exit 1; }
     .tools/bin/shellcheck scripts/*.sh .githooks/pre-push || { echo "lint-workflows: shell validation failed; fix the shellcheck findings above, then rerun just lint-workflows" >&2; exit 1; }
+    # screencomp runs its injected capture callback with the container's /bin/sh,
+    # and actionlint only shellchecks literal run: blocks, so check them as POSIX sh here.
+    callbacks=$(mktemp -d); trap 'rm -rf "$callbacks"' EXIT; node scripts/extract-injected-callbacks.mjs "$callbacks" && .tools/bin/shellcheck --shell=sh "$callbacks"/*.sh || { echo "lint-workflows: screencomp's injected capture callback is not valid POSIX sh; rewrite it without bash-only constructs, then rerun just lint-workflows" >&2; exit 1; }
     node scripts/verify-visual-contract.mjs || { echo "lint-workflows: visual tool pins or capture contracts drifted; update visual-tools.json and every named consumer together" >&2; exit 1; }
     node scripts/verify-reference-migration.mjs || { echo "lint-workflows: PR #12 reference migration verification failed; repair the migration map or its owned baselines and retry" >&2; exit 1; }
 
