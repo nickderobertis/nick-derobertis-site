@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # llmlint: ignore-file[changed_behavior_has_e2e] This CI/developer installer has no browser interface; its checksum and executable verification paths exercise the real downloaded tools.
 set -euo pipefail
+mode="${1:-}"
+[[ $# -le 1 && ("$mode" == "" || "$mode" == "--verify" || "$mode" == "--plan") ]] || {
+  echo "setup-ci-tools: unsupported arguments; usage: setup-ci-tools.sh [--verify|--plan]" >&2
+  exit 2
+}
 tool_root="$(pwd)/.tools"
 tool_bin="$tool_root/bin"
 # Reviewed platform contract. Each supported host maps to the upstream archive
@@ -45,7 +50,7 @@ verify_tools() {
   [[ "${actionlint_report%%$'\n'*}" == "$actionlint_version" ]] || return 1
   "$tool_bin/shellcheck" --version | grep -Fx "version: $shellcheck_version" >/dev/null
 }
-if [[ "${1:-}" == "--verify" ]]; then
+if [[ "$mode" == "--verify" ]]; then
   verify_tools || { echo "setup-ci-tools: pinned actionlint and shellcheck are not provisioned; run just bootstrap" >&2; exit 1; }
   printf 'actionlint %s, shellcheck %s\n' "$actionlint_version" "$shellcheck_version"
   exit 0
@@ -60,7 +65,8 @@ shellcheck_archive="shellcheck-v${shellcheck_version}.linux.${shellcheck_arch}.t
 shellcheck_url="https://github.com/koalaman/shellcheck/releases/download/v${shellcheck_version}/${shellcheck_archive}"
 # The archives and digests this host would install, so the reviewed platform
 # contract is observable without downloading anything.
-if [[ "${1:-}" == "--plan" ]]; then
+if [[ "$mode" == "--plan" ]]; then
+  # llmlint: ignore[tool_output_is_signal] This report mode exists only to emit the resolved platform contract; each line is a distinct pinned artifact, so the report is the signal rather than progress narration.
   printf 'platform %s\nactionlint %s %s\nshellcheck %s %s\n' "$platform" "$actionlint_url" "$actionlint_sha" "$shellcheck_url" "$shellcheck_sha"
   exit 0
 fi

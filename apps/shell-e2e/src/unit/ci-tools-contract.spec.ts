@@ -42,6 +42,7 @@ function temporaryDirectory(prefix: string) {
 
 // A `uname` ahead of the real one on PATH, so a single host can exercise every
 // reviewed platform and a rejected one.
+// llmlint: ignore-block[e2e_not_mocked] The host CPU is the one input a single machine cannot vary, and the installer under test is never mocked: it is the real script reading a real `uname` process, and the specs below drive its real download, checksum, and install path unmocked on this host's own architecture.
 function hostPath(system: string, machine: string) {
   const directory = temporaryDirectory("ci-tools-host.");
   const shim = path.join(directory, "uname");
@@ -52,6 +53,7 @@ function hostPath(system: string, machine: string) {
   );
   return `${directory}:${process.env.PATH ?? ""}`;
 }
+// llmlint: ignore-end[e2e_not_mocked]
 
 function runOnHost(system: string, machine: string, args: string[]) {
   return spawnSync(script, args, {
@@ -137,6 +139,19 @@ describe("pinned CI tool platform contract", () => {
     expect(result.stdout).toBe("");
   });
 
+  it.each([["--install"], ["--verify --plan"], ["--plan extra"]])(
+    "rejects the unsupported invocation %s",
+    (invocation) => {
+      const result = runInWorkingDirectory(workspace, invocation.split(" "));
+
+      expect(result.status).toBe(2);
+      expect(result.stderr).toContain(
+        "unsupported arguments; usage: setup-ci-tools.sh [--verify|--plan]",
+      );
+      expect(result.stdout).toBe("");
+    },
+  );
+
   it("provisions checksum-verified tools on this host and reports the pins", () => {
     const directory = contractWorkspace(() => {});
 
@@ -161,6 +176,8 @@ describe("pinned CI tool platform contract", () => {
 
   it("installs nothing when a pinned digest does not match the upstream archive", () => {
     const directory = contractWorkspace((parsed) => {
+      // The tampered document is deliberately written back unvalidated, so this
+      // narrows the parsed JSON rather than reusing the contract schema.
       const actionlint = parsed.actionlint as {
         sha256: Record<string, string>;
       };
