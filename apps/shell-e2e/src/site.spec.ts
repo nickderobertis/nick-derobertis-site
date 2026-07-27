@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import { z } from "zod";
 
 const pages = [
   {
@@ -87,6 +89,46 @@ test("every prerendered route contains substantive feature content", async ({
 interface StyleProbe {
   locate: (page: Page) => Locator;
   styles: Record<string, string>;
+}
+
+const routeManifestSchema = z.array(
+  z.object({ path: z.string().regex(/^\/(?:[a-z][a-z0-9-]*)?$/) }),
+);
+const federationManifestSchema = z.object({
+  remotes: z
+    .array(
+      z.object({
+        entry: z.string().regex(/\/remotes\/[a-z][a-z0-9-]*\/remoteEntry\.js$/),
+      }),
+    )
+    .nonempty(),
+});
+
+// The probes below have to cover every prerendered document, so both inventories
+// come from the sources the artifact check gates rather than a third copy.
+function prerenderedRoutePaths() {
+  return routeManifestSchema
+    .parse(JSON.parse(readFileSync("apps/shell/src/routes.json", "utf8")))
+    .map(({ path }) => path.slice(1));
+}
+
+function homeComposedRemotes() {
+  const manifest = federationManifestSchema.parse(
+    JSON.parse(
+      readFileSync("dist/apps/shell/remotes/home/mf-manifest.json", "utf8"),
+    ),
+  );
+  return [
+    ...new Set(
+      manifest.remotes.map(({ entry }) =>
+        z
+          .string()
+          .parse(
+            /\/remotes\/([a-z][a-z0-9-]*)\/remoteEntry\.js$/.exec(entry)?.[1],
+          ),
+      ),
+    ),
+  ];
 }
 
 // Every probe pins a style that only the feature's own remote stylesheet
@@ -178,9 +220,13 @@ async function expectStyling(page: Page, probe: StyleProbe, label: string) {
     await expect(target, `${label} ${property}`).toHaveCSS(property, value);
 }
 
+// llmlint: ignore-block[changed_behavior_has_e2e] A prerendered document has only its prerendered state: the empty, loading, and error states are reached through query parameters that client-mount, so they cannot exist with JavaScript disabled. Those states keep their happy/empty/loading/error coverage on both render paths in the per-feature specs with JavaScript enabled, where each remote's CSS still arrives with its own JavaScript.
 test("every prerendered route paints its remote styling with JavaScript disabled", async ({
   browser,
 }) => {
+  expect(routeStyling.map((probe) => probe.path).sort()).toEqual(
+    prerenderedRoutePaths().sort(),
+  );
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   for (const probe of routeStyling) {
@@ -193,6 +239,9 @@ test("every prerendered route paints its remote styling with JavaScript disabled
 test("every prerendered home pane paints its own styling with JavaScript disabled through both render paths", async ({
   browser,
 }) => {
+  expect(paneStyling.map((probe) => probe.remote).sort()).toEqual(
+    homeComposedRemotes().sort(),
+  );
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   for (const probe of paneStyling) {
@@ -203,6 +252,7 @@ test("every prerendered home pane paints its own styling with JavaScript disable
   }
   await context.close();
 });
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 test("navigation works with the keyboard", async ({ page }) => {
   await page.goto("");
