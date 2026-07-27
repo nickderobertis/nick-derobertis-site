@@ -57,6 +57,16 @@ client router restores an unknown deep link to the home route. GitHub Actions
 uploads this directory directly to Pages. The custom domain is intentionally
 outside this deployment until its separate migration.
 
+Page CSS ships with each remote's federated JavaScript, so every route document
+also inlines the page CSS of the remotes whose markup it prerenders — Home
+inlines its own plus the seven panes it composes — ahead of the deferred
+scripts. Without that, the prerendered content would paint unstyled until
+roughly a megabyte of JavaScript arrived. `scripts/remote-css.mjs` owns the
+route-to-remote map, reads each hashed `main.*.css` from the remote's own built
+document, rewrites its relative `url()` targets to the remote's public path, and
+deduplicates identical payloads; `scripts/check-static-artifact.mjs` fails when
+a route document is missing any of them.
+
 ## Affected-only economics
 
 Pull-request gates use Nx's dependency graph between `NX_BASE` and `NX_HEAD`.
