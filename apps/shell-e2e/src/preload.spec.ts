@@ -230,10 +230,40 @@ test("clicking Home after its preload settles mounts every pane without a skelet
   await expect(
     page.getByRole("heading", { name: "Selected awards" }),
   ).toBeVisible();
-  // Every pane arrives fully rendered because its module preload settled. The
-  // awards pane still mounts in its own loading state because it owns a
-  // client-side data fetch, which module preloading cannot resolve for it.
-  expect(await statusRoles()).toEqual(["Loading awards"]);
+  // All seven panes arrive fully rendered: their modules and the one pane that
+  // fetches its own data were both warmed, so no skeleton mounts at all.
+  expect(await statusRoles()).toEqual([]);
+});
+
+test("clicking Home recovers when the warmed awards data is unavailable", async ({
+  page,
+}) => {
+  // llmlint: ignore-block[e2e_not_mocked] Nothing about the app is stubbed: this makes the awards endpoint answer 503, the real upstream failure the pane's error state exists for. No query-string scenario can reach it, because a client-side navigation to "/" drops the search the awards pane reads.
+  await page.route("**/cv-data/domains/awards.json*", (route) =>
+    route.fulfill({
+      status: 503,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ error: "awards unavailable" }),
+    }),
+  );
+  // llmlint: ignore-end[e2e_not_mocked]
+  await openBio(page);
+  await navLink(page, "Home").hover();
+  await page.waitForLoadState("networkidle");
+
+  await navLink(page, "Home").click();
+
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Awards unavailable" }),
+  ).toBeVisible();
+  // A pane that cannot warm must not hold back the six that need no data.
+  await expect(
+    page.getByRole("region", { name: "Featured work" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Who am I?" })).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Timeline visualization" }),
+  ).toBeVisible();
 });
 
 test("clicking Home before its preload settles still shows pane skeletons", async ({

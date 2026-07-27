@@ -31,6 +31,10 @@ const homePreloadContract = [
   ["apps/shell/src/remotes.d.ts", "export function preload(): Promise<void>;"],
   ["apps/shell/src/main.tsx", "homePreload: home.preload"],
   ["apps/shell/src/router.tsx", "homePreload?: () => Promise<void>"],
+  ["apps/awards/src/page.tsx", "export { preloadAwards as preload }"],
+  ["apps/awards/src/use-awards.ts", "export async function preloadAwards()"],
+  ["apps/home/src/remotes.d.ts", "export function preload(): Promise<void>;"],
+  ["apps/home/src/page.tsx", "await awards.preload()"],
 ] as const;
 
 const bioContract = [

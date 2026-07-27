@@ -5,8 +5,12 @@ import {
 } from "@site/data-access-awards";
 import { AwardEmblem } from "./award-emblem";
 import Skeleton from "./skeleton";
-import { useAwards } from "./use-awards";
+import { preloadAwards, useAwards } from "./use-awards";
 import "./awards.css";
+
+// Hosts reach this through the remote's existing ./Page expose, so warming the
+// pane costs no new federation surface.
+export { preloadAwards as preload };
 
 function State({ name }: { name: "error" | "empty" }) {
   const copy =

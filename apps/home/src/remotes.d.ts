@@ -42,5 +42,7 @@ declare module "awards/Page" {
   import type { ComponentType } from "react";
 
   const Page: ComponentType;
+  // Fetches the pane's awards so a warmed Home mounts it past its skeleton.
+  export function preload(): Promise<void>;
   export default Page;
 }

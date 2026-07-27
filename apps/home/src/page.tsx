@@ -71,6 +71,17 @@ async function resolvePanes(): Promise<HydratedPanes> {
 
 if (hydrateFromSource) hydratedPanes = await resolvePanes();
 
+// Panes own their data. Carousel, cards, story and contact read bundled
+// homeContent, and timeline and skills read bundled CV domains, so all six
+// render their content on the first frame. Awards is the one pane that fetches,
+// so warming it is what lets a preloaded Home mount with no skeleton anywhere.
+// The entry-at-"/" path deliberately does not warm: its prerendered markup
+// contains the awards skeleton, and seeding past it would break hydration.
+async function warmPaneData(): Promise<void> {
+  const awards = await awardsModule;
+  await awards.preload();
+}
+
 let panePreload: Promise<void> | undefined;
 
 // The shell's Home route loader calls this on hover intent, generalizing the
@@ -80,9 +91,10 @@ let panePreload: Promise<void> | undefined;
 // Server rendering composes the panes directly, so there is nothing to warm.
 export function preload(): Promise<void> {
   if (typeof document === "undefined") return Promise.resolve();
-  panePreload ??= resolvePanes().then((panes) => {
+  panePreload ??= (async () => {
+    const [panes] = await Promise.all([resolvePanes(), warmPaneData()]);
     hydratedPanes = panes;
-  });
+  })();
   return panePreload;
 }
 
