@@ -89,6 +89,7 @@ let panePreload: Promise<void> | undefined;
 // mounts the resolved panes directly instead of suspending on lazy() — which
 // flashes a skeleton on first mount even when its promise already resolved.
 // Server rendering composes the panes directly, so there is nothing to warm.
+// llmlint: ignore[changed_behavior_has_e2e] Hover intent is a shell-router behaviour, so this entry point has no standalone equivalent to cover: apps/home/src/main.tsx mounts the page with no router and no nav links to hover. preload.spec.ts drives it through the real shell, and home.spec.ts keeps covering the standalone remote's render path, which still takes the Suspense branch below.
 export function preload(): Promise<void> {
   if (typeof document === "undefined") return Promise.resolve();
   panePreload ??= (async () => {

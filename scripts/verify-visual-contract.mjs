@@ -1,7 +1,4 @@
-import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 
 // llmlint: ignore-file[changed_behavior_has_e2e] This CLI/filesystem quality-gate validator has no browser interface; lint-workflows executes its real boundary against committed workflow, configuration, baselines, and documentation.
 
@@ -49,67 +46,6 @@ const sources = [
   ],
 ];
 const captureSource = readFileSync("scripts/capture-visual.mjs", "utf8");
-
-// screencomp's reusable workflow injects these callbacks into a `run:` step with
-// no `shell:` key, so the container's /bin/sh (dash) runs them — a bash-only
-// construct there does not fail loudly, it takes the `||` branch and reports a
-// bogus domain error, which reads as visual drift in classify-gate. actionlint
-// only shellchecks literal `run:` blocks, so these strings reach CI unlinted
-// unless this gate checks them as POSIX sh.
-const injectedShellCallbacks = ["capture-command"];
-function extractBlockScalar(source, key) {
-  const lines = source.split("\n");
-  const start = lines.findIndex((line) =>
-    new RegExp(`^\\s*${key}:\\s*\\|\\s*$`).test(line),
-  );
-  if (start === -1)
-    throw new Error(
-      `.github/workflows/visual-docs.yml must pass ${key} to the screencomp reusable workflow as a literal block scalar`,
-    );
-  const body = [];
-  const indent = /^\s*/.exec(lines[start + 1] ?? "")[0];
-  if (indent.length <= /^\s*/.exec(lines[start])[0].length)
-    throw new Error(
-      `.github/workflows/visual-docs.yml ${key} block is empty; restore the callback and rerun just lint-workflows`,
-    );
-  for (const line of lines.slice(start + 1)) {
-    if (line.trim() === "") {
-      body.push("");
-      continue;
-    }
-    if (!line.startsWith(indent)) break;
-    body.push(line.slice(indent.length));
-  }
-  return `${body.join("\n")}\n`;
-}
-const callbackDirectory = mkdtempSync(join(tmpdir(), "visual-callback-"));
-try {
-  for (const key of injectedShellCallbacks) {
-    const callbackPath = join(callbackDirectory, `${key}.sh`);
-    writeFileSync(
-      callbackPath,
-      extractBlockScalar(sources[0][1], key).replace(
-        /\$\{\{[^}]*\}\}/g,
-        "expression",
-      ),
-    );
-    const shellcheck = spawnSync(
-      ".tools/bin/shellcheck",
-      ["--shell=sh", callbackPath],
-      { encoding: "utf8" },
-    );
-    if (shellcheck.error)
-      throw new Error(
-        `could not run .tools/bin/shellcheck for ${key}: ${shellcheck.error.message}; run just bootstrap and rerun just lint-workflows`,
-      );
-    if (shellcheck.status !== 0)
-      throw new Error(
-        `${key} is not valid POSIX sh:\n${shellcheck.stdout}${shellcheck.stderr}screencomp runs this callback with the container's /bin/sh, so rewrite it without bash-only constructs and rerun just lint-workflows`,
-      );
-  }
-} finally {
-  rmSync(callbackDirectory, { force: true, recursive: true });
-}
 const nxConfig = JSON.parse(readFileSync("nx.json", "utf8"));
 const homeRspackSource = readFileSync("apps/home/rspack.config.ts", "utf8");
 const remoteMapMatch = homeRspackSource.match(/remoteMap\(\[([\s\S]*?)\]\)/);

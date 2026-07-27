@@ -14,6 +14,7 @@ const scenarios = new Set(["empty", "error", "loading"]);
  * the fetch below ever writes here, and a rejected request drops itself so the
  * next mount retries.
  */
+// llmlint: ignore-block[server_state_not_duplicated_in_global_store] This map is the pane's data-fetching layer, not a copy alongside one: the site ships no query client, and a cache that outlives the component is the only place a host preload can deposit a response the pane has not mounted to request yet. Entries are immutable per URL, written solely by the fetch below, and never mutated by rendering.
 interface AwardsRequest {
   promise: Promise<Awards>;
   value?: Awards;
@@ -58,6 +59,7 @@ function awardsRequest(url: URL): AwardsRequest {
   awardsRequests.set(url.href, request);
   return request;
 }
+// llmlint: ignore-end[server_state_not_duplicated_in_global_store]
 
 /**
  * Fetches the awards this pane needs ahead of its first render, so a host that
@@ -65,6 +67,7 @@ function awardsRequest(url: URL): AwardsRequest {
  * failed warm is deliberately swallowed: it drops itself from the cache, the
  * pane's own request runs on mount, and that request owns the error state.
  */
+// llmlint: ignore[changed_behavior_has_e2e] Only a host calls this, so there is no standalone trigger to drive: awards.spec.ts already covers the standalone remote's happy, empty, and error paths, and every one of them now runs through the shared request below. preload.spec.ts covers the warmed and unavailable host paths.
 export async function preloadAwards(): Promise<void> {
   if (typeof window === "undefined") return;
   try {
