@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 const pages = [
   {
@@ -84,17 +84,18 @@ test("every prerendered route contains substantive feature content", async ({
   await context.close();
 });
 
-// Each probe asserts a style that only the route's own remote stylesheet
-// declares, so it can only pass when that CSS is inline in the static document.
-const firstPaintStyling = [
+interface StyleProbe {
+  locate: (page: Page) => Locator;
+  styles: Record<string, string>;
+}
+
+// Every probe pins a style that only the feature's own remote stylesheet
+// declares, so it can pass only while that CSS reaches the browser without any
+// federated JavaScript.
+const routeStyling: (StyleProbe & { path: string })[] = [
   {
     path: "",
-    locate: (page: Page) => page.getByRole("region", { name: "Areas of work" }),
-    styles: { display: "grid" },
-  },
-  {
-    path: "",
-    locate: (page: Page) =>
+    locate: (page) =>
       page
         .getByRole("region", { name: "Areas of work" })
         .getByRole("article")
@@ -103,19 +104,17 @@ const firstPaintStyling = [
   },
   {
     path: "bio",
-    locate: (page: Page) =>
-      page.getByRole("heading", { name: "Optimizing Life" }),
+    locate: (page) => page.getByRole("heading", { name: "Optimizing Life" }),
     styles: { "text-align": "center", "font-weight": "400" },
   },
   {
     path: "research",
-    locate: (page: Page) =>
-      page.getByRole("heading", { name: "Research Works" }),
+    locate: (page) => page.getByRole("heading", { name: "Research Works" }),
     styles: { "font-family": "Georgia, serif", color: "rgb(255, 255, 255)" },
   },
   {
     path: "software",
-    locate: (page: Page) =>
+    locate: (page) =>
       page
         .getByRole("img", { name: "Python Tools for Working with Data logo" })
         .first(),
@@ -123,25 +122,84 @@ const firstPaintStyling = [
   },
   {
     path: "courses",
-    locate: (page: Page) => page.getByRole("heading", { name: "Courses" }),
+    locate: (page) => page.getByRole("heading", { name: "Courses" }),
     styles: { "font-family": "Georgia, serif" },
   },
-] as const;
+];
+
+// Home composes these panes, so its document carries their CSS too; each pane
+// also owns a standalone prerendered document that links the same stylesheet.
+const paneStyling: (StyleProbe & { remote: string })[] = [
+  {
+    remote: "home-carousel",
+    locate: (page) => page.getByRole("region", { name: "Featured work" }),
+    styles: { display: "grid", color: "rgb(255, 255, 255)" },
+  },
+  {
+    remote: "home-cards",
+    locate: (page) => page.getByRole("region", { name: "Areas of work" }),
+    styles: { display: "grid" },
+  },
+  {
+    remote: "home-story",
+    locate: (page) => page.getByRole("heading", { name: "Who am I?" }),
+    styles: { "font-family": "Georgia, serif" },
+  },
+  {
+    remote: "home-contact",
+    locate: (page) =>
+      page.getByRole("heading", { name: "Let’s build something useful." }),
+    styles: { "font-family": "Georgia, serif" },
+  },
+  {
+    remote: "timeline",
+    locate: (page) =>
+      page.getByRole("heading", { name: "Educated and Experienced" }),
+    styles: { "font-family": "Georgia, serif", "font-weight": "400" },
+  },
+  {
+    remote: "skills",
+    locate: (page) => page.getByRole("heading", { name: "Skilled in…" }),
+    styles: { "font-weight": "400" },
+  },
+  {
+    // Awards resolves its data after hydration, so both prerendered documents
+    // show its skeleton; that fallback still has to paint styled.
+    remote: "awards",
+    locate: (page) => page.getByRole("status", { name: "Loading awards" }),
+    styles: { display: "grid", overflow: "hidden" },
+  },
+];
+
+async function expectStyling(page: Page, probe: StyleProbe, label: string) {
+  const target = probe.locate(page);
+  await expect(target, label).toBeVisible();
+  for (const [property, value] of Object.entries(probe.styles))
+    await expect(target, `${label} ${property}`).toHaveCSS(property, value);
+}
 
 test("every prerendered route paints its remote styling with JavaScript disabled", async ({
   browser,
 }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  for (const probe of firstPaintStyling) {
+  for (const probe of routeStyling) {
     await page.goto(probe.path);
-    const target = probe.locate(page);
-    await expect(target).toBeVisible();
-    for (const [property, value] of Object.entries(probe.styles))
-      await expect(target, `${probe.path || "/"} ${property}`).toHaveCSS(
-        property,
-        value,
-      );
+    await expectStyling(page, probe, `/${probe.path}`);
+  }
+  await context.close();
+});
+
+test("every prerendered home pane paints its own styling with JavaScript disabled through both render paths", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  for (const probe of paneStyling) {
+    await page.goto("");
+    await expectStyling(page, probe, `${probe.remote} host-composed`);
+    await page.goto(`remotes/${probe.remote}/`);
+    await expectStyling(page, probe, `${probe.remote} standalone`);
   }
   await context.close();
 });
