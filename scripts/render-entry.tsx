@@ -76,11 +76,11 @@ export async function renderRoute(path: string) {
     createRouter: () =>
       createSiteRouter({
         pages: {
-          home: HomePage,
-          bio: BioPage,
-          research: ResearchPage,
-          software: SoftwarePage,
-          courses: CoursesPage,
+          home: { component: HomePage },
+          bio: { component: BioPage },
+          research: { component: ResearchPage },
+          software: { component: SoftwarePage },
+          courses: { component: CoursesPage },
         },
         context: {
           loadDomain: async (name) => domains[name] as never,

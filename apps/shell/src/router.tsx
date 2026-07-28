@@ -13,6 +13,7 @@ import {
   type BioPageProps,
   type CoursesPageProps,
   parseRouteView,
+  prerenderRouteAttribute,
   type ResearchPageProps,
   routeStateQueryKeys,
   type SoftwarePageProps,
@@ -21,24 +22,57 @@ import {
   createRootRouteWithContext,
   createRoute,
   createRouter,
+  lazyRouteComponent,
   Outlet,
+  type RouteComponent,
   type RouterHistory,
   redirect,
 } from "@tanstack/react-router";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactElement } from "react";
 import { routes } from "./routes";
 
+/**
+ * A route's page. `component` is a page the caller already resolved — every
+ * route during server rendering, and the entry route in the browser, which has
+ * to be in hand before hydration. `load` defers the page to the router, which
+ * fetches it when the route is preloaded or navigated to.
+ */
+export type RoutePage<Props> =
+  | { component: ComponentType<Props> }
+  | { load: () => Promise<{ default: ComponentType<Props> }> };
+
 export interface RoutePages {
-  home: ComponentType;
+  home: RoutePage<Record<string, unknown>>;
   /**
    * Resolves Home's pane modules so a hovered Home link mounts them without a
    * skeleton. Server rendering composes the panes directly and omits it.
    */
   homePreload?: () => Promise<void>;
-  bio: ComponentType<BioPageProps>;
-  research: ComponentType<ResearchPageProps<Research>>;
-  software: ComponentType<SoftwarePageProps<SoftwareProjects>>;
-  courses: ComponentType<CoursesPageProps<Courses>>;
+  bio: RoutePage<BioPageProps>;
+  research: RoutePage<ResearchPageProps<Research>>;
+  software: RoutePage<SoftwarePageProps<SoftwareProjects>>;
+  courses: RoutePage<CoursesPageProps<Courses>>;
+}
+
+/**
+ * Adapts a page to the route component that renders it from loader data. A
+ * deferred page becomes a lazyRouteComponent, so the router owns fetching it:
+ * `defaultPreload: "intent"` calls its `preload()` alongside the route's loader
+ * on hover, and a match only settles once that chunk has arrived.
+ */
+function routeComponent<Props>(
+  page: RoutePage<Props>,
+  render: (Page: ComponentType<Props>) => ReactElement,
+): RouteComponent {
+  if ("component" in page) {
+    const Page = page.component;
+    return () => render(Page);
+  }
+  const { load } = page;
+  return lazyRouteComponent(async () => {
+    const { default: Page } = await load();
+    return { default: () => render(Page) };
+  });
 }
 
 interface RouterContext {
@@ -66,7 +100,7 @@ function warmSoftwareLogos(projects: SoftwareProjects) {
   }
 }
 
-const routePath = (label: string) => {
+export const routePath = (label: string) => {
   const route = routes.find((item) => item.label === label);
   if (!route)
     throw new Error(
@@ -100,7 +134,7 @@ export function createSiteRouter({
     loader: () => {
       void pages.homePreload?.();
     },
-    component: () => <pages.home />,
+    component: routeComponent(pages.home, (Page) => <Page />),
   });
   const bio = createRoute({
     getParentRoute: () => Root,
@@ -108,10 +142,10 @@ export function createSiteRouter({
     loader: ({ context: ctx }) => ({
       view: parseRouteView(ctx.search.get(routeStateQueryKeys.bio)),
     }),
-    component: () => {
+    component: routeComponent(pages.bio, (Page) => {
       const data = bio.useLoaderData();
-      return <pages.bio initialView={data.view} />;
-    },
+      return <Page initialView={data.view} />;
+    }),
   });
   const research = createRoute({
     getParentRoute: () => Root,
@@ -130,10 +164,10 @@ export function createSiteRouter({
         return { research: null, view: "error" };
       }
     },
-    component: () => {
+    component: routeComponent(pages.research, (Page) => {
       const data = research.useLoaderData();
       return (
-        <pages.research
+        <Page
           initialState={
             data.view === "loading"
               ? { name: "loading" }
@@ -143,7 +177,7 @@ export function createSiteRouter({
           }
         />
       );
-    },
+    }),
   });
   const software = createRoute({
     getParentRoute: () => Root,
@@ -163,15 +197,12 @@ export function createSiteRouter({
         return { projects: null, view: "error" as const };
       }
     },
-    component: () => {
+    component: routeComponent(pages.software, (Page) => {
       const data = software.useLoaderData();
       return (
-        <pages.software
-          initialView={data.view}
-          projects={data.projects ?? undefined}
-        />
+        <Page initialView={data.view} projects={data.projects ?? undefined} />
       );
-    },
+    }),
   });
   const courses = createRoute({
     getParentRoute: () => Root,
@@ -189,15 +220,12 @@ export function createSiteRouter({
         return { courses: null, view: "error" as const };
       }
     },
-    component: () => {
+    component: routeComponent(pages.courses, (Page) => {
       const data = courses.useLoaderData();
       return (
-        <pages.courses
-          initialView={data.view}
-          courses={data.courses ?? undefined}
-        />
+        <Page initialView={data.view} courses={data.courses ?? undefined} />
       );
-    },
+    }),
   });
   const story = createRoute({
     getParentRoute: () => Root,
@@ -229,6 +257,23 @@ export function createSiteRouter({
     basepath: siteBase,
     defaultPreload: "intent",
   });
+}
+
+/**
+ * Reports the route the document in the browser was rendered for, so its page
+ * can be resolved before hydration while every other route stays deferred. The
+ * prerender step stamps the route on the root element; the pathname is the
+ * fallback for a document it never stamped, such as the static 404 the server
+ * returns for an unknown path. Returns undefined when no route owns the
+ * location, leaving every page deferred for the router's redirect to resolve.
+ */
+export function entryRoutePath(root: Element): string | undefined {
+  const stamped = root.getAttribute(prerenderRouteAttribute);
+  const pathname = window.location.pathname.startsWith(siteBase)
+    ? window.location.pathname.slice(siteBase.length)
+    : window.location.pathname;
+  const candidate = stamped ?? (pathname === "" ? "/" : pathname);
+  return routes.find((route) => route.path === candidate)?.path;
 }
 
 export async function loadBrowserDomain<

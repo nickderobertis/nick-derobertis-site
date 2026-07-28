@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 import { z } from "zod";
 
-// llmlint: ignore-block[tests_mirror_real_usage] "Hover a link, then click, and the switch is instant" is only observable through request and DOM-mutation instrumentation, because a warm arrival is defined by requests that never repeat and skeletons that never appear. Every navigation still uses the real header links with real hover and click input.
+// llmlint: ignore-block[tests_mirror_real_usage] "Hover a link, then click, and the switch is instant" and "startup never fetched that remote at all" are only observable through request and DOM-mutation instrumentation, because a warm arrival is defined by requests that never repeat, a deferred remote by requests that never happen, and both by skeletons that never appear. Every navigation still uses the real header links with real hover and click input.
 
 const softwareLogoProjects = z
   .array(
@@ -129,6 +129,182 @@ const navLink = (page: Page, label: string) =>
   page.getByRole("link", { name: label, exact: true });
 
 /**
+ * Watches for a hover preload to run to completion. The router holds a preload
+ * behind a short pointer-intent timer, and a route whose remote is still
+ * deferred keeps fetching in chained steps, so neither an already-quiet page
+ * nor `networkidle` — which a document reaches only once — can report that the
+ * hover has settled. Install it before the hover and await the returned settle.
+ */
+function watchPreload(page: Page) {
+  let inFlight = 0;
+  let settled = 0;
+  const started = () => {
+    inFlight += 1;
+  };
+  const finished = () => {
+    inFlight -= 1;
+    settled += 1;
+  };
+  page.on("request", started);
+  page.on("requestfinished", finished);
+  page.on("requestfailed", finished);
+  return async () => {
+    // The preload must have fetched something at all…
+    await expect.poll(() => settled).toBeGreaterThan(0);
+    // …and then stayed quiet long enough for every chained fetch to have
+    // started, so what follows is the whole preload rather than its first leg.
+    await expect
+      .poll(async () => {
+        const before = settled;
+        await page.waitForTimeout(500);
+        return inFlight === 0 && settled === before;
+      })
+      .toBe(true);
+    page.off("request", started);
+    page.off("requestfinished", finished);
+    page.off("requestfailed", finished);
+  };
+}
+
+const federationManifestSchema = z.object({
+  remotes: z
+    .array(
+      z.object({
+        entry: z.string().regex(/\/remotes\/[a-z][a-z0-9-]*\/remoteEntry\.js$/),
+      }),
+    )
+    .nonempty(),
+});
+const routeManifestSchema = z.array(
+  z.object({
+    path: z.string().regex(/^\/(?:[a-z][a-z0-9-]*)?$/),
+    label: z.string().min(1),
+    remote: z.string().min(1).optional(),
+  }),
+);
+
+// Which remotes startup could reach for is the shell's own build configuration,
+// so these journeys read the federation manifest it produced instead of keeping
+// a second inventory a new route remote could outgrow. Home's seven panes are
+// composed by the home remote rather than declared here, so they never collide.
+const routeRemotes = [
+  ...new Set(
+    federationManifestSchema
+      .parse(
+        JSON.parse(readFileSync("dist/apps/shell/mf-manifest.json", "utf8")),
+      )
+      .remotes.map(({ entry }) =>
+        z
+          .string()
+          .parse(
+            /\/remotes\/([a-z][a-z0-9-]*)\/remoteEntry\.js$/.exec(entry)?.[1],
+          ),
+      ),
+  ),
+];
+const siteRoutes = routeManifestSchema.parse(
+  JSON.parse(readFileSync("apps/shell/src/routes.json", "utf8")),
+);
+// Every leaf route names the remote that owns it. Home is the one route that
+// does not, because its remote is itself a host, so it is derived as the
+// remaining container: a new route remote that no route claims fails here
+// rather than quietly going uncovered.
+const leafRoutes = siteRoutes.flatMap((route) =>
+  route.remote ? [{ ...route, remote: route.remote }] : [],
+);
+const [homeRemote, ...unclaimedRemotes] = routeRemotes.filter(
+  (remote) => !leafRoutes.some((route) => route.remote === remote),
+);
+if (homeRemote === undefined || unclaimedRemotes.length > 0)
+  throw new Error(
+    `Exactly one route remote must be unclaimed by routes.json (Home's); found ${JSON.stringify([homeRemote, ...unclaimedRemotes])}. Align apps/shell/src/routes.json with the shell's federation remotes and rerun just test-e2e`,
+  );
+
+/**
+ * Records the federated assets each route remote is fetched for. "The visitor
+ * never paid for that remote" is a statement about requests that never
+ * happened, which no locator can answer, so the request log is the only place
+ * this journey can be observed.
+ */
+function recordRouteRemoteTraffic(page: Page) {
+  const fetched = new Map<string, string[]>(
+    routeRemotes.map((remote) => [remote, []]),
+  );
+  page.on("request", (request) => {
+    const remote = /\/remotes\/([a-z][a-z0-9-]*)\//.exec(request.url())?.[1];
+    const assets = remote === undefined ? undefined : fetched.get(remote);
+    assets?.push(request.url().split("/").at(-1) ?? request.url());
+  });
+  return {
+    assetsFor: (remote: string) => [...(fetched.get(remote) ?? [])],
+    /** Every route remote the visitor has spent at least one request on. */
+    reached: () =>
+      routeRemotes.filter((remote) => fetched.get(remote)?.length).sort(),
+  };
+}
+
+for (const route of leafRoutes)
+  test(`entering at ${route.label} fetches its remote alone until another link is hovered`, async ({
+    page,
+  }) => {
+    const { assetsFor, reached } = recordRouteRemoteTraffic(page);
+
+    await page.goto(route.path.slice(1), { waitUntil: "networkidle" });
+
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(navLink(page, route.label)).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    // This is the route the visitor asked for, so its remote is the only one
+    // startup may spend a request on.
+    expect(assetsFor(route.remote)).toContain("remoteEntry.js");
+    expect(reached()).toEqual([route.remote]);
+
+    await navLink(page, "Home").hover();
+
+    // Hover intent fetches the container and the page chunk behind it.
+    await expect.poll(() => assetsFor(homeRemote)).toContain("remoteEntry.js");
+    await expect.poll(() => assetsFor(homeRemote).length).toBeGreaterThan(1);
+    expect(reached()).toEqual([route.remote, homeRemote].sort());
+  });
+
+test("entering at Home hydrates its prerendered panes and still defers the leaf remotes", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+  const { assetsFor, reached } = recordRouteRemoteTraffic(page);
+
+  await page.goto("", { waitUntil: "networkidle" });
+
+  await expect(
+    page.getByRole("region", { name: "Featured work" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Who am I?" })).toBeVisible();
+  expect(errors).toEqual([]);
+  expect(assetsFor(homeRemote)).toContain("remoteEntry.js");
+  expect(reached()).toEqual([homeRemote]);
+
+  // The deferred remotes cost nothing because the document really did hydrate:
+  // its header links navigate in place and pull Bio's remote in on demand.
+  let documentRequests = 0;
+  page.on("request", (request) => {
+    if (request.isNavigationRequest()) documentRequests += 1;
+  });
+  await navLink(page, "Bio").click();
+
+  await expect(
+    page.getByRole("heading", { name: "Optimizing Life" }),
+  ).toBeVisible();
+  expect(assetsFor("bio")).toContain("remoteEntry.js");
+  expect(documentRequests).toBe(0);
+});
+
+/**
  * Reports the card logos loaded from a URL, as the visitor's DOM shows them:
  * `sourced` counts the images the browser has settled on a URL for, `painted`
  * counts those that decoded. Inline logo_base64 cards are excluded, since they
@@ -208,8 +384,9 @@ test("clicking Home after its preload settles mounts every pane without a skelet
   page,
 }) => {
   await openBio(page);
+  const preloaded = watchPreload(page);
   await navLink(page, "Home").hover();
-  await page.waitForLoadState("networkidle");
+  await preloaded();
   const statusRoles = await recordStatusRoles(page);
 
   await navLink(page, "Home").click();
@@ -248,8 +425,9 @@ test("clicking Home recovers when the warmed awards data is unavailable", async 
   );
   // llmlint: ignore-end[e2e_not_mocked,changed_behavior_has_e2e]
   await openBio(page);
+  const preloaded = watchPreload(page);
   await navLink(page, "Home").hover();
-  await page.waitForLoadState("networkidle");
+  await preloaded();
 
   await navLink(page, "Home").click();
 
