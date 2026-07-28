@@ -20,6 +20,17 @@ libraries, layout may use shared libraries, the shell may use layout and
 shared libraries, and remotes may consume shared libraries or explicitly
 allowed child remotes.
 
+Startup pays for one route remote, not the graph. The shell resolves only the
+page for the route its document was rendered for — the `data-prerendered-route`
+attribute the prerender step stamps on `#root`, with the pathname as the
+fallback — and registers the other four routes as lazy route components, so the
+router fetches each container when it preloads that route on hover intent. The
+shell therefore also sets the federation `shareStrategy` to `loaded-first`: the
+default `version-first` loads every declared remote's `remoteEntry.js` during
+share-scope startup to negotiate versions, which no deferral in application code
+can avoid. Nothing needs that negotiation here, because React and React DOM are
+eager singletons with version checks disabled in every federation config.
+
 The shared-library direction is:
 
 ```text
