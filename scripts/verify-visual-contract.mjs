@@ -159,12 +159,34 @@ if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(contract.pagesRepository))
   throw new Error(
     "Visual pagesRepository must be an owner/name; correct pagesRepository in visual-tools.json and rerun just lint-workflows",
   );
-const pagesUrl = `https://${contract.pagesRepository.split("/")[0]}.github.io/${contract.pagesRepository.split("/")[1]}/`;
-for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"])
-  if (!readFileSync(path, "utf8").includes(pagesUrl))
+// screencomp's visual-docs action deploys canonical galleries to
+// <project>/<arch> and pull-request previews to pr-<number>/<project>/<arch>.
+// It never writes a root index, so documenting the bare Pages root advertises a
+// permanent 404. Both URL forms are derived from visual-tools.json here so the
+// docs cannot drift from the deployed layout or from an architecture bump.
+const [pagesOwner, pagesName] = contract.pagesRepository.split("/");
+const pagesRoot = `https://${pagesOwner}.github.io/${pagesName}`;
+const galleryUrls = [
+  `${pagesRoot}/<project>/${contract.architecture}/`,
+  `${pagesRoot}/pr-<number>/<project>/${contract.architecture}/`,
+];
+// Every mention of the site must therefore continue into a project or pr-<number>
+// segment; anything else — with or without a trailing slash — is the bare root.
+const bareRoot = new RegExp(
+  `${pagesRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!/[A-Za-z0-9<])`,
+);
+for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"]) {
+  const documentation = readFileSync(path, "utf8");
+  for (const url of galleryUrls)
+    if (!documentation.includes(url))
+      throw new Error(
+        `Visual gallery documentation in ${path} must document ${url}`,
+      );
+  if (bareRoot.test(documentation))
     throw new Error(
-      `Visual gallery documentation in ${path} must link to ${pagesUrl}`,
+      `Visual gallery documentation in ${path} advertises the bare ${pagesRoot} Pages root, which screencomp never deploys; document the per-project gallery URLs instead`,
     );
+}
 const screencompSource = sources.find(
   ([name]) => name === "screencomp config",
 )[1];

@@ -1,4 +1,13 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import {
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
@@ -57,6 +66,66 @@ function projectsMatrix(names: string[]): VisualProject[] {
 // from Nx affected selection.
 function affectedProjectsMatrix(file: string): VisualProject[] {
   return projectsMatrix(affectedScreenshotProjects(file));
+}
+
+// screencomp only ever deploys <project>/<arch> and pr-<number>/<project>/<arch>,
+// so a doc that advertises the bare Pages root — or drops one of the deployed
+// forms — sends readers to a permanent 404. Every URL the gallery-documentation
+// tests use is assembled from visual-tools.json rather than written out, so this
+// file never carries a copyable dead link of its own.
+function galleryContract(): {
+  pagesRoot: string;
+  canonical: string;
+  preview: string;
+} {
+  const contract: unknown = JSON.parse(
+    readFileSync("visual-tools.json", "utf8"),
+  );
+  const { architecture, pagesRepository } =
+    typeof contract === "object" && contract !== null
+      ? (contract as { architecture?: unknown; pagesRepository?: unknown })
+      : {};
+  if (
+    typeof pagesRepository !== "string" ||
+    !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(pagesRepository) ||
+    typeof architecture !== "string" ||
+    !/^[A-Za-z0-9_-]+$/.test(architecture)
+  )
+    throw new Error(
+      "visual-tools.json must declare an owner/name pagesRepository and an architecture",
+    );
+  const [owner, name] = pagesRepository.split("/");
+  const pagesRoot = `https://${owner}.github.io/${name}`;
+  return {
+    pagesRoot,
+    canonical: `${pagesRoot}/<project>/${architecture}/`,
+    preview: `${pagesRoot}/pr-<number>/<project>/${architecture}/`,
+  };
+}
+
+// Run the real contract gate over the committed tree with one root-level
+// document swapped out. Every entry is symlinked, so only the replaced symlink is
+// removed — a nested path would delete the real file through its linked
+// directory, which is why this is restricted to root-level documents.
+function verifyContractWithRootDocument(
+  document: string,
+  contents: string,
+): { status: number | null; stderr: string } {
+  if (document.includes("/"))
+    throw new Error(`${document} must be a root-level document`);
+  const root = mkdtempSync(path.join(tmpdir(), "visual-contract-"));
+  try {
+    for (const entry of readdirSync("."))
+      symlinkSync(path.resolve(entry), path.join(root, entry));
+    rmSync(path.join(root, document));
+    writeFileSync(path.join(root, document), contents);
+    return spawnSync("node", ["scripts/verify-visual-contract.mjs"], {
+      cwd: root,
+      encoding: "utf8",
+    });
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
 }
 
 describe("visual affected selection", () => {
@@ -170,6 +239,28 @@ describe("visual affected selection", () => {
         encoding: "utf8",
       }),
     ).not.toThrow();
+  });
+
+  test("gallery documentation cannot advertise the undeployed Pages root", () => {
+    const { pagesRoot } = galleryContract();
+    for (const deadLink of [`${pagesRoot}/`, pagesRoot]) {
+      const result = verifyContractWithRootDocument(
+        "README.md",
+        `${readFileSync("README.md", "utf8")}\nSee the galleries at\n<${deadLink}>.\n`,
+      );
+      expect(result.status, deadLink).not.toBe(0);
+      expect(result.stderr, deadLink).toContain("advertises the bare");
+    }
+  });
+
+  test("gallery documentation must carry both deployed URL forms", () => {
+    const { canonical, preview } = galleryContract();
+    const result = verifyContractWithRootDocument(
+      "README.md",
+      readFileSync("README.md", "utf8").replaceAll(canonical, preview),
+    );
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(`must document ${canonical}`);
   });
 
   test("bootstrap provisions pinned workflow and shell linters without ambient tools", () => {
