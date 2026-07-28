@@ -1,4 +1,13 @@
 import { execFileSync, spawnSync } from "node:child_process";
+import {
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, test } from "vitest";
 
@@ -170,6 +179,26 @@ describe("visual affected selection", () => {
         encoding: "utf8",
       }),
     ).not.toThrow();
+  });
+
+  // screencomp only ever deploys <project>/<arch> and pr-<number>/<project>/<arch>,
+  // so a doc that advertises the bare Pages root sends readers to a permanent 404.
+  test("gallery documentation cannot advertise the undeployed Pages root", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "visual-contract-"));
+    for (const entry of readdirSync("."))
+      symlinkSync(path.resolve(entry), path.join(root, entry));
+    rmSync(path.join(root, "README.md"));
+    writeFileSync(
+      path.join(root, "README.md"),
+      `${readFileSync("README.md", "utf8")}\nSee the galleries at\n<https://nickderobertis.github.io/nick-derobertis-site-visual-docs/>.\n`,
+    );
+    const result = spawnSync("node", ["scripts/verify-visual-contract.mjs"], {
+      cwd: root,
+      encoding: "utf8",
+    });
+    rmSync(root, { force: true, recursive: true });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("advertises the bare");
   });
 
   test("bootstrap provisions pinned workflow and shell linters without ambient tools", () => {
