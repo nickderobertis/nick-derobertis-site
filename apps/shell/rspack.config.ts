@@ -32,7 +32,7 @@ export default {
       // react-dom below are eager singletons with version checks off, so the
       // host's instance always wins, and each container can wait until the
       // router asks for its route.
-      shareStrategy: "loaded-first" as const,
+      shareStrategy: "loaded-first",
       shared: {
         react: { singleton: true, requiredVersion: false, eager: true },
         "react-dom": { singleton: true, requiredVersion: false, eager: true },

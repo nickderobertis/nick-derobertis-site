@@ -166,16 +166,59 @@ function watchPreload(page: Page) {
   };
 }
 
-// The shell's own five route remotes. Home's seven panes live under their own
-// `home-*` and feature names, so they never collide with these.
+const federationManifestSchema = z.object({
+  remotes: z
+    .array(
+      z.object({
+        entry: z.string().regex(/\/remotes\/[a-z][a-z0-9-]*\/remoteEntry\.js$/),
+      }),
+    )
+    .nonempty(),
+});
+const routeManifestSchema = z.array(
+  z.object({
+    path: z.string().regex(/^\/(?:[a-z][a-z0-9-]*)?$/),
+    label: z.string().min(1),
+    remote: z.string().min(1).optional(),
+  }),
+);
+
+// Which remotes startup could reach for is the shell's own build configuration,
+// so these journeys read the federation manifest it produced instead of keeping
+// a second inventory a new route remote could outgrow. Home's seven panes are
+// composed by the home remote rather than declared here, so they never collide.
 const routeRemotes = [
-  "home",
-  "bio",
-  "research",
-  "software",
-  "courses",
-] as const;
-type RouteRemote = (typeof routeRemotes)[number];
+  ...new Set(
+    federationManifestSchema
+      .parse(
+        JSON.parse(readFileSync("dist/apps/shell/mf-manifest.json", "utf8")),
+      )
+      .remotes.map(({ entry }) =>
+        z
+          .string()
+          .parse(
+            /\/remotes\/([a-z][a-z0-9-]*)\/remoteEntry\.js$/.exec(entry)?.[1],
+          ),
+      ),
+  ),
+];
+const siteRoutes = routeManifestSchema.parse(
+  JSON.parse(readFileSync("apps/shell/src/routes.json", "utf8")),
+);
+// Every leaf route names the remote that owns it. Home is the one route that
+// does not, because its remote is itself a host, so it is derived as the
+// remaining container: a new route remote that no route claims fails here
+// rather than quietly going uncovered.
+const leafRoutes = siteRoutes.flatMap((route) =>
+  route.remote ? [{ ...route, remote: route.remote }] : [],
+);
+const [homeRemote, ...unclaimedRemotes] = routeRemotes.filter(
+  (remote) => !leafRoutes.some((route) => route.remote === remote),
+);
+if (homeRemote === undefined || unclaimedRemotes.length > 0)
+  throw new Error(
+    `Exactly one route remote must be unclaimed by routes.json (Home's); found ${JSON.stringify([homeRemote, ...unclaimedRemotes])}. Align apps/shell/src/routes.json with the shell's federation remotes and rerun just test-e2e`,
+  );
 
 /**
  * Records the federated assets each route remote is fetched for. "The visitor
@@ -192,43 +235,39 @@ function recordRouteRemoteTraffic(page: Page) {
     const assets = remote === undefined ? undefined : fetched.get(remote);
     assets?.push(request.url().split("/").at(-1) ?? request.url());
   });
-  return (remote: RouteRemote) => [...(fetched.get(remote) ?? [])];
+  return {
+    assetsFor: (remote: string) => [...(fetched.get(remote) ?? [])],
+    /** Every route remote the visitor has spent at least one request on. */
+    reached: () =>
+      routeRemotes.filter((remote) => fetched.get(remote)?.length).sort(),
+  };
 }
 
-test("a leaf route leaves every other route remote unfetched until its link is hovered", async ({
-  page,
-}) => {
-  const assetsFor = recordRouteRemoteTraffic(page);
+for (const route of leafRoutes)
+  test(`entering at ${route.label} fetches its remote alone until another link is hovered`, async ({
+    page,
+  }) => {
+    const { assetsFor, reached } = recordRouteRemoteTraffic(page);
 
-  await page.goto("bio", { waitUntil: "networkidle" });
-  await expect(
-    page.getByRole("heading", { name: "Optimizing Life" }),
-  ).toBeVisible();
+    await page.goto(route.path.slice(1), { waitUntil: "networkidle" });
 
-  // Bio is the route the visitor asked for, so its remote is the only one
-  // startup may spend a request on.
-  expect(assetsFor("bio")).toContain("remoteEntry.js");
-  expect({
-    home: assetsFor("home"),
-    research: assetsFor("research"),
-    software: assetsFor("software"),
-    courses: assetsFor("courses"),
-  }).toEqual({ home: [], research: [], software: [], courses: [] });
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(navLink(page, route.label)).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    // This is the route the visitor asked for, so its remote is the only one
+    // startup may spend a request on.
+    expect(assetsFor(route.remote)).toContain("remoteEntry.js");
+    expect(reached()).toEqual([route.remote]);
 
-  await navLink(page, "Research").hover();
+    await navLink(page, "Home").hover();
 
-  // Hover intent fetches the container and the page chunk behind it.
-  await expect.poll(() => assetsFor("research")).toContain("remoteEntry.js");
-  await expect.poll(() => assetsFor("research").length).toBeGreaterThan(1);
-  expect({
-    home: assetsFor("home"),
-    software: assetsFor("software"),
-    courses: assetsFor("courses"),
-  }).toEqual({ home: [], software: [], courses: [] });
-  await expect(
-    page.getByRole("heading", { name: "Research Works" }),
-  ).toHaveCount(0);
-});
+    // Hover intent fetches the container and the page chunk behind it.
+    await expect.poll(() => assetsFor(homeRemote)).toContain("remoteEntry.js");
+    await expect.poll(() => assetsFor(homeRemote).length).toBeGreaterThan(1);
+    expect(reached()).toEqual([route.remote, homeRemote].sort());
+  });
 
 test("entering at Home hydrates its prerendered panes and still defers the leaf remotes", async ({
   page,
@@ -238,7 +277,7 @@ test("entering at Home hydrates its prerendered panes and still defers the leaf 
     if (message.type() === "error") errors.push(message.text());
   });
   page.on("pageerror", (error) => errors.push(error.message));
-  const assetsFor = recordRouteRemoteTraffic(page);
+  const { assetsFor, reached } = recordRouteRemoteTraffic(page);
 
   await page.goto("", { waitUntil: "networkidle" });
 
@@ -247,13 +286,8 @@ test("entering at Home hydrates its prerendered panes and still defers the leaf 
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Who am I?" })).toBeVisible();
   expect(errors).toEqual([]);
-  expect(assetsFor("home")).toContain("remoteEntry.js");
-  expect({
-    bio: assetsFor("bio"),
-    research: assetsFor("research"),
-    software: assetsFor("software"),
-    courses: assetsFor("courses"),
-  }).toEqual({ bio: [], research: [], software: [], courses: [] });
+  expect(assetsFor(homeRemote)).toContain("remoteEntry.js");
+  expect(reached()).toEqual([homeRemote]);
 
   // The deferred remotes cost nothing because the document really did hydrate:
   // its header links navigate in place and pull Bio's remote in on demand.
