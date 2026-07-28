@@ -55,11 +55,21 @@ sweep. See [the architecture](docs/architecture.md) for project boundaries,
 hosting, and affected-test behavior.
 
 Pull requests with affected visual projects get one aggregated screencomp
-comment with real before/after diffs and links to the galleries at
-<https://nickderobertis.github.io/nick-derobertis-site-visual-docs/>. The
-galleries use a dedicated Pages repository because this repository's production
-Pages site is deployed from an Actions artifact; GitHub therefore does not serve
-its `gh-pages` branch, even when screencomp writes galleries there.
+comment with real before/after diffs and direct gallery links; that comment is
+the intended entry point. Galleries are published per project, not at a site
+root — there is no index page:
+
+- canonical (`master`):
+  `https://nickderobertis.github.io/nick-derobertis-site-visual-docs/<project>/x86_64/`
+- pull-request preview:
+  `https://nickderobertis.github.io/nick-derobertis-site-visual-docs/pr-<number>/<project>/x86_64/`
+
+Only affected projects are captured and deployed, so a project has a gallery
+only once it has been affected; previews are pruned when the pull request
+closes. The galleries use a dedicated Pages repository because this
+repository's production Pages site is deployed from an Actions artifact; GitHub
+therefore does not serve its `gh-pages` branch, even when screencomp writes
+galleries there.
 
 ## Deployment performance
 

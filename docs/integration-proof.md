@@ -93,11 +93,15 @@ affected app fresh in that container and classifying it against the committed,
 image-free baseline manifest — a byte-digest comparison, so a one-pixel layout,
 content, or color change fails:
 
-The reusable workflow publishes canonical and pull-request galleries to the
-dedicated visual-docs Pages site at
-<https://nickderobertis.github.io/nick-derobertis-site-visual-docs/> and posts
-one aggregated pull-request comment with inline before/after diffs when the
-change set is small. This repository cannot serve galleries from its own
+The reusable workflow publishes galleries to the dedicated visual-docs Pages
+site one directory per project — canonical galleries for the default branch at
+`https://nickderobertis.github.io/nick-derobertis-site-visual-docs/<project>/x86_64/`
+and pull-request previews at
+`https://nickderobertis.github.io/nick-derobertis-site-visual-docs/pr-<number>/<project>/x86_64/`.
+No root index is written, and only affected projects are deployed. The
+aggregated pull-request comment — which also carries inline before/after diffs
+when the change set is small — holds the direct links and is the intended entry
+point. This repository cannot serve galleries from its own
 `gh-pages` branch: its production Pages site uses an Actions artifact
 deployment, so GitHub serves that artifact rather than the branch. Keeping the
 gallery branch in a separate repository preserves the production deployment.
