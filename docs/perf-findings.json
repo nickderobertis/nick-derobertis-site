@@ -2,23 +2,23 @@
   "schemaVersion": 1,
   "runsPerRoute": 5,
   "environment": {
-    "capturedAt": "2026-07-22T04:25:17.303Z",
-    "host": "Linux 6.17.0-1019-aws x64",
-    "cpu": "Intel(R) Xeon(R) Platinum 8488C",
-    "logicalCpus": 4,
-    "memoryGiB": 15.3,
+    "capturedAt": "2026-07-28T05:00:24.859Z",
+    "host": "Linux 6.8.0-136-generic arm64",
+    "cpu": "unknown",
+    "logicalCpus": 14,
+    "memoryGiB": 29.3,
     "node": "v26.5.0",
     "lighthouse": "12.8.2",
     "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36",
     "formFactor": "desktop",
     "throttlingMethod": "simulate",
     "throttling": {
+      "cpuSlowdownMultiplier": 1,
       "rttMs": 40,
       "throughputKbps": 10240,
       "requestLatencyMs": 0,
       "downloadThroughputKbps": 0,
-      "uploadThroughputKbps": 0,
-      "cpuSlowdownMultiplier": 1
+      "uploadThroughputKbps": 0
     }
   },
   "sites": {
@@ -26,49 +26,49 @@
       "url": "https://nickderobertis.github.io/nick-derobertis-site/",
       "routes": {
         "/": {
-          "performance": 41,
-          "fcp": 230.0287,
-          "lcp": 3927.9916000000003,
-          "tbt": 1894.5000000000002,
-          "cls": 0.1418479560124313,
-          "transferBytes": 3638364,
-          "jsBytes": 3630161
+          "performance": 97,
+          "fcp": 303.7451,
+          "lcp": 426.6023576538086,
+          "tbt": 148,
+          "cls": 0,
+          "transferBytes": 3503541,
+          "jsBytes": 3472535
         },
         "/bio": {
-          "performance": 80,
-          "fcp": 217.68236404418946,
-          "lcp": 792.6689,
-          "tbt": 1,
-          "cls": 0.4417406726540958,
-          "transferBytes": 459644,
-          "jsBytes": 454334
+          "performance": 100,
+          "fcp": 257.4456061401367,
+          "lcp": 382.0046576538086,
+          "tbt": 38,
+          "cls": 0,
+          "transferBytes": 63242,
+          "jsBytes": 57074
         },
         "/research": {
-          "performance": 35,
-          "fcp": 258.807,
-          "lcp": 3068.177,
-          "tbt": 587,
-          "cls": 0.9852292742180383,
-          "transferBytes": 3212971,
-          "jsBytes": 904567
+          "performance": 90,
+          "fcp": 257.7177061401367,
+          "lcp": 2126.6886,
+          "tbt": 57,
+          "cls": 0,
+          "transferBytes": 2799503,
+          "jsBytes": 489563
         },
         "/software": {
-          "performance": 30,
-          "fcp": 266.6948,
-          "lcp": 2216.9798,
-          "tbt": 1163.5,
-          "cls": 0.8825354792995243,
-          "transferBytes": 942288,
-          "jsBytes": 903080
+          "performance": 100,
+          "fcp": 540.9307061401367,
+          "lcp": 659.7611576538086,
+          "tbt": 52,
+          "cls": 0,
+          "transferBytes": 844479,
+          "jsBytes": 489038
         },
         "/courses": {
-          "performance": 43,
-          "fcp": 236.3329,
-          "lcp": 1857.229,
-          "tbt": 648,
-          "cls": 0.9852292742180383,
-          "transferBytes": 908703,
-          "jsBytes": 903785
+          "performance": 100,
+          "fcp": 257.9333061401367,
+          "lcp": 382.1404576538086,
+          "tbt": 65,
+          "cls": 0,
+          "transferBytes": 500907,
+          "jsBytes": 489815
         }
       }
     },
@@ -76,98 +76,98 @@
       "url": "https://nickderobertis.com/",
       "routes": {
         "/": {
-          "performance": 41,
-          "fcp": 1914.0342000000003,
-          "lcp": 2527.75785,
-          "tbt": 4588.000000000002,
-          "cls": 0.000786985662271312,
-          "transferBytes": 4056429,
-          "jsBytes": 1734627
+          "performance": 73,
+          "fcp": 1880.6446,
+          "lcp": 2964.5816999999997,
+          "tbt": 25,
+          "cls": 0.0007843019688663137,
+          "transferBytes": 4206981,
+          "jsBytes": 1734124
         },
         "/bio": {
-          "performance": 80,
-          "fcp": 1722.9636,
-          "lcp": 2067.9293,
-          "tbt": 120.5,
-          "cls": 0,
-          "transferBytes": 2162395,
-          "jsBytes": 1396917
+          "performance": 82,
+          "fcp": 1420.0658999999998,
+          "lcp": 2420.2257,
+          "tbt": 19,
+          "cls": 0.00029770429131288493,
+          "transferBytes": 2326918,
+          "jsBytes": 1396388
         },
         "/research": {
-          "performance": 66,
-          "fcp": 1779.6410999999998,
-          "lcp": 2100.0403,
-          "tbt": 142,
-          "cls": 0.23974911741479019,
-          "transferBytes": 2081690,
-          "jsBytes": 1397127
+          "performance": 70,
+          "fcp": 1420.8114000000003,
+          "lcp": 2337.6124,
+          "tbt": 19.5,
+          "cls": 0.23979951782850178,
+          "transferBytes": 2231941,
+          "jsBytes": 1396381
         },
         "/software": {
-          "performance": 40,
-          "fcp": 1815.3024000000005,
-          "lcp": 2466.1112999999996,
-          "tbt": 339.00000000000045,
-          "cls": 0.5283112569514021,
-          "transferBytes": 2480854,
-          "jsBytes": 1397116
+          "performance": 63,
+          "fcp": 1507.9506,
+          "lcp": 1979.7365999999997,
+          "tbt": 19,
+          "cls": 0.5286710978694479,
+          "transferBytes": 2631141,
+          "jsBytes": 1396739
         },
         "/courses": {
           "performance": 72,
-          "fcp": 1737.3136,
-          "lcp": 2309.7933999999996,
-          "tbt": 108.5,
-          "cls": 0.1581233564427444,
-          "transferBytes": 2736964,
-          "jsBytes": 1397143
+          "fcp": 1423.5698,
+          "lcp": 2945.5025999999993,
+          "tbt": 20,
+          "cls": 0.1583927368603961,
+          "transferBytes": 2887289,
+          "jsBytes": 1396693
         }
       }
     }
   },
   "deltas": {
     "/": {
-      "performance": 0,
-      "fcp": -1684.0055000000002,
-      "lcp": 1400.2337500000003,
-      "tbt": -2693.500000000002,
-      "cls": 0.14106097035016,
-      "transferBytes": -418065,
-      "jsBytes": 1895534
+      "performance": 24,
+      "fcp": -1576.8995,
+      "lcp": -2537.979342346191,
+      "tbt": 123,
+      "cls": -0.0007843019688663137,
+      "transferBytes": -703440,
+      "jsBytes": 1738411
     },
     "/bio": {
-      "performance": 0,
-      "fcp": -1505.2812359558106,
-      "lcp": -1275.2603999999997,
-      "tbt": -119.5,
-      "cls": 0.4417406726540958,
-      "transferBytes": -1702751,
-      "jsBytes": -942583
+      "performance": 18,
+      "fcp": -1162.620293859863,
+      "lcp": -2038.2210423461913,
+      "tbt": 19,
+      "cls": -0.00029770429131288493,
+      "transferBytes": -2263676,
+      "jsBytes": -1339314
     },
     "/research": {
-      "performance": -31,
-      "fcp": -1520.8340999999998,
-      "lcp": 968.1367,
-      "tbt": 445,
-      "cls": 0.7454801568032481,
-      "transferBytes": 1131281,
-      "jsBytes": -492560
+      "performance": 20,
+      "fcp": -1163.0936938598636,
+      "lcp": -210.92380000000003,
+      "tbt": 37.5,
+      "cls": -0.23979951782850178,
+      "transferBytes": 567562,
+      "jsBytes": -906818
     },
     "/software": {
-      "performance": -10,
-      "fcp": -1548.6076000000005,
-      "lcp": -249.1314999999995,
-      "tbt": 824.4999999999995,
-      "cls": 0.3542242223481221,
-      "transferBytes": -1538566,
-      "jsBytes": -494036
+      "performance": 37,
+      "fcp": -967.0198938598631,
+      "lcp": -1319.9754423461911,
+      "tbt": 33,
+      "cls": -0.5286710978694479,
+      "transferBytes": -1786662,
+      "jsBytes": -907701
     },
     "/courses": {
-      "performance": -29,
-      "fcp": -1500.9807,
-      "lcp": -452.5643999999995,
-      "tbt": 539.5,
-      "cls": 0.827105917775294,
-      "transferBytes": -1828261,
-      "jsBytes": -493358
+      "performance": 28,
+      "fcp": -1165.6364938598633,
+      "lcp": -2563.362142346191,
+      "tbt": 45,
+      "cls": -0.1583927368603961,
+      "transferBytes": -2386382,
+      "jsBytes": -906878
     }
   }
 }
