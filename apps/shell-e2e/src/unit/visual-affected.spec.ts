@@ -183,14 +183,31 @@ describe("visual affected selection", () => {
 
   // screencomp only ever deploys <project>/<arch> and pr-<number>/<project>/<arch>,
   // so a doc that advertises the bare Pages root sends readers to a permanent 404.
+  // The invalid root is assembled from visual-tools.json rather than written out,
+  // so this file never carries a copyable dead link of its own.
   test("gallery documentation cannot advertise the undeployed Pages root", () => {
+    const contract: unknown = JSON.parse(
+      readFileSync("visual-tools.json", "utf8"),
+    );
+    const pagesRepository =
+      typeof contract === "object" && contract !== null
+        ? (contract as { pagesRepository?: unknown }).pagesRepository
+        : undefined;
+    if (
+      typeof pagesRepository !== "string" ||
+      !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(pagesRepository)
+    )
+      throw new Error(
+        "visual-tools.json must declare pagesRepository owner/name",
+      );
+    const [owner, name] = pagesRepository.split("/");
     const root = mkdtempSync(path.join(tmpdir(), "visual-contract-"));
     for (const entry of readdirSync("."))
       symlinkSync(path.resolve(entry), path.join(root, entry));
     rmSync(path.join(root, "README.md"));
     writeFileSync(
       path.join(root, "README.md"),
-      `${readFileSync("README.md", "utf8")}\nSee the galleries at\n<https://nickderobertis.github.io/nick-derobertis-site-visual-docs/>.\n`,
+      `${readFileSync("README.md", "utf8")}\nSee the galleries at\n<https://${owner}.github.io/${name}/>.\n`,
     );
     const result = spawnSync("node", ["scripts/verify-visual-contract.mjs"], {
       cwd: root,
