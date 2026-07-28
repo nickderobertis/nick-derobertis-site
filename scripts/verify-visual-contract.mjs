@@ -170,8 +170,10 @@ const galleryUrls = [
   `${pagesRoot}/<project>/${contract.architecture}/`,
   `${pagesRoot}/pr-<number>/<project>/${contract.architecture}/`,
 ];
+// Every mention of the site must therefore continue into a project or pr-<number>
+// segment; anything else — with or without a trailing slash — is the bare root.
 const bareRoot = new RegExp(
-  `${pagesRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/(?![a-z<])`,
+  `${pagesRoot.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?!/[A-Za-z0-9<])`,
 );
 for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"]) {
   const documentation = readFileSync(path, "utf8");
@@ -182,7 +184,7 @@ for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"]) {
       );
   if (bareRoot.test(documentation))
     throw new Error(
-      `Visual gallery documentation in ${path} advertises the bare ${pagesRoot}/ root, which screencomp never deploys; document the per-project gallery URLs instead`,
+      `Visual gallery documentation in ${path} advertises the bare ${pagesRoot} Pages root, which screencomp never deploys; document the per-project gallery URLs instead`,
     );
 }
 const screencompSource = sources.find(
