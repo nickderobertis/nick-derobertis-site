@@ -1,5 +1,5 @@
 import "@site/design-system";
-import { parseRouteView } from "@site/route-state";
+import { parseRouteView, routeViewQueryKeys } from "@site/route-state";
 import { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import Skeleton from "./skeleton";
@@ -13,8 +13,9 @@ if (!root) throw new Error("Missing remote root");
 // override is read; the shell's route validates the same parameter through
 // validateSearch and hands the result to the same prop. The default view stays
 // undefined so the page's own chunk — not this entry — pulls the CV data in.
+// llmlint: ignore[changed_behavior_has_e2e] research.spec.ts already drives this entry's happy, empty, loading, and error states through the standalone remotes/ URL with ?research-scenario=, alongside the host-composed path.
 const view = parseRouteView(
-  new URLSearchParams(window.location.search).get("research-scenario"),
+  new URLSearchParams(window.location.search).get(routeViewQueryKeys.research),
 );
 const initialState: ResearchViewState | undefined =
   view === "loading" || view === "error"

@@ -15,6 +15,7 @@ import {
   prerenderRouteAttribute,
   type ResearchPageProps,
   type RouteView,
+  routeViewQueryKeys,
   routeViews,
   type SoftwarePageProps,
 } from "@site/route-state";
@@ -152,9 +153,11 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Bio"),
     validateSearch: (search: Record<string, unknown>) => ({
-      "bio-view": viewOverride(search, "bio-view"),
+      [routeViewQueryKeys.bio]: viewOverride(search, routeViewQueryKeys.bio),
     }),
-    loaderDeps: ({ search }) => ({ view: search["bio-view"] ?? "default" }),
+    loaderDeps: ({ search }) => ({
+      view: search[routeViewQueryKeys.bio] ?? "default",
+    }),
     loader: ({ deps }) => deps,
     component: routeComponent(pages.bio, (Page) => {
       const data = bio.useLoaderData();
@@ -165,10 +168,13 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Research"),
     validateSearch: (search: Record<string, unknown>) => ({
-      "research-scenario": viewOverride(search, "research-scenario"),
+      [routeViewQueryKeys.research]: viewOverride(
+        search,
+        routeViewQueryKeys.research,
+      ),
     }),
     loaderDeps: ({ search }) => ({
-      view: search["research-scenario"] ?? "default",
+      view: search[routeViewQueryKeys.research] ?? "default",
     }),
     loader: async ({ context: ctx, deps: { view } }) => {
       if (view === "loading" || view === "error")
@@ -202,10 +208,13 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Software"),
     validateSearch: (search: Record<string, unknown>) => ({
-      "software-view": viewOverride(search, "software-view"),
+      [routeViewQueryKeys.software]: viewOverride(
+        search,
+        routeViewQueryKeys.software,
+      ),
     }),
     loaderDeps: ({ search }) => ({
-      view: search["software-view"] ?? "default",
+      view: search[routeViewQueryKeys.software] ?? "default",
     }),
     loader: async ({ context: ctx, deps: { view } }) => {
       if (view === "loading" || view === "error")
@@ -232,9 +241,14 @@ export function createSiteRouter({
     getParentRoute: () => Root,
     path: routePath("Courses"),
     validateSearch: (search: Record<string, unknown>) => ({
-      "courses-view": viewOverride(search, "courses-view"),
+      [routeViewQueryKeys.courses]: viewOverride(
+        search,
+        routeViewQueryKeys.courses,
+      ),
     }),
-    loaderDeps: ({ search }) => ({ view: search["courses-view"] ?? "default" }),
+    loaderDeps: ({ search }) => ({
+      view: search[routeViewQueryKeys.courses] ?? "default",
+    }),
     loader: async ({ context: ctx, deps: { view } }) => {
       if (view === "loading" || view === "error")
         return { courses: null, view };
