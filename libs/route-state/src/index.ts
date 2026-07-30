@@ -3,16 +3,9 @@ import contractInput from "./contracts.json";
 
 const contracts = z
   .object({
-    queryKeys: z.object({
-      bio: z.string().min(1),
-      research: z.string().min(1),
-      software: z.string().min(1),
-      courses: z.string().min(1),
-    }),
     prerenderRouteAttribute: z.string().regex(/^data-[a-z-]+$/),
   })
   .parse(contractInput);
-export const routeStateQueryKeys = contracts.queryKeys;
 export const prerenderRouteAttribute = contracts.prerenderRouteAttribute;
 
 export type AsyncViewState<T> =

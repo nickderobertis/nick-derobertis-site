@@ -1,9 +1,3 @@
 {
-  "queryKeys": {
-    "bio": "bio-view",
-    "research": "research-scenario",
-    "software": "software-view",
-    "courses": "courses-view"
-  },
   "prerenderRouteAttribute": "data-prerendered-route"
 }

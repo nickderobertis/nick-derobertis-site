@@ -82,10 +82,7 @@ export async function renderRoute(path: string) {
           software: { component: SoftwarePage },
           courses: { component: CoursesPage },
         },
-        context: {
-          loadDomain: async (name) => domains[name] as never,
-          search: url.searchParams,
-        },
+        context: { loadDomain: async (name) => domains[name] as never },
       }),
   });
   await handler(async ({ router }) => {

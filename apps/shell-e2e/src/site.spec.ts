@@ -264,7 +264,7 @@ test("navigation works with the keyboard", async ({ page }) => {
   ).toBeVisible();
 });
 
-// llmlint: ignore-block[tests_mirror_real_usage] Hydration warnings and full-document SPA regressions are explicit acceptance criteria that are observable only through browser console/error and request instrumentation; navigation and focus still use real user-facing controls.
+// llmlint: ignore-block[tests_mirror_real_usage] Hydration warnings, full-document SPA regressions, and whether a prerendered document was hydrated or replaced are explicit acceptance criteria that are observable only through browser console/error, request, and DOM-mutation instrumentation; navigation, focus, and every content assertion still use real user-facing controls.
 test("leaf routes reuse prerendered DOM without hydration warnings and navigate as an SPA", async ({
   browser,
 }) => {
@@ -311,6 +311,74 @@ test("query-only route states client-mount without hydration warnings", async ({
   await expect(
     page.getByRole("heading", { name: "No research projects yet" }),
   ).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+// Hydrating a prerendered document and throwing it away to client-render the
+// same page produce identical output, so the only way to tell them apart is to
+// watch whether the prerendered children of #root survive. The observer is
+// installed before the shell's deferred entry script runs.
+const rootRemovalKey = "__prerenderedRootRemovals";
+
+async function watchPrerenderedRoot(page: Page) {
+  await page.addInitScript((key: string) => {
+    Reflect.set(window, key, 0);
+    new MutationObserver((records) => {
+      for (const record of records)
+        if (record.target instanceof Element && record.target.id === "root")
+          Reflect.set(
+            window,
+            key,
+            Number(Reflect.get(window, key)) + record.removedNodes.length,
+          );
+    }).observe(document, { childList: true, subtree: true });
+  }, rootRemovalKey);
+  return () =>
+    page.evaluate(
+      (key: string) => Number(Reflect.get(window, key)),
+      rootRemovalKey,
+    );
+}
+
+test("a route reached with a tracking parameter hydrates its prerendered document", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+  const removedFromRoot = await watchPrerenderedRoot(page);
+
+  await page.goto("bio?utm_source=newsletter&fbclid=abc123", {
+    waitUntil: "networkidle",
+  });
+  await expect(
+    page.getByRole("heading", { name: "Optimizing Life" }),
+  ).toBeVisible();
+  await expect(page.getByRole("banner")).toBeVisible();
+  expect(await removedFromRoot()).toBe(0);
+  expect(errors).toEqual([]);
+});
+
+test("a route reached with a view override client-renders that view", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+  const removedFromRoot = await watchPrerenderedRoot(page);
+
+  await page.goto("bio?bio-view=empty&utm_source=newsletter", {
+    waitUntil: "networkidle",
+  });
+  await expect(page.getByRole("status")).toContainText("Biography coming soon");
+  await expect(page.getByRole("article")).toHaveCount(0);
+  // The static document holds the full biography, so this view is only
+  // reachable by replacing it.
+  expect(await removedFromRoot()).toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
 
