@@ -8,6 +8,7 @@ import {
   loadBrowserDomain,
   type RoutePage,
   type RoutePages,
+  rendersPrerenderedDocument,
   routePath,
 } from "./router";
 import "@site/design-system";
@@ -49,10 +50,9 @@ const pages: RoutePages = {
 const router = createSiteRouter({
   history: createBrowserHistory(),
   pages,
-  context: {
-    loadDomain: async (name) => loadBrowserDomain(name) as never,
-    search: new URLSearchParams(window.location.search),
-  },
+  // The validator returns the domain selected by `name`; the router's generic
+  // callback performs that name-to-return-type narrowing at each call site.
+  context: { loadDomain: async (name) => loadBrowserDomain(name) as never },
 });
 function hasSerializedRouter(value: unknown): value is {
   router: Record<string, unknown>;
@@ -62,7 +62,7 @@ function hasSerializedRouter(value: unknown): value is {
   return Boolean(serializedRouter && typeof serializedRouter === "object");
 }
 const hasStaticPayload = hasSerializedRouter(Reflect.get(window, "$_TSR"));
-const canHydrate = hasStaticPayload && !window.location.search;
+const canHydrate = hasStaticPayload && rendersPrerenderedDocument(router);
 if (!canHydrate) await router.load();
 const app = (
   <StrictMode>

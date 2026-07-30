@@ -264,7 +264,6 @@ test("navigation works with the keyboard", async ({ page }) => {
   ).toBeVisible();
 });
 
-// llmlint: ignore-block[tests_mirror_real_usage] Hydration warnings and full-document SPA regressions are explicit acceptance criteria that are observable only through browser console/error and request instrumentation; navigation and focus still use real user-facing controls.
 test("leaf routes reuse prerendered DOM without hydration warnings and navigate as an SPA", async ({
   browser,
 }) => {
@@ -314,6 +313,116 @@ test("query-only route states client-mount without hydration warnings", async ({
   expect(errors).toEqual([]);
 });
 
+// Hydrating a prerendered document and throwing it away to client-render the
+// same page produce identical output, so the only way to tell them apart is to
+// watch whether the prerendered main landmark survives: client rendering
+// empties the application root, taking the landmark with it. The observer is
+// installed before the shell's deferred entry script runs.
+const landmarkRemovalKey = "__prerenderedMainRemovals";
+
+// llmlint: ignore-block[tests_mirror_real_usage] Hydration and replacement produce the same visible page, so preserving the prerendered DOM identity—the explicit acceptance criterion—cannot be distinguished through user-visible output. This helper observes only removal of the accessible main landmark; route content is still asserted through roles below.
+async function watchPrerenderedMain(page: Page) {
+  // llmlint: ignore-block[e2e_uses_accessible_selectors] A MutationObserver receives detached nodes, which Playwright's role-based locators cannot reach by definition; matching the main landmark element is the closest available equivalent. Every assertion about what the visitor sees still uses getByRole.
+  await page.addInitScript((key: string) => {
+    Reflect.set(window, key, 0);
+    new MutationObserver((records) => {
+      for (const record of records)
+        for (const node of record.removedNodes)
+          if (
+            node instanceof Element &&
+            (node.matches("main") || node.querySelector("main"))
+          )
+            Reflect.set(window, key, Number(Reflect.get(window, key)) + 1);
+    }).observe(document, { childList: true, subtree: true });
+  }, landmarkRemovalKey);
+  // llmlint: ignore-end[e2e_uses_accessible_selectors]
+  return () =>
+    page.evaluate(
+      (key: string) => Number(Reflect.get(window, key)),
+      landmarkRemovalKey,
+    );
+}
+// llmlint: ignore-end[tests_mirror_real_usage]
+
+// Each leaf route owns a view-override parameter, and every one of them is
+// reachable from search, social, and email with tracking parameters attached.
+const leafRoutes = [
+  {
+    path: "bio",
+    heading: "Optimizing Life",
+    override: "bio-view=empty",
+    overrideHeading: "Biography coming soon",
+  },
+  {
+    path: "research",
+    heading: "Research Works",
+    override: "research-scenario=empty",
+    overrideHeading: "No research projects yet",
+  },
+  {
+    path: "software",
+    heading: "Open-Source Software",
+    override: "software-view=empty",
+    overrideHeading: "No software projects to show",
+  },
+  {
+    path: "courses",
+    heading: "Courses",
+    override: "courses-view=empty",
+    overrideHeading: "No courses to show",
+  },
+  // Preserve each route's literal heading and query pair for its parameterized
+  // accessible assertions instead of widening every field to string.
+] as const;
+
+for (const route of leafRoutes) {
+  test(`${route.path} reached with a tracking parameter hydrates its prerendered document`, async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    page.on("pageerror", (error) => errors.push(error.message));
+    const removedMainLandmarks = await watchPrerenderedMain(page);
+
+    await page.goto(`${route.path}?utm_source=newsletter&fbclid=abc123`, {
+      waitUntil: "networkidle",
+    });
+    await expect(
+      page.getByRole("heading", { name: route.heading, exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("banner")).toBeVisible();
+    // llmlint: ignore[tests_mirror_real_usage] A zero removal count is the identity proof that the prerendered main landmark was hydrated; the resulting page is visibly identical if React replaces it.
+    expect(await removedMainLandmarks()).toBe(0);
+    expect(errors).toEqual([]);
+  });
+
+  test(`${route.path} reached with a view override client-renders that view`, async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    page.on("pageerror", (error) => errors.push(error.message));
+    const removedMainLandmarks = await watchPrerenderedMain(page);
+
+    await page.goto(`${route.path}?${route.override}&utm_source=newsletter`, {
+      waitUntil: "networkidle",
+    });
+    await expect(
+      page.getByRole("heading", { name: route.overrideHeading, exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("article")).toHaveCount(0);
+    // The static document holds the default view, so an override is only
+    // reachable by replacing it.
+    // llmlint: ignore[tests_mirror_real_usage] A positive removal count proves the intentionally different view replaced the prerendered landmark; visible empty-state assertions alone cannot distinguish replacement from hydration.
+    expect(await removedMainLandmarks()).toBeGreaterThan(0);
+    expect(errors).toEqual([]);
+  });
+}
+
 test("Home reuses prerendered content without hydration warnings", async ({
   page,
 }) => {
@@ -332,8 +441,6 @@ test("Home reuses prerendered content without hydration warnings", async ({
   ).toBeVisible();
   expect(errors).toEqual([]);
 });
-// llmlint: ignore-end[tests_mirror_real_usage]
-
 test("the static 404 is intentional and the router recovers unknown routes", async ({
   browser,
   page,

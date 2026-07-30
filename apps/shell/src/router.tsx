@@ -12,10 +12,11 @@ import { SiteLayout } from "@site/layout";
 import {
   type BioPageProps,
   type CoursesPageProps,
-  parseRouteView,
   prerenderRouteAttribute,
   type ResearchPageProps,
-  routeStateQueryKeys,
+  type RouteView,
+  routeViewQueryKeys,
+  routeViews,
   type SoftwarePageProps,
 } from "@site/route-state";
 import {
@@ -79,7 +80,19 @@ interface RouterContext {
   loadDomain(name: "research"): Promise<Research>;
   loadDomain(name: "software_projects"): Promise<SoftwareProjects>;
   loadDomain(name: "courses"): Promise<Courses>;
-  search: URLSearchParams;
+}
+
+/**
+ * Reads a route's view-override parameter out of a raw query string. Returning
+ * undefined for everything else is what keeps the rest of a query string —
+ * `utm_source`, `fbclid`, `ref` — out of the route's rendered output, and out
+ * of the links the router builds from this location.
+ */
+function viewOverride(
+  search: Record<string, unknown>,
+  key: string,
+): RouteView | undefined {
+  return routeViews.find((view) => view === search[key]);
 }
 
 // Warmed logos are kept alive here so the browser cannot collect an in-flight
@@ -139,9 +152,13 @@ export function createSiteRouter({
   const bio = createRoute({
     getParentRoute: () => Root,
     path: routePath("Bio"),
-    loader: ({ context: ctx }) => ({
-      view: parseRouteView(ctx.search.get(routeStateQueryKeys.bio)),
+    validateSearch: (search: Record<string, unknown>) => ({
+      [routeViewQueryKeys.bio]: viewOverride(search, routeViewQueryKeys.bio),
     }),
+    loaderDeps: ({ search }) => ({
+      view: search[routeViewQueryKeys.bio] ?? "default",
+    }),
+    loader: ({ deps }) => deps,
     component: routeComponent(pages.bio, (Page) => {
       const data = bio.useLoaderData();
       return <Page initialView={data.view} />;
@@ -150,8 +167,16 @@ export function createSiteRouter({
   const research = createRoute({
     getParentRoute: () => Root,
     path: routePath("Research"),
-    loader: async ({ context: ctx }) => {
-      const view = parseRouteView(ctx.search.get(routeStateQueryKeys.research));
+    validateSearch: (search: Record<string, unknown>) => ({
+      [routeViewQueryKeys.research]: viewOverride(
+        search,
+        routeViewQueryKeys.research,
+      ),
+    }),
+    loaderDeps: ({ search }) => ({
+      view: search[routeViewQueryKeys.research] ?? "default",
+    }),
+    loader: async ({ context: ctx, deps: { view } }) => {
       if (view === "loading" || view === "error")
         return { research: null, view };
       try {
@@ -182,8 +207,16 @@ export function createSiteRouter({
   const software = createRoute({
     getParentRoute: () => Root,
     path: routePath("Software"),
-    loader: async ({ context: ctx }) => {
-      const view = parseRouteView(ctx.search.get(routeStateQueryKeys.software));
+    validateSearch: (search: Record<string, unknown>) => ({
+      [routeViewQueryKeys.software]: viewOverride(
+        search,
+        routeViewQueryKeys.software,
+      ),
+    }),
+    loaderDeps: ({ search }) => ({
+      view: search[routeViewQueryKeys.software] ?? "default",
+    }),
+    loader: async ({ context: ctx, deps: { view } }) => {
       if (view === "loading" || view === "error")
         return { projects: null, view };
       try {
@@ -207,8 +240,16 @@ export function createSiteRouter({
   const courses = createRoute({
     getParentRoute: () => Root,
     path: routePath("Courses"),
-    loader: async ({ context: ctx }) => {
-      const view = parseRouteView(ctx.search.get(routeStateQueryKeys.courses));
+    validateSearch: (search: Record<string, unknown>) => ({
+      [routeViewQueryKeys.courses]: viewOverride(
+        search,
+        routeViewQueryKeys.courses,
+      ),
+    }),
+    loaderDeps: ({ search }) => ({
+      view: search[routeViewQueryKeys.courses] ?? "default",
+    }),
+    loader: async ({ context: ctx, deps: { view } }) => {
       if (view === "loading" || view === "error")
         return { courses: null, view };
       try {
@@ -274,6 +315,34 @@ export function entryRoutePath(root: Element): string | undefined {
     : window.location.pathname;
   const candidate = stamped ?? (pathname === "" ? "/" : pathname);
   return routes.find((route) => route.path === candidate)?.path;
+}
+
+/**
+ * Reports whether the browser's location still renders the document the
+ * prerender step produced, so the shell can hydrate it instead of discarding
+ * it. Every route is prerendered with an empty query string, and the route
+ * `validateSearch` above is what turns a query string into rendered output: a
+ * view override genuinely changes the markup, while a tracking parameter
+ * leaves it identical and must not cost the visitor their prerendered HTML.
+ *
+ * Home is the conservative exception. Its panes are separate remotes that each
+ * read their own state parameter straight from the URL rather than through
+ * this router, so the shell cannot tell an inert parameter from a pane
+ * override there.
+ */
+export function rendersPrerenderedDocument(router: SiteRouter): boolean {
+  const { pathname, search } = router.state.location;
+  const matches = router.matchRoutes(pathname, search);
+  const leaf = matches[matches.length - 1];
+  if (leaf?.fullPath === routePath("Home"))
+    return Object.keys(search).length === 0;
+  const deps: unknown = leaf?.loaderDeps;
+  return (
+    !deps ||
+    typeof deps !== "object" ||
+    !("view" in deps) ||
+    deps.view === "default"
+  );
 }
 
 export async function loadBrowserDomain<

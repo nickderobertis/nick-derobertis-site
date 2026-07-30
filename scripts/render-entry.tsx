@@ -82,10 +82,9 @@ export async function renderRoute(path: string) {
           software: { component: SoftwarePage },
           courses: { component: CoursesPage },
         },
-        context: {
-          loadDomain: async (name) => domains[name] as never,
-          search: url.searchParams,
-        },
+        // The prerender domain table is complete; the router's generic callback
+        // narrows the selected value from its validated domain name.
+        context: { loadDomain: async (name) => domains[name] as never },
       }),
   });
   await handler(async ({ router }) => {
