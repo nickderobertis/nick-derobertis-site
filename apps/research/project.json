@@ -14,7 +14,12 @@
     },
     "build": {
       "executor": "@nx/rspack:rspack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}",
+        "{options.outputPath}/fragment.html",
+        "{options.outputPath}/fragment.css",
+        "{options.outputPath}/fragment.json"
+      ],
       "options": {
         "rspackConfig": "apps/research/rspack.config.ts",
         "outputPath": "dist/apps/research",

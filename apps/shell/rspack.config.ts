@@ -1,7 +1,7 @@
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
-import { remoteMap } from "@site/build-config";
+import { PublishedFragmentPlugin, remoteMap } from "@site/build-config";
 
 const base = "/nick-derobertis-site/";
 export default {
@@ -18,6 +18,7 @@ export default {
       optimization: true,
     }),
     new NxReactRspackPlugin(),
+    new PublishedFragmentPlugin("shell", false),
     new ModuleFederationPlugin({
       name: "shell",
       filename: "remoteEntry.js",

@@ -2,6 +2,7 @@ import { createRequire } from "node:module";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
+import { PublishedFragmentPlugin } from "./published-fragment";
 
 const remoteManifest = createRequire(import.meta.url)(
   "./remotes.json",
@@ -64,6 +65,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
         runtimeChunk: false,
       }),
       new NxReactRspackPlugin(),
+      new PublishedFragmentPlugin(name),
       new ModuleFederationPlugin({
         name: federationName,
         filename: "remoteEntry.js",
