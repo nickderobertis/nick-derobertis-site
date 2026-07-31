@@ -60,6 +60,17 @@ Running 25 tests using 1 worker
 The dependent tasks are the fixed static-site build and prerender prerequisites;
 the only executed e2e target is `skills:e2e`.
 
+After composition moved to published artifacts, an Awards-only source change
+no longer selects the shell prerender or any unrelated application build:
+
+```console
+$ pnpm exec nx show projects --affected --files=apps/awards/src/page.tsx --with-target=build --json
+["awards"]
+
+$ pnpm exec nx show projects --affected --files=apps/awards/src/page.tsx --with-target=prerender --json
+[]
+```
+
 ## Split data-access dependency economics
 
 ```console

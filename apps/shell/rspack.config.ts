@@ -18,7 +18,7 @@ export default {
       optimization: true,
     }),
     new NxReactRspackPlugin(),
-    new PublishedFragmentPlugin("shell", false),
+    new PublishedFragmentPlugin("shell"),
     new ModuleFederationPlugin({
       name: "shell",
       filename: "remoteEntry.js",

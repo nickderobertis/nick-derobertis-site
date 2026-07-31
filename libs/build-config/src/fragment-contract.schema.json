@@ -6,14 +6,20 @@
   "additionalProperties": false,
   "required": ["schemaVersion", "name", "react", "reactDom", "revision"],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "type": "number", "const": 1 },
     "name": { "type": "string", "pattern": "^[a-z][a-z-]*$" },
-    "react": { "type": "string", "minLength": 1 },
-    "reactDom": { "type": "string", "minLength": 1 },
-    "revision": { "type": "string", "minLength": 1 },
+    "react": {
+      "type": "string",
+      "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "reactDom": {
+      "type": "string",
+      "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "revision": { "type": "string", "pattern": "^[0-9a-f]{7,64}$" },
     "route": {
       "type": "string",
-      "pattern": "^/(?:[a-z0-9-]+)?$"
+      "pattern": "^\\/(?:[a-z0-9-]+)?$"
     }
   }
 }

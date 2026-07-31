@@ -2,13 +2,13 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const timelineContract = [
-  ["apps/shell/project.json", '"timeline"'],
+  ["scripts/compose.mjs", '"timeline"'],
   ["libs/build-config/src/remotes.json", '"timeline": "timeline"'],
   ["apps/home/rspack.config.ts", '"timeline"'],
   ["apps/home/src/remotes.d.ts", 'declare module "timeline/Page"'],
   ["apps/timeline/project.json", "E2E_REMOTE=timeline"],
   ["eslint.config.mjs", 'sourceTag: "scope:timeline"'],
-  ["scripts/prerender.mjs", "Object.keys(validatedRemoteManifest)"],
+  ["scripts/compose.mjs", "Object.keys(validatedRemoteManifest)"],
 ] as const;
 
 const awardsContract = [
@@ -17,7 +17,7 @@ const awardsContract = [
   ["apps/home/rspack.config.ts", '"awards"'],
   ["apps/home/src/page.tsx", 'import("awards/Page")'],
   ["apps/home/src/remotes.d.ts", 'declare module "awards/Page"'],
-  ["apps/shell/project.json", '"awards"'],
+  ["scripts/compose.mjs", '"awards"'],
   ["apps/awards/project.json", "E2E_REMOTE=awards"],
   ["libs/build-config/src/remotes.json", '"awards": "awards"'],
 ] as const;

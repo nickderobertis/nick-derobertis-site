@@ -73,10 +73,6 @@ perf url="" runs="":
 perf-compare new_url="" original_url="" runs="":
     @log=$(mktemp); trap 'rm -f "$log"' EXIT; PERF_URL="$1" PERF_ORIGINAL_URL="$2" PERF_RUNS="$3" pnpm exec nx run shell:perf >"$log" 2>&1 || { cat "$log" >&2; echo "perf-compare: audit failed; correct the reported URL/browser issue and rerun just perf-compare" >&2; exit 1; }; grep -m1 '^Performance comparison complete' "$log"
 
-# Compile the source-based React renderer consumed by the prerender target.
-build-prerender-renderer:
-    node scripts/build-prerender-renderer.mjs || { echo "build-prerender-renderer: compilation failed; fix the diagnostic above, then rerun just build-prerender-renderer" >&2; exit 1; }
-
 # Build the complete federated artifact before serving it at the Pages base path.
 serve: prerender
     node scripts/serve-e2e.mjs

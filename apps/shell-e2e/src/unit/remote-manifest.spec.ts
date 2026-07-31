@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "vitest";
 
-test("remote manifest matches Nx build dependencies", async () => {
+test("remote manifest matches published fragment composition", async () => {
   const manifest: unknown = JSON.parse(
     await readFile("libs/build-config/src/remotes.json", "utf8"),
   );
@@ -29,15 +29,20 @@ test("remote manifest matches Nx build dependencies", async () => {
     !Array.isArray(prerender.dependsOn)
   )
     throw new Error("Validated dependsOn list is required");
-  const projects = prerender.dependsOn.flatMap((item) =>
-    typeof item === "object" &&
-    item &&
-    "projects" in item &&
-    Array.isArray(item.projects)
-      ? item.projects
-      : [],
-  );
-  expect(projects.sort()).toEqual(Object.keys(remoteManifest).sort());
+  expect(prerender.dependsOn).toEqual(["build"]);
+  expect(project).toMatchObject({
+    targets: {
+      build: {
+        outputs: expect.arrayContaining([
+          "{options.outputPath}/fragment.html",
+          "{options.outputPath}/fragment.css",
+          "{options.outputPath}/fragment.json",
+        ]),
+      },
+    },
+  });
+  const compose = await readFile("scripts/compose.mjs", "utf8");
+  expect(compose).toContain("Object.keys(validatedRemoteManifest)");
   const declarations = `${await readFile("apps/home/src/remotes.d.ts", "utf8")}\n${await readFile("apps/shell/src/remotes.d.ts", "utf8")}`;
   const aliases = [
     ...declarations.matchAll(/declare module "([^/]+)\/Page"/g),
@@ -47,10 +52,21 @@ test("remote manifest matches Nx build dependencies", async () => {
   const remoteNames = Object.keys(remoteManifest);
   for (const remote of remoteNames) {
     expect(declarations).toContain(`${remoteManifest[remote]}/Page`);
-    expect(projects).toContain(remote);
+    expect(compose).toContain(`"${remote}"`);
     const remoteProject: unknown = JSON.parse(
       await readFile(`apps/${remote}/project.json`, "utf8"),
     );
+    expect(remoteProject).toMatchObject({
+      targets: {
+        build: {
+          outputs: expect.arrayContaining([
+            "{options.outputPath}/fragment.html",
+            "{options.outputPath}/fragment.css",
+            "{options.outputPath}/fragment.json",
+          ]),
+        },
+      },
+    });
     expect(remoteProject).toMatchObject({
       targets: {
         e2e: {

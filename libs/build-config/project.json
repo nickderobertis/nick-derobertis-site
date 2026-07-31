@@ -19,7 +19,9 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "options": { "command": "vitest run --passWithNoTests libs/build-config" }
+      "options": {
+        "command": "vitest run --passWithNoTests libs/build-config scripts/compose.spec.ts"
+      }
     }
   }
 }

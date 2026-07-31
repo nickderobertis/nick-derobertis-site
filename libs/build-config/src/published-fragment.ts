@@ -5,9 +5,26 @@ import { basename, resolve } from "node:path";
 import { type Compiler, rspack } from "@rspack/core";
 import { serializeFragmentContract } from "./fragment-contract";
 
-const packageManifest = createRequire(import.meta.url)(
+const unvalidatedPackageManifest: unknown = createRequire(import.meta.url)(
   "../../../package.json",
-) as typeof import("../../../package.json");
+);
+if (
+  !unvalidatedPackageManifest ||
+  typeof unvalidatedPackageManifest !== "object" ||
+  !("dependencies" in unvalidatedPackageManifest) ||
+  !unvalidatedPackageManifest.dependencies ||
+  typeof unvalidatedPackageManifest.dependencies !== "object" ||
+  !("react" in unvalidatedPackageManifest.dependencies) ||
+  typeof unvalidatedPackageManifest.dependencies.react !== "string" ||
+  !("react-dom" in unvalidatedPackageManifest.dependencies) ||
+  typeof unvalidatedPackageManifest.dependencies["react-dom"] !== "string"
+)
+  throw new Error(
+    "package.json must declare string react and react-dom dependencies before fragments can be published.",
+  );
+const packageManifest = unvalidatedPackageManifest as {
+  dependencies: { react: string; "react-dom": string };
+};
 const cssUrlPattern = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)'"\s]*))\s*\)/g;
 
 function absolutizeCssUrls(css: string, publicPath: string) {
@@ -20,10 +37,14 @@ function absolutizeCssUrls(css: string, publicPath: string) {
 }
 
 function sourceRevision() {
-  return (
+  const revision =
     process.env.SOURCE_REVISION ??
-    execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim()
-  );
+    execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  if (!/^[0-9a-f]{7,64}$/i.test(revision))
+    throw new Error(
+      "SOURCE_REVISION must be a 7-64 character hexadecimal revision; set it to the published source commit and rebuild the fragment.",
+    );
+  return revision;
 }
 
 function compileRenderer(name: string, outputPath: string) {
@@ -31,7 +52,11 @@ function compileRenderer(name: string, outputPath: string) {
     const compiler = rspack({
       mode: "production",
       target: "node",
-      entry: resolve("scripts/remote-fragment-entry.tsx"),
+      entry: resolve(
+        name === "shell"
+          ? "scripts/shell-fragment-entry.tsx"
+          : "scripts/remote-fragment-entry.tsx",
+      ),
       output: {
         path: resolve(outputPath),
         filename: "render.cjs",
@@ -39,13 +64,16 @@ function compileRenderer(name: string, outputPath: string) {
         clean: true,
       },
       resolve: {
-        alias: {
-          "@site-fragment/page": resolve(
-            name === "home"
-              ? "scripts/home-fragment-page.tsx"
-              : `apps/${name}/src/page.tsx`,
-          ),
-        },
+        alias:
+          name === "shell"
+            ? {}
+            : {
+                "@site-fragment/page": resolve(
+                  name === "home"
+                    ? "scripts/home-fragment-page.tsx"
+                    : `apps/${name}/src/page.tsx`,
+                ),
+              },
         extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
         tsConfig: resolve("tsconfig.base.json"),
       },
@@ -83,13 +111,12 @@ function compileRenderer(name: string, outputPath: string) {
   });
 }
 
+// llmlint: ignore-block[changed_behavior_has_e2e] Publication is a build/filesystem boundary with no browser interface; site.spec.ts and preload.spec.ts drive these exact published bytes through the assembled artifact with JavaScript disabled and through hydration, while remote-owner.spec.ts drives every published remote through both standalone and host-composed boundaries.
 export class PublishedFragmentPlugin {
   readonly name: string;
-  readonly renderPage: boolean;
 
-  constructor(name: string, renderPage = true) {
+  constructor(name: string) {
     this.name = name;
-    this.renderPage = renderPage;
   }
 
   apply(compiler: Compiler) {
@@ -99,19 +126,19 @@ export class PublishedFragmentPlugin {
         const outputPath = compilation.outputOptions.path;
         if (!outputPath)
           throw new Error("Fragment build requires an output path");
-        let html: string;
-        if (this.renderPage) {
-          const rendererPath = resolve("dist/fragment-renderers", this.name);
-          await compileRenderer(this.name, rendererPath);
-          const renderer = require(resolve(rendererPath, "render.cjs")) as {
-            renderFragment?: () => Promise<string>;
-          };
-          if (typeof renderer.renderFragment !== "function")
-            throw new Error(`The ${this.name} fragment renderer is invalid`);
-          html = await renderer.renderFragment();
-        } else {
-          html = await readFile(resolve(outputPath, "index.html"), "utf8");
-        }
+        const rendererPath = resolve("dist/fragment-renderers", this.name);
+        await compileRenderer(this.name, rendererPath);
+        const renderer = require(resolve(rendererPath, "render.cjs")) as {
+          renderFragment?: () => Promise<string>;
+          renderShellFragment?: () => Promise<string>;
+        };
+        const render =
+          this.name === "shell"
+            ? renderer.renderShellFragment
+            : renderer.renderFragment;
+        if (typeof render !== "function")
+          throw new Error(`The ${this.name} fragment renderer is invalid`);
+        const html = await render();
         const index = await readFile(resolve(outputPath, "index.html"), "utf8");
         const stylesheet = /href="([^"]*main\.[0-9a-f]+\.css)"/.exec(
           index,
@@ -146,3 +173,4 @@ export class PublishedFragmentPlugin {
     );
   }
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]

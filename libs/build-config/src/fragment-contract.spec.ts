@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "vitest";
+import { z } from "zod";
 import {
   fragmentContractSchema,
   serializeFragmentContract,
@@ -14,6 +15,21 @@ test("the checked-in fragment contract golden validates and round-trips", async 
   );
   const parsed = fragmentContractSchema.parse(golden);
   expect(JSON.parse(serializeFragmentContract(parsed))).toEqual(golden);
+});
+
+test("the published JSON Schema is generated from the runtime contract", async () => {
+  const published = JSON.parse(
+    await readFile(
+      "libs/build-config/src/fragment-contract.schema.json",
+      "utf8",
+    ),
+  );
+  const generated = z.toJSONSchema(fragmentContractSchema);
+  expect(published).toEqual({
+    ...generated,
+    $id: published.$id,
+    title: published.title,
+  });
 });
 
 test("optional fragment fields are omitted when empty", () => {
