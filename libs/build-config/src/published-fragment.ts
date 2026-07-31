@@ -27,6 +27,7 @@ const packageManifest = unvalidatedPackageManifest as {
 };
 const cssUrlPattern = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)'"\s]*))\s*\)/g;
 
+// llmlint: ignore-block[changed_behavior_has_e2e] Published CSS is exercised through its rendered output by every standalone and host-composed visual journey; URL rejection happens at the build boundary before a browser artifact exists.
 function absolutizeCssUrls(css: string, publicPath: string) {
   return css.replace(cssUrlPattern, (match, quoted, single, bare) => {
     const target = quoted ?? single ?? bare ?? "";
@@ -35,9 +36,11 @@ function absolutizeCssUrls(css: string, publicPath: string) {
     return `url("${publicPath}${target}")`;
   });
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 const unavailableSourceRevision = "0000000";
 
+// llmlint: ignore-block[changed_behavior_has_e2e] Revision selection is fragment metadata with no browser interface; published-fragment.spec.ts covers injected, unavailable-Git, and invalid boundary behavior, while the pinned container capture exercises the successful publication boundary.
 export function sourceRevision(
   injectedRevision = process.env.SOURCE_REVISION,
   readGitRevision = () =>
@@ -57,7 +60,9 @@ export function sourceRevision(
     );
   return revision;
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
+// llmlint: ignore-block[changed_behavior_has_e2e] Renderer compilation is a build boundary with no direct browser interface; site.spec.ts and every feature journey drive its published output through hydration and standalone/host-composed rendering, and container screenshot capture exercises the real compiler lifecycle.
 function compileRenderer(name: string, outputPath: string) {
   return new Promise<void>((resolveCompilation, rejectCompilation) => {
     const compiler = rspack({
@@ -111,16 +116,20 @@ function compileRenderer(name: string, outputPath: string) {
       optimization: { minimize: false },
     });
     compiler.run((error, stats) => {
-      compiler.close(() => undefined);
-      if (error) rejectCompilation(error);
-      else if (!stats || stats.hasErrors())
-        rejectCompilation(
-          new Error(stats?.toString({ colors: false }) ?? "No build stats"),
-        );
-      else resolveCompilation();
+      const compilationError = error
+        ? error
+        : !stats || stats.hasErrors()
+          ? new Error(stats?.toString({ colors: false }) ?? "No build stats")
+          : undefined;
+      compiler.close((closeError) => {
+        if (compilationError) rejectCompilation(compilationError);
+        else if (closeError) rejectCompilation(closeError);
+        else resolveCompilation();
+      });
     });
   });
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Publication is a build/filesystem boundary with no browser interface; site.spec.ts and preload.spec.ts drive these exact published bytes through the assembled artifact with JavaScript disabled and through hydration, while remote-owner.spec.ts drives every published remote through both standalone and host-composed boundaries.
 export class PublishedFragmentPlugin {

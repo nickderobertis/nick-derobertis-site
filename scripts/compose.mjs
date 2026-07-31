@@ -75,15 +75,18 @@ export function validatedHydrationMetadata(value, routePath) {
   const dom = new JSDOM(`<body>${value.replaceAll("\0", nulSentinel)}</body>`);
   const children = [...dom.window.document.body.children];
   const script = children[0];
-  if (
-    children.length !== 1 ||
-    script?.tagName !== "SCRIPT" ||
-    script.attributes.length !== 0 ||
-    !script.textContent?.includes("$_TSR.router=") ||
-    !script.textContent.includes("$_TSR.e()")
-  )
+  const violations = [
+    children.length !== 1 && `expected one element, found ${children.length}`,
+    script?.tagName !== "SCRIPT" && "the sole element is not a script",
+    script?.attributes.length !== 0 && "the hydration script has attributes",
+    !script?.textContent?.includes("$_TSR.router=") &&
+      "the hydration script lacks $_TSR.router assignment",
+    !script?.textContent?.includes("$_TSR.e()") &&
+      "the hydration script lacks $_TSR.e() completion",
+  ].filter(Boolean);
+  if (violations.length > 0)
     throw new Error(
-      `The shell fragment has invalid router hydration for ${routePath}. Rebuild the shell fragment and rerun just prerender.`,
+      `The shell fragment has invalid router hydration for ${routePath}: ${violations.join("; ")}. Rebuild the shell fragment and rerun just prerender.`,
     );
   return script.outerHTML.replaceAll(nulSentinel, "\0");
 }
@@ -131,6 +134,7 @@ export function validateFragmentContracts(contracts) {
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This normalization turns React's completed streamed boundary into the stable DOM React hydrates; site.spec.ts exercises the assembled result through hydration, and every feature journey drives the normalized markup through standalone and host-composed browser paths.
 function finalizeReactPrerender(html) {
   const dom = new JSDOM(`<body>${html}</body>`);
   const { document, Node } = dom.window;
@@ -154,6 +158,7 @@ function finalizeReactPrerender(html) {
   }
   return document.body.innerHTML;
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 function replaceSlot(markup, name, fragment) {
   const dom = new JSDOM(`<body>${markup}</body>`);
@@ -209,13 +214,17 @@ export async function compose({
       throw new Error(
         `The ${name} fragment CSS cannot be inlined safely. Remove markup tokens from that app's CSS, rebuild it, and rerun just prerender.`,
       );
-    if (
-      html.trim().length === 0 ||
-      /<(?:html|head|body)\b/i.test(html) ||
-      (name === "shell" && !html.includes("data-shell-route"))
-    )
+    const htmlViolations = [
+      html.trim().length === 0 && "markup is empty",
+      /<(?:html|head|body)\b/i.test(html) &&
+        "markup contains a document-level html, head, or body element",
+      name === "shell" &&
+        !html.includes("data-shell-route") &&
+        "shell markup lacks data-shell-route",
+    ].filter(Boolean);
+    if (htmlViolations.length > 0)
       throw new Error(
-        `The ${name} fragment HTML does not match the published page-markup contract. Rebuild ${name} and rerun just prerender.`,
+        `The ${name} fragment HTML does not match the published page-markup contract: ${htmlViolations.join("; ")}. Rebuild ${name} and rerun just prerender.`,
       );
     fragments.set(name, { html, css });
     contracts.push(contract);

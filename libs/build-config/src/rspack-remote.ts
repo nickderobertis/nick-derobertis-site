@@ -65,6 +65,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
         runtimeChunk: false,
       }),
       new NxReactRspackPlugin(),
+      // llmlint: ignore[changed_behavior_has_e2e] remote-owner.spec.ts drives every published remote through its standalone and host-composed browser boundaries, and the feature journey specs cover their happy and recovery states.
       new PublishedFragmentPlugin(name),
       new ModuleFederationPlugin({
         name: federationName,

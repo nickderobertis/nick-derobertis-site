@@ -18,6 +18,7 @@ export default {
       optimization: true,
     }),
     new NxReactRspackPlugin(),
+    // llmlint: ignore[changed_behavior_has_e2e] site.spec.ts drives the shell's composed published bytes with JavaScript disabled and through hydration, while every journey spec drives the same shell artifact through its host-composed boundary.
     new PublishedFragmentPlugin("shell"),
     new ModuleFederationPlugin({
       name: "shell",

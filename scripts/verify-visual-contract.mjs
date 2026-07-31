@@ -72,7 +72,7 @@ if (
     JSON.stringify(composedProjects)
 )
   throw new Error(
-    "Nx screenshot build dependencies must include every remote consumed by full-shell fragment composition",
+    "Nx screenshot build dependencies must include every remote consumed by full-shell fragment composition; add every remotes.json key to targetDefaults.screenshot.dependsOn projects in nx.json",
   );
 if (nxConfig.targetDefaults?.screenshot?.cache !== false)
   throw new Error(
