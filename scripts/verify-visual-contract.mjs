@@ -54,9 +54,8 @@ if (!remoteMapMatch)
     "Home composition must declare its remotes through remoteMap",
   );
 const composedProjects = [
-  "home",
-  ...[...remoteMapMatch[1].matchAll(/"([a-z][a-z0-9-]*)"/g)].map(
-    (match) => match[1],
+  ...Object.keys(
+    JSON.parse(readFileSync("libs/build-config/src/remotes.json", "utf8")),
   ),
 ].sort();
 const screenshotBuildDependency =
@@ -73,7 +72,7 @@ if (
     JSON.stringify(composedProjects)
 )
   throw new Error(
-    "Nx screenshot build dependencies must match the home composition remote map",
+    "Nx screenshot build dependencies must include every remote consumed by full-shell fragment composition",
   );
 if (nxConfig.targetDefaults?.screenshot?.cache !== false)
   throw new Error(
