@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { expect, test } from "vitest";
 
@@ -29,7 +30,36 @@ test("remote manifest matches published fragment composition", async () => {
     !Array.isArray(prerender.dependsOn)
   )
     throw new Error("Validated dependsOn list is required");
-  expect(prerender.dependsOn).toEqual(["build"]);
+  const taskGraphOutput = execFileSync(
+    "pnpm",
+    ["exec", "nx", "run", "shell:prerender", "--graph=stdout"],
+    {
+      encoding: "utf8",
+      env: { ...process.env, NX_DAEMON: "false" },
+      maxBuffer: 10 * 1024 * 1024,
+    },
+  );
+  const taskGraph: unknown = JSON.parse(taskGraphOutput);
+  if (
+    !taskGraph ||
+    typeof taskGraph !== "object" ||
+    !("tasks" in taskGraph) ||
+    !taskGraph.tasks ||
+    typeof taskGraph.tasks !== "object" ||
+    !("dependencies" in taskGraph.tasks) ||
+    !taskGraph.tasks.dependencies ||
+    typeof taskGraph.tasks.dependencies !== "object"
+  )
+    throw new Error("Nx must return a validated task dependency graph");
+  const dependencies = taskGraph.tasks.dependencies as Record<string, string[]>;
+  const prerenderDependencies = dependencies["shell:prerender"];
+  if (!prerenderDependencies)
+    throw new Error("Nx must schedule shell prerender dependencies");
+  expect(prerenderDependencies.sort()).toEqual(
+    ["shell", ...Object.keys(remoteManifest)]
+      .map((name) => `${name}:build`)
+      .sort(),
+  );
   expect(project).toMatchObject({
     targets: {
       build: {
