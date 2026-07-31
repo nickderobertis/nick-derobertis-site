@@ -69,7 +69,9 @@ Home's fragment similarly contains its `home-main` frame and seven pane slots.
 The contract records its schema version, app name, exact React and React DOM
 versions, and source revision. Revisions may differ because the artifacts are
 independent, but `scripts/compose.mjs` rejects React or React DOM version skew
-before writing any route.
+before writing any route. Publishers stamp `SOURCE_REVISION` when available;
+local or container builds that cannot reach Git use the contract-valid
+`0000000` sentinel so source metadata never makes a build unavailable.
 
 `shell:prerender` composes a GitHub Pages artifact at `dist/apps/shell` under
 the `/nick-derobertis-site/` base from those published bytes. It imports no app

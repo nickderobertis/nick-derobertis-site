@@ -36,10 +36,21 @@ function absolutizeCssUrls(css: string, publicPath: string) {
   });
 }
 
-function sourceRevision() {
-  const revision =
-    process.env.SOURCE_REVISION ??
-    execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+const unavailableSourceRevision = "0000000";
+
+export function sourceRevision(
+  injectedRevision = process.env.SOURCE_REVISION,
+  readGitRevision = () =>
+    execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
+) {
+  let revision = injectedRevision;
+  if (revision === undefined) {
+    try {
+      revision = readGitRevision();
+    } catch {
+      revision = unavailableSourceRevision;
+    }
+  }
   if (!/^[0-9a-f]{7,64}$/i.test(revision))
     throw new Error(
       "SOURCE_REVISION must be a 7-64 character hexadecimal revision; set it to the published source commit and rebuild the fragment.",
