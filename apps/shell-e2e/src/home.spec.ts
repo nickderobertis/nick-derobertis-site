@@ -254,11 +254,11 @@ test("script entry points reject invalid inputs with recovery actions", async ()
     await mkdir(output);
     await mkdir(builds);
     await cp("dist/apps/shell/index.html", join(output, "index.html"));
-    const missing = spawnSync(process.execPath, ["scripts/prerender.mjs"], {
+    const missing = spawnSync(process.execPath, ["scripts/compose.mjs"], {
       env: {
         ...process.env,
-        PRERENDER_OUTPUT: output,
-        REMOTE_BUILD_ROOT: builds,
+        COMPOSE_OUTPUT: output,
+        FRAGMENT_ROOT: builds,
       },
       encoding: "utf8",
     });

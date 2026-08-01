@@ -110,6 +110,7 @@ jobs:
       capture-command: |
         corepack enable
         pnpm install --frozen-lockfile
+        export SOURCE_REVISION="$GITHUB_SHA"
         case "$SCREENCOMP_PROJECT" in
           "" | [!a-z]* | [a-z]*[!a-z0-9-]*)
             echo "capture-command: SCREENCOMP_PROJECT must be a valid Nx project name" >&2

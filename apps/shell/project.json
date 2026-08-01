@@ -7,7 +7,12 @@
   "targets": {
     "build": {
       "executor": "@nx/rspack:rspack",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}",
+        "{options.outputPath}/fragment.html",
+        "{options.outputPath}/fragment.css",
+        "{options.outputPath}/fragment.json"
+      ],
       "options": {
         "rspackConfig": "apps/shell/rspack.config.ts",
         "outputPath": "dist/apps/shell",
@@ -23,29 +28,31 @@
     },
     "prerender": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] Nx dependency selection has no browser interface and remote-manifest.spec.ts exercises it at the project-graph contract; site.spec.ts drives the composed artifact with JavaScript disabled and through hydration, and every journey spec drives standalone and host-composed boundaries."
+      },
       "dependsOn": [
         "build",
-        "build-prerender-renderer",
         {
           "target": "build",
           "projects": [
             "home",
             "home-carousel",
+            "home-contact",
             "home-cards",
             "home-story",
-            "home-contact",
+            "timeline",
+            "skills",
+            "awards",
             "bio",
             "research",
             "software",
-            "courses",
-            "timeline",
-            "skills",
-            "awards"
+            "courses"
           ]
         }
       ],
       "options": {
-        "command": "node scripts/prerender.mjs && node scripts/check-static-artifact.mjs"
+        "command": "node scripts/compose.mjs && node scripts/check-static-artifact.mjs # llmlint: ignore[changed_behavior_has_e2e] Compose contract and filesystem failures happen before an artifact can be served, so compose.spec.ts exercises that real CLI boundary; site.spec.ts drives its successful output with and without JavaScript."
       }
     },
     "perf": {
@@ -54,14 +61,6 @@
       "options": {
         "command": "node scripts/performance-audit.mjs"
       }
-    },
-    "build-prerender-renderer": {
-      "executor": "nx:run-commands",
-      "metadata": {
-        "description": "llmlint: ignore[changed_behavior_has_e2e] This build-only Nx target has no browser interface; its output is consumed by shell:prerender and exercised through the real shell browser journeys."
-      },
-      "outputs": ["{workspaceRoot}/dist/prerender-renderer"],
-      "options": { "command": "node scripts/build-prerender-renderer.mjs" }
     },
     "lint": {
       "executor": "nx:run-commands",

@@ -53,12 +53,26 @@ if (!remoteMapMatch)
   throw new Error(
     "Home composition must declare its remotes through remoteMap",
   );
-const composedProjects = [
-  "home",
-  ...[...remoteMapMatch[1].matchAll(/"([a-z][a-z0-9-]*)"/g)].map(
-    (match) => match[1],
-  ),
-].sort();
+let remoteManifest;
+try {
+  remoteManifest = JSON.parse(
+    readFileSync("libs/build-config/src/remotes.json", "utf8"),
+  );
+} catch (error) {
+  throw new Error(
+    `libs/build-config/src/remotes.json is not readable JSON (${error.message}); restore it to an object mapping each remote's project name to its federation alias, then rerun just lint-workflows`,
+  );
+}
+if (
+  !remoteManifest ||
+  typeof remoteManifest !== "object" ||
+  Array.isArray(remoteManifest) ||
+  Object.values(remoteManifest).some((alias) => typeof alias !== "string")
+)
+  throw new Error(
+    "libs/build-config/src/remotes.json must be an object mapping each remote's project name to its federation alias string; restore that shape, then rerun just lint-workflows",
+  );
+const composedProjects = Object.keys(remoteManifest).sort();
 const screenshotBuildDependency =
   nxConfig.targetDefaults?.screenshot?.dependsOn?.find(
     (dependency) =>
@@ -73,7 +87,7 @@ if (
     JSON.stringify(composedProjects)
 )
   throw new Error(
-    "Nx screenshot build dependencies must match the home composition remote map",
+    "Nx screenshot build dependencies must include every remote consumed by full-shell fragment composition; add every remotes.json key to targetDefaults.screenshot.dependsOn projects in nx.json",
   );
 if (nxConfig.targetDefaults?.screenshot?.cache !== false)
   throw new Error(

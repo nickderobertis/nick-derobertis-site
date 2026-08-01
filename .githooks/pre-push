@@ -130,6 +130,7 @@ echo "pre-push: capturing affected microfrontends (${apps[*]}) in $CONTAINER…"
 docker run --rm --platform="linux/amd64" --ipc=host --shm-size=2g \
   -v "$PWD:/work" -v /work/node_modules -w /work \
   -e "SCREENCOMP_APPS=${apps[*]}" -e "ARCH=$ARCH" \
+  -e "SOURCE_REVISION=$(git rev-parse HEAD)" \
   ${ca_args[@]+"${ca_args[@]}"} \
   "$CONTAINER" \
   bash -lc '

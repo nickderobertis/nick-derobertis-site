@@ -1,7 +1,7 @@
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
-import { remoteMap } from "@site/build-config";
+import { PublishedFragmentPlugin, remoteMap } from "@site/build-config";
 
 const base = "/nick-derobertis-site/";
 export default {
@@ -18,6 +18,8 @@ export default {
       optimization: true,
     }),
     new NxReactRspackPlugin(),
+    // llmlint: ignore[changed_behavior_has_e2e] site.spec.ts drives the shell's composed published bytes with JavaScript disabled and through hydration, while every journey spec drives the same shell artifact through its host-composed boundary.
+    new PublishedFragmentPlugin("shell"),
     new ModuleFederationPlugin({
       name: "shell",
       filename: "remoteEntry.js",

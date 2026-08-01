@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nickderobertis.github.io/nick-derobertis-site/contracts/fragment-v1.schema.json",
+  "title": "Published fragment contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "name", "react", "reactDom", "revision"],
+  "properties": {
+    "schemaVersion": { "type": "number", "const": 1 },
+    "name": { "type": "string", "pattern": "^[a-z][a-z-]*$" },
+    "react": {
+      "type": "string",
+      "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "reactDom": {
+      "type": "string",
+      "pattern": "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "revision": { "type": "string", "pattern": "^[0-9a-f]{7,64}$" },
+    "route": {
+      "type": "string",
+      "pattern": "^\\/(?:[a-z0-9-]+)?$"
+    }
+  }
+}

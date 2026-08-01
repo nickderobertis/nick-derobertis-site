@@ -36,7 +36,11 @@
             "home-story",
             "timeline",
             "skills",
-            "awards"
+            "awards",
+            "bio",
+            "research",
+            "software",
+            "courses"
           ]
         },
         { "target": "prerender", "projects": ["shell"] }

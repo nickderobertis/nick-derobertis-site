@@ -23,7 +23,13 @@ const realRouteMarkers = {
   "/courses": 'class="courses-page"',
 };
 
-const root = "dist/apps/shell";
+// llmlint: ignore-block[changed_behavior_has_e2e] This override exists only so static-artifact.spec.ts can corrupt an isolated assembled artifact and exercise its failure diagnostics; site.spec.ts drives the successful default artifact in a real browser with and without JavaScript.
+const root = process.env.STATIC_ARTIFACT_ROOT ?? "dist/apps/shell";
+if (typeof root !== "string" || root.length === 0 || root.includes("\0"))
+  throw new Error(
+    "STATIC_ARTIFACT_ROOT must be a non-empty filesystem path; fix it and rerun just prerender.",
+  );
+// llmlint: ignore-end[changed_behavior_has_e2e]
 // llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
 // llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] routes.json is the serialized source; this plain-Node artifact boundary cannot import the TypeScript parser, and just check runs both validators against that same source.
 function parseRoutes(value) {
@@ -67,7 +73,7 @@ for (const route of validatedRoutes) {
   const expected = substantiveRouteContent[route.path];
   if (!expected || !html.includes(expected))
     throw new Error(
-      `${path} lacks substantive route content; fix scripts/prerender.mjs and rerun just check.`,
+      `${path} lacks substantive route content; fix scripts/compose.mjs and rerun just check.`,
     );
   // The prerendered markup only paints styled at first load when every remote
   // it renders has its page CSS inline ahead of the deferred federation scripts.
@@ -80,11 +86,11 @@ for (const route of validatedRoutes) {
     const inlined = html.indexOf(css);
     if (inlined === -1)
       throw new Error(
-        `${path} lacks the inlined ${names.join(", ")} page CSS; fix scripts/prerender.mjs and rerun just prerender.`,
+        `${path} lacks the inlined ${names.join(", ")} page CSS; fix scripts/compose.mjs and rerun just prerender.`,
       );
     if (deferredScripts === -1 || inlined > deferredScripts)
       throw new Error(
-        `${path} inlines the ${names.join(", ")} page CSS after its deferred scripts; fix scripts/prerender.mjs and rerun just prerender.`,
+        `${path} inlines the ${names.join(", ")} page CSS after its deferred scripts; fix scripts/compose.mjs and rerun just prerender.`,
       );
   }
   if (route.path !== "/") {
@@ -95,12 +101,12 @@ for (const route of validatedRoutes) {
     const marker = realRouteMarkers[route.path];
     if (!marker || !html.includes(marker))
       throw new Error(
-        `${path} lacks its real component marker (${marker ?? "undefined"}); fix scripts/render-entry.tsx and rerun just prerender.`,
+        `${path} lacks its real component marker (${marker ?? "undefined"}); rebuild the ${route.remote} fragment and rerun just prerender.`,
       );
     const routeAttribute = `${routeContracts.prerenderRouteAttribute}="${route.path}"`;
     if (!html.includes(routeAttribute))
       throw new Error(
-        `${path} lacks ${routeAttribute}; fix scripts/prerender.mjs and rerun just prerender.`,
+        `${path} lacks ${routeAttribute}; fix scripts/compose.mjs and rerun just prerender.`,
       );
     if (html.includes('id="__TSR_DEHYDRATED__"'))
       throw new Error(
@@ -108,11 +114,11 @@ for (const route of validatedRoutes) {
       );
     if (!html.includes("$_TSR.router="))
       throw new Error(
-        `${path} lacks the TanStack Router serialized state; fix scripts/render-entry.tsx and rerun just prerender.`,
+        `${path} lacks the TanStack Router serialized state; rebuild the shell fragment and rerun just prerender.`,
       );
     if (!html.includes("$_TSR.e()"))
       throw new Error(
-        `${path} lacks the TanStack Router hydration completion call; fix scripts/render-entry.tsx and rerun just prerender.`,
+        `${path} lacks the TanStack Router hydration completion call; rebuild the shell fragment and rerun just prerender.`,
       );
   }
 }

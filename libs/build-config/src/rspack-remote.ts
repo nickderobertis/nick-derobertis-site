@@ -2,7 +2,10 @@ import { createRequire } from "node:module";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
+import { PublishedFragmentPlugin } from "./published-fragment";
 
+// `require` returns `any`, so the checked-in JSON's own inferred type is
+// restored here and the entry shapes are validated below before any use.
 const remoteManifest = createRequire(import.meta.url)(
   "./remotes.json",
 ) as typeof import("./remotes.json");
@@ -46,6 +49,8 @@ interface RemoteOptions {
 export function remoteConfig(name: string, options: RemoteOptions = {}) {
   const root = `apps/${name}`;
   const publicPath = `${pagesBase}/remotes/${name}/`;
+  // The `in` guard has already established the key, but TypeScript does not
+  // narrow an arbitrary string to a manifest key, so the branch says so.
   const federationName =
     name in remoteManifest ? remoteManifest[name as RemoteProject] : name;
   return {
@@ -64,6 +69,8 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
         runtimeChunk: false,
       }),
       new NxReactRspackPlugin(),
+      // llmlint: ignore[changed_behavior_has_e2e] remote-owner.spec.ts drives every published remote through its standalone and host-composed browser boundaries, and the feature journey specs cover their happy and recovery states.
+      new PublishedFragmentPlugin(name),
       new ModuleFederationPlugin({
         name: federationName,
         filename: "remoteEntry.js",

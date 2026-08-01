@@ -20,7 +20,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: 26.5.0, cache: pnpm}
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec nx run shell:prerender
+      - run: just prerender
+        env:
+          SOURCE_REVISION: ${{ github.sha }}
       - uses: actions/upload-pages-artifact@v3
         with: {path: dist/apps/shell}
   deploy:

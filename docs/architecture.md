@@ -12,7 +12,7 @@ feature testable either inside its parent host or directly at its standalone
 URL while preserving route-boundary ownership.
 
 `libs/build-config/src/remotes.json` is the canonical remote registry.
-`remoteMap` turns it into project-base URLs, and the prerender target uses the
+`remoteMap` turns it into project-base URLs, and the compose target uses the
 same registry when staging every `remoteEntry.js`. React and React DOM are
 singleton federation dependencies. Nx project tags and ESLint prevent feature
 domains from reaching into one another: shared libraries may use only shared
@@ -22,7 +22,7 @@ allowed child remotes.
 
 Startup pays for one route remote, not the graph. The shell resolves only the
 page for the route its document was rendered for — the `data-prerendered-route`
-attribute the prerender step stamps on `#root`, with the pathname as the
+attribute the compose step stamps on `#root`, with the pathname as the
 fallback — and registers the other four routes as lazy route components, so the
 router fetches each container when it preloads that route on hover intent. The
 shell therefore also sets the federation `shareStrategy` to `loaded-first`: the
@@ -40,7 +40,8 @@ shared libraries -> layout -> shell
 ```
 
 `data-access-core` owns schema validation, generated CV contracts, and site
-configuration. Each `data-access-<domain>` library owns only its feature's data
+configuration and the versioned published-fragment schema. Each
+`data-access-<domain>` library owns only its feature's data
 shaping and depends only on the core. Nx module boundaries allow remotes to
 import core plus their own domain library and reject cross-domain imports.
 `design-system` owns only cross-cutting tokens, the reset, the `.main`
@@ -56,27 +57,52 @@ hooks may read the staged same-origin JSON, but they validate it through
 
 The former API is intentionally gone: there is no backend or runtime API. CV data is generated outside this
 repository, committed under `libs/data-access-core/vendor/codegen`, and validated at
-the core and prerender boundaries. Prerender copies the validated files
+the core and fragment-build boundaries. Compose copies the validated files
 to `cv-data/` in the artifact; browser data requests therefore remain static
 same-origin file reads.
 
-`shell:prerender` builds a GitHub Pages artifact at `dist/apps/shell` under the
-`/nick-derobertis-site/` base. It emits HTML for all five routes, stages every
-remote below `remotes/<name>/`, copies CV data, and creates `404.html`. The
+Every app build publishes `fragment.html`, `fragment.css`, and `fragment.json`
+beside its federated bundle. A remote's HTML and already-absolutized CSS are
+produced from that remote's source only. The shell fragment contains the five
+shell-owned router frames, their hydration payloads, and named route slots;
+Home's fragment similarly contains its `home-main` frame and seven pane slots.
+The contract records its schema version, app name, exact React and React DOM
+versions, and source revision. Revisions may differ because the artifacts are
+independent, but `scripts/compose.mjs` rejects React or React DOM version skew
+before writing any route. Publishers stamp `SOURCE_REVISION` when available;
+local or container builds that cannot reach Git use the contract-valid
+`0000000` sentinel so source metadata never makes a build unavailable.
+
+`shell:prerender` composes a GitHub Pages artifact at `dist/apps/shell` under
+the `/nick-derobertis-site/` base from those published bytes. It imports no app
+source: it fills the shell and Home slots, normalizes React's completed
+Suspense boundaries, emits HTML for all five routes, stages every remote below
+`remotes/<name>/`, copies CV data, and creates `404.html`. The
 fallback supplies useful no-script recovery text; with JavaScript enabled the
 client router restores an unknown deep link to the home route. GitHub Actions
 uploads this directory directly to Pages. The custom domain is intentionally
 outside this deployment until its separate migration.
 
 Page CSS ships with each remote's federated JavaScript, so every route document
-also inlines the page CSS of the remotes whose markup it prerenders — Home
+also inlines the published fragment CSS of the remotes whose markup it composes — Home
 inlines its own plus the seven panes it composes — ahead of the deferred
 scripts. Without that, the prerendered content would paint unstyled until
-roughly a megabyte of JavaScript arrived. `scripts/remote-css.mjs` owns the
-route-to-remote map, reads each hashed `main.*.css` from the remote's own built
-document, rewrites its relative `url()` targets to the remote's public path, and
-deduplicates identical payloads; `scripts/check-static-artifact.mjs` fails when
-a route document is missing any of them.
+roughly a megabyte of JavaScript arrived. Each app build rewrites relative
+`url()` targets against its own public path; compose maps routes to fragments
+and deduplicates identical payloads. `scripts/check-static-artifact.mjs` runs
+after assembly and fails when a route stamp or required inlined CSS is absent.
+
+The byte comparison against the former source renderer found three intentional
+differences. Router hydration timestamps reflect the independent shell build
+rather than compose time, and React's server-timing `requestAnimationFrame`
+probe is absent where async feature markup was rendered by its owning remote
+instead of inside the shell render. React-generated form-control IDs on Home
+also use each pane fragment's own render namespace instead of the former
+shell-wide namespace; each matching `for`/`id` pair remains intact. None of
+these differences changes application DOM semantics or hydration state; the
+browser suite verifies that all five documents reuse their DOM without
+hydration warnings. Route markup, substantive content, CSS, router payloads,
+staging, CV data, and fallback behavior are otherwise equivalent.
 
 ## Affected-only economics
 
@@ -88,8 +114,8 @@ optimization rather than the only safety net.
 
 The measured integration review is recorded in
 [integration-proof.md](integration-proof.md). Its `nx affected --files` proof
-showed that a design-system change selected all 12 dependent remotes, a Skills
-page change selected only `skills:e2e`, and domain/core data changes preserve
+showed that a design-system change selected all 12 dependent remotes, an Awards
+page change selects only `awards:build` and no prerender target, and domain/core data changes preserve
 the isolation documented there. In the Skills case, 25 browser
 tests passed and only one e2e target ran; the remaining 14 tasks were required
 static build/prerender dependencies. The shell integration target separately
