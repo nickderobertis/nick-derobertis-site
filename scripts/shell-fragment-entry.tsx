@@ -36,7 +36,14 @@ export async function renderShellFragment() {
       createRouter: () =>
         createSiteRouter({
           pages,
-          context: { loadDomain: async (name) => domains[name] as never },
+          // The generic parameter carries the requested domain's name through to
+          // its own value type, so each route loader receives exactly the domain
+          // it asked for without the lookup widening to a union.
+          context: {
+            loadDomain: async <Name extends keyof typeof domains>(
+              name: Name,
+            ): Promise<(typeof domains)[Name]> => domains[name],
+          },
         }),
     });
     await handler(async ({ router }) => {

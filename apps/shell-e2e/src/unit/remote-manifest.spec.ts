@@ -2,6 +2,19 @@ import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { expect, test } from "vitest";
 
+/**
+ * Nx reports `tasks.dependencies` as a map from task id to the task ids it
+ * depends on. Validating that shape here is what lets this test compare the
+ * scheduled dependencies as strings instead of trusting the graph's JSON.
+ */
+function isTaskDependencies(value: object): value is Record<string, string[]> {
+  return Object.values(value).every(
+    (tasks: unknown) =>
+      Array.isArray(tasks) &&
+      tasks.every((task: unknown) => typeof task === "string"),
+  );
+}
+
 test("remote manifest matches published fragment composition", async () => {
   const manifest: unknown = JSON.parse(
     await readFile("libs/build-config/src/remotes.json", "utf8"),
@@ -51,7 +64,11 @@ test("remote manifest matches published fragment composition", async () => {
     typeof taskGraph.tasks.dependencies !== "object"
   )
     throw new Error("Nx must return a validated task dependency graph");
-  const dependencies = taskGraph.tasks.dependencies as Record<string, string[]>;
+  const dependencies = taskGraph.tasks.dependencies;
+  if (!isTaskDependencies(dependencies))
+    throw new Error(
+      `Nx must report every task's dependencies as a list of task names, got ${JSON.stringify(dependencies)}`,
+    );
   const prerenderDependencies = dependencies["shell:prerender"];
   if (!prerenderDependencies)
     throw new Error("Nx must schedule shell prerender dependencies");
