@@ -4,6 +4,8 @@ import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
 import { PublishedFragmentPlugin } from "./published-fragment";
 
+// `require` returns `any`, so the checked-in JSON's own inferred type is
+// restored here and the entry shapes are validated below before any use.
 const remoteManifest = createRequire(import.meta.url)(
   "./remotes.json",
 ) as typeof import("./remotes.json");
@@ -47,6 +49,8 @@ interface RemoteOptions {
 export function remoteConfig(name: string, options: RemoteOptions = {}) {
   const root = `apps/${name}`;
   const publicPath = `${pagesBase}/remotes/${name}/`;
+  // The `in` guard has already established the key, but TypeScript does not
+  // narrow an arbitrary string to a manifest key, so the branch says so.
   const federationName =
     name in remoteManifest ? remoteManifest[name as RemoteProject] : name;
   return {

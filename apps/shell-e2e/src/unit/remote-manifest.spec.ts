@@ -3,6 +3,19 @@ import { readFile } from "node:fs/promises";
 import { expect, test } from "vitest";
 
 /**
+ * remotes.json maps each remote's Nx project name to its federation alias, so
+ * validating that both sides are strings is what lets this test compare the
+ * manifest against the composition and declaration files as text.
+ */
+function isRemoteManifest(value: unknown): value is Record<string, string> {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    Object.values(value).every((alias: unknown) => typeof alias === "string")
+  );
+}
+
+/**
  * Nx reports `tasks.dependencies` as a map from task id to the task ids it
  * depends on. Validating that shape here is what lets this test compare the
  * scheduled dependencies as strings instead of trusting the graph's JSON.
@@ -16,22 +29,18 @@ function isTaskDependencies(value: object): value is Record<string, string[]> {
 }
 
 test("remote manifest matches published fragment composition", async () => {
-  const manifest: unknown = JSON.parse(
+  const remoteManifest: unknown = JSON.parse(
     await readFile("libs/build-config/src/remotes.json", "utf8"),
   );
   const project: unknown = JSON.parse(
     await readFile("apps/shell/project.json", "utf8"),
   );
-  if (
-    !manifest ||
-    typeof manifest !== "object" ||
-    Object.values(manifest).some((value) => typeof value !== "string") ||
-    !project ||
-    typeof project !== "object" ||
-    !("targets" in project)
-  )
-    throw new Error("Validated manifest and project objects are required");
-  const remoteManifest = manifest as Record<string, string>;
+  if (!isRemoteManifest(remoteManifest))
+    throw new Error(
+      `remotes.json must map every remote name to a federation alias string, got ${JSON.stringify(remoteManifest)}`,
+    );
+  if (!project || typeof project !== "object" || !("targets" in project))
+    throw new Error("Validated shell project object is required");
   const targets = project.targets;
   if (!targets || typeof targets !== "object" || !("prerender" in targets))
     throw new Error("Validated prerender target is required");
