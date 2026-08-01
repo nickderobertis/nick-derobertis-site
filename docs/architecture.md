@@ -81,7 +81,7 @@ Suspense boundaries, emits HTML for all five routes, stages every remote below
 fallback supplies useful no-script recovery text; with JavaScript enabled the
 client router restores an unknown deep link to the home route. `just compose
 <store>/apps <output>` runs it plus `check-static-artifact.mjs` over an
-already-published content store; `shell:prerender` is the local shortcut that
+already-published content store; `just prerender` is the local shortcut that
 builds every app first and composes into `dist/apps/shell`, which is what
 `just serve` and the browser suites use. The custom domain is intentionally
 outside this deployment until its separate migration.
@@ -94,9 +94,10 @@ independent deployability comes from splitting *publishing an app's bytes* from
 stages and builds no app it does not have to:
 
 ```text
-affected (nx affected --with-target build, filtered to publishable apps)
+affected: just publish-lanes <before> <sha>   (just publish-lanes seeds every lane)
   -> publish lane per app (matrix, fail-fast: false)
-       nx run <app>:build  ->  apps/<app>/ on the content-store branch
+       just build-app <app>  ->  just publish-fragment
+                                   -> apps/<app>/ on the content-store branch
   -> deploy (one serialized lane)
        just compose .content-store/apps dist/site -> upload-pages-artifact -> deploy-pages
 ```

@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { join } from "node:path";
+import { join, normalize, resolve, sep } from "node:path";
 import { fragmentContractSchema } from "./fragment-contract.ts";
 
 // llmlint: ignore-block[changed_behavior_has_e2e] The remote registry is a build-time config file with no browser interface: a malformed manifest is rejected before any lane writes bytes, so no artifact and nothing servable exists on that path. publish-fragment.spec.ts drives the derived lane list through the real exported API, and publish-lanes.spec.ts drives it through the real selection CLI.
@@ -47,13 +47,16 @@ export const contentStoreAppRoot = "apps";
 export const contentStoreNoticePath = "README.md";
 
 /**
- * Branch names GitHub Pages can be configured to serve directly. The content
- * store holds unassembled per-app bytes, so serving it would publish a
- * directory listing of fragments instead of the composed site — and would move
- * the deploy back onto Pages' legacy branch builder, whose newer-build-kills-
- * older-build race is exactly what the workflow artifact deploy avoids.
+ * The three branch names this repository refuses as a content store. They are
+ * not every branch GitHub Pages can be pointed at — Pages will serve any branch
+ * — but they are the conventional ones, and they are the ones a misconfigured
+ * lane would plausibly reach. The content store holds unassembled per-app
+ * bytes, so serving it would publish a directory listing of fragments instead of
+ * the composed site, and would move the deploy back onto Pages' legacy branch
+ * builder, whose newer-build-kills-older-build race is exactly what the workflow
+ * artifact deploy avoids.
  */
-const servedBranches = ["master", "main", "gh-pages"];
+const prohibitedContentStoreBranches = ["master", "main", "gh-pages"];
 
 export const contentStoreNotice = `# Published fragment content store
 
@@ -95,7 +98,7 @@ interface GitResult {
 }
 
 /** Push URLs carry an access token, so never surface one in a message. */
-function redact(text: string) {
+function redactCredentials(text: string) {
   return text.replace(/\/\/[^@\s/]*@/g, "//***@");
 }
 
@@ -109,12 +112,12 @@ function git(args: readonly string[], cwd: string, allowFailure = false) {
   const stderr = result.stderr ?? "";
   if (result.error)
     throw new Error(
-      `Could not run git ${redact(args.join(" "))} in ${cwd}: ${result.error.message}. Install git on the publish runner and retry.`,
+      `Could not run git ${redactCredentials(args.join(" "))} in ${cwd}: ${result.error.message}. Install git on the publish runner and retry.`,
     );
   const status = result.status ?? 1;
   if (status !== 0 && !allowFailure)
     throw new Error(
-      `git ${redact(args.join(" "))} failed in ${cwd}: ${redact(`${stderr}${stdout}`).trim()}`,
+      `git ${redactCredentials(args.join(" "))} failed in ${cwd}: ${redactCredentials(`${stderr}${stdout}`).trim()}`,
     );
   return { status, stdout, stderr } satisfies GitResult;
 }
@@ -143,7 +146,7 @@ export function validatedBranch(value: string | undefined) {
     throw new Error(
       `PUBLISH_BRANCH must be a valid git branch name; received ${JSON.stringify(value)}. Set it to the content-store branch and rerun just publish-fragment.`,
     );
-  if (servedBranches.includes(value))
+  if (prohibitedContentStoreBranches.includes(value))
     throw new Error(
       `PUBLISH_BRANCH must not be ${value}: the fragment content store is storage only and must never become a branch GitHub Pages could serve. Publish to a dedicated content-store branch and rerun just publish-fragment.`,
     );
@@ -168,7 +171,29 @@ export function validatedPath(value: string | undefined, label: string) {
     throw new Error(
       `${label} must be a non-empty filesystem path. Set it to a readable directory and rerun just publish-fragment.`,
     );
+  // A leading dash reaches git and cp as an option rather than as a path, and a
+  // `..` segment reads or writes outside the directory this lane was handed.
+  if (value.startsWith("-") || normalize(value).split(sep).includes(".."))
+    throw new Error(
+      `${label} must be a filesystem path that neither begins with "-" nor traverses with ".."; received ${JSON.stringify(value)}. Set it to a directory this publish lane owns and rerun just publish-fragment.`,
+    );
   return value;
+}
+
+/**
+ * Scratch space, held to a stricter rule than a path this lane only reads: the
+ * lane runs `git checkout --force` and `git clean -fd` here, so a value that is
+ * or contains the workspace would destroy the checkout it was launched from.
+ */
+export function validatedWorkdir(value: string | undefined) {
+  const path = validatedPath(value, "PUBLISH_WORKDIR");
+  const resolved = resolve(path);
+  const workspace = resolve(".");
+  if (workspace === resolved || workspace.startsWith(`${resolved}${sep}`))
+    throw new Error(
+      `PUBLISH_WORKDIR must be scratch space this publish lane owns; ${resolved} is or contains the workspace, which the lane force-checks-out and cleans. Set it to a dedicated directory such as .publish-store and rerun just publish-fragment.`,
+    );
+  return path;
 }
 
 export function validatedCount(
@@ -270,7 +295,7 @@ function syncToBranchTip(options: PublishOptions, attempt: number) {
   );
   if (probe.status !== 0 && probe.status !== 2)
     throw new Error(
-      `Could not read the ${options.branch} content-store branch: ${redact(`${probe.stderr}${probe.stdout}`).trim()}. Check the publish credentials and rerun just publish-fragment.`,
+      `Could not read the ${options.branch} content-store branch: ${redactCredentials(`${probe.stderr}${probe.stdout}`).trim()}. Check the publish credentials and rerun just publish-fragment.`,
     );
   if (probe.status === 0) {
     git(
@@ -358,7 +383,7 @@ export async function publishFragment(
         changed: true,
         attempts: attempt,
       };
-    lastFailure = redact(`${pushed.stderr}${pushed.stdout}`).trim();
+    lastFailure = redactCredentials(`${pushed.stderr}${pushed.stdout}`).trim();
     if (attempt < options.attempts) await sleep(options.retryDelayMs * attempt);
   }
   throw new Error(
@@ -380,10 +405,7 @@ export function publishOptionsFromEnv(
     ),
     branch: validatedBranch(env.PUBLISH_BRANCH),
     remote: validatedRemote(env.PUBLISH_REMOTE),
-    workdir: validatedPath(
-      env.PUBLISH_WORKDIR ?? ".publish-store",
-      "PUBLISH_WORKDIR",
-    ),
+    workdir: validatedWorkdir(env.PUBLISH_WORKDIR ?? ".publish-store"),
     attempts: validatedCount(env.PUBLISH_ATTEMPTS, 5, "PUBLISH_ATTEMPTS"),
     retryDelayMs:
       validatedCount(env.PUBLISH_RETRY_SECONDS, 2, "PUBLISH_RETRY_SECONDS") *

@@ -78,8 +78,11 @@ test("the compose command refuses a content store it cannot read", () => {
 
   expect(result.status).toBe(2);
   expect(result.stderr).toMatch(
-    /compose: store must be a readable content-store apps directory/,
+    /^compose: store must be a readable content-store apps directory/,
   );
+  // The deploy lane's log carries the guidance and nothing else: no shell body.
+  expect(result.stderr).not.toContain("scripts/compose.mjs");
+  expect(result.stderr).not.toContain("FRAGMENT_ROOT=");
 });
 
 test("the compose command refuses to write outside the workspace", () => {
@@ -87,6 +90,7 @@ test("the compose command refuses to write outside the workspace", () => {
 
   expect(result.status).toBe(2);
   expect(result.stderr).toMatch(
-    /compose: output must be a workspace-relative directory/,
+    /^compose: output must be a workspace-relative directory/,
   );
+  expect(result.stderr).not.toContain("scripts/check-static-artifact.mjs");
 });

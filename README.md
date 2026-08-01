@@ -126,4 +126,4 @@ has never held a full set of fragments is seeded.
 The content-store branch is storage only and is never the served source: Pages
 stays on `build_type: workflow`, because the artifact deploy avoids the legacy
 branch builder's newer-build-kills-in-flight-build race. There is no runtime
-server or API to provision. See [docs/architecture.md](docs/architecture.md).
+server or API to provision.

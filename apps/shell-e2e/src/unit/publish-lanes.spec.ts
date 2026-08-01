@@ -91,6 +91,18 @@ describe("publish lane selection", () => {
     expect(result.stdout).toBe("");
   });
 
+  test("a range git would read as an option is refused before it reaches git", () => {
+    const result = spawnSync("just", ["publish-lanes", "--all", "HEAD"], {
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toMatch(
+      /publish-lanes: base and head must resolve to commits/,
+    );
+    expect(result.stdout).toBe("");
+  });
+
   test("an unrecognized argument is refused rather than read as no lanes", () => {
     const result = spawnSync("node", ["scripts/publishable-apps.mjs", "--al"], {
       encoding: "utf8",
@@ -103,6 +115,28 @@ describe("publish lane selection", () => {
     expect(result.stdout).toBe("");
   });
 
+  // `just build-app` is what a publish lane runs, and a lane may build only a
+  // project that owns a content-store subtree. A buildable library is a valid
+  // Nx build target and would otherwise slip through.
+  test("build-app refuses a buildable library that owns no publish lane", () => {
+    const library: unknown = JSON.parse(
+      readFileSync("libs/design-system/project.json", "utf8"),
+    );
+    expect(
+      (library as { targets: Record<string, unknown> }).targets,
+    ).toHaveProperty("build");
+    expect(registeredApps()).not.toContain("design-system");
+
+    const result = spawnSync("just", ["build-app", "design-system"], {
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toMatch(
+      /build-app: app must name a publish lane.*owns no content-store subtree/s,
+    );
+  });
+
   test("a selection that is not a list of project names is refused", () => {
     const result = spawnSync("node", ["scripts/publishable-apps.mjs"], {
       encoding: "utf8",
@@ -112,6 +146,54 @@ describe("publish lane selection", () => {
     expect(result.stderr).toMatch(
       /publishable-apps:.*JSON array of Nx project names/,
     );
+    expect(result.stdout).toBe("");
+  });
+});
+
+// A publish lane's log is read when something has gone wrong, so a successful
+// recipe emits only its own result and a failing one emits only guidance —
+// never the shell body Just would otherwise echo.
+describe("publish command surface output", () => {
+  test("a successful lane selection prints only the matrix", () => {
+    const result = spawnSync("just", ["publish-lanes"], { encoding: "utf8" });
+
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(result.stdout.trimEnd().split("\n")).toHaveLength(1);
+    expect(JSON.parse(result.stdout)).toEqual(registeredApps());
+  });
+
+  test("a refused build names the fix without echoing the recipe body", () => {
+    const result = spawnSync("just", ["build-app", "design-system"], {
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toMatch(/^build-app: app must name a publish lane/);
+    expect(result.stderr).not.toContain("scripts/publishable-apps.mjs");
+    expect(result.stderr).not.toContain("mktemp");
+  });
+
+  test("a refused publish names the fix without echoing the recipe body", () => {
+    const environment = Object.fromEntries(
+      Object.entries(process.env).filter(
+        ([name]) => !name.startsWith("PUBLISH_"),
+      ),
+    );
+
+    const result = spawnSync("just", ["publish-fragment"], {
+      encoding: "utf8",
+      env: environment,
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      "publish-fragment: PUBLISH_APP must name a publishable app",
+    );
+    expect(result.stderr).toContain(
+      "nothing was written to the content-store branch",
+    );
+    expect(result.stderr).not.toContain("node scripts/publish-fragment.mjs");
     expect(result.stdout).toBe("");
   });
 });

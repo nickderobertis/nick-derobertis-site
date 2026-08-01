@@ -16,8 +16,10 @@ try {
 } catch (error) {
   // Every message this can carry already names what to correct; add where the
   // operator acts, because a lane failure is read in a CI log with no context.
+  // PUBLISH_APP is deliberately not named here: this handler also catches the
+  // validation that would have rejected it, so it is not a value to echo back.
   console.error(
-    `publish-fragment: ${error instanceof Error ? error.message : String(error)}\npublish-fragment: nothing was written to the content-store branch, so ${process.env.PUBLISH_APP ?? "this app"} still serves its last published bytes. Fix the cause above and rerun this lane; the compose-and-deploy lane needs no change.`,
+    `publish-fragment: ${error instanceof Error ? error.message : String(error)}\npublish-fragment: nothing was written to the content-store branch, so this lane's app still serves its last published bytes. Fix the cause above and rerun this lane; the compose-and-deploy lane needs no change.`,
   );
   process.exit(1);
 }

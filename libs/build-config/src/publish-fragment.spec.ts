@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { afterEach, expect, test } from "vitest";
 import { serializeFragmentContract } from "./fragment-contract";
 import {
@@ -274,7 +274,7 @@ test("staging outside the owned subtree is refused before anything is committed"
 });
 
 test.each(["master", "main", "gh-pages"])(
-  "the content store may not be the %s branch GitHub Pages could serve",
+  "the content store may not be the conventionally served %s branch",
   (served) => {
     expect(() =>
       publishOptionsFromEnv({
@@ -319,6 +319,30 @@ test.each([
     /PUBLISH_WORKDIR must be a non-empty/,
   ],
   [
+    // Rejected because it still escapes once normalized; `dist/apps/x/../y`
+    // does not, and stays a legitimate build output path.
+    "a source that traverses above the workspace",
+    { PUBLISH_SOURCE: "dist/../../elsewhere/apps/shell" },
+    /PUBLISH_SOURCE must be a filesystem path that neither begins with "-" nor traverses/,
+  ],
+  [
+    "a source git and cp would read as an option",
+    { PUBLISH_SOURCE: "--exclude=apps" },
+    /PUBLISH_SOURCE must be a filesystem path that neither begins with "-"/,
+  ],
+  [
+    "a workdir that traverses out of the scratch directory",
+    { PUBLISH_WORKDIR: "../.publish-store" },
+    /PUBLISH_WORKDIR must be a filesystem path that neither begins with "-" nor traverses/,
+  ],
+  [
+    // The lane force-checks-out and cleans its workdir, so this value would
+    // wipe the checkout the lane is running from.
+    "a workdir that is the workspace itself",
+    { PUBLISH_WORKDIR: "." },
+    /PUBLISH_WORKDIR must be scratch space this publish lane owns; .* is or contains the workspace/,
+  ],
+  [
     "too many attempts",
     { PUBLISH_ATTEMPTS: "99" },
     /PUBLISH_ATTEMPTS must be an integer/,
@@ -332,6 +356,19 @@ test.each([
       ...overrides,
     }),
   ).toThrow(message);
+});
+
+test("a workdir that contains the workspace is refused before any checkout", () => {
+  expect(() =>
+    publishOptionsFromEnv({
+      PUBLISH_APP: "shell",
+      PUBLISH_BRANCH: branch,
+      PUBLISH_REMOTE: "https://github.example.invalid/site.git",
+      // Absolute, so it carries no `..` segment for the traversal check to
+      // catch; the lane's `git clean -fd` would still reach the workspace.
+      PUBLISH_WORKDIR: dirname(process.cwd()),
+    }),
+  ).toThrow(/is or contains the workspace/);
 });
 
 test("publish options default to the app's own build output", () => {
