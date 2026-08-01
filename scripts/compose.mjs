@@ -39,6 +39,7 @@ export const routeFragments = {
   "/software": ["software"],
   "/courses": ["courses"],
 };
+// llmlint: ignore-block[changed_behavior_has_e2e] These are build-time input validators in a Node CLI with no browser interface: they reject a malformed site config or shell fragment before any artifact exists, so there is nothing for a browser to load on the failure path. compose.spec.ts drives them through the real exported API, and site.spec.ts plus every feature journey drive the artifact they gate.
 function validatedPagesBase(value) {
   if (typeof value !== "string" || !/^\/[a-z0-9-]+$/.test(value))
     throw new Error(
@@ -99,6 +100,7 @@ function requiredPath(value, fallback, label) {
     );
   return path;
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Version skew prevents composition before any page can be served, so compose.spec.ts exercises this exported CLI boundary directly; site.spec.ts and every feature journey exercise matching contracts through the real assembled browser artifact.
 export function validateFragmentContracts(contracts) {
