@@ -63,6 +63,15 @@ try {
     `libs/build-config/src/remotes.json is not readable JSON (${error.message}); restore it to an object mapping each remote's project name to its federation alias, then rerun just lint-workflows`,
   );
 }
+if (
+  !remoteManifest ||
+  typeof remoteManifest !== "object" ||
+  Array.isArray(remoteManifest) ||
+  Object.values(remoteManifest).some((alias) => typeof alias !== "string")
+)
+  throw new Error(
+    "libs/build-config/src/remotes.json must be an object mapping each remote's project name to its federation alias string; restore that shape, then rerun just lint-workflows",
+  );
 const composedProjects = Object.keys(remoteManifest).sort();
 const screenshotBuildDependency =
   nxConfig.targetDefaults?.screenshot?.dependsOn?.find(
