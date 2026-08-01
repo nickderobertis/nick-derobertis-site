@@ -9,3 +9,7 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 .gh-secrets-state.json
+# Working copies of the published-fragment content store: the deploy lane's
+# checkout, and the scratch repository each publish lane pushes from.
+.content-store/
+.publish-store/

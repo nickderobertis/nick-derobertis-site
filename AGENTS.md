@@ -43,6 +43,25 @@ install; `scripts/verify-visual-contract.mjs` guards that and the toggle/baselin
 contracts. Per-app baselines/galleries and the `reference/screenshots` PR #12
 baseline are retained.
 
+Pages deployment is split: `.github/workflows/pages.yml` runs one publish lane
+per affected app, each building only its own app and writing only its own
+`apps/<app>/` subtree to the `published-fragments` content-store branch, and one
+serialized compose-and-deploy lane that runs `just compose` over whatever that
+branch currently holds and uploads it with `actions/upload-pages-artifact`.
+Compose builds nothing. **The content-store branch is storage and must never
+become the served source**: Pages stays on `build_type: workflow` because the
+artifact deploy avoids the legacy branch builder, where a newer build kills an
+in-flight one and records it `errored` with duration 0, and because serving the
+branch would publish unassembled fragments;
+`libs/build-config/src/publish-fragment.ts` rejects `master`, `main`, and
+`gh-pages`. The deploy lane uses `queue: max` with `cancel-in-progress: false`
+so queued deploys are never silently dropped — the default `queue: single`
+cancels the pending run when a third arrives, and `queue: max` with
+`cancel-in-progress: true` is a workflow validation error. Compose is idempotent
+full state, so a superseded run loses nothing. The actionlint release pinned in
+`ci-tools.json` predates the `queue` key, so `.github/actionlint.yaml` ignores
+that one message in that one file.
+
 ## Workflow
 
 Use `just` as the only command surface. `just check` is the full pre-push gate. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow, with the `.githooks/pre-push` guard as its local half (it re-captures only affected microfrontends when `[guard].paths` change and blocks the push until a regenerated baseline is committed).

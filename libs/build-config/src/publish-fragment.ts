@@ -3,11 +3,36 @@ import { existsSync } from "node:fs";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join } from "node:path";
-import { fragmentContractSchema } from "./fragment-contract";
+import { fragmentContractSchema } from "./fragment-contract.ts";
 
-const remoteManifest = createRequire(import.meta.url)(
-  "./remotes.json",
-) as typeof import("./remotes.json");
+// llmlint: ignore-block[changed_behavior_has_e2e] The remote registry is a build-time config file with no browser interface: a malformed manifest is rejected before any lane writes bytes, so no artifact and nothing servable exists on that path. publish-fragment.spec.ts drives the derived lane list through the real exported API, and publish-lanes.spec.ts drives it through the real selection CLI.
+/**
+ * Narrows the canonical remote registry before any lane name is derived from
+ * it. A publish lane's name becomes a branch subtree path, so a manifest key
+ * that is not a plain project name must be rejected here rather than reaching
+ * git.
+ */
+export function validatedRemoteRegistry(
+  value: unknown,
+): Record<string, string> {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    Object.keys(value).length === 0 ||
+    Object.keys(value).some((name) => !/^[a-z][a-z0-9-]*$/.test(name)) ||
+    Object.values(value).some((alias) => typeof alias !== "string")
+  )
+    throw new Error(
+      "libs/build-config/src/remotes.json must map every remote's project name to a federation alias string. Fix the remote registry and rerun just publish-fragment.",
+    );
+  return value as Record<string, string>;
+}
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
+const remoteManifest = validatedRemoteRegistry(
+  createRequire(import.meta.url)("./remotes.json"),
+);
 
 /** The shell plus every federated remote publishes exactly one subtree. */
 export const publishableApps: readonly string[] = [
@@ -104,11 +129,16 @@ export function validatedApp(value: string | undefined) {
 }
 
 export function validatedBranch(value: string | undefined) {
+  // The cheap shape check rejects anything unsafe to hand to a subprocess;
+  // git itself then owns the actual ref-name grammar, which is far more
+  // intricate than a regex here would honestly capture (trailing `/` or `.`,
+  // `//`, `@{`, control characters, and more).
   if (
     typeof value !== "string" ||
     !/^[A-Za-z0-9][A-Za-z0-9._/-]{0,99}$/.test(value) ||
-    value.includes("..") ||
-    value.endsWith(".lock")
+    spawnSync("git", ["check-ref-format", `refs/heads/${value}`], {
+      encoding: "utf8",
+    }).status !== 0
   )
     throw new Error(
       `PUBLISH_BRANCH must be a valid git branch name; received ${JSON.stringify(value)}. Set it to the content-store branch and rerun just publish-fragment.`,
@@ -186,7 +216,9 @@ async function readPublishedFragment(source: string, app: string) {
   }
   let contract: unknown;
   try {
-    contract = JSON.parse(await readFile(join(source, "fragment.json"), "utf8"));
+    contract = JSON.parse(
+      await readFile(join(source, "fragment.json"), "utf8"),
+    );
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(
@@ -245,7 +277,10 @@ function syncToBranchTip(options: PublishOptions, attempt: number) {
       ["fetch", "--depth=1", "--no-tags", "origin", options.branch],
       options.workdir,
     );
-    git(["checkout", "--force", "-B", "publish", "FETCH_HEAD"], options.workdir);
+    git(
+      ["checkout", "--force", "-B", "publish", "FETCH_HEAD"],
+      options.workdir,
+    );
     git(["clean", "-fdq"], options.workdir);
     return;
   }
@@ -332,6 +367,7 @@ export async function publishFragment(
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This is the publish lane's environment boundary in a CI/CLI context with no browser interface: it resolves PUBLISH_* values and their defaults before any bytes are written, so a rejected value leaves no artifact and nothing servable. publish-fragment.spec.ts drives it through the real exported API for every default and every rejection, scripts/publish-fragment.mjs is the real CLI it feeds, and the bytes the resulting options publish are driven through the browser by site.spec.ts and every feature journey once the compose lane assembles them.
 export function publishOptionsFromEnv(
   env: Record<string, string | undefined>,
 ): PublishOptions {
@@ -349,12 +385,9 @@ export function publishOptionsFromEnv(
       "PUBLISH_WORKDIR",
     ),
     attempts: validatedCount(env.PUBLISH_ATTEMPTS, 5, "PUBLISH_ATTEMPTS"),
-    retryDelayMs: validatedCount(
-      env.PUBLISH_RETRY_SECONDS,
-      2,
-      "PUBLISH_RETRY_SECONDS",
-    )
-      ? Number(env.PUBLISH_RETRY_SECONDS ?? 2) * 1000
-      : 0,
+    retryDelayMs:
+      validatedCount(env.PUBLISH_RETRY_SECONDS, 2, "PUBLISH_RETRY_SECONDS") *
+      1000,
   };
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]

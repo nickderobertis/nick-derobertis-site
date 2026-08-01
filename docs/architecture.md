@@ -73,15 +73,68 @@ before writing any route. Publishers stamp `SOURCE_REVISION` when available;
 local or container builds that cannot reach Git use the contract-valid
 `0000000` sentinel so source metadata never makes a build unavailable.
 
-`shell:prerender` composes a GitHub Pages artifact at `dist/apps/shell` under
-the `/nick-derobertis-site/` base from those published bytes. It imports no app
+`scripts/compose.mjs` assembles a GitHub Pages artifact under the
+`/nick-derobertis-site/` base from those published bytes. It imports no app
 source: it fills the shell and Home slots, normalizes React's completed
 Suspense boundaries, emits HTML for all five routes, stages every remote below
 `remotes/<name>/`, copies CV data, and creates `404.html`. The
 fallback supplies useful no-script recovery text; with JavaScript enabled the
-client router restores an unknown deep link to the home route. GitHub Actions
-uploads this directory directly to Pages. The custom domain is intentionally
+client router restores an unknown deep link to the home route. `just compose
+<store>/apps <output>` runs it plus `check-static-artifact.mjs` over an
+already-published content store; `shell:prerender` is the local shortcut that
+builds every app first and composes into `dist/apps/shell`, which is what
+`just serve` and the browser suites use. The custom domain is intentionally
 outside this deployment until its separate migration.
+
+## Independent publishing and one composed deploy
+
+Under GitHub Pages a deployed artifact is always the whole site, so
+independent deployability comes from splitting *publishing an app's bytes* from
+*assembling and deploying the site*. `.github/workflows/pages.yml` has three
+stages and builds no app it does not have to:
+
+```text
+affected (nx affected --with-target build, filtered to publishable apps)
+  -> publish lane per app (matrix, fail-fast: false)
+       nx run <app>:build  ->  apps/<app>/ on the content-store branch
+  -> deploy (one serialized lane)
+       just compose .content-store/apps dist/site -> upload-pages-artifact -> deploy-pages
+```
+
+`libs/build-config/src/publish-fragment.ts` owns a lane's whole contract. It
+re-reads the branch tip, replaces only `apps/<app>/`, and refuses to commit any
+staged path outside that subtree or the root notice, so a lane can never revert
+another lane's bytes. Concurrent lanes race for the tip, so a rejected
+non-fast-forward push is expected rather than exceptional: the lane re-syncs to
+the winner's tip and re-applies its own subtree, up to `PUBLISH_ATTEMPTS` times.
+Compose is idempotent full state — it always assembles every app's currently
+published bytes — so a superseded compose run loses nothing and the next one
+publishes everything. Publish lanes carry revisions independently, which is why
+compose tolerates revision skew while still rejecting React version skew.
+
+**The content-store branch is storage and must never become the served
+source.** Pages for this repository stays on `build_type: workflow`. The
+artifact deploy is what avoids the legacy Pages branch builder, where a newer
+build kills an in-flight one and records it `errored` with duration 0, and it is
+why the 10-builds-per-hour soft limit does not apply. Serving the branch would
+also publish unassembled per-app fragments rather than a site.
+`validatedBranch` rejects `master`, `main`, and `gh-pages` outright.
+
+The compose-and-deploy job declares `concurrency: {group: pages-compose-deploy,
+queue: max, cancel-in-progress: false}`. The default `queue: single` keeps at
+most one pending run and cancels it when a third arrives, which would silently
+drop the deploys of every app published in between; `queue: max` queues up to
+100 runs in FIFO order instead. `queue: max` with `cancel-in-progress: true` is
+a workflow validation error. The actionlint release pinned in `ci-tools.json`
+predates the `queue` key, so `.github/actionlint.yaml` ignores exactly that one
+message in exactly that one file.
+
+Nothing a lane builds may require git to be reachable: `SOURCE_REVISION` is
+stamped by the caller and falls back to the `0000000` sentinel, because the
+visual-capture container mounts only the worktree. A push to `master` publishes
+only affected apps; a manual `workflow_dispatch` republishes every lane, which
+is how a content store that has never held a full set of fragments is seeded,
+since compose refuses to assemble a partial site.
 
 Page CSS ships with each remote's federated JavaScript, so every route document
 also inlines the published fragment CSS of the remotes whose markup it composes — Home

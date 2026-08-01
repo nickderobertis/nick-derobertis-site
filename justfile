@@ -17,9 +17,16 @@ bootstrap:
     # llmlint: ignore[changed_behavior_has_e2e] Bootstrap is a developer CLI with no browser interface; this path verifies the installer bytes and propagates download, integrity, and installation failures directly.
     if ! command -v screencomp >/dev/null; then installer=$(mktemp); log=$(mktemp); trap 'rm -f "$installer" "$log"' EXIT; curl -fsSL -o "$installer" https://raw.githubusercontent.com/nickderobertis/screencomp/59c45975126574f60d148b3ef3c9c5f8cef24987/scripts/install.sh 2>"$log" || { cat "$log" >&2; echo "bootstrap: screencomp installer download failed; check network access and rerun just bootstrap" >&2; exit 1; }; actual=$(node -e 'const fs = require("node:fs"); const crypto = require("node:crypto"); process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"));' "$installer"); [[ "$actual" = dd4e02daf93c3f056b84b0555c03c60b8e8bfb29ecb462e7dfa4b84fd84202b4 ]] || { echo "bootstrap: screencomp installer checksum mismatch; verify GitHub repository access and rerun just bootstrap" >&2; exit 1; }; sh "$installer" --version v0.4.5 >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: screencomp install failed; check network access and rerun just bootstrap" >&2; exit 1; }; fi
 
-bootstrap-ci:
-    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap-ci: dependency install failed; check the lockfile and registry access, then rerun just bootstrap-ci" >&2; exit 1; }
+bootstrap-ci: install
+    # llmlint: ignore[changed_behavior_has_e2e] This CI setup command has no browser interface; it delegates to just install and to the real pinned-tool installer, which verifies the downloaded bytes and propagates every failure.
     scripts/setup-ci-tools.sh || { echo "bootstrap-ci: pinned CI tool installation failed; check the reported checksum or network error, then rerun just bootstrap-ci" >&2; exit 1; }
+
+# Workspace dependencies only. The Pages publish and deploy lanes need nothing
+# else: they never run lint-workflows, so the pinned actionlint and shellcheck
+# binaries bootstrap-ci downloads would be dead weight in every lane.
+install:
+    # llmlint: ignore[changed_behavior_has_e2e] This dependency-install command has no browser interface; it drives the real pnpm lockfile install and surfaces its failure verbatim, and every browser journey runs against the workspace it provisions.
+    log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm install --frozen-lockfile --reporter=silent >"$log" 2>&1 || { cat "$log" >&2; echo "install: dependency install failed; check the lockfile and registry access, then rerun just install" >&2; exit 1; }
 
 lint-workflows:
     scripts/setup-ci-tools.sh --verify >/dev/null
@@ -30,6 +37,8 @@ lint-workflows:
     callbacks=$(mktemp -d); trap 'rm -rf "$callbacks"' EXIT; node scripts/extract-injected-callbacks.mjs "$callbacks" && .tools/bin/shellcheck --shell=sh "$callbacks"/*.sh || { echo "lint-workflows: screencomp's injected capture callback is not valid POSIX sh; rewrite it without bash-only constructs, then rerun just lint-workflows" >&2; exit 1; }
     node scripts/verify-visual-contract.mjs || { echo "lint-workflows: visual tool pins or capture contracts drifted; update visual-tools.json and every named consumer together" >&2; exit 1; }
     node scripts/verify-reference-migration.mjs || { echo "lint-workflows: PR #12 reference migration verification failed; repair the migration map or its owned baselines and retry" >&2; exit 1; }
+    # llmlint: ignore[changed_behavior_has_e2e] This gate reads committed configuration and has no browser interface: it fails a push before any workflow runs, so nothing it rejects can reach a visitor. runtime-pins.spec.ts drives this exact command as a real subprocess over the committed tree and over copies with one pin moved.
+    node scripts/verify-runtime-pins.mjs || { echo "lint-workflows: workflow runtime pins drifted; align every workflow with package.json's packageManager and one Node version, then rerun just lint-workflows" >&2; exit 1; }
 
 check: test lint-workflows
     # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
@@ -65,6 +74,31 @@ test-e2e:
 
 prerender:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run shell:prerender >"$log" 2>&1 || { cat "$log" >&2; echo "prerender: static Pages artifact failed; fix the build or artifact validation above and rerun just prerender" >&2; exit 1; }
+
+# Print the publish-lane matrix for a push range, or every lane when no range
+# is given. The Pages workflow's affected job is the only caller.
+@publish-lanes base="" head="":
+    # llmlint: ignore[changed_behavior_has_e2e] This selection command has no browser interface; publish-lanes.spec.ts drives the real CLI it delegates to through affected selection, the seed-everything path, and invalid input.
+    base="$1"; head="$2"; if [[ -z "$base" ]]; then node scripts/publishable-apps.mjs --all; else git rev-parse --verify "$base^{commit}" >/dev/null 2>&1 && git rev-parse --verify "$head^{commit}" >/dev/null 2>&1 || { echo "publish-lanes: base and head must resolve to commits; pass the push range (for example just publish-lanes \"$base\" HEAD after fetching it), or pass no arguments to select every lane" >&2; exit 2; }; err=$(mktemp); trap 'rm -f "$err"' EXIT; affected=$(pnpm exec nx show projects --affected --with-target build --base="$base" --head="$head" --json 2>"$err") || { cat "$err" >&2; echo "publish-lanes: Nx could not resolve the affected projects between $base and $head; fix the error above, or fetch the missing commits, then rerun just publish-lanes $base $head" >&2; exit 1; }; printf '%s' "$affected" | node scripts/publishable-apps.mjs; fi
+
+# Build exactly one app, which is all a publish lane is allowed to build.
+build-app app:
+    # llmlint: ignore[changed_behavior_has_e2e] This build command has no browser interface; it dispatches the real Nx build target whose published output every standalone and host-composed browser journey drives.
+    app="$1"; [[ "$app" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "build-app: app must be a valid Nx project name; pass one name from just publish-lanes and rerun just build-app <app>" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; CI=1 pnpm exec nx run "$app:build" >"$log" 2>&1 || { cat "$log" >&2; echo "build-app: building $app failed; fix the errors above and rerun just build-app $app" >&2; exit 1; }
+
+# Write one app's already-built bytes to its own subtree of the content-store
+# branch. Every input arrives as PUBLISH_* environment values, which
+# scripts/publish-fragment.mjs validates before it touches git.
+publish-fragment:
+    # llmlint: ignore[changed_behavior_has_e2e] This publish CLI has no browser interface; publish-fragment.spec.ts drives it against a real local bare repository, and the bytes it stores reach the browser only once the compose lane assembles them.
+    node scripts/publish-fragment.mjs
+
+# Assemble and gate the Pages artifact from bytes that are already published.
+# This builds nothing: it is the compose-and-deploy lane's whole workload, and
+# it is idempotent full state, so a superseded run loses no publisher's bytes.
+compose store output:
+    # llmlint: ignore[changed_behavior_has_e2e] This assembly CLI has no browser interface; compose.spec.ts drives it over a fixture content store, and site.spec.ts plus every feature journey drive the artifact it emits in a real browser.
+    store="$1"; output="$2"; [[ "$store" != *..* && -d "$store" ]] || { echo "compose: store must be a readable content-store apps directory; check out the content-store branch and rerun just compose <store>/apps <output>" >&2; exit 2; }; [[ -n "$output" && "$output" != *..* && "$output" != /* ]] || { echo "compose: output must be a workspace-relative directory to write the artifact into; pass one such as dist/site and rerun just compose $store <output>" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; FRAGMENT_ROOT="$store" COMPOSE_OUTPUT="$output" node scripts/compose.mjs >"$log" 2>&1 && STATIC_ARTIFACT_ROOT="$output" node scripts/check-static-artifact.mjs >>"$log" 2>&1 || { cat "$log" >&2; echo "compose: assembling the published fragments failed; publish the app named above, then rerun just compose $store $output" >&2; exit 1; }
 
 # Network-dependent Lighthouse comparison; intentionally excluded from `check`.
 perf url="" runs="":
