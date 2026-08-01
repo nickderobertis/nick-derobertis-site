@@ -52,6 +52,7 @@ test("remote manifest matches published fragment composition", async () => {
     !Array.isArray(prerender.dependsOn)
   )
     throw new Error("Validated dependsOn list is required");
+  // llmlint: ignore-block[tests_mirror_real_usage] Which builds Nx schedules ahead of shell:prerender is a scheduling contract with no user-visible interface to drive: a prerender that rebuilds every remote from source and one that composes their published fragments emit the same bytes, so nothing a visitor can do distinguishes them, and only the graph reveals that an app-only change no longer drags the other twelve units into the deploy. The artifact those builds produce is driven through the real browser by site.spec.ts and every feature journey.
   const taskGraphOutput = execFileSync(
     "pnpm",
     ["exec", "nx", "run", "shell:prerender", "--graph=stdout"],
@@ -86,6 +87,7 @@ test("remote manifest matches published fragment composition", async () => {
       .map((name) => `${name}:build`)
       .sort(),
   );
+  // llmlint: ignore-end[tests_mirror_real_usage]
   // llmlint: ignore-block[tests_mirror_real_usage] Declared build outputs and the manifest compose iterates are Nx cache and wiring contracts with no user-facing interface to drive: a remote whose fragment files are undeclared still serves correctly until Nx restores a cached build without them. The composed result is exercised through compose.mjs's real exported API in scripts/compose.spec.ts and through the real browser by site.spec.ts and every feature journey.
   expect(project).toMatchObject({
     targets: {

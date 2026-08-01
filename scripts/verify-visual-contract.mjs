@@ -53,11 +53,17 @@ if (!remoteMapMatch)
   throw new Error(
     "Home composition must declare its remotes through remoteMap",
   );
-const composedProjects = [
-  ...Object.keys(
-    JSON.parse(readFileSync("libs/build-config/src/remotes.json", "utf8")),
-  ),
-].sort();
+let remoteManifest;
+try {
+  remoteManifest = JSON.parse(
+    readFileSync("libs/build-config/src/remotes.json", "utf8"),
+  );
+} catch (error) {
+  throw new Error(
+    `libs/build-config/src/remotes.json is not readable JSON (${error.message}); restore it to an object mapping each remote's project name to its federation alias, then rerun just lint-workflows`,
+  );
+}
+const composedProjects = Object.keys(remoteManifest).sort();
 const screenshotBuildDependency =
   nxConfig.targetDefaults?.screenshot?.dependsOn?.find(
     (dependency) =>
