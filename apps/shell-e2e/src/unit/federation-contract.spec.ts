@@ -2,12 +2,14 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 const timelineContract = [
+  // llmlint: ignore[tests_mirror_real_usage] Which remotes compose.mjs assembles is a build-wiring fact with no interface to drive: a composition that drops Timeline produces a page that still loads, and the omission only surfaces as a missing fragment at deploy time. The composed page is driven through the real browser by timeline.spec.ts and site.spec.ts.
   ["scripts/compose.mjs", '"timeline"'],
   ["libs/build-config/src/remotes.json", '"timeline": "timeline"'],
   ["apps/home/rspack.config.ts", '"timeline"'],
   ["apps/home/src/remotes.d.ts", 'declare module "timeline/Page"'],
   ["apps/timeline/project.json", "E2E_REMOTE=timeline"],
   ["eslint.config.mjs", 'sourceTag: "scope:timeline"'],
+  // llmlint: ignore[tests_mirror_real_usage] That compose.mjs iterates the validated manifest instead of a hardcoded list is the same wiring contract, invisible from the browser until a newly added remote silently goes uncomposed; compose.spec.ts drives the real exported composition API over it.
   ["scripts/compose.mjs", "Object.keys(validatedRemoteManifest)"],
 ] as const;
 
@@ -17,6 +19,7 @@ const awardsContract = [
   ["apps/home/rspack.config.ts", '"awards"'],
   ["apps/home/src/page.tsx", 'import("awards/Page")'],
   ["apps/home/src/remotes.d.ts", 'declare module "awards/Page"'],
+  // llmlint: ignore[tests_mirror_real_usage] Same composition contract for Awards: nothing a visitor can do reveals whether compose.mjs names this remote, and awards.spec.ts plus home.spec.ts drive the composed result through the real browser on both render paths.
   ["scripts/compose.mjs", '"awards"'],
   ["apps/awards/project.json", "E2E_REMOTE=awards"],
   ["libs/build-config/src/remotes.json", '"awards": "awards"'],
