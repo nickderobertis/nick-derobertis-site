@@ -1,0 +1,107 @@
+{
+  "id": "homeContact",
+  "name": "homeContact",
+  "metaData": {
+    "name": "homeContact",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "homeContact",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/home-contact/"
+  },
+  "shared": [
+    {
+      "id": "homeContact:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.ed8e126d38472a55.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.bcc95a1fcb3ed421.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "homeContact:react",
+      "name": "react",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.ed8e126d38472a55.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.bcc95a1fcb3ed421.css"
+          ]
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "homeContact:Page",
+      "name": "Page",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Page"
+    },
+    {
+      "id": "homeContact:Skeleton",
+      "name": "Skeleton",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Skeleton"
+    }
+  ]
+}
