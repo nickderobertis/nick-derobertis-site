@@ -65,3 +65,37 @@ test("the compose-time gate rejects missing inlined fragment CSS", async () => {
   expect(result.stderr).toContain("lacks the inlined bio page CSS");
   await writeFile(path, original);
 });
+
+// `just compose <store> <output>` is the deploy lane's whole command surface,
+// and its output argument becomes a write destination. Both arguments are
+// rejected before compose runs, so a bad path never reaches the filesystem.
+function composeCommand(store: string, output: string) {
+  return spawnSync("just", ["compose", store, output], { encoding: "utf8" });
+}
+
+test("the compose command refuses a content store it cannot read", () => {
+  const result = composeCommand(join(fixture, "absent"), "dist/site");
+
+  expect(result.status).toBe(2);
+  expect(result.stderr).toMatch(
+    /^compose: store must be a readable content-store apps directory/,
+  );
+  // The deploy lane's log carries the guidance and nothing else: no shell body.
+  expect(result.stderr).not.toContain("scripts/compose.mjs");
+  expect(result.stderr).not.toContain("FRAGMENT_ROOT=");
+});
+
+test.each([
+  ["an absolute path", "/etc/site"],
+  // Compose writes route documents and replaces its own `cv-data` and
+  // `remotes` subtrees, so a source directory is never a legal destination.
+  ["a source directory", "libs"],
+])("the compose command refuses to write to %s", (_case, output) => {
+  const result = composeCommand("dist/apps", output);
+
+  expect(result.status).toBe(2);
+  expect(result.stderr).toMatch(
+    /^compose: output must be a workspace-relative build directory beneath dist\//,
+  );
+  expect(result.stderr).not.toContain("scripts/check-static-artifact.mjs");
+});

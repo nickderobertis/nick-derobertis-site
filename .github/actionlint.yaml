@@ -1,0 +1,16 @@
+# The actionlint release pinned in ci-tools.json validates `concurrency` against
+# a schema that has no `queue` key. ci-tools.json is the single source for that
+# version; do not restate it here.
+# `queue` is current GitHub Actions syntax: it raises the pending-run limit of a
+# concurrency group from one (`single`, the default, which cancels the pending
+# run when another arrives) to 100 FIFO runs (`max`). The compose-and-deploy
+# lane in pages.yml depends on that, because a cancelled pending compose would
+# silently drop the deploys of every app published since the running one began.
+#
+# Scoped to that one file and that one message: any other actionlint finding in
+# pages.yml, and every finding in every other workflow, still fails
+# `just lint-workflows`. Delete this once actionlint ships the key.
+paths:
+  .github/workflows/pages.yml:
+    ignore:
+      - 'unexpected key "queue" for "concurrency" section'

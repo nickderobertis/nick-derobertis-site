@@ -43,7 +43,8 @@ Useful focused commands are:
 just test                 # affected unit and browser tests
 just test-e2e             # complete shell browser journeys
 just e2e-project skills   # one remote, standalone and host-composed
-just prerender            # static artifact in dist/apps/shell
+just prerender            # build every app, then compose dist/apps/shell
+just compose store out    # compose only, from already-published fragments
 just serve                # interactive static development server
 just lint                 # all-project lint and typecheck
 just format               # apply Biome formatting
@@ -114,7 +115,15 @@ from `just check` because they contact public deployments.
 ## Deploy
 
 Pushes to `master` run the full CI gate and the `pages.yml` workflow. That
-workflow installs the locked dependencies, runs `shell:prerender`, uploads
-`dist/apps/shell`, and deploys it with GitHub Pages. `workflow_dispatch` can
-rerun the same deployment manually. There is no runtime server or API to
-provision.
+workflow deploys each app independently: one publish lane per affected app
+builds only that app and writes only its own `apps/<app>/` subtree to the
+`published-fragments` content-store branch, and a single serialized lane runs
+`just compose .content-store/apps dist/site` over whatever that branch holds
+before uploading it to GitHub Pages. Nothing in the deploy lane builds an app.
+`workflow_dispatch` republishes every lane, which is how a content store that
+has never held a full set of fragments is seeded.
+
+The content-store branch is storage only and is never the served source: Pages
+stays on `build_type: workflow`, because the artifact deploy avoids the legacy
+branch builder's newer-build-kills-in-flight-build race. There is no runtime
+server or API to provision.

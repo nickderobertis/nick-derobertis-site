@@ -43,6 +43,13 @@ install; `scripts/verify-visual-contract.mjs` guards that and the toggle/baselin
 contracts. Per-app baselines/galleries and the `reference/screenshots` PR #12
 baseline are retained.
 
+Pages deploys per app: one publish lane per affected app writes only its own
+`apps/<app>/` subtree to the `published-fragments` content-store branch, and one
+serialized lane composes and uploads. Never make the content-store branch the
+served source, never move Pages off `build_type: workflow`, and never drop the
+deploy lane's `queue: max` with `cancel-in-progress: false`: each of those
+breaks deploys.
+
 ## Workflow
 
 Use `just` as the only command surface. `just check` is the full pre-push gate. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow, with the `.githooks/pre-push` guard as its local half (it re-captures only affected microfrontends when `[guard].paths` change and blocks the push until a regenerated baseline is committed).

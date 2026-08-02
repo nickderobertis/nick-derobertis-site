@@ -1,37 +1,171 @@
-name: Deploy Pages shell
+# Independent per-app publishing plus one serialized compose-and-deploy lane.
+# llmlint: ignore-file[changed_behavior_has_e2e] This CI-only workflow has no browser interface: it selects lanes, dispatches `just` recipes, and hands an already-assembled directory to GitHub's Pages actions, so nothing it does is observable to a visitor except through the artifact it uploads. publish-lanes.spec.ts drives the lane selection as a real subprocess, publish-fragment.spec.ts drives a lane's writes against a real local bare repository including non-fast-forward recovery, compose.spec.ts drives assembly over a real fixture content store, and site.spec.ts plus every feature journey drive the uploaded artifact in a real browser through both standalone and host-composed boundaries.
+#
+# A push to master no longer rebuilds the site. The `affected` job picks the
+# apps the push actually changed; one `publish` lane per app builds only that
+# app and writes only its own `apps/<app>/` subtree to the content-store branch;
+# the single `deploy` lane assembles whatever that branch currently holds and
+# uploads it as the Pages artifact. Compose consumes published bytes only — it
+# builds nothing.
+#
+# The content-store branch is storage, never the served source. Pages stays on
+# `build_type: workflow` so the artifact deploy avoids the legacy branch
+# builder, where a newer build kills an in-flight one and records it `errored`
+# with duration 0, and where the 10-builds-per-hour soft limit applies.
+name: Deploy Pages site
 on:
   push:
     branches: [master]
   workflow_dispatch:
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: true
+permissions: {}
+env:
+  # One source for this workflow's runtime pins, so three jobs cannot drift
+  # apart. scripts/verify-runtime-pins.mjs — run by just lint-workflows — holds
+  # PNPM_VERSION to package.json's authoritative `packageManager` field and
+  # NODE_VERSION to the single value every workflow in this repository uses.
+  PNPM_VERSION: 10.13.1
+  NODE_VERSION: 26.5.0
+  # Storage only. libs/build-config/src/publish-fragment.ts refuses to publish to
+  # any branch GitHub Pages could be pointed at.
+  CONTENT_STORE_BRANCH: published-fragments
 jobs:
-  build:
+  # Which apps does this push actually change? Libraries with a build target are
+  # dropped by `just publish-lanes`; only the shell and the federated remotes
+  # own a subtree.
+  affected:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      apps: ${{ steps.apps.outputs.apps }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: pnpm/action-setup@v4
+        with: {version: "${{ env.PNPM_VERSION }}"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "${{ env.NODE_VERSION }}", cache: pnpm}
+      - uses: extractions/setup-just@v2
+      # llmlint: ignore[work_goes_through_command_surface] Provisioning the lockfile is bootstrap that deliberately runs ahead of the command surface: it is what makes every `just` recipe below runnable in this lane, so it cannot itself be one. Wrapping it in a recipe would add indirection without removing the per-job repetition, which is inherent to independent lanes.
+      - run: pnpm install --frozen-lockfile
+      - name: Select the publish lanes this push needs
+        id: apps
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_HEAD: ${{ github.sha }}
+        run: |
+          # A manual dispatch republishes every lane, which is how a content
+          # store that has never held a full set of fragments is seeded: compose
+          # refuses to assemble a partial site.
+          if [ "$EVENT_NAME" = workflow_dispatch ]; then
+            apps="$(just publish-lanes)"
+          else
+            base="$PUSH_BEFORE"
+            # A newly created branch reports an all-zero "before".
+            git rev-parse --verify "$base^{commit}" >/dev/null 2>&1 || base="$(git rev-parse "$PUSH_HEAD~1")"
+            apps="$(just publish-lanes "$base" "$PUSH_HEAD")"
+          fi
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
+          echo "Publish lanes: $apps"
+
+  # One lane per changed app. Each builds only its own app and writes only its
+  # own subtree, so a lane can never revert another lane's published bytes; a
+  # rejected non-fast-forward push is re-applied on the winning lane's tip.
+  # fail-fast is off because independent deployability means one app's failure
+  # must not cancel another app's publish.
+  publish:
+    needs: affected
+    if: ${{ needs.affected.outputs.apps != '[]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.affected.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: {version: 10.13.1}
+        with: {version: "${{ env.PNPM_VERSION }}"}
       - uses: actions/setup-node@v4
-        with: {node-version: 26.5.0, cache: pnpm}
+        with: {node-version: "${{ env.NODE_VERSION }}", cache: pnpm}
+      - uses: extractions/setup-just@v2
+      # llmlint: ignore[work_goes_through_command_surface] Provisioning the lockfile is bootstrap that deliberately runs ahead of the command surface: it is what makes every `just` recipe below runnable in this lane, so it cannot itself be one. Wrapping it in a recipe would add indirection without removing the per-job repetition, which is inherent to independent lanes.
       - run: pnpm install --frozen-lockfile
-      - run: just prerender
+      - name: Build this app alone
         env:
+          PUBLISH_APP: ${{ matrix.app }}
+          # Stamped rather than read from git, so the same build works where the
+          # repository is unreachable, such as the visual-capture container.
           SOURCE_REVISION: ${{ github.sha }}
-      - uses: actions/upload-pages-artifact@v3
-        with: {path: dist/apps/shell}
+        run: just build-app "$PUBLISH_APP"
+      - name: Publish this app's subtree
+        env:
+          PUBLISH_APP: ${{ matrix.app }}
+          PUBLISH_BRANCH: ${{ env.CONTENT_STORE_BRANCH }}
+          # llmlint: ignore[boundary_inputs_validated] publish-fragment.ts validates this remote and redacts the token from every message it emits; GitHub mints and masks the token itself.
+          PUBLISH_REMOTE: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+        run: just publish-fragment
+
+  # The only lane that touches Pages, and the only one that assembles a site.
+  #
+  # `queue: max` with `cancel-in-progress: false` is load-bearing. The default
+  # `queue: single` keeps at most one pending run and cancels it when a third
+  # arrives, which would silently drop most lanes' deploys on a busy day;
+  # `queue: max` lets up to 100 runs wait in FIFO order instead. Cancelling in
+  # progress is both wrong here and rejected: `queue: max` with
+  # `cancel-in-progress: true` is a workflow validation error.
+  #
+  # Compose is idempotent full state, so a run that is superseded anyway loses
+  # nothing: the next one publishes every app's current bytes.
   deploy:
+    needs: [affected, publish]
+    # Deploys even when a lane failed — that app keeps its last published bytes
+    # while every other app still ships, which is the whole point of the split.
+    # `!cancelled()` rather than `always()`, so cancelling a run stops the deploy.
+    if: ${{ !cancelled() && needs.affected.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
-      url: "${{ steps.deployment.outputs.page_url }}"
-    needs: build
-    runs-on: ubuntu-latest
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages-compose-deploy
+      queue: max
+      cancel-in-progress: false
     steps:
+      - uses: actions/checkout@v4
+      - name: Check out the published bytes
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CONTENT_STORE_BRANCH }}
+          path: .content-store
+      - uses: pnpm/action-setup@v4
+        with: {version: "${{ env.PNPM_VERSION }}"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "${{ env.NODE_VERSION }}", cache: pnpm}
+      - uses: extractions/setup-just@v2
+      # llmlint: ignore[work_goes_through_command_surface] Provisioning the lockfile is bootstrap that deliberately runs ahead of the command surface: it is what makes every `just` recipe below runnable in this lane, so it cannot itself be one. Wrapping it in a recipe would add indirection without removing the per-job repetition, which is inherent to independent lanes.
+      - run: pnpm install --frozen-lockfile
+      - name: Report which lanes published into this deploy
+        env:
+          PUBLISH_RESULT: ${{ needs.publish.result }}
+          PUBLISH_LANES: ${{ needs.affected.outputs.apps }}
+        run: |
+          echo "Publish lanes for this run: $PUBLISH_LANES (result: $PUBLISH_RESULT)"
+          # A failed lane keeps its previously published bytes; every other app
+          # still deploys, which is the independent-deployability property.
+          if [ "$PUBLISH_RESULT" = failure ]; then
+            echo "At least one publish lane failed; composing the last published bytes for that app." >&2
+          fi
+      - name: Compose the site from published bytes
+        run: just compose .content-store/apps dist/site
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: dist/site}
       - name: Deploy to github.io project site
         id: deployment
         uses: actions/deploy-pages@v4
