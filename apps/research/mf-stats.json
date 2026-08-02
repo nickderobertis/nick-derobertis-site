@@ -1,0 +1,130 @@
+{
+  "id": "research",
+  "name": "research",
+  "metaData": {
+    "name": "research",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "research",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/research/"
+  },
+  "shared": [
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react-dom",
+      "version": "19.2.7",
+      "id": "research:react-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.406a3a2836ec2a86.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.a6de40233e803dd0.css"
+          ]
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react",
+      "version": "19.2.7",
+      "id": "research:react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.406a3a2836ec2a86.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.a6de40233e803dd0.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "path": "./Page",
+      "id": "research:Page",
+      "name": "Page",
+      "requires": [
+        "react"
+      ],
+      "file": "src/page.tsx",
+      "assets": {
+        "js": {
+          "sync": [
+            "763.c7a7d6b4fcb75c7a.js",
+            "common.d27ae7c9c01c6a0d.js",
+            "754.0073327ce2796e12.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "common.ecbed45f1b17414c.css",
+            "__federation_expose_Page.7fc66cd77766a671.css"
+          ],
+          "async": []
+        }
+      }
+    },
+    {
+      "path": "./Skeleton",
+      "id": "research:Skeleton",
+      "name": "Skeleton",
+      "requires": [],
+      "file": "src/skeleton.tsx",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}

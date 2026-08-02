@@ -1,0 +1,114 @@
+{
+  "id": "research",
+  "name": "research",
+  "metaData": {
+    "name": "research",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "research",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/research/"
+  },
+  "shared": [
+    {
+      "id": "research:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.406a3a2836ec2a86.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.a6de40233e803dd0.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "research:react",
+      "name": "react",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.406a3a2836ec2a86.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.a6de40233e803dd0.css"
+          ]
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "research:Page",
+      "name": "Page",
+      "assets": {
+        "js": {
+          "sync": [
+            "763.c7a7d6b4fcb75c7a.js",
+            "common.d27ae7c9c01c6a0d.js",
+            "754.0073327ce2796e12.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "common.ecbed45f1b17414c.css",
+            "__federation_expose_Page.7fc66cd77766a671.css"
+          ],
+          "async": []
+        }
+      },
+      "path": "./Page"
+    },
+    {
+      "id": "research:Skeleton",
+      "name": "Skeleton",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Skeleton"
+    }
+  ]
+}
