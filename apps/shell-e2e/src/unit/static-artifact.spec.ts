@@ -85,12 +85,17 @@ test("the compose command refuses a content store it cannot read", () => {
   expect(result.stderr).not.toContain("FRAGMENT_ROOT=");
 });
 
-test("the compose command refuses to write outside the workspace", () => {
-  const result = composeCommand("dist/apps", "/etc/site");
+test.each([
+  ["an absolute path", "/etc/site"],
+  // Compose writes route documents and replaces its own `cv-data` and
+  // `remotes` subtrees, so a source directory is never a legal destination.
+  ["a source directory", "libs"],
+])("the compose command refuses to write to %s", (_case, output) => {
+  const result = composeCommand("dist/apps", output);
 
   expect(result.status).toBe(2);
   expect(result.stderr).toMatch(
-    /^compose: output must be a workspace-relative directory/,
+    /^compose: output must be a workspace-relative build directory beneath dist\//,
   );
   expect(result.stderr).not.toContain("scripts/check-static-artifact.mjs");
 });

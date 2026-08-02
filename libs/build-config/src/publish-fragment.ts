@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join, normalize, resolve, sep } from "node:path";
@@ -42,6 +42,17 @@ export const publishableApps: readonly string[] = [
 
 /** Every app's published bytes live under this directory on the branch. */
 export const contentStoreAppRoot = "apps";
+
+/**
+ * The one name for the content-store branch, the deploy lane's working copy of
+ * it, and the scratch repository a publish lane pushes from. The workflow, the
+ * ignore rules, and the docs all restate these, so
+ * `scripts/verify-content-store-contract.mjs` — run by `just lint-workflows` —
+ * holds every restatement to these values.
+ */
+export const contentStoreBranch = "published-fragments";
+export const contentStoreCheckout = ".content-store";
+export const publishWorkdirDefault = ".publish-store";
 
 /** The notice committed at the content-store root when the branch is created. */
 export const contentStoreNoticePath = "README.md";
@@ -181,9 +192,28 @@ export function validatedPath(value: string | undefined, label: string) {
 }
 
 /**
- * Scratch space, held to a stricter rule than a path this lane only reads: the
- * lane runs `git checkout --force` and `git clean -fd` here, so a value that is
- * or contains the workspace would destroy the checkout it was launched from.
+ * Written inside the scratch repository's git directory, which `git clean`
+ * never touches, so a later run can tell a workdir this lane created from a
+ * directory that merely happens to sit at the same path.
+ */
+export const publishWorkdirMarker = "publish-fragment-workdir";
+
+function isPublishWorkdir(resolved: string) {
+  const gitDir = spawnSync("git", ["rev-parse", "--git-dir"], {
+    cwd: resolved,
+    encoding: "utf8",
+  });
+  if (gitDir.status !== 0) return false;
+  return existsSync(
+    join(resolve(resolved, gitDir.stdout.trim()), publishWorkdirMarker),
+  );
+}
+
+/**
+ * Scratch space, held to a stricter rule than a path this lane only reads,
+ * because the lane runs `git init`, `git checkout --force`, and `git clean -fd`
+ * here. Anything already living at that path would be destroyed, so the lane
+ * accepts only a directory it created itself or one that does not exist yet.
  */
 export function validatedWorkdir(value: string | undefined) {
   const path = validatedPath(value, "PUBLISH_WORKDIR");
@@ -192,6 +222,14 @@ export function validatedWorkdir(value: string | undefined) {
   if (workspace === resolved || workspace.startsWith(`${resolved}${sep}`))
     throw new Error(
       `PUBLISH_WORKDIR must be scratch space this publish lane owns; ${resolved} is or contains the workspace, which the lane force-checks-out and cleans. Set it to a dedicated directory such as .publish-store and rerun just publish-fragment.`,
+    );
+  if (resolved.split(sep).includes(".git"))
+    throw new Error(
+      `PUBLISH_WORKDIR must not sit inside a git directory; ${resolved} does. Set it to a dedicated scratch directory such as .publish-store and rerun just publish-fragment.`,
+    );
+  if (existsSync(resolved) && !isPublishWorkdir(resolved))
+    throw new Error(
+      `PUBLISH_WORKDIR must be a directory this publish lane created; ${resolved} already exists and carries no ${publishWorkdirMarker} marker, so the lane refuses to force-check-out and clean it. Remove it, or point PUBLISH_WORKDIR at a dedicated scratch directory such as .publish-store, then rerun just publish-fragment.`,
     );
   return path;
 }
@@ -264,6 +302,18 @@ async function readPublishedFragment(source: string, app: string) {
 
 function prepareWorkdir(options: PublishOptions) {
   git(["init", "--quiet"], options.workdir);
+  // Claim the directory before anything destructive runs in it, so a rerun can
+  // tell this scratch repository from a directory validatedWorkdir must refuse.
+  writeFileSync(
+    join(
+      resolve(
+        options.workdir,
+        git(["rev-parse", "--git-dir"], options.workdir).stdout.trim(),
+      ),
+      publishWorkdirMarker,
+    ),
+    `Scratch repository for the ${options.app} publish lane. Safe to delete.\n`,
+  );
   const existing = git(["remote"], options.workdir).stdout.split(/\s+/);
   git(
     existing.includes("origin")
@@ -405,7 +455,7 @@ export function publishOptionsFromEnv(
     ),
     branch: validatedBranch(env.PUBLISH_BRANCH),
     remote: validatedRemote(env.PUBLISH_REMOTE),
-    workdir: validatedWorkdir(env.PUBLISH_WORKDIR ?? ".publish-store"),
+    workdir: validatedWorkdir(env.PUBLISH_WORKDIR ?? publishWorkdirDefault),
     attempts: validatedCount(env.PUBLISH_ATTEMPTS, 5, "PUBLISH_ATTEMPTS"),
     retryDelayMs:
       validatedCount(env.PUBLISH_RETRY_SECONDS, 2, "PUBLISH_RETRY_SECONDS") *

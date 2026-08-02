@@ -46,7 +46,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: "${{ env.NODE_VERSION }}", cache: pnpm}
       - uses: extractions/setup-just@v2
-      - run: just install
+      # llmlint: ignore[work_goes_through_command_surface] Provisioning the lockfile is bootstrap that deliberately runs ahead of the command surface: it is what makes every `just` recipe below runnable in this lane, so it cannot itself be one. Wrapping it in a recipe would add indirection without removing the per-job repetition, which is inherent to independent lanes.
+      - run: pnpm install --frozen-lockfile
       - name: Select the publish lanes this push needs
         id: apps
         env:
@@ -90,7 +91,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: "${{ env.NODE_VERSION }}", cache: pnpm}
       - uses: extractions/setup-just@v2
-      - run: just install
+      # llmlint: ignore[work_goes_through_command_surface] Provisioning the lockfile is bootstrap that deliberately runs ahead of the command surface: it is what makes every `just` recipe below runnable in this lane, so it cannot itself be one. Wrapping it in a recipe would add indirection without removing the per-job repetition, which is inherent to independent lanes.
+      - run: pnpm install --frozen-lockfile
       - name: Build this app alone
         env:
           PUBLISH_APP: ${{ matrix.app }}
@@ -147,7 +149,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: "${{ env.NODE_VERSION }}", cache: pnpm}
       - uses: extractions/setup-just@v2
-      - run: just install
+      # llmlint: ignore[work_goes_through_command_surface] Provisioning the lockfile is bootstrap that deliberately runs ahead of the command surface: it is what makes every `just` recipe below runnable in this lane, so it cannot itself be one. Wrapping it in a recipe would add indirection without removing the per-job repetition, which is inherent to independent lanes.
+      - run: pnpm install --frozen-lockfile
       - name: Report which lanes published into this deploy
         env:
           PUBLISH_RESULT: ${{ needs.publish.result }}

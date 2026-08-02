@@ -6,6 +6,7 @@ import { afterEach, expect, test } from "vitest";
 import { serializeFragmentContract } from "./fragment-contract";
 import {
   assertOwnSubtree,
+  contentStoreBranch,
   contentStoreNoticePath,
   publishableApps,
   publishFragment,
@@ -14,7 +15,8 @@ import {
 } from "./publish-fragment";
 import remoteRegistry from "./remotes.json";
 
-const branch = "published-fragments";
+// The lane and its tests read the branch from the one source the drift gate holds every other restatement to.
+const branch = contentStoreBranch;
 const roots: string[] = [];
 
 afterEach(async () => {
@@ -356,6 +358,54 @@ test.each([
       ...overrides,
     }),
   ).toThrow(message);
+});
+
+test("a workdir the lane did not create is refused before any checkout", async () => {
+  const root = await mkdtemp(join(tmpdir(), "publish-workdir-"));
+  roots.push(root);
+  const occupied = join(root, "someone-elses-directory");
+  await mkdir(occupied, { recursive: true });
+  await writeFile(join(occupied, "keep.txt"), "not the lane's to clean\n");
+
+  const options = () =>
+    publishOptionsFromEnv({
+      PUBLISH_APP: "shell",
+      PUBLISH_BRANCH: branch,
+      PUBLISH_REMOTE: "https://github.example.invalid/site.git",
+      PUBLISH_WORKDIR: occupied,
+    });
+
+  expect(options).toThrow(/carries no publish-fragment-workdir marker/);
+
+  // The lane's own scratch repository is accepted on a rerun, because
+  // publishFragment marks it inside the git directory git clean cannot reach.
+  const { store } = await createContentStore(["awards"]);
+  await writeBuiltApp(join(root, "built", "shell"), "shell", "5be11ab");
+  const lane = {
+    ...optionsFor(root, store, "shell"),
+    workdir: join(root, "scratch"),
+  };
+  await publishFragment(lane);
+
+  expect(() =>
+    publishOptionsFromEnv({
+      PUBLISH_APP: "shell",
+      PUBLISH_BRANCH: branch,
+      PUBLISH_REMOTE: "https://github.example.invalid/site.git",
+      PUBLISH_WORKDIR: lane.workdir,
+    }),
+  ).not.toThrow();
+});
+
+test("a workdir inside a git directory is refused", () => {
+  expect(() =>
+    publishOptionsFromEnv({
+      PUBLISH_APP: "shell",
+      PUBLISH_BRANCH: branch,
+      PUBLISH_REMOTE: "https://github.example.invalid/site.git",
+      PUBLISH_WORKDIR: join(tmpdir(), "somewhere", ".git", "publish"),
+    }),
+  ).toThrow(/must not sit inside a git directory/);
 });
 
 test("a workdir that contains the workspace is refused before any checkout", () => {

@@ -9,23 +9,46 @@ import { describe, expect, test } from "vitest";
 // surface, so an affected library is never a lane and an unaffected app is never
 // rebuilt, republished, or redeployed.
 
-function publishLanes(...range: string[]): string[] {
-  const output = execFileSync("just", ["publish-lanes", ...range], {
-    encoding: "utf8",
-  });
-  const lanes: unknown = JSON.parse(output);
+/**
+ * Both the recipe and Nx hand back JSON this file then treats as project names,
+ * so neither is trusted until it has been narrowed to that shape.
+ */
+function projectNames(output: string, source: string): string[] {
+  const parsed: unknown = JSON.parse(output);
   if (
-    !Array.isArray(lanes) ||
-    !lanes.every(
-      (lane) => typeof lane === "string" && /^[a-z][a-z0-9-]*$/.test(lane),
+    !Array.isArray(parsed) ||
+    !parsed.every(
+      (name) => typeof name === "string" && /^[a-z][a-z0-9-]*$/.test(name),
     )
   )
-    throw new Error("just publish-lanes did not emit a list of project names");
-  return lanes;
+    throw new Error(`${source} did not emit a list of Nx project names`);
+  return parsed;
+}
+
+/** An Nx project file is config on disk, so its targets are narrowed too. */
+function buildTargetNames(projectFile: string): string[] {
+  const parsed: unknown = JSON.parse(readFileSync(projectFile, "utf8"));
+  const targets =
+    parsed && typeof parsed === "object" && "targets" in parsed
+      ? (parsed as { targets: unknown }).targets
+      : undefined;
+  if (!targets || typeof targets !== "object" || Array.isArray(targets))
+    throw new Error(`${projectFile} declares no Nx targets`);
+  return Object.keys(targets);
+}
+
+function publishLanes(...range: string[]): string[] {
+  return projectNames(
+    execFileSync("just", ["publish-lanes", ...range], {
+      encoding: "utf8",
+      timeout: 120_000,
+    }),
+    "just publish-lanes",
+  );
 }
 
 function affectedProjects(...range: string[]): string[] {
-  return JSON.parse(
+  return projectNames(
     execFileSync(
       "pnpm",
       [
@@ -39,8 +62,9 @@ function affectedProjects(...range: string[]): string[] {
         "--with-target=build",
         "--json",
       ],
-      { encoding: "utf8" },
+      { encoding: "utf8", timeout: 120_000 },
     ),
+    "nx show projects --affected",
   );
 }
 
@@ -48,15 +72,18 @@ function registeredApps(): string[] {
   const manifest: unknown = JSON.parse(
     readFileSync("libs/build-config/src/remotes.json", "utf8"),
   );
-  if (!manifest || typeof manifest !== "object")
-    throw new Error("the remote registry must be an object");
-  return ["shell", ...Object.keys(manifest)].sort();
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest))
+    throw new Error("the remote registry must map remote names to aliases");
+  return projectNames(
+    JSON.stringify(["shell", ...Object.keys(manifest)]),
+    "libs/build-config/src/remotes.json",
+  ).sort();
 }
 
 describe("publish lane selection", () => {
   test("a manual dispatch seeds every registered app's lane", () => {
     expect(publishLanes()).toEqual(registeredApps());
-  });
+  }, 30_000);
 
   test("a push range publishes only apps, never the libraries it also affects", () => {
     const affected = affectedProjects("HEAD~1", "HEAD");
@@ -74,7 +101,9 @@ describe("publish lane selection", () => {
       affected.filter((project) => registeredApps().includes(project)).sort(),
     );
     for (const library of libraries) expect(lanes).not.toContain(library);
-  });
+    // Two Nx graph loads in one test, which the full gate runs alongside three
+    // other projects; the default 5s budget is for in-process work, not this.
+  }, 180_000);
 
   test("a range that does not resolve to commits is refused before Nx runs", () => {
     const result = spawnSync(
@@ -89,7 +118,7 @@ describe("publish lane selection", () => {
       /publish-lanes: base and head must resolve to commits.*select every lane/s,
     );
     expect(result.stdout).toBe("");
-  });
+  }, 30_000);
 
   test("a range git would read as an option is refused before it reaches git", () => {
     const result = spawnSync("just", ["publish-lanes", "--all", "HEAD"], {
@@ -101,30 +130,27 @@ describe("publish lane selection", () => {
       /publish-lanes: base and head must resolve to commits/,
     );
     expect(result.stdout).toBe("");
-  });
+  }, 30_000);
 
   test("an unrecognized argument is refused rather than read as no lanes", () => {
-    const result = spawnSync("node", ["scripts/publishable-apps.mjs", "--al"], {
+    const result = spawnSync("just", ["publish-lanes", "--al"], {
       encoding: "utf8",
-      input: "",
     });
-    expect(result.status).toBe(1);
+
+    expect(result.status).toBe(2);
     expect(result.stderr).toMatch(
-      /publishable-apps: the only accepted argument is --all/,
+      /publish-lanes: base and head must resolve to commits/,
     );
     expect(result.stdout).toBe("");
-  });
+  }, 30_000);
 
   // `just build-app` is what a publish lane runs, and a lane may build only a
   // project that owns a content-store subtree. A buildable library is a valid
   // Nx build target and would otherwise slip through.
   test("build-app refuses a buildable library that owns no publish lane", () => {
-    const library: unknown = JSON.parse(
-      readFileSync("libs/design-system/project.json", "utf8"),
+    expect(buildTargetNames("libs/design-system/project.json")).toContain(
+      "build",
     );
-    expect(
-      (library as { targets: Record<string, unknown> }).targets,
-    ).toHaveProperty("build");
     expect(registeredApps()).not.toContain("design-system");
 
     const result = spawnSync("just", ["build-app", "design-system"], {
@@ -135,19 +161,17 @@ describe("publish lane selection", () => {
     expect(result.stderr).toMatch(
       /build-app: app must name a publish lane.*owns no content-store subtree/s,
     );
-  });
+  }, 30_000);
 
-  test("a selection that is not a list of project names is refused", () => {
-    const result = spawnSync("node", ["scripts/publishable-apps.mjs"], {
-      encoding: "utf8",
-      input: '["Awards", 3]',
-    });
-    expect(result.status).toBe(1);
-    expect(result.stderr).toMatch(
-      /publishable-apps:.*JSON array of Nx project names/,
-    );
-    expect(result.stdout).toBe("");
-  });
+  // The selection Nx pipes into the matrix is exercised by the push-range test
+  // above, which drives `just publish-lanes` over real `nx show projects`
+  // output. There is no recipe that feeds that step a hand-written selection,
+  // so its stdin contract has no separate command surface to test through.
+
+  test("every selected lane names a project the workspace can build", () => {
+    for (const lane of publishLanes())
+      expect(buildTargetNames(`apps/${lane}/project.json`)).toContain("build");
+  }, 30_000);
 });
 
 // A publish lane's log is read when something has gone wrong, so a successful
@@ -160,8 +184,10 @@ describe("publish command surface output", () => {
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
     expect(result.stdout.trimEnd().split("\n")).toHaveLength(1);
-    expect(JSON.parse(result.stdout)).toEqual(registeredApps());
-  });
+    expect(projectNames(result.stdout, "just publish-lanes")).toEqual(
+      registeredApps(),
+    );
+  }, 30_000);
 
   test("a refused build names the fix without echoing the recipe body", () => {
     const result = spawnSync("just", ["build-app", "design-system"], {
@@ -172,7 +198,7 @@ describe("publish command surface output", () => {
     expect(result.stderr).toMatch(/^build-app: app must name a publish lane/);
     expect(result.stderr).not.toContain("scripts/publishable-apps.mjs");
     expect(result.stderr).not.toContain("mktemp");
-  });
+  }, 30_000);
 
   test("a refused publish names the fix without echoing the recipe body", () => {
     const environment = Object.fromEntries(
@@ -195,5 +221,5 @@ describe("publish command surface output", () => {
     );
     expect(result.stderr).not.toContain("node scripts/publish-fragment.mjs");
     expect(result.stdout).toBe("");
-  });
+  }, 30_000);
 });

@@ -102,7 +102,13 @@ affected: just publish-lanes <before> <sha>   (just publish-lanes seeds every la
        just compose .content-store/apps dist/site -> upload-pages-artifact -> deploy-pages
 ```
 
-`libs/build-config/src/publish-fragment.ts` owns a lane's whole contract. It
+`libs/build-config/src/publish-fragment.ts` owns a lane's whole contract, and
+it is the one source for the names that contract is stated in: the
+`published-fragments` content-store branch, the `.content-store` working copy
+the deploy lane checks it out into, and the `.publish-store` scratch repository
+a lane pushes from. The workflow, the ignore rules, and these documents all
+restate those names, so `scripts/verify-content-store-contract.mjs` — run by
+`just lint-workflows` — holds every restatement to them. A lane
 re-reads the branch tip, replaces only `apps/<app>/`, and refuses to commit any
 staged path outside that subtree or the root notice, so a lane can never revert
 another lane's bytes. Concurrent lanes race for the tip, so a rejected

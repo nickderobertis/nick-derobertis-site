@@ -1,119 +1,113 @@
 import { spawnSync } from "node:child_process";
-import {
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
+import { readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 
 // Every workflow provisions pnpm and Node itself, so those pins are a contract
 // with exactly one authoritative source: package.json's `packageManager` for
 // pnpm, and — because nothing declares Node — agreement across workflows for
-// Node. scripts/verify-runtime-pins.mjs is the drift gate `just lint-workflows`
-// runs; these tests drive it as a real subprocess over the committed tree and
-// over copies of that tree with one pin moved.
+// Node. `just lint-workflows` is the gate that enforces it, and it is the only
+// interface these tests use: each drift case moves one pin in the committed
+// tree exactly as a contributor would, runs the real recipe, and restores the
+// file, so what fails the push here is what fails it in CI.
 
-const verifier = path.resolve("scripts/verify-runtime-pins.mjs");
+const pinnedWorkflow = ".github/workflows/pages.yml";
+const manifest = "package.json";
 
-function verify(cwd: string) {
-  return spawnSync("node", [verifier], { cwd, encoding: "utf8" });
+/** package.json is config on disk, so the pin is narrowed before it is used. */
+function declaredPackageManager(): string {
+  const parsed: unknown = JSON.parse(readFileSync(manifest, "utf8"));
+  const declared =
+    parsed && typeof parsed === "object" && "packageManager" in parsed
+      ? (parsed as { packageManager: unknown }).packageManager
+      : undefined;
+  if (typeof declared !== "string")
+    throw new Error(`${manifest} must declare a string packageManager pin`);
+  return declared;
+}
+
+function lintWorkflows() {
+  return spawnSync("just", ["lint-workflows"], { encoding: "utf8" });
 }
 
 /**
- * A throwaway copy of exactly what the gate reads — the manifest and the
- * workflows — so a drifted pin can be introduced without touching the
- * committed tree.
+ * Applies one edit per file to the committed tree, runs the real gate over the
+ * drifted result, and restores every file it touched even when an expectation
+ * throws.
  */
-function workspaceWith(
-  edit: (files: { manifest: string; workflows: Map<string, string> }) => void,
-) {
-  const root = mkdtempSync(path.join(tmpdir(), "runtime-pins-"));
-  const workflowRoot = path.join(root, ".github", "workflows");
-  mkdirSync(workflowRoot, { recursive: true });
-  const files = {
-    manifest: readFileSync("package.json", "utf8"),
-    workflows: new Map(
-      readdirSync(".github/workflows")
-        .filter((name) => name.endsWith(".yml"))
-        .map((name) => [
-          name,
-          readFileSync(path.join(".github/workflows", name), "utf8"),
-        ]),
-    ),
-  };
-  edit(files);
-  writeFileSync(path.join(root, "package.json"), files.manifest);
-  for (const [name, source] of files.workflows)
-    writeFileSync(path.join(workflowRoot, name), source);
-  return root;
-}
-
-function verifyWith(
-  edit: (files: { manifest: string; workflows: Map<string, string> }) => void,
-) {
-  const root = workspaceWith(edit);
+function lintWithDrift(edits: Record<string, readonly [string, string]>) {
+  const originals = Object.keys(edits).map(
+    (file) => [file, readFileSync(file, "utf8")] as const,
+  );
   try {
-    return verify(root);
+    for (const [file, original] of originals) {
+      const [from, to] = edits[file] as readonly [string, string];
+      expect(original).toContain(from);
+      writeFileSync(file, original.replace(from, to));
+    }
+    return lintWorkflows();
   } finally {
-    rmSync(root, { force: true, recursive: true });
+    for (const [file, original] of originals) writeFileSync(file, original);
   }
 }
 
 describe("workflow runtime pins", () => {
-  test("the committed workflows agree with the declared package manager", () => {
-    const result = verify(process.cwd());
-    const declared = JSON.parse(
-      readFileSync("package.json", "utf8"),
-    ).packageManager;
+  test("the gate reports the committed pins agreeing", () => {
+    const declared = declaredPackageManager().replace("pnpm@", "");
 
-    expect(result.status).toBe(0);
-    expect(result.stdout).toContain(
-      `runtime pins agree: pnpm ${declared.replace("pnpm@", "")}`,
-    );
-  });
+    const result = lintWorkflows();
 
-  test("a workflow that provisions a different pnpm than package.json is rejected", () => {
-    const result = verifyWith((files) => {
-      files.workflows.set(
-        "drifted.yml",
-        "name: Drifted\non: workflow_dispatch\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: pnpm/action-setup@v4\n        with: {version: 9.0.0}\n      - uses: actions/setup-node@v4\n        with: {node-version: 26.5.0}\n",
-      );
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).toContain(`runtime pins agree: pnpm ${declared}`);
+  }, 180_000);
+
+  test("a workflow provisioning a different pnpm than package.json fails the gate", () => {
+    const result = lintWithDrift({
+      [pinnedWorkflow]: ["PNPM_VERSION: 10.13.1", "PNPM_VERSION: 9.0.0"],
     });
 
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(
-      /package\.json pins pnpm [\d.]+ but .*drifted\.yml pins 9\.0\.0/,
+      /package\.json pins pnpm [\d.]+ but .*pages\.yml pins 9\.0\.0/,
     );
-  });
+    expect(result.stderr).toContain(
+      "lint-workflows: workflow runtime pins drifted",
+    );
+  }, 180_000);
 
-  test("workflows that disagree on the Node runtime are rejected", () => {
-    const result = verifyWith((files) => {
-      files.workflows.set(
-        "drifted.yml",
-        "name: Drifted\non: workflow_dispatch\njobs:\n  a:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/setup-node@v4\n        with: {node-version: 22.1.0}\n",
-      );
+  test("workflows that disagree on the Node runtime fail the gate", () => {
+    const result = lintWithDrift({
+      [pinnedWorkflow]: ["NODE_VERSION: 26.5.0", "NODE_VERSION: 22.1.0"],
     });
 
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(
       /workflows disagree on the Node runtime.*22\.1\.0/s,
     );
-  });
+  }, 180_000);
 
-  test("a manifest without an exact package manager pin is rejected", () => {
-    const result = verifyWith((files) => {
-      files.manifest = files.manifest.replace(
-        /"packageManager": "[^"]*"/,
+  test("a manifest without an exact package manager pin fails the gate", () => {
+    const declared = declaredPackageManager();
+
+    const result = lintWithDrift({
+      [manifest]: [
+        `"packageManager": "${declared}"`,
         '"packageManager": "pnpm@latest"',
-      );
+      ],
     });
 
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(/authoritative pnpm pin/);
+  }, 180_000);
+
+  test("every drift case leaves the committed pins exactly as it found them", () => {
+    expect(readFileSync(pinnedWorkflow, "utf8")).toContain(
+      "PNPM_VERSION: 10.13.1",
+    );
+    expect(readFileSync(pinnedWorkflow, "utf8")).toContain(
+      "NODE_VERSION: 26.5.0",
+    );
+    expect(readFileSync(manifest, "utf8")).toMatch(
+      /"packageManager": "pnpm@\d+\.\d+\.\d+"/,
+    );
   });
 });
