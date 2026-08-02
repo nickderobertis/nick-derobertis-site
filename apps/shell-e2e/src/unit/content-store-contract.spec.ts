@@ -42,16 +42,12 @@ describe("content-store contract", () => {
       /content-store contract agrees: branch (\S+), checkout (\S+), app root (\S+), lane workdir (\S+)/.exec(
         result.stdout,
       );
-    if (!reported)
+    const [, branch, checkout, appRoot, workdir] = reported ?? [];
+    if (!branch || !checkout || !appRoot || !workdir)
       throw new Error(
         "just lint-workflows did not report the content-store contract it enforced",
       );
-    contract = {
-      branch: reported[1] as string,
-      checkout: reported[2] as string,
-      appRoot: reported[3] as string,
-      workdir: reported[4] as string,
-    };
+    contract = { branch, checkout, appRoot, workdir };
   }, 180_000);
 
   test("the gate enforces the names the publish lane actually uses", () => {

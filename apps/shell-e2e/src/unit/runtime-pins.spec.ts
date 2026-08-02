@@ -16,9 +16,9 @@ const manifest = "package.json";
 /** package.json is config on disk, so the pin is narrowed before it is used. */
 function declaredPackageManager(): string {
   const parsed: unknown = JSON.parse(readFileSync(manifest, "utf8"));
-  const declared =
+  const declared: unknown =
     parsed && typeof parsed === "object" && "packageManager" in parsed
-      ? (parsed as { packageManager: unknown }).packageManager
+      ? parsed.packageManager
       : undefined;
   if (typeof declared !== "string")
     throw new Error(`${manifest} must declare a string packageManager pin`);
@@ -35,18 +35,20 @@ function lintWorkflows() {
  * throws.
  */
 function lintWithDrift(edits: Record<string, readonly [string, string]>) {
-  const originals = Object.keys(edits).map(
-    (file) => [file, readFileSync(file, "utf8")] as const,
-  );
+  const planned = Object.entries(edits).map(([file, [from, to]]) => ({
+    file,
+    from,
+    to,
+    original: readFileSync(file, "utf8"),
+  }));
   try {
-    for (const [file, original] of originals) {
-      const [from, to] = edits[file] as readonly [string, string];
+    for (const { file, from, to, original } of planned) {
       expect(original).toContain(from);
       writeFileSync(file, original.replace(from, to));
     }
     return lintWorkflows();
   } finally {
-    for (const [file, original] of originals) writeFileSync(file, original);
+    for (const { file, original } of planned) writeFileSync(file, original);
   }
 }
 

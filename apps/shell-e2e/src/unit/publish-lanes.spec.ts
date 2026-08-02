@@ -28,9 +28,9 @@ function projectNames(output: string, source: string): string[] {
 /** An Nx project file is config on disk, so its targets are narrowed too. */
 function buildTargetNames(projectFile: string): string[] {
   const parsed: unknown = JSON.parse(readFileSync(projectFile, "utf8"));
-  const targets =
+  const targets: unknown =
     parsed && typeof parsed === "object" && "targets" in parsed
-      ? (parsed as { targets: unknown }).targets
+      ? parsed.targets
       : undefined;
   if (!targets || typeof targets !== "object" || Array.isArray(targets))
     throw new Error(`${projectFile} declares no Nx targets`);
@@ -68,6 +68,23 @@ function affectedProjects(...range: string[]): string[] {
   );
 }
 
+/**
+ * A push range that provably reaches the shared libraries, which is the case
+ * lane selection has to get right. It is derived from history rather than
+ * assumed of the last commit, because a documentation-only commit affects no
+ * library and would leave the interesting case untested.
+ */
+function rangeReachingSharedLibraries(): [string, string] {
+  const head = execFileSync("git", ["log", "-1", "--format=%H", "--", "libs"], {
+    encoding: "utf8",
+  }).trim();
+  if (!/^[0-9a-f]{40}$/.test(head))
+    throw new Error(
+      "no commit in the available history touches libs/, so lane selection cannot be proven against an affected library",
+    );
+  return [`${head}~1`, head];
+}
+
 function registeredApps(): string[] {
   const manifest: unknown = JSON.parse(
     readFileSync("libs/build-config/src/remotes.json", "utf8"),
@@ -86,7 +103,8 @@ describe("publish lane selection", () => {
   }, 30_000);
 
   test("a push range publishes only apps, never the libraries it also affects", () => {
-    const affected = affectedProjects("HEAD~1", "HEAD");
+    const [base, head] = rangeReachingSharedLibraries();
+    const affected = affectedProjects(base, head);
     const libraries = affected.filter(
       (project) => !registeredApps().includes(project),
     );
@@ -95,7 +113,7 @@ describe("publish lane selection", () => {
     // subtree, so they must not become lanes.
     expect(libraries.length).toBeGreaterThan(0);
 
-    const lanes = publishLanes("HEAD~1", "HEAD");
+    const lanes = publishLanes(base, head);
 
     expect(lanes).toEqual(
       affected.filter((project) => registeredApps().includes(project)).sort(),

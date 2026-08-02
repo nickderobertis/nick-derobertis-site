@@ -26,6 +26,8 @@ export function validatedRemoteRegistry(
     throw new Error(
       "libs/build-config/src/remotes.json must map every remote's project name to a federation alias string. Fix the remote registry and rerun just publish-fragment.",
     );
+  // Every key and every value was just checked one by one, so this restates
+  // what the guard above proved rather than assuming anything about the file.
   return value as Record<string, string>;
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]

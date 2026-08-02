@@ -32,13 +32,15 @@ lint-workflows:
     .tools/bin/shellcheck scripts/*.sh .githooks/pre-push || { echo "lint-workflows: shell validation failed; fix the shellcheck findings above, then rerun just lint-workflows" >&2; exit 1; }
     # screencomp runs its injected capture callback with the container's /bin/sh,
     # and actionlint only shellchecks literal run: blocks, so check them as POSIX sh here.
-    callbacks=$(mktemp -d); trap 'rm -rf "$callbacks"' EXIT; node scripts/extract-injected-callbacks.mjs "$callbacks" && .tools/bin/shellcheck --shell=sh "$callbacks"/*.sh || { echo "lint-workflows: screencomp's injected capture callback is not valid POSIX sh; rewrite it without bash-only constructs, then rerun just lint-workflows" >&2; exit 1; }
-    node scripts/verify-visual-contract.mjs || { echo "lint-workflows: visual tool pins or capture contracts drifted; update visual-tools.json and every named consumer together" >&2; exit 1; }
-    node scripts/verify-reference-migration.mjs || { echo "lint-workflows: PR #12 reference migration verification failed; repair the migration map or its owned baselines and retry" >&2; exit 1; }
-    @# llmlint: ignore[changed_behavior_has_e2e] This gate reads committed configuration and has no browser interface: it fails a push before any workflow runs, so nothing it rejects can reach a visitor. runtime-pins.spec.ts drives this exact command as a real subprocess over the committed tree and over copies with one pin moved.
-    @node scripts/verify-runtime-pins.mjs || { echo "lint-workflows: workflow runtime pins drifted; align every workflow with package.json's packageManager and one Node version, then rerun just lint-workflows" >&2; exit 1; }
-    @# llmlint: ignore[changed_behavior_has_e2e] This gate reads committed configuration and has no browser interface: it fails a push before any workflow runs, so nothing it rejects can reach a visitor. content-store-contract.spec.ts drives this exact command as a real subprocess over the committed tree and over the tree with one restatement moved.
-    @{{node_typestrip}} scripts/verify-content-store-contract.mjs || { echo "lint-workflows: the content-store branch, checkout, or workdir names drifted; align every restatement with libs/build-config/src/publish-fragment.ts, then rerun just lint-workflows" >&2; exit 1; }
+    callbacks=$(mktemp -d); trap 'rm -rf "$callbacks"' EXIT; node scripts/extract-injected-callbacks.mjs "$callbacks" >/dev/null && .tools/bin/shellcheck --shell=sh "$callbacks"/*.sh || { echo "lint-workflows: screencomp's injected capture callback is not valid POSIX sh; rewrite it without bash-only constructs, then rerun just lint-workflows" >&2; exit 1; }
+    # Each verifier reports the contract it enforced, but a clean gate has to stay
+    # quiet, so the two contract reports a reader needs are collected into this
+    # recipe's single status line and the rest is dropped. Every verifier writes
+    # its diagnostics to stderr, so nothing is hidden on failure.
+    node scripts/verify-visual-contract.mjs >/dev/null || { echo "lint-workflows: visual tool pins or capture contracts drifted; update visual-tools.json and every named consumer together" >&2; exit 1; }
+    node scripts/verify-reference-migration.mjs >/dev/null || { echo "lint-workflows: PR #12 reference migration verification failed; repair the migration map or its owned baselines and retry" >&2; exit 1; }
+    @# llmlint: ignore[changed_behavior_has_e2e] These gates read committed configuration and have no browser interface: they fail a push before any workflow runs, so nothing they reject can reach a visitor. runtime-pins.spec.ts and content-store-contract.spec.ts drive this exact command as a real subprocess over the committed tree and over copies with one pin or one restatement moved.
+    @pins=$(node scripts/verify-runtime-pins.mjs) || { echo "lint-workflows: workflow runtime pins drifted; align every workflow with package.json's packageManager and one Node version, then rerun just lint-workflows" >&2; exit 1; }; names=$({{node_typestrip}} scripts/verify-content-store-contract.mjs) || { echo "lint-workflows: the content-store branch, checkout, or workdir names drifted; align every restatement with libs/build-config/src/publish-fragment.ts, then rerun just lint-workflows" >&2; exit 1; }; echo "lint-workflows: $pins; $names"
 
 check: test lint-workflows
     # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
