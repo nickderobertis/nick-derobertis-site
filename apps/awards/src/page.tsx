@@ -13,7 +13,7 @@ import "./awards.css";
 export { preloadAwards as preload };
 
 function State({ name }: { name: "error" | "empty" }) {
-  const copy =
+  const [heading, detail] =
     name === "error"
       ? [
           "Awards unavailable",
@@ -25,8 +25,8 @@ function State({ name }: { name: "error" | "empty" }) {
       className="awards-state"
       role={name === "error" ? "alert" : "status"}
     >
-      <h2>{copy[0]}</h2>
-      <p>{copy[1]}</p>
+      <h2>{heading}</h2>
+      <p>{detail}</p>
     </section>
   );
 }
