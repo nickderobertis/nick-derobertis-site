@@ -268,6 +268,11 @@ export function createSiteRouter({
       );
     }),
   });
+  // `story` and `catchAll` redirect during routing rather than render, so
+  // neither is prerendered and neither owns a directory in the deployed
+  // artifact. A direct request for /story/ therefore returns 404 from Pages by
+  // design, and the redirect applies only once the shell is already running.
+  // The five prerendered routes are home, bio, research, software, and courses.
   const story = createRoute({
     getParentRoute: () => Root,
     path: "/story",
