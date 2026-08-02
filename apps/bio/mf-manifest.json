@@ -1,0 +1,112 @@
+{
+  "id": "bio",
+  "name": "bio",
+  "metaData": {
+    "name": "bio",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "bio",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/bio/"
+  },
+  "shared": [
+    {
+      "id": "bio:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "main.76e63aef5915a183.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.d3cda19026929826.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "bio:react",
+      "name": "react",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "main.76e63aef5915a183.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.d3cda19026929826.css"
+          ]
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "bio:Page",
+      "name": "Page",
+      "assets": {
+        "js": {
+          "sync": [
+            "common.7bcfd3f0c09be66b.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "common.01757086d2a7ba1a.css",
+            "__federation_expose_Page.7fc66cd77766a671.css"
+          ],
+          "async": []
+        }
+      },
+      "path": "./Page"
+    },
+    {
+      "id": "bio:Skeleton",
+      "name": "Skeleton",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Skeleton"
+    }
+  ]
+}
