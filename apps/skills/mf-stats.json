@@ -1,0 +1,123 @@
+{
+  "id": "skills",
+  "name": "skills",
+  "metaData": {
+    "name": "skills",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "skills",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/skills/"
+  },
+  "shared": [
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react-dom",
+      "version": "19.2.7",
+      "id": "skills:react-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.3d61a9faef11102c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.8973bf472ea4ca23.css"
+          ]
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react",
+      "version": "19.2.7",
+      "id": "skills:react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.3d61a9faef11102c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.8973bf472ea4ca23.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "path": "./Page",
+      "id": "skills:Page",
+      "name": "Page",
+      "requires": [
+        "react"
+      ],
+      "file": "src/page.tsx",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    },
+    {
+      "path": "./Skeleton",
+      "id": "skills:Skeleton",
+      "name": "Skeleton",
+      "requires": [],
+      "file": "src/skeleton.tsx",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "id": "skills",
+  "name": "skills",
+  "metaData": {
+    "name": "skills",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "skills",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/skills/"
+  },
+  "shared": [
+    {
+      "id": "skills:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.3d61a9faef11102c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.8973bf472ea4ca23.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "skills:react",
+      "name": "react",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.3d61a9faef11102c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.8973bf472ea4ca23.css"
+          ]
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "skills:Page",
+      "name": "Page",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Page"
+    },
+    {
+      "id": "skills:Skeleton",
+      "name": "Skeleton",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Skeleton"
+    }
+  ]
+}
