@@ -1,0 +1,156 @@
+{
+  "id": "shell",
+  "name": "shell",
+  "metaData": {
+    "name": "shell",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "shell",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/"
+  },
+  "shared": [
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react-dom",
+      "version": "19.2.7",
+      "id": "shell:react-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "main.8dd78eacc89e184a.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.a609e3d8a63ab727.css"
+          ]
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react",
+      "version": "19.2.7",
+      "id": "shell:react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "main.8dd78eacc89e184a.js",
+            "remoteEntry.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.a609e3d8a63ab727.css"
+          ]
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    }
+  ],
+  "remotes": [
+    {
+      "alias": "home",
+      "consumingFederationContainerName": "shell",
+      "federationContainerName": "home",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/main.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home/remoteEntry.js"
+    },
+    {
+      "alias": "bio",
+      "consumingFederationContainerName": "shell",
+      "federationContainerName": "bio",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/main.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/bio/remoteEntry.js"
+    },
+    {
+      "alias": "research",
+      "consumingFederationContainerName": "shell",
+      "federationContainerName": "research",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/main.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/research/remoteEntry.js"
+    },
+    {
+      "alias": "software",
+      "consumingFederationContainerName": "shell",
+      "federationContainerName": "software",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/main.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/software/remoteEntry.js"
+    },
+    {
+      "alias": "courses",
+      "consumingFederationContainerName": "shell",
+      "federationContainerName": "courses",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/main.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/courses/remoteEntry.js"
+    }
+  ],
+  "exposes": [
+    {
+      "path": "./App",
+      "id": "shell:App",
+      "name": "App",
+      "requires": [],
+      "file": "src/app.tsx",
+      "assets": {
+        "js": {
+          "sync": [
+            "454.60585a232ed50db7.js",
+            "__federation_expose_App.cf937cb5178570ef.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}

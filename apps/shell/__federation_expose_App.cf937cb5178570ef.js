@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkshell=self.webpackChunkshell||[]).push([["362"],{4657(e,r,s){s.r(r),s.d(r,{App:()=>p});var u=s(9793),l=s(797);function p(e){var r=e.router;return(0,u.jsx)(l.p,{router:r})}}}]);
