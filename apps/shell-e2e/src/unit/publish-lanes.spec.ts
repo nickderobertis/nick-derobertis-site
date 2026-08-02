@@ -177,8 +177,27 @@ describe("publish lane selection", () => {
 
     expect(result.status).toBe(2);
     expect(result.stderr).toMatch(
-      /build-app: app must name a publish lane.*owns no content-store subtree/s,
+      /"design-system" is not a publish lane.*owns no content-store subtree/s,
     );
+    expect(result.stderr).toContain("build-app: app must name a publish lane");
+  }, 30_000);
+
+  // The lane list reaches this recipe as JSON, and an argument shaped like a
+  // fragment of that text spans two adjacent entries. It has to be compared
+  // against the lanes themselves, so this is refused as the single name it is.
+  test("build-app refuses an argument that spans two serialized lane names", () => {
+    const lanes = publishLanes();
+    const [first, second] = lanes;
+    if (!first || !second)
+      throw new Error("two publish lanes are needed to build a spanning name");
+    expect(JSON.stringify(lanes)).toContain(`"${first}","${second}"`);
+
+    const result = spawnSync("just", ["build-app", `${first}","${second}`], {
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("is not a publish lane");
   }, 30_000);
 
   // The selection Nx pipes into the matrix is exercised by the push-range test
@@ -213,7 +232,9 @@ describe("publish command surface output", () => {
     });
 
     expect(result.status).toBe(2);
-    expect(result.stderr).toMatch(/^build-app: app must name a publish lane/);
+    const lines = result.stderr.trimEnd().split("\n");
+    expect(lines[0]).toMatch(/^publishable-apps: "design-system" is not/);
+    expect(lines[1]).toMatch(/^build-app: app must name a publish lane/);
     expect(result.stderr).not.toContain("scripts/publishable-apps.mjs");
     expect(result.stderr).not.toContain("mktemp");
   }, 30_000);
