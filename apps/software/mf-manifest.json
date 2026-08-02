@@ -1,0 +1,114 @@
+{
+  "id": "software",
+  "name": "software",
+  "metaData": {
+    "name": "software",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "software",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/software/"
+  },
+  "shared": [
+    {
+      "id": "software:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.fb76ba72943bd1f0.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.094b3df20928996d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "software:react",
+      "name": "react",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.fb76ba72943bd1f0.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.094b3df20928996d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "software:Page",
+      "name": "Page",
+      "assets": {
+        "js": {
+          "sync": [
+            "228.a7ea37eb6634ee33.js",
+            "common.001c19f31ae80287.js",
+            "754.24300254fab10b32.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "common.d6305951046704f6.css",
+            "__federation_expose_Page.7fc66cd77766a671.css"
+          ],
+          "async": []
+        }
+      },
+      "path": "./Page"
+    },
+    {
+      "id": "software:Skeleton",
+      "name": "Skeleton",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Skeleton"
+    }
+  ]
+}
