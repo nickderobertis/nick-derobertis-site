@@ -1,0 +1,197 @@
+{
+  "id": "home",
+  "name": "home",
+  "metaData": {
+    "name": "home",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "home",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/home/"
+  },
+  "shared": [
+    {
+      "id": "home:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.1298f07233740572.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.36c08d01db433249.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "home:react",
+      "name": "react",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.1298f07233740572.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.36c08d01db433249.css"
+          ]
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [
+    {
+      "federationContainerName": "homeCards",
+      "moduleName": "Skeleton",
+      "alias": "homeCards",
+      "entry": "/nick-derobertis-site/remotes/home-cards/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "homeCarousel",
+      "moduleName": "Skeleton",
+      "alias": "homeCarousel",
+      "entry": "/nick-derobertis-site/remotes/home-carousel/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "homeContact",
+      "moduleName": "Skeleton",
+      "alias": "homeContact",
+      "entry": "/nick-derobertis-site/remotes/home-contact/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "homeStory",
+      "moduleName": "Skeleton",
+      "alias": "homeStory",
+      "entry": "/nick-derobertis-site/remotes/home-story/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "awards",
+      "moduleName": "Skeleton",
+      "alias": "awards",
+      "entry": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "skills",
+      "moduleName": "Skeleton",
+      "alias": "skills",
+      "entry": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "timeline",
+      "moduleName": "Skeleton",
+      "alias": "timeline",
+      "entry": "/nick-derobertis-site/remotes/timeline/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "homeCarousel",
+      "moduleName": "Page",
+      "alias": "homeCarousel",
+      "entry": "/nick-derobertis-site/remotes/home-carousel/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "homeCards",
+      "moduleName": "Page",
+      "alias": "homeCards",
+      "entry": "/nick-derobertis-site/remotes/home-cards/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "homeStory",
+      "moduleName": "Page",
+      "alias": "homeStory",
+      "entry": "/nick-derobertis-site/remotes/home-story/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "homeContact",
+      "moduleName": "Page",
+      "alias": "homeContact",
+      "entry": "/nick-derobertis-site/remotes/home-contact/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "timeline",
+      "moduleName": "Page",
+      "alias": "timeline",
+      "entry": "/nick-derobertis-site/remotes/timeline/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "skills",
+      "moduleName": "Page",
+      "alias": "skills",
+      "entry": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
+    },
+    {
+      "federationContainerName": "awards",
+      "moduleName": "Page",
+      "alias": "awards",
+      "entry": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
+    }
+  ],
+  "exposes": [
+    {
+      "id": "home:Page",
+      "name": "Page",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Page"
+    },
+    {
+      "id": "home:Skeleton",
+      "name": "Skeleton",
+      "assets": {
+        "js": {
+          "sync": [
+            "common.e48bf4a6a74fe442.js",
+            "__federation_expose_Skeleton.d2259be05ef83b29.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "common.007c18010b0d2af7.css"
+          ],
+          "async": []
+        }
+      },
+      "path": "./Skeleton"
+    }
+  ]
+}

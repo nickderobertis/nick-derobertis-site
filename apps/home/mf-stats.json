@@ -1,0 +1,269 @@
+{
+  "id": "home",
+  "name": "home",
+  "metaData": {
+    "name": "home",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "home",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/home/"
+  },
+  "shared": [
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react-dom",
+      "version": "19.2.7",
+      "id": "home:react-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.1298f07233740572.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.36c08d01db433249.css"
+          ]
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react",
+      "version": "19.2.7",
+      "id": "home:react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.1298f07233740572.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.36c08d01db433249.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    }
+  ],
+  "remotes": [
+    {
+      "alias": "homeCards",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "homeCards",
+      "moduleName": "Skeleton",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home-cards/remoteEntry.js"
+    },
+    {
+      "alias": "homeCarousel",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "homeCarousel",
+      "moduleName": "Skeleton",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home-carousel/remoteEntry.js"
+    },
+    {
+      "alias": "homeContact",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "homeContact",
+      "moduleName": "Skeleton",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home-contact/remoteEntry.js"
+    },
+    {
+      "alias": "homeStory",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "homeStory",
+      "moduleName": "Skeleton",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home-story/remoteEntry.js"
+    },
+    {
+      "alias": "awards",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "awards",
+      "moduleName": "Skeleton",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
+    },
+    {
+      "alias": "skills",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "skills",
+      "moduleName": "Skeleton",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
+    },
+    {
+      "alias": "timeline",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "timeline",
+      "moduleName": "Skeleton",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/timeline/remoteEntry.js"
+    },
+    {
+      "alias": "homeCarousel",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "homeCarousel",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home-carousel/remoteEntry.js"
+    },
+    {
+      "alias": "homeCards",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "homeCards",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home-cards/remoteEntry.js"
+    },
+    {
+      "alias": "homeStory",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "homeStory",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home-story/remoteEntry.js"
+    },
+    {
+      "alias": "homeContact",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "homeContact",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/home-contact/remoteEntry.js"
+    },
+    {
+      "alias": "timeline",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "timeline",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/timeline/remoteEntry.js"
+    },
+    {
+      "alias": "skills",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "skills",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
+    },
+    {
+      "alias": "awards",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "awards",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/page.tsx"
+      ],
+      "version": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
+    }
+  ],
+  "exposes": [
+    {
+      "path": "./Page",
+      "id": "home:Page",
+      "name": "Page",
+      "requires": [
+        "react"
+      ],
+      "file": "src/page.tsx",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    },
+    {
+      "path": "./Skeleton",
+      "id": "home:Skeleton",
+      "name": "Skeleton",
+      "requires": [],
+      "file": "src/skeleton.tsx",
+      "assets": {
+        "js": {
+          "sync": [
+            "common.e48bf4a6a74fe442.js",
+            "__federation_expose_Skeleton.d2259be05ef83b29.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "common.007c18010b0d2af7.css"
+          ],
+          "async": []
+        }
+      }
+    }
+  ]
+}
