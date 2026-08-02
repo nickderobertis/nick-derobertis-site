@@ -1,0 +1,123 @@
+{
+  "id": "homeCarousel",
+  "name": "homeCarousel",
+  "metaData": {
+    "name": "homeCarousel",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "homeCarousel",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/home-carousel/"
+  },
+  "shared": [
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react-dom",
+      "version": "19.2.7",
+      "id": "homeCarousel:react-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.1de1112dbe1785e5.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.9340117e53d113b7.css"
+          ]
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react",
+      "version": "19.2.7",
+      "id": "homeCarousel:react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.1de1112dbe1785e5.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.9340117e53d113b7.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "path": "./Page",
+      "id": "homeCarousel:Page",
+      "name": "Page",
+      "requires": [
+        "react"
+      ],
+      "file": "src/page.tsx",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    },
+    {
+      "path": "./Skeleton",
+      "id": "homeCarousel:Skeleton",
+      "name": "Skeleton",
+      "requires": [],
+      "file": "src/skeleton.tsx",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}
