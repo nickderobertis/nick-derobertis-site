@@ -1,0 +1,119 @@
+{
+  "id": "homeStory",
+  "name": "homeStory",
+  "metaData": {
+    "name": "homeStory",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "homeStory",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/home-story/"
+  },
+  "shared": [
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react-dom",
+      "version": "19.2.7",
+      "id": "homeStory:react-dom",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.15498c1924c37ef8.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.08c530015e68ce15.css"
+          ]
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "shareScope": "default",
+      "eager": true,
+      "name": "react",
+      "version": "19.2.7",
+      "id": "homeStory:react",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.15498c1924c37ef8.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.08c530015e68ce15.css"
+          ]
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "path": "./Page",
+      "id": "homeStory:Page",
+      "name": "Page",
+      "requires": [],
+      "file": "src/page.tsx",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    },
+    {
+      "path": "./Skeleton",
+      "id": "homeStory:Skeleton",
+      "name": "Skeleton",
+      "requires": [],
+      "file": "src/skeleton.tsx",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      }
+    }
+  ]
+}
