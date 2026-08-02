@@ -27,21 +27,73 @@ ARCH="x86_64"
 CONTAINER="mcr.microsoft.com/playwright:v1.61.1-noble"
 CONFIG="${SCREENCOMP_CONFIG:-screencomp.toml}"
 
+# --- 0. The two ways this hook is allowed to end without a clean verdict ------
+#
+# Under `set -e` a failing command substitution kills the hook where it stands,
+# so git reports only "failed to push some refs" and the reason the hook knew is
+# lost. Every exit that is not a clean verdict is therefore routed through one of
+# these two announcements, and neither is silent. Only an evaluated pass — no
+# screenshot-relevant change, or every affected app matching its baseline — is
+# allowed to be quiet.
+
+# The guard never formed an opinion — a tool it needs is missing or broke. It
+# says so and lets the push through: refusing a push it never evaluated is
+# indistinguishable, from the pusher's side, from finding real drift, and CI's
+# 'Visual docs' classify-gate is the authoritative gate either way.
+# SCREENCOMP_GUARD_REQUIRE=1 turns every such skip into a hard failure.
+skip_unevaluated() {
+  local reason="$1"
+  shift
+  {
+    echo
+    echo "pre-push: the screencomp visual guard could NOT evaluate this push."
+    echo "          reason: $reason"
+    local detail
+    for detail in "$@"; do echo "          $detail"; done
+    if [ -n "${SCREENCOMP_GUARD_REQUIRE:-}" ]; then
+      echo "          Refusing the push because SCREENCOMP_GUARD_REQUIRE is set."
+    else
+      echo "          Skipping the guard and allowing the push; CI's 'Visual docs'"
+      echo "          classify-gate still gates this change."
+      echo "          Set SCREENCOMP_GUARD_REQUIRE=1 to fail here instead of skipping."
+    fi
+    echo
+  } >&2
+  if [ -n "${SCREENCOMP_GUARD_REQUIRE:-}" ]; then exit 1; fi
+  exit 0
+}
+
+# The guard saw screenshot-relevant changes and could not clear them. Passing
+# would be false assurance, so it refuses — and says exactly what it hit.
+block_push() {
+  local reason="$1"
+  shift
+  {
+    echo
+    echo "############################################################################"
+    echo "#  screencomp pre-push guard: PUSH BLOCKED"
+    echo "############################################################################"
+    echo "#  $reason"
+    local detail
+    for detail in "$@"; do echo "#  $detail"; done
+    echo "#"
+    echo "#  To bypass: git push --no-verify"
+    echo "############################################################################"
+    echo
+  } >&2
+  exit 1
+}
+
 # No-op under CI: the visual-docs workflow already captures and classifies there.
 if [ -n "${CI:-}" ]; then
   exit 0
 fi
 
-# Without the CLI the guard cannot evaluate the push. Warn loudly and skip rather
-# than pass silently; set SCREENCOMP_GUARD_REQUIRE=1 to make it a hard failure.
+# Without the CLI the guard cannot evaluate the push.
 if ! command -v screencomp >/dev/null 2>&1; then
-  {
-    echo "pre-push: screencomp is NOT on PATH — the visual guard cannot run."
-    echo "          Install it, then: git config core.hooksPath .githooks"
-    echo "          CI still gates this. Set SCREENCOMP_GUARD_REQUIRE=1 to fail here instead."
-  } >&2
-  [ -n "${SCREENCOMP_GUARD_REQUIRE:-}" ] && exit 1
-  exit 0
+  skip_unevaluated \
+    "screencomp is not on PATH" \
+    "Install it with 'just bootstrap', then: git config core.hooksPath .githooks"
 fi
 
 # --- 1. Compute the push range(s) from git's stdin ---------------------------
@@ -65,36 +117,87 @@ fi
 if [ "${#ranges[@]}" -eq 0 ]; then
   exit 0
 fi
-changed="$(for r in "${ranges[@]}"; do git diff --name-only "$r"; done | sort -u)"
+# `|| exit` inside the subshell propagates a failing git diff (a range naming
+# commits this clone does not have) out through pipefail, so a bad range reports
+# instead of yielding a silently empty file list — which would read as "nothing
+# screenshot-relevant changed" and pass the push.
+changed=""
+if ! changed="$(for r in "${ranges[@]}"; do git diff --name-only "$r" || exit; done | sort -u)"; then
+  skip_unevaluated \
+    "'git diff' could not list this push's changed files (range(s): ${ranges[*]})" \
+    "Its error is above; the range may name commits this clone does not have."
+fi
 
 # --- 2. Cheap path: is anything screenshot-relevant? -------------------------
+# `set +e` around the pipeline is what keeps the non-zero scope statuses — both
+# the meaningful 3 and the failures — readable instead of fatal.
 set +e
 printf '%s\n' "$changed" | screencomp scope --config "$CONFIG" --changed-from - --exit-code --quiet
 scope_status=$?
 set -e
 case "$scope_status" in
-  0) exit 0 ;; # nothing relevant: pass silently, no capture
+  0) exit 0 ;; # nothing relevant: an evaluated pass, the one quiet exit
   3) : ;;      # relevant path matched: fall through
   *)
-    echo "pre-push: 'screencomp scope' failed (exit $scope_status); skipping the visual guard. CI still gates this." >&2
-    exit 0
+    skip_unevaluated \
+      "'screencomp scope' exited $scope_status, so whether this push touches screenshots is unknown" \
+      "Its error is above; check $CONFIG and the installed screencomp version."
     ;;
 esac
 
 # --- 3. Which microfrontends are affected? (mirrors CI's affected matrix) -----
 range_base="${ranges[0]%%..*}"
 range_head="${ranges[0]##*..}"
+nx_args=(show projects --with-target screenshot --json)
 if [ "$range_base" = "$range_head" ]; then
   echo "pre-push: cannot derive an affected range from '$range_head'; capturing all screenshot projects." >&2
-  affected_json="$(pnpm exec nx show projects --with-target screenshot --json)"
 else
-  affected_json="$(pnpm exec nx show projects --affected --with-target screenshot --base="$range_base" --head="$range_head" --json)"
+  nx_args=(show projects --affected --with-target screenshot --base="$range_base" --head="$range_head" --json)
 fi
-mapfile -t apps < <(printf '%s' "$affected_json" | node -e '
+# `pnpm exec nx` needs an installed workspace, and a freshly created clone or
+# worktree legitimately has no node_modules — `pnpm exec` then exits 254 for the
+# missing binary, printing its diagnosis to the stdout this captures. Taking the
+# status here instead of letting the assignment die under `set -e` is the whole
+# point of this section: that death happened before any message below could run,
+# so git reported a bare "failed to push some refs" and the reason was lost.
+affected_json=""
+nx_status=0
+affected_json="$(pnpm exec nx "${nx_args[@]}")" || nx_status=$?
+if [ "$nx_status" -ne 0 ]; then
+  # Whatever nx or pnpm said went into the capture rather than to the terminal,
+  # so replay it (bounded) as part of the diagnostic.
+  nx_said=()
+  while IFS= read -r line; do
+    [ "${#nx_said[@]}" -ge 6 ] && break
+    [ -n "$line" ] && nx_said+=("nx: $line")
+  done <<<"$affected_json"
+  skip_unevaluated \
+    "'pnpm exec nx show projects' exited $nx_status, so the affected microfrontends are unknown" \
+    ${nx_said[@]+"${nx_said[@]}"} \
+    "In a fresh clone or worktree this means the workspace is not installed:" \
+    "run 'just bootstrap' (or at minimum 'pnpm install --frozen-lockfile')," \
+    "then push again for a real verdict."
+fi
+apps_list=""
+parse_status=0
+apps_list="$(printf '%s' "$affected_json" | node -e '
   const a = JSON.parse(require("node:fs").readFileSync(0, "utf8"));
-  if (!Array.isArray(a) || !a.every((x) => typeof x === "string" && /^[a-z][a-z0-9-]*$/.test(x))) process.exit(2);
+  if (!Array.isArray(a) || !a.every((x) => typeof x === "string" && /^[a-z][a-z0-9-]*$/.test(x)))
+    throw new Error("expected a JSON array of Nx project names");
   process.stdout.write([...new Set(a)].sort().join("\n"));
-')
+')" || parse_status=$?
+# An unreadable project list is not an empty one: without this the parse failure
+# left `apps` empty and the hook announced "no microfrontend was affected — ok to
+# push", passing a push it had not evaluated.
+if [ "$parse_status" -ne 0 ]; then
+  skip_unevaluated \
+    "the affected-project list from Nx could not be read (node exited $parse_status)" \
+    "Expected a JSON array of project names; nx printed: $(printf '%.200s' "$affected_json")"
+fi
+apps=()
+if [ -n "$apps_list" ]; then
+  mapfile -t apps < <(printf '%s' "$apps_list")
+fi
 if [ "${#apps[@]}" -eq 0 ]; then
   echo "pre-push: screenshot-relevant files changed, but no microfrontend was affected — ok to push"
   exit 0
@@ -102,16 +205,9 @@ fi
 
 # --- 4. Capture requires Docker ----------------------------------------------
 if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
-  {
-    echo
-    echo "############################################################################"
-    echo "# screencomp pre-push guard: screenshot-relevant files changed, but Docker  #"
-    echo "# is not available to re-capture them. Refusing to push (a pass here would  #"
-    echo "# be false assurance). Start Docker and retry, or: git push --no-verify      #"
-    echo "############################################################################"
-    echo
-  } >&2
-  exit 1
+  block_push \
+    "Screenshot-relevant files changed in ${apps[*]}, but Docker is not available" \
+    "to re-capture them. Start Docker and retry."
 fi
 
 # Pass the host CA bundle into the container so a TLS-intercepting proxy does not
@@ -127,10 +223,17 @@ fi
 # then loop; the `-v /work/node_modules` volume masks the host tree for a clean
 # install matching CI's fresh checkout.
 echo "pre-push: capturing affected microfrontends (${apps[*]}) in $CONTAINER…" >&2
-docker run --rm --platform="linux/amd64" --ipc=host --shm-size=2g \
+# Resolved before the run: a command substitution inside a simple command's
+# arguments cannot fail the command, so an unresolvable HEAD would otherwise
+# capture under an empty SOURCE_REVISION rather than report.
+source_revision=""
+if ! source_revision="$(git rev-parse HEAD)"; then
+  block_push "Could not resolve HEAD to stamp the capture's source revision (git's error is above)."
+fi
+if ! docker run --rm --platform="linux/amd64" --ipc=host --shm-size=2g \
   -v "$PWD:/work" -v /work/node_modules -w /work \
   -e "SCREENCOMP_APPS=${apps[*]}" -e "ARCH=$ARCH" \
-  -e "SOURCE_REVISION=$(git rev-parse HEAD)" \
+  -e "SOURCE_REVISION=$source_revision" \
   ${ca_args[@]+"${ca_args[@]}"} \
   "$CONTAINER" \
   bash -lc '
@@ -141,7 +244,11 @@ docker run --rm --platform="linux/amd64" --ipc=host --shm-size=2g \
       echo "::capture $app::"
       SHOTS_OUT="shots/current/$app/$ARCH" pnpm exec nx run "$app:screenshot"
     done
-  '
+  '; then
+  block_push \
+    "Capturing ${apps[*]} in $CONTAINER failed; the container's output is above." \
+    "Nothing was classified, so this push cannot be cleared of visual drift."
+fi
 
 # --- 5. Classify each affected app against its committed baseline manifest -----
 drifted=()
@@ -156,13 +263,24 @@ for app in "${apps[@]}"; do
     3)
       drifted+=("$app")
       # Regenerate the drifted app's manifest and a review gallery. Never commit.
-      screencomp manifest --input "shots/current/$app" --arch "$ARCH" --output "$manifest"
-      screencomp gallery --input "shots/current/$app" --arch "$ARCH" \
-        --output "shots/review/$app" --title "Pre-push review: $app" >/dev/null
+      # Both are what makes the block below actionable, so a failure here has to
+      # name itself rather than end the hook on the drift it already found.
+      if ! screencomp manifest --input "shots/current/$app" --arch "$ARCH" --output "$manifest"; then
+        block_push \
+          "$app drifted from $manifest, but regenerating that baseline failed (error above)." \
+          "Review the drift by hand; there is no updated manifest to commit."
+      fi
+      if ! screencomp gallery --input "shots/current/$app" --arch "$ARCH" \
+        --output "shots/review/$app" --title "Pre-push review: $app" >/dev/null; then
+        block_push \
+          "$app drifted from $manifest, but building its review gallery failed (error above)." \
+          "The regenerated manifest is written; there is no gallery to review it against."
+      fi
       ;;
     *)
-      echo "pre-push: screencomp classify failed for $app (exit $status)" >&2
-      exit "$status"
+      block_push \
+        "'screencomp classify' exited $status for $app against $manifest (error above)," \
+        "so this push cannot be cleared of visual drift."
       ;;
   esac
 done
