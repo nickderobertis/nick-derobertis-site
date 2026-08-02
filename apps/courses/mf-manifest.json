@@ -1,0 +1,114 @@
+{
+  "id": "courses",
+  "name": "courses",
+  "metaData": {
+    "name": "courses",
+    "type": "app",
+    "buildInfo": {
+      "buildVersion": "local",
+      "buildName": "nick-derobertis-site"
+    },
+    "remoteEntry": {
+      "name": "remoteEntry.js",
+      "path": "",
+      "type": "global"
+    },
+    "types": {
+      "path": "",
+      "name": "",
+      "zip": "",
+      "api": ""
+    },
+    "globalName": "courses",
+    "pluginVersion": "2.8.0",
+    "publicPath": "/nick-derobertis-site/remotes/courses/"
+  },
+  "shared": [
+    {
+      "id": "courses:react-dom",
+      "name": "react-dom",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.7fc2b155a4b3480d.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.52f8612df6cbea2d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "courses:react",
+      "name": "react",
+      "version": "19.2.7",
+      "singleton": true,
+      "requiredVersion": "^19.2.7",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.7fc2b155a4b3480d.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.52f8612df6cbea2d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    }
+  ],
+  "remotes": [],
+  "exposes": [
+    {
+      "id": "courses:Page",
+      "name": "Page",
+      "assets": {
+        "js": {
+          "sync": [
+            "812.3c3a8aa00c112ff6.js",
+            "common.cf001499cb943664.js",
+            "754.4fe4a3025663518a.js"
+          ],
+          "async": []
+        },
+        "css": {
+          "sync": [
+            "common.e00d2b0e57982d7a.css",
+            "__federation_expose_Page.7fc66cd77766a671.css"
+          ],
+          "async": []
+        }
+      },
+      "path": "./Page"
+    },
+    {
+      "id": "courses:Skeleton",
+      "name": "Skeleton",
+      "assets": {
+        "js": {
+          "sync": [],
+          "async": []
+        },
+        "css": {
+          "sync": [],
+          "async": []
+        }
+      },
+      "path": "./Skeleton"
+    }
+  ]
+}
