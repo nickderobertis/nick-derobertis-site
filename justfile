@@ -136,8 +136,17 @@ setup-llm-harness:
 lint-llm:
     llmlint
 
-lint-llm-diff *args:
-    llmlint --diff --diff-base "origin/master" {{args}}
+# Judge the branch diff. The first argument is the diff base, not a file:
+# llmlint's trailing FILES positional replaces the configured globs, and a path
+# it cannot match is a silent exit 0, so a ref left there drops most rules and
+# reports a pass over a fraction of the ruleset. Files, when you really want to
+# narrow the run, come after the base; they stay positional so a path that
+# contains a space reaches llmlint as the one file the caller named. Both the
+# base and every file are checked here because llmlint answers an unmatchable
+# path with a clean run, so an argument this recipe gets wrong is invisible.
+# llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; it judges the working tree and reports an exit status, so nothing it does is observable to a visitor. lint-llm-diff.spec.ts drives this exact recipe as a real subprocess through the default base, an explicit ref, a range, pass-through files, both rejected-input paths, and a reported-findings failure.
+@lint-llm-diff base="origin/master" *files:
+    base="$1"; [[ "$base" != -* ]] && git rev-list -1 "$base" -- >/dev/null 2>&1 || { echo "lint-llm-diff: base must be a git revision to diff against, such as origin/master, HEAD~1, or a range; fetch the missing ref, then rerun just lint-llm-diff <base>" >&2; exit 2; }; for file in "${@:2}"; do [[ "$file" != -* && "$file" != *..* && -e "$file" ]] || { echo "lint-llm-diff: every file after the base must be an existing workspace path, because llmlint reports a clean run for a path it cannot match; correct or drop \"$file\", then rerun just lint-llm-diff $base <files>" >&2; exit 2; }; done; llmlint --diff --diff-base "$base" "${@:2}" || { echo "lint-llm-diff: the LLM judge reported the findings above; fix each one, or justify it with a narrow ignore directive at its site, then rerun just lint-llm-diff" >&2; exit 1; }
 
 lint-llm-validate *args:
     llmlint validate {{args}}
