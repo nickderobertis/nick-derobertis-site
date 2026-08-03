@@ -131,6 +131,48 @@ function recordFailedRequests(page: Page) {
   return failures;
 }
 
+/**
+ * Reports when the artifact has stopped fetching. A document reaches
+ * `networkidle` once, and the fetches that matter most here start after it: a
+ * host remote asks for its children only once its own bundle has run, so
+ * Home's seven panes are still arriving when the initial idle window closes.
+ * A test that navigates or asserts at that moment cancels those requests and
+ * records its own aborts as artifact failures, while a chunk the artifact
+ * really lacks never gets to answer 404. Install this before a navigation and
+ * await the returned settle after it.
+ */
+function watchTraffic(page: Page) {
+  let inFlight = 0;
+  let settled = 0;
+  const started = () => {
+    inFlight += 1;
+  };
+  const finished = () => {
+    inFlight -= 1;
+    settled += 1;
+  };
+  page.on("request", started);
+  page.on("requestfinished", finished);
+  page.on("requestfailed", finished);
+  return async () => {
+    // The document itself must have been fetched at all…
+    await expect.poll(() => settled).toBeGreaterThan(0);
+    // …and then the page must stay quiet long enough for the fetches hydration
+    // starts to have started, so this reports the whole load rather than its
+    // first leg.
+    await expect
+      .poll(async () => {
+        const before = settled;
+        await page.waitForTimeout(500);
+        return inFlight === 0 && settled === before;
+      })
+      .toBe(true);
+    page.off("request", started);
+    page.off("requestfinished", finished);
+    page.off("requestfailed", finished);
+  };
+}
+
 let server: Server;
 let origin: string;
 
@@ -164,10 +206,12 @@ for (const routePath of routePaths)
       if (response.status() === 200)
         served.add(extname(new URL(response.url()).pathname));
     });
+    const settle = watchTraffic(page);
 
     await page.goto(`${origin}${base}${routePath}`, {
       waitUntil: "networkidle",
     });
+    await settle();
 
     await expect(page.getByRole("banner")).toBeVisible();
     await expect(page.getByRole("contentinfo")).toBeVisible();
@@ -182,7 +226,13 @@ test("the composed deploy artifact hydrates and navigates without a document req
   page,
 }) => {
   const failures = recordFailedRequests(page);
+  const entered = watchTraffic(page);
   await page.goto(`${origin}${base}/`, { waitUntil: "networkidle" });
+  // Home's panes are fetched by its bundle, so waiting for them to arrive is
+  // also what puts hydration behind this click: an unhydrated document answers
+  // the header link with a document request, which is exactly what is asserted
+  // against below.
+  await entered();
   await expect(
     page.getByRole("heading", { name: "Finance researcher & educator" }),
   ).toBeVisible();
@@ -191,11 +241,13 @@ test("the composed deploy artifact hydrates and navigates without a document req
   page.on("request", (request) => {
     if (request.isNavigationRequest()) documentRequests += 1;
   });
+  const navigated = watchTraffic(page);
   await page.getByRole("link", { name: "Bio", exact: true }).click();
 
   await expect(
     page.getByRole("heading", { name: "Optimizing Life" }),
   ).toBeVisible();
+  await navigated();
   expect(documentRequests).toBe(0);
   expect(failures).toEqual([]);
 });
@@ -205,13 +257,15 @@ test("the composed deploy artifact serves each standalone remote document", asyn
 }) => {
   const failures = recordFailedRequests(page);
   for (const name of await readdir(join(composedSite, "remotes"))) {
+    const settle = watchTraffic(page);
     await page.goto(`${origin}${base}/remotes/${name}/`, {
       waitUntil: "networkidle",
     });
+    await settle();
     // Awards and Home prerender no heading of their own — one resolves its
     // data after hydration and the other is a host of slots — so a visible
     // heading on every remote is also proof its bundle ran.
     await expect(page.getByRole("heading").first()).toBeVisible();
+    expect(failures, `${name} standalone`).toEqual([]);
   }
-  expect(failures).toEqual([]);
 });
