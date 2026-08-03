@@ -22,6 +22,13 @@ const cliFindingsSchema = z.object({
   sites: z.object({
     new: z.object({
       routes: z.object({ "/": z.object({ fcp: z.number() }) }).passthrough(),
+      spreads: z
+        .object({
+          "/": z.object({
+            fcp: z.object({ min: z.number(), max: z.number() }),
+          }),
+        })
+        .passthrough(),
     }),
     original: z.object({
       routes: z.object({ "/": z.object({ fcp: z.number() }) }).passthrough(),
@@ -111,10 +118,14 @@ describe("performance audit CLI", () => {
     expect(findings.environment.formFactor).toBe("desktop");
     expect(findings.environment.throttling.cpuSlowdownMultiplier).toBe(1);
     expect(findings.sites.new.routes["/"].fcp).toBe(130);
+    expect(findings.sites.new.spreads["/"].fcp).toEqual({ min: 110, max: 150 });
     expect(findings.sites.original.routes["/"].fcp).toBe(230);
-    expect(report).toContain("| FCP | 130 ms | 230 ms | -100 ms |");
     expect(report).toContain(
-      "Absolute CPU- and network-bound timings are host-dependent",
+      "| FCP | 130 ms (110 ms–150 ms) | 230 ms (210 ms–250 ms) | -100 ms |",
+    );
+    expect(report).toContain("FCP: better");
+    expect(report).toContain(
+      "Performance score, FCP, LCP, and TBT are host-sensitive",
     );
     expect(report).toContain("cpuSlowdownMultiplier");
   });
