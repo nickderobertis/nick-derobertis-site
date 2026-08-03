@@ -13,6 +13,21 @@ const performanceConfigSchema = z.object({
   newUrl: z.string().url(),
   originalUrl: z.string().url(),
 });
+const cliMetricSchema = z.object({
+  performance: z.number().int(),
+  fcp: z.number(),
+});
+const cliSpreadSchema = z.object({
+  performance: z.object({
+    min: z.number().int(),
+    max: z.number().int(),
+  }),
+  fcp: z.object({ min: z.number(), max: z.number() }),
+});
+const cliSiteSchema = z.object({
+  routes: z.object({ "/": cliMetricSchema }).catchall(cliMetricSchema),
+  spreads: z.object({ "/": cliSpreadSchema }).catchall(cliSpreadSchema),
+});
 const cliFindingsSchema = z.object({
   runsPerRoute: z.number().int().positive(),
   environment: z.object({
@@ -20,38 +35,8 @@ const cliFindingsSchema = z.object({
     throttling: z.object({ cpuSlowdownMultiplier: z.literal(1) }),
   }),
   sites: z.object({
-    new: z.object({
-      routes: z.record(
-        z.string(),
-        z.object({ performance: z.number().int(), fcp: z.number() }),
-      ),
-      spreads: z.record(
-        z.string(),
-        z.object({
-          performance: z.object({
-            min: z.number().int(),
-            max: z.number().int(),
-          }),
-          fcp: z.object({ min: z.number(), max: z.number() }),
-        }),
-      ),
-    }),
-    original: z.object({
-      routes: z.record(
-        z.string(),
-        z.object({ performance: z.number().int(), fcp: z.number() }),
-      ),
-      spreads: z.record(
-        z.string(),
-        z.object({
-          performance: z.object({
-            min: z.number().int(),
-            max: z.number().int(),
-          }),
-          fcp: z.object({ min: z.number(), max: z.number() }),
-        }),
-      ),
-    }),
+    new: cliSiteSchema,
+    original: cliSiteSchema,
   }),
 });
 const performanceConfig = performanceConfigSchema.parse(
