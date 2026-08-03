@@ -2,7 +2,6 @@ import { spawnSync } from "node:child_process";
 import { createReadStream, readFileSync } from "node:fs";
 import { cp, mkdir, readdir, rm, stat } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
-import type { AddressInfo } from "node:net";
 import { extname, join, normalize } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 // The Pages base and the route inventory each have one validated source; this
@@ -189,7 +188,10 @@ test.beforeAll(async () => {
     `${composed.stdout ?? ""}${composed.stderr ?? ""}`,
   ).toBe(0);
   server = await startArtifactServer(composedSite);
-  origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  const address = server.address();
+  if (address === null || typeof address === "string")
+    throw new Error("Artifact server did not listen on a TCP socket");
+  origin = `http://127.0.0.1:${address.port}`;
 });
 
 test.afterAll(async () => {
