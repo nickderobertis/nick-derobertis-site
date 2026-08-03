@@ -1,24 +1,24 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "runsPerRoute": 5,
   "environment": {
-    "capturedAt": "2026-07-22T04:25:17.303Z",
+    "capturedAt": "2026-08-03T18:52:51.431Z",
     "host": "Linux 6.17.0-1019-aws x64",
     "cpu": "Intel(R) Xeon(R) Platinum 8488C",
-    "logicalCpus": 4,
-    "memoryGiB": 15.3,
+    "logicalCpus": 8,
+    "memoryGiB": 30.8,
     "node": "v26.5.0",
     "lighthouse": "12.8.2",
     "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36",
     "formFactor": "desktop",
     "throttlingMethod": "simulate",
     "throttling": {
+      "cpuSlowdownMultiplier": 1,
       "rttMs": 40,
       "throughputKbps": 10240,
       "requestLatencyMs": 0,
       "downloadThroughputKbps": 0,
-      "uploadThroughputKbps": 0,
-      "cpuSlowdownMultiplier": 1
+      "uploadThroughputKbps": 0
     }
   },
   "sites": {
@@ -26,49 +26,201 @@
       "url": "https://nickderobertis.github.io/nick-derobertis-site/",
       "routes": {
         "/": {
-          "performance": 41,
-          "fcp": 230.0287,
-          "lcp": 3927.9916000000003,
-          "tbt": 1894.5000000000002,
-          "cls": 0.1418479560124313,
-          "transferBytes": 3638364,
-          "jsBytes": 3630161
+          "performance": 74,
+          "fcp": 260.4913,
+          "lcp": 461.0905584228516,
+          "tbt": 699,
+          "cls": 0,
+          "transferBytes": 3503845,
+          "jsBytes": 3472923
         },
         "/bio": {
-          "performance": 80,
-          "fcp": 217.68236404418946,
-          "lcp": 792.6689,
-          "tbt": 1,
-          "cls": 0.4417406726540958,
-          "transferBytes": 459644,
-          "jsBytes": 454334
+          "performance": 98,
+          "fcp": 211.79720614013672,
+          "lcp": 432.3050584228516,
+          "tbt": 135,
+          "cls": 0,
+          "transferBytes": 47199,
+          "jsBytes": 40979
         },
         "/research": {
-          "performance": 35,
-          "fcp": 258.807,
-          "lcp": 3068.177,
-          "tbt": 587,
-          "cls": 0.9852292742180383,
-          "transferBytes": 3212971,
-          "jsBytes": 904567
+          "performance": 85,
+          "fcp": 216.0844061401367,
+          "lcp": 2083.0553,
+          "tbt": 183,
+          "cls": 0,
+          "transferBytes": 2799993,
+          "jsBytes": 490021
         },
         "/software": {
-          "performance": 30,
-          "fcp": 266.6948,
-          "lcp": 2216.9798,
-          "tbt": 1163.5,
-          "cls": 0.8825354792995243,
-          "transferBytes": 942288,
-          "jsBytes": 903080
+          "performance": 93,
+          "fcp": 523.2921,
+          "lcp": 548.4639999999999,
+          "tbt": 206,
+          "cls": 0,
+          "transferBytes": 844967,
+          "jsBytes": 489336
         },
         "/courses": {
-          "performance": 43,
-          "fcp": 236.3329,
-          "lcp": 1857.229,
-          "tbt": 648,
-          "cls": 0.9852292742180383,
-          "transferBytes": 908703,
-          "jsBytes": 903785
+          "performance": 92,
+          "fcp": 216.31800614013673,
+          "lcp": 426.45135842285157,
+          "tbt": 229,
+          "cls": 0,
+          "transferBytes": 501308,
+          "jsBytes": 490152
+        }
+      },
+      "spreads": {
+        "/": {
+          "performance": {
+            "min": 74,
+            "max": 75
+          },
+          "fcp": {
+            "min": 259.0826,
+            "max": 295.72
+          },
+          "lcp": {
+            "min": 359.72,
+            "max": 462.8675584228516
+          },
+          "tbt": {
+            "min": 689.9999999999998,
+            "max": 732.9999999999998
+          },
+          "cls": {
+            "min": 0,
+            "max": 0
+          },
+          "transferBytes": {
+            "min": 3503783,
+            "max": 4091624
+          },
+          "jsBytes": {
+            "min": 3472581,
+            "max": 4053744
+          }
+        },
+        "/bio": {
+          "performance": {
+            "min": 97,
+            "max": 99
+          },
+          "fcp": {
+            "min": 211.71260614013673,
+            "max": 223.4853
+          },
+          "lcp": {
+            "min": 417.36735842285157,
+            "max": 448.08455842285156
+          },
+          "tbt": {
+            "min": 118.79962921142575,
+            "max": 140
+          },
+          "cls": {
+            "min": 0,
+            "max": 0
+          },
+          "transferBytes": {
+            "min": 47161,
+            "max": 47356
+          },
+          "jsBytes": {
+            "min": 40916,
+            "max": 41018
+          }
+        },
+        "/research": {
+          "performance": {
+            "min": 79,
+            "max": 86
+          },
+          "fcp": {
+            "min": 214.46520614013673,
+            "max": 228.7549
+          },
+          "lcp": {
+            "min": 2081.4361,
+            "max": 2599.5747
+          },
+          "tbt": {
+            "min": 171,
+            "max": 219
+          },
+          "cls": {
+            "min": 0,
+            "max": 0
+          },
+          "transferBytes": {
+            "min": 2799941,
+            "max": 2800001
+          },
+          "jsBytes": {
+            "min": 489879,
+            "max": 490157
+          }
+        },
+        "/software": {
+          "performance": {
+            "min": 93,
+            "max": 95
+          },
+          "fcp": {
+            "min": 521.5447,
+            "max": 534.4639999999999
+          },
+          "lcp": {
+            "min": 537.5447,
+            "max": 722.8913584228516
+          },
+          "tbt": {
+            "min": 188,
+            "max": 216
+          },
+          "cls": {
+            "min": 0,
+            "max": 0
+          },
+          "transferBytes": {
+            "min": 844950,
+            "max": 844994
+          },
+          "jsBytes": {
+            "min": 489216,
+            "max": 489467
+          }
+        },
+        "/courses": {
+          "performance": {
+            "min": 92,
+            "max": 93
+          },
+          "fcp": {
+            "min": 213.8521,
+            "max": 231.9441
+          },
+          "lcp": {
+            "min": 424.00955842285157,
+            "max": 435.54335842285155
+          },
+          "tbt": {
+            "min": 223,
+            "max": 236
+          },
+          "cls": {
+            "min": 0,
+            "max": 0
+          },
+          "transferBytes": {
+            "min": 501211,
+            "max": 501395
+          },
+          "jsBytes": {
+            "min": 490144,
+            "max": 490268
+          }
         }
       }
     },
@@ -76,98 +228,250 @@
       "url": "https://nickderobertis.com/",
       "routes": {
         "/": {
-          "performance": 41,
-          "fcp": 1914.0342000000003,
-          "lcp": 2527.75785,
-          "tbt": 4588.000000000002,
-          "cls": 0.000786985662271312,
-          "transferBytes": 4056429,
-          "jsBytes": 1734627
+          "performance": 69,
+          "fcp": 1924.0463000000004,
+          "lcp": 2484.7547000000004,
+          "tbt": 215.50000000000045,
+          "cls": 0.0004510391176699696,
+          "transferBytes": 4057340,
+          "jsBytes": 1735669
         },
         "/bio": {
-          "performance": 80,
-          "fcp": 1722.9636,
-          "lcp": 2067.9293,
-          "tbt": 120.5,
-          "cls": 0,
-          "transferBytes": 2162395,
-          "jsBytes": 1396917
+          "performance": 82,
+          "fcp": 1687.6274,
+          "lcp": 2012.3661000000002,
+          "tbt": 55,
+          "cls": 0.0002461649211495432,
+          "transferBytes": 2163450,
+          "jsBytes": 1397968
         },
         "/research": {
-          "performance": 66,
-          "fcp": 1779.6410999999998,
-          "lcp": 2100.0403,
-          "tbt": 142,
+          "performance": 71,
+          "fcp": 1647.7362499999997,
+          "lcp": 1984.027,
+          "tbt": 54.5,
           "cls": 0.23974911741479019,
-          "transferBytes": 2081690,
-          "jsBytes": 1397127
+          "transferBytes": 2082515,
+          "jsBytes": 1397961
         },
         "/software": {
-          "performance": 40,
-          "fcp": 1815.3024000000005,
-          "lcp": 2466.1112999999996,
-          "tbt": 339.00000000000045,
-          "cls": 0.5283112569514021,
-          "transferBytes": 2480854,
-          "jsBytes": 1397116
+          "performance": 58,
+          "fcp": 1644.6930499999999,
+          "lcp": 2345.5269249999997,
+          "tbt": 77,
+          "cls": 0.5261178714550074,
+          "transferBytes": 2482094,
+          "jsBytes": 1397975
         },
         "/courses": {
-          "performance": 72,
-          "fcp": 1737.3136,
-          "lcp": 2309.7933999999996,
-          "tbt": 108.5,
-          "cls": 0.1581233564427444,
-          "transferBytes": 2736964,
-          "jsBytes": 1397143
+          "performance": 74,
+          "fcp": 1643.4197,
+          "lcp": 2260.84005,
+          "tbt": 54.5,
+          "cls": 0.15834236353494296,
+          "transferBytes": 2737742,
+          "jsBytes": 1397983
+        }
+      },
+      "spreads": {
+        "/": {
+          "performance": {
+            "min": 50,
+            "max": 75
+          },
+          "fcp": {
+            "min": 1802.87595,
+            "max": 2420.6075
+          },
+          "lcp": {
+            "min": 2363.6228500000007,
+            "max": 4199.9655
+          },
+          "tbt": {
+            "min": 161.50000000000045,
+            "max": 329.5
+          },
+          "cls": {
+            "min": 0.0004510391176699696,
+            "max": 0.00870468893958156
+          },
+          "transferBytes": {
+            "min": 4057236,
+            "max": 5263273
+          },
+          "jsBytes": {
+            "min": 1735607,
+            "max": 2279579
+          }
+        },
+        "/bio": {
+          "performance": {
+            "min": 69,
+            "max": 83
+          },
+          "fcp": {
+            "min": 1682.1865000000003,
+            "max": 2167.2777
+          },
+          "lcp": {
+            "min": 2002.5073000000002,
+            "max": 3151.3928000000005
+          },
+          "tbt": {
+            "min": 54.5,
+            "max": 124
+          },
+          "cls": {
+            "min": 0.0002458748223816572,
+            "max": 0.0002461649211495432
+          },
+          "transferBytes": {
+            "min": 2163218,
+            "max": 3365382
+          },
+          "jsBytes": {
+            "min": 1397967,
+            "max": 1939731
+          }
+        },
+        "/research": {
+          "performance": {
+            "min": 57,
+            "max": 71
+          },
+          "fcp": {
+            "min": 1642.6042,
+            "max": 2126.5586000000008
+          },
+          "lcp": {
+            "min": 1951.2195500000003,
+            "max": 3036.5086
+          },
+          "tbt": {
+            "min": 54.5,
+            "max": 130
+          },
+          "cls": {
+            "min": 0.23974911741479019,
+            "max": 0.239768328407698
+          },
+          "transferBytes": {
+            "min": 2082236,
+            "max": 3284610
+          },
+          "jsBytes": {
+            "min": 1397705,
+            "max": 1939718
+          }
+        },
+        "/software": {
+          "performance": {
+            "min": 46,
+            "max": 59
+          },
+          "fcp": {
+            "min": 1638.1542,
+            "max": 2125.90925
+          },
+          "lcp": {
+            "min": 2304.9036499999993,
+            "max": 3314.9987499999997
+          },
+          "tbt": {
+            "min": 69.28382101440411,
+            "max": 128.5
+          },
+          "cls": {
+            "min": 0.5261178714550074,
+            "max": 0.5286206974557363
+          },
+          "transferBytes": {
+            "min": 2481853,
+            "max": 3684022
+          },
+          "jsBytes": {
+            "min": 1397968,
+            "max": 1939717
+          }
+        },
+        "/courses": {
+          "performance": {
+            "min": 59,
+            "max": 75
+          },
+          "fcp": {
+            "min": 1534.8048,
+            "max": 2133.6946499999995
+          },
+          "lcp": {
+            "min": 2205.7907,
+            "max": 3599.357400000001
+          },
+          "tbt": {
+            "min": 52,
+            "max": 136
+          },
+          "cls": {
+            "min": 0.1581233564427444,
+            "max": 0.1583938312260383
+          },
+          "transferBytes": {
+            "min": 2737362,
+            "max": 3939889
+          },
+          "jsBytes": {
+            "min": 1397729,
+            "max": 1939708
+          }
         }
       }
     }
   },
   "deltas": {
     "/": {
-      "performance": 0,
-      "fcp": -1684.0055000000002,
-      "lcp": 1400.2337500000003,
-      "tbt": -2693.500000000002,
-      "cls": 0.14106097035016,
-      "transferBytes": -418065,
-      "jsBytes": 1895534
+      "performance": 5,
+      "fcp": -1663.5550000000003,
+      "lcp": -2023.6641415771487,
+      "tbt": 483.49999999999955,
+      "cls": -0.0004510391176699696,
+      "transferBytes": -553495,
+      "jsBytes": 1737254
     },
     "/bio": {
-      "performance": 0,
-      "fcp": -1505.2812359558106,
-      "lcp": -1275.2603999999997,
-      "tbt": -119.5,
-      "cls": 0.4417406726540958,
-      "transferBytes": -1702751,
-      "jsBytes": -942583
+      "performance": 16,
+      "fcp": -1475.8301938598634,
+      "lcp": -1580.0610415771487,
+      "tbt": 80,
+      "cls": -0.0002461649211495432,
+      "transferBytes": -2116251,
+      "jsBytes": -1356989
     },
     "/research": {
-      "performance": -31,
-      "fcp": -1520.8340999999998,
-      "lcp": 968.1367,
-      "tbt": 445,
-      "cls": 0.7454801568032481,
-      "transferBytes": 1131281,
-      "jsBytes": -492560
+      "performance": 14,
+      "fcp": -1431.651843859863,
+      "lcp": 99.02829999999994,
+      "tbt": 128.5,
+      "cls": -0.23974911741479019,
+      "transferBytes": 717478,
+      "jsBytes": -907940
     },
     "/software": {
-      "performance": -10,
-      "fcp": -1548.6076000000005,
-      "lcp": -249.1314999999995,
-      "tbt": 824.4999999999995,
-      "cls": 0.3542242223481221,
-      "transferBytes": -1538566,
-      "jsBytes": -494036
+      "performance": 35,
+      "fcp": -1121.4009499999997,
+      "lcp": -1797.0629249999997,
+      "tbt": 129,
+      "cls": -0.5261178714550074,
+      "transferBytes": -1637127,
+      "jsBytes": -908639
     },
     "/courses": {
-      "performance": -29,
-      "fcp": -1500.9807,
-      "lcp": -452.5643999999995,
-      "tbt": 539.5,
-      "cls": 0.827105917775294,
-      "transferBytes": -1828261,
-      "jsBytes": -493358
+      "performance": 18,
+      "fcp": -1427.1016938598632,
+      "lcp": -1834.3886915771482,
+      "tbt": 174.5,
+      "cls": -0.15834236353494296,
+      "transferBytes": -2236434,
+      "jsBytes": -907831
     }
   }
 }

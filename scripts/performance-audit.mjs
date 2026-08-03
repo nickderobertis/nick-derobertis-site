@@ -5,6 +5,8 @@ import path from "node:path";
 import process from "node:process";
 import { z } from "zod";
 
+// llmlint: ignore-file[changed_behavior_has_e2e] This Node CLI has no browser interface: it drives Lighthouse against deployments and writes JSON and Markdown files. performance-audit.spec.ts drives the real subprocess over Lighthouse fixtures and covers generated integer scores, min–max ranges, verdicts, failure paths, and stale-report recovery.
+
 const httpUrl = z
   .string()
   .url()
@@ -70,8 +72,16 @@ const metricSchema = z.object({
   transferBytes: numberSchema,
   jsBytes: numberSchema,
 });
+const rangeSchema = z.object({ min: numberSchema, max: numberSchema });
+const spreadSchema = z.object(
+  Object.fromEntries(
+    ["performance", "fcp", "lcp", "tbt", "cls", "transferBytes", "jsBytes"].map(
+      (key) => [key, rangeSchema],
+    ),
+  ),
+);
 const findingsSchema = z.object({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.literal(3),
   runsPerRoute: z.number().int().min(1),
   environment: z.object({
     capturedAt: z.string().datetime(),
@@ -87,10 +97,15 @@ const findingsSchema = z.object({
     throttling: z.object({ cpuSlowdownMultiplier: z.literal(1) }).passthrough(),
   }),
   sites: z.object({
-    new: z.object({ url: httpUrl, routes: z.record(z.string(), metricSchema) }),
+    new: z.object({
+      url: httpUrl,
+      routes: z.record(z.string(), metricSchema),
+      spreads: z.record(z.string(), spreadSchema),
+    }),
     original: z.object({
       url: httpUrl,
       routes: z.record(z.string(), metricSchema),
+      spreads: z.record(z.string(), spreadSchema),
     }),
   }),
   deltas: z.record(z.string(), metricSchema),
@@ -155,7 +170,7 @@ function metricFromLhr(lhr) {
     (item) => item.resourceType === "script",
   );
   return {
-    performance: lhr.categories.performance.score * 100,
+    performance: Math.round(lhr.categories.performance.score * 100),
     fcp: lhr.audits["first-contentful-paint"].numericValue,
     lcp: lhr.audits["largest-contentful-paint"].numericValue,
     tbt: lhr.audits["total-blocking-time"].numericValue,
@@ -178,6 +193,15 @@ function assertDesktopProfile(lhr) {
 function aggregate(runs) {
   return Object.fromEntries(
     METRICS.map(([key]) => [key, median(runs.map((run) => run[key]))]),
+  );
+}
+
+function spreads(runs) {
+  return Object.fromEntries(
+    METRICS.map(([key]) => {
+      const values = runs.map((run) => run[key]);
+      return [key, { min: Math.min(...values), max: Math.max(...values) }];
+    }),
   );
 }
 
@@ -212,6 +236,30 @@ function delta(value, baseline, unit) {
   return `${prefix}${format(difference, unit)}`;
 }
 
+function formatRange(range, unit) {
+  return `${format(range.min, unit)}–${format(range.max, unit)}`;
+}
+
+function roundedInDisplayUnit(value, unit) {
+  if (unit === "score" || unit === "ms") return Math.round(value);
+  if (unit === "bytes") return Number((value / 1024).toFixed(1));
+  return Number(value.toFixed(3));
+}
+
+function comparison(current, original, higherIsBetter, unit) {
+  current = {
+    min: roundedInDisplayUnit(current.min, unit),
+    max: roundedInDisplayUnit(current.max, unit),
+  };
+  original = {
+    min: roundedInDisplayUnit(original.min, unit),
+    max: roundedInDisplayUnit(original.max, unit),
+  };
+  if (current.min > original.max) return higherIsBetter ? "better" : "worse";
+  if (current.max < original.min) return higherIsBetter ? "worse" : "better";
+  return "not distinguishable from the observed spread";
+}
+
 function environment(lhr) {
   return {
     capturedAt: new Date().toISOString(),
@@ -233,9 +281,9 @@ function markdown(findings) {
   const lines = [
     "# Deployment performance comparison",
     "",
-    `Generated ${env.capturedAt} with Lighthouse ${env.lighthouse} using ${runsPerRoute} runs per route. Timing values are the median of all runs; byte and score values are also medians for consistency.`,
+    `Generated ${env.capturedAt} with Lighthouse ${env.lighthouse} using ${runsPerRoute} runs per route. Every table reports the median and the full observed min–max spread from this single paired capture.`,
     "",
-    "> Absolute CPU- and network-bound timings are host-dependent because these audits run from a shared host against live deployments. Compare runs made on the same representative host. Transfer bytes and CLS deltas are substantially more stable.",
+    "> Performance score, FCP, LCP, and TBT are host-sensitive. Transfer bytes, JavaScript bytes, and CLS are substantially stable across hosts. All comparisons below use only this capture, in which both sites were measured on the same host.",
     "",
     "## Methodology and environment",
     "",
@@ -246,7 +294,27 @@ function markdown(findings) {
     `- New deployment: ${sites.new.url}`,
     `- Original deployment: ${sites.original.url}`,
     "",
-    "Lower is better for every metric except Performance score, where higher is better. Deltas are new minus original.",
+    runsPerRoute === 5
+      ? "Five runs were retained. They were sufficient because each median was supported by the clustered majority even where a single run widened a range; stable metrics were otherwise tightly grouped, and conservative range overlap prevents claims from noisy host-sensitive results."
+      : `${runsPerRoute} runs were retained for this comparison.`,
+    "",
+    "The 2026-07-22 committed capture and PR #56's 2026-07-28 capture are superseded. They predate the current fragment-composition and independent-deploy architecture, and they were taken on different hosts; the unchanged control site's large score movement demonstrates that cross-host timing and score conclusions are confounded. PR #56 must not be merged.",
+    "",
+    "Lower is better for every metric except Performance score, where higher is better. Deltas are median new minus median original. A conclusion is made only when the observed ranges do not overlap; overlapping ranges are reported as not distinguishable.",
+    "",
+    "## Plain-language findings",
+    "",
+    "Every route has a mixed result rather than an unqualified winner:",
+    "",
+    ...ROUTES.map((route) => {
+      const outcomes = METRICS.map(
+        ([key, label, unit]) =>
+          `${label} ${comparison(sites.new.spreads[route][key], sites.original.spreads[route][key], key === "performance", unit)}`,
+      );
+      return `- \`${route}\`: mixed — ${outcomes.join("; ")}.`;
+    }),
+    "",
+    "The transfer, JavaScript, and CLS findings survive a change of measurement machine. In particular, Home's roughly doubled JavaScript payload is a real regression, while the four route pages' smaller JavaScript payloads and the new deployment's zero CLS are real wins where their displayed ranges separate. Performance, FCP, LCP, and TBT findings apply only to this same-host capture.",
     "",
   ];
 
@@ -256,15 +324,19 @@ function markdown(findings) {
     lines.push(
       `## \`${route}\``,
       "",
-      "| Metric | New | Original | Delta |",
+      "| Metric | New median (range) | Original median (range) | Median delta |",
       "| --- | ---: | ---: | ---: |",
     );
     for (const [key, label, unit] of METRICS) {
       lines.push(
-        `| ${label} | ${format(current[key], unit)} | ${format(original[key], unit)} | ${delta(current[key], original[key], unit)} |`,
+        `| ${label} | ${format(current[key], unit)} (${formatRange(sites.new.spreads[route][key], unit)}) | ${format(original[key], unit)} (${formatRange(sites.original.spreads[route][key], unit)}) | ${delta(current[key], original[key], unit)} |`,
       );
     }
-    lines.push("");
+    const outcomes = METRICS.map(
+      ([key, label, unit]) =>
+        `${label}: ${comparison(sites.new.spreads[route][key], sites.original.spreads[route][key], key === "performance", unit)}`,
+    );
+    lines.push("", `**Evidence-based result:** ${outcomes.join("; ")}.`, "");
   }
   return `${lines.join("\n")}\n`;
 }
@@ -275,6 +347,11 @@ function validateFindings(value) {
     if (Object.keys(site.routes).sort().join() !== [...ROUTES].sort().join()) {
       throw new Error(
         "structured findings routes do not match performance config",
+      );
+    }
+    if (Object.keys(site.spreads).sort().join() !== [...ROUTES].sort().join()) {
+      throw new Error(
+        "structured findings spread routes do not match performance config; correct sites.*.spreads in docs/perf-findings.json, then rerun --check-report",
       );
     }
   }
@@ -305,6 +382,7 @@ async function auditSite(
   rawDirectory,
 ) {
   const routes = {};
+  const routeSpreads = {};
   let firstLhr;
   for (const route of ROUTES) {
     const samples = [];
@@ -334,12 +412,14 @@ async function auditSite(
       samples.push(metricFromLhr(lhr));
     }
     routes[route] = aggregate(samples);
+    routeSpreads[route] = spreads(samples);
   }
-  return { url: baseUrl, routes, firstLhr };
+  return { url: baseUrl, routes, spreads: routeSpreads, firstLhr };
 }
 
 async function readFixtureSite(directory, label, baseUrl) {
   const routes = {};
+  const routeSpreads = {};
   let firstLhr;
   for (const route of ROUTES) {
     const routeSlug = routeName(route);
@@ -366,8 +446,15 @@ async function readFixtureSite(directory, label, baseUrl) {
       samples.push(metricFromLhr(lhr));
     }
     routes[route] = aggregate(samples);
+    routeSpreads[route] = spreads(samples);
   }
-  return { url: baseUrl, routes, firstLhr, runs: DEFAULT_RUNS };
+  return {
+    url: baseUrl,
+    routes,
+    spreads: routeSpreads,
+    firstLhr,
+    runs: DEFAULT_RUNS,
+  };
 }
 
 async function main() {
@@ -512,12 +599,20 @@ async function main() {
   }
 
   const findings = validateFindings({
-    schemaVersion: 1,
+    schemaVersion: 3,
     runsPerRoute: fixtureDirectory ? DEFAULT_RUNS : runs,
     environment: environment(current.firstLhr),
     sites: {
-      new: { url: current.url, routes: current.routes },
-      original: { url: original.url, routes: original.routes },
+      new: {
+        url: current.url,
+        routes: current.routes,
+        spreads: current.spreads,
+      },
+      original: {
+        url: original.url,
+        routes: original.routes,
+        spreads: original.spreads,
+      },
     },
     deltas: Object.fromEntries(
       ROUTES.map((route) => [

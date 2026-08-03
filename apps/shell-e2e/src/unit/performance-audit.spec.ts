@@ -13,19 +13,31 @@ const performanceConfigSchema = z.object({
   newUrl: z.string().url(),
   originalUrl: z.string().url(),
 });
+const cliMetricSchema = z.object({
+  performance: z.number().int(),
+  fcp: z.number(),
+});
+const cliSpreadSchema = z.object({
+  performance: z.object({
+    min: z.number().int(),
+    max: z.number().int(),
+  }),
+  fcp: z.object({ min: z.number(), max: z.number() }),
+});
+const cliSiteSchema = z.object({
+  routes: z.object({ "/": cliMetricSchema }).catchall(cliMetricSchema),
+  spreads: z.object({ "/": cliSpreadSchema }).catchall(cliSpreadSchema),
+});
 const cliFindingsSchema = z.object({
+  schemaVersion: z.literal(3),
   runsPerRoute: z.number().int().positive(),
   environment: z.object({
     formFactor: z.literal("desktop"),
     throttling: z.object({ cpuSlowdownMultiplier: z.literal(1) }),
   }),
   sites: z.object({
-    new: z.object({
-      routes: z.object({ "/": z.object({ fcp: z.number() }) }).passthrough(),
-    }),
-    original: z.object({
-      routes: z.object({ "/": z.object({ fcp: z.number() }) }).passthrough(),
-    }),
+    new: cliSiteSchema,
+    original: cliSiteSchema,
   }),
 });
 const performanceConfig = performanceConfigSchema.parse(
@@ -108,13 +120,24 @@ describe("performance audit CLI", () => {
     );
 
     expect(findings.runsPerRoute).toBe(performanceConfig.minimumRuns);
+    expect(findings.schemaVersion).toBe(3);
     expect(findings.environment.formFactor).toBe("desktop");
     expect(findings.environment.throttling.cpuSlowdownMultiplier).toBe(1);
     expect(findings.sites.new.routes["/"].fcp).toBe(130);
+    expect(findings.sites.new.spreads["/"].fcp).toEqual({ min: 110, max: 150 });
     expect(findings.sites.original.routes["/"].fcp).toBe(230);
-    expect(report).toContain("| FCP | 130 ms | 230 ms | -100 ms |");
+    for (const site of Object.values(findings.sites)) {
+      for (const route of Object.values(site.routes)) {
+        expect(route.performance).toEqual(expect.any(Number));
+        expect(Number.isInteger(route.performance)).toBe(true);
+      }
+    }
     expect(report).toContain(
-      "Absolute CPU- and network-bound timings are host-dependent",
+      "| FCP | 130 ms (110 ms–150 ms) | 230 ms (210 ms–250 ms) | -100 ms |",
+    );
+    expect(report).toContain("FCP: better");
+    expect(report).toContain(
+      "Performance score, FCP, LCP, and TBT are host-sensitive",
     );
     expect(report).toContain("cpuSlowdownMultiplier");
   });
