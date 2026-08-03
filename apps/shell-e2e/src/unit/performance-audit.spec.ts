@@ -21,17 +21,36 @@ const cliFindingsSchema = z.object({
   }),
   sites: z.object({
     new: z.object({
-      routes: z.object({ "/": z.object({ fcp: z.number() }) }).passthrough(),
-      spreads: z
-        .object({
-          "/": z.object({
-            fcp: z.object({ min: z.number(), max: z.number() }),
+      routes: z.record(
+        z.string(),
+        z.object({ performance: z.number().int(), fcp: z.number() }),
+      ),
+      spreads: z.record(
+        z.string(),
+        z.object({
+          performance: z.object({
+            min: z.number().int(),
+            max: z.number().int(),
           }),
-        })
-        .passthrough(),
+          fcp: z.object({ min: z.number(), max: z.number() }),
+        }),
+      ),
     }),
     original: z.object({
-      routes: z.object({ "/": z.object({ fcp: z.number() }) }).passthrough(),
+      routes: z.record(
+        z.string(),
+        z.object({ performance: z.number().int(), fcp: z.number() }),
+      ),
+      spreads: z.record(
+        z.string(),
+        z.object({
+          performance: z.object({
+            min: z.number().int(),
+            max: z.number().int(),
+          }),
+          fcp: z.object({ min: z.number(), max: z.number() }),
+        }),
+      ),
     }),
   }),
 });
@@ -120,6 +139,12 @@ describe("performance audit CLI", () => {
     expect(findings.sites.new.routes["/"].fcp).toBe(130);
     expect(findings.sites.new.spreads["/"].fcp).toEqual({ min: 110, max: 150 });
     expect(findings.sites.original.routes["/"].fcp).toBe(230);
+    for (const site of Object.values(findings.sites)) {
+      for (const route of Object.values(site.routes)) {
+        expect(route.performance).toEqual(expect.any(Number));
+        expect(Number.isInteger(route.performance)).toBe(true);
+      }
+    }
     expect(report).toContain(
       "| FCP | 130 ms (110 ms–150 ms) | 230 ms (210 ms–250 ms) | -100 ms |",
     );
@@ -128,6 +153,33 @@ describe("performance audit CLI", () => {
       "Performance score, FCP, LCP, and TBT are host-sensitive",
     );
     expect(report).toContain("cpuSlowdownMultiplier");
+  });
+
+  it("serializes Lighthouse performance scores as integers", () => {
+    const directory = createFixtureDirectory();
+    for (let run = 1; run <= performanceConfig.minimumRuns; run += 1) {
+      writeFileSync(
+        path.join(directory, `new-home-${run}.json`),
+        JSON.stringify(fixture(58)),
+      );
+    }
+
+    execFileSync(
+      process.execPath,
+      [script, "--summarize-fixtures", directory],
+      { cwd: directory },
+    );
+    const findings = cliFindingsSchema.parse(
+      JSON.parse(
+        readFileSync(path.join(directory, "docs/perf-findings.json"), "utf8"),
+      ),
+    );
+
+    expect(findings.sites.new.routes["/"].performance).toBe(58);
+    expect(findings.sites.new.spreads["/"].performance).toEqual({
+      min: 58,
+      max: 58,
+    });
   });
 
   it("fails clearly when a route has fewer than five runs", () => {
@@ -226,5 +278,39 @@ describe("performance audit CLI", () => {
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("docs/perf-report.md is stale");
+  });
+
+  it("rejects structured findings with a missing spread route", () => {
+    const directory = createFixtureDirectory();
+    execFileSync(
+      process.execPath,
+      [script, "--summarize-fixtures", directory],
+      { cwd: directory },
+    );
+    const findingsPath = path.join(directory, "docs/perf-findings.json");
+    const findings = z
+      .object({
+        sites: z
+          .object({
+            new: z
+              .object({ spreads: z.record(z.string(), z.unknown()) })
+              .passthrough(),
+          })
+          .passthrough(),
+      })
+      .passthrough()
+      .parse(JSON.parse(readFileSync(findingsPath, "utf8")));
+    delete findings.sites.new.spreads["/"];
+    writeFileSync(findingsPath, JSON.stringify(findings));
+
+    const result = spawnSync(process.execPath, [script, "--check-report"], {
+      cwd: directory,
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      "structured findings spread routes do not match performance config",
+    );
   });
 });
