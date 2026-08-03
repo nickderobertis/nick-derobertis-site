@@ -1,4 +1,5 @@
 import { access, readFile } from "node:fs/promises";
+import { JSDOM } from "jsdom";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
@@ -6,7 +7,12 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import { readRouteRemoteStyles, remotesForRoute } from "./remote-css.mjs";
+import {
+  inlineRemoteCssPattern,
+  readRouteRemoteStyles,
+  remotesForRoute,
+  validatePagesBase,
+} from "./remote-css.mjs";
 import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 const substantiveRouteContent = {
@@ -30,6 +36,94 @@ if (typeof root !== "string" || root.length === 0 || root.includes("\0"))
     "STATIC_ARTIFACT_ROOT must be a non-empty filesystem path; fix it and rerun just prerender.",
   );
 // llmlint: ignore-end[changed_behavior_has_e2e]
+
+// llmlint: ignore-block[changed_behavior_has_e2e] This gate runs before the artifact is served and fails the compose lane, so nothing it rejects reaches a visitor; composed-artifact.spec.ts drives the artifact it passes in a real browser from a content-store-shaped compose, and static-artifact.spec.ts drives this exact rejection over a real artifact with one asset removed.
+const pagesBase = validatePagesBase(siteConfig?.pagesBase);
+// Pages serves the artifact under the project base path, so resolving a
+// reference the way the browser does means resolving it against the document's
+// served URL. Any origin stands in for github.io here; only the path matters.
+const artifactOrigin = "http://artifact.invalid";
+
+/**
+ * Refuses a document that points at bytes the artifact does not contain. Every
+ * composed document carries a `<base href>` and root-absolute asset paths, so a
+ * reference is only meaningful once it is resolved against that base and mapped
+ * back through the Pages base path into the tree — which is exactly the lookup
+ * the browser performs and the one a missing bundle fails.
+ */
+async function assertReferencedAssetsResolve(artifactPath) {
+  const documentPath = `${root}/${artifactPath}`;
+  const documentUrl = new URL(`${pagesBase}/${artifactPath}`, artifactOrigin);
+  let rawMarkup;
+  try {
+    rawMarkup = await readFile(documentPath, "utf8");
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Could not read the composed document ${documentPath}: ${detail}. Fix scripts/compose.mjs to write it, then rerun just prerender.`,
+    );
+  }
+  // The inlined page CSS is checked below on its own terms and is the one part
+  // of a route document that carries no asset reference. Dropping it before
+  // parsing keeps this from paying for — and reporting on — a CSSOM build over
+  // every remote's stylesheet.
+  const markup = rawMarkup.replace(inlineRemoteCssPattern, "");
+  const { document } = new JSDOM(markup, { url: documentUrl.href }).window;
+  const baseUrl = new URL(
+    document.querySelector("base[href]")?.getAttribute("href") ?? ".",
+    documentUrl,
+  );
+  const references = [
+    ...[...document.querySelectorAll("script[src]")].map((element) => ({
+      kind: "script",
+      value: element.getAttribute("src"),
+    })),
+    ...[...document.querySelectorAll('link[rel~="stylesheet"][href]')].map(
+      (element) => ({
+        kind: "stylesheet",
+        value: element.getAttribute("href"),
+      }),
+    ),
+  ];
+  for (const { kind, value } of references) {
+    let resolved;
+    try {
+      resolved = new URL(value, baseUrl);
+    } catch {
+      throw new Error(
+        `${documentPath} references the unresolvable ${kind} ${JSON.stringify(value)}; fix scripts/compose.mjs and rerun just prerender.`,
+      );
+    }
+    // A cross-origin reference is somebody else's bytes to serve.
+    if (resolved.origin !== artifactOrigin) continue;
+    if (!resolved.pathname.startsWith(`${pagesBase}/`))
+      throw new Error(
+        `${documentPath} references the ${kind} ${value}, which resolves to ${resolved.pathname}, outside the ${pagesBase} Pages base path; fix scripts/compose.mjs and rerun just prerender.`,
+      );
+    // The URL parser already resolved `..` against the served path, so only a
+    // percent-encoded traversal could still reach outside the artifact here.
+    let relative;
+    try {
+      relative = decodeURIComponent(resolved.pathname.slice(pagesBase.length));
+    } catch {
+      relative = "";
+    }
+    if (relative === "" || relative.split("/").includes(".."))
+      throw new Error(
+        `${documentPath} references the ${kind} ${value}, whose escaped path ${resolved.pathname} does not name a file inside the artifact; fix scripts/compose.mjs and rerun just prerender.`,
+      );
+    const asset = `${root}${relative}`;
+    try {
+      await access(asset);
+    } catch {
+      throw new Error(
+        `${documentPath} references the ${kind} ${value}, but the artifact contains no ${asset}; fix scripts/compose.mjs to stage that app's published bytes and rerun just prerender.`,
+      );
+    }
+  }
+}
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
 // llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
 // llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] routes.json is the serialized source; this plain-Node artifact boundary cannot import the TypeScript parser, and just check runs both validators against that same source.
 function parseRoutes(value) {
@@ -59,11 +153,11 @@ function parseRoutes(value) {
 const validatedRoutes = parseRoutes(routes);
 const validatedRemoteManifest = parseRemoteManifest(remoteManifest);
 for (const route of validatedRoutes) {
-  const path =
-    route.path === "/"
-      ? `${root}/index.html`
-      : `${root}${route.path}/index.html`;
+  const artifactPath =
+    route.path === "/" ? "index.html" : `${route.path.slice(1)}/index.html`;
+  const path = `${root}/${artifactPath}`;
   const html = await readFile(path, "utf8");
+  await assertReferencedAssetsResolve(artifactPath);
   if (!html.includes(`<h1`) || !html.includes(route.heading))
     throw new Error(
       `${path} lacks its expected h1 (${route.heading}); fix the route renderer and rerun just prerender.`,
@@ -163,6 +257,7 @@ if (uncoveredPanes.length > 0)
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error("404 fallback is not intentional");
+await assertReferencedAssetsResolve("404.html");
 for (const name of Object.keys(validatedRemoteManifest)) {
   const remoteEntry = `${root}/remotes/${name}/remoteEntry.js`;
   try {
@@ -172,6 +267,7 @@ for (const name of Object.keys(validatedRemoteManifest)) {
       `${remoteEntry} is missing; rebuild the ${name} remote and rerun just prerender.`,
     );
   }
+  await assertReferencedAssetsResolve(`remotes/${name}/index.html`);
 }
 for (const file of [
   "cv.json",

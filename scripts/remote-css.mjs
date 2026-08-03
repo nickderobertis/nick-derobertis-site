@@ -59,7 +59,7 @@ export function remotesForRoute(routePath) {
   return names;
 }
 
-function validatePagesBase(value) {
+export function validatePagesBase(value) {
   if (typeof value !== "string" || !/^\/[a-z0-9-]+$/.test(value))
     throw new Error(
       `The Pages base path must match /[a-z0-9-]+; received ${JSON.stringify(value)}. Fix libs/data-access-core/src/site.config.json and rerun just check.`,

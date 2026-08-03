@@ -1,4 +1,11 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, expect, test } from "vitest";
@@ -108,6 +115,11 @@ async function writeContentStore(revisions: Record<string, string>) {
     const directory = join(apps, app);
     await mkdir(directory, { recursive: true });
     await Promise.all([
+      // The bytes a browser actually fetches: a publish lane stores its app's
+      // whole build output, and compose is the only thing that can put them in
+      // the served artifact.
+      writeFile(join(directory, `main.${revision}.js`), `//${app}\n`),
+      writeFile(join(directory, "remoteEntry.js"), `//${app} container\n`),
       writeFile(join(directory, "fragment.html"), fragmentHtml(app, revision)),
       writeFile(
         join(directory, "fragment.css"),
@@ -180,6 +192,30 @@ test("compose assembles a coherent site when one app's fragment is newer", async
   expect(await readFile(join(store.output, "404.html"), "utf8")).toContain(
     "Loading requested page",
   );
+});
+
+test("compose stages every app's bundle and withholds its fragment inputs", async () => {
+  const store = await writeContentStore({ shell: "5ce11ed", bio: "b10b10b" });
+
+  await compose({ fragmentRoot: store.apps, output: store.output });
+
+  // The shell's bundle belongs at the artifact root, because that is where the
+  // composed documents reference it from.
+  expect(await readdir(store.output)).toEqual(
+    expect.arrayContaining(["main.5ce11ed.js", "remoteEntry.js"]),
+  );
+  expect(await readdir(join(store.output, "remotes", "bio"))).toEqual(
+    expect.arrayContaining(["main.b10b10b.js", "remoteEntry.js"]),
+  );
+  // fragment.html, fragment.css, and fragment.json are compose's inputs, so no
+  // served subtree ships them.
+  const staged = await Promise.all(
+    [store.output, join(store.output, "remotes", "bio")].map((directory) =>
+      readdir(directory),
+    ),
+  );
+  for (const entries of staged)
+    expect(entries.filter((name) => name.startsWith("fragment."))).toEqual([]);
 });
 
 test("compose refuses a content store that is missing an app's published bytes", async () => {

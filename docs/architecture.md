@@ -86,6 +86,20 @@ builds every app first and composes into `dist/apps/shell`, which is what
 `just serve` and the browser suites use. The custom domain is intentionally
 outside this deployment until its separate migration.
 
+Staging is what puts an app's bytes into the artifact — the shell's build
+output at the root, each remote's below `remotes/<name>/` — copied verbatim
+except `fragment.html`, `fragment.css`, and `fragment.json`, which are
+compose's own inputs and mean nothing to a browser. From the shell's subtree
+compose additionally withholds every entry it writes itself, the route
+directories and `404.html` and `cv-data/` and `remotes/`, because `just
+prerender` composes into that same directory: a shell published from a
+developer's tree carries a whole previous composition beside its bundle.
+`check-static-artifact.mjs` then resolves every `<script src>` and `<link
+rel="stylesheet">` in every composed document the way the browser does, through
+the document's `<base href>` and the Pages base path, and refuses an artifact
+that references bytes it does not contain — which a document whose bundle was
+never staged does.
+
 ## Independent publishing and one composed deploy
 
 Under GitHub Pages a deployed artifact is always the whole site, so
