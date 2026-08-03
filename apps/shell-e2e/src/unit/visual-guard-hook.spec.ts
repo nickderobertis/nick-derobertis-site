@@ -220,6 +220,7 @@ describe("visual guard pre-push hook", () => {
     expect(run.status).toBe(0);
   });
 
+  // llmlint: ignore-block[e2e_not_mocked] This case's subject is Docker being unavailable, which cannot be produced with a real Docker subprocess on a host where Docker is installed; the PATH shim creates the condition under test rather than standing in for a boundary the test avoids. The Docker-available guard path is not exercised by this case; enabled pre-push hooks exercise the real Docker and screencomp subprocesses.
   test("the guard still refuses a push it cannot capture, and says why", () => {
     const noDocker = dockerUnavailableFixture();
     try {
@@ -240,6 +241,7 @@ describe("visual guard pre-push hook", () => {
       noDocker.cleanup();
     }
   });
+  // llmlint: ignore-end[e2e_not_mocked]
 
   test("under CI the guard defers to the visual-docs workflow", () => {
     const run = runHook({
