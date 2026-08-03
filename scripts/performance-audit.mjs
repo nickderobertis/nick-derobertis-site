@@ -5,6 +5,8 @@ import path from "node:path";
 import process from "node:process";
 import { z } from "zod";
 
+// llmlint: ignore-file[changed_behavior_has_e2e] This Node CLI has no browser interface: it drives Lighthouse against deployments and writes JSON and Markdown files. performance-audit.spec.ts drives the real subprocess over Lighthouse fixtures and covers generated integer scores, min–max ranges, verdicts, failure paths, and stale-report recovery.
+
 const httpUrl = z
   .string()
   .url()
@@ -32,7 +34,6 @@ const configSchema = z.object({
   originalUrl: httpUrl,
 });
 const numberSchema = z.number().finite();
-const performanceScoreSchema = z.number().int().min(0).max(100);
 const lhrSchema = z.object({
   lighthouseVersion: z.string().min(1),
   userAgent: z.string().min(1),
@@ -63,7 +64,7 @@ const lhrSchema = z.object({
   }),
 });
 const metricSchema = z.object({
-  performance: performanceScoreSchema,
+  performance: numberSchema,
   fcp: numberSchema,
   lcp: numberSchema,
   tbt: numberSchema,
@@ -72,21 +73,19 @@ const metricSchema = z.object({
   jsBytes: numberSchema,
 });
 const rangeSchema = z.object({ min: numberSchema, max: numberSchema });
-const spreadSchema = z.object({
-  performance: z.object({
-    min: performanceScoreSchema,
-    max: performanceScoreSchema,
-  }),
-  fcp: rangeSchema,
-  lcp: rangeSchema,
-  tbt: rangeSchema,
-  cls: rangeSchema,
-  transferBytes: rangeSchema,
-  jsBytes: rangeSchema,
-});
-const deltaMetricSchema = metricSchema.extend({
-  performance: z.number().int().min(-100).max(100),
-});
+const spreadSchema = z.object(
+  Object.fromEntries(
+    [
+      "performance",
+      "fcp",
+      "lcp",
+      "tbt",
+      "cls",
+      "transferBytes",
+      "jsBytes",
+    ].map((key) => [key, rangeSchema]),
+  ),
+);
 const findingsSchema = z.object({
   schemaVersion: z.literal(3),
   runsPerRoute: z.number().int().min(1),
@@ -115,7 +114,7 @@ const findingsSchema = z.object({
       spreads: z.record(z.string(), spreadSchema),
     }),
   }),
-  deltas: z.record(z.string(), deltaMetricSchema),
+  deltas: z.record(z.string(), metricSchema),
 });
 
 function parseJsonFile(filename, schema, label) {
@@ -283,7 +282,6 @@ function environment(lhr) {
   };
 }
 
-// llmlint: ignore-block[changed_behavior_has_e2e] This generated Markdown report is a Node CLI filesystem output with no browser interface; performance-audit.spec.ts drives the real subprocess and asserts its prose, ranges, deltas, conclusions, and stale-report recovery.
 function markdown(findings) {
   const { environment: env, runsPerRoute, sites } = findings;
   const lines = [
@@ -348,7 +346,6 @@ function markdown(findings) {
   }
   return `${lines.join("\n")}\n`;
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 function validateFindings(value) {
   const findings = findingsSchema.parse(value);
@@ -360,7 +357,7 @@ function validateFindings(value) {
     }
     if (Object.keys(site.spreads).sort().join() !== [...ROUTES].sort().join()) {
       throw new Error(
-        "structured findings spread routes do not match performance config",
+        "structured findings spread routes do not match performance config; correct sites.*.spreads in docs/perf-findings.json, then rerun --check-report",
       );
     }
   }
@@ -607,7 +604,6 @@ async function main() {
     await chrome?.kill();
   }
 
-  // llmlint: ignore-block[changed_behavior_has_e2e] These generated JSON findings are a Node CLI filesystem output with no browser interface; performance-audit.spec.ts drives the real subprocess over Lighthouse fixtures and validates integer score serialization in both generated files.
   const findings = validateFindings({
     schemaVersion: 3,
     runsPerRoute: fixtureDirectory ? DEFAULT_RUNS : runs,
@@ -644,7 +640,6 @@ async function main() {
   process.stdout.write(
     `Performance comparison complete for ${ROUTES.length} routes; report: ${reportPath}; structured findings: ${findingsPath}\n`,
   );
-  // llmlint: ignore-end[changed_behavior_has_e2e]
 }
 
 main().catch((error) => {

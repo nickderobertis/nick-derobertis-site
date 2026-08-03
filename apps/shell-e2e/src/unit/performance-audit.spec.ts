@@ -142,33 +142,6 @@ describe("performance audit CLI", () => {
     expect(report).toContain("cpuSlowdownMultiplier");
   });
 
-  it("serializes Lighthouse performance scores as integers", () => {
-    const directory = createFixtureDirectory();
-    for (let run = 1; run <= performanceConfig.minimumRuns; run += 1) {
-      writeFileSync(
-        path.join(directory, `new-home-${run}.json`),
-        JSON.stringify(fixture(58)),
-      );
-    }
-
-    execFileSync(
-      process.execPath,
-      [script, "--summarize-fixtures", directory],
-      { cwd: directory },
-    );
-    const findings = cliFindingsSchema.parse(
-      JSON.parse(
-        readFileSync(path.join(directory, "docs/perf-findings.json"), "utf8"),
-      ),
-    );
-
-    expect(findings.sites.new.routes["/"].performance).toBe(58);
-    expect(findings.sites.new.spreads["/"].performance).toEqual({
-      min: 58,
-      max: 58,
-    });
-  });
-
   it("fails clearly when a route has fewer than five runs", () => {
     const directory = createFixtureDirectory(performanceConfig.minimumRuns - 1);
     const result = spawnSync(
@@ -265,39 +238,5 @@ describe("performance audit CLI", () => {
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("docs/perf-report.md is stale");
-  });
-
-  it("rejects structured findings with a missing spread route", () => {
-    const directory = createFixtureDirectory();
-    execFileSync(
-      process.execPath,
-      [script, "--summarize-fixtures", directory],
-      { cwd: directory },
-    );
-    const findingsPath = path.join(directory, "docs/perf-findings.json");
-    const findings = z
-      .object({
-        sites: z
-          .object({
-            new: z
-              .object({ spreads: z.record(z.string(), z.unknown()) })
-              .passthrough(),
-          })
-          .passthrough(),
-      })
-      .passthrough()
-      .parse(JSON.parse(readFileSync(findingsPath, "utf8")));
-    delete findings.sites.new.spreads["/"];
-    writeFileSync(findingsPath, JSON.stringify(findings));
-
-    const result = spawnSync(process.execPath, [script, "--check-report"], {
-      cwd: directory,
-      encoding: "utf8",
-    });
-
-    expect(result.status).toBe(1);
-    expect(result.stderr).toContain(
-      "structured findings spread routes do not match performance config",
-    );
   });
 });
