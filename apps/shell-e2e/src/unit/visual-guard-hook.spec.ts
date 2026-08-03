@@ -23,7 +23,9 @@ const HOOK = path.resolve(".githooks/pre-push");
 const REPO = process.cwd();
 const SUBPROCESS_HOME = process.env.HOME;
 if (SUBPROCESS_HOME === undefined || SUBPROCESS_HOME === "") {
-  throw new Error("visual guard hook tests require HOME to resolve CLI configuration");
+  throw new Error(
+    "visual guard hook tests require HOME to resolve CLI configuration",
+  );
 }
 
 // The test runner prepends this workspace's node_modules/.bin to PATH, which
