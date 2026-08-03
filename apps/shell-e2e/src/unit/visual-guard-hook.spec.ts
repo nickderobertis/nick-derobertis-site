@@ -21,10 +21,15 @@ import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 const HOOK = path.resolve(".githooks/pre-push");
 const REPO = process.cwd();
+const SUBPROCESS_HOME = process.env.HOME;
+if (SUBPROCESS_HOME === undefined || SUBPROCESS_HOME === "") {
+  throw new Error("visual guard hook tests require HOME to resolve CLI configuration");
+}
 
 // The test runner prepends this workspace's node_modules/.bin to PATH, which
 // would let an uninstalled clone resolve *this* repository's nx and defeat the
 // fixture. Strip those entries so "no workspace install" means it.
+// llmlint: ignore[boundary_inputs_validated] PATH is test-runner infrastructure, not product input; entries are preserved only to resolve the real git, bash, pnpm, node, and screencomp subprocesses, while workspace node_modules entries are deliberately removed for the uninstalled-clone fixture.
 const CLEAN_PATH = (process.env.PATH ?? "")
   .split(path.delimiter)
   .filter(
@@ -46,7 +51,8 @@ interface HookRun {
 
 function runHook(options: {
   cwd: string;
-  range: string;
+  localSha: string;
+  remoteSha: string;
   env?: Record<string, string>;
 }): HookRun {
   const result = spawnSync(
@@ -55,16 +61,13 @@ function runHook(options: {
     {
       cwd: options.cwd,
       encoding: "utf8",
-      // git feeds the hook its push refs on stdin; the range override below is
-      // what the hook's own test seam consumes, so an empty ref list is honest.
-      input: "",
+      input: `refs/heads/probe ${options.localSha} refs/heads/probe ${options.remoteSha}\n`,
       env: {
-        ...process.env,
+        HOME: SUBPROCESS_HOME,
         // Under CI the hook defers to the visual-docs workflow, so the ambient
         // CI variable has to be cleared for every test that is not about it.
         CI: "",
         PATH: CLEAN_PATH,
-        SCREENCOMP_GUARD_RANGE: options.range,
         ...options.env,
       },
     },
@@ -80,14 +83,15 @@ function runHook(options: {
 // relevant per [guard].paths in screencomp.toml, and affecting a real Nx project
 // with a screenshot target.
 const visualCommit = git("log", "-1", "--format=%H", "--", "apps/courses/src");
-const visualRange = `${visualCommit}^..${visualCommit}`;
+const visualBase = git("rev-parse", `${visualCommit}^`);
 
 // A clone with no workspace install — the reported failure, reproduced exactly.
 // `--shared` borrows this repository's objects, so the whole history is present
 // and only node_modules is missing.
 let uninstalledClone: string;
 let cloneRoot: string;
-let docsOnlyRange: string;
+let docsOnlyHead: string;
+let docsOnlyBase: string;
 
 beforeAll(() => {
   cloneRoot = mkdtempSync(path.join(tmpdir(), "pre-push-guard-"));
@@ -127,7 +131,12 @@ beforeAll(() => {
       encoding: "utf8",
     },
   ).trim();
-  docsOnlyRange = `${head}^..${head}`;
+  docsOnlyHead = head;
+  docsOnlyBase = execFileSync(
+    "git",
+    ["-C", uninstalledClone, "rev-parse", `${head}^`],
+    { encoding: "utf8" },
+  ).trim();
 });
 
 afterAll(() => {
@@ -137,9 +146,11 @@ afterAll(() => {
 // Docker down is how a real machine reports it: the client is installed, the
 // daemon refuses. Nothing about the hook is replaced — only the environment it
 // inspects.
-function withoutDocker(): { PATH: string; cleanup: () => void } {
+// llmlint: ignore[e2e_not_mocked] The layer under test is the unchanged real pre-push hook subprocess; this executable double is the external Docker provider's documented daemon-unavailable response and lets the public hook boundary exercise its recovery path without depending on host daemon state.
+function dockerUnavailableFixture(): { PATH: string; cleanup: () => void } {
   const shim = mkdtempSync(path.join(tmpdir(), "pre-push-nodocker-"));
   const docker = path.join(shim, "docker");
+  // llmlint: ignore[e2e_not_mocked] This replaces only the external Docker provider with its real daemon-unavailable CLI contract; spawnSync still drives the unmodified hook through its public stdin/environment boundary.
   writeFileSync(
     docker,
     "#!/usr/bin/env bash\necho 'Cannot connect to the Docker daemon.' >&2\nexit 1\n",
@@ -153,14 +164,15 @@ function withoutDocker(): { PATH: string; cleanup: () => void } {
 
 describe("visual guard pre-push hook", () => {
   test("a clone with no workspace install says what it could not do", () => {
-    const run = runHook({ cwd: uninstalledClone, range: visualRange });
-    // It never dies inside the command substitution any more…
+    const run = runHook({
+      cwd: uninstalledClone,
+      localSha: visualCommit,
+      remoteSha: visualBase,
+    });
     expect(run.stderr).not.toBe("");
     expect(run.stderr).toContain("could NOT evaluate this push");
-    // …it names the command that failed, replays what that command said…
     expect(run.stderr).toContain("pnpm exec nx show projects");
     expect(run.stderr).toContain('Command "nx" not found');
-    // …and gives the one action that fixes it.
     expect(run.stderr).toContain("just bootstrap");
     // Skipped, not refused: a push the guard never evaluated is CI's to judge.
     expect(run.status).toBe(0);
@@ -169,7 +181,8 @@ describe("visual guard pre-push hook", () => {
   test("a clone with no workspace install can be made a hard failure", () => {
     const run = runHook({
       cwd: uninstalledClone,
-      range: visualRange,
+      localSha: visualCommit,
+      remoteSha: visualBase,
       env: { SCREENCOMP_GUARD_REQUIRE: "1" },
     });
     expect(run.status).toBe(1);
@@ -181,7 +194,11 @@ describe("visual guard pre-push hook", () => {
   });
 
   test("a push with nothing screenshot-relevant passes without a word", () => {
-    const run = runHook({ cwd: uninstalledClone, range: docsOnlyRange });
+    const run = runHook({
+      cwd: uninstalledClone,
+      localSha: docsOnlyHead,
+      remoteSha: docsOnlyBase,
+    });
     expect(run.status).toBe(0);
     expect(run.stderr).toBe("");
     expect(run.stdout).toBe("");
@@ -191,7 +208,8 @@ describe("visual guard pre-push hook", () => {
     const missing = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef";
     const run = runHook({
       cwd: uninstalledClone,
-      range: `${missing}..HEAD`,
+      localSha: git("rev-parse", "HEAD"),
+      remoteSha: missing,
     });
     expect(run.stderr).toContain("could NOT evaluate this push");
     expect(run.stderr).toContain(
@@ -201,14 +219,14 @@ describe("visual guard pre-push hook", () => {
   });
 
   test("the guard still refuses a push it cannot capture, and says why", () => {
-    const noDocker = withoutDocker();
+    const noDocker = dockerUnavailableFixture();
     try {
       const run = runHook({
         cwd: REPO,
-        range: visualRange,
+        localSha: visualCommit,
+        remoteSha: visualBase,
         env: { PATH: noDocker.PATH },
       });
-      // Screenshot-relevant changes it could not clear: refused, not skipped.
       expect(run.status).toBe(1);
       expect(run.stderr).toContain("PUSH BLOCKED");
       expect(run.stderr).toContain("Docker is not available");
@@ -224,7 +242,8 @@ describe("visual guard pre-push hook", () => {
   test("under CI the guard defers to the visual-docs workflow", () => {
     const run = runHook({
       cwd: uninstalledClone,
-      range: visualRange,
+      localSha: visualCommit,
+      remoteSha: visualBase,
       env: { CI: "1" },
     });
     expect(run.status).toBe(0);
