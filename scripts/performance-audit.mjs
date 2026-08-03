@@ -75,15 +75,9 @@ const metricSchema = z.object({
 const rangeSchema = z.object({ min: numberSchema, max: numberSchema });
 const spreadSchema = z.object(
   Object.fromEntries(
-    [
-      "performance",
-      "fcp",
-      "lcp",
-      "tbt",
-      "cls",
-      "transferBytes",
-      "jsBytes",
-    ].map((key) => [key, rangeSchema]),
+    ["performance", "fcp", "lcp", "tbt", "cls", "transferBytes", "jsBytes"].map(
+      (key) => [key, rangeSchema],
+    ),
   ),
 );
 const findingsSchema = z.object({
