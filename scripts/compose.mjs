@@ -1,5 +1,5 @@
-import { cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
 import { fragmentContractSchema } from "../libs/build-config/src/fragment-contract.ts";
@@ -39,6 +39,57 @@ export const routeFragments = {
   "/software": ["software"],
   "/courses": ["courses"],
 };
+
+/**
+ * `fragment.html`, `fragment.css`, and `fragment.json` are compose's inputs:
+ * the markup, styles, and version contract it reads to assemble a document. No
+ * browser ever requests them, so no app's published subtree ships them into the
+ * served artifact.
+ */
+const fragmentInputs = ["fragment.html", "fragment.css", "fragment.json"];
+
+/**
+ * Everything else an app published — its hashed JavaScript and CSS,
+ * `remoteEntry.js`, `mf-manifest.json`, and any asset directory a future build
+ * emits — is bytes a visitor's browser fetches, so staging copies it verbatim
+ * rather than naming a list that a new build output could silently outgrow.
+ *
+ * The entries below are the ones compose writes itself at the artifact root,
+ * and the shell's subtree never gets to supply them. `just prerender` composes
+ * into the shell's own build directory, so a shell published from a developer's
+ * tree carries a whole previous composition — every route document, the
+ * fallback, the CV data, and every remote — beside the bundle. Withholding those
+ * names keeps a stale composition out of the artifact no matter what order
+ * compose writes in, instead of relying on each one being overwritten later.
+ */
+const composeOwnedRootEntries = new Set([
+  ...fragmentInputs,
+  "index.html",
+  "404.html",
+  "cv-data",
+  "remotes",
+  ...Object.keys(routeFragments)
+    .filter((routePath) => routePath !== "/")
+    .map((routePath) => routePath.slice(1)),
+]);
+
+/**
+ * Copies one app's published bytes into the artifact, minus the entries the
+ * caller withholds. Compose is the only thing that puts an app's bundle into
+ * the artifact, so an app whose bytes are not staged serves documents whose
+ * every script and stylesheet 404s.
+ */
+async function stagePublishedBytes(source, destination, withheld) {
+  const entries = await readdir(source, { withFileTypes: true });
+  await mkdir(destination, { recursive: true });
+  for (const entry of entries) {
+    if (withheld.has(entry.name)) continue;
+    await cp(join(source, entry.name), join(destination, entry.name), {
+      recursive: true,
+    });
+  }
+}
+
 // llmlint: ignore-block[changed_behavior_has_e2e] These are build-time input validators in a Node CLI with no browser interface: they reject a malformed site config or shell fragment before any artifact exists, so there is nothing for a browser to load on the failure path. compose.spec.ts drives them through the real exported API, and site.spec.ts plus every feature journey drive the artifact they gate.
 function validatedPagesBase(value) {
   if (typeof value !== "string" || !/^\/[a-z0-9-]+$/.test(value))
@@ -296,6 +347,23 @@ export async function compose({
       },
     ]),
   );
+  // Every composed document references the shell's bundle at the artifact
+  // root, so those bytes have to be there before the documents that point at
+  // them. Staging first also means this run's route documents, 404 fallback,
+  // CV data, and remote subtrees are written over anything the shell subtree
+  // happened to carry. When the output is the shell's own build directory
+  // there is nothing to stage: the bundle is already exactly where it belongs.
+  const shellSource = join(fragmentRoot, "shell");
+  if (resolve(shellSource) !== resolve(output))
+    try {
+      await stagePublishedBytes(shellSource, output, composeOwnedRootEntries);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `Could not stage the published shell bytes from ${shellSource} into ${output}: ${detail}. Verify published inputs and COMPOSE_OUTPUT permissions, then rerun just prerender.`,
+      );
+    }
+
   const deferredScriptAnchor = "<script defer";
   for (const [routePath, names] of Object.entries(routeFragments)) {
     const shellRoute = routeTemplates.get(routePath);
@@ -380,10 +448,8 @@ export async function compose({
     await rm(join(output, "remotes"), { recursive: true, force: true });
     for (const name of Object.keys(validatedRemoteManifest)) {
       const source = join(fragmentRoot, name);
-      await stat(source);
       const destination = join(output, "remotes", name);
-      await mkdir(dirname(destination), { recursive: true });
-      await cp(source, destination, { recursive: true });
+      await stagePublishedBytes(source, destination, new Set(fragmentInputs));
       const remoteDocument = await readFile(
         join(destination, "index.html"),
         "utf8",

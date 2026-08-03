@@ -75,9 +75,19 @@ local or container builds that cannot reach Git use the contract-valid
 
 `scripts/compose.mjs` assembles a GitHub Pages artifact under the
 `/nick-derobertis-site/` base from those published bytes. It imports no app
-source: it fills the shell and Home slots, normalizes React's completed
-Suspense boundaries, emits HTML for all five routes, stages every remote below
-`remotes/<name>/`, copies CV data, and creates `404.html`. The
+source: it stages the shell's bundle at the artifact root, fills the shell and
+Home slots, normalizes React's completed Suspense boundaries, emits HTML for
+all five routes, stages every remote below `remotes/<name>/`, copies CV data,
+and creates `404.html`. Staging copies each app's published bytes verbatim
+except `fragment.html`, `fragment.css`, and `fragment.json`, which are
+compose's own inputs and mean nothing to a browser, and except the entries
+compose writes itself at the artifact root — `index.html`, `404.html`,
+`cv-data/`, `remotes/`, and the four route directories — which the shell's
+subtree must never supply, because the local shortcut composes into that same
+directory. `check-static-artifact.mjs` then resolves every `<script src>` and
+`<link rel="stylesheet">` in every composed document the way the browser does,
+through the document's `<base href>` and the Pages base path, and refuses an
+artifact that references bytes it does not contain. The
 fallback supplies useful no-script recovery text; with JavaScript enabled the
 client router restores an unknown deep link to the home route. `just compose
 <store>/apps <output>` runs it plus `check-static-artifact.mjs` over an
