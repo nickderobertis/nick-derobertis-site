@@ -5,7 +5,10 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { extname, join, normalize } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import { z } from "zod";
+// The Pages base and the route inventory each have one validated source; this
+// spec reads them rather than restating either contract.
+import { siteBase } from "../../../libs/data-access-core/src/site.ts";
+import { parseSiteRoutes } from "../../../libs/route-state/src/index.ts";
 
 /**
  * The deploy lane never serves an app's build directory. It checks out the
@@ -18,20 +21,10 @@ import { z } from "zod";
 const contentStore = "dist/e2e-content-store/apps";
 const composedSite = "dist/e2e-composed-site";
 
-const siteConfigSchema = z.object({
-  pagesBase: z.string().regex(/^\/[a-z0-9-]+$/),
-});
-const routeManifestSchema = z.array(
-  z.object({ path: z.string().regex(/^\/(?:[a-z][a-z0-9-]*)?$/) }),
-);
-const base = siteConfigSchema.parse(
-  JSON.parse(
-    readFileSync("libs/data-access-core/src/site.config.json", "utf8"),
-  ),
-).pagesBase;
-const routePaths = routeManifestSchema
-  .parse(JSON.parse(readFileSync("apps/shell/src/routes.json", "utf8")))
-  .map(({ path }) => path);
+const base = siteBase;
+const routePaths = parseSiteRoutes(
+  JSON.parse(readFileSync("apps/shell/src/routes.json", "utf8")),
+).map(({ path }) => path);
 
 /**
  * Rebuilds the content store the publish lanes leave behind: one directory per
@@ -77,6 +70,11 @@ const contentTypes: Record<string, string> = {
  * document and a 404 status. Nothing here fills a gap in the artifact, which is
  * the point — a document that references bytes compose failed to stage gets the
  * 404 a visitor would get.
+ *
+ * `scripts/serve-e2e.mjs` is deliberately not reused: it serves the shell's
+ * build directory, answers a missing file with the fallback under a 200, and
+ * injects the data scenarios and latency the feature journeys need. Every one
+ * of those would hide the defect this spec exists to catch.
  */
 function startArtifactServer(root: string) {
   const server = createServer(async (request, response) => {
@@ -210,7 +208,10 @@ test("the composed deploy artifact serves each standalone remote document", asyn
     await page.goto(`${origin}${base}/remotes/${name}/`, {
       waitUntil: "networkidle",
     });
-    await expect(page.locator("#root")).not.toBeEmpty();
+    // Awards and Home prerender no heading of their own — one resolves its
+    // data after hydration and the other is a host of slots — so a visible
+    // heading on every remote is also proof its bundle ran.
+    await expect(page.getByRole("heading").first()).toBeVisible();
   }
   expect(failures).toEqual([]);
 });

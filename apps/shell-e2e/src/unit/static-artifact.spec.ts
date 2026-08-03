@@ -12,6 +12,7 @@ import {
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterAll, beforeAll, expect, test } from "vitest";
+import { siteBase } from "../../../../libs/data-access-core/src/site.ts";
 
 let fixture: string;
 const corruptibleRemote = "bio";
@@ -99,21 +100,22 @@ test("the compose-time gate rejects missing inlined fragment CSS", async () => {
 
 // Both references below are root-absolute paths carrying the Pages base, in
 // documents that also carry a <base href>, so only a browser-faithful
-// resolution finds them in the tree at all.
-const pagesBasePrefix = /^\/nick-derobertis-site\//;
+// resolution finds them in the tree at all. The base comes from its one
+// validated source rather than being restated here.
+const pagesBasePrefix = new RegExp(`^${siteBase}/`);
 
 test.each([
   [
     "stylesheet",
     "index.html",
     /<link href="([^"]+\.css)" rel="stylesheet">/,
-    /^\/nick-derobertis-site\/[^/]+\.css$/,
+    new RegExp(`^${siteBase}/[^/]+\\.css$`),
   ],
   [
     "script",
     `remotes/${corruptibleRemote}/index.html`,
     /<script defer src="([^"]+\.js)"><\/script>/,
-    new RegExp(`^/nick-derobertis-site/remotes/${corruptibleRemote}/[^/]+$`),
+    new RegExp(`^${siteBase}/remotes/${corruptibleRemote}/[^/]+$`),
   ],
 ])(
   "the compose-time gate rejects a document whose %s the artifact lacks",

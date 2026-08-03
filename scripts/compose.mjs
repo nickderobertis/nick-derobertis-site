@@ -46,7 +46,11 @@ export const routeFragments = {
  * browser ever requests them, so no app's published subtree ships them into the
  * served artifact.
  */
-const fragmentInputs = ["fragment.html", "fragment.css", "fragment.json"];
+const fragmentInputs = new Set([
+  "fragment.html",
+  "fragment.css",
+  "fragment.json",
+]);
 
 /**
  * Everything else an app published — its hashed JavaScript and CSS,
@@ -348,11 +352,9 @@ export async function compose({
     ]),
   );
   // Every composed document references the shell's bundle at the artifact
-  // root, so those bytes have to be there before the documents that point at
-  // them. Staging first also means this run's route documents, 404 fallback,
-  // CV data, and remote subtrees are written over anything the shell subtree
-  // happened to carry. When the output is the shell's own build directory
-  // there is nothing to stage: the bundle is already exactly where it belongs.
+  // root, so those bytes have to be staged before the documents that point at
+  // them are written. When the output is the shell's own build directory there
+  // is nothing to stage: the bundle is already exactly where it belongs.
   const shellSource = join(fragmentRoot, "shell");
   if (resolve(shellSource) !== resolve(output))
     try {
@@ -449,7 +451,7 @@ export async function compose({
     for (const name of Object.keys(validatedRemoteManifest)) {
       const source = join(fragmentRoot, name);
       const destination = join(output, "remotes", name);
-      await stagePublishedBytes(source, destination, new Set(fragmentInputs));
+      await stagePublishedBytes(source, destination, fragmentInputs);
       const remoteDocument = await readFile(
         join(destination, "index.html"),
         "utf8",

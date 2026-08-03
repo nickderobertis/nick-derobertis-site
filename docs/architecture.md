@@ -75,19 +75,9 @@ local or container builds that cannot reach Git use the contract-valid
 
 `scripts/compose.mjs` assembles a GitHub Pages artifact under the
 `/nick-derobertis-site/` base from those published bytes. It imports no app
-source: it stages the shell's bundle at the artifact root, fills the shell and
-Home slots, normalizes React's completed Suspense boundaries, emits HTML for
-all five routes, stages every remote below `remotes/<name>/`, copies CV data,
-and creates `404.html`. Staging copies each app's published bytes verbatim
-except `fragment.html`, `fragment.css`, and `fragment.json`, which are
-compose's own inputs and mean nothing to a browser, and except the entries
-compose writes itself at the artifact root — `index.html`, `404.html`,
-`cv-data/`, `remotes/`, and the four route directories — which the shell's
-subtree must never supply, because the local shortcut composes into that same
-directory. `check-static-artifact.mjs` then resolves every `<script src>` and
-`<link rel="stylesheet">` in every composed document the way the browser does,
-through the document's `<base href>` and the Pages base path, and refuses an
-artifact that references bytes it does not contain. The
+source: it fills the shell and Home slots, normalizes React's completed
+Suspense boundaries, emits HTML for all five routes, stages every remote below
+`remotes/<name>/`, copies CV data, and creates `404.html`. The
 fallback supplies useful no-script recovery text; with JavaScript enabled the
 client router restores an unknown deep link to the home route. `just compose
 <store>/apps <output>` runs it plus `check-static-artifact.mjs` over an
@@ -95,6 +85,20 @@ already-published content store; `just prerender` is the local shortcut that
 builds every app first and composes into `dist/apps/shell`, which is what
 `just serve` and the browser suites use. The custom domain is intentionally
 outside this deployment until its separate migration.
+
+Staging is what puts an app's bytes into the artifact — the shell's build
+output at the root, each remote's below `remotes/<name>/` — copied verbatim
+except `fragment.html`, `fragment.css`, and `fragment.json`, which are
+compose's own inputs and mean nothing to a browser. From the shell's subtree
+compose additionally withholds every entry it writes itself, the route
+directories and `404.html` and `cv-data/` and `remotes/`, because `just
+prerender` composes into that same directory: a shell published from a
+developer's tree carries a whole previous composition beside its bundle.
+`check-static-artifact.mjs` then resolves every `<script src>` and `<link
+rel="stylesheet">` in every composed document the way the browser does, through
+the document's `<base href>` and the Pages base path, and refuses an artifact
+that references bytes it does not contain — which a document whose bundle was
+never staged does.
 
 ## Independent publishing and one composed deploy
 

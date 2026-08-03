@@ -8,6 +8,7 @@ import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
 import {
+  inlineRemoteCssPattern,
   readRouteRemoteStyles,
   remotesForRoute,
   validatePagesBase,
@@ -53,25 +54,41 @@ const artifactOrigin = "http://artifact.invalid";
 async function assertReferencedAssetsResolve(artifactPath) {
   const documentPath = `${root}/${artifactPath}`;
   const documentUrl = new URL(`${pagesBase}/${artifactPath}`, artifactOrigin);
-  const { document } = new JSDOM(await readFile(documentPath, "utf8"), {
-    url: documentUrl.href,
-  }).window;
+  let rawMarkup;
+  try {
+    rawMarkup = await readFile(documentPath, "utf8");
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Could not read the composed document ${documentPath}: ${detail}. Fix scripts/compose.mjs to write it, then rerun just prerender.`,
+    );
+  }
+  // The inlined page CSS is checked below on its own terms and is the one part
+  // of a route document that carries no asset reference. Dropping it before
+  // parsing keeps this from paying for — and reporting on — a CSSOM build over
+  // every remote's stylesheet.
+  const markup = rawMarkup.replace(inlineRemoteCssPattern, "");
+  const { document } = new JSDOM(markup, { url: documentUrl.href }).window;
   const baseUrl = new URL(
     document.querySelector("base[href]")?.getAttribute("href") ?? ".",
     documentUrl,
   );
-  const references = [...document.querySelectorAll("script[src]")].map(
-    (element) => ({ kind: "script", value: element.getAttribute("src") }),
-  );
-  for (const element of document.querySelectorAll('link[rel~="stylesheet"]'))
-    references.push({
-      kind: "stylesheet",
-      value: element.getAttribute("href"),
-    });
+  const references = [
+    ...[...document.querySelectorAll("script[src]")].map((element) => ({
+      kind: "script",
+      value: element.getAttribute("src"),
+    })),
+    ...[...document.querySelectorAll('link[rel~="stylesheet"][href]')].map(
+      (element) => ({
+        kind: "stylesheet",
+        value: element.getAttribute("href"),
+      }),
+    ),
+  ];
   for (const { kind, value } of references) {
     let resolved;
     try {
-      resolved = new URL(value ?? "", baseUrl);
+      resolved = new URL(value, baseUrl);
     } catch {
       throw new Error(
         `${documentPath} references the unresolvable ${kind} ${JSON.stringify(value)}; fix scripts/compose.mjs and rerun just prerender.`,
@@ -83,7 +100,19 @@ async function assertReferencedAssetsResolve(artifactPath) {
       throw new Error(
         `${documentPath} references the ${kind} ${value}, which resolves to ${resolved.pathname}, outside the ${pagesBase} Pages base path; fix scripts/compose.mjs and rerun just prerender.`,
       );
-    const asset = `${root}${decodeURIComponent(resolved.pathname.slice(pagesBase.length))}`;
+    // The URL parser already resolved `..` against the served path, so only a
+    // percent-encoded traversal could still reach outside the artifact here.
+    let relative;
+    try {
+      relative = decodeURIComponent(resolved.pathname.slice(pagesBase.length));
+    } catch {
+      relative = "";
+    }
+    if (relative === "" || relative.split("/").includes(".."))
+      throw new Error(
+        `${documentPath} references the ${kind} ${value}, whose escaped path ${resolved.pathname} does not name a file inside the artifact; fix scripts/compose.mjs and rerun just prerender.`,
+      );
+    const asset = `${root}${relative}`;
     try {
       await access(asset);
     } catch {
