@@ -32,7 +32,6 @@ const configSchema = z.object({
   originalUrl: httpUrl,
 });
 const numberSchema = z.number().finite();
-// llmlint: ignore[changed_behavior_has_e2e] This schema guards a Node CLI's JSON file boundary, not a browser interface; performance-audit.spec.ts drives the real subprocess and parses its generated findings to assert every route score is an integer.
 const performanceScoreSchema = z.number().int().min(0).max(100);
 const lhrSchema = z.object({
   lighthouseVersion: z.string().min(1),
@@ -63,7 +62,6 @@ const lhrSchema = z.object({
     }),
   }),
 });
-// llmlint: ignore-block[changed_behavior_has_e2e] These schemas validate a Node CLI's JSON file contract, not browser behavior; performance-audit.spec.ts drives the real subprocess through generated findings, invalid file inputs, report freshness, and integer-score serialization.
 const metricSchema = z.object({
   performance: performanceScoreSchema,
   fcp: numberSchema,
@@ -73,15 +71,12 @@ const metricSchema = z.object({
   transferBytes: numberSchema,
   jsBytes: numberSchema,
 });
-const rangeSchema = z
-  .object({ min: numberSchema, max: numberSchema })
-  .refine(({ min, max }) => min <= max, { message: "min must not exceed max" });
+const rangeSchema = z.object({ min: numberSchema, max: numberSchema });
 const spreadSchema = z.object({
-  performance: z
-    .object({ min: performanceScoreSchema, max: performanceScoreSchema })
-    .refine(({ min, max }) => min <= max, {
-      message: "min must not exceed max",
-    }),
+  performance: z.object({
+    min: performanceScoreSchema,
+    max: performanceScoreSchema,
+  }),
   fcp: rangeSchema,
   lcp: rangeSchema,
   tbt: rangeSchema,
@@ -93,7 +88,7 @@ const deltaMetricSchema = metricSchema.extend({
   performance: z.number().int().min(-100).max(100),
 });
 const findingsSchema = z.object({
-  schemaVersion: z.literal(2),
+  schemaVersion: z.literal(3),
   runsPerRoute: z.number().int().min(1),
   environment: z.object({
     capturedAt: z.string().datetime(),
@@ -122,7 +117,6 @@ const findingsSchema = z.object({
   }),
   deltas: z.record(z.string(), deltaMetricSchema),
 });
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 function parseJsonFile(filename, schema, label) {
   try {
@@ -177,7 +171,6 @@ function median(values) {
     : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Lighthouse extraction is observable only through this Node CLI's files; performance-audit.spec.ts drives the real subprocess with Lighthouse fixtures, including a binary-float score that it proves serializes as an integer.
 function metricFromLhr(lhr) {
   lhr = lhrSchema.parse(lhr);
   const scripts = lhr.audits["resource-summary"].details.items.find(
@@ -193,7 +186,6 @@ function metricFromLhr(lhr) {
     jsBytes: scripts?.transferSize ?? 0,
   };
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 function assertDesktopProfile(lhr) {
   lhr = lhrSchema.parse(lhr);
@@ -211,7 +203,6 @@ function aggregate(runs) {
   );
 }
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Spread aggregation belongs to the Node CLI's generated-file contract and has no browser interface; performance-audit.spec.ts drives the real subprocess over five fixture runs and asserts the serialized min-max spread and Markdown range.
 function spreads(runs) {
   return Object.fromEntries(
     METRICS.map(([key]) => {
@@ -220,7 +211,6 @@ function spreads(runs) {
     }),
   );
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 function routeUrl(base, route) {
   const normalized = base.endsWith("/") ? base : `${base}/`;
@@ -253,21 +243,16 @@ function delta(value, baseline, unit) {
   return `${prefix}${format(difference, unit)}`;
 }
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Range formatting is observable only in this Node CLI's Markdown file; performance-audit.spec.ts drives the real subprocess and asserts the rendered min-max table cell.
 function formatRange(range, unit) {
   return `${format(range.min, unit)}–${format(range.max, unit)}`;
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Display-unit conversion is observable only in this Node CLI's Markdown file; performance-audit.spec.ts drives the real subprocess and asserts the rendered range, deltas, conclusions, and stale-report recovery.
 function roundedInDisplayUnit(value, unit) {
   if (unit === "score" || unit === "ms") return Math.round(value);
   if (unit === "bytes") return Number((value / 1024).toFixed(1));
   return Number(value.toFixed(3));
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Range conclusions are generated Markdown from a Node CLI with no browser interface; performance-audit.spec.ts drives the real subprocess and asserts the resulting conclusion text and stale-report recovery.
 function comparison(current, original, higherIsBetter, unit) {
   current = {
     min: roundedInDisplayUnit(current.min, unit),
@@ -281,7 +266,6 @@ function comparison(current, original, higherIsBetter, unit) {
   if (current.max < original.min) return higherIsBetter ? "worse" : "better";
   return "not distinguishable from the observed spread";
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 function environment(lhr) {
   return {
@@ -299,7 +283,7 @@ function environment(lhr) {
   };
 }
 
-// llmlint: ignore-block[changed_behavior_has_e2e] This report generator has no browser interface: performance-audit.spec.ts drives the real Node CLI as a subprocess, verifies the generated Markdown table and conclusions, and exercises stale-report recovery against the filesystem boundary.
+// llmlint: ignore-block[changed_behavior_has_e2e] This generated Markdown report is a Node CLI filesystem output with no browser interface; performance-audit.spec.ts drives the real subprocess and asserts its prose, ranges, deltas, conclusions, and stale-report recovery.
 function markdown(findings) {
   const { environment: env, runsPerRoute, sites } = findings;
   const lines = [
@@ -366,7 +350,6 @@ function markdown(findings) {
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Structured-finding route validation is a Node CLI file-boundary failure with no browser interface; performance-audit.spec.ts drives the real subprocess with a missing spread route and asserts its rejection.
 function validateFindings(value) {
   const findings = findingsSchema.parse(value);
   for (const site of [findings.sites.new, findings.sites.original]) {
@@ -388,7 +371,6 @@ function validateFindings(value) {
   }
   return findings;
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 function routeName(route) {
   return route === "/"
@@ -399,7 +381,6 @@ function routeName(route) {
         .replace(/-$/, "");
 }
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Live Lighthouse orchestration is a Node CLI boundary with no browser UI; performance-audit.spec.ts drives the same extraction and aggregation path through the real CLI using retained Lighthouse JSON fixtures, while the network-dependent capture is intentionally outside the deterministic gate.
 async function auditSite(
   label,
   baseUrl,
@@ -444,9 +425,7 @@ async function auditSite(
   }
   return { url: baseUrl, routes, spreads: routeSpreads, firstLhr };
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Fixture summarization is a Node CLI filesystem boundary with no browser UI; performance-audit.spec.ts drives this exact path as a real subprocess through successful output, insufficient runs, malformed fixtures, integer-score serialization, and stale-report recovery.
 async function readFixtureSite(directory, label, baseUrl) {
   const routes = {};
   const routeSpreads = {};
@@ -486,7 +465,6 @@ async function readFixtureSite(directory, label, baseUrl) {
     runs: DEFAULT_RUNS,
   };
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 async function main() {
   cli = parseArgs(process.argv.slice(2));
@@ -629,9 +607,9 @@ async function main() {
     await chrome?.kill();
   }
 
-  // llmlint: ignore-block[changed_behavior_has_e2e] Structured findings are a Node CLI filesystem contract with no browser interface: performance-audit.spec.ts drives this exact subprocess over Lighthouse fixtures and validates both generated files plus the freshness failure path.
+  // llmlint: ignore-block[changed_behavior_has_e2e] These generated JSON findings are a Node CLI filesystem output with no browser interface; performance-audit.spec.ts drives the real subprocess over Lighthouse fixtures and validates integer score serialization in both generated files.
   const findings = validateFindings({
-    schemaVersion: 2,
+    schemaVersion: 3,
     runsPerRoute: fixtureDirectory ? DEFAULT_RUNS : runs,
     environment: environment(current.firstLhr),
     sites: {

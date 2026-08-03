@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "runsPerRoute": 5,
   "environment": {
     "capturedAt": "2026-08-03T18:52:51.431Z",

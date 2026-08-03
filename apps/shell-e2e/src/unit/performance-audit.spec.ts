@@ -29,6 +29,7 @@ const cliSiteSchema = z.object({
   spreads: z.object({ "/": cliSpreadSchema }).catchall(cliSpreadSchema),
 });
 const cliFindingsSchema = z.object({
+  schemaVersion: z.literal(3),
   runsPerRoute: z.number().int().positive(),
   environment: z.object({
     formFactor: z.literal("desktop"),
@@ -119,6 +120,7 @@ describe("performance audit CLI", () => {
     );
 
     expect(findings.runsPerRoute).toBe(performanceConfig.minimumRuns);
+    expect(findings.schemaVersion).toBe(3);
     expect(findings.environment.formFactor).toBe("desktop");
     expect(findings.environment.throttling.cpuSlowdownMultiplier).toBe(1);
     expect(findings.sites.new.routes["/"].fcp).toBe(130);
