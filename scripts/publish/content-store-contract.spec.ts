@@ -8,7 +8,10 @@ import { beforeAll, describe, expect, test } from "vitest";
 // `just lint-workflows` is the gate that holds every restatement to it. That
 // gate is the only interface these tests use — it reports the names it enforced,
 // and each case then moves one restatement in the committed tree exactly as a
-// rename would, runs the real recipe, and restores the file.
+// rename would, runs the real recipe, and restores the file. Because a drifted
+// restatement is briefly the committed tree, tooling-publish's test target
+// declares `parallelism: false`: another project's gate reading one of these
+// files mid-case would otherwise see this file's edit as its own failure.
 
 const workflow = ".github/workflows/pages.yml";
 

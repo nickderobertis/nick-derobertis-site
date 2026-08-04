@@ -8,7 +8,10 @@ import { describe, expect, test } from "vitest";
 // Node. `just lint-workflows` is the gate that enforces it, and it is the only
 // interface these tests use: each drift case moves one pin in the committed
 // tree exactly as a contributor would, runs the real recipe, and restores the
-// file, so what fails the push here is what fails it in CI.
+// file, so what fails the push here is what fails it in CI. Because a drifted
+// pin is briefly the committed tree, tooling-ci's test target declares
+// `parallelism: false`: another project's gate reading package.json or a
+// workflow mid-case would otherwise see this file's edit as its own failure.
 
 const pinnedWorkflow = ".github/workflows/pages.yml";
 const manifest = "package.json";
