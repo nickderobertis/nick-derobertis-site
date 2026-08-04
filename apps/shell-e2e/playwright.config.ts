@@ -27,7 +27,8 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "exec node ../../scripts/serve-e2e.mjs",
+    command:
+      "exec node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ../../scripts/serve-e2e.mjs",
     env: { PORT: port },
     url: testBaseUrl,
     reuseExistingServer: false,

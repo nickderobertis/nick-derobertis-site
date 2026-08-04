@@ -1,12 +1,11 @@
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
-import { createServer } from "node:http";
-import { basename, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import { handleE2eDataRequest } from "./e2e-data-provider.mjs";
+import {
+  closeOnSignals,
+  createSiteServer,
+} from "../libs/e2e-fixtures/src/index.ts";
 
 function validateSiteConfig(value) {
   if (
@@ -31,57 +30,16 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535)
     `PORT must be an integer from 1 to 65535; received ${JSON.stringify(portValue)}. Set a valid PORT and run just test-e2e again.`,
   );
 // llmlint: ignore-end[changed_behavior_has_e2e]
-const remoteLazyAssetLatencyMs = 300;
-const types = {
-  ".css": "text/css",
-  ".html": "text/html",
-  ".js": "text/javascript",
-  ".json": "application/json",
-};
-const server = createServer(async (request, response) => {
-  const url = new URL(request.url ?? "/", "http://localhost");
-  if (
-    await handleE2eDataRequest({
-      base,
-      loadingMs: 750,
-      response,
-      root,
-      url,
-    })
-  )
-    return;
-  const relative = normalize(
-    url.pathname.startsWith(base)
-      ? url.pathname.slice(base.length)
-      : url.pathname,
-  ).replace(/^\.\.(\/|\\)/, "");
-  let file = join(root, relative);
-  try {
-    if ((await stat(file)).isDirectory()) file = join(file, "index.html");
-    await stat(file);
-  } catch {
-    file = join(root, "404.html");
-  }
-  response.setHeader(
-    "Content-Type",
-    types[extname(file)] ?? "application/octet-stream",
-  );
-  const assetName = basename(file);
-  const isEagerRemoteAsset =
-    assetName.startsWith("main.") ||
-    assetName === "remoteEntry.js" ||
-    assetName.startsWith("common.") ||
-    assetName.startsWith("__federation_expose_Skeleton.");
-  if (
-    remoteLazyAssetLatencyMs > 0 &&
-    url.pathname.includes("/remotes/") &&
-    extname(file) === ".js" &&
-    !isEagerRemoteAsset
-  )
-    await new Promise((resolve) =>
-      setTimeout(resolve, remoteLazyAssetLatencyMs),
-    );
-  createReadStream(file).pipe(response);
+const server = createSiteServer({
+  base,
+  // A `?scenario=loading` domain stays pending long enough for a journey to
+  // assert the loading state before its data arrives.
+  dataLoadingMs: 750,
+  // A remote's lazily loaded page code arrives late enough for a journey to
+  // observe the skeleton it replaces, which is the state those journeys assert.
+  lazyAssetLatencyMs: 300,
+  notFound: { file: "404.html" },
+  root,
 });
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.
 server.on("error", (error) => {
@@ -93,20 +51,9 @@ server.on("error", (error) => {
 server.listen(port, "127.0.0.1");
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
-let shuttingDown = false;
-function shutDown() {
-  if (shuttingDown) return;
-  shuttingDown = true;
-  server.close((error) => {
-    if (error) {
-      console.error(
-        `Could not stop the e2e server cleanly: ${error.message}. Ensure no requests are stuck, then rerun just test-e2e.`,
-      );
-      process.exitCode = 1;
-    }
-  });
-  server.closeAllConnections();
-}
-
-process.on("SIGINT", shutDown);
-process.on("SIGTERM", shutDown);
+closeOnSignals(server, ["SIGINT", "SIGTERM"], (error) => {
+  console.error(
+    `Could not stop the e2e server cleanly: ${error.message}. Ensure no requests are stuck, then rerun just test-e2e.`,
+  );
+  process.exitCode = 1;
+});

@@ -1,16 +1,8 @@
 import { createHash } from "node:crypto";
-import {
-  createReadStream,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
-import { createServer } from "node:http";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
-import { handleE2eDataRequest } from "./e2e-data-provider.mjs";
+import { createSiteServer } from "../libs/e2e-fixtures/src/index.ts";
 
 process.on("uncaughtException", (error) => {
   console.error(
@@ -70,63 +62,43 @@ if (!existsSync(path.join(projectRoot, "index.html")))
   throw new Error(
     `Built remote not found: ${projectRoot}; run pnpm exec nx build ${project} first`,
   );
-const contentTypes = new Map([
-  [".css", "text/css; charset=utf-8"],
-  [".html", "text/html; charset=utf-8"],
-  [".js", "text/javascript; charset=utf-8"],
-  [".json", "application/json; charset=utf-8"],
-  [".png", "image/png"],
-  [".svg", "image/svg+xml"],
-]);
-const routePrefix = `/nick-derobertis-site/remotes/${project}/`;
-const pagesPrefix = "/nick-derobertis-site/";
-const server = createServer(async (request, response) => {
-  const requestUrl = new URL(request.url ?? "/", "http://localhost");
-  if (
-    await handleE2eDataRequest({
-      base: pagesPrefix.slice(0, -1),
-      loadingMs: 5_000,
-      response,
-      root: path.resolve("dist/apps/shell"),
-      url: requestUrl,
-    })
-  )
-    return;
-  const match = requestUrl.pathname.match(
-    /^\/nick-derobertis-site\/remotes\/([a-z][a-z0-9-]*)\/(.*)$/,
-  );
-  if (match && !existsSync(path.join("apps", match[1], "project.json"))) {
-    response.writeHead(400).end("Unknown visual project");
-    return;
-  }
-  const servedRoot = match
-    ? path.resolve("dist/apps", match[1])
-    : existsSync("dist/apps/shell/index.html")
-      ? path.resolve("dist/apps/shell")
-      : projectRoot;
-  const shellRelative = requestUrl.pathname.startsWith(pagesPrefix)
-    ? requestUrl.pathname.slice(pagesPrefix.length)
-    : requestUrl.pathname.slice(1);
-  let candidate = path.resolve(
-    servedRoot,
-    match ? match[2] || "index.html" : shellRelative || "index.html",
-  );
-  if (!match && (!existsSync(candidate) || statSync(candidate).isDirectory())) {
-    candidate = path.join(servedRoot, shellRelative, "index.html");
-  }
-  if (
-    !candidate.startsWith(`${servedRoot}${path.sep}`) ||
-    !existsSync(candidate) ||
-    !statSync(candidate).isFile()
-  ) {
-    response.writeHead(404).end("Not found");
-    return;
-  }
-  response.setHeader(
-    "content-type",
-    contentTypes.get(path.extname(candidate)) ?? "application/octet-stream",
-  );
-  createReadStream(candidate).pipe(response);
+const pagesBase = "/nick-derobertis-site";
+const routePrefix = `${pagesBase}/remotes/${project}/`;
+const shellRoot = path.resolve("dist/apps/shell");
+const remoteRequestPattern = new RegExp(
+  `^${pagesBase}/remotes/([a-z][a-z0-9-]*)/(.*)$`,
+);
+const server = createSiteServer({
+  base: pagesBase,
+  contentTypes: {
+    ".css": "text/css; charset=utf-8",
+    ".html": "text/html; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+  },
+  // A `loading` capture must still show its skeleton when the shot is taken, so
+  // the steered domain stays pending well past the capture itself.
+  dataLoadingMs: 5_000,
+  dataRoot: shellRoot,
+  // The composed shell is served whenever it has been built; otherwise this
+  // project's own standalone output is all a capture can load.
+  root: existsSync(path.join(shellRoot, "index.html"))
+    ? shellRoot
+    : projectRoot,
+  // Each remote is served from the bytes its own build published, so a
+  // host-composed capture loads every pane exactly as the deployed site does.
+  route: (url) => {
+    const match = remoteRequestPattern.exec(url.pathname);
+    if (!match) return undefined;
+    if (!existsSync(path.join("apps", match[1], "project.json")))
+      return { status: 400, body: "Unknown visual project" };
+    return {
+      root: path.resolve("dist/apps", match[1]),
+      relative: match[2] || "index.html",
+    };
+  },
 });
 await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const address = server.address();
@@ -337,7 +309,7 @@ try {
       const relative =
         scenario.render === "standalone"
           ? routePrefix
-          : `${pagesPrefix}${hostPath}`;
+          : `${pagesBase}/${hostPath}`;
       await page.goto(
         `http://127.0.0.1:${address.port}${relative}${queryFor(scenario.state)}`,
         {

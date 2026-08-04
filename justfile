@@ -1,7 +1,7 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
 set positional-arguments := true
 
-# These scripts import libs/build-config/src/*.ts, which Node type-strips.
+# These scripts import workspace libraries' TypeScript, which Node type-strips.
 # package.json declares no module type, so Node warns once per run about
 # reparsing them. Drop that one warning rather than silencing all of them.
 node_typestrip := "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON"
@@ -100,7 +100,7 @@ prerender:
 # it is idempotent full state, so a superseded run loses no publisher's bytes.
 @compose store output:
     # llmlint: ignore[changed_behavior_has_e2e] This assembly CLI has no browser interface; compose.spec.ts drives it over a fixture content store, and site.spec.ts plus every feature journey drive the artifact it emits in a real browser.
-    store="$1"; output="$2"; [[ "$store" != *..* && -d "$store" ]] || { echo "compose: store must be a readable content-store apps directory; check out the content-store branch and rerun just compose <store>/apps <output>" >&2; exit 2; }; [[ "$output" != *..* && "$output" == dist/?* ]] || { echo "compose: output must be a workspace-relative build directory beneath dist/, which is the only tree compose may write into; pass one such as dist/site and rerun just compose $store <output>" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; FRAGMENT_ROOT="$store" COMPOSE_OUTPUT="$output" node scripts/compose.mjs >"$log" 2>&1 && STATIC_ARTIFACT_ROOT="$output" node scripts/check-static-artifact.mjs >>"$log" 2>&1 || { cat "$log" >&2; echo "compose: assembling the published fragments failed; publish the app named above, then rerun just compose $store $output" >&2; exit 1; }
+    store="$1"; output="$2"; [[ "$store" != *..* && -d "$store" ]] || { echo "compose: store must be a readable content-store apps directory; check out the content-store branch and rerun just compose <store>/apps <output>" >&2; exit 2; }; [[ "$output" != *..* && "$output" == dist/?* ]] || { echo "compose: output must be a workspace-relative build directory beneath dist/, which is the only tree compose may write into; pass one such as dist/site and rerun just compose $store <output>" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; FRAGMENT_ROOT="$store" COMPOSE_OUTPUT="$output" {{node_typestrip}} scripts/compose.mjs >"$log" 2>&1 && STATIC_ARTIFACT_ROOT="$output" {{node_typestrip}} scripts/check-static-artifact.mjs >>"$log" 2>&1 || { cat "$log" >&2; echo "compose: assembling the published fragments failed; publish the app named above, then rerun just compose $store $output" >&2; exit 1; }
 
 # Network-dependent Lighthouse comparison; intentionally excluded from `check`.
 perf url="" runs="":
@@ -111,7 +111,7 @@ perf-compare new_url="" original_url="" runs="":
 
 # Build the complete federated artifact before serving it at the Pages base path.
 serve: prerender
-    node scripts/serve-e2e.mjs
+    {{node_typestrip}} scripts/serve-e2e.mjs
 
 e2e-affected-files file:
     # llmlint: ignore[tool_output_is_signal] This proof command intentionally preserves unedited Nx selection and execution output for docs/integration-proof.md.

@@ -1,0 +1,27 @@
+{
+  "name": "e2e-fixtures",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/e2e-fixtures/src",
+  "projectType": "library",
+  "tags": ["type:shared", "scope:e2e"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint libs/e2e-fixtures" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/e2e-fixtures/tsconfig.json" }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/e2e-fixtures/tsconfig.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/e2e-fixtures/vite.config.ts"
+      }
+    }
+  }
+}

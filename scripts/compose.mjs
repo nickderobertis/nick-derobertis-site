@@ -2,6 +2,11 @@ import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
+import {
+  inlineRemoteCssPattern,
+  parseRemoteManifest,
+  routeContracts,
+} from "../libs/artifact-contracts/src/index.ts";
 import { fragmentContractSchema } from "../libs/build-config/src/fragment-contract.ts";
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
@@ -9,8 +14,6 @@ import remoteManifest from "../libs/build-config/src/remotes.json" with {
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import { inlineRemoteCssPattern } from "./remote-css.mjs";
-import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 const validatedRemoteManifest = parseRemoteManifest(remoteManifest);
 const appNames = ["shell", ...Object.keys(validatedRemoteManifest)];

@@ -52,7 +52,7 @@
         }
       ],
       "options": {
-        "command": "node scripts/compose.mjs && node scripts/check-static-artifact.mjs # llmlint: ignore[changed_behavior_has_e2e] Compose contract and filesystem failures happen before an artifact can be served, so compose.spec.ts exercises that real CLI boundary; site.spec.ts drives its successful output with and without JavaScript."
+        "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/compose.mjs && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-static-artifact.mjs # llmlint: ignore[changed_behavior_has_e2e] Compose contract and filesystem failures happen before an artifact can be served, so compose.spec.ts exercises that real CLI boundary; site.spec.ts drives its successful output with and without JavaScript."
       }
     },
     "perf": {

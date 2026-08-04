@@ -14,7 +14,6 @@ paths = [
   "libs/**/*.tsx",
   "libs/**/*.css",
   "scripts/capture-visual.mjs",
-  "scripts/e2e-data-provider.mjs",
   "visual-projects.json",
   "screencomp.toml",
 ]

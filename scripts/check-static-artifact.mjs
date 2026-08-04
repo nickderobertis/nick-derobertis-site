@@ -1,19 +1,20 @@
 import { access, readFile } from "node:fs/promises";
 import { JSDOM } from "jsdom";
 import routes from "../apps/shell/src/routes.json" with { type: "json" };
+import {
+  inlineRemoteCssPattern,
+  parseRemoteManifest,
+  readRouteRemoteStyles,
+  remotesForRoute,
+  routeContracts,
+  validatePagesBase,
+} from "../libs/artifact-contracts/src/index.ts";
 import remoteManifest from "../libs/build-config/src/remotes.json" with {
   type: "json",
 };
 import siteConfig from "../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
-import {
-  inlineRemoteCssPattern,
-  readRouteRemoteStyles,
-  remotesForRoute,
-  validatePagesBase,
-} from "./remote-css.mjs";
-import { parseRemoteManifest, routeContracts } from "./route-contracts.mjs";
 
 const substantiveRouteContent = {
   "/": "Who am I?",
@@ -190,7 +191,7 @@ for (const route of validatedRoutes) {
   if (route.path !== "/") {
     if (!route.remote || !remotesForRoute(route.path).includes(route.remote))
       throw new Error(
-        `${path} does not inline the page CSS of its own ${route.remote ?? "route"} remote; align scripts/remote-css.mjs with apps/shell/src/routes.json and rerun just prerender.`,
+        `${path} does not inline the page CSS of its own ${route.remote ?? "route"} remote; align libs/artifact-contracts/src/remote-css.ts with apps/shell/src/routes.json and rerun just prerender.`,
       );
     const marker = realRouteMarkers[route.path];
     if (!marker || !html.includes(marker))
@@ -252,7 +253,7 @@ const uncoveredPanes = ["home", ...composedByHome].filter(
 );
 if (uncoveredPanes.length > 0)
   throw new Error(
-    `${root}/index.html does not inline the page CSS of every remote the home host composes (missing ${uncoveredPanes.join(", ")}); add them to scripts/remote-css.mjs and rerun just prerender.`,
+    `${root}/index.html does not inline the page CSS of every remote the home host composes (missing ${uncoveredPanes.join(", ")}); add them to libs/artifact-contracts/src/remote-css.ts and rerun just prerender.`,
   );
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))

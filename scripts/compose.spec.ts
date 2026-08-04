@@ -9,6 +9,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, expect, test } from "vitest";
+import { remotesForRoute } from "../libs/artifact-contracts/src/index.ts";
 import { serializeFragmentContract } from "../libs/build-config/src/fragment-contract.ts";
 import { publishableApps } from "../libs/build-config/src/publish-fragment.ts";
 import {
@@ -18,7 +19,6 @@ import {
   validatedHydrationMetadata,
   validateFragmentContracts,
 } from "./compose.mjs";
-import { remotesForRoute } from "./remote-css.mjs";
 
 test("compose rejects independently published React version skew", () => {
   expect(() =>
