@@ -46,7 +46,7 @@
     "screenshot": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/visual/capture-visual.mjs home-story \"${SHOTS_OUT:-shots/current/home-story/x86_64}\""
+        "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON apps/home-story/visual/capture.ts \"${SHOTS_OUT:-shots/current/home-story/x86_64}\""
       }
     }
   }

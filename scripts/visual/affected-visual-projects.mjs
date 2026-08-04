@@ -36,6 +36,16 @@ const projects = [...new Set(names)].sort().map((id) => {
     throw new Error(
       `affected project ${id} has no apps/${id}/project.json; only workspace apps expose a screenshot target`,
     );
+  const projectConfig = JSON.parse(
+    readFileSync(`apps/${id}/project.json`, "utf8"),
+  );
+  if (
+    !projectConfig.targets?.screenshot ||
+    !existsSync(`apps/${id}/visual/scenarios.ts`)
+  )
+    throw new Error(
+      `affected project ${id} must own an Nx screenshot target and visual/scenarios.ts`,
+    );
   const manifest = `apps/${id}/visual/baseline/${ARCH}.json`;
   if (!existsSync(manifest))
     throw new Error(

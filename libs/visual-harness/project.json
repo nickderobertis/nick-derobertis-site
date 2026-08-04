@@ -1,0 +1,27 @@
+{
+  "name": "visual-harness",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/visual-harness/src",
+  "projectType": "library",
+  "tags": ["type:shared", "scope:visual-harness"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": "biome lint libs/visual-harness" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/visual-harness/tsconfig.json" }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config libs/visual-harness/vite.config.ts --coverage"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": { "command": "tsc -p libs/visual-harness/tsconfig.json" }
+    }
+  }
+}

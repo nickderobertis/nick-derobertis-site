@@ -1,4 +1,6 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 // llmlint: ignore-file[changed_behavior_has_e2e] This CLI/filesystem quality-gate validator has no browser interface; lint-workflows executes its real boundary against committed workflow, configuration, baselines, and documentation.
 
@@ -45,7 +47,7 @@ const sources = [
     readFileSync("scripts/visual/affected-visual-projects.mjs", "utf8"),
   ],
 ];
-const captureSource = readFileSync("scripts/visual/capture-visual.mjs", "utf8");
+const captureSource = readFileSync("libs/visual-harness/src/index.ts", "utf8");
 const nxConfig = JSON.parse(readFileSync("nx.json", "utf8"));
 const homeRspackSource = readFileSync("apps/home/rspack.config.ts", "utf8");
 const remoteMapMatch = homeRspackSource.match(/remoteMap\(\[([\s\S]*?)\]\)/);
@@ -93,32 +95,56 @@ if (nxConfig.targetDefaults?.screenshot?.cache !== false)
   throw new Error(
     "Nx screenshot target must not cache: its output path depends on SHOTS_OUT, and the reusable workflow re-runs it into a second tree for the reproducibility gate",
   );
-const visualProjects = JSON.parse(readFileSync("visual-projects.json", "utf8"));
-const allowedProjectStates = new Set([
-  "all",
-  "empty",
-  "loading",
-  "error",
-  "expanded",
-  "employment-only",
-]);
-if (typeof visualProjects !== "object" || visualProjects === null)
-  throw new Error("visual-projects.json must be an object");
-for (const [project, config] of Object.entries(visualProjects)) {
-  if (
-    !/^[a-z][a-z0-9-]*$/.test(project) ||
-    typeof config !== "object" ||
-    config === null ||
-    typeof config.hostPath !== "string" ||
-    !Array.isArray(config.states) ||
-    !config.states.every((state) => allowedProjectStates.has(state))
-  )
-    throw new Error(`Invalid visual project contract for ${project}`);
+const visualProjects = readdirSync("apps")
+  .filter((project) => {
+    if (!statSync(`apps/${project}`).isDirectory()) return false;
+    const projectConfig = JSON.parse(
+      readFileSync(`apps/${project}/project.json`, "utf8"),
+    );
+    return Boolean(projectConfig.targets?.screenshot);
+  })
+  .sort();
+const screencompSource = readFileSync("screencomp.toml", "utf8");
+const stateToggle = screencompSource.match(
+  /key = "state"[\s\S]*?values = \[([^\]]+)\]/,
+);
+if (!stateToggle) throw new Error("screencomp.toml has no state toggle values");
+const toggleStates = new Set(
+  [...stateToggle[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]),
+);
+for (const project of visualProjects) {
   const projectConfig = JSON.parse(
     readFileSync(`apps/${project}/project.json`, "utf8"),
   );
-  if (!projectConfig.targets?.screenshot)
-    throw new Error(`Visual project ${project} has no Nx screenshot target`);
+  if (
+    !projectConfig.targets.screenshot.options?.command?.includes(
+      `apps/${project}/visual/capture.ts`,
+    )
+  )
+    throw new Error(
+      `Visual project ${project} screenshot target must run its app-owned capture.ts`,
+    );
+  let suite;
+  try {
+    ({ suite } = await import(
+      pathToFileURL(path.resolve(`apps/${project}/visual/scenarios.ts`))
+    ));
+  } catch (error) {
+    throw new Error(
+      `Visual project ${project} has no readable scenarios.ts (${error.message})`,
+    );
+  }
+  if (
+    suite?.project !== project ||
+    typeof suite.hostPath !== "string" ||
+    !Array.isArray(suite.scenarios)
+  )
+    throw new Error(`Invalid visual suite for ${project}`);
+  for (const scenario of suite.scenarios)
+    if (!toggleStates.has(scenario.state))
+      throw new Error(
+        `Visual scenario state ${scenario.state} is missing from screencomp.toml's state toggle values`,
+      );
   const baseline = JSON.parse(
     readFileSync(`apps/${project}/visual/baseline/x86_64.json`, "utf8"),
   );
@@ -141,7 +167,9 @@ for (const [project, config] of Object.entries(visualProjects)) {
   const baselineStates = new Set(
     baseline.shots.map((shot) => shot.toggles?.state),
   );
-  for (const state of ["happy", ...config.states])
+  for (const state of new Set(
+    suite.scenarios.map((scenario) => scenario.state),
+  ))
     if (!baselineStates.has(state))
       throw new Error(`Visual project ${project} baseline is missing ${state}`);
 }
@@ -201,9 +229,6 @@ for (const path of ["AGENTS.md", "README.md", "docs/integration-proof.md"]) {
       `Visual gallery documentation in ${path} advertises the bare ${pagesRoot} Pages root, which screencomp never deploys; document the per-project gallery URLs instead`,
     );
 }
-const screencompSource = sources.find(
-  ([name]) => name === "screencomp config",
-)[1];
 for (const state of [
   "happy",
   "all",
@@ -216,10 +241,6 @@ for (const state of [
   if (!screencompSource.includes(`"${state}"`))
     throw new Error(
       `Visual state ${state} is missing from screencomp.toml; update the capture and toggle contracts together`,
-    );
-  if (!captureSource.includes(`"${state}"`))
-    throw new Error(
-      `Visual state ${state} is missing from capture-visual.mjs; update the capture and toggle contracts together`,
     );
 }
 for (const toggle of ["render", "state", "viewport"]) {
@@ -238,10 +259,6 @@ for (const value of [
   if (!screencompSource.includes(`"${value}"`))
     throw new Error(
       `Visual toggle value ${value} is missing from screencomp.toml`,
-    );
-  if (!captureSource.includes(`"${value}"`))
-    throw new Error(
-      `Visual toggle value ${value} is missing from capture-visual.mjs`,
     );
 }
 console.log(

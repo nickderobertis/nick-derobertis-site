@@ -31,7 +31,8 @@
       "@site/route-state": ["libs/route-state/src/index.ts"],
       "@site/layout": ["libs/layout/src/index.ts"],
       "@site/build-config": ["libs/build-config/src/index.ts"],
-      "@site/testing": ["libs/testing/src/index.ts"]
+      "@site/testing": ["libs/testing/src/index.ts"],
+      "@site/visual-harness": ["libs/visual-harness/src/index.ts"]
     }
   }
 }

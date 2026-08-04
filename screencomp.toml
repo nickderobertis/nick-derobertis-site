@@ -13,8 +13,9 @@ paths = [
   "libs/**/*.ts",
   "libs/**/*.tsx",
   "libs/**/*.css",
-  "scripts/visual/capture-visual.mjs",
-  "visual-projects.json",
+  "apps/*/visual/scenarios.ts",
+  "apps/*/visual/capture.ts",
+  "libs/visual-harness/**/*.ts",
   "screencomp.toml",
 ]
 

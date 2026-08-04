@@ -1,5 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import {
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
@@ -43,6 +44,46 @@ function affectedScreenshotProjects(file: string): string[] {
   )
     throw new Error("Nx affected output was not a list of project names");
   return projects;
+}
+
+function verifyContractWithAwardsScenario(contents: string): {
+  status: number | null;
+  stderr: string;
+} {
+  const root = mkdtempSync(path.join(tmpdir(), "visual-scenario-contract-"));
+  try {
+    for (const entry of readdirSync(".")) {
+      if (entry !== "apps")
+        symlinkSync(path.resolve(entry), path.join(root, entry));
+    }
+    mkdirSync(path.join(root, "apps"));
+    for (const entry of readdirSync("apps")) {
+      if (entry !== "awards")
+        symlinkSync(
+          path.resolve("apps", entry),
+          path.join(root, "apps", entry),
+        );
+    }
+    mkdirSync(path.join(root, "apps/awards/visual"), { recursive: true });
+    for (const entry of readdirSync("apps/awards")) {
+      if (entry !== "visual")
+        symlinkSync(
+          path.resolve("apps/awards", entry),
+          path.join(root, "apps/awards", entry),
+        );
+    }
+    symlinkSync(
+      path.resolve("apps/awards/visual/baseline"),
+      path.join(root, "apps/awards/visual/baseline"),
+    );
+    writeFileSync(path.join(root, "apps/awards/visual/scenarios.ts"), contents);
+    return spawnSync("node", ["scripts/visual/verify-visual-contract.mjs"], {
+      cwd: root,
+      encoding: "utf8",
+    });
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
 }
 
 interface VisualProject {
@@ -222,7 +263,7 @@ describe("visual affected selection", () => {
   test("capture output cannot escape its owning project", () => {
     const capture = spawnSync(
       "node",
-      ["scripts/visual/capture-visual.mjs", "bio", "/tmp/escaped-visual"],
+      ["apps/bio/visual/capture.ts", "/tmp/escaped-visual"],
       { encoding: "utf8" },
     );
     expect(capture.status).not.toBe(0);
@@ -243,6 +284,18 @@ describe("visual affected selection", () => {
         encoding: "utf8",
       }),
     ).not.toThrow();
+  });
+
+  test("visual scenarios cannot declare a state outside screencomp's toggle", () => {
+    const invalidScenario = readFileSync(
+      "apps/awards/visual/scenarios.ts",
+      "utf8",
+    ).replace('"all", "empty"', '"not-listed", "empty"');
+    const result = verifyContractWithAwardsScenario(invalidScenario);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      "Visual scenario state not-listed is missing from screencomp.toml",
+    );
   });
 
   test("gallery documentation cannot advertise the undeployed Pages root", () => {
