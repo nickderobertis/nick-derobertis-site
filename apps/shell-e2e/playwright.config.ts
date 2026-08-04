@@ -17,7 +17,6 @@ if (!/^\d{1,5}$/.test(port) || Number(port) < 1 || Number(port) > 65_535)
 const testBaseUrl = `http://127.0.0.1:${port}${siteConfig.pagesBase}/`;
 export default defineConfig({
   testDir: "./src",
-  testIgnore: "unit/**",
   workers: 1,
   retries: 1,
   expect: { timeout: 15_000 },
@@ -28,7 +27,7 @@ export default defineConfig({
   },
   webServer: {
     command:
-      "exec node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ../../scripts/serve-e2e.mjs",
+      "exec node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ../../scripts/serve/serve-e2e.mjs",
     env: { PORT: port },
     url: testBaseUrl,
     reuseExistingServer: false,

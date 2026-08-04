@@ -1,0 +1,27 @@
+{
+  "name": "tooling-visual",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts/visual",
+  "projectType": "application",
+  "tags": ["type:tooling", "scope:visual"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome lint scripts/visual"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p scripts/visual/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --maxWorkers=1 --config scripts/visual/vite.config.ts"
+      }
+    }
+  }
+}

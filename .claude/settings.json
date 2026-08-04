@@ -14,7 +14,7 @@
     "SessionStart": [
       {
         "hooks": [
-          { "type": "command", "command": "./scripts/session-setup.sh" }
+          { "type": "command", "command": "./scripts/ci/session-setup.sh" }
         ]
       }
     ]

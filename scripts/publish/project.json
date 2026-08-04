@@ -1,0 +1,27 @@
+{
+  "name": "tooling-publish",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts/publish",
+  "projectType": "application",
+  "tags": ["type:tooling", "scope:build"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome lint scripts/publish"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p scripts/publish/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --maxWorkers=1 --config scripts/publish/vite.config.ts"
+      }
+    }
+  }
+}

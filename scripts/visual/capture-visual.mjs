@@ -1,0 +1,405 @@
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { chromium } from "@playwright/test";
+import { createSiteServer } from "../../libs/e2e-fixtures/src/index.ts";
+
+process.on("uncaughtException", (error) => {
+  console.error(
+    `capture-visual: ${error instanceof Error ? error.message : String(error)}; rerun the owning nx screenshot target after fixing the reported boundary`,
+  );
+  process.exit(1);
+});
+
+const [project, outputArgument] = process.argv.slice(2);
+if (!project || !outputArgument || !/^[a-z][a-z0-9-]*$/.test(project))
+  throw new Error(
+    "usage: capture-visual.mjs <project> <output-root>; example: capture-visual.mjs bio shots/current/bio/x86_64",
+  );
+const outputRoot = path.resolve(outputArgument);
+// The reusable visual-docs workflow hands the capture a per-project/arch
+// SHOTS_OUT beneath shots/ (shots/current/<project>/<arch> and its verify twin).
+// Confine writes to this project's own capture roots so a mistyped SHOTS_OUT can
+// never clobber another project's tree or escape the workspace.
+const allowedOutputRoots = [
+  path.resolve("shots", "current", project),
+  path.resolve("shots", "verify", project),
+];
+if (
+  !allowedOutputRoots.some(
+    (root) =>
+      outputRoot === root || outputRoot.startsWith(`${root}${path.sep}`),
+  )
+)
+  throw new Error(
+    `Output root must be inside shots/current/${project} or shots/verify/${project}; the visual-docs workflow sets SHOTS_OUT for you`,
+  );
+const projectRoot = path.resolve("dist/apps", project);
+const visualProjects = JSON.parse(readFileSync("visual-projects.json", "utf8"));
+const allowedVisualStates = new Set([
+  "all",
+  "empty",
+  "loading",
+  "error",
+  "expanded",
+  "employment-only",
+]);
+if (
+  typeof visualProjects !== "object" ||
+  visualProjects === null ||
+  !Object.hasOwn(visualProjects, project) ||
+  typeof visualProjects[project].hostPath !== "string" ||
+  !/^(?:[a-z][a-z0-9-]*)?$/.test(visualProjects[project].hostPath) ||
+  !Array.isArray(visualProjects[project].states) ||
+  !visualProjects[project].states.every((state) =>
+    allowedVisualStates.has(state),
+  )
+)
+  throw new Error(
+    `Project ${project} is not configured in visual-projects.json; add a validated hostPath and states entry before capturing it`,
+  );
+if (!existsSync(path.join(projectRoot, "index.html")))
+  throw new Error(
+    `Built remote not found: ${projectRoot}; run pnpm exec nx build ${project} first`,
+  );
+const pagesBase = "/nick-derobertis-site";
+const routePrefix = `${pagesBase}/remotes/${project}/`;
+const shellRoot = path.resolve("dist/apps/shell");
+const remoteRequestPattern = new RegExp(
+  `^${pagesBase}/remotes/([a-z][a-z0-9-]*)/(.*)$`,
+);
+const server = createSiteServer({
+  base: pagesBase,
+  contentTypes: {
+    ".css": "text/css; charset=utf-8",
+    ".html": "text/html; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".png": "image/png",
+    ".svg": "image/svg+xml",
+  },
+  // A `loading` capture must still show its skeleton when the shot is taken, so
+  // the steered domain stays pending well past the capture itself.
+  dataLoadingMs: 5_000,
+  dataRoot: shellRoot,
+  // The composed shell is served whenever it has been built; otherwise this
+  // project's own standalone output is all a capture can load.
+  root: existsSync(path.join(shellRoot, "index.html"))
+    ? shellRoot
+    : projectRoot,
+  // Each remote is served from the bytes its own build published, so a
+  // host-composed capture loads every pane exactly as the deployed site does.
+  route: (url) => {
+    const match = remoteRequestPattern.exec(url.pathname);
+    if (!match) return undefined;
+    if (!existsSync(path.join("apps", match[1], "project.json")))
+      return { status: 400, body: "Unknown visual project" };
+    return {
+      root: path.resolve("dist/apps", match[1]),
+      relative: match[2] || "index.html",
+    };
+  },
+});
+await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+const address = server.address();
+if (!address || typeof address === "string")
+  throw new Error(
+    `Could not start visual capture server; check local loopback availability and rerun the ${project} screenshot target`,
+  );
+const browser = await chromium.launch({
+  args: [
+    "--disable-skia-runtime-opts",
+    "--headless=new",
+    "--disable-gpu",
+    "--disable-gpu-rasterization",
+    "--use-gl=angle",
+    "--use-angle=swiftshader",
+    "--force-color-profile=srgb",
+    "--font-render-hinting=none",
+    "--disable-lcd-text",
+    "--hide-scrollbars",
+    "--disable-dev-shm-usage",
+  ],
+});
+const viewports = [
+  ["desktop", 1110, 900],
+  ["tablet", 768, 1024],
+  ["mobile", 375, 812],
+];
+const hostPath = visualProjects[project].hostPath;
+const projectStates = visualProjects[project].states;
+
+function queryFor(state) {
+  if (state === "happy") return "";
+  if (project === "awards")
+    return state === "all" ? "?awards-view=all" : `?awards-scenario=${state}`;
+  if (project === "research") return `?research-scenario=${state}`;
+  if (project === "bio") return `?bio-view=${state}`;
+  if (project === "courses") return `?courses-view=${state}`;
+  if (project === "software") return `?software-view=${state}`;
+  if (project.startsWith("home")) return `?state=${state}`;
+  if (project === "skills" && state !== "expanded")
+    return `?skills-state=${state}`;
+  if (project === "timeline" && state !== "employment-only")
+    return `?timeline-state=${state}`;
+  return "";
+}
+
+async function prepareCaptureTarget(page, state) {
+  const homeTargets = new Map([
+    ["home-carousel", ["region", "Featured work"]],
+    ["home-cards", ["region", "Areas of work"]],
+    ["home-story", ["heading", "Who am I?"]],
+    ["home-contact", ["heading", "Let’s build something useful."]],
+  ]);
+  if (["empty", "loading", "error"].includes(state)) {
+    await page.addStyleTag({
+      content:
+        "*,*::before,*::after{animation:none!important;caret-color:transparent!important;transition:none!important}",
+    });
+    // The data-loading state now renders each app's own `<Skeleton>` — the same
+    // component the shell/host uses as its lazy fallback — so the loading capture
+    // targets that skeleton by its accessible name (role=status + aria-label).
+    // The skeleton has fixed CSS dimensions, so its element screenshot is stable
+    // host-composed too, unlike the former text status that reflowed ~2px.
+    const skeletonLabel = new Map([
+      ["awards", "Loading awards"],
+      ["bio", "Loading biography"],
+      ["courses", "Loading courses"],
+      ["home-cards", "Loading areas of work"],
+      ["home-carousel", "Loading featured work"],
+      ["home-contact", "Loading contact options"],
+      ["home-story", "Loading story"],
+      ["research", "Loading research"],
+      ["skills", "Loading skills"],
+      ["software", "Loading software"],
+      ["timeline", "Loading timeline"],
+    ]);
+    const stateSelector = new Map([
+      ["awards", ".awards-state"],
+      ["bio", ".bio-state"],
+      ["courses", ".courses-state"],
+      ["home", ".pane-state"],
+      ["home-cards", ".pane-state"],
+      ["home-carousel", ".pane-state"],
+      ["home-contact", ".pane-state"],
+      ["home-story", ".pane-state"],
+      ["research", ".research-state"],
+      ["skills", ".skills-state"],
+      ["software", ".software-state"],
+      ["timeline", ".timeline-state"],
+    ]);
+    const findIndicator = () => {
+      if (state === "loading") {
+        // Home has no data-loading skeleton of its own; its composed page shows
+        // each pane's skeleton, so fall back to the first status region there.
+        const label = skeletonLabel.get(project);
+        return page.getByRole(
+          "status",
+          label ? { name: label, exact: true } : {},
+        );
+      }
+      const selector = stateSelector.get(project);
+      if (selector) return page.locator(selector);
+      let locator = page.getByRole(
+        state === "error" && !project.startsWith("home") ? "alert" : "status",
+      );
+      if (project !== "home")
+        locator = locator.filter({ hasNotText: "Loading HOME page…" });
+      return locator;
+    };
+    const indicator = findIndicator();
+    try {
+      await indicator.first().waitFor({ state: "visible" });
+    } catch (error) {
+      throw new Error(
+        `${project} ${state} indicator did not render; verify the e2e data provider and rerun the screenshot target`,
+        { cause: error },
+      );
+    }
+    return indicator.first();
+  }
+  if (project === "awards")
+    return page.getByRole("region", {
+      name: state === "all" ? "Awards & honors" : "Selected awards",
+    });
+  if (project === "research") return page.locator(".research-page");
+  if (project === "skills") {
+    if (state === "expanded")
+      await page
+        .getByRole("button", { name: "Explore Programming category" })
+        .click();
+    return page.getByRole("region", { name: "Skilled in…" });
+  }
+  if (project === "timeline") {
+    if (state === "employment-only")
+      await page.getByRole("checkbox", { name: "Education" }).uncheck();
+    return page.getByRole("region", { name: "Educated and Experienced" });
+  }
+  if (homeTargets.has(project)) {
+    const [role, name] = homeTargets.get(project);
+    return page.getByRole(role, { name });
+  }
+  if (project === "home") return page.locator("body");
+  return page.locator("body");
+}
+
+const shots = [];
+try {
+  const scenarios = [{ render: "standalone", state: "happy", viewports }];
+  scenarios.push({ render: "host-composed", state: "happy", viewports });
+  for (const state of projectStates) {
+    for (const render of ["standalone", "host-composed"]) {
+      // Skip host-composed `loading`: even as a fixed-dimension skeleton, the
+      // host-composed capture still jitters ~2px run-to-run (a host-composition
+      // layout-timing effect, not a content one — CI drift confirmed it), while
+      // the standalone loading shot already covers the same skeleton
+      // deterministically. Every other state stays in both renders.
+      if (render === "host-composed" && state === "loading") continue;
+      scenarios.push({ render, state, viewports: [viewports[0]] });
+    }
+  }
+  for (const scenario of scenarios) {
+    for (const [viewport, width, height] of scenario.viewports) {
+      const context = await browser.newContext({
+        deviceScaleFactor: 2,
+        reducedMotion: "reduce",
+        viewport: { width, height },
+      });
+      const page = await context.newPage();
+      // Install the canonical clock before any application code runs. Installing
+      // it after navigation can replace React's timing primitives while a busy
+      // worker is still hydrating, producing a false structural mismatch.
+      await page.clock.install({ time: new Date("2026-07-20T12:00:00Z") });
+      const browserErrors = [];
+      page.on("console", (message) => {
+        if (
+          message.type() === "error" &&
+          scenario.state !== "error" &&
+          !message.text().startsWith("Failed to load resource:")
+        )
+          browserErrors.push(`browser console: ${message.text()}`);
+      });
+      page.on("pageerror", (error) => {
+        if (
+          scenario.state !== "error" &&
+          !error.message.startsWith("Loading chunk ") &&
+          !error.message.includes("[ Federation Runtime ]")
+        )
+          browserErrors.push(`page error: ${error.message}`);
+      });
+      page.on("response", (response) => {
+        if (
+          response.status() >= 400 &&
+          scenario.state !== "error" &&
+          !response.url().includes("/cv-data/domains/")
+        )
+          browserErrors.push(`HTTP ${response.status()}: ${response.url()}`);
+      });
+      if (scenario.state === "loading")
+        await page.addInitScript(() => {
+          const nativeSetTimeout = window.setTimeout.bind(window);
+          window.setTimeout = (handler, timeout = 0, ...args) =>
+            nativeSetTimeout(
+              handler,
+              timeout >= 400 ? 2_147_483_647 : timeout,
+              ...args,
+            );
+        });
+      const relative =
+        scenario.render === "standalone"
+          ? routePrefix
+          : `${pagesBase}/${hostPath}`;
+      await page.goto(
+        `http://127.0.0.1:${address.port}${relative}${queryFor(scenario.state)}`,
+        {
+          waitUntil:
+            scenario.state === "loading" ? "domcontentloaded" : "networkidle",
+        },
+      );
+      if (project === "home") {
+        await page
+          .getByText("Loading HOME page…")
+          .waitFor({ state: "hidden", timeout: 30_000 });
+      }
+      const image = `${scenario.render}/${scenario.state}/${viewport}.png`;
+      mkdirSync(path.dirname(path.join(outputRoot, image)), {
+        recursive: true,
+      });
+      const capturePath = path.join(outputRoot, image);
+      const initialTarget = await prepareCaptureTarget(page, scenario.state);
+      await initialTarget.waitFor({ state: "visible" });
+      // Freeze only after the scenario has rendered. Reading the emulated time
+      // immediately before pausing avoids travel-to-the-past races without
+      // fast-forwarding long enough to advance carousel application state.
+      let clockPaused = false;
+      for (let attempt = 0; attempt < 5 && !clockPaused; attempt += 1) {
+        const pauseTime = await page.evaluate(() => Date.now() + 1_000);
+        try {
+          await page.clock.pauseAt(pauseTime);
+          clockPaused = true;
+        } catch (error) {
+          if (
+            attempt === 4 ||
+            !(error instanceof Error) ||
+            !error.message.includes("Cannot fast-forward to the past")
+          )
+            throw new Error(
+              `Could not freeze the browser clock before capturing ${image}: ${error instanceof Error ? error.message : String(error)}. Verify the page reaches a stable state, then rerun just check.`,
+              { cause: error },
+            );
+        }
+      }
+      let captured = false;
+      for (let attempt = 0; attempt < 2 && !captured; attempt += 1) {
+        const target =
+          attempt === 0
+            ? initialTarget
+            : await prepareCaptureTarget(page, scenario.state);
+        await target.waitFor({ state: "visible" });
+        try {
+          await target.screenshot({
+            animations: "disabled",
+            path: capturePath,
+          });
+          captured = true;
+        } catch (error) {
+          if (
+            attempt > 0 ||
+            !(error instanceof Error) ||
+            !error.message.includes("Element is not attached to the DOM")
+          )
+            throw new Error(
+              `Could not capture ${image} after retrying its render target: ${error instanceof Error ? error.message : String(error)}. Verify the scenario remains visible, then rerun just check.`,
+              { cause: error },
+            );
+        }
+      }
+      if (browserErrors.length > 0)
+        throw new Error(
+          `Visual capture reported ${browserErrors.join("; ")} in ${scenario.render}/${scenario.state}/${viewport}; rerun the ${project} screenshot target and inspect this scenario`,
+        );
+      const hash = createHash("sha256")
+        .update(readFileSync(capturePath))
+        .digest("hex");
+      shots.push({
+        name: project,
+        toggles: {
+          render: scenario.render,
+          state: scenario.state,
+          viewport,
+        },
+        hash,
+        image,
+      });
+      await context.close();
+    }
+  }
+} finally {
+  await browser.close();
+  server.close();
+}
+writeFileSync(
+  path.join(outputRoot, "captures.json"),
+  `${JSON.stringify({ schema: 1, shots }, null, 2)}\n`,
+);

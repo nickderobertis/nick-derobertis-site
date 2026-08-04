@@ -103,8 +103,8 @@ input shapes and that `docs/perf-report.md` is an exact rendering of
 refresh and verify the readable artifact with:
 
 ```bash
-node scripts/performance-audit.mjs --refresh-report
-node scripts/performance-audit.mjs --check-report
+node scripts/perf/performance-audit.mjs --refresh-report
+node scripts/perf/performance-audit.mjs --check-report
 ```
 
 Absolute timings depend on the machine and live network path, so use the same

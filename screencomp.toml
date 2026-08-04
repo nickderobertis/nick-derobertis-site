@@ -13,7 +13,7 @@ paths = [
   "libs/**/*.ts",
   "libs/**/*.tsx",
   "libs/**/*.css",
-  "scripts/capture-visual.mjs",
+  "scripts/visual/capture-visual.mjs",
   "visual-projects.json",
   "screencomp.toml",
 ]

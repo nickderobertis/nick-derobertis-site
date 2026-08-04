@@ -70,7 +70,7 @@ const contentTypes: Record<string, string> = {
  * the point — a document that references bytes compose failed to stage gets the
  * 404 a visitor would get.
  *
- * `scripts/serve-e2e.mjs` is deliberately not reused: it serves the shell's
+ * `scripts/serve/serve-e2e.mjs` is deliberately not reused: it serves the shell's
  * build directory, answers a missing file with the fallback under a 200, and
  * injects the data scenarios and latency the feature journeys need. Every one
  * of those would hide the defect this spec exists to catch.

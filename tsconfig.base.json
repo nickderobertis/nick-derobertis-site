@@ -10,7 +10,7 @@
     "noEmit": true,
     "resolveJsonModule": true,
     // Build and publish modules under libs/build-config/src are executed by
-    // Node's type stripping from scripts/*.mjs, where the ESM resolver requires
+    // Node's type stripping from scripts/*/*.mjs, where the ESM resolver requires
     // the real file extension. Every project here already compiles with noEmit,
     // so permitting the `.ts` specifier changes nothing but resolution.
     "allowImportingTsExtensions": true,

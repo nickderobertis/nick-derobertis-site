@@ -1,0 +1,27 @@
+{
+  "name": "tooling-serve",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts/serve",
+  "projectType": "application",
+  "tags": ["type:tooling", "scope:e2e"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome lint scripts/serve"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p scripts/serve/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --maxWorkers=1 --config scripts/serve/vite.config.ts"
+      }
+    }
+  }
+}

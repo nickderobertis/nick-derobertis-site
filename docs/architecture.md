@@ -68,12 +68,12 @@ shell-owned router frames, their hydration payloads, and named route slots;
 Home's fragment similarly contains its `home-main` frame and seven pane slots.
 The contract records its schema version, app name, exact React and React DOM
 versions, and source revision. Revisions may differ because the artifacts are
-independent, but `scripts/compose.mjs` rejects React or React DOM version skew
+independent, but `scripts/compose/compose.mjs` rejects React or React DOM version skew
 before writing any route. Publishers stamp `SOURCE_REVISION` when available;
 local or container builds that cannot reach Git use the contract-valid
 `0000000` sentinel so source metadata never makes a build unavailable.
 
-`scripts/compose.mjs` assembles a GitHub Pages artifact under the
+`scripts/compose/compose.mjs` assembles a GitHub Pages artifact under the
 `/nick-derobertis-site/` base from those published bytes. It imports no app
 source: it fills the shell and Home slots, normalizes React's completed
 Suspense boundaries, emits HTML for all five routes, stages every remote below
@@ -121,7 +121,7 @@ it is the one source for the names that contract is stated in: the
 `published-fragments` content-store branch, the `.content-store` working copy
 the deploy lane checks it out into, and the `.publish-store` scratch repository
 a lane pushes from. The workflow, the ignore rules, and these documents all
-restate those names, so `scripts/verify-content-store-contract.mjs` — run by
+restate those names, so `scripts/publish/verify-content-store-contract.mjs` — run by
 `just lint-workflows` — holds every restatement to them. A lane
 re-reads the branch tip, replaces only `apps/<app>/`, and refuses to commit any
 staged path outside that subtree or the root notice, so a lane can never revert
@@ -163,7 +163,7 @@ inlines its own plus the seven panes it composes — ahead of the deferred
 scripts. Without that, the prerendered content would paint unstyled until
 roughly a megabyte of JavaScript arrived. Each app build rewrites relative
 `url()` targets against its own public path; compose maps routes to fragments
-and deduplicates identical payloads. `scripts/check-static-artifact.mjs` runs
+and deduplicates identical payloads. `scripts/artifact/check-static-artifact.mjs` runs
 after assembly and fails when a route stamp or required inlined CSS is absent.
 
 The byte comparison against the former source renderer found three intentional
@@ -195,3 +195,23 @@ tests passed and only one e2e target ran; the remaining 14 tasks were required
 static build/prerender dependencies. The shell integration target separately
 protects navigation, direct routes, static markup, fallback recovery, and the
 cross-remote state matrix.
+
+## Workspace tooling projects
+
+`scripts/` is eight Nx projects rather than a folder of loose files, one per
+tooling concern: `tooling-compose`, `tooling-artifact`, `tooling-publish`,
+`tooling-visual`, `tooling-perf`, `tooling-serve`, `tooling-ci`, and
+`tooling-workspace`. Each owns its CLIs and the specs that drive them, so Nx
+selects a tooling change the way it selects an app change, and a spec about the
+publish lanes no longer waits on a thirteen-app federation build to run.
+`tooling-artifact` is the only one whose `test` target depends on
+`shell:prerender`, because its specs read the assembled artifact. The
+real-browser performance audit needs that artifact too, so it runs as
+`tooling-perf`'s `e2e` target alongside the other Playwright journeys rather
+than holding up that project's own tests.
+
+No file in `scripts/` imports another one. What two CLIs share lives in a
+library instead: `@site/artifact-contracts` parses the serialized route and
+remote contracts for both compose and the artifact gate, and
+`@site/e2e-fixtures` owns the Pages-base static server and the CV-data
+scenarios that the e2e server and the visual capture host both serve through.

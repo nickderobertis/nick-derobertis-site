@@ -44,7 +44,7 @@
     "screenshot": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/capture-visual.mjs timeline \"${SHOTS_OUT:-shots/current/timeline/x86_64}\""
+        "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/visual/capture-visual.mjs timeline \"${SHOTS_OUT:-shots/current/timeline/x86_64}\""
       }
     }
   }

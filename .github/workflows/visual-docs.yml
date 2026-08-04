@@ -67,7 +67,7 @@ jobs:
           NX_HEAD: ${{ steps.range.outputs.head }}
         run: |
           affected="$(pnpm exec nx show projects --affected --with-target screenshot --base="$NX_BASE" --head="$NX_HEAD" --json)"
-          projects="$(printf '%s' "$affected" | node scripts/affected-visual-projects.mjs)"
+          projects="$(printf '%s' "$affected" | node scripts/visual/affected-visual-projects.mjs)"
           echo "projects=$projects" >> "$GITHUB_OUTPUT"
           echo "Affected visual projects: $projects"
 

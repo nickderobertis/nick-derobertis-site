@@ -52,14 +52,14 @@
         }
       ],
       "options": {
-        "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/compose.mjs && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-static-artifact.mjs # llmlint: ignore[changed_behavior_has_e2e] Compose contract and filesystem failures happen before an artifact can be served, so compose.spec.ts exercises that real CLI boundary; site.spec.ts drives its successful output with and without JavaScript."
+        "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/compose/compose.mjs && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/artifact/check-static-artifact.mjs # llmlint: ignore[changed_behavior_has_e2e] Compose contract and filesystem failures happen before an artifact can be served, so compose.spec.ts exercises that real CLI boundary; site.spec.ts drives its successful output with and without JavaScript."
       }
     },
     "perf": {
       "executor": "nx:run-commands",
       "cache": false,
       "options": {
-        "command": "node scripts/performance-audit.mjs"
+        "command": "node scripts/perf/performance-audit.mjs"
       }
     },
     "lint": {

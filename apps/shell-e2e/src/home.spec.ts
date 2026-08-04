@@ -227,10 +227,14 @@ for (const path of renderPaths) {
 }
 
 test("script entry points reject invalid inputs with recovery actions", async () => {
-  const invalidPort = spawnSync(process.execPath, ["scripts/serve-e2e.mjs"], {
-    env: { ...process.env, PORT: "invalid" },
-    encoding: "utf8",
-  });
+  const invalidPort = spawnSync(
+    process.execPath,
+    ["scripts/serve/serve-e2e.mjs"],
+    {
+      env: { ...process.env, PORT: "invalid" },
+      encoding: "utf8",
+    },
+  );
   expect(invalidPort.status).not.toBe(0);
   expect(invalidPort.stderr).toContain("run just test-e2e again");
   const occupiedServer = createServer();
@@ -240,10 +244,14 @@ test("script entry points reject invalid inputs with recovery actions", async ()
   const address = occupiedServer.address();
   if (address === null || typeof address === "string")
     throw new Error("Expected a TCP address for the occupied test port");
-  const occupiedPort = spawnSync(process.execPath, ["scripts/serve-e2e.mjs"], {
-    env: { ...process.env, PORT: String(address.port) },
-    encoding: "utf8",
-  });
+  const occupiedPort = spawnSync(
+    process.execPath,
+    ["scripts/serve/serve-e2e.mjs"],
+    {
+      env: { ...process.env, PORT: String(address.port) },
+      encoding: "utf8",
+    },
+  );
   occupiedServer.close();
   expect(occupiedPort.status).not.toBe(0);
   expect(occupiedPort.stderr).toContain("Choose an available PORT");
@@ -254,14 +262,18 @@ test("script entry points reject invalid inputs with recovery actions", async ()
     await mkdir(output);
     await mkdir(builds);
     await cp("dist/apps/shell/index.html", join(output, "index.html"));
-    const missing = spawnSync(process.execPath, ["scripts/compose.mjs"], {
-      env: {
-        ...process.env,
-        COMPOSE_OUTPUT: output,
-        FRAGMENT_ROOT: builds,
+    const missing = spawnSync(
+      process.execPath,
+      ["scripts/compose/compose.mjs"],
+      {
+        env: {
+          ...process.env,
+          COMPOSE_OUTPUT: output,
+          FRAGMENT_ROOT: builds,
+        },
+        encoding: "utf8",
       },
-      encoding: "utf8",
-    });
+    );
     expect(missing.status).not.toBe(0);
     expect(missing.stderr).toContain("Run just check");
   } finally {
