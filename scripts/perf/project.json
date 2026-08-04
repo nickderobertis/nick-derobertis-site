@@ -25,12 +25,6 @@
     },
     "e2e": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        {
-          "target": "prerender",
-          "projects": ["shell"]
-        }
-      ],
       "options": {
         "command": "vitest run --config scripts/perf/vite.browser.config.ts"
       }
