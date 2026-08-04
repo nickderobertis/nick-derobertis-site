@@ -1,3 +1,7 @@
+// Read as a serialized build input for the same reason as the remote
+// registry: Node type-strips this module for the prerender CLIs, which
+// cannot resolve a workspace alias.
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import contractInput from "../../route-state/src/contracts.json" with {
   type: "json",
 };

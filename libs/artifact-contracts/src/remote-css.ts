@@ -1,5 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { basename, join } from "node:path";
+// The prerender CLIs load this module through Node's type stripping, where a
+// workspace alias does not resolve, so the canonical remote registry is read
+// as the serialized build input it is.
+// eslint-disable-next-line @nx/enforce-module-boundaries
 import remoteManifest from "../../build-config/src/remotes.json" with {
   type: "json",
 };

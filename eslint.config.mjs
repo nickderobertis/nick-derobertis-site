@@ -20,6 +20,13 @@ export default [
               sourceTag: "type:layout",
               onlyDependOnLibsWithTags: ["type:shared"],
             },
+            // Workspace tooling composes the contract, build, and fixture
+            // libraries the CLIs it owns already load, and nothing else: a
+            // tooling project may never reach into an app or a feature domain.
+            {
+              sourceTag: "type:tooling",
+              onlyDependOnLibsWithTags: ["type:shared", "type:data-core"],
+            },
             {
               sourceTag: "type:app",
               onlyDependOnLibsWithTags: ["type:shared", "type:layout"],

@@ -128,9 +128,16 @@ function compileRenderer(name: string, outputPath: string) {
         clean: true,
       },
       resolve: {
+        // Each entry reaches the app it prerenders through this compilation's
+        // own aliases rather than a static import. That is what keeps the
+        // entries build inputs: nothing in this library's module graph — and so
+        // nothing in Nx's project graph — points from here back into an app.
         alias:
           name === "shell"
-            ? {}
+            ? {
+                "@site-fragment/router": resolve("apps/shell/src/router.tsx"),
+                "@site-fragment/routes": resolve("apps/shell/src/routes.ts"),
+              }
             : {
                 "@site-fragment/page": resolve(
                   name === "home"

@@ -9,9 +9,14 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, expect, test } from "vitest";
+// This spec drives compose.mjs itself, which Node type-strips, so it reaches
+// the same library modules by the same paths the CLI resolves rather than
+// through a workspace alias no build script can resolve.
+/* eslint-disable @nx/enforce-module-boundaries */
 import { remotesForRoute } from "../../libs/artifact-contracts/src/index.ts";
 import { serializeFragmentContract } from "../../libs/build-config/src/fragment-contract.ts";
 import { publishableApps } from "../../libs/build-config/src/publish-fragment.ts";
+/* eslint-enable @nx/enforce-module-boundaries */
 import {
   compose,
   homePanes,

@@ -5,9 +5,13 @@ import { createServer, type Server } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 // The Pages base and the route inventory each have one validated source; this
-// spec reads them rather than restating either contract.
-import { siteBase } from "../../../libs/data-access-core/src/site.ts";
-import { parseSiteRoutes } from "../../../libs/route-state/src/index.ts";
+// spec reads them rather than restating either contract. The e2e tag policy
+// governs application code, so reading those two contracts is exempted here.
+/* eslint-disable @nx/enforce-module-boundaries */
+import { siteBase } from "@site/data-access-core";
+import { parseSiteRoutes } from "@site/route-state";
+
+/* eslint-enable @nx/enforce-module-boundaries */
 
 /**
  * The deploy lane never serves an app's build directory. It checks out the

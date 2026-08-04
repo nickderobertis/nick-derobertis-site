@@ -1,11 +1,19 @@
+// An rspack entry point, not a module this library imports: the publish plugin
+// compiles it in its own build to prerender the shell's published fragment, and
+// aliases `@site-fragment/*` to the shell's own router and routes there, the
+// same way a remote's entry is aliased to that remote's page. The CV data it
+// renders with is read through the client every app reads it through; the
+// library's own module graph reaches neither the shell nor the CV data.
+/* eslint-disable @nx/enforce-module-boundaries */
+
 import { cvDataClient } from "@site/data-access-core";
+import { createSiteRouter } from "@site-fragment/router";
+import { routes } from "@site-fragment/routes";
 import {
   createRequestHandler,
   RouterServer,
 } from "@tanstack/react-router/ssr/server";
 import { prerender } from "react-dom/static";
-import { createSiteRouter } from "../../../apps/shell/src/router";
-import { routes } from "../../../apps/shell/src/routes";
 
 function slot(name: string) {
   return function PublishedFragmentSlot() {
