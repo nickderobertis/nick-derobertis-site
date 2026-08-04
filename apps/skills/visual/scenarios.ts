@@ -1,5 +1,5 @@
-import type { VisualSuite } from "../../../libs/visual-harness/src/index.ts";
-import { standardVisualScenarios } from "../../../libs/visual-harness/src/scenarios.ts";
+import type { VisualSuite } from "@site/visual-harness";
+import { standardVisualScenarios } from "@site/visual-harness/scenarios";
 
 const states = ["empty", "loading", "error", "expanded"] as const;
 export const suite: VisualSuite = {

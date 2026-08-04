@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { Locator, Page } from "@playwright/test";
 import { chromium } from "@playwright/test";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Node executes the TypeScript capture entry directly, so this shared runtime fixture cannot rely on Vite's tsconfig alias resolution.
 import { createSiteServer } from "../../e2e-fixtures/src/index.ts";
 
 export type VisualViewport = "desktop" | "tablet" | "mobile";

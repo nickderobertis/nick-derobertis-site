@@ -1,4 +1,4 @@
-import { defineAppTestConfig } from "../testing/src/index.ts";
+import { defineAppTestConfig } from "@site/testing";
 
 export default defineAppTestConfig({
   project: "layout",

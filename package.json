@@ -26,6 +26,8 @@
     "@nx/rspack": "23.1.0",
     "@nx/vite": "23.1.0",
     "@nx/workspace": "23.1.0",
+    "@site/testing": "workspace:*",
+    "@site/visual-harness": "workspace:*",
     "@playwright/test": "1.61.1",
     "@swc-node/register": "1.12.1",
     "@swc/core": "1.15.46",

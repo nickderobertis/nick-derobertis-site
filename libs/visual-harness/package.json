@@ -1,0 +1,9 @@
+{
+  "name": "@site/visual-harness",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./scenarios": "./src/scenarios.ts"
+  }
+}
