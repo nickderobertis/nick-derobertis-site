@@ -1,17 +1,8 @@
-import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
+import { defineAppTestConfig } from "../testing/src/index.ts";
 
-export default defineConfig({
-  root: fileURLToPath(new URL("../..", import.meta.url)),
-  test: {
-    include: ["libs/route-state/src/**/*.spec.ts"],
-    environment: "node",
-    coverage: {
-      provider: "v8",
-      reportsDirectory: "coverage/libs/route-state",
-      thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
-      include: ["libs/route-state/src/**/*.ts"],
-      exclude: ["libs/route-state/src/index.ts"],
-    },
-  },
+export default defineAppTestConfig({
+  project: "route-state",
+  dir: "libs/route-state",
+  coverageInclude: ["libs/route-state/src/**/*.ts"],
+  coverageExclude: ["libs/route-state/src/index.ts"],
 });

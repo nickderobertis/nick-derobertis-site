@@ -1,22 +1,9 @@
-import { fileURLToPath } from "node:url";
-import { defineConfig } from "vitest/config";
-export default defineConfig({
-  root: fileURLToPath(new URL("../..", import.meta.url)),
-  resolve: {
-    alias: {
-      "@site/data-access-core": fileURLToPath(
-        new URL("../data-access-core/src/index.ts", import.meta.url),
-      ),
-    },
-  },
-  test: {
-    include: ["libs/data-access-home/src/**/*.spec.ts"],
-    coverage: {
-      provider: "v8",
-      reportsDirectory: "coverage/libs/data-access-home",
-      thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
-      include: ["libs/data-access-home/src/**/*.ts"],
-      exclude: ["libs/data-access-home/src/index.ts"],
-    },
-  },
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Test configuration consumes the workspace-wide shared harness; production data-domain dependencies remain unchanged.
+import { defineAppTestConfig } from "../testing/src/index.ts";
+
+export default defineAppTestConfig({
+  project: "data-access-home",
+  dir: "libs/data-access-home",
+  coverageInclude: ["libs/data-access-home/src/**/*.ts"],
+  coverageExclude: ["libs/data-access-home/src/index.ts"],
 });
