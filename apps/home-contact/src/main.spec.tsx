@@ -1,7 +1,7 @@
 import { act, screen } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { beforeEach, expect, test, vi } from "vitest";
-import HomeStoryPage from "./page";
+import HomeContactPage from "./page";
 
 /**
  * The markup the remote's build publishes into its own index.html. It is
@@ -10,7 +10,7 @@ import HomeStoryPage from "./page";
  */
 async function publishedFragment() {
   vi.stubGlobal("window", undefined);
-  const { prelude } = await prerender(<HomeStoryPage />);
+  const { prelude } = await prerender(<HomeContactPage />);
   const html = await new Response(prelude).text();
   vi.unstubAllGlobals();
   return html;
@@ -22,8 +22,8 @@ async function startRemote() {
   });
 }
 
-function pane() {
-  return screen.getByRole("region", { name: "Who am I?" });
+function channels() {
+  return screen.getByRole("navigation", { name: "Contact options" });
 }
 
 beforeEach(() => {
@@ -38,21 +38,21 @@ test("refuses to start against a document with no remote root", async () => {
   await expect(import("./main")).rejects.toThrow("Missing remote root");
 });
 
-test("adopts the story a visitor is already reading", async () => {
+test("adopts the contact options a visitor is already looking at", async () => {
   document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  const published = pane();
+  const published = channels();
 
   await startRemote();
 
-  // Hydration takes over the shipped nodes in place, so the story the visitor
-  // saw at first paint is never torn down and repainted.
-  expect(pane()).toBe(published);
+  // Hydration takes over the shipped nodes in place, so the channels the
+  // visitor saw at first paint are never torn down and repainted.
+  expect(channels()).toBe(published);
   expect(
-    screen.getByRole("img", { name: "Portrait of Nick DeRobertis" }),
+    screen.getByRole("link", { name: "Email Nick →" }),
   ).toBeInTheDocument();
 });
 
-test("renders from scratch when the document ships no prerendered story", async () => {
+test("renders from scratch when the document ships no prerendered options", async () => {
   document.body.innerHTML = '<div id="root"></div>';
 
   await startRemote();
@@ -60,15 +60,15 @@ test("renders from scratch when the document ships no prerendered story", async 
   // Nothing was shipped to adopt, so the pane arrives behind Suspense with the
   // skeleton standing in until its page chunk resolves.
   expect(
-    await screen.findByRole("region", { name: "Who am I?" }),
+    await screen.findByRole("navigation", { name: "Contact options" }),
   ).toBeInTheDocument();
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
 
-test("throws the published story away for a visitor previewing another state", async () => {
-  window.history.replaceState(null, "", "/?state=error");
+test("throws the published options away for a visitor previewing another state", async () => {
+  window.history.replaceState(null, "", "/?state=empty");
   document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  const published = pane();
+  const published = channels();
 
   await startRemote();
 
@@ -76,7 +76,7 @@ test("throws the published story away for a visitor previewing another state", a
   // state's markup underneath another state's render.
   expect(published).not.toBeInTheDocument();
   expect(
-    await screen.findByText("Nick’s story could not be loaded."),
+    await screen.findByText("No contact options are available."),
   ).toBeInTheDocument();
-  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  expect(screen.queryByRole("link")).not.toBeInTheDocument();
 });

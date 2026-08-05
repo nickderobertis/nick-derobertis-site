@@ -55,15 +55,13 @@ test("renders from scratch when the document ships no prerendered cards", async 
 
   await startRemote();
 
-  // Nothing was shipped to adopt, so the visitor waits on the pane's own
-  // loading frame until the page chunk arrives behind Suspense.
-  expect(
-    screen.getByRole("status", { name: "Loading areas of work" }),
-  ).toBeInTheDocument();
+  // Nothing was shipped to adopt, so the pane arrives behind Suspense with the
+  // skeleton standing in until its page chunk resolves.
   expect(
     await screen.findByRole("region", { name: "Areas of work" }),
   ).toBeInTheDocument();
   expect(screen.getAllByRole("article")).toHaveLength(3);
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
 
 test("throws the published cards away for a visitor previewing another state", async () => {
