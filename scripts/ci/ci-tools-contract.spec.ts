@@ -320,13 +320,11 @@ describe("tooling target output", () => {
   });
 
   it("preserves failure diagnostics and gives a concrete next action", () => {
-    const result = spawnSync(wrapper, [
-      "ci",
-      "test",
-      "vitest",
-      "--config",
-      "missing-vite-config.ts",
-    ], { cwd: workspace, encoding: "utf8" });
+    const result = spawnSync(
+      wrapper,
+      ["ci", "test", "vitest", "--config", "missing-vite-config.ts"],
+      { cwd: workspace, encoding: "utf8" },
+    );
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("missing-vite-config.ts");
