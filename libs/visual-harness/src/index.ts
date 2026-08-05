@@ -1,10 +1,33 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Locator, Page } from "@playwright/test";
 import { chromium } from "@playwright/test";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Node executes the TypeScript capture entry directly, so this shared runtime fixture cannot rely on Vite's tsconfig alias resolution.
+import { validatePagesBase } from "../../artifact-contracts/src/index.ts";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Node executes the TypeScript capture entry directly, so this shared runtime fixture cannot rely on Vite's tsconfig alias resolution.
 import { createSiteServer } from "../../e2e-fixtures/src/index.ts";
+
+// The Pages base has exactly one source, libs/data-access-core/src/site.config.json,
+// and a capture that restated it would serve every remote from a prefix the
+// deployed site does not use. It is read as the serialized build input it is,
+// resolved from this module so the capture's cwd cannot change the answer, and
+// checked with the same contract the prerender and artifact gates apply.
+const siteConfigPath = fileURLToPath(
+  new URL("../../data-access-core/src/site.config.json", import.meta.url),
+);
+
+function readPagesBase(): string {
+  const siteConfig: unknown = JSON.parse(readFileSync(siteConfigPath, "utf8"));
+  return validatePagesBase(
+    typeof siteConfig === "object" &&
+      siteConfig !== null &&
+      "pagesBase" in siteConfig
+      ? siteConfig.pagesBase
+      : undefined,
+  );
+}
 
 export type VisualViewport = "desktop" | "tablet" | "mobile";
 export type VisualScenario = {
@@ -65,7 +88,7 @@ export async function captureVisualSuite(
     throw new Error(
       `Built remote not found: ${projectRoot}; run pnpm exec nx build ${project} first`,
     );
-  const pagesBase = "/nick-derobertis-site";
+  const pagesBase = readPagesBase();
   const routePrefix = `${pagesBase}/remotes/${project}/`;
   const shellRoot = path.resolve("dist/apps/shell");
   const remoteRequestPattern = new RegExp(
