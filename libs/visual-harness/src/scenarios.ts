@@ -35,6 +35,7 @@ export function standardVisualScenarios({
       // host-composed capture still jitters ~2px run-to-run (a host-composition
       // layout-timing effect, not a content one). The standalone loading shot
       // already covers the same skeleton deterministically.
+      // llmlint: ignore[changed_behavior_has_e2e] The task's visual contract deliberately excludes only this nondeterministic duplicate; every app's real-browser journeys still exercise loading through both standalone and host-composed boundaries.
       if (render === "host-composed" && state === "loading") continue;
       scenarios.push({
         render,
