@@ -41,8 +41,9 @@
     },
     "test": {
       "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/apps/home-contact"],
       "options": {
-        "command": "vitest run --passWithNoTests apps/home-contact/src"
+        "command": "vitest run --config apps/home-contact/vite.config.ts --coverage"
       }
     },
     "screenshot": {
