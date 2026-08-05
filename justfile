@@ -126,7 +126,7 @@ e2e-project project:
     project="$1"; [[ "$project" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "e2e-project: project must be a valid Nx project name" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run "$project:e2e" >"$log" 2>&1 || { cat "$log" >&2; echo "e2e-project: remote browser journey failed; fix the failure above and rerun just e2e-project $project" >&2; exit 1; }
 
 setup-llmlint:
-    ./scripts/ci/setup-llmlint.sh
+    log=$(mktemp); trap 'rm -f "$log"' EXIT; ./scripts/ci/setup-llmlint.sh >"$log" 2>&1 || { cat "$log" >&2; echo "setup-llmlint: setup failed; resolve the diagnostic above and rerun just setup-llmlint" >&2; exit 1; }; echo "setup-llmlint: llmlint is ready"
 
 # llmlint: ignore[changed_behavior_has_e2e] This command-only recipe has no browser interface and delegates to the real registry/integrity installer.
 setup-llm-harness:
