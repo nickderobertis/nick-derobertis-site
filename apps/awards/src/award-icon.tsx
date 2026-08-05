@@ -1,9 +1,19 @@
-export type AwardIconName =
-  | "cfa"
-  | "gmat"
-  | "scholarship"
-  | "student"
-  | "teaching";
+/**
+ * Every mark this component can draw, declared as values and not only as a
+ * type, so anything that has to cover all of them reads this one list instead
+ * of restating it. The const assertion is what the single declaration rests on:
+ * without it these names widen to `string` and `AwardIconName` can no longer
+ * derive from them.
+ */
+export const awardIconNames = [
+  "cfa",
+  "gmat",
+  "scholarship",
+  "student",
+  "teaching",
+] as const;
+
+export type AwardIconName = (typeof awardIconNames)[number];
 
 /**
  * The mark an emblem centres between its laurel branches. Each award kind gets

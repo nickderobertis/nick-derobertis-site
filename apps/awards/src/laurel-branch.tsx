@@ -1,7 +1,7 @@
-// Each leaf is its own [x, y, rotation] because the wreath is drawn, not
-// generated: the spacing tightens toward the tip so the branch reads as laurel
-// rather than as a repeated stamp.
-const leaves = [
+// Each leaf is its own placement because the wreath is drawn, not generated:
+// the spacing tightens toward the tip so the branch reads as laurel rather than
+// as a repeated stamp.
+const leaves: readonly (readonly [x: number, y: number, rotate: number])[] = [
   [34, 122, -54],
   [27, 111, -48],
   [22, 99, -41],
@@ -12,7 +12,7 @@ const leaves = [
   [30, 37, 5],
   [38, 28, 18],
   [47, 21, 30],
-] as const;
+];
 
 /**
  * One half of the emblem's laurel wreath. The emblem draws it twice, mirroring

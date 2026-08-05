@@ -1,25 +1,27 @@
 import { expect, test } from "@playwright/test";
 
-const renderPaths = [
+const renderPaths: readonly { label: string; path: string }[] = [
   { label: "host-composed", path: "" },
   { label: "standalone", path: "remotes/awards/" },
-] as const;
+];
 
-const viewports = [
+type Viewport = { name: string; width: number; height: number };
+
+const phone: Viewport = { name: "mobile", width: 345, height: 844 };
+const viewports: readonly Viewport[] = [
   { name: "desktop", width: 1110, height: 900 },
   { name: "tablet", width: 690, height: 1024 },
-  { name: "mobile", width: 345, height: 844 },
-] as const;
-const phone = viewports[2];
+  phone,
+];
 
-const dataBoundaryStates = [
-  { scenario: "empty", heading: "No awards yet", role: "status" as const },
-  {
-    scenario: "error",
-    heading: "Awards unavailable",
-    role: "alert" as const,
-  },
-] as const;
+const dataBoundaryStates: readonly {
+  scenario: string;
+  heading: string;
+  role: "status" | "alert";
+}[] = [
+  { scenario: "empty", heading: "No awards yet", role: "status" },
+  { scenario: "error", heading: "Awards unavailable", role: "alert" },
+];
 
 for (const renderPath of renderPaths) {
   test.describe(`awards ${renderPath.label}`, () => {

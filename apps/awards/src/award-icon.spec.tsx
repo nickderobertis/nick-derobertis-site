@@ -1,14 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
-import { AwardIcon, type AwardIconName } from "./award-icon";
-
-const iconNames: ReadonlyArray<AwardIconName> = [
-  "cfa",
-  "gmat",
-  "scholarship",
-  "student",
-  "teaching",
-];
+import { AwardIcon, type AwardIconName, awardIconNames } from "./award-icon";
 
 function drawIcon(name: AwardIconName) {
   const { container } = render(
@@ -45,9 +37,10 @@ test("cycles the CFA blades through the challenge's three colours", () => {
 test("draws a different mark for every award kind", () => {
   // A card is only recognisable by its mark, so two kinds sharing a drawing is
   // the failure this locks out — including the fallback silently swallowing a
-  // kind it should have drawn.
-  const drawings = iconNames.map((name) => drawIcon(name).innerHTML);
+  // kind it should have drawn. The kinds come from the component's own list, so
+  // a name added there is covered here rather than quietly skipped.
+  const drawings = awardIconNames.map((name) => drawIcon(name).innerHTML);
 
-  expect(new Set(drawings).size).toBe(iconNames.length);
+  expect(new Set(drawings).size).toBe(awardIconNames.length);
   expect(drawings.every((drawing) => drawing.length > 0)).toBe(true);
 });
