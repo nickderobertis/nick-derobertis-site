@@ -27,10 +27,12 @@ export function resolveTsconfigAliases(
 ): Record<string, string> {
   const tsconfig = baseTsConfigSchema.parse(config);
   return Object.fromEntries(
-    Object.entries(tsconfig.compilerOptions.paths).map(([alias, [target]]) => [
-      alias,
-      path.resolve(root, target),
-    ]),
+    Object.entries(tsconfig.compilerOptions.paths).map(([alias, targets]) => {
+      const target = targets[0];
+      /* v8 ignore next -- Zod's min(1) enforces this boundary invariant, but its inferred array type does not retain tuple cardinality. */
+      if (target === undefined) throw new Error(`Missing path target for ${alias}`);
+      return [alias, path.resolve(root, target)];
+    }),
   );
 }
 
