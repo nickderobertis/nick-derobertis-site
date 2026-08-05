@@ -42,7 +42,76 @@ const CLEAN_PATH = (process.env.PATH ?? "")
   .join(path.delimiter);
 
 function git(...args: string[]): string {
-  return execFileSync("git", args, { encoding: "utf8" }).trim();
+  return execFileSync("git", args, { encoding: "utf8", input: "" }).trim();
+}
+
+const GUARD_IDENTITY = [
+  "-c",
+  "user.email=guard@example.invalid",
+  "-c",
+  "user.name=guard",
+];
+// A real microfrontend source path: screenshot-relevant per [guard].paths in
+// screencomp.toml, and owned by a project that has a screenshot target.
+const VISUAL_SOURCE = "apps/courses/src/page.tsx";
+
+interface PushRange {
+  base: string;
+  head: string;
+}
+
+// The push range a test names is built here rather than read out of the ambient
+// checkout. CI clones shallow and hands `just check` a bare NX_BASE sha, so
+// there is no history behind HEAD to name a range with, and asking for the
+// parent of whatever commit the checkout happens to hold fails outright. Two
+// `git commit-tree` calls write the range's commits straight into `repo`'s
+// object store, off its own HEAD tree: no ref moves and no index or working-tree
+// change, so this is equally safe to run against a contributor's own clone. All
+// the surrounding checkout has to supply is HEAD.
+function writeVisualRange(repo: string, indexFile: string): PushRange {
+  const inRepo = (...args: string[]): string => git("-C", repo, ...args);
+  const staged = (...args: string[]): string =>
+    execFileSync("git", ["-C", repo, ...args], {
+      encoding: "utf8",
+      env: { ...process.env, GIT_INDEX_FILE: indexFile },
+      input: "",
+    }).trim();
+  const tree = inRepo("rev-parse", "HEAD^{tree}");
+  const base = inRepo(
+    ...GUARD_IDENTITY,
+    "commit-tree",
+    tree,
+    "-m",
+    "guard fixture: unchanged base",
+  );
+  staged("read-tree", tree);
+  const blob = execFileSync(
+    "git",
+    ["-C", repo, "hash-object", "-w", "--stdin"],
+    {
+      encoding: "utf8",
+      input: `${execFileSync(
+        "git",
+        ["-C", repo, "show", `HEAD:${VISUAL_SOURCE}`],
+        {
+          encoding: "utf8",
+        },
+      )}// guard fixture: a screenshot-relevant source change\n`,
+    },
+  ).trim();
+  staged("update-index", "--cacheinfo", `100644,${blob},${VISUAL_SOURCE}`);
+  return {
+    base,
+    head: inRepo(
+      ...GUARD_IDENTITY,
+      "commit-tree",
+      staged("write-tree"),
+      "-p",
+      base,
+      "-m",
+      "guard fixture: a courses source change",
+    ),
+  };
 }
 
 interface HookRun {
@@ -81,17 +150,16 @@ function runHook(options: {
   };
 }
 
-// The most recent commit that changed a microfrontend's source: screenshot
-// relevant per [guard].paths in screencomp.toml, and affecting a real Nx project
-// with a screenshot target.
-const visualCommit = git("log", "-1", "--format=%H", "--", "apps/courses/src");
-const visualBase = git("rev-parse", `${visualCommit}^`);
-
 // A clone with no workspace install — the reported failure, reproduced exactly.
-// `--shared` borrows this repository's objects, so the whole history is present
-// and only node_modules is missing.
+// `--shared` borrows this repository's objects when it can, and only
+// node_modules is missing either way.
 let uninstalledClone: string;
 let cloneRoot: string;
+// Each repository gets its own fixture range: cloning a shallow repository — how
+// CI checks this one out — makes git ignore `--shared` and fetch instead, so the
+// clone has an object store of its own and cannot see the range written here.
+let cloneVisual: PushRange;
+let repoVisual: PushRange;
 let docsOnlyHead: string;
 let docsOnlyBase: string;
 
@@ -112,16 +180,18 @@ beforeAll(() => {
     "--detach",
     git("rev-parse", "HEAD"),
   ]);
+  repoVisual = writeVisualRange(REPO, path.join(cloneRoot, "repo-index"));
+  cloneVisual = writeVisualRange(
+    uninstalledClone,
+    path.join(cloneRoot, "clone-index"),
+  );
   // A genuine documentation-only push, committed in the disposable clone.
   writeFileSync(path.join(uninstalledClone, "GUARD_NOTES.md"), "docs only\n");
   execFileSync("git", ["-C", uninstalledClone, "add", "GUARD_NOTES.md"]);
   execFileSync("git", [
     "-C",
     uninstalledClone,
-    "-c",
-    "user.email=guard@example.invalid",
-    "-c",
-    "user.name=guard",
+    ...GUARD_IDENTITY,
     "commit",
     "-m",
     "docs: guard fixture",
@@ -168,8 +238,8 @@ describe("visual guard pre-push hook", () => {
   test("a clone with no workspace install says what it could not do", () => {
     const run = runHook({
       cwd: uninstalledClone,
-      localSha: visualCommit,
-      remoteSha: visualBase,
+      localSha: cloneVisual.head,
+      remoteSha: cloneVisual.base,
     });
     expect(run.stderr).not.toBe("");
     expect(run.stderr).toContain("could NOT evaluate this push");
@@ -183,8 +253,8 @@ describe("visual guard pre-push hook", () => {
   test("a clone with no workspace install can be made a hard failure", () => {
     const run = runHook({
       cwd: uninstalledClone,
-      localSha: visualCommit,
-      remoteSha: visualBase,
+      localSha: cloneVisual.head,
+      remoteSha: cloneVisual.base,
       env: { SCREENCOMP_GUARD_REQUIRE: "1" },
     });
     expect(run.status).toBe(1);
@@ -226,8 +296,8 @@ describe("visual guard pre-push hook", () => {
     try {
       const run = runHook({
         cwd: REPO,
-        localSha: visualCommit,
-        remoteSha: visualBase,
+        localSha: repoVisual.head,
+        remoteSha: repoVisual.base,
         env: { PATH: noDocker.PATH },
       });
       expect(run.status).toBe(1);
@@ -246,8 +316,8 @@ describe("visual guard pre-push hook", () => {
   test("under CI the guard defers to the visual-docs workflow", () => {
     const run = runHook({
       cwd: uninstalledClone,
-      localSha: visualCommit,
-      remoteSha: visualBase,
+      localSha: cloneVisual.head,
+      remoteSha: cloneVisual.base,
       env: { CI: "1" },
     });
     expect(run.status).toBe(0);
