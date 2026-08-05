@@ -1,31 +1,9 @@
 import { siteBase } from "@site/data-access-core";
 import { homeContent, readPaneState } from "@site/data-access-home";
-import { useEffect, useState } from "react";
+import { CarouselState } from "./carousel-state";
 import Skeleton from "./skeleton";
+import { useCarousel } from "./use-carousel";
 import "./carousel.css";
-
-function useCarousel(length: number, enabled: boolean) {
-  const [active, setActive] = useState(0);
-  useEffect(() => {
-    if (!enabled) return;
-    const timer = window.setInterval(
-      () => setActive((current) => (current + 1) % length),
-      5000,
-    );
-    return () => window.clearInterval(timer);
-  }, [enabled, length]);
-  const move = (offset: number) =>
-    setActive((current) => (current + offset + length) % length);
-  return { active, move };
-}
-
-function StateMessage({ state }: { state: "empty" | "error" }) {
-  const messages = {
-    empty: "No featured stories are available yet.",
-    error: "Featured stories could not be loaded.",
-  };
-  return <output className="pane-state">{messages[state]}</output>;
-}
 
 export default function HomeCarouselPage() {
   const state = readPaneState(
@@ -36,7 +14,8 @@ export default function HomeCarouselPage() {
     state === "happy",
   );
   if (state === "loading") return <Skeleton />;
-  if (state !== "happy") return <StateMessage state={state} />;
+  if (state !== "happy") return <CarouselState name={state} />;
+  /* v8 ignore next -- useCarousel only ever writes `active` modulo the story count, so it always names one of them; the fallback restores the type that indexing by a number drops. */
   const slide = homeContent.carousel[active] ?? homeContent.carousel[0];
   return (
     <section
