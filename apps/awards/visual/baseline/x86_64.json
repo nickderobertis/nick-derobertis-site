@@ -14,6 +14,24 @@
       "name": "awards",
       "toggles": {
         "render": "host-composed",
+        "state": "all",
+        "viewport": "mobile"
+      },
+      "hash": "d7fc3f9ad609ca612031fc6578c10733c5e817a28d9866027cd0970903ceed86"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "all",
+        "viewport": "tablet"
+      },
+      "hash": "d201be29286be8fe2b526c3a69c5b6346eb30911d172c268ca13f911544897c1"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
         "state": "empty",
         "viewport": "desktop"
       },
@@ -23,10 +41,46 @@
       "name": "awards",
       "toggles": {
         "render": "host-composed",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "c1814822ca83ac621f769f4728ac2ad9f247b1439f450cc9a58773f46355f553"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "ceb03493c80ebdb3b6a6ab5ac965632aacce8d74c176fe224d7f0ddf1f6fff00"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "3f6c2a0ea7c53e0b8493603ce7ba0a87b4ad7b5c9efeb006dfe2d7f6ba6c1bd2"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "52bc50dcb1e66c5357faecfda5cbbfa0dca1ba4c06651cbade1c1787e11f75ed"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "a1aff82750cd793e0ff6e0b0b5a7a178f5e22cfe10e8d8dd81b86d0c7aac939a"
     },
     {
       "name": "awards",
@@ -68,6 +122,24 @@
       "name": "awards",
       "toggles": {
         "render": "standalone",
+        "state": "all",
+        "viewport": "mobile"
+      },
+      "hash": "9e60e6de5a0fc04a857c5ab9645695a5f46055fa96e60addf9898e5f4a25c073"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "all",
+        "viewport": "tablet"
+      },
+      "hash": "6f7f6ba5e9ef6e3cd1841001474f340b0ab8b26836313f34ea3875910a203ca2"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
       },
@@ -77,10 +149,46 @@
       "name": "awards",
       "toggles": {
         "render": "standalone",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "4f61dba3f2362ba8ff7c2605cb29ff0431adac5edcc1d4f49da22ccef2b1f254"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "8c139fc8070f21661b9f661e240519baccac38bca8002160970d13d120968bee"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "0244e035a0a018928397ac29cb87529c9fc54f8ee420461e83324f02476f7c83"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "5367de33ebc83ed9d8c543dc6722ac8847b31e54df89945d999e08a8f2e3bf77"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "4741df79578688155930ad7297f7a94fdf2e003215a9abfadaeec7df8ca874db"
     },
     {
       "name": "awards",
@@ -117,6 +225,24 @@
         "viewport": "desktop"
       },
       "hash": "9adb3b72a382b66f0dd851e81588c5b51f1f6e7b337d0f1336f14eb7da2a34a4"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "mobile"
+      },
+      "hash": "3f7c639a80000000aa9063159ff24c75daf56e3b77d85056252636d8652933b9"
+    },
+    {
+      "name": "awards",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "tablet"
+      },
+      "hash": "45c54f3119bf1116b0f7a917463e8c87852eb394c5a0a862f46272ccc8b5cf52"
     }
   ]
 }
