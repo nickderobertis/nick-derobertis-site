@@ -1,16 +1,14 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { homePanes, type RemoteName, remoteContract } from "./site-contract.ts";
 
-export type RemoteContract = {
-  host: string;
-  standalone: string;
-  role: string;
-  name: string;
-  loadingName: string;
-  loadingQuery?: string;
-};
-
-export function remoteOwnershipTests(contract: RemoteContract): void {
-  const role = contract.role as Parameters<Page["getByRole"]>[0];
+/**
+ * Registers the ownership journeys one remote owns: it renders through its
+ * standalone and host-composed boundaries, and it shows its own skeleton while
+ * its page resolves. The contract comes from the shared site contract, so an
+ * app declares only which remote it owns.
+ */
+export function remoteOwnershipTests(name: RemoteName): void {
+  const contract = remoteContract(name);
   for (const [render, route] of [
     ["host-composed", contract.host],
     ["standalone", contract.standalone],
@@ -28,20 +26,14 @@ export function remoteOwnershipTests(contract: RemoteContract): void {
       });
       await page.goto(route);
       await expect(
-        page.getByRole(role, { name: contract.name, exact: true }),
+        page.getByRole(contract.role, { name: contract.name, exact: true }),
       ).toBeVisible();
       expect(failures).toEqual([]);
     });
 
-  const nestedHomeOwner = [
-    "timeline",
-    "awards",
-    "skills",
-    "home-carousel",
-    "home-cards",
-    "home-story",
-    "home-contact",
-  ].some((name) => contract.standalone === `remotes/${name}/`);
+  // A pane Home composes reaches its host-composed skeleton through a client
+  // navigation to Home; every other remote needs its route's loading query.
+  const nestedHomeOwner = homePanes().some((pane) => pane.remote === name);
   const loadingBoundaries =
     nestedHomeOwner || contract.loadingQuery
       ? (["host-composed", "standalone"] as const)
@@ -71,7 +63,7 @@ export function remoteOwnershipTests(contract: RemoteContract): void {
         }),
       ).toBeVisible();
       await expect(
-        page.getByRole(role, { name: contract.name, exact: true }),
+        page.getByRole(contract.role, { name: contract.name, exact: true }),
       ).toBeVisible();
       await expect(
         page.getByRole("status", {

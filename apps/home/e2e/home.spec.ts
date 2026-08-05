@@ -4,109 +4,26 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
+import { homePanes, paneRenderPaths, remoteContract } from "@site/e2e-harness";
 
-const panes = [
-  {
-    remote: "home-carousel",
-    happy: { role: "region" as const, name: "Featured work" },
-    loadingName: "Loading featured work",
-    states: {
-      empty: "No featured stories are available yet.",
-      error: "Featured stories could not be loaded.",
-    },
-  },
-  {
-    remote: "home-cards",
-    happy: { role: "region" as const, name: "Areas of work" },
-    loadingName: "Loading areas of work",
-    states: {
-      empty: "No areas of work are available yet.",
-      error: "Areas of work could not be loaded.",
-    },
-  },
-  {
-    remote: "home-story",
-    happy: { role: "heading" as const, name: "Who am I?" },
-    loadingName: "Loading story",
-    states: {
-      empty: "No story is available yet.",
-      error: "Nick’s story could not be loaded.",
-    },
-  },
-  {
-    remote: "home-contact",
-    happy: {
-      role: "heading" as const,
-      name: "Let’s build something useful.",
-    },
-    loadingName: "Loading contact options",
-    states: {
-      empty: "No contact options are available.",
-      error: "Contact options could not be loaded.",
-    },
-  },
-] as const;
-
-const renderPaths = [
-  { name: "standalone", url: (remote: string) => `remotes/${remote}/` },
-  { name: "host-composed", url: () => "" },
-] as const;
-
-for (const pane of panes) {
-  for (const path of renderPaths) {
-    test(`${pane.remote} happy path is accessible ${path.name}`, async ({
-      page,
-    }) => {
-      await page.goto(path.url(pane.remote));
-      await expect(
-        page.getByRole(pane.happy.role, { name: pane.happy.name }),
-      ).toBeVisible();
-    });
-
-    test(`${pane.remote} loading state shows its skeleton ${path.name}`, async ({
-      page,
-    }) => {
-      await page.goto(`${path.url(pane.remote)}?state=loading`);
-      await expect(
-        page.getByRole("status", { name: pane.loadingName, exact: true }),
-      ).toBeVisible();
-    });
-
-    for (const [state, message] of Object.entries(pane.states))
-      test(`${pane.remote} ${state} state is visible ${path.name}`, async ({
-        page,
-      }) => {
-        await page.goto(`${path.url(pane.remote)}?state=${state}`);
-        await expect(
-          page.getByRole("status").filter({ hasText: message }),
-        ).toBeVisible();
-      });
-  }
-}
+// Home owns the composed page: every pane it composes is asserted here through
+// both render paths, while each pane owns its own states in its own suite.
+const panes = homePanes();
+const statefulPanes = panes.flatMap((pane) =>
+  pane.states ? [{ ...pane, states: pane.states }] : [],
+);
+const renderPaths = paneRenderPaths(remoteContract("home"));
 
 for (const path of renderPaths)
   test(`HOME composition loads all pane boundaries ${path.name}`, async ({
     page,
   }) => {
-    await page.goto(path.name === "standalone" ? "remotes/home/" : "");
-    await expect(
-      page.getByRole("region", { name: "Featured work" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "Areas of work" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Who am I?" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Let’s build something useful." }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "Timeline visualization" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Selected awards" }),
-    ).toBeVisible();
+    await page.goto(path.url);
+    for (const pane of panes)
+      await expect(
+        page.getByRole(pane.role, { name: pane.name }),
+        pane.remote,
+      ).toBeVisible();
   });
 
 for (const path of renderPaths)
@@ -114,10 +31,9 @@ for (const path of renderPaths)
     test(`HOME composition exposes its ${state} state ${path.name}`, async ({
       page,
     }) => {
-      const url = path.name === "standalone" ? "remotes/home/" : "";
-      await page.goto(`${url}?state=${state}`);
-      await expect(page.getByRole("status")).toHaveCount(4);
-      for (const pane of panes)
+      await page.goto(`${path.url}?state=${state}`);
+      await expect(page.getByRole("status")).toHaveCount(statefulPanes.length);
+      for (const pane of statefulPanes)
         if (state === "loading")
           await expect(
             page.getByRole("status", { name: pane.loadingName, exact: true }),
@@ -133,8 +49,7 @@ for (const path of renderPaths)
     test(`HOME composition exposes the timeline ${state} state ${path.name}`, async ({
       page,
     }) => {
-      const url = path.name === "standalone" ? "remotes/home/" : "";
-      await page.goto(`${url}?timeline-state=${state}`);
+      await page.goto(`${path.url}?timeline-state=${state}`);
       if (state === "loading") {
         await expect(
           page.getByRole("status", { name: "Loading timeline", exact: true }),
@@ -151,53 +66,6 @@ for (const path of renderPaths)
       ).toBeVisible();
     });
 
-const viewports = [
-  { name: "mobile", width: 375, height: 812 },
-  { name: "tablet", width: 768, height: 1024 },
-  { name: "desktop", width: 1440, height: 900 },
-] as const;
-
-for (const pane of panes)
-  for (const viewport of viewports)
-    for (const path of renderPaths)
-      test(`${pane.remote} fits the ${viewport.name} breakpoint ${path.name}`, async ({
-        page,
-      }) => {
-        await page.setViewportSize(viewport);
-        await page.goto(path.url(pane.remote));
-        const locator = page.getByRole(pane.happy.role, {
-          name: pane.happy.name,
-        });
-        await expect(locator).toBeVisible();
-        const box = await locator.boundingBox();
-        expect(box?.x).toBeGreaterThanOrEqual(0);
-        expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(
-          viewport.width + 1,
-        );
-      });
-
-for (const path of renderPaths) {
-  test(`carousel rotates automatically ${path.name}`, async ({ page }) => {
-    await page.goto(path.url("home-carousel"));
-    await expect(
-      page.getByRole("heading", { name: "Finance researcher & educator" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", {
-        name: "Serial founder & full-stack software engineer",
-      }),
-    ).toBeVisible({ timeout: 6500 });
-  });
-  test(`carousel controls rotate with keyboard ${path.name}`, async ({
-    page,
-  }) => {
-    await page.goto(path.url("home-carousel"));
-    await page.getByRole("button", { name: "Next featured story" }).focus();
-    await page.keyboard.press("Enter");
-    await expect(page.getByText("Story 2 of 2")).toBeVisible();
-  });
-}
-
 for (const path of renderPaths) {
   test(`HOME action links navigate ${path.name}`, async ({ page }) => {
     const internalLinks = [
@@ -207,11 +75,11 @@ for (const path of renderPaths) {
       ["View bio", "/bio"],
     ] as const;
     for (const [name, destination] of internalLinks) {
-      await page.goto(path.url("home"));
+      await page.goto(path.url);
       await page.getByRole("link", { name, exact: true }).first().click();
       await expect(page).toHaveURL(new RegExp(`${destination}$`));
     }
-    await page.goto(path.url("home"));
+    await page.goto(path.url);
     await expect(
       page.getByRole("link", { name: "Email Nick" }),
     ).toHaveAttribute("href", "mailto:derobertis.nick@gmail.com");

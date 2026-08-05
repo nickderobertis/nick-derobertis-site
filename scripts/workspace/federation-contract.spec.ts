@@ -47,7 +47,7 @@ const homePreloadContract: ReadonlyArray<ContractEntry> = [
 const bioContract: ReadonlyArray<ContractEntry> = [
   ["apps/bio/src/page.tsx", 'id="bio-heading">Optimizing Life'],
   ["apps/bio/e2e/bio.spec.ts", 'name: "Optimizing Life"'],
-  ["apps/shell/e2e/site.spec.ts", 'heading: "Optimizing Life"'],
+  ["libs/e2e-harness/src/site-contract.ts", 'heading: "Optimizing Life"'],
 ];
 
 async function expectContract(contract: ReadonlyArray<ContractEntry>) {
