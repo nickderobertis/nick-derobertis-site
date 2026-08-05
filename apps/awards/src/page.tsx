@@ -3,7 +3,9 @@ import {
   calculateAwardsStats,
   selectedAwards,
 } from "@site/data-access-awards";
-import { AwardEmblem } from "./award-emblem";
+import { AwardCard } from "./award-card";
+import { AwardsState } from "./awards-state";
+import { AwardsStatistics } from "./awards-statistics";
 import Skeleton from "./skeleton";
 import { preloadAwards, useAwards } from "./use-awards";
 import "./awards.css";
@@ -12,81 +14,26 @@ import "./awards.css";
 // pane costs no new federation surface.
 export { preloadAwards as preload };
 
-function State({ name }: { name: "error" | "empty" }) {
-  const [heading, detail] =
-    name === "error"
-      ? [
-          "Awards unavailable",
-          "Awards could not be loaded. Please try again later.",
-        ]
-      : ["No awards yet", "New honors and achievements will appear here."];
-  return (
-    <section
-      className="awards-state"
-      role={name === "error" ? "alert" : "status"}
-    >
-      <h2>{heading}</h2>
-      <p>{detail}</p>
-    </section>
-  );
-}
-
 export default function AwardsPage() {
   const state = useAwards();
   if (state.name === "loading") return <Skeleton />;
-  if (state.name !== "ready") return <State name={state.name} />;
-  if (state.awards.length === 0) return <State name="empty" />;
+  if (state.name !== "ready") return <AwardsState name={state.name} />;
+  if (state.awards.length === 0) return <AwardsState name="empty" />;
+  // The prerendered fragment has no location to read; a visitor who asks for
+  // the full set arrives with the query only the client render can see.
   const showAll =
     new URLSearchParams(
       typeof window === "undefined" ? "" : window.location.search,
     ).get("awards-view") === "all";
   const awards = showAll ? state.awards : selectedAwards(state.awards);
-  const cards = buildAwardCards(awards);
-  const stats = calculateAwardsStats(awards);
+  const label = showAll ? "Awards & honors" : "Selected awards";
   return (
-    <section
-      className="awards-pane"
-      aria-label={showAll ? "Awards & honors" : "Selected awards"}
-    >
-      <h2 className="visually-hidden">
-        {showAll ? "Awards & honors" : "Selected awards"}
-      </h2>
-      <dl className="visually-hidden" aria-label="Awards statistics">
-        <div>
-          <dt>Awards</dt>
-          <dd>{stats.total}</dd>
-        </div>
-        <div>
-          <dt>Years</dt>
-          <dd>
-            {stats.firstYear}–{stats.latestYear}
-          </dd>
-        </div>
-        <div>
-          <dt>With details</dt>
-          <dd>{stats.withExtraInfo}</dd>
-        </div>
-      </dl>
+    <section className="awards-pane" aria-label={label}>
+      <h2 className="visually-hidden">{label}</h2>
+      <AwardsStatistics stats={calculateAwardsStats(awards)} />
       <div className="award-grid">
-        {cards.map((award) => (
-          <article
-            className="award-card"
-            aria-labelledby={`${award.id}-title`}
-            key={award.id}
-          >
-            <div className="award-visual">
-              <time dateTime={award.received}>{award.received}</time>
-              <AwardEmblem icon={award.icon} />
-            </div>
-            <h3 id={`${award.id}-title`}>{award.title}</h3>
-            {award.parts.length > 0 ? (
-              <ul aria-label="Award parts">
-                {award.parts.map((part) => (
-                  <li key={part}>{part}</li>
-                ))}
-              </ul>
-            ) : null}
-          </article>
+        {buildAwardCards(awards).map((award) => (
+          <AwardCard award={award} key={award.id} />
         ))}
       </div>
     </section>
