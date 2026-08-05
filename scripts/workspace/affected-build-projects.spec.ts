@@ -8,14 +8,40 @@ function runAffectedBuildProjects(file: string) {
   });
 }
 
+// The recipe echoes its own command line ahead of Nx's JSON, so the selection is
+// the last line. Whatever that line turns out to be is subprocess output, not a
+// project list: it is narrowed to the array of Nx project names these
+// assertions read, so a recipe that starts printing something else fails here
+// instead of being compared as an opaque value.
+function selectedProjects(stdout: string): string[] {
+  const printed = stdout.trim().split("\n").at(-1) ?? "";
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(printed);
+  } catch {
+    throw new Error(
+      `just affected-build-projects must print a JSON array of Nx project names; its last line was ${JSON.stringify(printed)}`,
+    );
+  }
+  if (
+    !Array.isArray(parsed) ||
+    !parsed.every(
+      (project) =>
+        typeof project === "string" && /^[a-z][a-z0-9-]*$/.test(project),
+    )
+  )
+    throw new Error(
+      `just affected-build-projects must print a JSON array of Nx project names; received ${printed}`,
+    );
+  return parsed;
+}
+
 describe("affected build economics proof", () => {
   it("limits an awards emblem edit to the awards remote", () => {
     const result = runAffectedBuildProjects("apps/awards/src/award-emblem.tsx");
 
     expect(result.status).toBe(0);
-    expect(
-      JSON.parse(result.stdout.trim().split("\n").at(-1) ?? "null"),
-    ).toEqual(["awards"]);
+    expect(selectedProjects(result.stdout)).toEqual(["awards"]);
   });
 
   it.each([
@@ -25,9 +51,7 @@ describe("affected build economics proof", () => {
     const result = runAffectedBuildProjects(file);
 
     expect(result.status).toBe(0);
-    expect(
-      JSON.parse(result.stdout.trim().split("\n").at(-1) ?? "null"),
-    ).toEqual(expected);
+    expect(selectedProjects(result.stdout)).toEqual(expected);
   });
 
   it("reports the real Nx build graph for a shared data contract", () => {
@@ -36,10 +60,7 @@ describe("affected build economics proof", () => {
     );
 
     expect(result.status).toBe(0);
-    const projects = JSON.parse(
-      result.stdout.trim().split("\n").at(-1) ?? "null",
-    ) as unknown;
-    expect(projects).toEqual(
+    expect(selectedProjects(result.stdout)).toEqual(
       expect.arrayContaining([
         "data-access-core",
         "data-access-awards",

@@ -94,13 +94,35 @@ interface VisualProject {
   "gallery-title": string;
 }
 
+// The matrix arrives as a subprocess's stdout, and the reusable workflow reads
+// exactly these five string fields per lane. Narrowing here means a selector
+// that drops or renames one fails as a malformed matrix rather than as an
+// undefined compared against an expected path.
+function isVisualProject(value: unknown): value is VisualProject {
+  if (typeof value !== "object" || value === null) return false;
+  const lane: Record<string, unknown> = value as Record<string, unknown>;
+  return (
+    typeof lane.id === "string" &&
+    /^[a-z][a-z0-9-]*$/.test(lane.id) &&
+    typeof lane.current === "string" &&
+    typeof lane.verify === "string" &&
+    typeof lane.manifest === "string" &&
+    typeof lane["gallery-title"] === "string"
+  );
+}
+
 function projectsMatrix(names: string[]): VisualProject[] {
   const output = execFileSync(
     "node",
     ["scripts/visual/affected-visual-projects.mjs"],
     { encoding: "utf8", input: JSON.stringify(names) },
   );
-  return JSON.parse(output);
+  const matrix: unknown = JSON.parse(output);
+  if (!Array.isArray(matrix) || !matrix.every(isVisualProject))
+    throw new Error(
+      `affected-visual-projects.mjs must print a JSON array of {id, current, verify, manifest, gallery-title} lanes; received ${output}`,
+    );
+  return matrix;
 }
 
 // The full matrix the CI `affected` job feeds into `projects`, derived end to end

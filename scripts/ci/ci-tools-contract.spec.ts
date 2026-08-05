@@ -214,6 +214,25 @@ describe("just installer boundary", () => {
     expect(existsSync(path.join(binDirectory, "just"))).toBe(true);
   }, 60_000);
 
+  // The destination comes from the environment, so it is constrained before the
+  // script creates a directory or writes an executable into it.
+  it.each([
+    ["a relative destination", "relative/bin"],
+    ["a destination that climbs out of the named directory", "/tmp/../etc/bin"],
+  ])("installs nothing for %s", (_, destination) => {
+    const result = spawnSync(installJustScript, [], {
+      cwd: workspace,
+      encoding: "utf8",
+      env: { ...process.env, XDG_BIN_HOME: destination },
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain(
+      "must be an absolute path with no '..' segment",
+    );
+    expect(existsSync(path.resolve(workspace, destination))).toBe(false);
+  });
+
   it("reports how to recover when the destination cannot be created", () => {
     const parent = temporaryDirectory("just-unwritable.");
     const file = path.join(parent, "not-a-directory");
