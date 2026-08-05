@@ -9,7 +9,7 @@
       "executor": "nx:run-commands",
       "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {
-        "command": "E2E_REMOTE=courses E2E_PORT=4318 playwright test --config apps/shell-e2e/playwright.config.ts remote-owner.spec.ts courses.spec.ts"
+        "command": "playwright test --config apps/courses/e2e/playwright.config.ts"
       }
     },
     "build": {
@@ -35,7 +35,9 @@
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p apps/courses/tsconfig.app.json" }
+      "options": {
+        "command": "tsc -p apps/courses/tsconfig.app.json && tsc -p apps/courses/e2e/tsconfig.json"
+      }
     },
     "test": {
       "executor": "nx:run-commands",

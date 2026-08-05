@@ -85,7 +85,7 @@ An awards shaping change selects only the awards library and remote. A core
 client change fans out to every CV-backed feature and all Home composition
 remotes. Bio is correctly absent because it has no CV or site-config dependency.
 The shell-wide route, keyboard, fallback, and state matrix remains the explicit
-`shell-e2e:integration` target run by `just check`.
+`shell:e2e` target run by `just check`.
 
 ## Static Pages and visual evidence
 

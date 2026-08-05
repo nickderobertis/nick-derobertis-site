@@ -141,22 +141,19 @@ for (const renderPath of renderPaths) {
   });
 }
 
+// The standalone remote ships no shell chrome, so what a visitor sees of the
+// shared theme is the page behind the timeline: its paper canvas, its ink text,
+// and the type both inherit. Asserting the painted document rather than the
+// custom properties keeps this failing only when the visitor's page changes.
 test("standalone remote loads the shared design-system foundation", async ({
   page,
 }) => {
   await openTimeline(page, "remotes/timeline/");
-  const rootStyles = await page
-    .getByRole("region", { name: "Educated and Experienced" })
-    .evaluate((element) => {
-      const styles = getComputedStyle(element.ownerDocument.documentElement);
-      return {
-        fontFamily: styles.fontFamily,
-        navy: styles.getPropertyValue("--navy").trim(),
-        paper: styles.getPropertyValue("--paper").trim(),
-      };
-    });
-  // llmlint: ignore[tests_mirror_real_usage] Pins the font contract behind the browser visual goldens.
-  expect(rootStyles.fontFamily).toBe("Arial, sans-serif");
-  expect(rootStyles.navy).toBe("#12324a");
-  expect(rootStyles.paper).toBe("#fff");
+  await expect(
+    page.getByRole("region", { name: "Educated and Experienced" }),
+  ).toBeVisible();
+  const canvas = page.getByRole("document");
+  await expect(canvas).toHaveCSS("font-family", "Arial, sans-serif");
+  await expect(canvas).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  await expect(canvas).toHaveCSS("color", "rgb(38, 52, 62)");
 });

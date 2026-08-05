@@ -5,6 +5,14 @@
   "projectType": "application",
   "tags": ["type:app", "scope:shell"],
   "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
+      "options": {
+        "config": "apps/shell/e2e/playwright.config.ts",
+        "skipInstall": true
+      }
+    },
     "build": {
       "executor": "@nx/rspack:rspack",
       "outputs": [
@@ -70,7 +78,9 @@
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p apps/shell/tsconfig.app.json" }
+      "options": {
+        "command": "tsc -p apps/shell/tsconfig.app.json && tsc -p apps/shell/e2e/tsconfig.json"
+      }
     },
     "test": {
       "executor": "nx:run-commands",

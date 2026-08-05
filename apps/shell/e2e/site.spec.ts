@@ -1,34 +1,14 @@
-import { readFileSync } from "node:fs";
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { z } from "zod";
+import {
+  type HomePaneRemote,
+  homePanes,
+  type RoutePath,
+  siteRoutes,
+} from "@site/e2e-harness";
 
-const pages = [
-  {
-    link: "Home",
-    heading: "Finance researcher & educator",
-    path: "",
-  },
-  {
-    link: "Bio",
-    heading: "Optimizing Life",
-    path: "bio",
-  },
-  {
-    link: "Research",
-    heading: "Research Works",
-    path: "research",
-  },
-  {
-    link: "Software",
-    heading: "Open-Source Software",
-    path: "software",
-  },
-  {
-    link: "Courses",
-    heading: "Courses",
-    path: "courses",
-  },
-];
+// The route inventory and the panes Home composes are one contract each, owned
+// by @site/e2e-harness and joined there to the manifests that publish them.
+const pages = siteRoutes();
 
 for (const route of pages)
   test(`${route.link} direct route resolves all project-path assets`, async ({
@@ -68,19 +48,12 @@ test("every route has useful HTML with JavaScript disabled", async ({
 test("every prerendered route contains substantive feature content", async ({
   browser,
 }) => {
-  const expected = [
-    ["", "Who am I?"],
-    ["bio", "Reproducible Research"],
-    ["research", "Valuation without Cash Flows"],
-    ["software", "Python Tools for Working with Data"],
-    ["courses", "Financial Modeling"],
-  ] as const;
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  for (const [path, content] of expected) {
-    await page.goto(path);
+  for (const route of pages) {
+    await page.goto(route.path);
     await expect(
-      page.getByText(content, { exact: false }).first(),
+      page.getByText(route.feature, { exact: false }).first(),
     ).toBeVisible();
   }
   await context.close();
@@ -91,52 +64,12 @@ interface StyleProbe {
   styles: Record<string, string>;
 }
 
-const routeManifestSchema = z.array(
-  z.object({ path: z.string().regex(/^\/(?:[a-z][a-z0-9-]*)?$/) }),
-);
-const federationManifestSchema = z.object({
-  remotes: z
-    .array(
-      z.object({
-        entry: z.string().regex(/\/remotes\/[a-z][a-z0-9-]*\/remoteEntry\.js$/),
-      }),
-    )
-    .nonempty(),
-});
-
-// The probes below have to cover every prerendered document, so both inventories
-// come from the sources the artifact check gates rather than a third copy.
-function prerenderedRoutePaths() {
-  return routeManifestSchema
-    .parse(JSON.parse(readFileSync("apps/shell/src/routes.json", "utf8")))
-    .map(({ path }) => path.slice(1));
-}
-
-function homeComposedRemotes() {
-  const manifest = federationManifestSchema.parse(
-    JSON.parse(
-      readFileSync("dist/apps/shell/remotes/home/mf-manifest.json", "utf8"),
-    ),
-  );
-  return [
-    ...new Set(
-      manifest.remotes.map(({ entry }) =>
-        z
-          .string()
-          .parse(
-            /\/remotes\/([a-z][a-z0-9-]*)\/remoteEntry\.js$/.exec(entry)?.[1],
-          ),
-      ),
-    ),
-  ];
-}
-
 // Every probe pins a style that only the feature's own remote stylesheet
 // declares, so it can pass only while that CSS reaches the browser without any
-// federated JavaScript.
-const routeStyling: (StyleProbe & { path: string })[] = [
-  {
-    path: "",
+// federated JavaScript. Keying both tables by the shared contract's own route
+// and pane names is what keeps a new route or pane from shipping unprobed.
+const routeStyling: Record<RoutePath, StyleProbe> = {
+  "": {
     locate: (page) =>
       page
         .getByRole("region", { name: "Areas of work" })
@@ -144,74 +77,63 @@ const routeStyling: (StyleProbe & { path: string })[] = [
         .first(),
     styles: { "text-align": "center" },
   },
-  {
-    path: "bio",
+  bio: {
     locate: (page) => page.getByRole("heading", { name: "Optimizing Life" }),
     styles: { "text-align": "center", "font-weight": "400" },
   },
-  {
-    path: "research",
+  research: {
     locate: (page) => page.getByRole("heading", { name: "Research Works" }),
     styles: { "font-family": "Georgia, serif", color: "rgb(255, 255, 255)" },
   },
-  {
-    path: "software",
+  software: {
     locate: (page) =>
       page
         .getByRole("img", { name: "Python Tools for Working with Data logo" })
         .first(),
     styles: { width: "40px", "flex-basis": "40px" },
   },
-  {
-    path: "courses",
+  courses: {
     locate: (page) => page.getByRole("heading", { name: "Courses" }),
     styles: { "font-family": "Georgia, serif" },
   },
-];
+};
 
 // Home composes these panes, so its document carries their CSS too; each pane
 // also owns a standalone prerendered document that links the same stylesheet.
-const paneStyling: (StyleProbe & { remote: string })[] = [
-  {
-    remote: "home-carousel",
+const paneStyling: Record<HomePaneRemote, StyleProbe> = {
+  "home-carousel": {
     locate: (page) => page.getByRole("region", { name: "Featured work" }),
     styles: { display: "grid", color: "rgb(255, 255, 255)" },
   },
-  {
-    remote: "home-cards",
+  "home-cards": {
     locate: (page) => page.getByRole("region", { name: "Areas of work" }),
     styles: { display: "grid" },
   },
-  {
-    remote: "home-story",
+  "home-story": {
     locate: (page) => page.getByRole("heading", { name: "Who am I?" }),
     styles: { "font-family": "Georgia, serif" },
   },
-  {
-    remote: "home-contact",
+  "home-contact": {
     locate: (page) =>
       page.getByRole("heading", { name: "Let’s build something useful." }),
     styles: { "font-family": "Georgia, serif" },
   },
-  {
-    remote: "timeline",
+  timeline: {
     locate: (page) =>
       page.getByRole("heading", { name: "Educated and Experienced" }),
     styles: { "font-family": "Georgia, serif", "font-weight": "400" },
   },
-  {
-    remote: "skills",
+  skills: {
     locate: (page) => page.getByRole("heading", { name: "Skilled in…" }),
     styles: { "font-weight": "400" },
   },
-  {
-    // Awards resolves its data after hydration, so both prerendered documents
-    // show its skeleton; that fallback still has to paint styled.
-    remote: "awards",
+  // Awards resolves its data after hydration, so both prerendered documents
+  // show its skeleton; that fallback still has to paint styled.
+  awards: {
     locate: (page) => page.getByRole("status", { name: "Loading awards" }),
     styles: { display: "grid", overflow: "hidden" },
   },
-];
+};
 
 async function expectStyling(page: Page, probe: StyleProbe, label: string) {
   const target = probe.locate(page);
@@ -224,14 +146,11 @@ async function expectStyling(page: Page, probe: StyleProbe, label: string) {
 test("every prerendered route paints its remote styling with JavaScript disabled", async ({
   browser,
 }) => {
-  expect(routeStyling.map((probe) => probe.path).sort()).toEqual(
-    prerenderedRoutePaths().sort(),
-  );
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  for (const probe of routeStyling) {
-    await page.goto(probe.path);
-    await expectStyling(page, probe, `/${probe.path}`);
+  for (const route of pages) {
+    await page.goto(route.path);
+    await expectStyling(page, routeStyling[route.path], `/${route.path}`);
   }
   await context.close();
 });
@@ -239,20 +158,32 @@ test("every prerendered route paints its remote styling with JavaScript disabled
 test("every prerendered home pane paints its own styling with JavaScript disabled through both render paths", async ({
   browser,
 }) => {
-  expect(paneStyling.map((probe) => probe.remote).sort()).toEqual(
-    homeComposedRemotes().sort(),
-  );
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  for (const probe of paneStyling) {
-    await page.goto("");
-    await expectStyling(page, probe, `${probe.remote} host-composed`);
-    await page.goto(`remotes/${probe.remote}/`);
-    await expectStyling(page, probe, `${probe.remote} standalone`);
+  for (const pane of homePanes()) {
+    const probe = paneStyling[pane.remote];
+    await page.goto(pane.host);
+    await expectStyling(page, probe, `${pane.remote} host-composed`);
+    await page.goto(pane.standalone);
+    await expectStyling(page, probe, `${pane.remote} standalone`);
   }
   await context.close();
 });
 // llmlint: ignore-end[changed_behavior_has_e2e]
+
+// The shared design-system palette reaches a visitor through the chrome the
+// shell paints with it, so the header is where those values are asserted.
+test("the site header paints the shared theme", async ({ page }) => {
+  await page.goto("");
+  await expect(page.getByRole("banner")).toHaveCSS(
+    "background-color",
+    "rgb(18, 50, 74)",
+  );
+  await expect(page.getByRole("banner")).toHaveCSS(
+    "color",
+    "rgb(255, 255, 255)",
+  );
+});
 
 test("navigation works with the keyboard", async ({ page }) => {
   await page.goto("");
@@ -346,34 +277,9 @@ async function watchPrerenderedMain(page: Page) {
 
 // Each leaf route owns a view-override parameter, and every one of them is
 // reachable from search, social, and email with tracking parameters attached.
-const leafRoutes = [
-  {
-    path: "bio",
-    heading: "Optimizing Life",
-    override: "bio-view=empty",
-    overrideHeading: "Biography coming soon",
-  },
-  {
-    path: "research",
-    heading: "Research Works",
-    override: "research-scenario=empty",
-    overrideHeading: "No research projects yet",
-  },
-  {
-    path: "software",
-    heading: "Open-Source Software",
-    override: "software-view=empty",
-    overrideHeading: "No software projects to show",
-  },
-  {
-    path: "courses",
-    heading: "Courses",
-    override: "courses-view=empty",
-    overrideHeading: "No courses to show",
-  },
-  // Preserve each route's literal heading and query pair for its parameterized
-  // accessible assertions instead of widening every field to string.
-] as const;
+const leafRoutes = pages.flatMap((route) =>
+  route.emptyView ? [{ ...route, emptyView: route.emptyView }] : [],
+);
 
 for (const route of leafRoutes) {
   test(`${route.path} reached with a tracking parameter hydrates its prerendered document`, async ({
@@ -408,11 +314,12 @@ for (const route of leafRoutes) {
     page.on("pageerror", (error) => errors.push(error.message));
     const removedMainLandmarks = await watchPrerenderedMain(page);
 
-    await page.goto(`${route.path}?${route.override}&utm_source=newsletter`, {
-      waitUntil: "networkidle",
-    });
+    await page.goto(
+      `${route.path}?${route.emptyView.query}&utm_source=newsletter`,
+      { waitUntil: "networkidle" },
+    );
     await expect(
-      page.getByRole("heading", { name: route.overrideHeading, exact: true }),
+      page.getByRole("heading", { name: route.emptyView.heading, exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("article")).toHaveCount(0);
     // The static document holds the default view, so an override is only
