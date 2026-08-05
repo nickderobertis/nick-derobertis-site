@@ -34,5 +34,5 @@ export function parseRemoteManifest(value: unknown): Record<string, string> {
     throw new Error(
       "The canonical remote manifest must contain valid string mappings; fix libs/build-config/src/remotes.json and rerun just check.",
     );
-  return value as Record<string, string>;
+  return Object.fromEntries(Object.entries(value));
 }

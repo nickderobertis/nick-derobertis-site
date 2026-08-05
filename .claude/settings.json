@@ -1,14 +1,12 @@
 {
-  "_llmlint": "ignore-file[least_privilege_grants] These reviewed developer permissions support the repository's required just, pnpm, and commit workflow; the SessionStart hook itself invokes only its fixed checked-in script.",
   "permissions": {
     "allow": [
-      "Bash(just *)",
-      "Bash(pnpm *)",
-      "Bash(git status*)",
-      "Bash(git diff*)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(uv run --script *)"
+      "Bash(just check)",
+      "Bash(just lint-llm-diff origin/master --skip-nx-cache)",
+      "Bash(git status --short --branch)",
+      "Bash(git diff --check)",
+      "Bash(git add -A)",
+      "Bash(git commit -m *)"
     ]
   },
   "hooks": {

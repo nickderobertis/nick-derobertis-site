@@ -1,6 +1,6 @@
-import { defineAppTestConfig } from "./src/index.ts";
+import { defineWorkspaceTestConfig } from "./src/index.ts";
 
-export default defineAppTestConfig({
+export default defineWorkspaceTestConfig({
   project: "testing",
   dir: "libs/testing",
   coverageInclude: ["libs/testing/src/index.ts"],

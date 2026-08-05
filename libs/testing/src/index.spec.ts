@@ -1,10 +1,10 @@
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { defineAppTestConfig, resolveTsconfigAliases } from "./index.ts";
+import { defineWorkspaceTestConfig, resolveTsconfigAliases } from "./index.ts";
 
-describe("defineAppTestConfig", () => {
+describe("defineWorkspaceTestConfig", () => {
   test("builds the fixed component-test contract and merges remote aliases", () => {
-    const config = defineAppTestConfig({
+    const config = defineWorkspaceTestConfig({
       project: "awards",
       dir: "apps/awards",
       remotes: { "homeCards/Skeleton": "apps/home-cards/src/skeleton.tsx" },
@@ -30,8 +30,8 @@ describe("defineAppTestConfig", () => {
     });
   });
 
-  test("uses the app source tree as the default coverage boundary", () => {
-    const config = defineAppTestConfig({ project: "bio", dir: "apps/bio" });
+  test("uses the project source tree as the default coverage boundary", () => {
+    const config = defineWorkspaceTestConfig({ project: "bio", dir: "apps/bio" });
     expect(config.test?.coverage?.include).toEqual([
       "apps/bio/src/**/*.{ts,tsx}",
     ]);
@@ -39,7 +39,7 @@ describe("defineAppTestConfig", () => {
 
   test("rejects invalid project names at the configuration boundary", () => {
     expect(() =>
-      defineAppTestConfig({ project: "Bad_Name", dir: "apps/bio" }),
+      defineWorkspaceTestConfig({ project: "Bad_Name", dir: "apps/bio" }),
     ).toThrow("Invalid test project name");
   });
 

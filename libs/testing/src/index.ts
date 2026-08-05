@@ -5,9 +5,9 @@ import { parseConfigFileTextToJson } from "typescript";
 import type { TestUserConfig, ViteUserConfig } from "vitest/config";
 import { z } from "zod";
 
-export type UserConfig = ViteUserConfig & { test?: TestUserConfig };
+export type WorkspaceTestConfig = ViteUserConfig & { test?: TestUserConfig };
 
-export interface AppTestConfigOptions {
+export interface WorkspaceTestConfigOptions {
   project: string;
   dir: string;
   remotes?: Record<string, string>;
@@ -27,20 +27,20 @@ export function resolveTsconfigAliases(
 ): Record<string, string> {
   const tsconfig = baseTsConfigSchema.parse(config);
   return Object.fromEntries(
-    Object.entries(tsconfig.compilerOptions.paths).map(([alias, targets]) => [
+    Object.entries(tsconfig.compilerOptions.paths).map(([alias, [target]]) => [
       alias,
-      path.resolve(root, targets[0] as string),
+      path.resolve(root, target),
     ]),
   );
 }
 
-export function defineAppTestConfig({
+export function defineWorkspaceTestConfig({
   project,
   dir,
   remotes = {},
   coverageInclude = [`${dir}/src/**/*.{ts,tsx}`],
   coverageExclude,
-}: AppTestConfigOptions): UserConfig {
+}: WorkspaceTestConfigOptions): WorkspaceTestConfig {
   if (!/^[a-z][a-z0-9-]*$/.test(project))
     throw new Error(`Invalid test project name: ${project}`);
   const root = path.resolve(import.meta.dirname, "../../..");

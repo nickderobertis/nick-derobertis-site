@@ -198,6 +198,8 @@ export async function captureVisualSuite(
         if (scenario.stallTimers)
           await page.addInitScript(() => {
             const nativeSetTimeout = window.setTimeout.bind(window);
+            // DOM and Node timer declarations overlap in this test runtime;
+            // preserve the browser overloads after wrapping the native timer.
             window.setTimeout = ((
               handler: TimerHandler,
               timeout = 0,

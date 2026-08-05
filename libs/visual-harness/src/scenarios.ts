@@ -20,9 +20,13 @@ export function standardVisualScenarios({
   target,
   prepare,
 }: StandardScenarioOptions): VisualScenario[] {
-  const scenarios: VisualScenario[] = ["standalone", "host-composed"].map(
+  const renders: ReadonlyArray<VisualScenario["render"]> = [
+    "standalone",
+    "host-composed",
+  ];
+  const scenarios: VisualScenario[] = renders.map(
     (render) => ({
-      render: render as VisualScenario["render"],
+      render,
       state: "happy",
       viewports: allViewports,
       target: (page) => target(page, "happy"),
@@ -30,7 +34,7 @@ export function standardVisualScenarios({
     }),
   );
   for (const state of states) {
-    for (const render of ["standalone", "host-composed"] as const) {
+    for (const render of renders) {
       // Skip host-composed `loading`: even as a fixed-dimension skeleton, the
       // host-composed capture still jitters ~2px run-to-run (a host-composition
       // layout-timing effect, not a content one). The standalone loading shot

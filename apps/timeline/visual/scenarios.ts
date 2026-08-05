@@ -1,7 +1,12 @@
 import type { VisualSuite } from "@site/visual-harness";
 import { standardVisualScenarios } from "@site/visual-harness/scenarios";
 
-const states = ["empty", "loading", "error", "employment-only"] as const;
+const states: ReadonlyArray<string> = [
+  "empty",
+  "loading",
+  "error",
+  "employment-only",
+];
 export const suite: VisualSuite = {
   project: "timeline",
   hostPath: "",

@@ -41,6 +41,7 @@ test("binds app-owned target and preparation behavior to every scenario", async 
     query: () => "",
     target: (_page, state) => {
       targeted.push(state);
+      // This unit exercises callback wiring only; Locator is intentionally opaque.
       return {} as Locator;
     },
     prepare: async (_page, state) => {
@@ -48,7 +49,9 @@ test("binds app-owned target and preparation behavior to every scenario", async 
     },
   });
   for (const scenario of scenarios) {
+    // This unit exercises callback wiring only; Page is intentionally opaque.
     scenario.target({} as Page);
+    // This unit exercises callback wiring only; Page is intentionally opaque.
     await scenario.prepare?.({} as Page);
   }
   expect(targeted).toEqual(["happy", "happy", "empty", "empty"]);

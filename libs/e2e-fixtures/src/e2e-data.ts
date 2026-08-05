@@ -3,7 +3,7 @@ import type { ServerResponse } from "node:http";
 import { join } from "node:path";
 
 /** The CV domains a browser journey can steer into a non-happy state. */
-const scenarioDomains = ["research", "awards"] as const;
+const scenarioDomains: ReadonlyArray<string> = ["research", "awards"];
 const scenarios = ["empty", "error", "loading"];
 
 export interface E2eDataRequest {

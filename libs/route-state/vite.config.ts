@@ -1,6 +1,6 @@
-import { defineAppTestConfig } from "@site/testing";
+import { defineWorkspaceTestConfig } from "@site/testing";
 
-export default defineAppTestConfig({
+export default defineWorkspaceTestConfig({
   project: "route-state",
   dir: "libs/route-state",
   coverageInclude: ["libs/route-state/src/**/*.ts"],
