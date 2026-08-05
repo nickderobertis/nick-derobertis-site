@@ -1,9 +1,27 @@
 import { expect, test } from "@playwright/test";
 
-const renderPaths = [
+const renderPaths: readonly { label: string; path: string }[] = [
   { label: "host-composed", path: "" },
   { label: "standalone", path: "remotes/awards/" },
-] as const;
+];
+
+type Viewport = { name: string; width: number; height: number };
+
+const phone: Viewport = { name: "mobile", width: 345, height: 844 };
+const viewports: readonly Viewport[] = [
+  { name: "desktop", width: 1110, height: 900 },
+  { name: "tablet", width: 690, height: 1024 },
+  phone,
+];
+
+const dataBoundaryStates: readonly {
+  scenario: string;
+  heading: string;
+  role: "status" | "alert";
+}[] = [
+  { scenario: "empty", heading: "No awards yet", role: "status" },
+  { scenario: "error", heading: "Awards unavailable", role: "alert" },
+];
 
 for (const renderPath of renderPaths) {
   test.describe(`awards ${renderPath.label}`, () => {
@@ -59,14 +77,7 @@ for (const renderPath of renderPaths) {
       ).toContainText("$2000/yr");
     });
 
-    for (const state of [
-      { scenario: "empty", heading: "No awards yet", role: "status" as const },
-      {
-        scenario: "error",
-        heading: "Awards unavailable",
-        role: "alert" as const,
-      },
-    ]) {
+    for (const state of dataBoundaryStates) {
       test(`renders the ${state.scenario} data-boundary state`, async ({
         page,
       }) => {
@@ -102,24 +113,58 @@ for (const renderPath of renderPaths) {
       ).toBeAttached();
     });
 
-    for (const viewport of [
-      { name: "desktop", width: 1110, height: 900 },
-      { name: "tablet", width: 690, height: 1024 },
-      { name: "mobile", width: 345, height: 844 },
-    ]) {
-      test(`fits the ${viewport.name} selected-awards viewport`, async ({
+    for (const viewport of viewports)
+      for (const view of [
+        {
+          label: "selected-awards",
+          query: "",
+          name: "Selected awards",
+          cards: 4,
+        },
+        {
+          label: "all-awards",
+          query: "?awards-view=all",
+          name: "Awards & honors",
+          cards: 7,
+        },
+      ]) {
+        test(`fits the ${viewport.name} ${view.label} viewport`, async ({
+          page,
+        }) => {
+          await page.setViewportSize(viewport);
+          await page.goto(`${renderPath.path}${view.query}`);
+          const pane = page.getByRole("region", { name: view.name });
+          await expect(pane).toBeVisible();
+          await expect(pane.getByRole("article")).toHaveCount(view.cards);
+          const box = await pane.boundingBox();
+          expect(box?.x).toBeGreaterThanOrEqual(0);
+          expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(
+            viewport.width + 1,
+          );
+          // Every card has to wrap inside the pane: a grid that overflows it
+          // pushes an award off the side of a phone with nothing to scroll to.
+          const overflow = await pane.evaluate(
+            (element) => element.scrollWidth - element.clientWidth,
+          );
+          expect(overflow).toBeLessThanOrEqual(1);
+        });
+      }
+
+    for (const state of dataBoundaryStates)
+      test(`fits the ${state.scenario} state onto a phone`, async ({
         page,
       }) => {
-        await page.setViewportSize(viewport);
-        await page.goto(renderPath.path);
-        const pane = page.getByRole("region", { name: "Selected awards" });
-        await expect(pane).toBeVisible();
-        const box = await pane.boundingBox();
+        await page.setViewportSize(phone);
+        await page.goto(`${renderPath.path}?awards-scenario=${state.scenario}`);
+        const statePanel = page
+          .getByRole(state.role)
+          .filter({ has: page.getByRole("heading", { name: state.heading }) });
+        await expect(statePanel).toBeVisible();
+        const box = await statePanel.boundingBox();
         expect(box?.x).toBeGreaterThanOrEqual(0);
         expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(
-          viewport.width + 1,
+          phone.width + 1,
         );
       });
-    }
   });
 }

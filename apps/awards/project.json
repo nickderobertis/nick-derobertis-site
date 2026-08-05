@@ -41,7 +41,10 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "options": { "command": "vitest run --passWithNoTests apps/awards/src" }
+      "outputs": ["{workspaceRoot}/coverage/apps/awards"],
+      "options": {
+        "command": "vitest run --config apps/awards/vite.config.ts --coverage"
+      }
     },
     "screenshot": {
       "executor": "nx:run-commands",
