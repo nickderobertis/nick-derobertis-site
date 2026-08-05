@@ -153,7 +153,6 @@ test("standalone remote loads the shared design-system foundation", async ({
     page.getByRole("region", { name: "Educated and Experienced" }),
   ).toBeVisible();
   const canvas = page.getByRole("document");
-  // llmlint: ignore[tests_mirror_real_usage] Pins the font contract behind the browser visual goldens.
   await expect(canvas).toHaveCSS("font-family", "Arial, sans-serif");
   await expect(canvas).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await expect(canvas).toHaveCSS("color", "rgb(38, 52, 62)");

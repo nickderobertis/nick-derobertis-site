@@ -217,3 +217,12 @@ library instead: `@site/artifact-contracts` parses the serialized route and
 remote contracts for both compose and the artifact gate, and
 `@site/e2e-fixtures` owns the Pages-base static server and the CV-data
 scenarios that the e2e server and the visual capture host both serve through.
+
+Every app owns its Playwright suite, so the facts more than one suite asserts
+live in `@site/e2e-harness`: the route inventory, each remote's accessible
+landmark and loading status, and the panes Home composes. The harness joins
+each of them to the manifest that publishes it — `apps/shell/src/routes.json`,
+`libs/build-config/src/remotes.json`, and the composition
+`apps/home/rspack.config.ts` declares — and fails by name when the two
+disagree, so a new route or pane cannot ship without the journeys that cover
+it.

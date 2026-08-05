@@ -202,8 +202,9 @@ export interface PaneStates {
   error: string;
 }
 
-// Only the panes Home drives through its shared `state` query answer for their
-// own empty and error copy; the other three own those states in their suites.
+// The panes Home drives through its shared `state` query declare their empty
+// and error copy here; the other three reach those states through their own
+// query parameters and own that copy in their own suites.
 const homePaneStates = {
   "home-carousel": {
     empty: "No featured stories are available yet.",
