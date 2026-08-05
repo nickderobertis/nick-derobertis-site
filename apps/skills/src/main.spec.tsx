@@ -1,0 +1,80 @@
+import { act, screen } from "@testing-library/react";
+import { prerender } from "react-dom/static";
+import { beforeEach, expect, test, vi } from "vitest";
+import SkillsPage from "./page";
+
+/**
+ * The markup the remote's build publishes into its own index.html. Producing it
+ * from the page itself is what makes the hydration below the real one: a
+ * hand-written stand-in would prove nothing about the bytes a visitor receives.
+ */
+async function publishedFragment() {
+  // The build prerenders without a browser, so the fragment every visitor is
+  // served carries the settled tree whatever query they later arrive with.
+  vi.stubGlobal("window", undefined);
+  const { prelude } = await prerender(<SkillsPage />);
+  const html = await new Response(prelude).text();
+  vi.unstubAllGlobals();
+  return html;
+}
+
+async function startRemote() {
+  await act(async () => {
+    await import("./main");
+  });
+}
+
+function pane() {
+  return screen.getByRole("region", { name: "Skilled in…" });
+}
+
+beforeEach(() => {
+  vi.resetModules();
+  document.body.innerHTML = "";
+  window.history.replaceState(null, "", "/");
+});
+
+test("refuses to start against a document with no remote root", async () => {
+  document.body.innerHTML = "<main></main>";
+
+  await expect(import("./main")).rejects.toThrow("Missing remote root");
+});
+
+test("adopts the published tree a visitor is already looking at", async () => {
+  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+  const published = pane();
+
+  await startRemote();
+
+  // Hydration takes over the shipped nodes in place, so the chart the visitor
+  // has been looking at since first paint is never torn down and repainted.
+  expect(pane()).toBe(published);
+  expect(
+    screen.getByRole("button", { name: "Explore Programming category" }),
+  ).toBeInTheDocument();
+});
+
+test("renders from scratch when the document ships no prerendered tree", async () => {
+  document.body.innerHTML = '<div id="root"></div>';
+
+  await startRemote();
+
+  expect(
+    await screen.findByRole("region", { name: "Skilled in…" }),
+  ).toBeInTheDocument();
+});
+
+test("throws the published tree away when the visitor asked for another state", async () => {
+  window.history.replaceState(null, "", "/?skills-state=error");
+  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+  const published = pane();
+
+  await startRemote();
+
+  // The fragment was published for the settled tree. Adopting it would leave
+  // one state's markup underneath another state's render, so it has to go.
+  expect(published).not.toBeInTheDocument();
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Skills unavailable",
+  );
+});
