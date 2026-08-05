@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(just check)",
-      "Bash(just lint-llm-diff origin/master --skip-nx-cache)",
+      "Bash(just lint-llm-diff origin/master)",
       "Bash(git status --short --branch)",
       "Bash(git diff --check)"
     ]

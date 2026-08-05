@@ -8,19 +8,19 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "biome lint scripts/artifact"
+        "command": "scripts/ci/run-tooling-target.sh artifact lint biome lint scripts/artifact"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc -p scripts/artifact/tsconfig.json"
+        "command": "scripts/ci/run-tooling-target.sh artifact typecheck tsc -p scripts/artifact/tsconfig.json"
       }
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vitest run --reporter=dot --maxWorkers=1 --config scripts/artifact/vite.config.ts"
+        "command": "scripts/ci/run-tooling-target.sh artifact test vitest run --reporter=dot --maxWorkers=1 --config scripts/artifact/vite.config.ts"
       },
       "dependsOn": [
         {

@@ -1,8 +1,8 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
-// Every spec here drives a real CLI, hook, or Nx graph from the workspace root,
-// so the test root is the workspace and each subprocess inherits that cwd.
+// These workspace contracts resolve repository files and subprocess paths from
+// the workspace root, matching the contributor commands they verify.
 export default defineConfig({
   root: fileURLToPath(new URL("../..", import.meta.url)),
   test: {

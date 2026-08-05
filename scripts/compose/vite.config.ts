@@ -1,8 +1,8 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
-// Every spec here drives a real CLI, hook, or Nx graph from the workspace root,
-// so the test root is the workspace and each subprocess inherits that cwd.
+// Compose resolves every artifact path from the workspace root, so its direct
+// API tests use that same root as production composition.
 export default defineConfig({
   root: fileURLToPath(new URL("../..", import.meta.url)),
   test: {

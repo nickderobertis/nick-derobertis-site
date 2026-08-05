@@ -304,3 +304,32 @@ describe("ci-tools.json contract validation", () => {
     expect(result.stdout).toBe("");
   });
 });
+
+describe("tooling target output", () => {
+  const wrapper = path.join(workspace, "scripts/ci/run-tooling-target.sh");
+
+  it("stays quiet when the delegated target succeeds", () => {
+    const result = spawnSync(wrapper, ["ci", "test", "true"], {
+      cwd: workspace,
+      encoding: "utf8",
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toBe("");
+  });
+
+  it("preserves failure diagnostics and gives a concrete next action", () => {
+    const result = spawnSync(
+      wrapper,
+      ["ci", "test", "sh", "-c", "echo target-diagnostic >&2; exit 9"],
+      { cwd: workspace, encoding: "utf8" },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("target-diagnostic");
+    expect(result.stderr).toContain(
+      "tooling-ci:test failed; fix the diagnostics above and rerun just check",
+    );
+  });
+});
