@@ -1,12 +1,12 @@
 // The shell owns route loaders, so this route-boundary import is the deliberate
 // exception to the normal app-to-data-library dependency rule.
-// eslint-disable-next-line @nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The shell validates route payloads at its loader boundary; feature apps never gain this data-core dependency.
 import type {
   Courses,
   Research,
   SoftwareProjects,
 } from "@site/data-access-core";
-// eslint-disable-next-line @nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing and validates route payloads before passing them to remotes.
 import { siteBase, validateCvDomain } from "@site/data-access-core";
 import { SiteLayout } from "@site/layout";
 import {

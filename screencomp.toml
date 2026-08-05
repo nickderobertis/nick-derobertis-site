@@ -13,9 +13,12 @@ paths = [
   "libs/**/*.ts",
   "libs/**/*.tsx",
   "libs/**/*.css",
-  "scripts/capture-visual.mjs",
-  "scripts/e2e-data-provider.mjs",
-  "visual-projects.json",
+  "apps/*/visual/scenarios.ts",
+  "apps/*/visual/capture.ts",
+  "libs/visual-harness/**/*.ts",
+  # The harness serves every capture through the shared site server, so a
+  # fixture change moves the captured bytes just as a harness change does.
+  "libs/e2e-fixtures/**/*.ts",
   "screencomp.toml",
 ]
 

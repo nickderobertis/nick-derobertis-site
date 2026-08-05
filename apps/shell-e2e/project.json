@@ -21,13 +21,6 @@
       "executor": "nx:run-commands",
       "options": { "command": "tsc -p apps/shell-e2e/tsconfig.json" }
     },
-    "test": {
-      "executor": "nx:run-commands",
-      "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
-      "options": {
-        "command": "vitest run --maxWorkers=1 --passWithNoTests apps/shell-e2e/src/unit"
-      }
-    },
     "build": {
       "executor": "nx:run-commands",
       "options": { "command": "tsc -p apps/shell-e2e/tsconfig.json" }

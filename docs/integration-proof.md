@@ -141,13 +141,13 @@ edit selects exactly its dependents, each becoming one `projects` lane:
 
 ```console
 $ nx show projects --affected --files apps/skills/src/page.tsx --with-target screenshot --json \
-    | node scripts/affected-visual-projects.mjs
+    | node scripts/visual/affected-visual-projects.mjs
 [{"id":"skills","current":"shots/current/skills","verify":"shots/verify/skills","manifest":"apps/skills/visual/baseline/x86_64.json","gallery-title":"skills"}]
 
 $ nx show projects --affected --files libs/design-system/src/theme.css --with-target screenshot --json \
-    | node scripts/affected-visual-projects.mjs
+    | node scripts/visual/affected-visual-projects.mjs
 # → 12 lanes: awards, bio, courses, home, home-cards, home-carousel,
 #   home-contact, home-story, research, skills, software, timeline
 ```
 
-`apps/shell-e2e/src/unit/visual-affected.spec.ts` locks both cases in.
+`scripts/visual/visual-affected.spec.ts` locks both cases in.

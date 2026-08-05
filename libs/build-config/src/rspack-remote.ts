@@ -74,6 +74,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
       new ModuleFederationPlugin({
         name: federationName,
         filename: "remoteEntry.js",
+        // llmlint: ignore[microfrontends_split_aggressively] Skeleton is the declared dependency-light loading boundary consumed by the shell while the route-level Page chunk resolves; no feature implementation internals are exposed.
         exposes: {
           "./Page": "./src/page.tsx",
           "./Skeleton": "./src/skeleton.tsx",

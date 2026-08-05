@@ -5,9 +5,13 @@ import { createServer, type Server } from "node:http";
 import { extname, join, normalize } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 // The Pages base and the route inventory each have one validated source; this
-// spec reads them rather than restating either contract.
-import { siteBase } from "../../../libs/data-access-core/src/site.ts";
-import { parseSiteRoutes } from "../../../libs/route-state/src/index.ts";
+// spec reads them rather than restating either contract. The e2e tag policy
+// governs application code, so reading those two contracts is exempted here.
+/* eslint-disable @nx/enforce-module-boundaries -- This deploy-topology journey reads the host's canonical base and route contracts while exercising the assembled artifact, not application internals. */
+import { siteBase } from "@site/data-access-core";
+import { parseSiteRoutes } from "@site/route-state";
+
+/* eslint-enable @nx/enforce-module-boundaries */
 
 /**
  * The deploy lane never serves an app's build directory. It checks out the
@@ -70,7 +74,7 @@ const contentTypes: Record<string, string> = {
  * the point — a document that references bytes compose failed to stage gets the
  * 404 a visitor would get.
  *
- * `scripts/serve-e2e.mjs` is deliberately not reused: it serves the shell's
+ * `scripts/serve/serve-e2e.mjs` is deliberately not reused: it serves the shell's
  * build directory, answers a missing file with the fallback under a 200, and
  * injects the data scenarios and latency the feature journeys need. Every one
  * of those would hide the defect this spec exists to catch.

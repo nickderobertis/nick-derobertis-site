@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    // compose.spec.ts drives compose.mjs through its real exported API, so the
+    // CLI's inferred types are what this project checks that spec against.
+    "allowJs": true
+  },
+  "include": ["*.spec.ts", "vite.config.ts"]
+}

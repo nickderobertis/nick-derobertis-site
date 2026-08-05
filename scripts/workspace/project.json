@@ -1,0 +1,27 @@
+{
+  "name": "tooling-workspace",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts/workspace",
+  "projectType": "application",
+  "tags": ["type:tooling", "scope:workspace"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh workspace lint biome lint scripts/workspace"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh workspace typecheck tsc -p scripts/workspace/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh workspace test vitest run --reporter=dot --maxWorkers=1 --config scripts/workspace/vite.config.ts"
+      }
+    }
+  }
+}

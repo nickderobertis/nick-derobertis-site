@@ -1,0 +1,34 @@
+{
+  "name": "tooling-perf",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts/perf",
+  "projectType": "application",
+  "tags": ["type:tooling", "scope:perf"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh perf lint biome lint scripts/perf"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh perf typecheck tsc -p scripts/perf/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh perf test vitest run --reporter=dot --maxWorkers=1 --config scripts/perf/vite.config.ts"
+      }
+    },
+    "e2e": {
+      "executor": "nx:run-commands",
+      "parallelism": false,
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh perf e2e vitest run --reporter=dot --config scripts/perf/vite.browser.config.ts"
+      }
+    }
+  }
+}

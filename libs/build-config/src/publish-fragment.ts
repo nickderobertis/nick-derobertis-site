@@ -49,7 +49,7 @@ export const contentStoreAppRoot = "apps";
  * The one name for the content-store branch, the deploy lane's working copy of
  * it, and the scratch repository a publish lane pushes from. The workflow, the
  * ignore rules, and the docs all restate these, so
- * `scripts/verify-content-store-contract.mjs` — run by `just lint-workflows` —
+ * `scripts/publish/verify-content-store-contract.mjs` — run by `just lint-workflows` —
  * holds every restatement to these values.
  */
 export const contentStoreBranch = "published-fragments";
@@ -444,7 +444,7 @@ export async function publishFragment(
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
-// llmlint: ignore-block[changed_behavior_has_e2e] This is the publish lane's environment boundary in a CI/CLI context with no browser interface: it resolves PUBLISH_* values and their defaults before any bytes are written, so a rejected value leaves no artifact and nothing servable. publish-fragment.spec.ts drives it through the real exported API for every default and every rejection, scripts/publish-fragment.mjs is the real CLI it feeds, and the bytes the resulting options publish are driven through the browser by site.spec.ts and every feature journey once the compose lane assembles them.
+// llmlint: ignore-block[changed_behavior_has_e2e] This is the publish lane's environment boundary in a CI/CLI context with no browser interface: it resolves PUBLISH_* values and their defaults before any bytes are written, so a rejected value leaves no artifact and nothing servable. publish-fragment.spec.ts drives it through the real exported API for every default and every rejection, scripts/publish/publish-fragment.mjs is the real CLI it feeds, and the bytes the resulting options publish are driven through the browser by site.spec.ts and every feature journey once the compose lane assembles them.
 export function publishOptionsFromEnv(
   env: Record<string, string | undefined>,
 ): PublishOptions {

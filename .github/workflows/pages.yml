@@ -20,7 +20,7 @@ on:
 permissions: {}
 env:
   # One source for this workflow's runtime pins, so three jobs cannot drift
-  # apart. scripts/verify-runtime-pins.mjs — run by just lint-workflows — holds
+  # apart. scripts/ci/verify-runtime-pins.mjs — run by just lint-workflows — holds
   # PNPM_VERSION to package.json's authoritative `packageManager` field and
   # NODE_VERSION to the single value every workflow in this repository uses.
   PNPM_VERSION: 10.13.1

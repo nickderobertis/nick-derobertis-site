@@ -1,0 +1,28 @@
+{
+  "name": "tooling-ci",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts/ci",
+  "projectType": "application",
+  "tags": ["type:tooling", "scope:ci"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh ci lint biome lint scripts/ci"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh ci typecheck tsc -p scripts/ci/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh ci test vitest run --reporter=dot --maxWorkers=1 --config scripts/ci/vite.config.ts"
+      },
+      "parallelism": false
+    }
+  }
+}

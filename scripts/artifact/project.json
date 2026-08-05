@@ -1,0 +1,33 @@
+{
+  "name": "tooling-artifact",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts/artifact",
+  "projectType": "application",
+  "tags": ["type:tooling", "scope:build"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh artifact lint biome lint scripts/artifact"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh artifact typecheck tsc -p scripts/artifact/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh artifact test vitest run --reporter=dot --maxWorkers=1 --config scripts/artifact/vite.config.ts"
+      },
+      "dependsOn": [
+        {
+          "target": "prerender",
+          "projects": ["shell"]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "tooling-compose",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "scripts/compose",
+  "projectType": "application",
+  "tags": ["type:tooling", "scope:build"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh compose lint biome lint scripts/compose"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh compose typecheck tsc -p scripts/compose/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "scripts/ci/run-tooling-target.sh compose test vitest run --reporter=dot --maxWorkers=1 --config scripts/compose/vite.config.ts"
+      }
+    }
+  }
+}

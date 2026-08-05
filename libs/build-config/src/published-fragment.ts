@@ -118,8 +118,8 @@ function compileRenderer(name: string, outputPath: string) {
       target: "node",
       entry: resolve(
         name === "shell"
-          ? "scripts/shell-fragment-entry.tsx"
-          : "scripts/remote-fragment-entry.tsx",
+          ? "libs/build-config/src/shell-fragment-entry.tsx"
+          : "libs/build-config/src/remote-fragment-entry.tsx",
       ),
       output: {
         path: resolve(outputPath),
@@ -128,13 +128,20 @@ function compileRenderer(name: string, outputPath: string) {
         clean: true,
       },
       resolve: {
+        // Each entry reaches the app it prerenders through this compilation's
+        // own aliases rather than a static import. That is what keeps the
+        // entries build inputs: nothing in this library's module graph — and so
+        // nothing in Nx's project graph — points from here back into an app.
         alias:
           name === "shell"
-            ? {}
+            ? {
+                "@site-fragment/router": resolve("apps/shell/src/router.tsx"),
+                "@site-fragment/routes": resolve("apps/shell/src/routes.ts"),
+              }
             : {
                 "@site-fragment/page": resolve(
                   name === "home"
-                    ? "scripts/home-fragment-page.tsx"
+                    ? "libs/build-config/src/home-fragment-page.tsx"
                     : `apps/${name}/src/page.tsx`,
                 ),
               },
