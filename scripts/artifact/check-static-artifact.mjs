@@ -171,7 +171,9 @@ for (const route of validatedRoutes) {
       `${path} lacks its expected h1 (${route.heading}); fix the route renderer and rerun just prerender.`,
     );
   if (!html.includes("/nick-derobertis-site/"))
-    throw new Error(`${path} lacks the Pages base path`);
+    throw new Error(
+      `${path} lacks the Pages base path; fix the route renderer and rerun just prerender.`,
+    );
   const expected = substantiveRouteContent[route.path];
   if (!expected || !html.includes(expected))
     throw new Error(
@@ -264,7 +266,9 @@ if (uncoveredPanes.length > 0)
   );
 const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
-  throw new Error("404 fallback is not intentional");
+  throw new Error(
+    "404 fallback is not intentional; restore the recovery document in scripts/compose/compose.mjs and rerun just prerender.",
+  );
 await assertReferencedAssetsResolve("404.html");
 for (const name of Object.keys(validatedRemoteManifest)) {
   const remoteEntry = `${root}/remotes/${name}/remoteEntry.js`;
@@ -287,6 +291,14 @@ for (const file of [
   "domains/skills.json",
   "domains/software_projects.json",
   "domains/timeline.json",
-])
-  await access(`${root}/cv-data/${file}`);
+]) {
+  const cvPath = `${root}/cv-data/${file}`;
+  try {
+    await access(cvPath);
+  } catch {
+    throw new Error(
+      `${cvPath} is missing; rebuild the CV data artifact and rerun just prerender.`,
+    );
+  }
+}
 // llmlint: ignore-end[changed_behavior_has_e2e]
