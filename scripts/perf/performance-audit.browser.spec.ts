@@ -11,6 +11,8 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
+import { parseSiteRoutes } from "@site/route-state";
+import type { VisualSuite } from "@site/visual-harness";
 import { afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -31,27 +33,44 @@ const productionConfig = productionConfigSchema.parse(
     readFileSync(path.join(workspace, "performance.config.json"), "utf8"),
   ),
 );
-const localRoutes = [
-  ...productionConfig.routes,
-  "/remotes/home/",
-  // Perf-audit only the content-bearing placeholder states. The `loading` state
-  // now renders a skeleton (empty placeholder elements, no text/image), so
-  // Lighthouse finds no Largest Contentful Paint and the audit fails NO_LCP —
-  // measuring LCP of a permanently-loading skeleton is meaningless. `empty` and
-  // `error` still render contentful text.
-  ...["empty", "error"].flatMap((state) => [
-    `/?state=${state}`,
-    `/remotes/home/?state=${state}`,
-  ]),
-  ...["bio", "research", "software", "courses"].flatMap((route) => [
-    `/remotes/${route}/`,
-    // See above: skip `loading` (skeleton, no LCP); keep content-bearing states.
-    ...["empty", "error"].flatMap((state) => [
-      `/${route}?${route}-view=${state}`,
-      `/remotes/${route}/?${route}-view=${state}`,
-    ]),
-  ]),
-];
+const routes = parseSiteRoutes(
+  JSON.parse(
+    readFileSync(path.join(workspace, "apps/shell/src/routes.json"), "utf8"),
+  ),
+);
+const localSuites = Object.values(
+  import.meta.glob<VisualSuite>(
+    "../../apps/{home,bio,research,software,courses}/visual/scenarios.ts",
+    { eager: true, import: "suite" },
+  ),
+);
+const hostPaths = new Map(
+  routes.map((route) => [route.remote ?? "home", route.path]),
+);
+const shellRoutePaths = [...hostPaths.values()];
+if (
+  productionConfig.routes.length !== shellRoutePaths.length ||
+  productionConfig.routes.some((route) => !shellRoutePaths.includes(route))
+)
+  throw new Error(
+    "performance.config.json routes must match the shell route contract",
+  );
+const localRoutes = localSuites.flatMap((suite) =>
+  suite.scenarios
+    // A permanently-loading skeleton has no Largest Contentful Paint, so it is
+    // not a meaningful Lighthouse target. The app contract still supplies the
+    // content-bearing happy, empty, and error states for both render paths.
+    .filter(({ state }) => state !== "loading")
+    .map(({ query = "", render }) => {
+      const base =
+        render === "standalone"
+          ? `/remotes/${suite.project}/`
+          : hostPaths.get(suite.project);
+      if (base === undefined)
+        throw new Error(`No shell route is declared for ${suite.project}`);
+      return `${base}${query}`;
+    }),
+);
 const localUrlSchema = z
   .string()
   .url()

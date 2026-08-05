@@ -100,14 +100,18 @@ interface VisualProject {
 // undefined compared against an expected path.
 function isVisualProject(value: unknown): value is VisualProject {
   if (typeof value !== "object" || value === null) return false;
-  const lane: Record<string, unknown> = value as Record<string, unknown>;
   return (
-    typeof lane.id === "string" &&
-    /^[a-z][a-z0-9-]*$/.test(lane.id) &&
-    typeof lane.current === "string" &&
-    typeof lane.verify === "string" &&
-    typeof lane.manifest === "string" &&
-    typeof lane["gallery-title"] === "string"
+    "id" in value &&
+    typeof value.id === "string" &&
+    /^[a-z][a-z0-9-]*$/.test(value.id) &&
+    "current" in value &&
+    typeof value.current === "string" &&
+    "verify" in value &&
+    typeof value.verify === "string" &&
+    "manifest" in value &&
+    typeof value.manifest === "string" &&
+    "gallery-title" in value &&
+    typeof value["gallery-title"] === "string"
   );
 }
 
@@ -144,10 +148,18 @@ function galleryContract(): {
   const contract: unknown = JSON.parse(
     readFileSync("visual-tools.json", "utf8"),
   );
-  const { architecture, pagesRepository } =
-    typeof contract === "object" && contract !== null
-      ? (contract as { architecture?: unknown; pagesRepository?: unknown })
-      : {};
+  const architecture =
+    typeof contract === "object" &&
+    contract !== null &&
+    "architecture" in contract
+      ? contract.architecture
+      : undefined;
+  const pagesRepository =
+    typeof contract === "object" &&
+    contract !== null &&
+    "pagesRepository" in contract
+      ? contract.pagesRepository
+      : undefined;
   if (
     typeof pagesRepository !== "string" ||
     !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(pagesRepository) ||

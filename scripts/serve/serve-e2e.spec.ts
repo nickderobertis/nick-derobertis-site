@@ -101,7 +101,7 @@ describe("serve-e2e lifecycle", () => {
     );
   });
 
-  it.each(["SIGTERM", "SIGINT"] as const)(
+  it.each<NodeJS.Signals>(["SIGTERM", "SIGINT"])(
     "releases its listening port after %s",
     async (shutdownSignal) => {
       const port = await availablePort();

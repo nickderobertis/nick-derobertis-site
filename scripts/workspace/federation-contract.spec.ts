@@ -1,7 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
-const timelineContract = [
+type ContractEntry = readonly [path: string, expected: string];
+
+const timelineContract: ReadonlyArray<ContractEntry> = [
   // llmlint: ignore[tests_mirror_real_usage] Which remotes compose.mjs assembles is a build-wiring fact with no interface to drive: a composition that drops Timeline produces a page that still loads, and the omission only surfaces as a missing fragment at deploy time. The composed page is driven through the real browser by timeline.spec.ts and site.spec.ts.
   ["scripts/compose/compose.mjs", '"timeline"'],
   ["libs/build-config/src/remotes.json", '"timeline": "timeline"'],
@@ -11,9 +13,9 @@ const timelineContract = [
   ["eslint.config.mjs", 'sourceTag: "scope:timeline"'],
   // llmlint: ignore[tests_mirror_real_usage] That compose.mjs iterates the validated manifest instead of a hardcoded list is the same wiring contract, invisible from the browser until a newly added remote silently goes uncomposed; compose.spec.ts drives the real exported composition API over it.
   ["scripts/compose/compose.mjs", "Object.keys(validatedRemoteManifest)"],
-] as const;
+];
 
-const awardsContract = [
+const awardsContract: ReadonlyArray<ContractEntry> = [
   ["apps/awards/project.json", '"name": "awards"'],
   ["apps/awards/rspack.config.ts", 'remoteConfig("awards")'],
   ["apps/home/rspack.config.ts", '"awards"'],
@@ -23,13 +25,12 @@ const awardsContract = [
   ["scripts/compose/compose.mjs", '"awards"'],
   ["apps/awards/project.json", "E2E_REMOTE=awards"],
   ["libs/build-config/src/remotes.json", '"awards": "awards"'],
-] as const;
+];
 
 // The shell declares home/Page ambiently, so the remote's preload export, the
 // host's declaration of it, and the router wiring have to move together. The
-// `as const` narrows the entries to the readonly path/expected tuples
-// expectContract takes, the same way every contract above does.
-const homePreloadContract = [
+// Explicit tuple typing keeps every declaration compatible with expectContract.
+const homePreloadContract: ReadonlyArray<ContractEntry> = [
   ["apps/home/src/page.tsx", "export function preload(): Promise<void>"],
   ["apps/shell/src/remotes.d.ts", "export function preload(): Promise<void>;"],
   [
@@ -41,17 +42,15 @@ const homePreloadContract = [
   ["apps/awards/src/use-awards.ts", "export async function preloadAwards()"],
   ["apps/home/src/remotes.d.ts", "export function preload(): Promise<void>;"],
   ["apps/home/src/page.tsx", "await awards.preload()"],
-] as const;
+];
 
-const bioContract = [
+const bioContract: ReadonlyArray<ContractEntry> = [
   ["apps/bio/src/page.tsx", 'id="bio-heading">Optimizing Life'],
   ["apps/shell-e2e/src/bio.spec.ts", 'name: "Optimizing Life"'],
   ["apps/shell-e2e/src/site.spec.ts", 'heading: "Optimizing Life"'],
-] as const;
+];
 
-async function expectContract(
-  contract: readonly (readonly [path: string, expected: string])[],
-) {
+async function expectContract(contract: ReadonlyArray<ContractEntry>) {
   const declarations = await Promise.all(
     contract.map(async ([path, expected]) => ({
       contents: await readFile(path, "utf8"),

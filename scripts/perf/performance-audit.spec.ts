@@ -78,10 +78,11 @@ function createFixtureDirectory(runs = performanceConfig.minimumRuns) {
   const routes = performanceConfig.routes.map((route: string) =>
     route === "/" ? "home" : route.slice(1),
   );
-  for (const [site, offset] of [
+  const sites: ReadonlyArray<readonly [site: string, offset: number]> = [
     ["new", 10],
     ["original", 20],
-  ] as const) {
+  ];
+  for (const [site, offset] of sites) {
     for (const route of routes) {
       for (let run = 1; run <= runs; run += 1) {
         writeFileSync(
