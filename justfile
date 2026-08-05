@@ -126,6 +126,7 @@ e2e-project project:
     project="$1"; [[ "$project" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "e2e-project: project must be a valid Nx project name" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run "$project:e2e" >"$log" 2>&1 || { cat "$log" >&2; echo "e2e-project: remote browser journey failed; fix the failure above and rerun just e2e-project $project" >&2; exit 1; }
 
 setup-llmlint:
+    # llmlint: ignore[changed_behavior_has_e2e] This developer-only installer has no browser interface; its success and failure output contracts are exercised through real subprocess tests in tooling-ci.
     log=$(mktemp); trap 'rm -f "$log"' EXIT; ./scripts/ci/setup-llmlint.sh >"$log" 2>&1 || { cat "$log" >&2; echo "setup-llmlint: setup failed; resolve the diagnostic above and rerun just setup-llmlint" >&2; exit 1; }; echo "setup-llmlint: llmlint is ready"
 
 # llmlint: ignore[changed_behavior_has_e2e] This command-only recipe has no browser interface and delegates to the real registry/integrity installer.
@@ -146,6 +147,7 @@ lint-llm:
 # path with a clean run, so an argument this recipe gets wrong is invisible.
 # llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; it judges the working tree and reports an exit status, so nothing it does is observable to a visitor. lint-llm-diff.spec.ts drives this exact recipe as a real subprocess through the default base, an explicit ref, a range, pass-through files, both rejected-input paths, and a reported-findings failure.
 @lint-llm-diff base="origin/master" *files:
+    # llmlint: ignore[changed_behavior_has_e2e] This developer-only judge command has no browser interface; lint-llm-diff.spec.ts drives its argument validation and exit behavior through the real just subprocess.
     base="$1"; [[ "$base" != -* ]] && git rev-list -1 "$base" -- >/dev/null 2>&1 || { echo "lint-llm-diff: base must be a git revision to diff against, such as origin/master, HEAD~1, or a range; fetch the missing ref, then rerun just lint-llm-diff <base>" >&2; exit 2; }; llmlint_args=(--diff --diff-base "$base"); for argument in "${@:2}"; do [[ "$argument" != -* && "$argument" != *..* && -e "$argument" ]] || { echo "lint-llm-diff: every file after the base must be an existing workspace path, because llmlint reports a clean run for a path it cannot match; correct or drop \"$argument\", then rerun just lint-llm-diff $base <files>" >&2; exit 2; }; llmlint_args+=("$argument"); done; llmlint "${llmlint_args[@]}" || { echo "lint-llm-diff: the LLM judge reported the findings above; fix each one, or justify it with a narrow ignore directive at its site, then rerun just lint-llm-diff" >&2; exit 1; }
 
 lint-llm-validate *args:
