@@ -31,7 +31,10 @@ describe("defineWorkspaceTestConfig", () => {
   });
 
   test("uses the project source tree as the default coverage boundary", () => {
-    const config = defineWorkspaceTestConfig({ project: "bio", dir: "apps/bio" });
+    const config = defineWorkspaceTestConfig({
+      project: "bio",
+      dir: "apps/bio",
+    });
     expect(config.test?.coverage?.include).toEqual([
       "apps/bio/src/**/*.{ts,tsx}",
     ]);

@@ -24,15 +24,13 @@ export function standardVisualScenarios({
     "standalone",
     "host-composed",
   ];
-  const scenarios: VisualScenario[] = renders.map(
-    (render) => ({
-      render,
-      state: "happy",
-      viewports: allViewports,
-      target: (page) => target(page, "happy"),
-      ...(prepare ? { prepare: (page) => prepare(page, "happy") } : {}),
-    }),
-  );
+  const scenarios: VisualScenario[] = renders.map((render) => ({
+    render,
+    state: "happy",
+    viewports: allViewports,
+    target: (page) => target(page, "happy"),
+    ...(prepare ? { prepare: (page) => prepare(page, "happy") } : {}),
+  }));
   for (const state of states) {
     for (const render of renders) {
       // Skip host-composed `loading`: even as a fixed-dimension skeleton, the

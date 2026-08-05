@@ -30,7 +30,8 @@ export function resolveTsconfigAliases(
     Object.entries(tsconfig.compilerOptions.paths).map(([alias, targets]) => {
       const target = targets[0];
       /* v8 ignore next -- Zod's min(1) enforces this boundary invariant, but its inferred array type does not retain tuple cardinality. */
-      if (target === undefined) throw new Error(`Missing path target for ${alias}`);
+      if (target === undefined)
+        throw new Error(`Missing path target for ${alias}`);
       return [alias, path.resolve(root, target)];
     }),
   );
