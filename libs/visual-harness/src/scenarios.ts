@@ -31,6 +31,11 @@ export function standardVisualScenarios({
   );
   for (const state of states) {
     for (const render of ["standalone", "host-composed"] as const) {
+      // Skip host-composed `loading`: even as a fixed-dimension skeleton, the
+      // host-composed capture still jitters ~2px run-to-run (a host-composition
+      // layout-timing effect, not a content one). The standalone loading shot
+      // already covers the same skeleton deterministically.
+      if (render === "host-composed" && state === "loading") continue;
       scenarios.push({
         render,
         state,
