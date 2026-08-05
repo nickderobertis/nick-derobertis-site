@@ -1,6 +1,7 @@
 import { siteBase } from "@site/data-access-core";
 import { homeContent, readPaneState } from "@site/data-access-home";
 import Skeleton from "./skeleton";
+import { StoryState } from "./story-state";
 import "./story.css";
 
 export default function HomeStoryPage() {
@@ -8,12 +9,7 @@ export default function HomeStoryPage() {
     typeof window === "undefined" ? "" : window.location.search,
   );
   if (state === "loading") return <Skeleton />;
-  if (state === "error")
-    return (
-      <output className="pane-state">Nick’s story could not be loaded.</output>
-    );
-  if (state === "empty")
-    return <output className="pane-state">No story is available yet.</output>;
+  if (state !== "happy") return <StoryState name={state} />;
   return (
     <section className="pane story-pane" aria-labelledby="story-title">
       <div
