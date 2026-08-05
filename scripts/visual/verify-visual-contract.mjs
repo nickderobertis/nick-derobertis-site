@@ -25,7 +25,8 @@ if (
   !Object.keys(contract).every((key) => contractKeys.includes(key)) ||
   !contractKeys.every(
     (key) => typeof contract[key] === "string" && contract[key].length > 0,
-  )
+  ) ||
+  !/^[a-z0-9_]+$/.test(contract.architecture)
 )
   throw new Error(
     "visual-tools.json must contain non-empty architecture, pagesRepository, playwrightContainer, and screencompVersion strings",

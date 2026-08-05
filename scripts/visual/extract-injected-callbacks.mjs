@@ -1,5 +1,5 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, statSync, writeFileSync } from "node:fs";
+import { isAbsolute, join, normalize, parse } from "node:path";
 
 // llmlint: ignore-file[changed_behavior_has_e2e] This CLI/filesystem extractor has no browser interface; lint-workflows executes its real boundary against the committed workflow and hands the result to shellcheck.
 
@@ -20,9 +20,15 @@ process.on("uncaughtException", (error) => {
 });
 
 const [outputDirectory] = process.argv.slice(2);
-if (typeof outputDirectory !== "string" || outputDirectory.length === 0)
+if (
+  typeof outputDirectory !== "string" ||
+  !isAbsolute(outputDirectory) ||
+  normalize(outputDirectory) !== outputDirectory ||
+  outputDirectory === parse(outputDirectory).root ||
+  !statSync(outputDirectory).isDirectory()
+)
   throw new Error(
-    "an output directory argument is required, for example just lint-workflows",
+    "output directory must be an existing normalized absolute directory created for this run, for example through just lint-workflows",
   );
 
 function extractBlockScalar(lines, key) {
@@ -52,7 +58,6 @@ function extractBlockScalar(lines, key) {
 }
 
 const lines = readFileSync(workflowPath, "utf8").split("\n");
-mkdirSync(outputDirectory, { recursive: true });
 for (const key of injectedCallbacks) {
   // GitHub expands `${{ … }}` before the shell ever sees it, so a placeholder
   // keeps shellcheck parsing the shell rather than the expression syntax.
@@ -60,7 +65,7 @@ for (const key of injectedCallbacks) {
     /\$\{\{[^}]*\}\}/g,
     "expression",
   );
-  writeFileSync(join(outputDirectory, `${key}.sh`), callback);
+  writeFileSync(join(outputDirectory, `${key}.sh`), callback, { flag: "wx" });
 }
 console.log(
   `extracted ${injectedCallbacks.length} injected screencomp callback(s) from ${workflowPath}`,
