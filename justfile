@@ -109,6 +109,12 @@ perf url="" runs="":
 perf-compare new_url="" original_url="" runs="":
     @log=$(mktemp); trap 'rm -f "$log"' EXIT; PERF_URL="$1" PERF_ORIGINAL_URL="$2" PERF_RUNS="$3" pnpm exec nx run shell:perf >"$log" 2>&1 || { cat "$log" >&2; echo "perf-compare: audit failed; correct the reported URL/browser issue and rerun just perf-compare" >&2; exit 1; }; grep -m1 '^Performance comparison complete' "$log"
 
+perf-refresh-report:
+    @log=$(mktemp); trap 'rm -f "$log"' EXIT; {{node_typestrip}} scripts/perf/performance-audit.mjs --refresh-report >"$log" 2>&1 || { cat "$log" >&2; echo "perf-refresh-report: rendering the readable report failed; correct the structured findings and rerun just perf-refresh-report" >&2; exit 1; }
+
+perf-check-report:
+    @log=$(mktemp); trap 'rm -f "$log"' EXIT; {{node_typestrip}} scripts/perf/performance-audit.mjs --check-report >"$log" 2>&1 || { cat "$log" >&2; echo "perf-check-report: readable report verification failed; rerun just perf-refresh-report and commit the refreshed report" >&2; exit 1; }
+
 # Build the complete federated artifact before serving it at the Pages base path.
 serve: prerender
     {{node_typestrip}} scripts/serve/serve-e2e.mjs

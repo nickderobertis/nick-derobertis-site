@@ -351,7 +351,7 @@ function validateFindings(value) {
     }
     if (Object.keys(site.spreads).sort().join() !== [...ROUTES].sort().join()) {
       throw new Error(
-        "structured findings spread routes do not match performance config; correct sites.*.spreads in docs/perf-findings.json, then rerun --check-report",
+        "structured findings spread routes do not match performance config; correct sites.*.spreads in docs/perf-findings.json, then rerun just perf-check-report",
       );
     }
   }
@@ -638,9 +638,9 @@ async function main() {
 
 main().catch((error) => {
   const recovery = cli.checkReport
-    ? "run node scripts/perf/performance-audit.mjs --refresh-report, review the diff, then rerun --check-report"
+    ? "run just perf-refresh-report, review the diff, then rerun just perf-check-report"
     : cli.refreshReport
-      ? "correct docs/perf-findings.json, then rerun --refresh-report"
+      ? "correct docs/perf-findings.json, then rerun just perf-refresh-report"
       : "correct the reported input or environment and rerun the same performance command";
   process.stderr.write(
     `performance audit failed: ${error.message}; ${recovery}\n`,

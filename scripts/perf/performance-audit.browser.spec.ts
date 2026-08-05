@@ -209,7 +209,7 @@ describe("performance audit real-browser e2e CLI", () => {
       { cwd: directory, encoding: "utf8" },
     );
     expect(stale.status).toBe(1);
-    expect(stale.stderr).toContain("--refresh-report");
+    expect(stale.stderr).toContain("just perf-refresh-report");
 
     const refreshed = spawnSync(
       process.execPath,
