@@ -116,6 +116,17 @@ describe("just lint-llm-diff argument routing", () => {
     expect(argv).toEqual(["--diff", "--diff-base", "HEAD~1..HEAD"]);
   });
 
+  test("accepts the Nx cache bypass without treating it as a file", () => {
+    const invocation = runLintLlmDiff(["origin/master", "--skip-nx-cache"]);
+
+    expect(invocation.status).toBe(0);
+    expect(judgedArgv(invocation)).toEqual([
+      "--diff",
+      "--diff-base",
+      "origin/master",
+    ]);
+  });
+
   test("keeps files available after the base", () => {
     const invocation = runLintLlmDiff([
       "HEAD~1",
