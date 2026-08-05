@@ -481,6 +481,7 @@ export async function compose({
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
 if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
+  // llmlint: ignore[boundary_inputs_validated] COMPOSE_OUTPUT intentionally accepts an arbitrary absolute root for isolated artifact and lifecycle tests; compose validates every derived path beneath that caller-owned root, while the public `just compose` recipe confines normal writes beneath dist/.
   await compose({
     fragmentRoot: requiredPath(
       process.env.FRAGMENT_ROOT,

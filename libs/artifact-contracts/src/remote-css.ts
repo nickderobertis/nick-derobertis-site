@@ -3,7 +3,7 @@ import { basename, join } from "node:path";
 // The prerender CLIs load this module through Node's type stripping, where a
 // workspace alias does not resolve, so the canonical remote registry is read
 // as the serialized build input it is.
-// eslint-disable-next-line @nx/enforce-module-boundaries
+// eslint-disable-next-line @nx/enforce-module-boundaries -- This pure contract parser reads the canonical serialized build manifest directly because Node type stripping cannot resolve workspace aliases.
 import remoteManifest from "../../build-config/src/remotes.json" with {
   type: "json",
 };

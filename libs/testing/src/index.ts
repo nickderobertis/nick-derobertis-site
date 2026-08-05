@@ -3,6 +3,7 @@ import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { parseConfigFileTextToJson } from "typescript";
 import type { TestUserConfig, ViteUserConfig } from "vitest/config";
+import { z } from "zod";
 
 export type UserConfig = ViteUserConfig & { test?: TestUserConfig };
 
@@ -14,8 +15,23 @@ export interface AppTestConfigOptions {
   coverageExclude?: string[];
 }
 
-interface BaseTsConfig {
-  compilerOptions: { paths: Record<string, [string, ...string[]]> };
+const baseTsConfigSchema = z.object({
+  compilerOptions: z.object({
+    paths: z.record(z.string(), z.array(z.string()).min(1)),
+  }),
+});
+
+export function resolveTsconfigAliases(
+  root: string,
+  config: unknown,
+): Record<string, string> {
+  const tsconfig = baseTsConfigSchema.parse(config);
+  return Object.fromEntries(
+    Object.entries(tsconfig.compilerOptions.paths).map(([alias, targets]) => [
+      alias,
+      path.resolve(root, targets[0] as string),
+    ]),
+  );
 }
 
 export function defineAppTestConfig({
@@ -35,13 +51,7 @@ export function defineAppTestConfig({
   );
   /* v8 ignore next -- The committed workspace config is validated by TypeScript; this preserves a useful boundary error for corrupted checkouts. */
   if (parsed.error) throw new Error("Could not parse tsconfig.base.json");
-  const tsconfig = parsed.config as BaseTsConfig;
-  const aliases = Object.fromEntries(
-    Object.entries(tsconfig.compilerOptions.paths).map(([alias, targets]) => [
-      alias,
-      path.resolve(root, targets[0]),
-    ]),
-  );
+  const aliases = resolveTsconfigAliases(root, parsed.config);
   const remoteAliases = Object.fromEntries(
     Object.entries(remotes).map(([alias, target]) => [
       alias,

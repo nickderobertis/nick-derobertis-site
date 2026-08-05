@@ -13,6 +13,7 @@ import { z } from "zod";
 
 const workspace = path.resolve(import.meta.dirname, "../..");
 const script = path.join(workspace, "scripts/ci/setup-ci-tools.sh");
+const installJustScript = path.join(workspace, "scripts/ci/install-just.sh");
 const digestSchema = z.object({
   x86_64: z.string().regex(/^[0-9a-f]{64}$/),
   aarch64: z.string().regex(/^[0-9a-f]{64}$/),
@@ -198,6 +199,36 @@ describe("pinned CI tool platform contract", () => {
       false,
     );
   }, 180_000);
+});
+
+describe("just installer boundary", () => {
+  it("downloads, verifies, and installs just into a caller-owned bin directory", () => {
+    const binDirectory = temporaryDirectory("just-bin.");
+    const result = spawnSync(installJustScript, [], {
+      cwd: workspace,
+      encoding: "utf8",
+      env: { ...process.env, XDG_BIN_HOME: binDirectory },
+    });
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(existsSync(path.join(binDirectory, "just"))).toBe(true);
+  }, 60_000);
+
+  it("reports how to recover when the destination cannot be created", () => {
+    const parent = temporaryDirectory("just-unwritable.");
+    const file = path.join(parent, "not-a-directory");
+    writeFileSync(file, "occupied");
+    const result = spawnSync(installJustScript, [], {
+      cwd: workspace,
+      encoding: "utf8",
+      env: { ...process.env, XDG_BIN_HOME: path.join(file, "bin") },
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(
+      "set XDG_BIN_HOME to a writable directory and retry",
+    );
+  });
 });
 
 describe("ci-tools.json contract validation", () => {

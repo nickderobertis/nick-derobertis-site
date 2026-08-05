@@ -20,7 +20,10 @@ esac
 
 if ! contract_output=$(
   node -e '
-    const { codex } = require("./ci-tools.json");
+    const contract = require("./ci-tools.json");
+    if (!contract || typeof contract !== "object" || Array.isArray(contract))
+      throw new Error("invalid CI tool contract root; ci-tools.json must contain an object");
+    const { codex } = contract;
     if (
       !codex ||
       Object.keys(codex).length !== 3 ||

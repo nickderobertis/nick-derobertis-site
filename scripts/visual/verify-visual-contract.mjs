@@ -49,6 +49,14 @@ const sources = [
 ];
 const captureSource = readFileSync("libs/visual-harness/src/index.ts", "utf8");
 const nxConfig = JSON.parse(readFileSync("nx.json", "utf8"));
+if (
+  typeof nxConfig !== "object" ||
+  nxConfig === null ||
+  Array.isArray(nxConfig) ||
+  typeof nxConfig.targetDefaults !== "object" ||
+  nxConfig.targetDefaults === null
+)
+  throw new Error("nx.json must contain an object-valued targetDefaults");
 const homeRspackSource = readFileSync("apps/home/rspack.config.ts", "utf8");
 const remoteMapMatch = homeRspackSource.match(/remoteMap\(\[([\s\S]*?)\]\)/);
 if (!remoteMapMatch)
@@ -101,6 +109,14 @@ const visualProjects = readdirSync("apps")
     const projectConfig = JSON.parse(
       readFileSync(`apps/${project}/project.json`, "utf8"),
     );
+    if (
+      typeof projectConfig !== "object" ||
+      projectConfig === null ||
+      Array.isArray(projectConfig) ||
+      typeof projectConfig.targets !== "object" ||
+      projectConfig.targets === null
+    )
+      throw new Error(`Invalid Nx project configuration for ${project}`);
     return Boolean(projectConfig.targets?.screenshot);
   })
   .sort();
@@ -116,6 +132,14 @@ for (const project of visualProjects) {
   const projectConfig = JSON.parse(
     readFileSync(`apps/${project}/project.json`, "utf8"),
   );
+  if (
+    typeof projectConfig !== "object" ||
+    projectConfig === null ||
+    Array.isArray(projectConfig) ||
+    typeof projectConfig.targets !== "object" ||
+    projectConfig.targets === null
+  )
+    throw new Error(`Invalid Nx project configuration for ${project}`);
   if (
     !projectConfig.targets.screenshot.options?.command?.includes(
       `apps/${project}/visual/capture.ts`,

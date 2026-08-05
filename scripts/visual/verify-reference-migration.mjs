@@ -12,6 +12,9 @@ const migration = JSON.parse(
   readFileSync("reference/screenshots/screencomp-migration.json", "utf8"),
 );
 if (
+  typeof migration !== "object" ||
+  migration === null ||
+  Array.isArray(migration) ||
   migration.schema !== 1 ||
   migration.sourceCommit !== "c7fe035" ||
   typeof migration.groups !== "object" ||

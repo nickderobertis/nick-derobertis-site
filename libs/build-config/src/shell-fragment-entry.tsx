@@ -4,7 +4,7 @@
 // same way a remote's entry is aliased to that remote's page. The CV data it
 // renders with is read through the client every app reads it through; the
 // library's own module graph reaches neither the shell nor the CV data.
-/* eslint-disable @nx/enforce-module-boundaries */
+/* eslint-disable @nx/enforce-module-boundaries -- This build-only rspack entry is compiled in the shell's graph with @site-fragment aliases; it is not imported by the library runtime. */
 
 import { cvDataClient } from "@site/data-access-core";
 import { createSiteRouter } from "@site-fragment/router";

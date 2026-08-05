@@ -40,6 +40,11 @@ const projects = [...new Set(names)].sort().map((id) => {
     readFileSync(`apps/${id}/project.json`, "utf8"),
   );
   if (
+    typeof projectConfig !== "object" ||
+    projectConfig === null ||
+    Array.isArray(projectConfig) ||
+    typeof projectConfig.targets !== "object" ||
+    projectConfig.targets === null ||
     !projectConfig.targets?.screenshot ||
     !existsSync(`apps/${id}/visual/scenarios.ts`)
   )

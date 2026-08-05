@@ -198,6 +198,7 @@ cross-remote state matrix.
 
 ## Workspace tooling projects
 
+<!-- llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] This human-readable ownership map intentionally names the projects; module-boundaries.spec.ts verifies their tags and targets against the Nx graph. -->
 `scripts/` is eight Nx projects rather than a folder of loose files, one per
 tooling concern: `tooling-compose`, `tooling-artifact`, `tooling-publish`,
 `tooling-visual`, `tooling-perf`, `tooling-serve`, `tooling-ci`, and
@@ -209,6 +210,7 @@ publish lanes no longer waits on a thirteen-app federation build to run.
 real-browser performance audit needs that artifact too, so it runs as
 `tooling-perf`'s `e2e` target alongside the other Playwright journeys rather
 than holding up that project's own tests.
+<!-- llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate] -->
 
 No file in `scripts/` imports another one. What two CLIs share lives in a
 library instead: `@site/artifact-contracts` parses the serialized route and

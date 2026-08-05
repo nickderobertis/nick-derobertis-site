@@ -1,6 +1,6 @@
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { defineAppTestConfig } from "./index.ts";
+import { defineAppTestConfig, resolveTsconfigAliases } from "./index.ts";
 
 describe("defineAppTestConfig", () => {
   test("builds the fixed component-test contract and merges remote aliases", () => {
@@ -41,5 +41,13 @@ describe("defineAppTestConfig", () => {
     expect(() =>
       defineAppTestConfig({ project: "Bad_Name", dir: "apps/bio" }),
     ).toThrow("Invalid test project name");
+  });
+
+  test("rejects malformed tsconfig path mappings at the configuration boundary", () => {
+    expect(() =>
+      resolveTsconfigAliases("/workspace", {
+        compilerOptions: { paths: { "@site/broken": [] } },
+      }),
+    ).toThrow();
   });
 });

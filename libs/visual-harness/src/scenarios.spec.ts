@@ -28,6 +28,7 @@ test("expands the deterministic viewport and render contract", () => {
     { render: "standalone", state: "empty", viewports: ["desktop"] },
     { render: "host-composed", state: "empty", viewports: ["desktop"] },
     { render: "standalone", state: "loading", viewports: ["desktop"] },
+    { render: "host-composed", state: "loading", viewports: ["desktop"] },
     { render: "standalone", state: "error", viewports: ["desktop"] },
     { render: "host-composed", state: "error", viewports: ["desktop"] },
   ]);

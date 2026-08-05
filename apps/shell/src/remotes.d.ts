@@ -17,7 +17,7 @@ declare module "bio/Page" {
 }
 declare module "research/Page" {
   // The shell owns this route boundary and its validated loader payload.
-  // eslint-disable-next-line @nx/enforce-module-boundaries
+  // eslint-disable-next-line @nx/enforce-module-boundaries -- The host-owned declaration types the validated payload passed across this route remote boundary.
   import type { Research } from "@site/data-access-core";
   import type { ResearchPageProps } from "@site/route-state";
   import type { ComponentType } from "react";
@@ -27,7 +27,7 @@ declare module "research/Page" {
 }
 declare module "software/Page" {
   // The shell owns this route boundary and its validated loader payload.
-  // eslint-disable-next-line @nx/enforce-module-boundaries
+  // eslint-disable-next-line @nx/enforce-module-boundaries -- The host-owned declaration types the validated payload passed across this route remote boundary.
   import type { SoftwareProjects } from "@site/data-access-core";
   import type { SoftwarePageProps } from "@site/route-state";
   import type { ComponentType } from "react";
@@ -37,7 +37,7 @@ declare module "software/Page" {
 }
 declare module "courses/Page" {
   // The shell owns this route boundary and its validated loader payload.
-  // eslint-disable-next-line @nx/enforce-module-boundaries
+  // eslint-disable-next-line @nx/enforce-module-boundaries -- The host-owned declaration types the validated payload passed across this route remote boundary.
   import type { Courses } from "@site/data-access-core";
   import type { CoursesPageProps } from "@site/route-state";
   import type { ComponentType } from "react";

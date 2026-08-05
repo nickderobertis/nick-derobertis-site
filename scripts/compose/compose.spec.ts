@@ -12,7 +12,7 @@ import { afterEach, expect, test } from "vitest";
 // This spec drives compose.mjs itself, which Node type-strips, so it reaches
 // the same library modules by the same paths the CLI resolves rather than
 // through a workspace alias no build script can resolve.
-/* eslint-disable @nx/enforce-module-boundaries */
+/* eslint-disable @nx/enforce-module-boundaries -- This CLI integration spec follows the same direct source paths used by Node type stripping, which cannot resolve workspace aliases. */
 import { remotesForRoute } from "../../libs/artifact-contracts/src/index.ts";
 import { serializeFragmentContract } from "../../libs/build-config/src/fragment-contract.ts";
 import { publishableApps } from "../../libs/build-config/src/publish-fragment.ts";
