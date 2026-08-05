@@ -4,9 +4,7 @@
       "Bash(just check)",
       "Bash(just lint-llm-diff origin/master --skip-nx-cache)",
       "Bash(git status --short --branch)",
-      "Bash(git diff --check)",
-      "Bash(git add -A)",
-      "Bash(git commit -m *)"
+      "Bash(git diff --check)"
     ]
   },
   "hooks": {
