@@ -1,0 +1,8 @@
+{
+  "name": "@site/e2e-harness",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

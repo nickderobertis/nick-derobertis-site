@@ -112,7 +112,7 @@ test("remote manifest matches published fragment composition", async () => {
   const remoteNames = Object.keys(remoteManifest);
   for (const remote of remoteNames) {
     expect(declarations).toContain(`${remoteManifest[remote]}/Page`);
-    // llmlint: ignore-block[tests_mirror_real_usage] Same cache-and-wiring contract per remote: nothing a visitor can do reveals whether this remote is named in the composition map or declares its fragment files as build outputs, and both are already driven end to end by remote-owner.spec.ts through the standalone and host-composed artifacts.
+    // llmlint: ignore-block[tests_mirror_real_usage] Same cache-and-wiring contract per remote: nothing a visitor can do reveals whether this remote is named in the composition map or declares its fragment files as build outputs, and both are already driven end to end by each app's ownership.spec.ts through the standalone and host-composed artifacts.
     expect(compose).toContain(`"${remote}"`);
     const remoteProject: unknown = JSON.parse(
       await readFile(`apps/${remote}/project.json`, "utf8"),
@@ -132,7 +132,11 @@ test("remote manifest matches published fragment composition", async () => {
     expect(remoteProject).toMatchObject({
       targets: {
         e2e: {
-          options: { command: expect.stringContaining(`E2E_REMOTE=${remote}`) },
+          options: {
+            command: expect.stringContaining(
+              `apps/${remote}/e2e/playwright.config.ts`,
+            ),
+          },
         },
       },
     });

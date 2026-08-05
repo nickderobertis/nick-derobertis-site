@@ -19,6 +19,7 @@
     "paths": {
       "@site/artifact-contracts": ["libs/artifact-contracts/src/index.ts"],
       "@site/e2e-fixtures": ["libs/e2e-fixtures/src/index.ts"],
+      "@site/e2e-harness": ["libs/e2e-harness/src/index.ts"],
       "@site/design-system": ["libs/design-system/src/index.ts"],
       "@site/data-access-core": ["libs/data-access-core/src/index.ts"],
       "@site/data-access-awards": ["libs/data-access-awards/src/index.ts"],

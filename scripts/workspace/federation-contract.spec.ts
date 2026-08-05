@@ -9,7 +9,7 @@ const timelineContract: ReadonlyArray<ContractEntry> = [
   ["libs/build-config/src/remotes.json", '"timeline": "timeline"'],
   ["apps/home/rspack.config.ts", '"timeline"'],
   ["apps/home/src/remotes.d.ts", 'declare module "timeline/Page"'],
-  ["apps/timeline/project.json", "E2E_REMOTE=timeline"],
+  ["apps/timeline/project.json", "apps/timeline/e2e/playwright.config.ts"],
   ["eslint.config.mjs", 'sourceTag: "scope:timeline"'],
   // llmlint: ignore[tests_mirror_real_usage] That compose.mjs iterates the validated manifest instead of a hardcoded list is the same wiring contract, invisible from the browser until a newly added remote silently goes uncomposed; compose.spec.ts drives the real exported composition API over it.
   ["scripts/compose/compose.mjs", "Object.keys(validatedRemoteManifest)"],
@@ -23,7 +23,7 @@ const awardsContract: ReadonlyArray<ContractEntry> = [
   ["apps/home/src/remotes.d.ts", 'declare module "awards/Page"'],
   // llmlint: ignore[tests_mirror_real_usage] Same composition contract for Awards: nothing a visitor can do reveals whether compose.mjs names this remote, and awards.spec.ts plus home.spec.ts drive the composed result through the real browser on both render paths.
   ["scripts/compose/compose.mjs", '"awards"'],
-  ["apps/awards/project.json", "E2E_REMOTE=awards"],
+  ["apps/awards/project.json", "apps/awards/e2e/playwright.config.ts"],
   ["libs/build-config/src/remotes.json", '"awards": "awards"'],
 ];
 
@@ -46,8 +46,8 @@ const homePreloadContract: ReadonlyArray<ContractEntry> = [
 
 const bioContract: ReadonlyArray<ContractEntry> = [
   ["apps/bio/src/page.tsx", 'id="bio-heading">Optimizing Life'],
-  ["apps/shell-e2e/src/bio.spec.ts", 'name: "Optimizing Life"'],
-  ["apps/shell-e2e/src/site.spec.ts", 'heading: "Optimizing Life"'],
+  ["apps/bio/e2e/bio.spec.ts", 'name: "Optimizing Life"'],
+  ["apps/shell/e2e/site.spec.ts", 'heading: "Optimizing Life"'],
 ];
 
 async function expectContract(contract: ReadonlyArray<ContractEntry>) {

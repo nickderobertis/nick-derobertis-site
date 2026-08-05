@@ -186,7 +186,7 @@ function compileRenderer(name: string, outputPath: string) {
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Publication is a build/filesystem boundary with no browser interface; site.spec.ts and preload.spec.ts drive these exact published bytes through the assembled artifact with JavaScript disabled and through hydration, while remote-owner.spec.ts drives every published remote through both standalone and host-composed boundaries.
+// llmlint: ignore-block[changed_behavior_has_e2e] Publication is a build/filesystem boundary with no browser interface; site.spec.ts and preload.spec.ts drive these exact published bytes through the assembled artifact with JavaScript disabled and through hydration, while each app's ownership.spec.ts drives its published remote through both standalone and host-composed boundaries.
 export class PublishedFragmentPlugin {
   readonly name: string;
 
