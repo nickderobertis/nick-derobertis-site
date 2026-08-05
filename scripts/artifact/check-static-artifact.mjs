@@ -16,6 +16,13 @@ import siteConfig from "../../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
 
+process.on("uncaughtException", (error) => {
+  console.error(
+    `check-static-artifact: ${error instanceof Error ? error.message : String(error)}`,
+  );
+  process.exit(1);
+});
+
 const substantiveRouteContent = {
   "/": "Who am I?",
   "/bio": "Reproducible Research",

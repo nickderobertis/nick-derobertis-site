@@ -11,6 +11,17 @@ process.on("uncaughtException", (error) => {
 const migration = JSON.parse(
   readFileSync("reference/screenshots/screencomp-migration.json", "utf8"),
 );
+const visualTools = JSON.parse(readFileSync("visual-tools.json", "utf8"));
+if (
+  !visualTools ||
+  typeof visualTools !== "object" ||
+  Array.isArray(visualTools) ||
+  typeof visualTools.architecture !== "string" ||
+  !/^[a-z0-9_]+$/.test(visualTools.architecture)
+)
+  throw new Error(
+    "Invalid visual architecture contract; repair visual-tools.json",
+  );
 if (
   typeof migration !== "object" ||
   migration === null ||
@@ -45,9 +56,10 @@ for (const [group, owner] of Object.entries(migration.groups)) {
       `Reference group has no PNGs: ${group}; restore its PR #12 PNGs or remove the stale migration entry`,
     );
   mappedFiles.push(...pngs.map((file) => path.join(groupRoot, file)));
-  if (!existsSync(`apps/${owner}/visual/baseline/x86_64.json`))
+  const baseline = `apps/${owner}/visual/baseline/${visualTools.architecture}.json`;
+  if (!existsSync(baseline))
     throw new Error(
-      `Reference owner ${owner} has no screencomp baseline; run its screenshot target and seed apps/${owner}/visual/baseline/x86_64.json with screencomp manifest`,
+      `Reference owner ${owner} has no screencomp baseline; run its screenshot target and seed ${baseline} with a screencomp manifest`,
     );
 }
 

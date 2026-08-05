@@ -7,6 +7,13 @@ import {
   createSiteServer,
 } from "../../libs/e2e-fixtures/src/index.ts";
 
+process.on("uncaughtException", (error) => {
+  console.error(
+    `serve-e2e: ${error instanceof Error ? error.message : String(error)}`,
+  );
+  process.exit(1);
+});
+
 function validateSiteConfig(value) {
   if (
     !value ||

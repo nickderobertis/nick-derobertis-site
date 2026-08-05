@@ -47,6 +47,20 @@ const sources = [
     readFileSync("scripts/visual/affected-visual-projects.mjs", "utf8"),
   ],
 ];
+const visualProjectNames = readdirSync("apps")
+  .filter((project) => {
+    const configPath = `apps/${project}/project.json`;
+    return (
+      statSync(`apps/${project}`).isDirectory() &&
+      readFileSync(configPath, "utf8").includes('"screenshot"')
+    );
+  })
+  .sort();
+for (const project of visualProjectNames)
+  sources.push([
+    `${project} screenshot target`,
+    readFileSync(`apps/${project}/project.json`, "utf8"),
+  ]);
 const captureSource = readFileSync("libs/visual-harness/src/index.ts", "utf8");
 const nxConfig = JSON.parse(readFileSync("nx.json", "utf8"));
 if (
@@ -170,7 +184,10 @@ for (const project of visualProjects) {
         `Visual scenario state ${scenario.state} is missing from screencomp.toml's state toggle values`,
       );
   const baseline = JSON.parse(
-    readFileSync(`apps/${project}/visual/baseline/x86_64.json`, "utf8"),
+    readFileSync(
+      `apps/${project}/visual/baseline/${contract.architecture}.json`,
+      "utf8",
+    ),
   );
   if (
     typeof baseline !== "object" ||
@@ -204,6 +221,7 @@ const expectedConsumers = {
     "screencomp config",
     "affected selector",
     "pre-push guard",
+    ...visualProjectNames.map((project) => `${project} screenshot target`),
   ],
   pagesRepository: ["workflow"],
   playwrightContainer: ["workflow", "pre-push guard"],
