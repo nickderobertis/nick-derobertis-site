@@ -106,7 +106,15 @@ function validatedPagesBase(value) {
   return value;
 }
 
-const pagesBase = validatedPagesBase(siteConfig.pagesBase);
+function validatedSiteConfig(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new Error(
+      "site.config.json must contain an object; fix the site config and rerun just prerender.",
+    );
+  return value;
+}
+
+const pagesBase = validatedPagesBase(validatedSiteConfig(siteConfig).pagesBase);
 
 function decodeShellMetadata(element, attribute, label) {
   const encoded = element.getAttribute(attribute);

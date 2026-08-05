@@ -116,15 +116,14 @@ describe("just lint-llm-diff argument routing", () => {
     expect(argv).toEqual(["--diff", "--diff-base", "HEAD~1..HEAD"]);
   });
 
-  test("accepts the Nx cache bypass without treating it as a file", () => {
+  test("rejects unsupported cache flags before invoking the judge", () => {
     const invocation = runLintLlmDiff(["origin/master", "--skip-nx-cache"]);
 
-    expect(invocation.status).toBe(0);
-    expect(judgedArgv(invocation)).toEqual([
-      "--diff",
-      "--diff-base",
-      "origin/master",
-    ]);
+    expect(invocation.status).toBe(2);
+    expect(invocation.argv).toBeNull();
+    expect(invocation.stderr).toContain(
+      "lint-llm-diff: every file after the base must be an existing workspace path",
+    );
   });
 
   test("keeps files available after the base", () => {
