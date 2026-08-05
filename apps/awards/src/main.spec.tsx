@@ -29,6 +29,23 @@ async function startRemote() {
   });
 }
 
+/**
+ * Starts the remote against an awards boundary that never answers, holding the
+ * pane on its loading frame. That frame is the only moment at which adopting
+ * the published fragment and throwing it away look different in the document:
+ * once the awards arrive, both paths have replaced it with the same pane.
+ */
+async function startRemoteOnPendingAwards() {
+  vi.stubGlobal("fetch", () => new Promise<Response>(() => {}));
+  await act(async () => {
+    await import("./main");
+  });
+}
+
+function loadingFrame() {
+  return screen.getByRole("status", { name: "Loading awards" });
+}
+
 beforeEach(() => {
   vi.resetModules();
   document.body.innerHTML = "";
@@ -71,9 +88,9 @@ test("renders from scratch when the document ships no prerendered awards", async
   ).toBeInTheDocument();
 });
 
-test("re-renders rather than hydrating for a visitor who asked for the full set", async () => {
-  // The published fragment can only ever show the selected view, so a visitor
-  // arriving with a query has to be given a fresh render of what they asked for.
+test("shows the complete set to a visitor who arrives asking for it", async () => {
+  // The published fragment can only ever settle onto the selected view, so a
+  // visitor arriving with a query has to be given what they asked for instead.
   window.history.replaceState(null, "", "/?awards-view=all");
   document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
 
@@ -85,4 +102,29 @@ test("re-renders rather than hydrating for a visitor who asked for the full set"
   expect(
     screen.queryByRole("region", { name: "Selected awards" }),
   ).not.toBeInTheDocument();
+});
+
+test("adopts the loading frame a visitor is already looking at", async () => {
+  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+  const published = loadingFrame();
+
+  await startRemoteOnPendingAwards();
+
+  // Hydration takes over the shipped nodes in place, so the frame the visitor
+  // has been watching since first paint is never torn down and repainted.
+  expect(loadingFrame()).toBe(published);
+});
+
+test("throws the published frame away when it was rendered for another view", async () => {
+  window.history.replaceState(null, "", "/?awards-view=all");
+  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+  const published = loadingFrame();
+
+  await startRemoteOnPendingAwards();
+
+  // The fragment was published for the selected view. Adopting it would leave
+  // one view's markup underneath another view's render, so this visitor's
+  // frame has to be a fresh one.
+  expect(published).not.toBeInTheDocument();
+  expect(loadingFrame()).not.toBe(published);
 });
