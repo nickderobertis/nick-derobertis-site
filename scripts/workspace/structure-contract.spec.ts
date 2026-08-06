@@ -15,6 +15,13 @@ import { z } from "zod";
  * This spec is what makes them fail instead, and it derives every subject from
  * the real Nx project graph so a project added tomorrow is covered the day it
  * is added rather than when someone remembers to extend a list here.
+ *
+ * Which projects owe which convention comes from what the instructions promise,
+ * never from what a project currently declares. Auditing only the projects that
+ * already have a `test` or `screenshot` target would answer "does every
+ * complying project comply", so the one regression this spec exists to catch —
+ * an app quietly dropping its tests or its visual ownership — would report
+ * green.
  */
 
 const targetSchema = z.object({
@@ -70,6 +77,33 @@ function withTarget(target: string) {
   return projects.filter((project) => project.targets?.[target]);
 }
 
+/** apps/AGENTS.md governs everything under `apps/`. */
+const isApp = (project: Project) => project.root.startsWith("apps/");
+
+/**
+ * The only projects AGENTS.md places below the coverage floor, so the only ones
+ * that may declare no `test` target. `tooling-*` drives `just` recipes, hooks,
+ * and CLIs as real subprocesses v8 cannot instrument from the parent process,
+ * and `design-system` publishes a single stylesheet with no unit-testable
+ * interface; both reasons are recorded there, which the assertion below holds
+ * AGENTS.md to. A trailing `*` matches a project family.
+ */
+const coverageExemptions = ["tooling-*", "design-system"];
+
+const exemptFromCoverage = (project: Project) =>
+  coverageExemptions.some((exemption) =>
+    exemption.endsWith("*")
+      ? project.name.startsWith(exemption.slice(0, -1))
+      : project.name === exemption,
+  );
+
+/**
+ * apps/AGENTS.md: only the shell, which has no `screenshot` target, may omit
+ * `visual/`. Every other app owes both halves of that ownership.
+ */
+const owesVisualOwnership = (project: Project) =>
+  isApp(project) && project.name !== "shell";
+
 // A `test` target names its Vitest config on the command line, and the coverage
 // floor is read by importing that config. The path comes out of the project
 // graph, so it is narrowed to a workspace-relative Vitest config before it is
@@ -101,9 +135,23 @@ function walk(directory: string): string[] {
 }
 
 describe("app project structure", () => {
+  it("gives every app the uniform target set its instructions name", () => {
+    const missing = projects
+      .filter(isApp)
+      .flatMap((project) =>
+        ["build", "lint", "test", "typecheck"]
+          .filter((target) => !project.targets?.[target])
+          .map(
+            (target) =>
+              `${project.name} declares no ${target} target, which apps/AGENTS.md requires of every app`,
+          ),
+      );
+    expect(missing).toEqual([]);
+  });
+
   it("gives every app its own component config and browser suite", () => {
     const missing = projects
-      .filter((project) => project.root.startsWith("apps/"))
+      .filter(isApp)
       .flatMap((project) =>
         [
           `${project.root}/vite.config.ts`,
@@ -130,13 +178,24 @@ describe("app project structure", () => {
     expect(empty).toEqual([]);
   });
 
-  it("gives every screenshot project its own visual scenario inventory", () => {
-    const missing = withTarget("screenshot")
-      .filter((project) => !existsSync(`${project.root}/visual/scenarios.ts`))
-      .map(
+  it("gives every app but the shell a screenshot target and a scenario inventory", () => {
+    // A project that already declares a screenshot target owes the inventory
+    // too, even where the documented set does not reach it.
+    const missing = projects
+      .filter(
         (project) =>
-          `${project.name} is missing ${project.root}/visual/scenarios.ts`,
-      );
+          owesVisualOwnership(project) || project.targets?.screenshot,
+      )
+      .flatMap((project) => [
+        ...(project.targets?.screenshot
+          ? []
+          : [
+              `${project.name} declares no screenshot target, and apps/AGENTS.md lets only the shell omit visual ownership`,
+            ]),
+        ...(existsSync(`${project.root}/visual/scenarios.ts`)
+          ? []
+          : [`${project.name} is missing ${project.root}/visual/scenarios.ts`]),
+      ]);
     expect(missing).toEqual([]);
   });
 });
@@ -180,17 +239,24 @@ describe("test target contract", () => {
 });
 
 describe("coverage floor", () => {
-  // The tooling projects drive `just` recipes, hooks, and CLIs as real
-  // subprocesses, which v8 cannot instrument from the parent process, so their
-  // gate is the subject inventory below rather than a percentage.
-  const exemptFromCoverage = (project: Project) =>
-    project.name.startsWith("tooling-");
+  it("keeps AGENTS.md naming every project it exempts", () => {
+    const instructions = readFileSync("AGENTS.md", "utf8");
+    const unstated = coverageExemptions
+      .filter((exemption) => !instructions.includes(`\`${exemption}\``))
+      .map(
+        (exemption) =>
+          `${exemption} sits below the coverage floor here but AGENTS.md does not name it`,
+      );
+    expect(unstated).toEqual([]);
+  });
 
-  it("holds every non-tooling project to 95 on all four metrics", async () => {
+  it("holds every project outside those exemptions to 95 on all four metrics", async () => {
     const configured = await Promise.all(
-      withTarget("test")
+      projects
         .filter((project) => !exemptFromCoverage(project))
         .map(async (project) => {
+          if (!project.targets?.test)
+            return `${project.name} declares no test target to carry a coverage floor, and AGENTS.md exempts only ${coverageExemptions.join(" and ")}`;
           const config = /--config\s+(\S+)/.exec(
             targetCommand(project, "test"),
           )?.[1];

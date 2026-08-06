@@ -25,6 +25,6 @@
     }
   },
   "metadata": {
-    "description": "llmlint: ignore[changed_behavior_has_e2e] This project publishes only theme.css, which has no unit-testable interface: its tokens, reset, shared .main container, and visually-hidden primitive are verified in the browser by site.spec.ts, by each remote's standalone design-system journey, and by every app's screencomp capture. A Vitest target here could only ever pass vacuously, so it declares none."
+    "description": "llmlint: ignore[changed_behavior_has_e2e] This project publishes only theme.css, which has no unit-testable interface: its tokens, reset, shared .main container, and visually-hidden primitive are verified in the browser by site.spec.ts, by each remote's standalone design-system journey, and by every app's screencomp capture. A Vitest target here could only ever pass vacuously, so it declares none; AGENTS.md records that exemption and structure-contract.spec.ts holds every other project to a test target and the coverage floor."
   }
 }
