@@ -7,15 +7,24 @@
   "targets": {
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": "biome lint libs/design-system" }
+      "options": {
+        "command": "biome lint libs/design-system"
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/design-system/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/design-system/tsconfig.json"
+      }
     },
     "build": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/design-system/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/design-system/tsconfig.json"
+      }
     }
+  },
+  "metadata": {
+    "description": "llmlint: ignore[changed_behavior_has_e2e] This project publishes only theme.css, which has no unit-testable interface: its tokens, reset, shared .main container, and visually-hidden primitive are verified in the browser by site.spec.ts, by each remote's standalone design-system journey, and by every app's screencomp capture. A Vitest target here could only ever pass vacuously, so it declares none."
   }
 }

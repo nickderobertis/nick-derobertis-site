@@ -7,18 +7,27 @@
   "targets": {
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": "biome lint libs/build-config" }
+      "options": {
+        "command": "biome lint libs/build-config"
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/build-config/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/build-config/tsconfig.json"
+      }
     },
     "build": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/build-config/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/build-config/tsconfig.json"
+      }
     },
     "test": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] This target runs the library's own unit gate and has no browser interface; what it configures reaches a visitor only through each app's published bytes, which every app's ownership.spec.ts drives through its standalone and host-composed boundaries and site.spec.ts drives through the composed artifact."
+      },
       "outputs": ["{workspaceRoot}/coverage/libs/build-config"],
       "options": {
         "command": "vitest run --config libs/build-config/vite.config.ts --coverage"
