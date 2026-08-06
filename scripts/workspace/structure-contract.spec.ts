@@ -61,6 +61,18 @@ function withTarget(target: string) {
   return projects.filter((project) => project.targets?.[target]);
 }
 
+// A `test` target names its Vitest config on the command line, and the coverage
+// floor is read by importing that config. The path comes out of the project
+// graph, so it is narrowed to a workspace-relative Vitest config before it is
+// resolved and imported.
+const vitestConfigPath = z
+  .string()
+  .regex(/^(?:[a-z0-9-]+\/)+vite(?:\.[a-z0-9-]+)?\.config\.ts$/);
+
+// `just --summary` prints the recipe names, and each is interpolated into the
+// pattern that finds the spec driving it, so they are narrowed first.
+const recipeName = z.string().regex(/^[a-z][a-z0-9-]*$/);
+
 function targetCommand(project: Project, target: string) {
   const command = project.targets?.[target]?.options?.command;
   if (command === undefined)
@@ -173,9 +185,11 @@ describe("coverage floor", () => {
           const config = /--config\s+(\S+)/.exec(
             targetCommand(project, "test"),
           )?.[1];
-          if (!config) return `${project.name} runs vitest without --config`;
+          const named = vitestConfigPath.safeParse(config);
+          if (!named.success)
+            return `${project.name} names no workspace Vitest config to read its coverage floor from`;
           const module: unknown = await import(
-            pathToFileURL(resolve(config)).href
+            pathToFileURL(resolve(named.data)).href
           );
           const thresholds = z
             .object({
@@ -189,14 +203,14 @@ describe("coverage floor", () => {
             })
             .safeParse(module);
           if (!thresholds.success)
-            return `${project.name} declares no coverage thresholds in ${config}`;
+            return `${project.name} declares no coverage thresholds in ${named.data}`;
           const declared = thresholds.data.default.test.coverage.thresholds;
           const below = ["lines", "functions", "branches", "statements"].filter(
             (metric) => declared[metric] !== 95,
           );
           return below.length === 0
             ? undefined
-            : `${project.name} does not hold ${below.join(", ")} at 95 in ${config}`;
+            : `${project.name} does not hold ${below.join(", ")} at 95 in ${named.data}`;
         }),
     );
     expect(configured.filter((finding) => finding !== undefined)).toEqual([]);
@@ -292,9 +306,13 @@ describe("tooling subject inventory", () => {
 
   it("either drives every just recipe or records why it cannot", () => {
     const specs = toolingSpecs();
-    const recipes = execFileSync("just", ["--summary"], { encoding: "utf8" })
-      .trim()
-      .split(/\s+/);
+    const recipes = recipeName
+      .array()
+      .parse(
+        execFileSync("just", ["--summary"], { encoding: "utf8" })
+          .trim()
+          .split(/\s+/),
+      );
     const findings = recipes
       .filter((recipe) => {
         // A spec drives a recipe through `just`, or names it in the diagnostic

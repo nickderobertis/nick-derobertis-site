@@ -105,13 +105,19 @@ describe("workflow runtime pins", () => {
   }, 180_000);
 
   test("the pin verifier reports the agreement the gate depends on", () => {
+    const declared = /^pnpm@(\d+\.\d+\.\d+)$/.exec(declaredPackageManager());
+    const version = declared?.[1];
+    if (!version)
+      throw new Error(
+        `${manifest} must pin packageManager to an exact pnpm version`,
+      );
     const result = spawnSync("node", ["scripts/ci/verify-runtime-pins.mjs"], {
       encoding: "utf8",
     });
 
     expect(result.status, result.stderr).toBe(0);
     expect(result.stdout.trim()).toBe(
-      `runtime pins agree: pnpm ${declaredPackageManager().split("@")[1]} (3 references), Node 26.5.0 (4 references)`,
+      `runtime pins agree: pnpm ${version} (3 references), Node 26.5.0 (4 references)`,
     );
   });
 

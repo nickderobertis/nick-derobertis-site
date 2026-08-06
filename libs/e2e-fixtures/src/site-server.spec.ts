@@ -211,8 +211,9 @@ describe("the Pages-base site server", () => {
 
 describe("returning the port to a supervising runner", () => {
   // A runner that sends SIGTERM and immediately starts the next capture gets
-  // EADDRINUSE if the server outlives the signal, so the shutdown is driven
-  // through the real signal rather than by calling close directly.
+  // EADDRINUSE if the server outlives the signal, so each case sends a real
+  // signal to this process rather than calling close or synthesizing the event.
+  // SIGUSR2 stands in for SIGTERM because the test process has to survive it.
   const signal: NodeJS.Signals = "SIGUSR2";
 
   /** Takes the server just started out of the shared teardown's hands. */
@@ -234,8 +235,8 @@ describe("returning the port to a supervising runner", () => {
     closeOnSignals(server, [signal], (error) => closeErrors.push(error));
 
     expect((await fetch(`${origin}${base}/`)).ok).toBe(true);
-    process.emit(signal);
-    process.emit(signal);
+    process.kill(process.pid, signal);
+    process.kill(process.pid, signal);
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     await expect(fetch(`${origin}${base}/`)).rejects.toThrow();
@@ -250,7 +251,7 @@ describe("returning the port to a supervising runner", () => {
     closeOnSignals(server, [signal], (error) => closeErrors.push(error));
     await new Promise<void>((resolve) => server.close(() => resolve()));
 
-    process.emit(signal);
+    process.kill(process.pid, signal);
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     expect(closeErrors.map((error) => error.message)).toEqual([

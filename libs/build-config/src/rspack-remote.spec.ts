@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, test } from "vitest";
+import { z } from "zod";
 import { type RemoteProject, remoteConfig, remoteMap } from "./rspack-remote";
 
 // `@nx/rspack`'s app plugin reads the app it is configuring from the task
@@ -20,9 +21,13 @@ afterEach(() => {
 // Every remote is served from its own directory below the Pages project base,
 // and a host reaches it through a `<alias>@<url>` entry. Both halves come from
 // the same two committed inputs, so they are read here rather than restated.
-const pagesBase: string = JSON.parse(
-  readFileSync("libs/data-access-core/src/site.config.json", "utf8"),
-).pagesBase;
+const { pagesBase } = z
+  .object({ pagesBase: z.string().regex(/^\/[a-z0-9-]+$/) })
+  .parse(
+    JSON.parse(
+      readFileSync("libs/data-access-core/src/site.config.json", "utf8"),
+    ),
+  );
 
 describe("federation remote map", () => {
   test("points each host entry at the remote's own published container", () => {
