@@ -14,10 +14,73 @@
       "name": "courses",
       "toggles": {
         "render": "host-composed",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "7c51d48cde4e901ceb143c744fbdb7744f21a4ca59e93b39b757cc9ebec6b95b"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "8249d2e6c56519dd96853ac551bb1abeb5fb67763463f3f0f4f1f840d647d293"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "60083953a668aa5ac9a0e6ea1967029473651d94a6a7152a4b8f184395477c64"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "b1ee7adb7e1d8a61a232a8067d3c529120fbbfa44682628b98723e7aacdd3ee1"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "35b1d5769ad4a4c091cc8c49c317baae32f7438442706d2fd15c6b7f96e938d6"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "expanded",
+        "viewport": "desktop"
+      },
+      "hash": "62b3ac4c9c9ad56b436cb7df71b0b85e693006aa35e6744068e415c9fc9ba34e"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "expanded",
+        "viewport": "mobile"
+      },
+      "hash": "4657c53c602a1a8e82ab9b52cb456b9cd9a433bfa9a9aec095c697f0a9193287"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "host-composed",
+        "state": "expanded",
+        "viewport": "tablet"
+      },
+      "hash": "4e4b7b9495dc06b341972705e0259afa602e1b5d759e1b641231987a0b6680ea"
     },
     {
       "name": "courses",
@@ -59,10 +122,73 @@
       "name": "courses",
       "toggles": {
         "render": "standalone",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "c95effeadaa2a718a06636053c2d100397f584361f9cc4c49ba05a16605701e7"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "2e1fd2f9c82c0bbd20569f570395bfedcc43ca2df9ef9be5aebd33b6f16eb10b"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "da6226993ab98c5517f8407d0fe900c2358be5a19b1e54ccf0d8c69b819785b3"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "e9484b1ef32e337091f106c799622248471ca58004a9ce1bfc7742dffaee5460"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "1f95c2b109034555f34e35c601513cdc9d8c6ed0b6b911e85034b58a90b2bae9"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "expanded",
+        "viewport": "desktop"
+      },
+      "hash": "301e1ca405850ab13cc921b4e9416d8390d01ded009201ffae212bc7ec401844"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "expanded",
+        "viewport": "mobile"
+      },
+      "hash": "c546813dbd4d3fc29ccee5b3484c02f30978c03e98839dd78b8b97a9af133eed"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "expanded",
+        "viewport": "tablet"
+      },
+      "hash": "55977a4fb529d276f80c362a2bf0c6ee318cc0c97f13b3e440ab778052769b05"
     },
     {
       "name": "courses",
@@ -99,6 +225,24 @@
         "viewport": "desktop"
       },
       "hash": "658a3655afc6444d133885db21ae2c59a45f46871f81f95205c80707d33ecb09"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "mobile"
+      },
+      "hash": "a37d156e113b79d41250fd9c4bc4cfe2991b842eb913ae7e1d3ed31fd3544b33"
+    },
+    {
+      "name": "courses",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "tablet"
+      },
+      "hash": "1447f7748c1e7db3f654d630320270025da8aae75e8e8b611aaaaab1993be700"
     }
   ]
 }
