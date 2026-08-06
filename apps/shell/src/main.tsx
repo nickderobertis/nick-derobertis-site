@@ -2,15 +2,14 @@ import { createBrowserHistory, RouterProvider } from "@tanstack/react-router";
 import { RouterClient } from "@tanstack/react-router/ssr/client";
 import { type ComponentType, StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
+import { loadBrowserDomain } from "./browser-domain";
 import {
-  createSiteRouter,
   entryRoutePath,
-  loadBrowserDomain,
-  type RoutePage,
-  type RoutePages,
   rendersPrerenderedDocument,
-  routePath,
-} from "./router";
+} from "./prerendered-document";
+import type { RoutePage } from "./route-component";
+import { routePath } from "./route-path";
+import { createSiteRouter, type RoutePages } from "./router";
 import "@site/design-system";
 
 const root = document.getElementById("root");

@@ -1,0 +1,16 @@
+# Stand-in route remotes
+
+The shell reaches its five route pages across a Module Federation boundary:
+`home/Page`, `bio/Page`, `research/Page`, `software/Page`, and `courses/Page`
+are separate deployables resolved by the federation runtime at load time, and
+`apps/shell/src/remotes.d.ts` is the only contract the shell has with them.
+
+Vitest has no federation runtime, so `apps/shell/vite.config.ts` resolves those
+five specifiers to the modules here. They are the boundary the shell's own
+bootstrap is tested against — never a stand-in for anything inside
+`apps/shell/src`, which is exercised as the real thing. Each one renders what
+the shell handed it across the boundary, so a spec can assert the route wiring
+by reading the page instead of by inspecting router internals.
+
+The remotes themselves are covered by their own apps' specs and by the
+real-browser journeys in `apps/*/e2e`.
