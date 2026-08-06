@@ -376,8 +376,10 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
 // A route loader is the only place the running site fetches a CV domain, and it
 // is reached by navigating into a route: a direct load hydrates the payload the
 // prerender already baked in and asks the data host for nothing. Both ways a
-// served domain can be unusable have to leave the visitor with the route's own
-// recovery panel rather than a blank pane or a thrown error.
+// served domain can be unusable have to leave the visitor with that route's own
+// recovery panel rather than a blank pane or a thrown error, on every route
+// that loads a domain.
+// llmlint: ignore-block[e2e_not_mocked] A data host that is up and serving valid bytes cannot be asked to fail; forcing the served status and body at the transport is the only way a visitor's browser can reach these states, and it is the boundary under test rather than a stand-in for anything inside the site. The site, its shell, its router, its loaders, and every remote are the real deployed artifact here, and preload.spec.ts steers the same boundary the same way.
 const unusableDomains = [
   {
     // A cache or gateway can answer a failed request with the last payload it
@@ -390,30 +392,58 @@ const unusableDomains = [
     name: "answers with a body the CV schema rejects",
     serve: (route: Route) =>
       route.fulfill({
-        body: '[{"name":"not a research project"}]',
+        body: '[{"name":"not what the CV publishes"}]',
         contentType: "application/json",
         status: 200,
       }),
   },
 ] as const;
 
-for (const served of unusableDomains)
-  test(`Research recovers when the data host ${served.name}`, async ({
-    page,
-  }) => {
-    await page.goto("", { waitUntil: "networkidle" });
-    await page.route("**/cv-data/domains/research.json*", served.serve);
+const loadedRoutes = [
+  {
+    detail:
+      "The research collection could not be loaded. Please try again later.",
+    domain: "research",
+    heading: "Research is unavailable",
+    link: "Research",
+    path: "research",
+  },
+  {
+    detail: "Please try again later.",
+    domain: "software_projects",
+    heading: "Software projects are unavailable",
+    link: "Software",
+    path: "software",
+  },
+  {
+    detail: "Please try again later.",
+    domain: "courses",
+    heading: "Courses are unavailable",
+    link: "Courses",
+    path: "courses",
+  },
+] as const;
 
-    await page.getByRole("link", { name: "Research", exact: true }).click();
+for (const route of loadedRoutes)
+  for (const served of unusableDomains)
+    test(`${route.link} recovers when the data host ${served.name}`, async ({
+      page,
+    }) => {
+      await page.goto("", { waitUntil: "networkidle" });
+      await page.route(
+        `**/cv-data/domains/${route.domain}.json*`,
+        served.serve,
+      );
 
-    await expect(page).toHaveURL(/nick-derobertis-site\/research$/);
-    await expect(
-      page.getByRole("heading", { name: "Research is unavailable" }),
-    ).toBeVisible();
-    await expect(
-      page.getByText(
-        "The research collection could not be loaded. Please try again later.",
-      ),
-    ).toBeVisible();
-    await expect(page.getByRole("banner")).toBeVisible();
-  });
+      await page.getByRole("link", { name: route.link, exact: true }).click();
+
+      await expect(page).toHaveURL(
+        new RegExp(`nick-derobertis-site/${route.path}$`),
+      );
+      await expect(
+        page.getByRole("heading", { name: route.heading }),
+      ).toBeVisible();
+      await expect(page.getByText(route.detail).first()).toBeVisible();
+      await expect(page.getByRole("banner")).toBeVisible();
+    });
+// llmlint: ignore-end[e2e_not_mocked]
