@@ -226,3 +226,49 @@ each of them to the manifest that publishes it — `apps/shell/src/routes.json`,
 `apps/home/rspack.config.ts` declares — and fails by name when the two
 disagree, so a new route or pane cannot ship without the journeys that cover
 it.
+
+## Test harness libraries
+
+Splitting one suite per app multiplies the number of places a testing decision
+is made, so each decision has exactly one library that owns it and each app
+declares only what is its own.
+
+`@site/e2e-harness` owns the Playwright side. `defineAppE2eConfig` builds an
+app's whole configuration from its project name and port — the test directory,
+the Pages-base URL, the `serve-e2e.mjs` web server, the retry and trace policy —
+so `apps/<app>/e2e/playwright.config.ts` is one call rather than thirteen
+copies of a policy that can drift. `remoteOwnershipTests` registers the
+federation journeys every remote owes, and `homePaneJourneys` registers the
+happy, skeleton, empty, error, and breakpoint journeys every Home pane owes, in
+both render paths; the seven pane suites are a single call each.
+
+`@site/testing` owns the Vitest side. `defineWorkspaceTestConfig` resolves the
+workspace path aliases from `tsconfig.base.json`, points coverage at the
+project's own source tree, and declares the 95% four-metric floor, so the floor
+is one value in one library rather than a threshold block per project. A host
+passes the federation specifiers its component tests must resolve — Home points
+each at the sibling app's real source, and the shell at the stand-ins under
+`apps/shell/test-remotes` — because Vitest has no Module Federation runtime.
+
+`@site/visual-harness` owns capture. `captureVisualSuite` serves the artifact
+each app's shots are taken from, confines its writes to that project's own
+`shots/` roots, drives each scenario's viewport, state, and render path, and
+writes the `captures.json` screencomp classifies; `standardVisualScenarios`
+builds the scenario set every app shares from that app's own states, queries,
+and target locators. `apps/<app>/visual/scenarios.ts` therefore declares only
+what is particular to that app, and `capture.ts` beside it is one call.
+
+`@site/e2e-fixtures` sits under both: it owns the Pages-base static server and
+the CV-data scenario steering that the Playwright web server and the visual
+capture host both serve through, so a `?scenario=` state means the same thing
+in a journey and in a screenshot.
+
+`scripts/workspace/structure-contract.spec.ts` holds the whole arrangement
+together. It derives its subjects from the Nx project graph, the justfile, and
+the hook directory, and fails when an app has no `vite.config.ts`, no `e2e/`
+with its own Playwright config, or no `visual/scenarios.ts` for a `screenshot`
+target; when a `test` target passes `--passWithNoTests`, names no Vitest config,
+or declares a floor below 95 on any metric; when a project holds specs no target
+runs; when a component ships with no co-located spec; or when a workspace
+script, `just` recipe, or hook is driven by no tooling spec and records no
+reason it cannot be.
