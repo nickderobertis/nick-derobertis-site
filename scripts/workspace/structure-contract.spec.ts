@@ -21,9 +21,14 @@ const targetSchema = z.object({
   options: z.object({ command: z.string().optional() }).optional(),
 });
 
+// Both project paths are walked and read from disk, so they are narrowed to
+// workspace-relative directories at the graph boundary rather than trusted
+// because Nx printed them.
+const workspaceDirectory = z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/);
+
 const projectSchema = z.object({
-  root: z.string(),
-  sourceRoot: z.string().optional(),
+  root: workspaceDirectory,
+  sourceRoot: workspaceDirectory.optional(),
   tags: z.array(z.string()).optional(),
   targets: z.record(z.string(), targetSchema).optional(),
 });
