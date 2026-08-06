@@ -6,7 +6,7 @@ import CoursesPage from "./page";
 
 const published = cvDataClient.domain("courses");
 
-function banner() {
+function pageHeading() {
   return screen.getByRole("heading", { level: 1, name: "Courses" });
 }
 
@@ -21,7 +21,7 @@ afterEach(() => {
 test("shows the whole catalogue a visitor arrives at the route for", () => {
   render(<CoursesPage />);
 
-  expect(banner()).toBeInTheDocument();
+  expect(pageHeading()).toBeInTheDocument();
   const list = screen.getByRole("region", { name: "Course list" });
   expect(within(list).getAllByRole("article")).toHaveLength(published.length);
   expect(
@@ -36,7 +36,7 @@ test("keeps its banner while the loading frame settles onto the courses", () => 
 
   // The banner is the route's own copy, not the data's, so a visitor waiting on
   // the catalogue still knows which page they are on.
-  expect(banner()).toBeInTheDocument();
+  expect(pageHeading()).toBeInTheDocument();
   expect(
     screen.getByRole("status", { name: "Loading courses" }),
   ).toBeInTheDocument();
@@ -94,7 +94,7 @@ test("prerenders the whole catalogue into the fragment the build publishes", asy
   // it the way a browser does before asking what a visitor without JavaScript
   // is left reading.
   document.body.innerHTML = html;
-  expect(banner()).toBeInTheDocument();
+  expect(pageHeading()).toBeInTheDocument();
   expect(screen.getAllByRole("article")).toHaveLength(published.length);
   // The syllabus ships as a disclosure, so a visitor without JavaScript can
   // still open it and read the whole syllabus out of the served bytes.

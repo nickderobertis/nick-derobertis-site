@@ -5,7 +5,7 @@ import { CourseDetails } from "./course-details";
 
 const courses = cvDataClient.domain("courses");
 
-function courseNamed(id: string): Course {
+function courseById(id: string): Course {
   const course = courses.find((candidate) => candidate.id === id);
   if (!course) throw new Error(`The CV no longer records the ${id} course`);
   return course;
@@ -17,7 +17,7 @@ function pane(heading: string) {
 }
 
 test("opens with the long description and how the course is currently offered", () => {
-  render(<CourseDetails course={courseNamed("FIN-4934")} />);
+  render(<CourseDetails course={courseById("FIN-4934")} />);
 
   const overview = pane("About this course");
   expect(
@@ -32,7 +32,7 @@ test("opens with the long description and how the course is currently offered", 
 });
 
 test("names the textbook, how it is published, and whether it is required", () => {
-  render(<CourseDetails course={courseNamed("FIN-4934")} />);
+  render(<CourseDetails course={courseById("FIN-4934")} />);
 
   const textbook = pane("Textbook");
   expect(within(textbook).getByText("Financial Modeling")).toBeInTheDocument();
@@ -63,7 +63,7 @@ test("marks a textbook the course insists on as required", () => {
 });
 
 test("lists the courses and skills a student needs before enrolling", () => {
-  render(<CourseDetails course={courseNamed("FIN-4934")} />);
+  render(<CourseDetails course={courseById("FIN-4934")} />);
 
   const prerequisites = pane("Prerequisites");
   expect(
@@ -107,7 +107,7 @@ test("shows a bare prerequisites pane when the CV records only the heading", () 
 });
 
 test("weights the grading categories and files the scale behind a disclosure", () => {
-  render(<CourseDetails course={courseNamed("FIN-4934")} />);
+  render(<CourseDetails course={courseById("FIN-4934")} />);
 
   const grading = pane("Grading");
   expect(
@@ -146,7 +146,7 @@ test("omits the grade scale for a course graded without one", () => {
 });
 
 test("gathers a course's reading list under its own pane", () => {
-  render(<CourseDetails course={courseNamed("FIN-4934")} />);
+  render(<CourseDetails course={courseById("FIN-4934")} />);
 
   const resources = pane("Resources");
   expect(
@@ -156,7 +156,7 @@ test("gathers a course's reading list under its own pane", () => {
 
 test("shows nothing at all for a course the CV records no detail for", () => {
   const { container } = render(
-    <CourseDetails course={courseNamed("FIN-4243")} />,
+    <CourseDetails course={courseById("FIN-4243")} />,
   );
 
   expect(container.querySelector(".course-details")).toBeEmptyDOMElement();

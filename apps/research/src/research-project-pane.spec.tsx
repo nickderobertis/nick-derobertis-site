@@ -11,7 +11,7 @@ const worksInProgress = buildResearchProjectModels(
   "work_in_progress",
 );
 
-function modelNamed(id: string) {
+function modelById(id: string) {
   const model = [...workingPapers, ...worksInProgress].find(
     (candidate) => candidate.project.id === id,
   );
@@ -20,7 +20,7 @@ function modelNamed(id: string) {
 }
 
 function renderPane(id: string, index = 0) {
-  const { categories, coauthors, project } = modelNamed(id);
+  const { categories, coauthors, project } = modelById(id);
   return render(
     <ResearchProjectPane
       categories={categories}

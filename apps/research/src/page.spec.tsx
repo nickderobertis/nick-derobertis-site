@@ -16,7 +16,7 @@ const publishedCounts = (["working_paper", "work_in_progress"] as const).map(
  * is an article, so a bare article count would include the wrapper as a tenth
  * paper.
  */
-function publishedProjects() {
+function projectCountsBySection() {
   return ["Working Papers", "Works in Progress"].map(
     (heading) =>
       within(screen.getByRole("region", { name: heading })).getAllByRole(
@@ -39,7 +39,7 @@ test("shows the whole portfolio a visitor arrives at the route for", () => {
   expect(
     screen.getByRole("heading", { level: 1, name: "Research Works" }),
   ).toBeInTheDocument();
-  expect(publishedProjects()).toEqual(publishedCounts);
+  expect(projectCountsBySection()).toEqual(publishedCounts);
   expect(publishedCounts).toEqual([4, 5]);
 });
 
@@ -108,7 +108,7 @@ test("prerenders the whole portfolio into the fragment the build publishes", asy
   expect(
     screen.getByRole("heading", { level: 1, name: "Research Works" }),
   ).toBeInTheDocument();
-  expect(publishedProjects()).toEqual(publishedCounts);
+  expect(projectCountsBySection()).toEqual(publishedCounts);
   expect(publishedCounts).toEqual([4, 5]);
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });

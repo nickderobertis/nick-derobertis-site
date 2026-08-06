@@ -6,7 +6,7 @@ import SoftwarePage from "./page";
 
 const published = cvDataClient.domain("software_projects");
 
-function banner() {
+function pageHeading() {
   return screen.getByRole("heading", {
     level: 1,
     name: "Open-Source Software",
@@ -24,7 +24,7 @@ afterEach(() => {
 test("shows the whole portfolio a visitor arrives at the route for", () => {
   render(<SoftwarePage />);
 
-  expect(banner()).toBeInTheDocument();
+  expect(pageHeading()).toBeInTheDocument();
   const grid = screen.getByRole("region", { name: "Software projects" });
   expect(within(grid).getAllByRole("article")).toHaveLength(published.length);
   expect(
@@ -41,7 +41,7 @@ test("keeps its banner while the loading frame settles onto the projects", () =>
 
   // The banner is the route's own copy, not the data's, so a visitor waiting on
   // the portfolio still knows which page they are on.
-  expect(banner()).toBeInTheDocument();
+  expect(pageHeading()).toBeInTheDocument();
   expect(
     screen.getByRole("status", { name: "Loading software" }),
   ).toBeInTheDocument();
@@ -103,7 +103,7 @@ test("prerenders the whole portfolio into the fragment the build publishes", asy
   // it the way a browser does before asking what a visitor without JavaScript
   // is left with.
   document.body.innerHTML = html;
-  expect(banner()).toBeInTheDocument();
+  expect(pageHeading()).toBeInTheDocument();
   expect(screen.getAllByRole("article")).toHaveLength(published.length);
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });

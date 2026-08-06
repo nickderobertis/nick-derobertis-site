@@ -5,7 +5,7 @@ import { CoursePane } from "./course-pane";
 
 const courses = cvDataClient.domain("courses");
 
-function courseNamed(id: string): Course {
+function courseById(id: string): Course {
   const course = courses.find((candidate) => candidate.id === id);
   if (!course) throw new Error(`The CV no longer records the ${id} course`);
   return course;
@@ -16,7 +16,7 @@ function card() {
 }
 
 test("titles a course, shows its code, and reads out how it was rated", () => {
-  render(<CoursePane course={courseNamed("FIN-4934")} index={0} />);
+  render(<CoursePane course={courseById("FIN-4934")} index={0} />);
 
   expect(
     within(card()).getByRole("heading", {
@@ -35,7 +35,7 @@ test("titles a course, shows its code, and reads out how it was rated", () => {
 });
 
 test("lists the terms the course has been taught in", () => {
-  render(<CoursePane course={courseNamed("FIN-4934")} index={0} />);
+  render(<CoursePane course={courseById("FIN-4934")} index={0} />);
 
   const periods = within(card()).getByRole("list", { name: "Periods taught" });
   expect(
@@ -46,7 +46,7 @@ test("lists the terms the course has been taught in", () => {
 });
 
 test("names the university and where it teaches the course", () => {
-  render(<CoursePane course={courseNamed("FIRE-311")} index={0} />);
+  render(<CoursePane course={courseById("FIRE-311")} index={0} />);
 
   expect(
     within(card()).getByText("Virginia Commonwealth University"),
@@ -55,7 +55,7 @@ test("names the university and where it teaches the course", () => {
 });
 
 test("says nothing about a rating the CV never recorded", () => {
-  render(<CoursePane course={courseNamed("FIRE-311")} index={0} />);
+  render(<CoursePane course={courseById("FIRE-311")} index={0} />);
 
   expect(
     within(card()).queryByText("Evaluation score"),
@@ -63,7 +63,7 @@ test("says nothing about a rating the CV never recorded", () => {
 });
 
 test("gathers the topics the course covers under their own heading", () => {
-  render(<CoursePane course={courseNamed("FIN-4243")} index={0} />);
+  render(<CoursePane course={courseById("FIN-4243")} index={0} />);
 
   const topics = within(card()).getByRole("region", {
     name: "Debt and Money Markets topics",
@@ -76,7 +76,7 @@ test("gathers the topics the course covers under their own heading", () => {
 });
 
 test("offers the course website when the CV publishes one", () => {
-  render(<CoursePane course={courseNamed("FIN-4934")} index={0} />);
+  render(<CoursePane course={courseById("FIN-4934")} index={0} />);
 
   expect(
     within(card()).getByRole("link", { name: "Course website" }),
@@ -87,7 +87,7 @@ test("offers the course website when the CV publishes one", () => {
 });
 
 test("files the syllabus behind a disclosure a reader has to open", () => {
-  render(<CoursePane course={courseNamed("FIN-4934")} index={0} />);
+  render(<CoursePane course={courseById("FIN-4934")} index={0} />);
 
   // The card is long enough already, so the syllabus arrives collapsed and the
   // reader opens it by the course's own name.
@@ -106,17 +106,17 @@ test("files the syllabus behind a disclosure a reader has to open", () => {
 });
 
 test("offers no disclosure for a course with no syllabus behind it", () => {
-  render(<CoursePane course={courseNamed("FIN-4243")} index={0} />);
+  render(<CoursePane course={courseById("FIN-4243")} index={0} />);
 
   expect(within(card()).queryByRole("group")).not.toBeInTheDocument();
 });
 
 test("alternates the tone of neighbouring cards so a reader can tell them apart", () => {
   const { container: light } = render(
-    <CoursePane course={courseNamed("FIN-4243")} index={0} />,
+    <CoursePane course={courseById("FIN-4243")} index={0} />,
   );
   const { container: dark } = render(
-    <CoursePane course={courseNamed("FIN-4243")} index={1} />,
+    <CoursePane course={courseById("FIN-4243")} index={1} />,
   );
 
   expect(light.querySelector("article")?.className).not.toContain(

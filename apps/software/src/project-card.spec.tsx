@@ -5,7 +5,7 @@ import { ProjectCard } from "./project-card";
 
 const projects = cvDataClient.domain("software_projects");
 
-function projectNamed(id: string) {
+function projectById(id: string) {
   const project = projects.find((candidate) => candidate.id === id);
   if (!project) throw new Error(`The CV no longer records the ${id} project`);
   return project;
@@ -22,7 +22,7 @@ function linkNames() {
 }
 
 test("titles a project by its display name and shows the package it ships as", () => {
-  render(<ProjectCard project={projectNamed("data-code")} />);
+  render(<ProjectCard project={projectById("data-code")} />);
 
   expect(
     within(card()).getByRole("heading", {
@@ -41,7 +41,7 @@ test("titles a project by its display name and shows the package it ships as", (
 });
 
 test("reads out the counts the CV records for the project", () => {
-  render(<ProjectCard project={projectNamed("fin-model-course")} />);
+  render(<ProjectCard project={projectById("fin-model-course")} />);
 
   expect(
     within(card())
@@ -56,7 +56,7 @@ test("reads out the counts the CV records for the project", () => {
 });
 
 test("falls back to the repository name when the CV records no display name", () => {
-  render(<ProjectCard project={projectNamed("pypi-sphinx-quickstart")} />);
+  render(<ProjectCard project={projectById("pypi-sphinx-quickstart")} />);
 
   expect(
     within(card()).getByRole("heading", { name: "pypi-sphinx-quickstart" }),
@@ -72,7 +72,7 @@ test("falls back to the repository name when the CV records no display name", ()
 });
 
 test("draws an inlined logo the CV carries as image data", () => {
-  const project = projectNamed("datastream-excel-downloader-py");
+  const project = projectById("datastream-excel-downloader-py");
 
   render(<ProjectCard project={project} />);
 
@@ -84,14 +84,14 @@ test("draws an inlined logo the CV carries as image data", () => {
 });
 
 test("offers only the destinations the CV records for the project", () => {
-  render(<ProjectCard project={projectNamed("data-code")} />);
+  render(<ProjectCard project={projectById("data-code")} />);
   // Its site and repository are the same address, so a third link would send a
   // visitor back where the first one already goes.
   expect(linkNames()).toEqual(["Repository", "Documentation"]);
 });
 
 test("adds a project site only when it is somewhere the repository is not", () => {
-  render(<ProjectCard project={projectNamed("py-research-workflows")} />);
+  render(<ProjectCard project={projectById("py-research-workflows")} />);
 
   expect(linkNames()).toEqual(["Repository", "Documentation", "Project site"]);
   expect(
@@ -103,7 +103,7 @@ test("adds a project site only when it is somewhere the repository is not", () =
 });
 
 test("offers no destinations for a project the CV publishes nowhere", () => {
-  render(<ProjectCard project={projectNamed("derobertis-consulting")} />);
+  render(<ProjectCard project={projectById("derobertis-consulting")} />);
 
   expect(linkNames()).toEqual([]);
 });

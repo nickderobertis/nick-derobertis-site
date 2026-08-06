@@ -41,7 +41,6 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/apps/research"],
       "options": {
         "command": "vitest run --config apps/research/vite.config.ts --coverage"
       }
