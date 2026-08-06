@@ -11,6 +11,10 @@ async function startRemote(search = "") {
   document.body.innerHTML = '<div id="root"></div>';
   await act(async () => {
     await import("./main");
+    // The entry mounts the page lazily behind a Suspense boundary, so settling
+    // that same module here is what makes the assertions below about the
+    // mounted page — rather than about how fast this machine resolved a chunk.
+    await import("./page");
   });
 }
 
@@ -30,7 +34,7 @@ test("mounts the portfolio a visitor arriving at the remote came for", async () 
   await startRemote();
 
   expect(
-    await screen.findByRole("heading", { level: 1, name: "Research Works" }),
+    screen.getByRole("heading", { level: 1, name: "Research Works" }),
   ).toBeInTheDocument();
   expect(
     screen.getByRole("region", { name: "Working Papers" }),
@@ -41,7 +45,7 @@ test("shows the empty collection to a visitor who steers the remote into it", as
   await startRemote("?research-scenario=empty");
 
   expect(
-    await screen.findByRole("heading", { name: "No research projects yet" }),
+    screen.getByRole("heading", { name: "No research projects yet" }),
   ).toBeInTheDocument();
   expect(
     screen.queryByRole("region", { name: "Working Papers" }),
@@ -52,7 +56,7 @@ test("shows the failed collection to a visitor who steers the remote into it", a
   await startRemote("?research-scenario=error");
 
   expect(
-    await screen.findByRole("heading", { name: "Research is unavailable" }),
+    screen.getByRole("heading", { name: "Research is unavailable" }),
   ).toBeInTheDocument();
 });
 
@@ -60,7 +64,7 @@ test("holds the loading frame a visitor asks the remote to demonstrate", async (
   await startRemote("?research-scenario=loading");
 
   expect(
-    await screen.findByRole("status", { name: "Loading research" }),
+    screen.getByRole("status", { name: "Loading research" }),
   ).toBeInTheDocument();
 });
 
@@ -68,6 +72,6 @@ test("ignores a scenario the route does not offer", async () => {
   await startRemote("?research-scenario=whatever");
 
   expect(
-    await screen.findByRole("heading", { level: 1, name: "Research Works" }),
+    screen.getByRole("heading", { level: 1, name: "Research Works" }),
   ).toBeInTheDocument();
 });

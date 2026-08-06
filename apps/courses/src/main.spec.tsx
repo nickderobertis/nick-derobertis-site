@@ -11,6 +11,10 @@ async function startRemote(search = "") {
   document.body.innerHTML = '<div id="root"></div>';
   await act(async () => {
     await import("./main");
+    // The entry mounts the page lazily behind a Suspense boundary, so settling
+    // that same module here is what makes the assertions below about the
+    // mounted page — rather than about how fast this machine resolved a chunk.
+    await import("./page");
   });
 }
 
@@ -30,7 +34,7 @@ test("mounts the catalogue a visitor arriving at the remote came for", async () 
   await startRemote();
 
   expect(
-    await screen.findByRole("region", { name: "Course list" }),
+    screen.getByRole("region", { name: "Course list" }),
   ).toBeInTheDocument();
   expect(
     screen.getByRole("heading", { level: 2, name: "Financial Modeling" }),
@@ -41,7 +45,7 @@ test("shows the empty state to a visitor who steers the remote into it", async (
   await startRemote("?courses-view=empty");
 
   expect(
-    await screen.findByRole("heading", { name: "No courses to show" }),
+    screen.getByRole("heading", { name: "No courses to show" }),
   ).toBeInTheDocument();
   expect(screen.queryByRole("article")).not.toBeInTheDocument();
 });
@@ -50,7 +54,7 @@ test("shows the error state to a visitor who steers the remote into it", async (
   await startRemote("?courses-view=error");
 
   expect(
-    await screen.findByRole("heading", { name: "Courses are unavailable" }),
+    screen.getByRole("heading", { name: "Courses are unavailable" }),
   ).toBeInTheDocument();
   expect(screen.getByRole("alert")).toBeInTheDocument();
 });
@@ -59,6 +63,6 @@ test("ignores a view the route does not offer", async () => {
   await startRemote("?courses-view=whatever");
 
   expect(
-    await screen.findByRole("region", { name: "Course list" }),
+    screen.getByRole("region", { name: "Course list" }),
   ).toBeInTheDocument();
 });
