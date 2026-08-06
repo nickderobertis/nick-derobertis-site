@@ -19,7 +19,7 @@ const awardsContract: ReadonlyArray<ContractEntry> = [
   ["apps/awards/project.json", '"name": "awards"'],
   ["apps/awards/rspack.config.ts", 'remoteConfig("awards")'],
   ["apps/home/rspack.config.ts", '"awards"'],
-  ["apps/home/src/page.tsx", 'import("awards/Page")'],
+  ["apps/home/src/panes.ts", 'import("awards/Page")'],
   ["apps/home/src/remotes.d.ts", 'declare module "awards/Page"'],
   // llmlint: ignore[tests_mirror_real_usage] Same composition contract for Awards: nothing a visitor can do reveals whether compose.mjs names this remote, and awards.spec.ts plus home.spec.ts drive the composed result through the real browser on both render paths.
   ["scripts/compose/compose.mjs", '"awards"'],
@@ -28,10 +28,13 @@ const awardsContract: ReadonlyArray<ContractEntry> = [
 ];
 
 // The shell declares home/Page ambiently, so the remote's preload export, the
-// host's declaration of it, and the router wiring have to move together. The
-// Explicit tuple typing keeps every declaration compatible with expectContract.
+// host's declaration of it, and the router wiring have to move together. Home
+// warms its panes from the module that owns them and re-exports that warming at
+// its route boundary, which is the surface the shell reaches. The explicit
+// tuple typing keeps every declaration compatible with expectContract.
 const homePreloadContract: ReadonlyArray<ContractEntry> = [
-  ["apps/home/src/page.tsx", "export function preload(): Promise<void>"],
+  ["apps/home/src/panes.ts", "export function preload(): Promise<void>"],
+  ["apps/home/src/page.tsx", 'export { preload } from "./panes"'],
   ["apps/shell/src/remotes.d.ts", "export function preload(): Promise<void>;"],
   [
     "apps/shell/src/main.tsx",
@@ -41,11 +44,11 @@ const homePreloadContract: ReadonlyArray<ContractEntry> = [
   ["apps/awards/src/page.tsx", "export { preloadAwards as preload }"],
   ["apps/awards/src/use-awards.ts", "export async function preloadAwards()"],
   ["apps/home/src/remotes.d.ts", "export function preload(): Promise<void>;"],
-  ["apps/home/src/page.tsx", "await awards.preload()"],
+  ["apps/home/src/panes.ts", "await awards.preload()"],
 ];
 
 const bioContract: ReadonlyArray<ContractEntry> = [
-  ["apps/bio/src/page.tsx", 'id="bio-heading">Optimizing Life'],
+  ["apps/bio/src/biography.tsx", 'id="bio-heading">Optimizing Life'],
   ["apps/bio/e2e/bio.spec.ts", 'name: "Optimizing Life"'],
   ["libs/e2e-harness/src/site-contract.ts", 'heading: "Optimizing Life"'],
 ];

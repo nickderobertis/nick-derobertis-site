@@ -104,6 +104,17 @@ describe("workflow runtime pins", () => {
     expect(result.stderr).toMatch(/authoritative pnpm pin/);
   }, 180_000);
 
+  test("the pin verifier reports the agreement the gate depends on", () => {
+    const result = spawnSync("node", ["scripts/ci/verify-runtime-pins.mjs"], {
+      encoding: "utf8",
+    });
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout.trim()).toBe(
+      `runtime pins agree: pnpm ${declaredPackageManager().split("@")[1]} (3 references), Node 26.5.0 (4 references)`,
+    );
+  });
+
   test("every drift case leaves the committed pins exactly as it found them", () => {
     expect(readFileSync(pinnedWorkflow, "utf8")).toContain(
       "PNPM_VERSION: 10.13.1",

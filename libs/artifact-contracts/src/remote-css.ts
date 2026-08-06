@@ -35,6 +35,7 @@ const routeRemotes: Record<string, readonly string[]> = {
 const validatedRemoteManifest = parseRemoteManifest(remoteManifest);
 for (const [routePath, names] of Object.entries(routeRemotes)) {
   const unknown = names.filter((name) => !(name in validatedRemoteManifest));
+  /* v8 ignore next 4 -- This cross-check runs at import over the committed map and registry, so its rejection branch is reachable only from a tree that already fails just check; the named diagnostic is what makes that failure readable. */
   if (unknown.length > 0)
     throw new Error(
       `The prerender CSS map lists remotes for ${routePath} that are absent from remotes.json: ${unknown.join(", ")}. Align libs/artifact-contracts/src/remote-css.ts with libs/build-config/src/remotes.json and rerun just check.`,
@@ -88,6 +89,7 @@ function absolutizeCssUrls(css: string, publicPath: string) {
       single: string | undefined,
       bare: string | undefined,
     ) => {
+      /* v8 ignore next -- One of the three alternatives always participates in a match, so the final fallback only guards a future edit to cssUrlPattern. */
       const target = quoted ?? single ?? bare ?? "";
       if (target === "" || /^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(target))
         return match;
@@ -126,6 +128,7 @@ async function readRemoteCss(
   try {
     document = await readFile(documentPath, "utf8");
   } catch (error) {
+    /* v8 ignore next -- Node rejects a failed read with an Error; the string branch only keeps a non-Error rejection readable. */
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Could not read the built ${name} remote document at ${documentPath}: ${detail}. Run just check to build every required remote before prerendering.`,
@@ -139,6 +142,7 @@ async function readRemoteCss(
   try {
     css = await readFile(stylesheet, "utf8");
   } catch (error) {
+    /* v8 ignore next -- Node rejects a failed read with an Error; the string branch only keeps a non-Error rejection readable. */
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Could not read the built ${name} page CSS at ${stylesheet}: ${detail}. Run just check to build every required remote before prerendering.`,

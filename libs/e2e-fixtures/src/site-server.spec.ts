@@ -3,7 +3,11 @@ import type { Server } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createSiteServer, type SiteServerOptions } from "./site-server.ts";
+import {
+  closeOnSignals,
+  createSiteServer,
+  type SiteServerOptions,
+} from "./site-server.ts";
 
 // The server every browser journey and every visual capture is served through,
 // driven here over real HTTP against a real artifact tree on disk.
@@ -164,6 +168,33 @@ describe("the Pages-base site server", () => {
     });
   });
 
+  it("serves a path outside the base and one whose type it does not know", async () => {
+    const root = await artifact();
+    await writeFile(join(root, "manifest.webmanifest"), "{}");
+    const origin = await serve({ root });
+
+    // Screenshot capture and the visual host both request assets above the
+    // Pages base, which are resolved against the served root as they are.
+    const outside = await fetch(`${origin}/index.html`);
+    const unknownType = await fetch(`${origin}${base}/manifest.webmanifest`);
+
+    expect(await outside.text()).toContain("home document");
+    expect(unknownType.headers.get("content-type")).toBe(
+      "application/octet-stream",
+    );
+  });
+
+  it("empties a list domain as a list rather than as research's envelope", async () => {
+    const root = await artifact();
+    const origin = await serve({ root });
+
+    const empty = await fetch(
+      `${origin}${base}/cv-data/domains/awards.json?scenario=empty`,
+    );
+
+    expect(await empty.json()).toEqual([]);
+  });
+
   it("reports a domain whose fixture the artifact does not carry", async () => {
     const root = await artifact();
     await rm(join(root, "cv-data/domains/awards.json"));
@@ -175,5 +206,55 @@ describe("the Pages-base site server", () => {
     expect(await missing.json()).toEqual({
       error: "awards fixture unavailable",
     });
+  });
+});
+
+describe("returning the port to a supervising runner", () => {
+  // A runner that sends SIGTERM and immediately starts the next capture gets
+  // EADDRINUSE if the server outlives the signal, so the shutdown is driven
+  // through the real signal rather than by calling close directly.
+  const signal: NodeJS.Signals = "SIGUSR2";
+
+  /** Takes the server just started out of the shared teardown's hands. */
+  function ownedServer() {
+    const server = servers.pop();
+    if (!server) throw new Error("no site server was started");
+    return server;
+  }
+
+  afterEach(() => {
+    process.removeAllListeners(signal);
+  });
+
+  it("stops serving on the signal and stays quiet when it arrives twice", async () => {
+    const root = await artifact();
+    const origin = await serve({ root });
+    const server = ownedServer();
+    const closeErrors: Error[] = [];
+    closeOnSignals(server, [signal], (error) => closeErrors.push(error));
+
+    expect((await fetch(`${origin}${base}/`)).ok).toBe(true);
+    process.emit(signal);
+    process.emit(signal);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    await expect(fetch(`${origin}${base}/`)).rejects.toThrow();
+    expect(closeErrors).toEqual([]);
+  });
+
+  it("reports a close the caller has to act on", async () => {
+    const root = await artifact();
+    await serve({ root });
+    const server = ownedServer();
+    const closeErrors: Error[] = [];
+    closeOnSignals(server, [signal], (error) => closeErrors.push(error));
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+
+    process.emit(signal);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(closeErrors.map((error) => error.message)).toEqual([
+      "Server is not running.",
+    ]);
   });
 });

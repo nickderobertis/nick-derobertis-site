@@ -80,6 +80,7 @@ export function createSiteServer({
   route,
 }: SiteServerOptions): Server {
   return createServer(async (request, response) => {
+    /* v8 ignore next -- Node always sets a request target on an HTTP request; the fallback only keeps the URL construction total. */
     const url = new URL(request.url ?? "/", "http://localhost");
     if (
       await handleE2eDataRequest({

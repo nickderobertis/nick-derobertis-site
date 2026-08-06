@@ -112,6 +112,22 @@ describe("content-store contract", () => {
     );
   }, 180_000);
 
+  test("the verifier reports the same contract the recipe surfaces", () => {
+    const result = spawnSync(
+      "node",
+      [
+        "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+        "scripts/publish/verify-content-store-contract.mjs",
+      ],
+      { encoding: "utf8" },
+    );
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout.trim()).toBe(
+      `content-store contract agrees: branch ${contract.branch}, checkout ${contract.checkout}, app root ${contract.appRoot}, lane workdir ${contract.workdir}`,
+    );
+  });
+
   test("every drift case leaves the committed restatements as it found them", () => {
     expect(readFileSync(workflow, "utf8")).toContain(
       `CONTENT_STORE_BRANCH: ${contract.branch}`,

@@ -13,12 +13,6 @@
       "executor": "nx:run-commands",
       "options": { "command": "tsc -p libs/design-system/tsconfig.json" }
     },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "vitest run --passWithNoTests libs/design-system"
-      }
-    },
     "build": {
       "executor": "nx:run-commands",
       "options": { "command": "tsc -p libs/design-system/tsconfig.json" }

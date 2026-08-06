@@ -85,3 +85,16 @@ test("a renderer that does not return HTML is rejected", async () => {
     renderFragmentHtml({ renderFragment: () => Promise.resolve(42) }, "bio"),
   ).rejects.toThrow("The bio fragment renderer did not return HTML");
 });
+
+// A publish lane stamps whichever revision it can reach, so the unstamped path
+// is the one a developer's own build takes: it must resolve this checkout's own
+// commit rather than fall through to the unavailable-Git sentinel.
+test("an unstamped build reads the revision from the checkout it is building", () => {
+  expect(sourceRevision(undefined)).toMatch(/^[0-9a-f]{7,64}$/i);
+});
+
+test("a revision that is not a commit is rejected before it is stamped", () => {
+  expect(() => sourceRevision("not-a-revision")).toThrow(
+    /must be a 7-64 character hexadecimal revision/,
+  );
+});

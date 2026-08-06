@@ -354,6 +354,40 @@ describe("visual affected selection", () => {
     expect(result.stderr).toContain(`must document ${canonical}`);
   });
 
+  // screencomp's capture callback reaches CI through `with:`, where actionlint
+  // never shellchecks it, so `just lint-workflows` extracts it to disk first.
+  // An extractor that silently wrote nothing would hand shellcheck an empty
+  // directory and report a clean gate over an unlinted callback.
+  test("the callback extractor writes the injected capture script shellcheck reads", () => {
+    const output = mkdtempSync(path.join(tmpdir(), "injected-callbacks-"));
+    try {
+      const result = spawnSync(
+        "node",
+        ["scripts/visual/extract-injected-callbacks.mjs", output],
+        { encoding: "utf8" },
+      );
+
+      expect(result.status, result.stderr).toBe(0);
+      expect(readdirSync(output)).toEqual(["capture-command.sh"]);
+      expect(
+        readFileSync(path.join(output, "capture-command.sh"), "utf8"),
+      ).toContain("SCREENCOMP_PROJECT");
+    } finally {
+      rmSync(output, { recursive: true, force: true });
+    }
+  });
+
+  test("the callback extractor refuses an output directory it did not receive", () => {
+    const result = spawnSync(
+      "node",
+      ["scripts/visual/extract-injected-callbacks.mjs", "relative/output"],
+      { encoding: "utf8" },
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("extract-injected-callbacks:");
+  });
+
   test("bootstrap provisions pinned workflow and shell linters without ambient tools", () => {
     const verify = spawnSync("scripts/ci/setup-ci-tools.sh", ["--verify"], {
       encoding: "utf8",

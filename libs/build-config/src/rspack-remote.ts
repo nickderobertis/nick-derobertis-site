@@ -12,6 +12,7 @@ const remoteManifest = createRequire(import.meta.url)(
 const siteConfig: unknown = createRequire(import.meta.url)(
   "../../data-access-core/src/site.config.json",
 );
+/* v8 ignore start -- Both guards run at import over committed build inputs that just check already validates through every consumer; only a corrupted checkout reaches their rejection branches, and the named diagnostic is what makes that failure readable. */
 if (
   Object.entries(remoteManifest).some(
     ([key, value]) =>
@@ -29,6 +30,7 @@ if (
   !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase)
 )
   throw new Error("site.config.json must define a valid pagesBase");
+/* v8 ignore stop */
 const pagesBase = siteConfig.pagesBase;
 
 export type RemoteProject = keyof typeof remoteManifest;

@@ -19,8 +19,9 @@
     },
     "test": {
       "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/libs/artifact-contracts"],
       "options": {
-        "command": "vitest run --passWithNoTests libs/artifact-contracts"
+        "command": "vitest run --config libs/artifact-contracts/vite.config.ts --coverage"
       }
     }
   }

@@ -263,6 +263,86 @@ test("a lane refuses to publish an app that was never built", async () => {
   );
 });
 
+test("a lane that cannot reach the content store names the credentials to check", async () => {
+  const { root } = await createContentStore();
+  await writeBuiltApp(join(root, "built", "shell"), "shell", "5be11ab");
+
+  await expect(
+    publishFragment({
+      ...optionsFor(root, join(root, "never-created.git"), "shell"),
+      attempts: 1,
+    }),
+  ).rejects.toThrow(
+    new RegExp(`Could not read the ${branch} content-store branch`),
+  );
+});
+
+test("a lane refuses a fragment contract it cannot parse", async () => {
+  const { root, store } = await createContentStore(["awards"]);
+  const source = join(root, "built", "shell");
+  await writeBuiltApp(source, "shell", "5be11ab");
+  await writeFile(join(source, "fragment.json"), "{ not json");
+
+  await expect(
+    publishFragment(optionsFor(root, store, "shell")),
+  ).rejects.toThrow(/Could not read the built shell fragment contract/);
+});
+
+test("a lane refuses a fragment contract the published schema rejects", async () => {
+  const { root, store } = await createContentStore(["awards"]);
+  const source = join(root, "built", "shell");
+  await writeBuiltApp(source, "shell", "5be11ab");
+  await writeFile(
+    join(source, "fragment.json"),
+    JSON.stringify({ schemaVersion: 1, name: "shell" }),
+  );
+
+  await expect(
+    publishFragment(optionsFor(root, store, "shell")),
+  ).rejects.toThrow(/The built shell fragment contract is invalid/);
+});
+
+test("a rerun reuses the lane's scratch repository rather than a second remote", async () => {
+  const { root, store } = await createContentStore(["awards"]);
+  const options = optionsFor(root, store, "shell");
+  await writeBuiltApp(join(root, "built", "shell"), "shell", "5be11ab");
+  await publishFragment(options);
+
+  await writeBuiltApp(
+    join(root, "built", "shell"),
+    "shell",
+    "5be11ab",
+    "<main>shell again</main>",
+  );
+  const result = await publishFragment(options);
+
+  expect(result).toMatchObject({ changed: true, attempts: 1 });
+  expect(git(["remote"], options.workdir).trim()).toBe("origin");
+  expect(publishedFile(store, "apps/shell/fragment.html")).toBe(
+    "<main>shell again</main>",
+  );
+});
+
+test("a lane seeds a second content store without carrying its first one's history", async () => {
+  const { root, store } = await createContentStore(["awards"]);
+  const options = optionsFor(root, store, "shell");
+  await writeBuiltApp(join(root, "built", "shell"), "shell", "5be11ab");
+  await publishFragment(options);
+
+  const empty = await createContentStore();
+  const result = await publishFragment({ ...options, remote: empty.store });
+
+  expect(result).toMatchObject({ changed: true, attempts: 1 });
+  expect(git(["rev-list", "--count", branch], empty.store).trim()).toBe("1");
+  expect(publishedPaths(empty.store)).toEqual([
+    contentStoreNoticePath,
+    "apps/shell/fragment.css",
+    "apps/shell/fragment.html",
+    "apps/shell/fragment.json",
+    "apps/shell/index.html",
+  ]);
+});
+
 test("staging outside the owned subtree is refused before anything is committed", () => {
   expect(() =>
     assertOwnSubtree(
@@ -349,6 +429,16 @@ test.each([
     { PUBLISH_ATTEMPTS: "99" },
     /PUBLISH_ATTEMPTS must be an integer/,
   ],
+  [
+    "a lane that would never attempt to publish",
+    { PUBLISH_ATTEMPTS: "0" },
+    /PUBLISH_ATTEMPTS must be an integer/,
+  ],
+  [
+    "an attempt count that is not a number",
+    { PUBLISH_ATTEMPTS: "several" },
+    /PUBLISH_ATTEMPTS must be an integer/,
+  ],
 ])("publish options reject %s", (_case, overrides, message) => {
   expect(() =>
     publishOptionsFromEnv({
@@ -419,6 +509,17 @@ test("a workdir that contains the workspace is refused before any checkout", () 
       PUBLISH_WORKDIR: dirname(process.cwd()),
     }),
   ).toThrow(/is or contains the workspace/);
+});
+
+test("a runner may narrow how many times a lane races for the branch tip", () => {
+  expect(
+    publishOptionsFromEnv({
+      PUBLISH_APP: "timeline",
+      PUBLISH_BRANCH: branch,
+      PUBLISH_REMOTE: "https://github.example.invalid/site.git",
+      PUBLISH_ATTEMPTS: "2",
+    }),
+  ).toMatchObject({ attempts: 2 });
 });
 
 test("publish options default to the app's own build output", () => {

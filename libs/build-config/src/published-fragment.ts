@@ -46,6 +46,7 @@ const packageDependencies = reactDependencies(
 const cssUrlPattern = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)'"\s]*))\s*\)/g;
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Published CSS is exercised through its rendered output by every standalone and host-composed visual journey; URL rejection happens at the build boundary before a browser artifact exists.
+/* v8 ignore start -- Reachable only from the emit hook below, which runs inside a real rspack build; every app build drives it and every route journey drives the CSS it rewrites. */
 function absolutizeCssUrls(css: string, publicPath: string) {
   return css.replace(cssUrlPattern, (match, quoted, single, bare) => {
     const target = quoted ?? single ?? bare ?? "";
@@ -54,6 +55,7 @@ function absolutizeCssUrls(css: string, publicPath: string) {
     return `url("${publicPath}${target}")`;
   });
 }
+/* v8 ignore stop */
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
 const unavailableSourceRevision = "0000000";
@@ -111,6 +113,7 @@ export async function renderFragmentHtml(
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Renderer compilation is a build boundary with no direct browser interface; site.spec.ts and every feature journey drive its published output through hydration and standalone/host-composed rendering, and container screenshot capture exercises the real compiler lifecycle.
+/* v8 ignore start -- Compiling a renderer and emitting a fragment happen inside the rspack build that owns this plugin, which v8 cannot instrument from a test process; every app build drives both, the artifact gate rejects what they emit wrongly, and every route journey drives the published bytes. */
 function compileRenderer(name: string, outputPath: string) {
   return new Promise<void>((resolveCompilation, rejectCompilation) => {
     const compiler = rspack({
@@ -241,4 +244,5 @@ export class PublishedFragmentPlugin {
     );
   }
 }
+/* v8 ignore stop */
 // llmlint: ignore-end[changed_behavior_has_e2e]
