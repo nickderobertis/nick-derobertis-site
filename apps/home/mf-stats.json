@@ -37,7 +37,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.2a6c1bf60b493d4b.js"
+            "main.5c3200e8f141a85f.js"
           ]
         },
         "css": {
@@ -64,7 +64,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.2a6c1bf60b493d4b.js"
+            "main.5c3200e8f141a85f.js"
           ]
         },
         "css": {
@@ -88,7 +88,7 @@
       "federationContainerName": "homeCards",
       "moduleName": "Skeleton",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/home-cards/remoteEntry.js"
     },
@@ -98,7 +98,7 @@
       "federationContainerName": "homeCarousel",
       "moduleName": "Skeleton",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/home-carousel/remoteEntry.js"
     },
@@ -108,7 +108,7 @@
       "federationContainerName": "homeContact",
       "moduleName": "Skeleton",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/home-contact/remoteEntry.js"
     },
@@ -118,7 +118,7 @@
       "federationContainerName": "homeStory",
       "moduleName": "Skeleton",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/home-story/remoteEntry.js"
     },
@@ -128,7 +128,7 @@
       "federationContainerName": "awards",
       "moduleName": "Skeleton",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
     },
@@ -138,7 +138,7 @@
       "federationContainerName": "skills",
       "moduleName": "Skeleton",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
     },
@@ -148,9 +148,19 @@
       "federationContainerName": "timeline",
       "moduleName": "Skeleton",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/timeline/remoteEntry.js"
+    },
+    {
+      "alias": "awards",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "awards",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/panes.ts"
+      ],
+      "version": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
     },
     {
       "alias": "homeCarousel",
@@ -158,7 +168,7 @@
       "federationContainerName": "homeCarousel",
       "moduleName": "Page",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/home-carousel/remoteEntry.js"
     },
@@ -168,7 +178,7 @@
       "federationContainerName": "homeCards",
       "moduleName": "Page",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/home-cards/remoteEntry.js"
     },
@@ -178,9 +188,19 @@
       "federationContainerName": "homeStory",
       "moduleName": "Page",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/home-story/remoteEntry.js"
+    },
+    {
+      "alias": "skills",
+      "consumingFederationContainerName": "home",
+      "federationContainerName": "skills",
+      "moduleName": "Page",
+      "usedIn": [
+        "src/panes.ts"
+      ],
+      "version": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
     },
     {
       "alias": "homeContact",
@@ -188,7 +208,7 @@
       "federationContainerName": "homeContact",
       "moduleName": "Page",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/home-contact/remoteEntry.js"
     },
@@ -198,29 +218,9 @@
       "federationContainerName": "timeline",
       "moduleName": "Page",
       "usedIn": [
-        "src/page.tsx"
+        "src/panes.ts"
       ],
       "version": "/nick-derobertis-site/remotes/timeline/remoteEntry.js"
-    },
-    {
-      "alias": "skills",
-      "consumingFederationContainerName": "home",
-      "federationContainerName": "skills",
-      "moduleName": "Page",
-      "usedIn": [
-        "src/page.tsx"
-      ],
-      "version": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
-    },
-    {
-      "alias": "awards",
-      "consumingFederationContainerName": "home",
-      "federationContainerName": "awards",
-      "moduleName": "Page",
-      "usedIn": [
-        "src/page.tsx"
-      ],
-      "version": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
     }
   ],
   "exposes": [

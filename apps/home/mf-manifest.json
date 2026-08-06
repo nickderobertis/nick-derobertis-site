@@ -35,7 +35,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.2a6c1bf60b493d4b.js"
+            "main.5c3200e8f141a85f.js"
           ]
         },
         "css": {
@@ -58,7 +58,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.2a6c1bf60b493d4b.js"
+            "main.5c3200e8f141a85f.js"
           ]
         },
         "css": {
@@ -115,6 +115,12 @@
       "entry": "/nick-derobertis-site/remotes/timeline/remoteEntry.js"
     },
     {
+      "federationContainerName": "awards",
+      "moduleName": "Page",
+      "alias": "awards",
+      "entry": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
+    },
+    {
       "federationContainerName": "homeCarousel",
       "moduleName": "Page",
       "alias": "homeCarousel",
@@ -133,6 +139,12 @@
       "entry": "/nick-derobertis-site/remotes/home-story/remoteEntry.js"
     },
     {
+      "federationContainerName": "skills",
+      "moduleName": "Page",
+      "alias": "skills",
+      "entry": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
+    },
+    {
       "federationContainerName": "homeContact",
       "moduleName": "Page",
       "alias": "homeContact",
@@ -143,18 +155,6 @@
       "moduleName": "Page",
       "alias": "timeline",
       "entry": "/nick-derobertis-site/remotes/timeline/remoteEntry.js"
-    },
-    {
-      "federationContainerName": "skills",
-      "moduleName": "Page",
-      "alias": "skills",
-      "entry": "/nick-derobertis-site/remotes/skills/remoteEntry.js"
-    },
-    {
-      "federationContainerName": "awards",
-      "moduleName": "Page",
-      "alias": "awards",
-      "entry": "/nick-derobertis-site/remotes/awards/remoteEntry.js"
     }
   ],
   "exposes": [
