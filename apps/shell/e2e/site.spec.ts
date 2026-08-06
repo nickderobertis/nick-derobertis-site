@@ -1,4 +1,10 @@
-import { expect, type Locator, type Page, test } from "@playwright/test";
+import {
+  expect,
+  type Locator,
+  type Page,
+  type Route,
+  test,
+} from "@playwright/test";
 import {
   type HomePaneRemote,
   homePanes,
@@ -366,3 +372,48 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
     page.getByRole("heading", { name: "Finance researcher & educator" }),
   ).toBeVisible();
 });
+
+// A route loader is the only place the running site fetches a CV domain, and it
+// is reached by navigating into a route: a direct load hydrates the payload the
+// prerender already baked in and asks the data host for nothing. Both ways a
+// served domain can be unusable have to leave the visitor with the route's own
+// recovery panel rather than a blank pane or a thrown error.
+const unusableDomains = [
+  {
+    // A cache or gateway can answer a failed request with the last payload it
+    // held, so the status is the only thing saying this is not the answer.
+    name: "answers a failed request with the payload it last held",
+    serve: async (route: Route) =>
+      route.fulfill({ response: await route.fetch(), status: 503 }),
+  },
+  {
+    name: "answers with a body the CV schema rejects",
+    serve: (route: Route) =>
+      route.fulfill({
+        body: '[{"name":"not a research project"}]',
+        contentType: "application/json",
+        status: 200,
+      }),
+  },
+] as const;
+
+for (const served of unusableDomains)
+  test(`Research recovers when the data host ${served.name}`, async ({
+    page,
+  }) => {
+    await page.goto("", { waitUntil: "networkidle" });
+    await page.route("**/cv-data/domains/research.json*", served.serve);
+
+    await page.getByRole("link", { name: "Research", exact: true }).click();
+
+    await expect(page).toHaveURL(/nick-derobertis-site\/research$/);
+    await expect(
+      page.getByRole("heading", { name: "Research is unavailable" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        "The research collection could not be loaded. Please try again later.",
+      ),
+    ).toBeVisible();
+    await expect(page.getByRole("banner")).toBeVisible();
+  });
