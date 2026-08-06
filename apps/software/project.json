@@ -41,7 +41,9 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "options": { "command": "vitest run --passWithNoTests apps/software/src" }
+      "options": {
+        "command": "vitest run --config apps/software/vite.config.ts --coverage"
+      }
     },
     "screenshot": {
       "executor": "nx:run-commands",

@@ -14,10 +14,46 @@
       "name": "software",
       "toggles": {
         "render": "host-composed",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "5f69720791b8657196279d3778335064e2ff29c2ab8e90731c8c3529f62d263c"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "7c12121aacb64075bc05623f15ee8193ace27b487ac9dabc363c2b83aff1bd1e"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "a6a8d52466bbcfca3bf654b25d31d302f86e88e2e424f8e344c1782bb98ad684"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "bb4bb9412e2c3a0d9a7a15e79ab1ae6c87a619b9b8e92aeecac033341646cbb7"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "77a73fe6d5b62da8d27587ff5950cae50ebb9015a273f2e7ff82053db0664beb"
     },
     {
       "name": "software",
@@ -59,10 +95,46 @@
       "name": "software",
       "toggles": {
         "render": "standalone",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "5f69720791b8657196279d3778335064e2ff29c2ab8e90731c8c3529f62d263c"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "7c12121aacb64075bc05623f15ee8193ace27b487ac9dabc363c2b83aff1bd1e"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "a6a8d52466bbcfca3bf654b25d31d302f86e88e2e424f8e344c1782bb98ad684"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "bb4bb9412e2c3a0d9a7a15e79ab1ae6c87a619b9b8e92aeecac033341646cbb7"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "77a73fe6d5b62da8d27587ff5950cae50ebb9015a273f2e7ff82053db0664beb"
     },
     {
       "name": "software",
@@ -99,6 +171,24 @@
         "viewport": "desktop"
       },
       "hash": "25b90785e5753049a387253d8c3ea086216102abb55db59680ba02e66c6d0171"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "mobile"
+      },
+      "hash": "3bb937b48d5ec3897d12d8d2a617757b49d555d3bc1988f528122b6d5c21b695"
+    },
+    {
+      "name": "software",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "tablet"
+      },
+      "hash": "f1eb99feaf08d633daa81e4fa87f841dd072b3238ac550464d6e6c5aaab00288"
     }
   ]
 }

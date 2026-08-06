@@ -14,10 +14,46 @@
       "name": "research",
       "toggles": {
         "render": "host-composed",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "a6073665a420d42d8dfdbb25f831641018bac6063efc84da09b018b5a5aceb42"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "70994a49f723714165f2397c1a812b97f23a1a858479e254041ecf9e14b8a8ad"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "6ca15677b33f6005d42b677091ec0fd59cc11f132dda22117c0d5aecbc550e7b"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "ca8af6357ef57dc07ad01116b6d18ae76f3c902952be21898dc58cf363a53170"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "482ce448c5b72afafaf7d12a5e79e0ef5c92a0e3e3901b096f655e320978fd7e"
     },
     {
       "name": "research",
@@ -59,10 +95,46 @@
       "name": "research",
       "toggles": {
         "render": "standalone",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "71fa5b1a961cd9c602541284e7afecbeb5bb67f20e7e7d65df868a24cb58c704"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "69b09af58bf828ca1df940c21fe43bdd814c368d8f5b0cbea2c9508f671d445f"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "ffb07c295c6e20884121aa60f73592785e107f5f27989e9d402264c8916d53e4"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "90c428988952865b00ea85056c204d56d09ef0e7425ff797948b0dcb23be77e7"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "b8c24e83c4e0f6853e2e256ed1af7bf22373a78140ae99799f3de2f4e2eb129b"
     },
     {
       "name": "research",
@@ -99,6 +171,24 @@
         "viewport": "desktop"
       },
       "hash": "93396c54d6b22f055bfba414a0ae8efbad0e5208c8d2607ff70701cdb49daf50"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "mobile"
+      },
+      "hash": "7af125d36afd9242c7014e7d0ca33303a4088dd22635190512199fe335b6d368"
+    },
+    {
+      "name": "research",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "tablet"
+      },
+      "hash": "d5a3039027f312def064955890e4829e5f2124a03866232babdf46742ef90074"
     }
   ]
 }

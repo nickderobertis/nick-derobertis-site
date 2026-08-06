@@ -1,10 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "types": ["node"] },
+  "compilerOptions": {
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom/vitest"]
+  },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "rspack.config.ts",
+    "vite.config.ts",
     "../../libs/build-config/src/**/*.ts"
   ]
 }

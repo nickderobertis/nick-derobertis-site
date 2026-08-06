@@ -14,10 +14,46 @@
       "name": "bio",
       "toggles": {
         "render": "host-composed",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "51de896a8284323a7b6bf81802a5a5ad83321a685329dca46363c22cc8d0d214"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "eeed388801769be994396defdf314f40d01acda0eaff1a206c42813048ae8e47"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "a5071c9e2d40a4890f9e83b4d95450eb668c486711fee7c7d402c8e367e268e7"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "911258e867dda9cb21c4e84b5e687328db2170ffd92853167a094bf3667ce036"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "d38a591a6b9720a1d13c59709760af4b4c5d0d7b4d9e9226aebb3608320fca96"
     },
     {
       "name": "bio",
@@ -59,10 +95,46 @@
       "name": "bio",
       "toggles": {
         "render": "standalone",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "163bf75e79b43c46b9359cbb43bf39b861e08601a57f7a083c28b13b58e5506d"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "d64863a51b30a0ab29ae705cbf20ec8cd0e2f7a5818cfa2cc0f022f485603d8a"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "2cbf230ac3c6477ffd9538070d09361f4813ae0b7fa046ea0ff43b42320fe9cf"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "b61273d62adaf4acaa146f35732094c8e505c1e91a8388cba8b0fb951e5feada"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "97e463e8f9d3039cd2ad8c15e88fe0f5f49686024758ce362affc16b1a28f091"
     },
     {
       "name": "bio",
@@ -99,6 +171,24 @@
         "viewport": "desktop"
       },
       "hash": "04081ee2eb3cea13c70c2e0e9cd4c00eae3b0258e3bf1f7ba345863b5d3b5932"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "mobile"
+      },
+      "hash": "998db23736b7ab0eda6f19228dde7fd327d5bf9336be71423879e08a0211681e"
+    },
+    {
+      "name": "bio",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "tablet"
+      },
+      "hash": "6ca09482562bd6cad4964ab6dfc05cd20b842ce017df72825d73fe0c7fab3c71"
     }
   ]
 }
