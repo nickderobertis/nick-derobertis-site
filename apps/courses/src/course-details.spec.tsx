@@ -13,7 +13,10 @@ function courseById(id: string): Course {
 
 function pane(heading: string) {
   const found = screen.getByRole("heading", { level: 3, name: heading });
-  return found.parentElement as HTMLElement;
+  const surrounding = found.parentElement;
+  if (!surrounding)
+    throw new Error(`The ${heading} heading stands outside any pane`);
+  return surrounding;
 }
 
 test("opens with the long description and how the course is currently offered", () => {

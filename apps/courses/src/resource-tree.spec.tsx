@@ -12,18 +12,17 @@ const publishedResources = financialModeling.resources ?? [];
 test("keeps a nested reading list under the topic it belongs to", () => {
   render(<ResourceTree resources={publishedResources} />);
 
-  const topics = within(screen.getAllByRole("list")[0] as HTMLElement);
-  const python = topics
+  const [outermost] = screen.getAllByRole("list");
+  if (!outermost) throw new Error("ResourceTree rendered no reading list");
+  const python = within(outermost)
     .getAllByRole("listitem")
     .find((item) => item.textContent?.startsWith("Python"));
-  expect(python).toBeDefined();
+  if (!python) throw new Error("The CV no longer records the Python topic");
   // The Python topic groups four kinds of tutorial, each of which groups its
   // own links, so the reading list has to nest rather than flatten.
+  expect(within(python).getAllByRole("list")[0]).toBeInTheDocument();
   expect(
-    within(python as HTMLElement).getAllByRole("list")[0],
-  ).toBeInTheDocument();
-  expect(
-    within(python as HTMLElement).getByRole("link", {
+    within(python).getByRole("link", {
       name: "Python from Scratch",
     }),
   ).toHaveAttribute(
@@ -38,15 +37,14 @@ test("credits an author and repeats the note the CV records for a resource", () 
   const codecademy = screen
     .getAllByRole("listitem")
     .find((item) => item.textContent?.startsWith("Learn Python 2"));
-  expect(codecademy).toBeDefined();
+  if (!codecademy)
+    throw new Error("The CV no longer records the Learn Python 2 resource");
   expect(
-    within(codecademy as HTMLElement).getByText("by codecademy", {
+    within(codecademy).getByText("by codecademy", {
       exact: false,
     }),
   ).toBeInTheDocument();
-  expect(
-    within(codecademy as HTMLElement).getByText(/teaches Python 2/),
-  ).toBeInTheDocument();
+  expect(within(codecademy).getByText(/teaches Python 2/)).toBeInTheDocument();
 });
 
 test("names a heading resource that links nowhere without offering a dead link", () => {

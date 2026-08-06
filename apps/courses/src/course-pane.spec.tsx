@@ -92,6 +92,8 @@ test("files the syllabus behind a disclosure a reader has to open", () => {
   // The card is long enough already, so the syllabus arrives collapsed and the
   // reader opens it by the course's own name.
   const [syllabus] = within(card()).getAllByRole("group");
+  if (!syllabus)
+    throw new Error("The course card files no syllabus disclosure");
   const opener = within(card()).getByText("Explore Financial Modeling details");
   expect(syllabus).not.toHaveAttribute("open");
 
@@ -99,7 +101,7 @@ test("files the syllabus behind a disclosure a reader has to open", () => {
 
   expect(syllabus).toHaveAttribute("open");
   expect(
-    within(syllabus as HTMLElement).getByRole("heading", {
+    within(syllabus).getByRole("heading", {
       name: "About this course",
     }),
   ).toBeInTheDocument();

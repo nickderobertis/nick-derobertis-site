@@ -1,11 +1,12 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient, type ResearchStatus } from "@site/data-access-core";
 import { act, render, screen, within } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import ResearchPage from "./page";
 
 const published = cvDataClient.domain("research");
-const publishedCounts = (["working_paper", "work_in_progress"] as const).map(
+const sectionStatuses: ResearchStatus[] = ["working_paper", "work_in_progress"];
+const publishedCounts = sectionStatuses.map(
   (status) =>
     (published.projects ?? []).filter((project) => project.status === status)
       .length,
@@ -89,8 +90,10 @@ test("reports research that could not be loaded", () => {
   const heading = screen.getByRole("heading", {
     name: "Research is unavailable",
   });
+  const panel = heading.parentElement;
+  if (!panel) throw new Error("The failure heading stands outside any panel");
   expect(
-    within(heading.parentElement as HTMLElement).getByText(
+    within(panel).getByText(
       "The research collection could not be loaded. Please try again later.",
     ),
   ).toBeInTheDocument();

@@ -3,11 +3,11 @@ import { expect, test } from "vitest";
 import { ResearchState } from "./research-state";
 
 function livePanel(container: HTMLElement) {
-  const panel = container.querySelector('[aria-live="polite"]');
+  const panel = container.querySelector<HTMLElement>('[aria-live="polite"]');
   // The panel replaces content the visitor is already waiting on, so it has to
   // be announced when it arrives rather than sit there silently.
   if (!panel) throw new Error("The research state panel is not announced");
-  return panel as HTMLElement;
+  return panel;
 }
 
 test("reports a CV with no research as an empty collection, not a failure", () => {
