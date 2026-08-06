@@ -1,4 +1,3 @@
-// eslint-disable-next-line @nx/enforce-module-boundaries -- Test configuration consumes the workspace-wide shared harness; production build-configuration dependencies remain unchanged.
 import { defineWorkspaceTestConfig } from "@site/testing";
 
 export default defineWorkspaceTestConfig({
