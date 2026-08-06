@@ -2,18 +2,18 @@ import { cvDataClient } from "@site/data-access-core";
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
-// Every landmark the composed page owes a visitor, one per pane Home declares.
-// Home is the only place these seven appear together, so this is what a broken
-// composition breaks.
+// Every landmark the composed page owes a visitor, one per pane Home declares,
+// each a region named by the pane's own heading. Home is the only place these
+// seven appear together, so this is what a broken composition breaks.
 const paneLandmarks = [
-  { role: "region", name: "Featured work" },
-  { role: "region", name: "Areas of work" },
-  { role: "region", name: "Who am I?" },
-  { role: "region", name: "Skilled in…" },
-  { role: "region", name: "Selected awards" },
-  { role: "region", name: "Let’s build something useful." },
-  { role: "region", name: "Educated and Experienced" },
-] as const;
+  "Featured work",
+  "Areas of work",
+  "Who am I?",
+  "Skilled in…",
+  "Selected awards",
+  "Let’s build something useful.",
+  "Educated and Experienced",
+];
 
 const paneSkeletons = [
   "Loading featured work",
@@ -66,8 +66,11 @@ test("suspends on one skeleton per pane before any of them arrive", async () => 
 test("settles onto all seven panes the composition declares", async () => {
   await renderComposedPage();
 
-  for (const { role, name } of paneLandmarks)
-    expect(await screen.findByRole(role, { name }), name).toBeInTheDocument();
+  for (const name of paneLandmarks)
+    expect(
+      await screen.findByRole("region", { name }),
+      name,
+    ).toBeInTheDocument();
   for (const name of paneSkeletons)
     expect(screen.queryByRole("status", { name }), name).toBeNull();
 });
@@ -115,7 +118,7 @@ test("hands hosts the composed page's warm-up through its page module", async ()
   await renderComposedPage();
   // A warmed Home mounts straight onto its panes: the skeletons are exactly
   // what the shell paid the preload to avoid showing.
-  for (const { role, name } of paneLandmarks)
-    expect(screen.getByRole(role, { name }), name).toBeInTheDocument();
+  for (const name of paneLandmarks)
+    expect(screen.getByRole("region", { name }), name).toBeInTheDocument();
   expect(screen.queryByRole("status")).toBeNull();
 });

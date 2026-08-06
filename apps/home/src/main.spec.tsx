@@ -22,6 +22,19 @@ async function startRemote() {
   });
 }
 
+/**
+ * The panes arrive on module promises the page module creates once, so how long
+ * the mounted remote stays suspended is how long the runner takes to load seven
+ * pane modules — which a loaded machine pushes past Testing Library's one-second
+ * wall clock. Awaiting the very promises the mounted page is suspended on settles
+ * the frame on that work instead of on a timer. The page read its render path at
+ * mount, so it stays on the Suspense branch this covers.
+ */
+async function settlePanes() {
+  const { preload } = await import("./panes");
+  await act(preload);
+}
+
 beforeEach(() => {
   vi.resetModules();
   document.body.innerHTML = "";
@@ -43,6 +56,7 @@ test("holds the composed page's own loading frame until it arrives", async () =>
   document.body.innerHTML = '<div id="root"></div>';
 
   await startRemote();
+  await settlePanes();
 
   expect(
     await screen.findByRole("region", { name: "Featured work" }),
