@@ -64,9 +64,8 @@ beforeAll(() => {
     env: { ...process.env, NX_DAEMON: "false" },
     stdio: "pipe",
   });
-  const graph = graphSchema.parse(
-    JSON.parse(readFileSync(graphFile, "utf8")) as unknown,
-  );
+  const printed: unknown = JSON.parse(readFileSync(graphFile, "utf8"));
+  const graph = graphSchema.parse(printed);
   projects = Object.entries(graph.graph.nodes).map(([name, node]) => ({
     name,
     ...node.data,
