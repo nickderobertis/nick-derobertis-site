@@ -50,7 +50,14 @@ const defaultContentTypes: Readonly<Record<string, string>> = {
  * chunks a host needs before it can render anything at all. Delaying these
  * would postpone the skeleton the lazy delay exists to make observable.
  */
-function isEagerRemoteAsset(assetName: string) {
+/**
+ * Whether a remote asset is one this server always serves at once. Everything
+ * else a remote publishes is its lazily loaded page code, which is what the
+ * latency option below holds back so a skeleton is observable. A Playwright
+ * journey that needs to own that window holds the same set from the browser
+ * side, so this is the one place the distinction is written down.
+ */
+export function isEagerRemoteAsset(assetName: string) {
   return (
     assetName.startsWith("main.") ||
     assetName === "remoteEntry.js" ||
