@@ -55,22 +55,31 @@ if (
   throw new Error(
     "performance.config.json routes must match the shell route contract",
   );
-const localRoutes = localSuites.flatMap((suite) =>
-  suite.scenarios
-    // A permanently-loading skeleton has no Largest Contentful Paint, so it is
-    // not a meaningful Lighthouse target. The app contract still supplies the
-    // content-bearing happy, empty, and error states for both render paths.
-    .filter(({ state }) => state !== "loading")
-    .map(({ query = "", render }) => {
-      const base =
-        render === "standalone"
-          ? `/remotes/${suite.project}/`
-          : hostPaths.get(suite.project);
-      if (base === undefined)
-        throw new Error(`No shell route is declared for ${suite.project}`);
-      return `${base}${query}`;
-    }),
-);
+// A route is one Lighthouse target, and several scenarios resolve to the same
+// one — a state captured at three breakpoints is three shots of a single URL —
+// so the audit set is deduplicated. Auditing a URL twice would only spend
+// another browser run on it, and the findings it writes are keyed by route, so
+// a duplicated input never matches the routes the audit reports back.
+const localRoutes = [
+  ...new Set(
+    localSuites.flatMap((suite) =>
+      suite.scenarios
+        // A permanently-loading skeleton has no Largest Contentful Paint, so it is
+        // not a meaningful Lighthouse target. The app contract still supplies the
+        // content-bearing happy, empty, and error states for both render paths.
+        .filter(({ state }) => state !== "loading")
+        .map(({ query = "", render }) => {
+          const base =
+            render === "standalone"
+              ? `/remotes/${suite.project}/`
+              : hostPaths.get(suite.project);
+          if (base === undefined)
+            throw new Error(`No shell route is declared for ${suite.project}`);
+          return `${base}${query}`;
+        }),
+    ),
+  ),
+];
 const localUrlSchema = z
   .string()
   .url()
