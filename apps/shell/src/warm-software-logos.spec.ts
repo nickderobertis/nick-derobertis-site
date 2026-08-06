@@ -26,7 +26,7 @@ function project(overrides: Partial<Project>): Project {
     id: "a-project",
     name: "A project",
     ...overrides,
-  } as Project;
+  };
 }
 
 beforeEach(() => {

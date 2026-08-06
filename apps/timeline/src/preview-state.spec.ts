@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { parseTimelineState, previewState } from "./preview-state";
+import {
+  parseTimelineState,
+  previewState,
+  type TimelinePreviewState,
+} from "./preview-state";
 
 beforeEach(() => {
   window.history.replaceState(null, "", "/");
@@ -14,7 +18,14 @@ test("shows the settled timeline to a visitor who arrives without a steer", () =
 });
 
 test("honours every state a visitor can steer the pane into", () => {
-  for (const state of ["empty", "error", "loading", "ready"] as const) {
+  const steerable: TimelinePreviewState[] = [
+    "empty",
+    "error",
+    "loading",
+    "ready",
+  ];
+
+  for (const state of steerable) {
     window.history.replaceState(null, "", `/?timeline-state=${state}`);
 
     expect(previewState()).toBe(state);

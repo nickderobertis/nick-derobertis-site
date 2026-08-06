@@ -3,6 +3,7 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell validates route payloads at its loader boundary; feature apps never gain this data-core dependency.
 import type {
   Courses,
+  CvDomains,
   Research,
   SoftwareProjects,
 } from "@site/data-access-core";
@@ -42,10 +43,20 @@ export interface RoutePages {
   courses: RoutePage<CoursesPageProps<Courses>>;
 }
 
+/** The CV domains a route loader fetches, named as the CV publishes them. */
+export type RouteDomainName = "courses" | "research" | "software_projects";
+
+/**
+ * Fetches one CV domain for a route loader. The requested name is the type
+ * parameter, so each loader below receives that domain's own payload type
+ * rather than something it has to narrow by hand.
+ */
+export type LoadRouteDomain = <Name extends RouteDomainName>(
+  name: Name,
+) => Promise<CvDomains[Name]>;
+
 interface RouterContext {
-  loadDomain(name: "research"): Promise<Research>;
-  loadDomain(name: "software_projects"): Promise<SoftwareProjects>;
-  loadDomain(name: "courses"): Promise<Courses>;
+  loadDomain: LoadRouteDomain;
 }
 
 /**

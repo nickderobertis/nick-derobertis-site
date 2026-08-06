@@ -33,7 +33,14 @@ function openAt(location: string) {
       software: { component: SoftwarePage },
       courses: { component: CoursesPage },
     },
-    context: { loadDomain: async () => undefined as never },
+    // Nothing here loads a route, so no CV domain is ever asked for; a loader
+    // that refuses everything satisfies the context and would fail loudly if
+    // one were.
+    context: {
+      loadDomain: async (name) => {
+        throw new Error(`This spec serves no CV domain, including ${name}`);
+      },
+    },
   });
 }
 

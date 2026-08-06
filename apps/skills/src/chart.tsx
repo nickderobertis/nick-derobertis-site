@@ -4,7 +4,7 @@ import { arc } from "./chart-geometry";
 import { SkillDetails } from "./skill-details";
 import { useChartModel } from "./use-chart-model";
 
-const COLORS = [
+const COLORS: readonly string[] = [
   "#267bb5",
   "#ff7f0e",
   "#2ca02c",
@@ -12,7 +12,7 @@ const COLORS = [
   "#9467bd",
   "#8c564b",
   "#df65b0",
-] as const;
+];
 
 /**
  * The sunburst. The inner ring is one sector per category and the outer ring is

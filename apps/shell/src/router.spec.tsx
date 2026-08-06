@@ -9,11 +9,19 @@ import HomePage, { preload, preloadCount } from "../test-remotes/home-page";
 import ResearchPage from "../test-remotes/research-page";
 import SoftwarePage from "../test-remotes/software-page";
 import { App } from "./app";
-import { createSiteRouter, type RoutePages } from "./router";
+import {
+  createSiteRouter,
+  type LoadRouteDomain,
+  type RoutePages,
+} from "./router";
 
 const research = cvDataClient.domain("research");
 const courses = cvDataClient.domain("courses");
 const softwareProjects = cvDataClient.domain("software_projects");
+
+/** Serves each route's domain from the CV, as the deployed loaders do. */
+const serveCvDomains: LoadRouteDomain = async (name) =>
+  cvDataClient.domain(name);
 
 /**
  * The five route remotes, resolved the two ways the shell resolves them: the
@@ -29,17 +37,11 @@ const pages: RoutePages = {
   courses: { component: CoursesPage },
 };
 
-function openSite(
-  path: string,
-  loadDomain: (name: string) => Promise<unknown> = async (name) =>
-    ({ research, courses, software_projects: softwareProjects })[name],
-) {
+function openSite(path: string, loadDomain: LoadRouteDomain = serveCvDomains) {
   const router = createSiteRouter({
     history: createMemoryHistory({ initialEntries: [`${siteBase}${path}`] }),
     pages,
-    // The validator returns the domain selected by `name`; the router's generic
-    // callback performs that name-to-return-type narrowing at each call site.
-    context: { loadDomain: async (name: string) => loadDomain(name) as never },
+    context: { loadDomain },
   });
   render(<App router={router} />);
   return router;
@@ -104,7 +106,7 @@ test("fetches a deferred route's page only once the visitor goes there", async (
         },
       },
     },
-    context: { loadDomain: async () => research as never },
+    context: { loadDomain: serveCvDomains },
   });
   render(<App router={router} />);
   await screen.findByRole("heading", { name: "Finance researcher" });

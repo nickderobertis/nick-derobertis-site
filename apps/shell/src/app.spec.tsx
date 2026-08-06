@@ -21,7 +21,13 @@ test("puts the site's router on screen", async () => {
       software: { component: SoftwarePage },
       courses: { component: CoursesPage },
     },
-    context: { loadDomain: async () => undefined as never },
+    // Bio loads no CV domain, so a loader that refuses everything satisfies
+    // the context and would fail loudly if this router ever asked for one.
+    context: {
+      loadDomain: async (name) => {
+        throw new Error(`This spec serves no CV domain, including ${name}`);
+      },
+    },
   });
 
   render(<App router={router} />);

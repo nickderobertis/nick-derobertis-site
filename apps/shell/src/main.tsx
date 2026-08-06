@@ -49,9 +49,7 @@ const pages: RoutePages = {
 const router = createSiteRouter({
   history: createBrowserHistory(),
   pages,
-  // The validator returns the domain selected by `name`; the router's generic
-  // callback performs that name-to-return-type narrowing at each call site.
-  context: { loadDomain: async (name) => loadBrowserDomain(name) as never },
+  context: { loadDomain: (name) => loadBrowserDomain(name) },
 });
 function hasSerializedRouter(value: unknown): value is {
   router: Record<string, unknown>;

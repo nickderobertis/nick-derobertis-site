@@ -1,15 +1,8 @@
 export type TimelinePreviewState = "empty" | "error" | "loading" | "ready";
 
-const TIMELINE_STATES: ReadonlySet<string> = new Set([
-  "empty",
-  "error",
-  "loading",
-  "ready",
-]);
-
 export function parseTimelineState(input: unknown): TimelinePreviewState {
-  return typeof input === "string" && TIMELINE_STATES.has(input)
-    ? (input as TimelinePreviewState)
+  return input === "empty" || input === "error" || input === "loading"
+    ? input
     : "ready";
 }
 

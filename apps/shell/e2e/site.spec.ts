@@ -380,7 +380,10 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
 // recovery panel rather than a blank pane or a thrown error, on every route
 // that loads a domain.
 // llmlint: ignore-block[changed_behavior_has_e2e,e2e_not_mocked,tests_mirror_real_usage] A visitor reaches these states when the data host is degraded, and a host that is up and serving valid bytes cannot be asked to degrade: forcing the served status and body at the transport is the only way to put a real browser into the state under test. What is steered is the remote data host — the far side of the boundary, and the boundary these loaders exist to guard — not any part of the site. The artifact under test is the real one throughout: the composed shell, its router, its loaders, and every route remote are the deployed bytes, driven by real navigation and asserted through roles and accessible names. preload.spec.ts steers the same boundary the same way.
-const unusableDomains = [
+const unusableDomains: readonly {
+  name: string;
+  serve: (route: Route) => Promise<void>;
+}[] = [
   {
     // A cache or gateway can answer a failed request with the last payload it
     // held, so the status is the only thing saying this is not the answer.
@@ -397,9 +400,15 @@ const unusableDomains = [
         status: 200,
       }),
   },
-] as const;
+];
 
-const loadedRoutes = [
+const loadedRoutes: readonly {
+  detail: string;
+  domain: string;
+  heading: string;
+  link: string;
+  path: string;
+}[] = [
   {
     detail:
       "The research collection could not be loaded. Please try again later.",
@@ -422,7 +431,7 @@ const loadedRoutes = [
     link: "Courses",
     path: "courses",
   },
-] as const;
+];
 
 for (const route of loadedRoutes)
   for (const served of unusableDomains)

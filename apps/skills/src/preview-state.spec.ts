@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { previewState } from "./preview-state";
+import { previewState, type SkillsPreviewState } from "./preview-state";
 
 beforeEach(() => {
   window.history.replaceState(null, "", "/");
@@ -14,7 +14,9 @@ test("shows the settled pane to a visitor who arrives without a steer", () => {
 });
 
 test("honours every state a visitor can steer the pane into", () => {
-  for (const state of ["empty", "error", "loading"] as const) {
+  const steerable: SkillsPreviewState[] = ["empty", "error", "loading"];
+
+  for (const state of steerable) {
     window.history.replaceState(null, "", `/?skills-state=${state}`);
 
     expect(previewState()).toBe(state);

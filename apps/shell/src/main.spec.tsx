@@ -22,6 +22,15 @@ const domains = {
 };
 
 /**
+ * The domain published under a requested URL's name, or nothing when the CV
+ * publishes no such domain. The name arrives out of a fetched URL, so it is
+ * matched against what is served rather than trusted to be one of them.
+ */
+function servedDomain(name: string | undefined) {
+  return Object.entries(domains).find(([served]) => served === name)?.[1];
+}
+
+/**
  * The document the shell's prerender publishes for one route: the markup a
  * visitor is served, and the inline script that hands the router starting up
  * inside it the state that markup was rendered with. Producing both from the
@@ -41,13 +50,7 @@ async function publishedDocument(path: string) {
           software: { component: SoftwarePage },
           courses: { component: CoursesPage },
         },
-        // The generic parameter carries the requested domain's name through to
-        // its own value type, exactly as the publish step's entry does.
-        context: {
-          loadDomain: async <Name extends keyof typeof domains>(
-            name: Name,
-          ): Promise<(typeof domains)[Name]> => domains[name],
-        },
+        context: { loadDomain: async (name) => cvDataClient.domain(name) },
       }),
   });
   await handler(async ({ router }) => {
@@ -104,7 +107,7 @@ function serveEmptyDocument(path: string) {
 function serveCvDomains() {
   vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
     const name = /domains\/([a-z_]+)\.json$/.exec(String(input))?.[1];
-    const domain = domains[name as keyof typeof domains];
+    const domain = servedDomain(name);
     return new Response(JSON.stringify(domain), {
       status: domain ? 200 : 404,
       headers: { "content-type": "application/json" },
@@ -192,12 +195,14 @@ test("fetches each other route's remote only once the visitor goes there", async
   await startShell();
   await screen.findByRole("heading", { name: "Finance researcher" });
 
-  for (const [label, heading] of [
+  const deferredRoutes: [link: string, heading: string][] = [
     ["Bio", "Optimizing Life"],
     ["Research", "Research"],
     ["Software", "Open-Source Software"],
     ["Courses", "Courses"],
-  ] as const) {
+  ];
+
+  for (const [label, heading] of deferredRoutes) {
     fireEvent.click(screen.getByRole("link", { name: label }));
 
     expect(await screen.findByRole("heading", { name: heading })).toBeVisible();
