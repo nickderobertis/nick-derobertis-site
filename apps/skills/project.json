@@ -41,7 +41,10 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "options": { "command": "vitest run --passWithNoTests apps/skills/src" }
+      "outputs": ["{workspaceRoot}/coverage/apps/skills"],
+      "options": {
+        "command": "vitest run --config apps/skills/vite.config.ts --coverage"
+      }
     },
     "screenshot": {
       "executor": "nx:run-commands",

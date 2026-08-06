@@ -1,9 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "types": ["node", "vitest/globals"] },
+  "compilerOptions": {
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom/vitest"]
+  },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
+    "test-remotes/**/*.tsx",
     "rspack.config.ts",
     "vite.config.ts"
   ]

@@ -3,16 +3,15 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell validates route payloads at its loader boundary; feature apps never gain this data-core dependency.
 import type {
   Courses,
+  CvDomains,
   Research,
   SoftwareProjects,
 } from "@site/data-access-core";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing and validates route payloads before passing them to remotes.
-import { siteBase, validateCvDomain } from "@site/data-access-core";
-import { SiteLayout } from "@site/layout";
+import { siteBase } from "@site/data-access-core";
 import {
   type BioPageProps,
   type CoursesPageProps,
-  prerenderRouteAttribute,
   type ResearchPageProps,
   type RouteView,
   routeViewQueryKeys,
@@ -23,24 +22,13 @@ import {
   createRootRouteWithContext,
   createRoute,
   createRouter,
-  lazyRouteComponent,
-  Outlet,
-  type RouteComponent,
   type RouterHistory,
   redirect,
 } from "@tanstack/react-router";
-import type { ComponentType, ReactElement } from "react";
-import { routes } from "./routes";
-
-/**
- * A route's page. `component` is a page the caller already resolved — every
- * route during server rendering, and the entry route in the browser, which has
- * to be in hand before hydration. `load` defers the page to the router, which
- * fetches it when the route is preloaded or navigated to.
- */
-export type RoutePage<Props> =
-  | { component: ComponentType<Props> }
-  | { load: () => Promise<{ default: ComponentType<Props> }> };
+import { type RoutePage, routeComponent } from "./route-component";
+import { routePath } from "./route-path";
+import { SiteRoot } from "./site-root";
+import { warmSoftwareLogos } from "./warm-software-logos";
 
 export interface RoutePages {
   home: RoutePage<Record<string, unknown>>;
@@ -55,31 +43,20 @@ export interface RoutePages {
   courses: RoutePage<CoursesPageProps<Courses>>;
 }
 
+/** The CV domains a route loader fetches, named as the CV publishes them. */
+export type RouteDomainName = "courses" | "research" | "software_projects";
+
 /**
- * Adapts a page to the route component that renders it from loader data. A
- * deferred page becomes a lazyRouteComponent, so the router owns fetching it:
- * `defaultPreload: "intent"` calls its `preload()` alongside the route's loader
- * on hover, and a match only settles once that chunk has arrived.
+ * Fetches one CV domain for a route loader. The requested name is the type
+ * parameter, so each loader below receives that domain's own payload type
+ * rather than something it has to narrow by hand.
  */
-function routeComponent<Props>(
-  page: RoutePage<Props>,
-  render: (Page: ComponentType<Props>) => ReactElement,
-): RouteComponent {
-  if ("component" in page) {
-    const Page = page.component;
-    return () => render(Page);
-  }
-  const { load } = page;
-  return lazyRouteComponent(async () => {
-    const { default: Page } = await load();
-    return { default: () => render(Page) };
-  });
-}
+export type LoadRouteDomain = <Name extends RouteDomainName>(
+  name: Name,
+) => Promise<CvDomains[Name]>;
 
 interface RouterContext {
-  loadDomain(name: "research"): Promise<Research>;
-  loadDomain(name: "software_projects"): Promise<SoftwareProjects>;
-  loadDomain(name: "courses"): Promise<Courses>;
+  loadDomain: LoadRouteDomain;
 }
 
 /**
@@ -95,33 +72,6 @@ function viewOverride(
   return routeViews.find((view) => view === search[key]);
 }
 
-// Warmed logos are kept alive here so the browser cannot collect an in-flight
-// request, and so a repeated loader run never refetches an already warm URL.
-const warmedSoftwareLogos = new Map<string, HTMLImageElement>();
-
-// Software cards render `logo_base64` in preference to `logo_url`, so only the
-// external URLs cost a request. Warming them alongside the domain JSON means a
-// hovered Software link arrives with its visible card logos already decoded.
-function warmSoftwareLogos(projects: SoftwareProjects) {
-  if (typeof Image === "undefined") return;
-  for (const project of projects) {
-    const url = project.logo_base64 ? undefined : project.logo_url;
-    if (!url || warmedSoftwareLogos.has(url)) continue;
-    const image = new Image();
-    warmedSoftwareLogos.set(url, image);
-    image.src = url;
-  }
-}
-
-export const routePath = (label: string) => {
-  const route = routes.find((item) => item.label === label);
-  if (!route)
-    throw new Error(
-      `Missing ${label} route in routes.json. Add the route to apps/shell/src/routes.json and rerun just check.`,
-    );
-  return route.path;
-};
-
 export function createSiteRouter({
   history,
   pages,
@@ -132,11 +82,7 @@ export function createSiteRouter({
   context: RouterContext;
 }) {
   const Root = createRootRouteWithContext<RouterContext>()({
-    component: () => (
-      <SiteLayout routes={routes.map(({ path, label }) => ({ path, label }))}>
-        <Outlet />
-      </SiteLayout>
-    ),
+    component: SiteRoot,
   });
   const home = createRoute({
     getParentRoute: () => Root,
@@ -303,60 +249,6 @@ export function createSiteRouter({
     basepath: siteBase,
     defaultPreload: "intent",
   });
-}
-
-/**
- * Reports the route the document in the browser was rendered for, so its page
- * can be resolved before hydration while every other route stays deferred. The
- * prerender step stamps the route on the root element; the pathname is the
- * fallback for a document it never stamped, such as the static 404 the server
- * returns for an unknown path. Returns undefined when no route owns the
- * location, leaving every page deferred for the router's redirect to resolve.
- */
-export function entryRoutePath(root: Element): string | undefined {
-  const stamped = root.getAttribute(prerenderRouteAttribute);
-  const pathname = window.location.pathname.startsWith(siteBase)
-    ? window.location.pathname.slice(siteBase.length)
-    : window.location.pathname;
-  const candidate = stamped ?? (pathname === "" ? "/" : pathname);
-  return routes.find((route) => route.path === candidate)?.path;
-}
-
-/**
- * Reports whether the browser's location still renders the document the
- * prerender step produced, so the shell can hydrate it instead of discarding
- * it. Every route is prerendered with an empty query string, and the route
- * `validateSearch` above is what turns a query string into rendered output: a
- * view override genuinely changes the markup, while a tracking parameter
- * leaves it identical and must not cost the visitor their prerendered HTML.
- *
- * Home is the conservative exception. Its panes are separate remotes that each
- * read their own state parameter straight from the URL rather than through
- * this router, so the shell cannot tell an inert parameter from a pane
- * override there.
- */
-export function rendersPrerenderedDocument(router: SiteRouter): boolean {
-  const { pathname, search } = router.state.location;
-  const matches = router.matchRoutes(pathname, search);
-  const leaf = matches[matches.length - 1];
-  if (leaf?.fullPath === routePath("Home"))
-    return Object.keys(search).length === 0;
-  const deps: unknown = leaf?.loaderDeps;
-  return (
-    !deps ||
-    typeof deps !== "object" ||
-    !("view" in deps) ||
-    deps.view === "default"
-  );
-}
-
-export async function loadBrowserDomain<
-  Name extends "research" | "software_projects" | "courses",
->(name: Name) {
-  const response = await fetch(`${siteBase}/cv-data/domains/${name}.json`);
-  if (!response.ok)
-    throw new Error(`${name} request failed: ${response.status}`);
-  return validateCvDomain(name, await response.json());
 }
 
 export type SiteRouter = ReturnType<typeof createSiteRouter>;

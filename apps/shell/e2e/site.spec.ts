@@ -1,4 +1,10 @@
-import { expect, type Locator, type Page, test } from "@playwright/test";
+import {
+  expect,
+  type Locator,
+  type Page,
+  type Route,
+  test,
+} from "@playwright/test";
 import {
   type HomePaneRemote,
   homePanes,
@@ -366,3 +372,87 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
     page.getByRole("heading", { name: "Finance researcher & educator" }),
   ).toBeVisible();
 });
+
+// A route loader is the only place the running site fetches a CV domain, and it
+// is reached by navigating into a route: a direct load hydrates the payload the
+// prerender already baked in and asks the data host for nothing. Both ways a
+// served domain can be unusable have to leave the visitor with that route's own
+// recovery panel rather than a blank pane or a thrown error, on every route
+// that loads a domain.
+// llmlint: ignore-block[changed_behavior_has_e2e,e2e_not_mocked,tests_mirror_real_usage] A visitor reaches these states when the data host is degraded, and a host that is up and serving valid bytes cannot be asked to degrade: forcing the served status and body at the transport is the only way to put a real browser into the state under test. What is steered is the remote data host — the far side of the boundary, and the boundary these loaders exist to guard — not any part of the site. The artifact under test is the real one throughout: the composed shell, its router, its loaders, and every route remote are the deployed bytes, driven by real navigation and asserted through roles and accessible names. preload.spec.ts steers the same boundary the same way.
+const unusableDomains: readonly {
+  name: string;
+  serve: (route: Route) => Promise<void>;
+}[] = [
+  {
+    // A cache or gateway can answer a failed request with the last payload it
+    // held, so the status is the only thing saying this is not the answer.
+    name: "answers a failed request with the payload it last held",
+    serve: async (route: Route) =>
+      route.fulfill({ response: await route.fetch(), status: 503 }),
+  },
+  {
+    name: "answers with a body the CV schema rejects",
+    serve: (route: Route) =>
+      route.fulfill({
+        body: '[{"name":"not what the CV publishes"}]',
+        contentType: "application/json",
+        status: 200,
+      }),
+  },
+];
+
+const loadedRoutes: readonly {
+  detail: string;
+  domain: string;
+  heading: string;
+  link: string;
+  path: string;
+}[] = [
+  {
+    detail:
+      "The research collection could not be loaded. Please try again later.",
+    domain: "research",
+    heading: "Research is unavailable",
+    link: "Research",
+    path: "research",
+  },
+  {
+    detail: "Please try again later.",
+    domain: "software_projects",
+    heading: "Software projects are unavailable",
+    link: "Software",
+    path: "software",
+  },
+  {
+    detail: "Please try again later.",
+    domain: "courses",
+    heading: "Courses are unavailable",
+    link: "Courses",
+    path: "courses",
+  },
+];
+
+for (const route of loadedRoutes)
+  for (const served of unusableDomains)
+    test(`${route.link} recovers when the data host ${served.name}`, async ({
+      page,
+    }) => {
+      await page.goto("", { waitUntil: "networkidle" });
+      await page.route(
+        `**/cv-data/domains/${route.domain}.json*`,
+        served.serve,
+      );
+
+      await page.getByRole("link", { name: route.link, exact: true }).click();
+
+      await expect(page).toHaveURL(
+        new RegExp(`nick-derobertis-site/${route.path}$`),
+      );
+      await expect(
+        page.getByRole("heading", { name: route.heading }),
+      ).toBeVisible();
+      await expect(page.getByText(route.detail).first()).toBeVisible();
+      await expect(page.getByRole("banner")).toBeVisible();
+    });
+// llmlint: ignore-end[changed_behavior_has_e2e,e2e_not_mocked,tests_mirror_real_usage]

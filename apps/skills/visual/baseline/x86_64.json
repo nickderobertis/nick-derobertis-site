@@ -5,10 +5,37 @@
       "name": "skills",
       "toggles": {
         "render": "host-composed",
+        "state": "dropdowns",
+        "viewport": "desktop"
+      },
+      "hash": "d0b6ebb7b1707c2596709f1be90bb8e0a1e2344a667e93c2ee259abb2cb59d69"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "dropdowns",
+        "viewport": "mobile"
+      },
+      "hash": "32b3a86a9d6c9e72de0205cfb7b3b8f5d2c8da650d21617ffb8582fcb94d31c6"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
         "state": "empty",
         "viewport": "desktop"
       },
       "hash": "05a72e676200a5018d56f4a8e527135ad0ddcc59b76c8f99d79033fa7033829e"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "2208f08214d9d38ac42e4e114c9e2585337732513c222e1b3af10a129638497d"
     },
     {
       "name": "skills",
@@ -23,10 +50,28 @@
       "name": "skills",
       "toggles": {
         "render": "host-composed",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "82cf711b2835e407ad1bca420f8cd7042ebe0b17fb05d6fbdc423af8328a37b0"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
         "state": "expanded",
         "viewport": "desktop"
       },
       "hash": "ff04a3d29f5b969f7955378b04cc0e46d0f9e68d74cb1d9f0b3efee683d4f092"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "expanded",
+        "viewport": "mobile"
+      },
+      "hash": "74f8703272d8bc8317f255303e6d99d1187ff546c8258790922cbc4c8472f898"
     },
     {
       "name": "skills",
@@ -58,11 +103,56 @@
     {
       "name": "skills",
       "toggles": {
+        "render": "host-composed",
+        "state": "stats",
+        "viewport": "desktop"
+      },
+      "hash": "ca6de779581ef047a23d9dc6d58c15ba03a97523cc5aed4514c5b00f420c7995"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "host-composed",
+        "state": "stats",
+        "viewport": "mobile"
+      },
+      "hash": "a111176ec0e8e2b440639b59e01726d04c5ff4a5e18d2d7efabb5efa2bd68d37"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "dropdowns",
+        "viewport": "desktop"
+      },
+      "hash": "7ec3ea59375ca34c98068a99c4c7a613b9f16260c1233650d1f75ea459f9a9fd"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "dropdowns",
+        "viewport": "mobile"
+      },
+      "hash": "b050b0d40192dbf4d131052f57e2ebdc6c95d48ab1a80de851eba638f7b3c973"
+    },
+    {
+      "name": "skills",
+      "toggles": {
         "render": "standalone",
         "state": "empty",
         "viewport": "desktop"
       },
       "hash": "9c2071d3f84ca7d54ef5ded638dbbb43bb6aecf1025390d138a89b280b34d4a9"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "39a6bce114dc535c49973060c7332148136fcdd5911c34473a0ddb66e5ed18a2"
     },
     {
       "name": "skills",
@@ -77,10 +167,28 @@
       "name": "skills",
       "toggles": {
         "render": "standalone",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "1aa1f21219a431976cc78cde4fe096c6b6b45242edfb27052d22cf5e3c954b9b"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
         "state": "expanded",
         "viewport": "desktop"
       },
       "hash": "036db08a177e20df2539a1760bb1c96b52f66147a8a1309708949c6a91dd8d23"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "expanded",
+        "viewport": "mobile"
+      },
+      "hash": "afe8b5dc96ee8569e9137462ee16de04b3f5814ca330b991f05ee9f0260c9529"
     },
     {
       "name": "skills",
@@ -117,6 +225,33 @@
         "viewport": "desktop"
       },
       "hash": "9c955b95f6c144df52ed60163274fd76d996ab20ad5b3069d368bd6f59ada5ec"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "mobile"
+      },
+      "hash": "958c72f613ed2d8263dfeaf85c967fbd0ec4dd8cf879ab83592761ed50fca3b2"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "stats",
+        "viewport": "desktop"
+      },
+      "hash": "be7c92ff9787741b4909a30527472c3ebf86793114b37f0fb6cb0473a3c08757"
+    },
+    {
+      "name": "skills",
+      "toggles": {
+        "render": "standalone",
+        "state": "stats",
+        "viewport": "mobile"
+      },
+      "hash": "b172dfd69d943ac9364c96e0bfe226002d5c1980f7f6debdd21a70f1a0ad2581"
     }
   ]
 }
