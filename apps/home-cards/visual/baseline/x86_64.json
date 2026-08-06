@@ -14,10 +14,46 @@
       "name": "home-cards",
       "toggles": {
         "render": "host-composed",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "1ac7d2a7d31018bc7643485a192ad86838b6df95d26eb5ae444b3911c13dd07d"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "1021e88305413617cbd79ff63a7dfce8302dabf3bda6d70b94174476fa4833df"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "63a3eafd2bd138182bcb4246bad7d2069c9854cb52a7a8cdf035b3f484808c26"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "418bef97c36231233ad43cc6cd4530052a1ab973e8659acea3c2a1b51a5b6a0f"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "f51b64a9631eac4bde96e7c9c36ca49fa782aa9b8123121080cbdfe3fdc8a5ac"
     },
     {
       "name": "home-cards",
@@ -59,10 +95,46 @@
       "name": "home-cards",
       "toggles": {
         "render": "standalone",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "3af5abe0fb4ef88cdd52e925da912a5e4cc8ed4ec9ec60d876bb9307f38e20b8"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "empty",
+        "viewport": "tablet"
+      },
+      "hash": "9c88f0e7967f87668b3a5a2d6acbe7f21bba9fff0a78d1966818dface53bfafb"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "96ee7de2c54bc050dcd307a39b2d72c4a2319cea9700f3d057b2c720236ee4db"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "62a630f46e13060e0fa5e796ddac9994f97a427b843af470b044c3f9ba6e3066"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "tablet"
+      },
+      "hash": "b68d6d62e3362cb21eed8d7e1a5ca610c7e45b906bad7068f1c6789df6de368e"
     },
     {
       "name": "home-cards",
@@ -99,6 +171,24 @@
         "viewport": "desktop"
       },
       "hash": "9adb3b72a382b66f0dd851e81588c5b51f1f6e7b337d0f1336f14eb7da2a34a4"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "mobile"
+      },
+      "hash": "3f7c639a80000000aa9063159ff24c75daf56e3b77d85056252636d8652933b9"
+    },
+    {
+      "name": "home-cards",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "tablet"
+      },
+      "hash": "45c54f3119bf1116b0f7a917463e8c87852eb394c5a0a862f46272ccc8b5cf52"
     }
   ]
 }
