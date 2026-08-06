@@ -40,10 +40,18 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535)
 const server = createSiteServer({
   base,
   // A `?scenario=loading` domain stays pending long enough for a journey to
-  // assert the loading state before its data arrives.
-  dataLoadingMs: 750,
-  // A remote's lazily loaded page code arrives late enough for a journey to
-  // observe the skeleton it replaces, which is the state those journeys assert.
+  // assert the loading state before its data arrives. The window matches the
+  // 1500ms every previewed loading state holds itself open for, with room for
+  // the request a pane only makes once its own page code has arrived.
+  dataLoadingMs: 2_000,
+  // The one remote a journey names through `?hold-remote-code=` keeps its page
+  // code pending for the whole journey, so a host-composed skeleton can be
+  // watched without racing whichever of the load and the host's warm lands
+  // first.
+  holdRemoteCodeMs: 3_000,
+  // Every other remote's lazily loaded page code arrives late enough for a
+  // journey to observe the skeleton it replaces, which is the state those
+  // journeys assert.
   lazyAssetLatencyMs: 300,
   notFound: { file: "404.html" },
   root,

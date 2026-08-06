@@ -1,38 +1,26 @@
-import { basename } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import { isEagerRemoteAsset } from "@site/e2e-fixtures";
+import { heldRemoteCodeHeader, holdRemoteCodeQuery } from "@site/e2e-fixtures";
 import { homePanes, type RemoteName, remoteContract } from "./site-contract.ts";
 
 /**
- * Holds one remote's lazily loaded page code until the caller releases it, and
- * reports how many requests it held.
+ * Counts the responses the site server held back as one remote's lazily loaded
+ * page code, read off the responses this journey already watches.
  *
  * A pane Home composes reaches its skeleton through a client navigation, and
  * Home warms every pane on the same hover that starts that navigation. The
  * skeleton is therefore on screen only until whichever of the two finishes
  * first, and on a busy machine the warm wins: the pane mounts already resolved
- * and the skeleton is never rendered. Holding its page code moves that window
- * into the journey's own hands. The remote's entry and its eagerly served
- * skeleton are deliberately not held — the fallback has to be able to render.
+ * and the skeleton is never rendered. Naming the pane's remote in the document
+ * this journey navigates to holds that page code on the server for the whole
+ * journey instead. The remote's entry and its eagerly served skeleton are
+ * deliberately not held — the fallback has to be able to render.
  */
-async function holdPageCode(page: Page, name: RemoteName) {
-  let release = (): void => undefined;
-  const released = new Promise<void>((resolve) => {
-    release = resolve;
-  });
+function countHeldPageCode(page: Page, name: RemoteName) {
   let held = 0;
-  await page.route(
-    (url) =>
-      url.pathname.includes(`/remotes/${name}/`) &&
-      url.pathname.endsWith(".js") &&
-      !isEagerRemoteAsset(basename(url.pathname)),
-    async (route) => {
-      held += 1;
-      await released;
-      await route.continue();
-    },
-  );
-  return { release: () => release(), held: () => held };
+  page.on("response", (response) => {
+    if (response.headers()[heldRemoteCodeHeader] === name) held += 1;
+  });
+  return () => held;
 }
 
 /**
@@ -81,7 +69,7 @@ export function remoteOwnershipTests(name: RemoteName): void {
       // the standalone documents hold their own boundary open.
       const nested =
         render === "host-composed" && !contract.loadingQuery
-          ? await holdPageCode(page, name)
+          ? countHeldPageCode(page, name)
           : undefined;
       if (render === "host-composed") {
         if (contract.loadingQuery)
@@ -89,7 +77,10 @@ export function remoteOwnershipTests(name: RemoteName): void {
             waitUntil: "domcontentloaded",
           });
         else {
-          await page.goto("bio");
+          // The document this journey starts from arms the hold, and the client
+          // navigation that follows keeps it, so the pane's page code is still
+          // in flight when Home mounts.
+          await page.goto(`bio?${holdRemoteCodeQuery}=${name}`);
           await page.getByRole("link", { name: "Home", exact: true }).click();
         }
       } else
@@ -102,13 +93,13 @@ export function remoteOwnershipTests(name: RemoteName): void {
           exact: true,
         }),
       ).toBeVisible();
-      nested?.release();
       await expect(
         page.getByRole(contract.role, { name: contract.name, exact: true }),
       ).toBeVisible();
       // A renamed chunk would hold nothing and quietly put this journey back on
-      // the server's timer, so the hold has to have caught the pane's code.
-      if (nested) expect(nested.held()).toBeGreaterThan(0);
+      // the server's ordinary latency, so the hold has to have caught the pane's
+      // code.
+      if (nested) expect(nested()).toBeGreaterThan(0);
       await expect(
         page.getByRole("status", {
           name: contract.loadingName,

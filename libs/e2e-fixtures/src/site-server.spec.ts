@@ -14,6 +14,7 @@ import {
 
 const base = "/nick-derobertis-site";
 const lazyAssetLatencyMs = 250;
+const holdRemoteCodeMs = 700;
 const servers: Server[] = [];
 const roots: string[] = [];
 
@@ -22,8 +23,10 @@ async function artifact() {
   roots.push(root);
   await mkdir(join(root, "bio"), { recursive: true });
   await mkdir(join(root, "remotes/bio"), { recursive: true });
+  await mkdir(join(root, "remotes/awards"), { recursive: true });
   await mkdir(join(root, "cv-data/domains"), { recursive: true });
   await Promise.all([
+    writeFile(join(root, "remotes/awards/pane.ghi789.js"), "//lazy\n"),
     writeFile(join(root, "index.html"), "<h1>home document</h1>"),
     writeFile(join(root, "404.html"), "<h1>recovery document</h1>"),
     writeFile(join(root, "bio/index.html"), "<h1>bio route</h1>"),
@@ -114,6 +117,44 @@ describe("the Pages-base site server", () => {
     expect(lazy.headers.get("content-type")).toBe("text/javascript");
     expect(lazyMs).toBeGreaterThanOrEqual(lazyAssetLatencyMs);
     expect(eagerMs).toBeLessThan(lazyAssetLatencyMs);
+  });
+
+  it("holds the page code of the remote a document named, and no other", async () => {
+    const root = await artifact();
+    const origin = await serve({ root, holdRemoteCodeMs, lazyAssetLatencyMs });
+
+    await fetch(`${origin}${base}/bio?hold-remote-code=awards`);
+    const heldStarted = process.hrtime.bigint();
+    const held = await fetch(`${origin}${base}/remotes/awards/pane.ghi789.js`);
+    const heldMs = Number(process.hrtime.bigint() - heldStarted) / 1e6;
+    const otherStarted = process.hrtime.bigint();
+    const other = await fetch(`${origin}${base}/remotes/bio/pane.def456.js`);
+    const otherMs = Number(process.hrtime.bigint() - otherStarted) / 1e6;
+
+    expect(held.headers.get("x-e2e-held-remote-code")).toBe("awards");
+    expect(heldMs).toBeGreaterThanOrEqual(holdRemoteCodeMs);
+    expect(other.headers.get("x-e2e-held-remote-code")).toBeNull();
+    expect(otherMs).toBeGreaterThanOrEqual(lazyAssetLatencyMs);
+    expect(otherMs).toBeLessThan(holdRemoteCodeMs);
+  });
+
+  it("ends a page-code hold at the next document and refuses an unnamed one", async () => {
+    const root = await artifact();
+    const origin = await serve({ root, holdRemoteCodeMs });
+
+    await fetch(`${origin}${base}/bio?hold-remote-code=awards`);
+    await fetch(`${origin}${base}/`);
+    const started = process.hrtime.bigint();
+    const released = await fetch(
+      `${origin}${base}/remotes/awards/pane.ghi789.js`,
+    );
+    const releasedMs = Number(process.hrtime.bigint() - started) / 1e6;
+    const unusable = await fetch(`${origin}${base}/bio?hold-remote-code=../..`);
+
+    expect(released.headers.get("x-e2e-held-remote-code")).toBeNull();
+    expect(releasedMs).toBeLessThan(holdRemoteCodeMs);
+    expect(unusable.status).toBe(400);
+    expect(await unusable.text()).toBe("Unsupported e2e remote-code hold");
   });
 
   it("routes each remote to its own document root and refuses an unknown one", async () => {

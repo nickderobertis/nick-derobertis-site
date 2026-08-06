@@ -104,30 +104,15 @@ for (const renderPath of renderPaths) {
     test("renders its skeleton while the awards boundary is pending", async ({
       page,
     }) => {
-      // This test owns how long the boundary stays pending. The server's
-      // loading scenario only holds the response on a timer, and on a busy
-      // machine the lazily loaded remote chunks can take longer to arrive than
-      // that timer runs, so the pane is already settled by the time the first
-      // assertion looks and the skeleton this journey exists to prove is
-      // missed. Holding the awards response here instead keeps the boundary
-      // pending until the skeleton has been observed, then releases it so the
-      // pane resolves the same way it does in production.
-      let release = (): void => undefined;
-      const held = new Promise<void>((resolve) => {
-        release = resolve;
-      });
-      await page.route(
-        (url) => url.pathname.endsWith("/cv-data/domains/awards.json"),
-        async (route) => {
-          await held;
-          await route.continue();
-        },
-      );
+      // The pane asks for its awards only once its own page code has arrived,
+      // and the served loading scenario then holds that response open from
+      // there, so the window this asserts in belongs to the request the pane
+      // really makes rather than to whichever of the two the machine finished
+      // first.
       await page.goto(`${renderPath.path}?awards-scenario=loading`);
       await expect(
         page.getByRole("status", { name: "Loading awards", exact: true }),
       ).toBeVisible();
-      release();
       await expect(
         page.getByRole("heading", { name: "Selected awards" }),
       ).toBeAttached();
