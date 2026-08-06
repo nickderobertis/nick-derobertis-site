@@ -1,5 +1,6 @@
-import { siteBase } from "@site/data-access-core";
 import { homeContent, readPaneState } from "@site/data-access-home";
+import { CardsState } from "./cards-state";
+import { MarketingCard } from "./marketing-card";
 import Skeleton from "./skeleton";
 import "./cards.css";
 
@@ -8,29 +9,11 @@ export default function HomeCardsPage() {
     typeof window === "undefined" ? "" : window.location.search,
   );
   if (state === "loading") return <Skeleton />;
-  if (state === "error")
-    return (
-      <output className="pane-state">Areas of work could not be loaded.</output>
-    );
-  if (state === "empty")
-    return (
-      <output className="pane-state">
-        No areas of work are available yet.
-      </output>
-    );
+  if (state !== "happy") return <CardsState name={state} />;
   return (
     <section className="pane home-cards" aria-label="Areas of work">
       {homeContent.cards.map((card) => (
-        <article className="marketing-card" key={card.title}>
-          <span className="card-icon" aria-hidden="true">
-            {card.icon}
-          </span>
-          <h2>{card.title}</h2>
-          <p>{card.description}</p>
-          <a className="action" href={`${siteBase}${card.link}`}>
-            {card.linkLabel}
-          </a>
-        </article>
+        <MarketingCard card={card} key={card.title} />
       ))}
     </section>
   );

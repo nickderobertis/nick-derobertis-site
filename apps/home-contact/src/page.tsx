@@ -1,4 +1,5 @@
 import { homeContent, readPaneState } from "@site/data-access-home";
+import { ContactState } from "./contact-state";
 import Skeleton from "./skeleton";
 import "./contact.css";
 
@@ -7,16 +8,7 @@ export default function HomeContactPage() {
     typeof window === "undefined" ? "" : window.location.search,
   );
   if (state === "loading") return <Skeleton />;
-  if (state === "error")
-    return (
-      <output className="pane-state">
-        Contact options could not be loaded.
-      </output>
-    );
-  if (state === "empty")
-    return (
-      <output className="pane-state">No contact options are available.</output>
-    );
+  if (state !== "happy") return <ContactState name={state} />;
   return (
     <section className="pane contact-pane" aria-labelledby="contact-title">
       <div className="contact-copy">

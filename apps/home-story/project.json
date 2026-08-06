@@ -41,8 +41,9 @@
     },
     "test": {
       "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/apps/home-story"],
       "options": {
-        "command": "vitest run --passWithNoTests apps/home-story/src"
+        "command": "vitest run --config apps/home-story/vite.config.ts --coverage"
       }
     },
     "screenshot": {
