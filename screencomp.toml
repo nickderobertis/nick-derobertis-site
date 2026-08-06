@@ -40,4 +40,16 @@ values = ["standalone", "host-composed"]
 [[toggle]]
 key = "state"
 label = "State"
-values = ["happy", "all", "empty", "loading", "error", "expanded", "employment-only"]
+values = [
+  "happy",
+  "all",
+  "empty",
+  "loading",
+  "error",
+  "expanded",
+  "dropdowns",
+  "stats",
+  "employment-only",
+  "education-only",
+  "no-results",
+]
