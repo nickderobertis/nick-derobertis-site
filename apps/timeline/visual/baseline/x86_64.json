@@ -5,10 +5,37 @@
       "name": "timeline",
       "toggles": {
         "render": "host-composed",
+        "state": "education-only",
+        "viewport": "desktop"
+      },
+      "hash": "677cc921dc06d7de32ed456a5f53b429497760720bf25f965d1b99f55e1414f3"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
+        "state": "education-only",
+        "viewport": "mobile"
+      },
+      "hash": "7d8f270cd0759f3193294005e9d03e8fb047b4c8864535c242a4c42e1155a306"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
         "state": "employment-only",
         "viewport": "desktop"
       },
       "hash": "fc3180ae8ba53427f61d3de7ad7342388acee0df3305264d2086597e8a724ca6"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
+        "state": "employment-only",
+        "viewport": "mobile"
+      },
+      "hash": "c54c3177c23c856ba30f150632f88322cdddf9b62b224a4c87bdd49c7ec9cba3"
     },
     {
       "name": "timeline",
@@ -23,10 +50,28 @@
       "name": "timeline",
       "toggles": {
         "render": "host-composed",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "78fbe6f8812ce66d31f8263fefd46623d2bce4438a173b391f623bc0c1caaa97"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "753f4cf70d1d36a695285400137bd689374b62930a718467d63b4e7bd684de4f"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "2d3bfa1787b6ddcc4a1d8964e16289b95efc059dba17923d5fd444be930b085e"
     },
     {
       "name": "timeline",
@@ -58,11 +103,56 @@
     {
       "name": "timeline",
       "toggles": {
+        "render": "host-composed",
+        "state": "no-results",
+        "viewport": "desktop"
+      },
+      "hash": "2313c1918bd66be0399e1da8ee58bb6a8b9bd5a3fe252ca8431a21e217f1791d"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "host-composed",
+        "state": "no-results",
+        "viewport": "mobile"
+      },
+      "hash": "d43b9f4d5e5adc3c12b1f45946e67365e2a280d609e4ce69e795727d1cf69c8f"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "education-only",
+        "viewport": "desktop"
+      },
+      "hash": "0f499ef07d66863b57cdf986bd818a44e4d069b54a53e4a9858dfbb9ddcaa2c3"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "education-only",
+        "viewport": "mobile"
+      },
+      "hash": "c6cda975f08eea06f6123a5f474f6e3c2d9acd03a731f2061db17a7ac83b9b78"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
         "render": "standalone",
         "state": "employment-only",
         "viewport": "desktop"
       },
       "hash": "03871eeba6217541874c850c72337d8e585151eff24fe8209e1be3ef095b81da"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "employment-only",
+        "viewport": "mobile"
+      },
+      "hash": "3a4bf75b70936dbee8fa7da058cc1598c4d1b419bbb28d2cf2e2b8bf665dc018"
     },
     {
       "name": "timeline",
@@ -77,10 +167,28 @@
       "name": "timeline",
       "toggles": {
         "render": "standalone",
+        "state": "empty",
+        "viewport": "mobile"
+      },
+      "hash": "78fbe6f8812ce66d31f8263fefd46623d2bce4438a173b391f623bc0c1caaa97"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
         "state": "error",
         "viewport": "desktop"
       },
       "hash": "70eb6458cbc895fe77ea1ac2ad7fbc56c4b53ad7edee506cd28ed5534319bfab"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "error",
+        "viewport": "mobile"
+      },
+      "hash": "2d3bfa1787b6ddcc4a1d8964e16289b95efc059dba17923d5fd444be930b085e"
     },
     {
       "name": "timeline",
@@ -117,6 +225,33 @@
         "viewport": "desktop"
       },
       "hash": "bda068f45dedc319c3d9aa3e314b88f66729f6fde4fab26234443dfa23571dc7"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "loading",
+        "viewport": "mobile"
+      },
+      "hash": "7d1cf843f354510c365131824b7d7f7e5fbc5b3150402919ec51c39f2361a5cf"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "no-results",
+        "viewport": "desktop"
+      },
+      "hash": "ee722abb5b2a012b6727a6713d43462105b3c7e63b0afef96cc177520bb6114e"
+    },
+    {
+      "name": "timeline",
+      "toggles": {
+        "render": "standalone",
+        "state": "no-results",
+        "viewport": "mobile"
+      },
+      "hash": "8488966d8451c0ace6ae77a2477262bc58af9addcd7025630dc2c346339ee44b"
     }
   ]
 }
