@@ -49,7 +49,7 @@ const pages: RoutePages = {
 const router = createSiteRouter({
   history: createBrowserHistory(),
   pages,
-  context: { loadDomain: (name) => loadBrowserDomain(name) },
+  context: { loadDomain: async (name) => loadBrowserDomain(name) },
 });
 function hasSerializedRouter(value: unknown): value is {
   router: Record<string, unknown>;
