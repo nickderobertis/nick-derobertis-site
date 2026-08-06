@@ -89,7 +89,6 @@ function runInlineScript(script: HTMLScriptElement) {
     value: script,
   });
   try {
-    // biome-ignore lint/security/noGlobalEval: This is the served document's own script, evaluated to reproduce the browser step jsdom omits.
     new Function(script.textContent ?? "")();
   } finally {
     Reflect.deleteProperty(document, "currentScript");
