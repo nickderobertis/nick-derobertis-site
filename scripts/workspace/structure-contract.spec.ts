@@ -33,9 +33,13 @@ const projectSchema = z.object({
   targets: z.record(z.string(), targetSchema).optional(),
 });
 
+// A node's name reaches the exemption rule and every diagnostic this contract
+// reports, so it is narrowed to an Nx project name at the same boundary.
+const projectName = z.string().regex(/^[a-z][a-z0-9-]*$/);
+
 const graphSchema = z.object({
   graph: z.object({
-    nodes: z.record(z.string(), z.object({ data: projectSchema })),
+    nodes: z.record(projectName, z.object({ data: projectSchema })),
   }),
 });
 

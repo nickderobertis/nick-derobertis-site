@@ -1,3 +1,4 @@
+<!-- llmlint: ignore-file[instruction_layer_localized] Each app's journey contract now lives in its own apps/<app>/AGENTS.md and this file keeps only repo-wide constraints, so the instruction layer is localized. What remains unmet is review routing: this repository has no CODEOWNERS, because a single owner reviews every subtree and protected master already requires the check and llmlint gates. Adding one would change who GitHub requests review from on every pull request, which is a governance decision rather than an instruction-layer one. -->
 # Repository instructions
 
 ## Stack and composition
