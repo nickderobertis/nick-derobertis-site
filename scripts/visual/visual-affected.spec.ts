@@ -358,6 +358,7 @@ describe("visual affected selection", () => {
   // never shellchecks it, so `just lint-workflows` extracts it to disk first.
   // An extractor that silently wrote nothing would hand shellcheck an empty
   // directory and report a clean gate over an unlinted callback.
+  // llmlint: ignore-block[work_goes_through_command_surface] just lint-workflows pipes this extractor into shellcheck and deletes the directory it wrote, so the recipe can prove neither what was extracted nor that a bad output root is refused. These two cases drive the CLI the recipe runs, against the same committed workflow, to cover exactly what the recipe cannot observe.
   test("the callback extractor writes the injected capture script shellcheck reads", () => {
     const output = mkdtempSync(path.join(tmpdir(), "injected-callbacks-"));
     try {
@@ -387,6 +388,7 @@ describe("visual affected selection", () => {
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain("extract-injected-callbacks:");
   });
+  // llmlint: ignore-end[work_goes_through_command_surface]
 
   test("bootstrap provisions pinned workflow and shell linters without ambient tools", () => {
     const verify = spawnSync("scripts/ci/setup-ci-tools.sh", ["--verify"], {

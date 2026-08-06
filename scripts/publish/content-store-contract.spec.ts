@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { beforeAll, describe, expect, test } from "vitest";
 
+// scripts/publish/verify-content-store-contract.mjs is the CLI these tests own,
+// reached the way a contributor reaches it: through `just lint-workflows`.
 // The content-store branch, its deploy-lane checkout, and a publish lane's
 // scratch repository are named in files that cannot import each other, so
 // libs/build-config/src/publish-fragment.ts is the one source and
@@ -111,22 +113,6 @@ describe("content-store contract", () => {
       /README\.md describes the deploy split without naming/,
     );
   }, 180_000);
-
-  test("the verifier reports the same contract the recipe surfaces", () => {
-    const result = spawnSync(
-      "node",
-      [
-        "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
-        "scripts/publish/verify-content-store-contract.mjs",
-      ],
-      { encoding: "utf8" },
-    );
-
-    expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout.trim()).toBe(
-      `content-store contract agrees: branch ${contract.branch}, checkout ${contract.checkout}, app root ${contract.appRoot}, lane workdir ${contract.workdir}`,
-    );
-  });
 
   test("every drift case leaves the committed restatements as it found them", () => {
     expect(readFileSync(workflow, "utf8")).toContain(

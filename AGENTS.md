@@ -6,7 +6,7 @@
 - Language: TypeScript.
 - References composed: `base.md`, `shapes/web-app.md`, `shapes/react.md`, `languages/typescript.md`, `ci.md`, `llmlint.md`, `monorepo.md`.
 - Excluded: bun, because it is incompatible with the supported workspace path for Nx's rspack Module Federation executor; pnpm's workspace linker is required here. Also excluded: release automation, because GitHub Pages deployment is the artifact lifecycle; server/auth guidance, because this is a public static site with no privileged actions.
-- Coverage is 95% on lines, functions, branches, and statements, for app UI as well as library code; `defineWorkspaceTestConfig` declares that floor and every project's `test` target runs through it. The `tooling-*` projects are exempt because their subjects run as real subprocesses v8 cannot instrument: every `scripts/**/*.mjs`, `just` recipe, and hook must instead be driven by a spec or record why it cannot be. Markup, composition, and recovery are verified through real-browser journeys.
+- Coverage is 95% on lines, functions, branches, and statements, for app UI as well as library code. The `tooling-*` projects are exempt because their subjects run as real subprocesses v8 cannot instrument; every workspace script, `just` recipe, and hook must instead be driven by a spec or record why it cannot be.
 
 Use pnpm; never add backend or runtime API infrastructure. The shell owns routing and layout. It consumes five route remotes; Home is itself a host for seven feature remotes. Remotes expose only route pages and compose only declared child remotes. Libraries flow `shared -> layout -> shell`, enforced by Nx tags. See `docs/architecture.md`.
 
@@ -52,7 +52,7 @@ breaks deploys.
 ## Workflow
 
 <!-- llmlint: ignore[contracts_have_one_source_or_a_drift_gate] This contributor-facing ownership inventory is deliberately explicit; module-boundaries.spec.ts verifies every scripts project is tagged tooling and owns the required targets, while Nx remains the project source of truth. -->
-Use `just` as the only command surface. `just check` is the full pre-push gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage, and add it to the owning app: a new component needs a `.spec.tsx` beside it, a new state or feature needs a journey in that app's own `e2e/` suite and a scenario in its own `visual/scenarios.ts`. Validate imported CV data with schemas at the boundary. Screenshot capture belongs to each app rather than to a centralized script: `apps/<app>/visual/scenarios.ts` declares that app's scenarios, `capture.ts` beside it drives them through `captureVisualSuite` from `@site/visual-harness`, and the app's own `screenshot` target runs it. Capture is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow, with the `.githooks/pre-push` guard as its local half (it re-captures only affected microfrontends when `[guard].paths` change and blocks the push until a regenerated baseline is committed).
+Use `just` as the only command surface. `just check` is the full pre-push gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is owned by the app whose scenarios it takes, never by a centralized script, and is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow, with the `.githooks/pre-push` guard as its local half (it re-captures only affected microfrontends when `[guard].paths` change and blocks the push until a regenerated baseline is committed).
 
 Dependency freshness is checked with `pnpm outdated`; every dependency's
 `current` version must equal its `wanted` version. Major rspack and TypeScript
@@ -70,11 +70,7 @@ cache locking or a remote cache.
 
 ## Journeys
 
-Every app owns its own tests: a Playwright suite under `apps/<app>/e2e/` with its own `playwright.config.ts`, a visual inventory in `apps/<app>/visual/scenarios.ts`, and a component spec beside every component. A journey belongs to the app whose behavior it covers; extend that app's contract with every new route, feature, or state.
-
-Federation ownership is the one contract no single app states alone. `remoteOwnershipTests` in `@site/e2e-harness` registers it, and the harness resolves the route inventory, each remote's landmark and loading status, and Home's panes against the manifests that publish them — `apps/shell/src/routes.json`, `libs/build-config/src/remotes.json`, and the composition in `apps/home/rspack.config.ts` — failing by name when the two disagree. Every one of the 12 remotes therefore renders without failed assets through both its standalone and host-composed boundary, and a new route or pane cannot ship without the journeys that cover it.
-
-Substantial scenarios must remain real-browser covered through standalone and host-composed paths. Keep one Nx-bounded remote per feature domain, exposed only at the route boundary; no cross-remote internals or mixed domains.
+Substantial scenarios must remain real-browser covered through both the standalone remote and the host-composed boundary, and all 12 remotes must render without failed assets through both. Keep one Nx-bounded remote per feature domain, exposed only at the route boundary; no cross-remote internals or mixed domains.
 
 ## Commits, releases, and merging
 

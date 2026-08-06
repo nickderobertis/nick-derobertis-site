@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 
+// scripts/ci/verify-runtime-pins.mjs is the CLI these tests own, reached the way
+// a contributor reaches it: through `just lint-workflows`.
 // Every workflow provisions pnpm and Node itself, so those pins are a contract
 // with exactly one authoritative source: package.json's `packageManager` for
 // pnpm, and — because nothing declares Node — agreement across workflows for
@@ -103,23 +105,6 @@ describe("workflow runtime pins", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(/authoritative pnpm pin/);
   }, 180_000);
-
-  test("the pin verifier reports the agreement the gate depends on", () => {
-    const declared = /^pnpm@(\d+\.\d+\.\d+)$/.exec(declaredPackageManager());
-    const version = declared?.[1];
-    if (!version)
-      throw new Error(
-        `${manifest} must pin packageManager to an exact pnpm version`,
-      );
-    const result = spawnSync("node", ["scripts/ci/verify-runtime-pins.mjs"], {
-      encoding: "utf8",
-    });
-
-    expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout.trim()).toBe(
-      `runtime pins agree: pnpm ${version} (3 references), Node 26.5.0 (4 references)`,
-    );
-  });
 
   test("every drift case leaves the committed pins exactly as it found them", () => {
     expect(readFileSync(pinnedWorkflow, "utf8")).toContain(

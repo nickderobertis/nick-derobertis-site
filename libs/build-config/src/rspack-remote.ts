@@ -14,6 +14,9 @@ const siteConfig: unknown = createRequire(import.meta.url)(
 );
 /* v8 ignore start -- Both guards run at import over committed build inputs that just check already validates through every consumer; only a corrupted checkout reaches their rejection branches, and the named diagnostic is what makes that failure readable. */
 if (
+  typeof remoteManifest !== "object" ||
+  remoteManifest === null ||
+  Array.isArray(remoteManifest) ||
   Object.entries(remoteManifest).some(
     ([key, value]) =>
       !/^[a-z][a-z-]+$/.test(key) ||

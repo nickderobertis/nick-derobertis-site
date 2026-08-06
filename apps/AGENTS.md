@@ -21,9 +21,6 @@ break that app's gates:
 - `apps/<app>/src/**/*.spec.tsx` — a spec beside every component, behind the
   95% four-metric floor `apps/<app>/vite.config.ts` declares.
 
-`scripts/workspace/structure-contract.spec.ts` derives all of that from the Nx
-project graph.
-
 ## Journeys
 
 Substantial scenarios must remain real-browser covered through both the
