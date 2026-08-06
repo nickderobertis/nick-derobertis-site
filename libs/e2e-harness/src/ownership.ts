@@ -1,5 +1,27 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
+import { heldRemoteCodeHeader, holdRemoteCodeQuery } from "@site/e2e-fixtures";
 import { homePanes, type RemoteName, remoteContract } from "./site-contract.ts";
+
+/**
+ * Counts the responses the site server held back as one remote's lazily loaded
+ * page code, read off the responses this journey already watches.
+ *
+ * A pane Home composes reaches its skeleton through a client navigation, and
+ * Home warms every pane on the same hover that starts that navigation. The
+ * skeleton is therefore on screen only until whichever of the two finishes
+ * first, and on a busy machine the warm wins: the pane mounts already resolved
+ * and the skeleton is never rendered. Naming the pane's remote in the document
+ * this journey navigates to holds that page code on the server for the whole
+ * journey instead. The remote's entry and its eagerly served skeleton are
+ * deliberately not held — the fallback has to be able to render.
+ */
+function countHeldPageCode(page: Page, name: RemoteName) {
+  let held = 0;
+  page.on("response", (response) => {
+    if (response.headers()[heldRemoteCodeHeader] === name) held += 1;
+  });
+  return () => held;
+}
 
 /**
  * Registers the ownership journeys one remote owns: it renders through its
@@ -43,13 +65,22 @@ export function remoteOwnershipTests(name: RemoteName): void {
     test(`shows its skeleton while loading through its ${render} boundary`, async ({
       page,
     }) => {
+      // Only the navigated pane route races the warm; the loading queries and
+      // the standalone documents hold their own boundary open.
+      const nested =
+        render === "host-composed" && !contract.loadingQuery
+          ? countHeldPageCode(page, name)
+          : undefined;
       if (render === "host-composed") {
         if (contract.loadingQuery)
           await page.goto(`${contract.host}?${contract.loadingQuery}`, {
             waitUntil: "domcontentloaded",
           });
         else {
-          await page.goto("bio");
+          // The document this journey starts from arms the hold, and the client
+          // navigation that follows keeps it, so the pane's page code is still
+          // in flight when Home mounts.
+          await page.goto(`bio?${holdRemoteCodeQuery}=${name}`);
           await page.getByRole("link", { name: "Home", exact: true }).click();
         }
       } else
@@ -65,6 +96,10 @@ export function remoteOwnershipTests(name: RemoteName): void {
       await expect(
         page.getByRole(contract.role, { name: contract.name, exact: true }),
       ).toBeVisible();
+      // A renamed chunk would hold nothing and quietly put this journey back on
+      // the server's ordinary latency, so the hold has to have caught the pane's
+      // code.
+      if (nested) expect(nested()).toBeGreaterThan(0);
       await expect(
         page.getByRole("status", {
           name: contract.loadingName,

@@ -1,4 +1,3 @@
-<!-- llmlint: ignore-file[instruction_layer_localized] The root journey inventory is deliberately a shell-wide federation contract: every feature must be exercised through both its standalone remote and host-composed boundary, so localizing those coupled journeys under individual apps would split the single end-to-end ownership model. -->
 # Repository instructions
 
 ## Stack and composition
@@ -7,7 +6,7 @@
 - Language: TypeScript.
 - References composed: `base.md`, `shapes/web-app.md`, `shapes/react.md`, `languages/typescript.md`, `ci.md`, `llmlint.md`, `monorepo.md`.
 - Excluded: bun, because it is incompatible with the supported workspace path for Nx's rspack Module Federation executor; pnpm's workspace linker is required here. Also excluded: release automation, because GitHub Pages deployment is the artifact lifecycle; server/auth guidance, because this is a public static site with no privileged actions.
-- Coverage is 95% for library code. Shell markup is principally verified through real-browser e2e journeys.
+- Coverage is 95% on lines, functions, branches, and statements, for app UI as well as library code. Two exemptions exist, and they are the only ones: the `tooling-*` projects, because their subjects run as real subprocesses v8 cannot instrument — every workspace script, `just` recipe, and hook must instead be driven by a spec or record why it cannot be — and `design-system`, because it publishes only `theme.css`, which has no unit-testable interface, so it declares no `test` target and is verified in the browser by `site.spec.ts`, each remote's standalone design-system journey, and every app's screencomp capture. Every other project owes a `test` target and that floor; `scripts/workspace/structure-contract.spec.ts` derives the owed set from this sentence rather than from what each project happens to declare.
 
 Use pnpm; never add backend or runtime API infrastructure. The shell owns routing and layout. It consumes five route remotes; Home is itself a host for seven feature remotes. Remotes expose only route pages and compose only declared child remotes. Libraries flow `shared -> layout -> shell`, enforced by Nx tags. See `docs/architecture.md`.
 
@@ -53,7 +52,7 @@ breaks deploys.
 ## Workflow
 
 <!-- llmlint: ignore[contracts_have_one_source_or_a_drift_gate] This contributor-facing ownership inventory is deliberately explicit; module-boundaries.spec.ts verifies every scripts project is tagged tooling and owns the required targets, while Nx remains the project source of truth. -->
-Use `just` as the only command surface. `just check` is the full pre-push gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow, with the `.githooks/pre-push` guard as its local half (it re-captures only affected microfrontends when `[guard].paths` change and blocks the push until a regenerated baseline is committed).
+Use `just` as the only command surface. `just check` is the full pre-push gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is owned by the app whose scenarios it takes, never by a centralized script, and is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow, with the `.githooks/pre-push` guard as its local half (it re-captures only affected microfrontends when `[guard].paths` change and blocks the push until a regenerated baseline is committed).
 
 Dependency freshness is checked with `pnpm outdated`; every dependency's
 `current` version must equal its `wanted` version. Major rspack and TypeScript
@@ -71,21 +70,7 @@ cache locking or a remote cache.
 
 ## Journeys
 
-This numbered inventory is the browser-test contract; extend it with every new route, feature, or state.
-
-1. Site shell: all five Pages-base routes load directly with header, footer, route content, and no failed assets; keyboard navigation works; each route retains useful substantive prerendered HTML without JavaScript; unknown paths show the static 404 recovery document and client-side redirect home; `/story` redirects to `/bio`; startup fetches only the entry route's remote and leaves the other four route remotes unfetched until a nav link is hovered; hover intent preloads a route's code, data, and images, so a settled hover then click mounts Home's panes and Software's warm card logos without a skeleton, while a click that beats the preload still shows skeletons and settles.
-2. Federation ownership: all 12 remotes render without failed assets through both standalone and host-composed boundaries.
-   The deploy topology is covered apart from the local one: composing a content-store-shaped fragment root into a fresh output directory, serving that directory as Pages serves it, and loading every route and standalone remote from it produces no failed request.
-3. Home: its composed page and carousel, cards, story, contact, timeline, skills, and awards panes cover happy, empty, loading, and error states in both render paths; action links, automatic and keyboard carousel controls, responsive breakpoints, and invalid build-script inputs are covered.
-4. Bio: complete story, responsive layout, and happy, empty, loading, and error states in both render paths.
-5. Research: category groupings, optional coauthors/resources, narrow and standard layouts, async recovery, and happy, empty, loading, and error states in both render paths.
-6. Software: project totals, optional fields, responsive grids, and happy, empty, loading, and error states in both render paths.
-7. Courses: course topics, full and sparse records, responsive panes, and happy, empty, loading, and error states in both render paths.
-8. Timeline: complete CV history; education, employment, and no-result filters; compact mobile labels; invalid-state recovery; shared styles; and happy, empty, loading, and error states in both render paths.
-9. Skills: recursive tree, pointer and keyboard stats, category drill-down, accessible selectors, responsive layouts, invalid-state recovery, shared styles, and happy, empty, loading, and error states in both render paths.
-10. Awards: selected and complete sets, optional card content, statistics, responsive layouts, async recovery, and happy, empty, loading, and error states in both render paths.
-
-Substantial scenarios must remain real-browser covered through standalone and host-composed paths. Keep one Nx-bounded remote per feature domain, exposed only at the route boundary; no cross-remote internals or mixed domains.
+Substantial scenarios must remain real-browser covered through both the standalone remote and the host-composed boundary, and all 12 remotes must render without failed assets through both. Keep one Nx-bounded remote per feature domain, exposed only at the route boundary; no cross-remote internals or mixed domains.
 
 ## Commits, releases, and merging
 

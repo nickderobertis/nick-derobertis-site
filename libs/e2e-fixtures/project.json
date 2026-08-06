@@ -7,20 +7,30 @@
   "targets": {
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": "biome lint libs/e2e-fixtures" }
+      "options": {
+        "command": "biome lint libs/e2e-fixtures"
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/e2e-fixtures/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/e2e-fixtures/tsconfig.json"
+      }
     },
     "build": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/e2e-fixtures/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/e2e-fixtures/tsconfig.json"
+      }
     },
     "test": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] This target runs the fixture library's own unit gate and has no browser interface; the server it covers is the one every Playwright journey and every screenshot capture is already served through."
+      },
+      "outputs": ["{workspaceRoot}/coverage/libs/e2e-fixtures"],
       "options": {
-        "command": "vitest run --config libs/e2e-fixtures/vite.config.ts"
+        "command": "vitest run --config libs/e2e-fixtures/vite.config.ts --coverage"
       }
     }
   }

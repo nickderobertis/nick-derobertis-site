@@ -1,4 +1,12 @@
-/apps/shell/ @nickderobertis
-/apps/*/e2e/ @nickderobertis
+# Review routing for the localized instruction layers. Each app, library, and
+# tooling subtree carries its own AGENTS.md, so a change to one is reviewed by
+# the owner of that subtree rather than by whoever notices the pull request.
+# Only those subtrees are routed: a blanket `*` owner would claim every path in
+# the repository to route the handful that need it, which is a grant far wider
+# than the routing it exists for.
+/AGENTS.md @nickderobertis
+/apps/ @nickderobertis
 /libs/ @nickderobertis
+/scripts/ @nickderobertis
 /.github/ @nickderobertis
+/docs/ @nickderobertis

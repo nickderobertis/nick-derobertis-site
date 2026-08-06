@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { beforeAll, describe, expect, test } from "vitest";
 
+// scripts/publish/verify-content-store-contract.mjs is the CLI these tests own,
+// reached the way a contributor reaches it: through `just lint-workflows`.
 // The content-store branch, its deploy-lane checkout, and a publish lane's
 // scratch repository are named in files that cannot import each other, so
 // libs/build-config/src/publish-fragment.ts is the one source and

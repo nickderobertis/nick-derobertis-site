@@ -1,0 +1,90 @@
+import { readFileSync } from "node:fs";
+import { afterEach, describe, expect, test } from "vitest";
+import { z } from "zod";
+import { remoteConfig, remoteMap } from "./rspack-remote";
+
+// `@nx/rspack`'s app plugin reads the app it is configuring from the task
+// environment Nx sets around a build, and normalizes the paths it was given
+// against that project's root. Building a remote's configuration outside such
+// a task is not something this function supports, so each case declares the
+// build task it is standing in rather than asserting against a stand-in plugin.
+function inBuildTaskFor(project: string) {
+  process.env.NX_TASK_TARGET_PROJECT = project;
+  process.env.NX_TASK_TARGET_TARGET = "build";
+}
+
+afterEach(() => {
+  delete process.env.NX_TASK_TARGET_PROJECT;
+  delete process.env.NX_TASK_TARGET_TARGET;
+});
+
+// Every remote is served from its own directory below the Pages project base,
+// and a host reaches it through a `<alias>@<url>` entry. Both halves come from
+// the same two committed inputs, so they are read here rather than restated.
+const { pagesBase } = z
+  .object({ pagesBase: z.string().regex(/^\/[a-z0-9-]+$/) })
+  .parse(
+    JSON.parse(
+      readFileSync("libs/data-access-core/src/site.config.json", "utf8"),
+    ),
+  );
+
+describe("federation remote map", () => {
+  test("points each host entry at the remote's own published container", () => {
+    expect(remoteMap(["awards", "timeline"])).toEqual({
+      awards: `awards@${pagesBase}/remotes/awards/remoteEntry.js`,
+      timeline: `timeline@${pagesBase}/remotes/timeline/remoteEntry.js`,
+    });
+  });
+
+  test("resolves a hyphenated project to its camel-case federation alias", () => {
+    expect(remoteMap(["home-cards"])).toEqual({
+      homeCards: `homeCards@${pagesBase}/remotes/home-cards/remoteEntry.js`,
+    });
+  });
+
+  test("composes nothing when a host declares no child remotes", () => {
+    expect(remoteMap([])).toEqual({});
+  });
+});
+
+describe("remote build configuration", () => {
+  test("pins a remote's entry, public path, and exposed route boundary", () => {
+    inBuildTaskFor("awards");
+    const config = remoteConfig("awards");
+
+    expect(config.entry).toBe("./apps/awards/src/main.tsx");
+    expect(config.output).toMatchObject({
+      publicPath: `${pagesBase}/remotes/awards/`,
+      uniqueName: "awards",
+    });
+    const federation = config.plugins.at(-1);
+    expect(federation).toMatchObject({
+      _options: {
+        name: "awards",
+        filename: "remoteEntry.js",
+        exposes: {
+          "./Page": "./src/page.tsx",
+          "./Skeleton": "./src/skeleton.tsx",
+        },
+        remotes: {},
+      },
+    });
+  });
+
+  test("gives a host the child remotes it was configured with", () => {
+    inBuildTaskFor("home");
+    const remotes = remoteMap(["awards"]);
+
+    expect(remoteConfig("home", { remotes }).plugins.at(-1)).toMatchObject({
+      _options: { name: "home", remotes },
+    });
+  });
+
+  test("falls back to the project name when a build is not a registered remote", () => {
+    inBuildTaskFor("shell");
+    expect(remoteConfig("shell").plugins.at(-1)).toMatchObject({
+      _options: { name: "shell" },
+    });
+  });
+});

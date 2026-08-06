@@ -7,20 +7,30 @@
   "targets": {
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": "biome lint libs/artifact-contracts" }
+      "options": {
+        "command": "biome lint libs/artifact-contracts"
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/artifact-contracts/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/artifact-contracts/tsconfig.json"
+      }
     },
     "build": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/artifact-contracts/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/artifact-contracts/tsconfig.json"
+      }
     },
     "test": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] This target runs the library's own unit gate and has no browser interface; the contracts it covers reach a visitor only as the prerendered route documents site.spec.ts drives with JavaScript disabled and through hydration, and as the inlined page CSS every feature journey drives on both render paths."
+      },
+      "outputs": ["{workspaceRoot}/coverage/libs/artifact-contracts"],
       "options": {
-        "command": "vitest run --passWithNoTests libs/artifact-contracts"
+        "command": "vitest run --config libs/artifact-contracts/vite.config.ts --coverage"
       }
     }
   }

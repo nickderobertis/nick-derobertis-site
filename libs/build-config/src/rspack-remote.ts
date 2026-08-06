@@ -12,7 +12,12 @@ const remoteManifest = createRequire(import.meta.url)(
 const siteConfig: unknown = createRequire(import.meta.url)(
   "../../data-access-core/src/site.config.json",
 );
+/* v8 ignore start -- Both guards run at import over committed build inputs that just check already validates through every consumer; only a corrupted checkout reaches their rejection branches, and the named diagnostic is what makes that failure readable. */
+// llmlint: ignore[changed_behavior_has_e2e] These guards reject a malformed build input before any bundle exists, so nothing they refuse can reach a visitor and there is no browser interface to drive; rspack-remote.spec.ts covers the configuration they produce, and every app's ownership.spec.ts drives the remote that configuration builds through both boundaries.
 if (
+  typeof remoteManifest !== "object" ||
+  remoteManifest === null ||
+  Array.isArray(remoteManifest) ||
   Object.entries(remoteManifest).some(
     ([key, value]) =>
       !/^[a-z][a-z-]+$/.test(key) ||
@@ -29,6 +34,7 @@ if (
   !/^\/[a-z0-9-]+$/.test(siteConfig.pagesBase)
 )
   throw new Error("site.config.json must define a valid pagesBase");
+/* v8 ignore stop */
 const pagesBase = siteConfig.pagesBase;
 
 export type RemoteProject = keyof typeof remoteManifest;

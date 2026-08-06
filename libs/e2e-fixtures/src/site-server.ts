@@ -22,6 +22,13 @@ export interface SiteServerOptions {
    * makes a skeleton observable in a browser journey. Zero serves it at once.
    */
   lazyAssetLatencyMs?: number;
+  /**
+   * How long the page code of the remote a journey named through
+   * `?hold-remote-code=` is held back. This is the window a journey that has to
+   * watch a federation boundary suspend gets, so it is far longer than the
+   * latency every other remote's page code is served under.
+   */
+  holdRemoteCodeMs?: number;
   /** How long a `?scenario=loading` CV-data request is held. */
   dataLoadingMs?: number;
   /** The root the CV-data fixtures are read from; defaults to `root`. */
@@ -46,9 +53,29 @@ const defaultContentTypes: Readonly<Record<string, string>> = {
 };
 
 /**
- * A remote's eagerly loaded bytes: its entry, its container, and the shared
- * chunks a host needs before it can render anything at all. Delaying these
- * would postpone the skeleton the lazy delay exists to make observable.
+ * The query a journey navigates with to name the one remote whose lazily loaded
+ * page code this server holds back: `bio?hold-remote-code=awards` asks for a
+ * long enough window to watch that remote's federation boundary suspend. The
+ * hold lasts until the next document is requested, so it cannot outlive the
+ * journey that asked for it, and a client-side navigation keeps it.
+ */
+export const holdRemoteCodeQuery = "hold-remote-code";
+
+/**
+ * The header a held response carries, naming the remote it was held for. A
+ * journey reads it off the responses it already watches, so it can prove the
+ * hold caught real page code instead of quietly matching nothing.
+ */
+export const heldRemoteCodeHeader = "x-e2e-held-remote-code";
+
+const remoteNamePattern = /^[a-z][a-z0-9-]*$/;
+
+/**
+ * Whether a remote asset is one this server always serves at once: its entry,
+ * its container, and the shared chunks a host needs before it can render
+ * anything at all. Everything else a remote publishes is its lazily loaded page
+ * code, which is what the latency options below hold back so a skeleton is
+ * observable; delaying the eager set would postpone that skeleton instead.
  */
 function isEagerRemoteAsset(assetName: string) {
   return (
@@ -64,23 +91,51 @@ function contains(file: string, root: string) {
 }
 
 /**
+ * Whether this request is for one of the site's documents rather than one of
+ * the assets a document pulls in. Only a document carries the query a visitor
+ * — or a journey — navigated with, so this is where a page-code hold is armed.
+ */
+function isDocumentRequest(url: URL) {
+  const extension = extname(url.pathname);
+  return extension === "" || extension === ".html";
+}
+
+/**
  * Serves a built artifact the way GitHub Pages serves it — every route beneath
- * one base path — together with the CV-data scenarios browser journeys steer.
- * Callers own their artifact layout through `route`, `notFound`, and the
- * latency options; everything else about serving the bytes is shared.
+ * one base path — together with the CV-data scenarios browser journeys steer
+ * and the page-code hold they arm through `?hold-remote-code=`. Those two are
+ * the only way a journey opens a pending boundary long enough to watch: the
+ * server answers the site's real requests slowly, so nothing in the browser has
+ * to stand in for the network. Callers own their artifact layout through
+ * `route`, `notFound`, and the latency options; everything else about serving
+ * the bytes is shared.
  */
 export function createSiteServer({
   root,
   base,
   lazyAssetLatencyMs = 0,
+  holdRemoteCodeMs = 3_000,
   dataLoadingMs = 750,
   dataRoot = root,
   contentTypes = defaultContentTypes,
   notFound = { status: 404, body: "Not found" },
   route,
 }: SiteServerOptions): Server {
+  // The remote whose page code is held back for the journey now underway. Each
+  // document request re-reads it, so a hold ends with the navigation that armed
+  // it and nothing leaks into the next journey.
+  let heldRemote: string | undefined;
   return createServer(async (request, response) => {
+    /* v8 ignore next -- Node always sets a request target on an HTTP request; the fallback only keeps the URL construction total. */
     const url = new URL(request.url ?? "/", "http://localhost");
+    if (isDocumentRequest(url)) {
+      const named = url.searchParams.get(holdRemoteCodeQuery);
+      if (named !== null && !remoteNamePattern.test(named)) {
+        response.writeHead(400).end("Unsupported e2e remote-code hold");
+        return;
+      }
+      heldRemote = named ?? undefined;
+    }
     if (
       await handleE2eDataRequest({
         base,
@@ -120,13 +175,26 @@ export function createSiteServer({
       "Content-Type",
       contentTypes[extname(file)] ?? "application/octet-stream",
     );
-    if (
-      lazyAssetLatencyMs > 0 &&
+    const lazyRemoteAsset =
       url.pathname.includes("/remotes/") &&
       extname(file) === ".js" &&
-      !isEagerRemoteAsset(basename(file))
-    )
-      await new Promise((resolve) => setTimeout(resolve, lazyAssetLatencyMs));
+      !isEagerRemoteAsset(basename(file));
+    const heldFor =
+      lazyRemoteAsset &&
+      heldRemote !== undefined &&
+      url.pathname.includes(`/remotes/${heldRemote}/`)
+        ? heldRemote
+        : undefined;
+    if (heldFor !== undefined)
+      response.setHeader(heldRemoteCodeHeader, heldFor);
+    const latencyMs =
+      heldFor !== undefined
+        ? holdRemoteCodeMs
+        : lazyRemoteAsset
+          ? lazyAssetLatencyMs
+          : 0;
+    if (latencyMs > 0)
+      await new Promise((resolve) => setTimeout(resolve, latencyMs));
     createReadStream(file).pipe(response);
   });
 }

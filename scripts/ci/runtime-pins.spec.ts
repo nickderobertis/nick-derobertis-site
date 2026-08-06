@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 
+// scripts/ci/verify-runtime-pins.mjs is the CLI these tests own, reached the way
+// a contributor reaches it: through `just lint-workflows`.
 // Every workflow provisions pnpm and Node itself, so those pins are a contract
 // with exactly one authoritative source: package.json's `packageManager` for
 // pnpm, and — because nothing declares Node — agreement across workflows for

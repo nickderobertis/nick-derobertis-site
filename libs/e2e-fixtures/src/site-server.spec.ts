@@ -3,13 +3,18 @@ import type { Server } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createSiteServer, type SiteServerOptions } from "./site-server.ts";
+import {
+  closeOnSignals,
+  createSiteServer,
+  type SiteServerOptions,
+} from "./site-server.ts";
 
 // The server every browser journey and every visual capture is served through,
 // driven here over real HTTP against a real artifact tree on disk.
 
 const base = "/nick-derobertis-site";
 const lazyAssetLatencyMs = 250;
+const holdRemoteCodeMs = 700;
 const servers: Server[] = [];
 const roots: string[] = [];
 
@@ -18,8 +23,10 @@ async function artifact() {
   roots.push(root);
   await mkdir(join(root, "bio"), { recursive: true });
   await mkdir(join(root, "remotes/bio"), { recursive: true });
+  await mkdir(join(root, "remotes/awards"), { recursive: true });
   await mkdir(join(root, "cv-data/domains"), { recursive: true });
   await Promise.all([
+    writeFile(join(root, "remotes/awards/pane.ghi789.js"), "//lazy\n"),
     writeFile(join(root, "index.html"), "<h1>home document</h1>"),
     writeFile(join(root, "404.html"), "<h1>recovery document</h1>"),
     writeFile(join(root, "bio/index.html"), "<h1>bio route</h1>"),
@@ -112,6 +119,44 @@ describe("the Pages-base site server", () => {
     expect(eagerMs).toBeLessThan(lazyAssetLatencyMs);
   });
 
+  it("holds the page code of the remote a document named, and no other", async () => {
+    const root = await artifact();
+    const origin = await serve({ root, holdRemoteCodeMs, lazyAssetLatencyMs });
+
+    await fetch(`${origin}${base}/bio?hold-remote-code=awards`);
+    const heldStarted = process.hrtime.bigint();
+    const held = await fetch(`${origin}${base}/remotes/awards/pane.ghi789.js`);
+    const heldMs = Number(process.hrtime.bigint() - heldStarted) / 1e6;
+    const otherStarted = process.hrtime.bigint();
+    const other = await fetch(`${origin}${base}/remotes/bio/pane.def456.js`);
+    const otherMs = Number(process.hrtime.bigint() - otherStarted) / 1e6;
+
+    expect(held.headers.get("x-e2e-held-remote-code")).toBe("awards");
+    expect(heldMs).toBeGreaterThanOrEqual(holdRemoteCodeMs);
+    expect(other.headers.get("x-e2e-held-remote-code")).toBeNull();
+    expect(otherMs).toBeGreaterThanOrEqual(lazyAssetLatencyMs);
+    expect(otherMs).toBeLessThan(holdRemoteCodeMs);
+  });
+
+  it("ends a page-code hold at the next document and refuses an unnamed one", async () => {
+    const root = await artifact();
+    const origin = await serve({ root, holdRemoteCodeMs });
+
+    await fetch(`${origin}${base}/bio?hold-remote-code=awards`);
+    await fetch(`${origin}${base}/`);
+    const started = process.hrtime.bigint();
+    const released = await fetch(
+      `${origin}${base}/remotes/awards/pane.ghi789.js`,
+    );
+    const releasedMs = Number(process.hrtime.bigint() - started) / 1e6;
+    const unusable = await fetch(`${origin}${base}/bio?hold-remote-code=../..`);
+
+    expect(released.headers.get("x-e2e-held-remote-code")).toBeNull();
+    expect(releasedMs).toBeLessThan(holdRemoteCodeMs);
+    expect(unusable.status).toBe(400);
+    expect(await unusable.text()).toBe("Unsupported e2e remote-code hold");
+  });
+
   it("routes each remote to its own document root and refuses an unknown one", async () => {
     const root = await artifact();
     const remotes = new Map([["bio", join(root, "remotes/bio")]]);
@@ -164,6 +209,33 @@ describe("the Pages-base site server", () => {
     });
   });
 
+  it("serves a path outside the base and one whose type it does not know", async () => {
+    const root = await artifact();
+    await writeFile(join(root, "manifest.webmanifest"), "{}");
+    const origin = await serve({ root });
+
+    // Screenshot capture and the visual host both request assets above the
+    // Pages base, which are resolved against the served root as they are.
+    const outside = await fetch(`${origin}/index.html`);
+    const unknownType = await fetch(`${origin}${base}/manifest.webmanifest`);
+
+    expect(await outside.text()).toContain("home document");
+    expect(unknownType.headers.get("content-type")).toBe(
+      "application/octet-stream",
+    );
+  });
+
+  it("empties a list domain as a list rather than as research's envelope", async () => {
+    const root = await artifact();
+    const origin = await serve({ root });
+
+    const empty = await fetch(
+      `${origin}${base}/cv-data/domains/awards.json?scenario=empty`,
+    );
+
+    expect(await empty.json()).toEqual([]);
+  });
+
   it("reports a domain whose fixture the artifact does not carry", async () => {
     const root = await artifact();
     await rm(join(root, "cv-data/domains/awards.json"));
@@ -175,5 +247,56 @@ describe("the Pages-base site server", () => {
     expect(await missing.json()).toEqual({
       error: "awards fixture unavailable",
     });
+  });
+});
+
+describe("returning the port to a supervising runner", () => {
+  // A runner that sends SIGTERM and immediately starts the next capture gets
+  // EADDRINUSE if the server outlives the signal, so each case sends a real
+  // signal to this process rather than calling close or synthesizing the event.
+  // SIGUSR2 stands in for SIGTERM because the test process has to survive it.
+  const signal: NodeJS.Signals = "SIGUSR2";
+
+  /** Takes the server just started out of the shared teardown's hands. */
+  function ownedServer() {
+    const server = servers.pop();
+    if (!server) throw new Error("no site server was started");
+    return server;
+  }
+
+  afterEach(() => {
+    process.removeAllListeners(signal);
+  });
+
+  it("stops serving on the signal and stays quiet when it arrives twice", async () => {
+    const root = await artifact();
+    const origin = await serve({ root });
+    const server = ownedServer();
+    const closeErrors: Error[] = [];
+    closeOnSignals(server, [signal], (error) => closeErrors.push(error));
+
+    expect((await fetch(`${origin}${base}/`)).ok).toBe(true);
+    process.kill(process.pid, signal);
+    process.kill(process.pid, signal);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    await expect(fetch(`${origin}${base}/`)).rejects.toThrow();
+    expect(closeErrors).toEqual([]);
+  });
+
+  it("reports a close the caller has to act on", async () => {
+    const root = await artifact();
+    await serve({ root });
+    const server = ownedServer();
+    const closeErrors: Error[] = [];
+    closeOnSignals(server, [signal], (error) => closeErrors.push(error));
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+
+    process.kill(process.pid, signal);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(closeErrors.map((error) => error.message)).toEqual([
+      "Server is not running.",
+    ]);
   });
 });

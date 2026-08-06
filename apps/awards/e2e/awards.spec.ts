@@ -104,6 +104,11 @@ for (const renderPath of renderPaths) {
     test("renders its skeleton while the awards boundary is pending", async ({
       page,
     }) => {
+      // The pane asks for its awards only once its own page code has arrived,
+      // and the served loading scenario then holds that response open from
+      // there, so the window this asserts in belongs to the request the pane
+      // really makes rather than to whichever of the two the machine finished
+      // first.
       await page.goto(`${renderPath.path}?awards-scenario=loading`);
       await expect(
         page.getByRole("status", { name: "Loading awards", exact: true }),

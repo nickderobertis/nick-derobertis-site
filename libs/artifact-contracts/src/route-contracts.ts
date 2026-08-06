@@ -7,6 +7,7 @@ import contractInput from "../../route-state/src/contracts.json" with {
 };
 
 // llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] contracts.json is the single serialized source; this validator and the Zod validator in @site/route-state independently reject invalid boundary input because the prerender tooling loads this contract through Node's type stripping without the router runtime @site/route-state pulls in, and just check executes both consumers.
+/* v8 ignore start -- This guard runs at import over the committed contract, which TypeScript already types and just check validates through both consumers; only a corrupted checkout reaches its rejection branches, and the useful boundary error is worth keeping for that case. */
 if (
   !contractInput ||
   typeof contractInput !== "object" ||
@@ -17,6 +18,7 @@ if (
   throw new Error(
     "route-state contracts.json has an invalid prerenderRouteAttribute; set it to a data-* attribute name and rerun just check.",
   );
+/* v8 ignore stop */
 
 export const routeContracts = contractInput;
 // llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate]
