@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, test } from "vitest";
 import { z } from "zod";
-import { type RemoteProject, remoteConfig, remoteMap } from "./rspack-remote";
+import { remoteConfig, remoteMap } from "./rspack-remote";
 
 // `@nx/rspack`'s app plugin reads the app it is configuring from the task
 // environment Nx sets around a build, and normalizes the paths it was given
@@ -31,14 +31,14 @@ const { pagesBase } = z
 
 describe("federation remote map", () => {
   test("points each host entry at the remote's own published container", () => {
-    expect(remoteMap(["awards", "timeline"] as RemoteProject[])).toEqual({
+    expect(remoteMap(["awards", "timeline"])).toEqual({
       awards: `awards@${pagesBase}/remotes/awards/remoteEntry.js`,
       timeline: `timeline@${pagesBase}/remotes/timeline/remoteEntry.js`,
     });
   });
 
   test("resolves a hyphenated project to its camel-case federation alias", () => {
-    expect(remoteMap(["home-cards"] as RemoteProject[])).toEqual({
+    expect(remoteMap(["home-cards"])).toEqual({
       homeCards: `homeCards@${pagesBase}/remotes/home-cards/remoteEntry.js`,
     });
   });
@@ -74,7 +74,7 @@ describe("remote build configuration", () => {
 
   test("gives a host the child remotes it was configured with", () => {
     inBuildTaskFor("home");
-    const remotes = remoteMap(["awards"] as RemoteProject[]);
+    const remotes = remoteMap(["awards"]);
 
     expect(remoteConfig("home", { remotes }).plugins.at(-1)).toMatchObject({
       _options: { name: "home", remotes },
