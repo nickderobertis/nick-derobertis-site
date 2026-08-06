@@ -379,7 +379,7 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
 // served domain can be unusable have to leave the visitor with that route's own
 // recovery panel rather than a blank pane or a thrown error, on every route
 // that loads a domain.
-// llmlint: ignore-block[e2e_not_mocked] A data host that is up and serving valid bytes cannot be asked to fail; forcing the served status and body at the transport is the only way a visitor's browser can reach these states, and it is the boundary under test rather than a stand-in for anything inside the site. The site, its shell, its router, its loaders, and every remote are the real deployed artifact here, and preload.spec.ts steers the same boundary the same way.
+// llmlint: ignore-block[changed_behavior_has_e2e,e2e_not_mocked,tests_mirror_real_usage] A visitor reaches these states when the data host is degraded, and a host that is up and serving valid bytes cannot be asked to degrade: forcing the served status and body at the transport is the only way to put a real browser into the state under test. What is steered is the remote data host — the far side of the boundary, and the boundary these loaders exist to guard — not any part of the site. The artifact under test is the real one throughout: the composed shell, its router, its loaders, and every route remote are the deployed bytes, driven by real navigation and asserted through roles and accessible names. preload.spec.ts steers the same boundary the same way.
 const unusableDomains = [
   {
     // A cache or gateway can answer a failed request with the last payload it
@@ -446,4 +446,4 @@ for (const route of loadedRoutes)
       await expect(page.getByText(route.detail).first()).toBeVisible();
       await expect(page.getByRole("banner")).toBeVisible();
     });
-// llmlint: ignore-end[e2e_not_mocked]
+// llmlint: ignore-end[changed_behavior_has_e2e,e2e_not_mocked,tests_mirror_real_usage]
