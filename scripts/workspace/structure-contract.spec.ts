@@ -245,6 +245,12 @@ describe("app typecheck inputs", () => {
               .map(([, config]) => config)
               .filter((config) => config !== undefined),
           );
+        // A typecheck that compiles nothing this contract can read would pass it
+        // by default, so an unreadable command is itself the finding.
+        if (configs.length === 0)
+          return [
+            `${project.name} names no tsc project in its typecheck command, so what it compiles cannot be read`,
+          ];
         const compiled = (await Promise.all(configs.map(programFiles))).flat();
         return compiled
           .filter((file) => file.startsWith(publishPath))
