@@ -221,8 +221,11 @@ publish lanes no longer waits on a thirteen-app federation build to run.
 `tooling-artifact` is the only one whose `test` target depends on
 `shell:prerender`, because its specs read the assembled artifact. The
 real-browser performance audit needs that artifact too, so it runs as
-`tooling-perf`'s `e2e` target alongside the other Playwright journeys rather
-than holding up that project's own tests.
+`tooling-perf`'s `e2e` target — declaring the same prerender dependency the app
+journeys declare, since `dist/apps/shell` is also `shell:build`'s output
+directory and a cached build restored into it leaves nothing composed behind —
+alongside the other Playwright journeys rather than holding up that project's
+own tests.
 <!-- llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate] -->
 
 No file in `scripts/` imports another one. What two CLIs share lives in a
