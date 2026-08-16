@@ -2,8 +2,12 @@ import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { serializeFragmentContract } from "@site/build-config";
 import { afterEach, expect, test } from "vitest";
-import { serializeFragmentContract } from "./fragment-contract";
+// The lane list is derived from the canonical registry, which build-config owns
+// as a serialized build input rather than as part of its public surface.
+// eslint-disable-next-line @nx/enforce-module-boundaries -- This spec reads the canonical serialized remote registry directly because it is a build input, not an exported module.
+import remoteRegistry from "../../build-config/src/remotes.json";
 import {
   assertOwnSubtree,
   contentStoreBranch,
@@ -13,7 +17,6 @@ import {
   publishOptionsFromEnv,
   validatedRemoteRegistry,
 } from "./publish-fragment";
-import remoteRegistry from "./remotes.json";
 
 // The lane and its tests read the branch from the one source the drift gate holds every other restatement to.
 const branch = contentStoreBranch;
@@ -300,6 +303,36 @@ test("a lane refuses a fragment contract the published schema rejects", async ()
   await expect(
     publishFragment(optionsFor(root, store, "shell")),
   ).rejects.toThrow(/The built shell fragment contract is invalid/);
+});
+
+test("a lane names the whole contract when the built one is not an object", async () => {
+  const { root, store } = await createContentStore(["awards"]);
+  const source = join(root, "built", "shell");
+  await writeBuiltApp(source, "shell", "5be11ab");
+  // A contract that is not an object at all fails at its root, where the issue
+  // names no field; the diagnostic has to say what was rejected anyway.
+  await writeFile(join(source, "fragment.json"), "[]");
+
+  await expect(
+    publishFragment(optionsFor(root, store, "shell")),
+  ).rejects.toThrow(/The built shell fragment contract is invalid: contract /);
+});
+
+test("a lane with no git on the runner names what to install", async () => {
+  const { root, store } = await createContentStore(["awards"]);
+  await writeBuiltApp(join(root, "built", "shell"), "shell", "5be11ab");
+  // A runner that never installed git is the one failure the lane cannot read
+  // an exit status from: git never starts, so it reports no output at all.
+  const path = process.env.PATH;
+  process.env.PATH = join(root, "no-tools");
+
+  try {
+    await expect(
+      publishFragment(optionsFor(root, store, "shell")),
+    ).rejects.toThrow(/Install git on the publish runner and retry/);
+  } finally {
+    process.env.PATH = path;
+  }
 });
 
 test("a rerun reuses the lane's scratch repository rather than a second remote", async () => {

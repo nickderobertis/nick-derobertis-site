@@ -15,7 +15,7 @@ import { afterEach, expect, test } from "vitest";
 /* eslint-disable @nx/enforce-module-boundaries -- This CLI integration spec follows the same direct source paths used by Node type stripping, which cannot resolve workspace aliases. */
 import { remotesForRoute } from "../../libs/artifact-contracts/src/index.ts";
 import { serializeFragmentContract } from "../../libs/build-config/src/fragment-contract.ts";
-import { publishableApps } from "../../libs/build-config/src/publish-fragment.ts";
+import { publishableApps } from "../../libs/publish-config/src/publish-fragment.ts";
 /* eslint-enable @nx/enforce-module-boundaries */
 import {
   compose,

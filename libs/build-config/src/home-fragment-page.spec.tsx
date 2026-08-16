@@ -1,7 +1,6 @@
 import { render } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import HomeFragmentPage from "./home-fragment-page";
-import { validatedRemoteRegistry } from "./publish-fragment";
 import remoteRegistry from "./remotes.json";
 
 // The published Home fragment is a frame of empty slots: the shell's compose
@@ -29,7 +28,7 @@ describe("the published Home fragment frame", () => {
 
   test("names only remotes the canonical registry publishes", () => {
     const { container } = render(<HomeFragmentPage />);
-    const registered = Object.keys(validatedRemoteRegistry(remoteRegistry));
+    const registered = Object.keys(remoteRegistry);
 
     for (const slot of container.querySelectorAll(
       "template[data-published-fragment]",

@@ -54,6 +54,15 @@ describe("affected build economics proof", () => {
     expect(selectedProjects(result.stdout)).toEqual(expected);
   });
 
+  it("limits a publish-path edit to the library that owns it", () => {
+    const result = runAffectedBuildProjects(
+      "libs/publish-config/src/publish-fragment.ts",
+    );
+
+    expect(result.status).toBe(0);
+    expect(selectedProjects(result.stdout)).toEqual(["publish-config"]);
+  });
+
   it("reports the real Nx build graph for a shared data contract", () => {
     const result = runAffectedBuildProjects(
       "libs/data-access-core/src/client.ts",

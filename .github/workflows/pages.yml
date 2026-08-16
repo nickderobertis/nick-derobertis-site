@@ -25,7 +25,7 @@ env:
   # NODE_VERSION to the single value every workflow in this repository uses.
   PNPM_VERSION: 10.13.1
   NODE_VERSION: 26.5.0
-  # Storage only. libs/build-config/src/publish-fragment.ts refuses to publish to
+  # Storage only. libs/publish-config/src/publish-fragment.ts refuses to publish to
   # any branch GitHub Pages could be pointed at.
   CONTENT_STORE_BRANCH: published-fragments
 jobs:

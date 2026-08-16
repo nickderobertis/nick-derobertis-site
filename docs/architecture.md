@@ -49,7 +49,10 @@ container used by every standalone and host route, and accessibility
 primitives. `layout` owns shell header/footer/navigation presentation. Each remote
 owns its page and loading-skeleton CSS, so feature styling does not create a
 shared dependency edge. The former unused `ui` and `analytics` placeholders
-were removed. `build-config` owns federation build configuration. Feature data
+were removed. `build-config` owns federation build configuration, which every
+app's rspack config imports; `publish-config` owns the content-store publish
+path, which only workspace tooling imports, so an edit to a publish lane never
+reaches an app build. Feature data
 hooks may read the staged same-origin JSON, but they validate it through
 `data-access-core` before rendering.
 
@@ -116,7 +119,7 @@ affected: just publish-lanes <before> <sha>   (just publish-lanes seeds every la
        just compose .content-store/apps dist/site -> upload-pages-artifact -> deploy-pages
 ```
 
-`libs/build-config/src/publish-fragment.ts` owns a lane's whole contract, and
+`libs/publish-config/src/publish-fragment.ts` owns a lane's whole contract, and
 it is the one source for the names that contract is stated in: the
 `published-fragments` content-store branch, the `.content-store` working copy
 the deploy lane checks it out into, and the `.publish-store` scratch repository

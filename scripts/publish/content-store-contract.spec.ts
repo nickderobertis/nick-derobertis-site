@@ -6,7 +6,7 @@ import { beforeAll, describe, expect, test } from "vitest";
 // reached the way a contributor reaches it: through `just lint-workflows`.
 // The content-store branch, its deploy-lane checkout, and a publish lane's
 // scratch repository are named in files that cannot import each other, so
-// libs/build-config/src/publish-fragment.ts is the one source and
+// libs/publish-config/src/publish-fragment.ts is the one source and
 // `just lint-workflows` is the gate that holds every restatement to it. That
 // gate is the only interface these tests use — it reports the names it enforced,
 // and each case then moves one restatement in the committed tree exactly as a
