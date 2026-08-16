@@ -1,5 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -324,6 +325,179 @@ describe("the workspace eslint run is keyed on everything it reads", () => {
       expect.arrayContaining([other.name, "shell"]),
     );
   }, 60_000);
+});
+
+/**
+ * The keys above are declarations. What a developer and CI actually pay is
+ * whether Nx runs a task or replays it, so the two claims that motivate this
+ * change are also made against a real run: the same edit that has to rerun the
+ * command reading it has to leave every other command replaying.
+ */
+
+/** Nx's per-task note when it replayed a result instead of running a command. */
+const replayedNote = "[existing outputs match the cache, left as is]";
+
+const probedTargets = ["typecheck", "test", "build", "lint"];
+
+/**
+ * The project the Biome experiment runs on: the first library, by name, that
+ * declares all four probed targets. Read from the graph rather than named, so
+ * it stays a real project as the workspace changes.
+ */
+function probeProject(): string {
+  const [probe] = projects
+    .filter((project) => project.root.startsWith("libs/"))
+    .filter((project) =>
+      probedTargets.every((target) => target in project.targets),
+    )
+    .sort((one, other) => one.name.localeCompare(other.name));
+  if (!probe)
+    throw new Error(
+      `no library declares all of ${probedTargets.join(", ")}, so the cache experiment has nothing to run on`,
+    );
+  return probe.name;
+}
+
+/**
+ * Whether Nx ran each task or replayed it. Nx reports one line per task, so the
+ * outcome is read from the run rather than inferred, and a target the run never
+ * mentions is an error instead of a silently absent assertion.
+ */
+function outcomesOf(project: string, targets: string[]) {
+  const result = spawnSync(
+    "pnpm",
+    [
+      "exec",
+      "nx",
+      "run-many",
+      "-t",
+      targets.join(","),
+      `--projects=${project}`,
+      "--parallel=1",
+      "--output-style=static",
+    ],
+    { encoding: "utf8" },
+  );
+  const printed = `${result.stdout ?? ""}${result.stderr ?? ""}`.replace(
+    ansiEscape,
+    "",
+  );
+  if (result.status !== 0)
+    throw new Error(
+      `nx run-many -t ${targets.join(",")} --projects=${project} failed: ${printed}`,
+    );
+  const outcomes = new Map<string, "replayed" | "ran">();
+  for (const line of printed.split("\n")) {
+    const task = /^> nx run (\S+:\S+)/.exec(line.trim())?.[1];
+    if (task !== undefined)
+      outcomes.set(task, line.includes(replayedNote) ? "replayed" : "ran");
+  }
+  const unreported = targets.filter(
+    (target) => !outcomes.has(`${project}:${target}`),
+  );
+  if (unreported.length > 0)
+    throw new Error(
+      `nx reported no outcome for ${unreported.map((target) => `${project}:${target}`).join(", ")}: ${printed}`,
+    );
+  return outcomes;
+}
+
+/**
+ * An edit that changes the bytes Nx hashes and nothing about what a tool does
+ * with them, restored before the test that made it returns. That inertness is
+ * what makes an outcome attributable to the key rather than to a new
+ * diagnostic, so it is verified against Biome here rather than assumed: an edit
+ * that stops being inert fails at this line instead of surfacing as a
+ * formatting failure somewhere else in the gate.
+ */
+function withInertEdit<T>(
+  file: string,
+  mutate: (original: string) => string,
+  body: () => T,
+): T {
+  const original = readFileSync(file, "utf8");
+  try {
+    writeFileSync(file, mutate(original));
+    const checked = spawnSync(
+      "pnpm",
+      ["exec", "biome", "check", "--error-on-warnings", file],
+      { encoding: "utf8" },
+    );
+    if (checked.status !== 0)
+      throw new Error(
+        `the probe edit to ${file} is not inert: ${checked.stdout ?? ""}${checked.stderr ?? ""}`,
+      );
+    return body();
+  } finally {
+    writeFileSync(file, original);
+  }
+}
+
+/**
+ * A token this run has never used. Without one the probes below would be
+ * self-defeating: the second time a given edit is made, Nx has already cached
+ * the task it should rerun under exactly that edit's hash, and would replay it.
+ * Only the key's novelty is load-bearing, so nothing reads the token back.
+ */
+const probeToken = () => randomUUID();
+
+/**
+ * One more exclusion, naming a path the workspace does not have. It goes last,
+ * where a negation changes the outcome for nothing the earlier patterns already
+ * matched, and where Biome's own ordering for this list leaves it alone.
+ */
+function oneMoreExclusion(original: string): string {
+  const list = /("includes"\s*:\s*\[\n)([\s\S]*?)(\n(\s*)\])/.exec(original);
+  const [matched, declaration, entries, closing, closingIndent] = list ?? [];
+  if (!matched || !declaration || !entries || !closing || !closingIndent)
+    throw new Error("biome.json declares no files.includes list to probe");
+  const indent = /^\s+/.exec(entries)?.[0] ?? `${closingIndent}  `;
+  return original.replace(
+    matched,
+    `${declaration}${entries},\n${indent}"!.cache-keying-probe-${probeToken()}"${closing}`,
+  );
+}
+
+/** A comment, which changes no rule the configuration exports. */
+const oneMoreComment = (original: string) =>
+  `// A cache-keying probe's inert edit (${probeToken()}), restored before its test returns.\n${original}`;
+
+describe("what a rule-file change actually costs when the gate runs", () => {
+  it("replays build, test, and typecheck for a Biome change, and reruns lint", () => {
+    const project = probeProject();
+
+    // Warm every probed target first. On a cold cache there is nothing to
+    // replay, and a miss would read below as evidence about a key it is not
+    // about.
+    outcomesOf(project, probedTargets);
+
+    const outcomes = withInertEdit("biome.json", oneMoreExclusion, () =>
+      outcomesOf(project, probedTargets),
+    );
+
+    expect(outcomes.get(`${project}:typecheck`)).toBe("replayed");
+    expect(outcomes.get(`${project}:test`)).toBe("replayed");
+    expect(outcomes.get(`${project}:build`)).toBe("replayed");
+    // The same edit against the one command that reads it. Without this the
+    // three above would also hold for a biome.json nothing is keyed on, which
+    // would replay a Biome green from before the rule changed.
+    expect(outcomes.get(`${project}:lint`)).toBe("ran");
+  }, 300_000);
+
+  it("reruns apps/shell's lint for an eslint configuration change", () => {
+    outcomesOf("shell", ["lint"]);
+    // Nothing changed between these two runs, so the second has to replay. An
+    // uncacheable lint target would satisfy the assertion below for free.
+    expect(outcomesOf("shell", ["lint"]).get("shell:lint")).toBe("replayed");
+
+    const outcomes = withInertEdit("eslint.config.mjs", oneMoreComment, () =>
+      outcomesOf("shell", ["lint"]),
+    );
+
+    // Named by no input, this file used to key nothing: a rule change replayed
+    // the pass that had never read it.
+    expect(outcomes.get("shell:lint")).toBe("ran");
+  }, 300_000);
 });
 
 /**

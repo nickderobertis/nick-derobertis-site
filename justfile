@@ -128,6 +128,13 @@ e2e-affected-files file:
 affected-build-projects file:
     file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "affected-build-projects: file must be a workspace-relative file" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=build --json
 
+# Print the projects whose prerender a prospective single-file edit selects,
+# which is the other half of the composition economics the build selection
+# above reports: whether the edit recomposes the served artifact at all.
+# llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; affected-build-projects.spec.ts drives its real `just` subprocess through success and validation failures.
+affected-prerender-projects file:
+    file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "affected-prerender-projects: file must be a workspace-relative file" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=prerender --json
+
 e2e-project project:
     project="$1"; [[ "$project" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "e2e-project: project must be a valid Nx project name" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec nx run "$project:e2e" >"$log" 2>&1 || { cat "$log" >&2; echo "e2e-project: remote browser journey failed; fix the failure above and rerun just e2e-project $project" >&2; exit 1; }
 

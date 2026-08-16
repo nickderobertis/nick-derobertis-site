@@ -80,10 +80,10 @@ selection is what makes the boundary rules see the edit; the shell's own build
 replays from cache, because none of its inputs moved.
 
 ```console
-$ pnpm exec nx show projects --affected --files=apps/awards/src/page.tsx --with-target=build --json
+$ just affected-build-projects apps/awards/src/page.tsx
 ["awards","shell"]
 
-$ pnpm exec nx show projects --affected --files=apps/awards/src/page.tsx --with-target=prerender --json
+$ just affected-prerender-projects apps/awards/src/page.tsx
 ["shell"]
 ```
 
