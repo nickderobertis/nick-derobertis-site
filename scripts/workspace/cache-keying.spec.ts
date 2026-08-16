@@ -364,6 +364,7 @@ function probeProject(): string {
  * mentions is an error instead of a silently absent assertion.
  */
 function outcomesOf(project: string, targets: string[]) {
+  // llmlint: ignore-block[work_goes_through_command_surface] The Nx dispatch is the subject here, not the means: this reads whether Nx ran or replayed one named task, which requires this exact invocation — one project, one task at a time, and the static reporter that prints a per-task outcome. Every `just` recipe that dispatches targets does so for the whole affected set and reports a pass or a failure rather than a cache outcome, and this spec runs inside one of them, so routing through the surface would both hide the signal and recurse.
   const result = spawnSync(
     "pnpm",
     [
@@ -386,6 +387,7 @@ function outcomesOf(project: string, targets: string[]) {
     throw new Error(
       `nx run-many -t ${targets.join(",")} --projects=${project} failed: ${printed}`,
     );
+  // llmlint: ignore-end[work_goes_through_command_surface]
   const outcomes = new Map<string, "replayed" | "ran">();
   for (const line of printed.split("\n")) {
     const task = /^> nx run (\S+:\S+)/.exec(line.trim())?.[1];
@@ -415,14 +417,26 @@ function withInertEdit<T>(
   mutate: (original: string) => string,
   body: () => T,
 ): T {
-  const original = readFileSync(file, "utf8");
+  // Both the bytes on disk and the mutator's answer are narrowed before either
+  // is written back: a rule file that has become empty, and a probe that
+  // returned the text it was given, both read downstream as "Nx replayed
+  // everything" — the shape of a passing result, arrived at without a probe.
+  const configuration = z.string().min(1);
+  const original = configuration.parse(readFileSync(file, "utf8"));
+  const probed = configuration.parse(mutate(original));
+  if (probed === original)
+    throw new Error(
+      `the probe edit to ${file} changed nothing, so it keys nothing and no target could rerun for it`,
+    );
   try {
-    writeFileSync(file, mutate(original));
+    writeFileSync(file, probed);
+    // llmlint: ignore-block[work_goes_through_command_surface] This asks Biome about one file, the scratch edit just written, while the tree is deliberately in a state no gate should see. `just lint` and `just check` answer for the whole tree and would fail here for everything except the question being asked; there is no recipe that formats-checks a single path, and adding one would exist only for this line.
     const checked = spawnSync(
       "pnpm",
       ["exec", "biome", "check", "--error-on-warnings", file],
       { encoding: "utf8" },
     );
+    // llmlint: ignore-end[work_goes_through_command_surface]
     if (checked.status !== 0)
       throw new Error(
         `the probe edit to ${file} is not inert: ${checked.stdout ?? ""}${checked.stderr ?? ""}`,
