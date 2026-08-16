@@ -31,11 +31,14 @@ import { z } from "zod";
 /** Read as a fileset, this is what `biome lint` loads and nothing else does. */
 const biomeConfig = "{workspaceRoot}/biome.json";
 
-/** The cached targets whose commands never read the Biome configuration. */
-const cachedWorkBesidesLint = ["build", "test", "typecheck"];
+/** Targets whose commands — rspack, Vitest, tsc — read no Biome configuration. */
+const readNoBiomeConfig = ["build", "test", "typecheck"];
 
-/** The targets that drive a browser against a served site, which none replay. */
-const neverReplayed = ["e2e", "prerender", "screenshot"];
+/**
+ * Targets that compose the served artifact or drive a browser against it.
+ * Replaying one would report a pass over bytes it never served.
+ */
+const composeOrDriveTheArtifact = ["e2e", "prerender", "screenshot", "perf"];
 
 const inputSchema = z.union([
   z.string(),
@@ -202,7 +205,7 @@ describe("the Biome configuration keys only the target that reads it", () => {
   it("keys no project's build, test, or typecheck on biome.json", () => {
     const overkeyed = projects
       .flatMap(targetsOf)
-      .filter(({ name }) => cachedWorkBesidesLint.includes(name))
+      .filter(({ name }) => readNoBiomeConfig.includes(name))
       .filter(({ target }) =>
         keyedOn(declaredInputs(target)).includes(biomeConfig),
       )
@@ -246,7 +249,7 @@ describe("the Biome configuration keys only the target that reads it", () => {
 
     const miskeyed = shapes
       .flatMap(targetsOf)
-      .filter(({ name }) => [...cachedWorkBesidesLint, "lint"].includes(name))
+      .filter(({ name }) => [...readNoBiomeConfig, "lint"].includes(name))
       .map(({ task, target }) => ({
         task,
         runsBiome: /\bbiome\b/.test(target.options?.command ?? ""),
@@ -323,14 +326,26 @@ describe("the workspace eslint run is keyed on everything it reads", () => {
   }, 60_000);
 });
 
+/**
+ * One recipe as `just` defines it. Anything `just` says about a recipe it
+ * cannot show carries no `--skip-nx-cache` either, and would read here as a
+ * gate that keeps its cache, so the answer counts only once it opens with the
+ * requested recipe's own header.
+ */
+function recipeBody(recipe: string): string {
+  return z
+    .string()
+    .refine(
+      (body) => new RegExp(`(^|\\n)${recipe}(:| )`).test(body),
+      `just --show ${recipe} must print that recipe's definition`,
+    )
+    .parse(execFileSync("just", ["--show", recipe], { encoding: "utf8" }));
+}
+
 describe("the gate keeps the cache it can replay", () => {
   it("discards no cached task in check or check-all", () => {
     const discarding = ["check", "check-all"]
-      .filter((recipe) =>
-        execFileSync("just", ["--show", recipe], { encoding: "utf8" }).includes(
-          "--skip-nx-cache",
-        ),
-      )
+      .filter((recipe) => recipeBody(recipe).includes("--skip-nx-cache"))
       .map(
         (recipe) =>
           `just ${recipe} passes --skip-nx-cache, which discards the cached builds under its e2e and screenshot targets`,
@@ -340,7 +355,7 @@ describe("the gate keeps the cache it can replay", () => {
 
   it("declares the targets it cannot replay uncacheable", () => {
     const undeclared = allTargets()
-      .filter(({ name }) => neverReplayed.includes(name))
+      .filter(({ name }) => composeOrDriveTheArtifact.includes(name))
       .filter(({ target }) => target.cache !== false)
       .map(
         ({ task }) =>
