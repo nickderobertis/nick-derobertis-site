@@ -1,9 +1,9 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, onTestFinished } from "vitest";
 import { z } from "zod";
 
 /**
@@ -334,8 +334,35 @@ describe("the workspace eslint run is keyed on everything it reads", () => {
  * command reading it has to leave every other command replaying.
  */
 
-/** Nx's per-task note when it replayed a result instead of running a command. */
-const replayedNote = "[existing outputs match the cache, left as is]";
+/**
+ * Nx's per-task notes for a result it replayed instead of running the command.
+ * Which one it prints says only where the outputs had to come from — still on
+ * disk, the local cache, or a remote one — and one run prints more than one of
+ * them across a set of tasks, so all three read the same way here: the command
+ * did not run.
+ */
+const replayedNotes = [
+  "[existing outputs match the cache, left as is]",
+  "[local cache]",
+  "[remote cache]",
+];
+
+/**
+ * A cache directory the calling test owns, empty until that test fills it.
+ *
+ * Nx keeps a cached result in two places: the outputs under
+ * `NX_CACHE_DIRECTORY`, and the record naming them in the database under
+ * `NX_WORKSPACE_DATA_DIRECTORY`. Moving only the first leaves the record
+ * behind, and Nx answers from it for outputs still sitting in the tree, so both
+ * have to move for a run to start from nothing. Nx's daemon lives in that same
+ * data directory, so these runs go without it rather than start one for a
+ * directory that is about to be discarded.
+ */
+function ownCacheDirectory(): string {
+  const directory = mkdtempSync(join(tmpdir(), "cache-keying-nx-"));
+  onTestFinished(() => rmSync(directory, { force: true, recursive: true }));
+  return directory;
+}
 
 const probedTargets = ["typecheck", "test", "build", "lint"];
 
@@ -359,11 +386,25 @@ function probeProject(): string {
 }
 
 /**
- * Whether Nx ran each task or replayed it. Nx reports one line per task, so the
- * outcome is read from the run rather than inferred, and a target the run never
- * mentions is an error instead of a silently absent assertion.
+ * Under GitHub Actions, Nx folds each task's output into a collapsible group,
+ * which puts a marker and a status icon in front of the per-task line read
+ * below. `NX_SKIP_LOG_GROUPING` turns that off for these runs, and the marker
+ * is stripped here as well, so what this reads is the same line on a runner and
+ * on a contributor's machine whichever way that switch goes.
  */
-function outcomesOf(project: string, targets: string[]) {
+const groupMarker = /^::(?:end)?group::\S*\s*/;
+
+/**
+ * Whether Nx ran each task or replayed it, against the cache directory the
+ * calling test owns. Nx reports one line per task, so the outcome is read from
+ * the run rather than inferred, and a target the run never mentions is an error
+ * instead of a silently absent assertion.
+ */
+function outcomesOf(
+  project: string,
+  targets: string[],
+  cacheDirectory: string,
+) {
   // llmlint: ignore-block[work_goes_through_command_surface] The Nx dispatch is the subject here, not the means: this reads whether Nx ran or replayed one named task, which requires this exact invocation — one project, one task at a time, and the static reporter that prints a per-task outcome. Every `just` recipe that dispatches targets does so for the whole affected set and reports a pass or a failure rather than a cache outcome, and this spec runs inside one of them, so routing through the surface would both hide the signal and recurse.
   const result = spawnSync(
     "pnpm",
@@ -377,7 +418,16 @@ function outcomesOf(project: string, targets: string[]) {
       "--parallel=1",
       "--output-style=static",
     ],
-    { encoding: "utf8" },
+    {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        NX_CACHE_DIRECTORY: join(cacheDirectory, "cache"),
+        NX_DAEMON: "false",
+        NX_SKIP_LOG_GROUPING: "true",
+        NX_WORKSPACE_DATA_DIRECTORY: join(cacheDirectory, "data"),
+      },
+    },
   );
   const printed = `${result.stdout ?? ""}${result.stderr ?? ""}`.replace(
     ansiEscape,
@@ -390,9 +440,15 @@ function outcomesOf(project: string, targets: string[]) {
   // llmlint: ignore-end[work_goes_through_command_surface]
   const outcomes = new Map<string, "replayed" | "ran">();
   for (const line of printed.split("\n")) {
-    const task = /^> nx run (\S+:\S+)/.exec(line.trim())?.[1];
+    const reported = line.trim().replace(groupMarker, "");
+    const task = /^> nx run (\S+:\S+)/.exec(reported)?.[1];
     if (task !== undefined)
-      outcomes.set(task, line.includes(replayedNote) ? "replayed" : "ran");
+      outcomes.set(
+        task,
+        replayedNotes.some((note) => reported.includes(note))
+          ? "replayed"
+          : "ran",
+      );
   }
   const unreported = targets.filter(
     (target) => !outcomes.has(`${project}:${target}`),
@@ -479,14 +535,22 @@ const oneMoreComment = (original: string) =>
 describe("what a rule-file change actually costs when the gate runs", () => {
   it("replays build, test, and typecheck for a Biome change, and reruns lint", () => {
     const project = probeProject();
+    const cacheDirectory = ownCacheDirectory();
 
-    // Warm every probed target first. On a cold cache there is nothing to
-    // replay, and a miss would read below as evidence about a key it is not
-    // about.
-    outcomesOf(project, probedTargets);
+    // This run is where the cache being measured comes from. It starts empty,
+    // so every probed target has to run here — and that it did is asserted
+    // rather than assumed, because a replay at this point would mean the run
+    // read a cache from outside the test, and every outcome below would be
+    // about that cache instead of the keys.
+    const warmed = outcomesOf(project, probedTargets, cacheDirectory);
+    expect(
+      probedTargets.filter(
+        (target) => warmed.get(`${project}:${target}`) !== "ran",
+      ),
+    ).toEqual([]);
 
     const outcomes = withInertEdit("biome.json", oneMoreExclusion, () =>
-      outcomesOf(project, probedTargets),
+      outcomesOf(project, probedTargets, cacheDirectory),
     );
 
     expect(outcomes.get(`${project}:typecheck`)).toBe("replayed");
@@ -499,13 +563,21 @@ describe("what a rule-file change actually costs when the gate runs", () => {
   }, 300_000);
 
   it("reruns apps/shell's lint for an eslint configuration change", () => {
-    outcomesOf("shell", ["lint"]);
+    const cacheDirectory = ownCacheDirectory();
+
+    // Against an empty cache this first run is the one that fills it, so it
+    // runs the command rather than replaying anything.
+    expect(
+      outcomesOf("shell", ["lint"], cacheDirectory).get("shell:lint"),
+    ).toBe("ran");
     // Nothing changed between these two runs, so the second has to replay. An
     // uncacheable lint target would satisfy the assertion below for free.
-    expect(outcomesOf("shell", ["lint"]).get("shell:lint")).toBe("replayed");
+    expect(
+      outcomesOf("shell", ["lint"], cacheDirectory).get("shell:lint"),
+    ).toBe("replayed");
 
     const outcomes = withInertEdit("eslint.config.mjs", oneMoreComment, () =>
-      outcomesOf("shell", ["lint"]),
+      outcomesOf("shell", ["lint"], cacheDirectory),
     );
 
     // Named by no input, this file used to key nothing: a rule change replayed
