@@ -72,6 +72,22 @@
     },
     "lint": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "eslint runs once for the whole workspace here, so this target's cache key covers every file it reads: its own configuration, every project's TypeScript and JavaScript, and every project.json, because @nx/enforce-module-boundaries reads the tags they declare. Keyed on apps/shell alone, a cached pass could be replayed for a rule or a source file that no run ever saw."
+      },
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/biome.json",
+        "{workspaceRoot}/eslint.config.mjs",
+        "{workspaceRoot}/**/*.ts",
+        "{workspaceRoot}/**/*.tsx",
+        "{workspaceRoot}/**/*.js",
+        "{workspaceRoot}/**/*.jsx",
+        "{workspaceRoot}/**/*.mjs",
+        "{workspaceRoot}/**/*.cjs",
+        "{workspaceRoot}/**/project.json"
+      ],
       "options": {
         "command": "eslint . --max-warnings=0 && biome lint apps/shell"
       }

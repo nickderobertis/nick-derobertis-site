@@ -37,11 +37,20 @@ function selectedProjects(stdout: string): string[] {
 }
 
 describe("affected build economics proof", () => {
-  it("limits an awards emblem edit to the awards remote", () => {
+  it("limits an awards emblem edit to the awards remote and the workspace linter", () => {
     const result = runAffectedBuildProjects("apps/awards/src/award-emblem.tsx");
 
     expect(result.status).toBe(0);
-    expect(selectedProjects(result.stdout)).toEqual(["awards"]);
+    // No other remote is selected. The shell is, for a reason that has nothing
+    // to do with its own bytes: it owns the workspace's single eslint run,
+    // whose key covers every TypeScript file, and Nx marks a project affected
+    // rather than a target. Its build replays from cache, since none of its own
+    // inputs moved; what the edit really buys is the eslint pass that has to
+    // see it.
+    expect([...selectedProjects(result.stdout)].sort()).toEqual([
+      "awards",
+      "shell",
+    ]);
   });
 
   it.each([
