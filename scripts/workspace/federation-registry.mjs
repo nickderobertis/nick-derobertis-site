@@ -44,6 +44,7 @@ function reject(source, reason) {
   );
 }
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This is the boundary where an arbitrary JSON document becomes the narrow project record the rest of this module trusts, and it is entered from eslint.config.mjs and from the Nx plugin, neither of which a browser can reach. A configuration it rejects, or a project.json it cannot parse, stops the run before a single build input is derived, so no artifact is ever built from that declaration and there is nothing for a visitor to load. federation-registry.spec.ts drives both paths as real subprocesses: fabricated project configurations through this same entry point, and an unreadable project.json in a real apps directory.
 /**
  * One project narrowed to what this module's consumers actually read: its Nx
  * project name, the metadata a remote declares itself through, and the names of
@@ -101,7 +102,9 @@ export function readDeclaredProject(path) {
   }
   return declaredProject(document, path);
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This decides whether a project federates at all and holds the alias, boundary tags, and scope: tag it declares to the grammars their consumers need; it runs while eslint and the registry generator read declarations, long before rspack builds any federation container. Each rejection here refuses to emit a build input, so the container the declaration would have named is one that never exists for a browser to request. federation-registry.spec.ts drives every rejection scenario as a real subprocess: an alias that could not be a container name, a remote name that could not be a content-store subtree path, a non-object declaration, missing or malformed boundary tags, and a remote carrying no scope tag for the boundary it publishes.
 /**
  * The federation declaration one project makes, or `undefined` when it makes
  * none — which is what tells a host like the shell apart from a remote.
@@ -144,7 +147,9 @@ export function federationDeclaration({ name, metadata, tags, source }) {
     );
   return { name, alias, onlyDependOnLibsWithTags: [...admitted] };
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This assembles the declarations into the ordered remote set the registry and the module boundaries are derived from, and its two failures describe workspaces a running site cannot exhibit: one that federates nothing leaves no remote to serve, and two remotes claiming one container name would have overwritten each other before either was built. Both abort the generator instead of reaching a page. federation-registry.spec.ts drives each as a real subprocess over fabricated declarations, and drives the committed tree and a copy whose remote declaration has drifted through the contributor's own push gate.
 /**
  * Every remote the workspace declares, ordered by project name so that what is
  * derived from them does not depend on the order projects were discovered in.
@@ -169,6 +174,7 @@ export function federationRemotes(projects) {
   }
   return remotes;
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 /**
  * The canonical remote registry: each remote's project name mapped to the
