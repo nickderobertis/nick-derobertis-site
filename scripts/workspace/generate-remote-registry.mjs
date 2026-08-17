@@ -94,9 +94,41 @@ function graphProjects() {
 function committedRegistry() {
   try {
     return readFileSync(registryPath, "utf8");
-  } catch {
-    return undefined;
+  } catch (error) {
+    // An absent file is a registry nobody has generated yet, which this run is
+    // about to. Every other read failure is this CLI's to report: swallowed, it
+    // reaches the contributor under --check as a generic disagreement with the
+    // graph, which sends them to a derivation that is correct.
+    if (error?.code === "ENOENT") return undefined;
+    throw new Error(
+      `${registryPath} could not be read: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
+}
+
+/**
+ * The key order the committed registry already uses, so a regeneration that
+ * derives the same remotes rewrites no bytes.
+ *
+ * @param {string | undefined} committed
+ */
+function committedOrder(committed) {
+  if (committed === undefined) return [];
+  let parsed;
+  try {
+    parsed = JSON.parse(committed);
+  } catch (error) {
+    // The order is cosmetic, but a committed file that does not parse is a
+    // finding of its own, and reporting it as drift would name the wrong cause.
+    throw new Error(
+      `${registryPath} is not readable as JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+    throw new Error(
+      `${registryPath} is not a JSON object mapping each remote's project name to its federation alias`,
+    );
+  return Object.keys(parsed);
 }
 
 /**
@@ -104,18 +136,9 @@ function committedRegistry() {
  * that file does not name appended in project-name order.
  *
  * @param {Record<string, string>} registry
- * @param {string | undefined} committed
+ * @param {readonly string[]} order
  */
-function serializeRemoteRegistry(registry, committed) {
-  let order = [];
-  try {
-    const parsed = committed === undefined ? {} : JSON.parse(committed);
-    if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed))
-      order = Object.keys(parsed);
-  } catch {
-    // An unreadable committed file orders nothing; the derivation still does.
-    order = [];
-  }
+function serializeRemoteRegistry(registry, order) {
   const names = [
     ...order.filter((name) => name in registry),
     ...Object.keys(registry).filter((name) => !order.includes(name)),
@@ -130,7 +153,7 @@ const checking = process.argv.includes("--check");
 const committed = committedRegistry();
 const generated = serializeRemoteRegistry(
   remoteRegistry(federationRemotes(graphProjects())),
-  committed,
+  committedOrder(committed),
 );
 
 if (checking) {

@@ -8,7 +8,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -123,8 +123,12 @@ function readApps(documents: Readonly<Record<string, string>>) {
  * narrowing the CLI does before it reads a node's root is only reachable from
  * here — and it is the boundary that decides whether a malformed graph is
  * reported as one or read as a project.
+ *
+ * `commit` writes the registry the CLI compares its derivation against, which
+ * the committed tree can never be left holding: a registry that has stopped
+ * being readable is only reachable from a workspace this spec builds.
  */
-function generateFromGraph(graph: unknown) {
+function generateFromGraph(graph: unknown, commit?: (path: string) => void) {
   const root = mkdtempSync(join(tmpdir(), "remote-registry-graph-"));
   scratch.push(root);
   for (const module of [
@@ -132,6 +136,9 @@ function generateFromGraph(graph: unknown) {
     "generate-remote-registry.mjs",
   ])
     cpSync(`scripts/workspace/${module}`, join(root, module));
+  const registry = join(root, registryPath);
+  mkdirSync(dirname(registry), { recursive: true });
+  commit?.(registry);
   const bin = join(root, "bin");
   mkdirSync(bin);
   // The path is cut off the flag rather than stripped with a shell parameter
@@ -346,6 +353,71 @@ describe("the project graph the generator derives the registry from", () => {
     // read of the file Nx was asked for is what fails here.
     expect(result.stderr).toMatch(/generate-remote-registry: /);
   });
+});
+
+describe("the committed registry the generator compares against", () => {
+  /** One remote, as a node of the graph the CLI reads projects out of. */
+  const bioGraph = {
+    graph: {
+      nodes: {
+        bio: {
+          data: {
+            name: "bio",
+            root: "apps/bio",
+            tags: ["type:remote", "scope:bio"],
+            metadata: {
+              federation: { alias: "bio" },
+              boundaries: { onlyDependOnLibsWithTags: ["type:shared"] },
+            },
+          },
+        },
+      },
+    },
+  };
+
+  it("reports drift only when the file it read actually disagrees", () => {
+    const clean = generateFromGraph(bioGraph, (path) =>
+      writeFileSync(path, '{\n  "bio": "bio"\n}\n'),
+    );
+    expect(clean.status, clean.stderr).toBe(0);
+
+    const drifted = generateFromGraph(bioGraph, (path) =>
+      writeFileSync(path, '{\n  "bio": "biography"\n}\n'),
+    );
+    expect(drifted.status).not.toBe(0);
+    expect(drifted.stderr).toMatch(
+      new RegExp(`${registryPath} disagrees with the remotes`),
+    );
+  });
+
+  it.each([
+    [
+      "a registry that is not JSON",
+      (path: string) => writeFileSync(path, "{ bio: bio }"),
+      /remotes\.json is not readable as JSON: /,
+    ],
+    [
+      "a registry that is not a mapping",
+      (path: string) => writeFileSync(path, '["bio"]\n'),
+      /remotes\.json is not a JSON object mapping each remote's project name/,
+    ],
+    [
+      "a registry that cannot be read at all",
+      (path: string) => mkdirSync(path),
+      /remotes\.json could not be read: /,
+    ],
+  ])(
+    "names %s as the cause rather than reporting it as drift",
+    (_case, commit, reason) => {
+      const result = generateFromGraph(bioGraph, commit);
+
+      expect(result.status).not.toBe(0);
+      // Every one of these makes the comparison fail, so reporting drift would
+      // send a contributor to a derivation that is doing exactly its job.
+      expect(result.stderr).toMatch(reason);
+      expect(result.stderr).not.toMatch(/disagrees with the remotes/);
+    },
+  );
 });
 
 describe("the canonical registry the workspace commits", () => {
