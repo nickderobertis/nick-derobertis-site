@@ -36,23 +36,15 @@ afterEach(() => {
 });
 
 /** One project.json document, as a project reaches the registry's boundary. */
-function project(
-  name: string,
-  metadata: unknown,
-  tags: readonly string[] = [],
-) {
-  return { name, metadata, tags };
+function project(name: string, metadata: unknown) {
+  return { name, metadata };
 }
 
-function remote(name: string, alias: string, admits: readonly string[]) {
-  return project(
-    name,
-    {
-      federation: { alias },
-      boundaries: { onlyDependOnLibsWithTags: admits },
-    },
-    ["type:remote", `scope:${name}`],
-  );
+function remote(name: string, alias: string, tags: readonly string[]) {
+  return project(name, {
+    federation: { alias },
+    boundaries: { onlyDependOnLibsWithTags: tags },
+  });
 }
 
 /**
@@ -211,26 +203,6 @@ describe("the federation declaration each remote owns", () => {
       "a boundary tag that could not be an Nx tag",
       [remote("awards", "awards", ["type:shared", "Data Core"])],
       /declares no metadata.boundaries.onlyDependOnLibsWithTags/,
-    ],
-    [
-      "a remote carrying no scope tag for the boundary it publishes",
-      [
-        {
-          ...remote("awards", "awards", ["type:shared"]),
-          tags: ["type:remote", "scope:prizes"],
-        },
-      ],
-      /none of which is the scope:awards tag/,
-    ],
-    [
-      "a tag that could not be an Nx tag",
-      [
-        {
-          ...remote("awards", "awards", ["type:shared"]),
-          tags: ["Scope Awards"],
-        },
-      ],
-      /declares a tags that is not a list of Nx tags/,
     ],
     [
       "two remotes claiming one federation container",
