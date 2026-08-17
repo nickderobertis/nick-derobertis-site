@@ -133,7 +133,6 @@ affected-build-projects file:
 # above reports: whether the edit recomposes the served artifact at all.
 # llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; affected-build-projects.spec.ts drives its real `just` subprocess through success and validation failures.
 affected-prerender-projects file:
-    @# llmlint: ignore[changed_behavior_has_e2e] This developer CLI prints an Nx selection and has no browser interface; whether an edit recomposes the artifact is a graph fact with nothing for a visitor to observe, and affected-build-projects.spec.ts drives this exact recipe as a real subprocess through both selections it reports and its rejected-input path. The artifact the selection governs is driven in a real browser by site.spec.ts and every feature journey.
     @file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "affected-prerender-projects: file must be a workspace-relative file that exists, such as apps/awards/src/page.tsx; correct the path and rerun just affected-prerender-projects <file>" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=prerender --json || { echo "affected-prerender-projects: Nx could not resolve the prerender selection; fix the project-graph error reported above and rerun just affected-prerender-projects <file>" >&2; exit 1; }
 
 e2e-project project:
