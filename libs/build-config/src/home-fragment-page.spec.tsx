@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import HomeFragmentPage from "./home-fragment-page";
-import remoteRegistry from "./remotes.json";
+import { remoteRegistry } from "./remote-registry";
 
 // The published Home fragment is a frame of empty slots: the shell's compose
 // step fills each `<template>` with the pane remote of the same name. A slot

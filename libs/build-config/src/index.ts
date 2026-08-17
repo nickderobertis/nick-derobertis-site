@@ -5,4 +5,5 @@ export {
   serializeFragmentContract,
 } from "./fragment-contract";
 export { PublishedFragmentPlugin } from "./published-fragment";
-export { type RemoteProject, remoteConfig, remoteMap } from "./rspack-remote";
+export type { RemoteProject } from "./remote-registry";
+export { remoteConfig, remoteMap } from "./rspack-remote";
