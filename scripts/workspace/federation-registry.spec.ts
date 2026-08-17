@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import {
   cpSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -74,6 +75,57 @@ function derive(configurations: readonly unknown[]) {
   return spawnSync(process.execPath, [probe, JSON.stringify(configurations)], {
     encoding: "utf8",
   });
+}
+
+/**
+ * Runs the real generator CLI over a project graph this spec fabricates, by
+ * shadowing the `pnpm exec nx graph` it shells out to with a stub that writes
+ * the caller's graph to the file the CLI asked Nx for.
+ *
+ * Nx cannot be made to print an entry that is not a project node, so the
+ * narrowing the CLI does before it reads a node's root is only reachable from
+ * here — and it is the boundary that decides whether a malformed graph is
+ * reported as one or read as a project.
+ */
+function generateFromGraph(graph: unknown) {
+  const root = mkdtempSync(join(tmpdir(), "remote-registry-graph-"));
+  scratch.push(root);
+  for (const module of [
+    "federation-registry.mjs",
+    "generate-remote-registry.mjs",
+  ])
+    cpSync(`scripts/workspace/${module}`, join(root, module));
+  const bin = join(root, "bin");
+  mkdirSync(bin);
+  // The path is cut off the flag rather than stripped with a shell parameter
+  // expansion, which inside a JavaScript string reads as a template placeholder
+  // that was never interpolated.
+  writeFileSync(
+    join(bin, "pnpm"),
+    [
+      "#!/bin/sh",
+      'for argument in "$@"; do',
+      '  case "$argument" in',
+      '    --file=*) printf %s "$GRAPH" > "$(printf %s "$argument" | cut -d= -f2-)" ;;',
+      "  esac",
+      "done",
+      "",
+    ].join("\n"),
+    { mode: 0o755 },
+  );
+  return spawnSync(
+    process.execPath,
+    ["generate-remote-registry.mjs", "--check"],
+    {
+      cwd: root,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        GRAPH: JSON.stringify(graph),
+        PATH: `${bin}:${process.env.PATH ?? ""}`,
+      },
+    },
+  );
 }
 
 // Both the paths git prints and the declarations they hold are read back as
@@ -170,6 +222,45 @@ describe("the federation declaration each remote owns", () => {
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toMatch(reason);
+  });
+});
+
+describe("the project graph the generator derives the registry from", () => {
+  it.each([
+    [
+      "a graph carrying no project nodes",
+      { graph: { nodes: [] } },
+      /printed no project nodes/,
+    ],
+    [
+      "an entry that is not a project node",
+      { graph: { nodes: { bio: "apps/bio" } } },
+      /reported the project "bio" as "apps\/bio", which is not a project node/,
+    ],
+    [
+      "a project node carrying no configuration",
+      { graph: { nodes: { bio: { data: null } } } },
+      /reported the project "bio" with no project configuration/,
+    ],
+    [
+      "a project node rooted outside the workspace",
+      { graph: { nodes: { bio: { data: { root: "../bio" } } } } },
+      /reported the project "bio" at "\.\.\/bio", which is not a workspace-relative directory/,
+    ],
+  ])("refuses %s", (_case, graph, reason) => {
+    const result = generateFromGraph(graph);
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(reason);
+  });
+
+  it("reports the reason Nx itself refused to resolve the graph", () => {
+    const result = generateFromGraph(undefined);
+
+    expect(result.status).not.toBe(0);
+    // The stub writes nothing when there is no graph to write, so the CLI's own
+    // read of the file Nx was asked for is what fails here.
+    expect(result.stderr).toMatch(/generate-remote-registry: /);
   });
 });
 

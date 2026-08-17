@@ -63,17 +63,27 @@ function graphProjects() {
       throw new Error(
         "nx graph printed no project nodes, so no remote registry could be derived from it",
       );
-    // A node's root names the file every diagnostic below points a contributor
-    // at, so it is narrowed to a workspace-relative directory here rather than
-    // trusted because Nx printed it; the configuration itself is narrowed by
-    // the one boundary every reader of a project goes through.
+    // A node carries the configuration every projection below reads and a root
+    // that names the file every diagnostic points a contributor at, so each is
+    // narrowed here rather than trusted because Nx printed it; the
+    // configuration's own fields are narrowed by the one boundary every reader
+    // of a project goes through.
     return Object.entries(nodes).map(([name, node]) => {
-      const root = node?.data?.root;
+      if (typeof node !== "object" || node === null || Array.isArray(node))
+        throw new Error(
+          `nx graph reported the project ${JSON.stringify(name)} as ${JSON.stringify(node)}, which is not a project node`,
+        );
+      const data = node.data;
+      if (typeof data !== "object" || data === null || Array.isArray(data))
+        throw new Error(
+          `nx graph reported the project ${JSON.stringify(name)} with no project configuration to derive a remote from`,
+        );
+      const root = data.root;
       if (typeof root !== "string" || !workspaceDirectory.test(root))
         throw new Error(
           `nx graph reported the project ${JSON.stringify(name)} at ${JSON.stringify(root)}, which is not a workspace-relative directory`,
         );
-      return declaredProject(node.data, `${root}/project.json`);
+      return declaredProject(data, `${root}/project.json`);
     });
   } finally {
     rmSync(directory, { force: true, recursive: true });
