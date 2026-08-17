@@ -70,9 +70,6 @@ export function artifactHoldDirectory(root: string): string {
   );
 }
 
-/**
- * Whether the process that wrote a hold is still running.
- */
 function running(pid: number): boolean {
   try {
     process.kill(pid, 0);
