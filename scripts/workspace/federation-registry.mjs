@@ -11,71 +11,85 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
  * constraints in `eslint.config.mjs` — is derived from here instead, so adding
  * a remote is one edit inside the remote rather than four that have to agree.
  *
- * The grammars below are the ones the derived consumers are held to: a project
- * name becomes a content-store subtree path and an Nx project, an alias becomes
- * a federation container name, and a tag reaches `@nx/enforce-module-boundaries`.
- * Each is checked here, once, rather than by every consumer downstream.
+ * Two callers read a project configuration into this module — an Nx plugin
+ * reading `project.json` files and a CLI reading the resolved project graph —
+ * and both arrive through `declaredProject`, which is the one boundary where an
+ * arbitrary JSON document becomes the narrow record everything below trusts.
+ *
+ * The grammars are the ones the derived consumers are held to: a remote's name
+ * becomes a content-store subtree path and a directory in the served artifact,
+ * an alias becomes a federation container name, and a tag reaches
+ * `@nx/enforce-module-boundaries`. Each is checked here, once, rather than by
+ * every consumer downstream. A project that federates nothing is only ever an
+ * Nx project name, so it is held to the wider grammar.
  */
 
+const projectName = /^[a-z][a-z0-9-]*$/;
 const remoteName = /^[a-z][a-z-]+$/;
 const federationAlias = /^[a-z][A-Za-z]*$/;
 const libraryTag = /^[a-z][a-z-]*:[a-z][a-z0-9-]*$/;
-
-/** One remote as its own project declares it. */
-/** @typedef {{ name: string, alias: string, onlyDependOnLibsWithTags: string[] }} FederationRemote */
-
-/** A project as either the Nx project graph or a `project.json` file gives it. */
-/** @typedef {{ name: string, configuration: Record<string, unknown>, source: string }} DeclaredProject */
+const targetName = /^[a-z][a-z0-9-]*$/;
 
 function reject(source, reason) {
   throw new Error(
-    `${source} ${reason}. Fix that project's federation declaration and rerun just check.`,
+    `${source} ${reason}. Fix that project's declaration and rerun just check.`,
   );
+}
+
+/**
+ * One project narrowed to what this module's consumers actually read: its Nx
+ * project name, the metadata a remote declares itself through, and the names of
+ * the targets it declares. Nothing else from the document survives, so no
+ * consumer can reach a field this boundary did not check.
+ */
+export function declaredProject(configuration, source) {
+  if (typeof configuration !== "object" || configuration === null)
+    reject(source, "is not an Nx project configuration object");
+  const { name, metadata, targets } = configuration;
+  if (typeof name !== "string" || !projectName.test(name))
+    reject(source, "declares no Nx project name");
+  if (
+    metadata !== undefined &&
+    (typeof metadata !== "object" || metadata === null)
+  )
+    reject(source, "declares a metadata that is not an object");
+  if (
+    targets !== undefined &&
+    (typeof targets !== "object" || targets === null)
+  )
+    reject(source, "declares a targets that is not an object");
+  const declaredTargets = Object.keys(targets ?? {});
+  if (declaredTargets.some((target) => !targetName.test(target)))
+    reject(source, "declares a target that could not be an Nx target name");
+  return { name, metadata, targets: declaredTargets, source };
+}
+
+/** The same narrowing, for a project read straight off disk. */
+export function readDeclaredProject(path) {
+  return declaredProject(JSON.parse(readFileSync(path, "utf8")), path);
 }
 
 /**
  * The federation declaration one project makes, or `undefined` when it makes
  * none — which is what tells a host like the shell apart from a remote.
- *
- * @param {DeclaredProject} project
- * @returns {FederationRemote | undefined}
  */
-export function federationDeclaration({ name, configuration, source }) {
-  const metadata = configuration?.metadata;
-  if (
-    metadata === undefined ||
-    typeof metadata !== "object" ||
-    metadata === null ||
-    Array.isArray(metadata)
-  )
-    return undefined;
-  const federation = /** @type {Record<string, unknown>} */ (metadata)
-    .federation;
+export function federationDeclaration({ name, metadata, source }) {
+  const federation = metadata?.federation;
   if (federation === undefined) return undefined;
-  if (
-    typeof federation !== "object" ||
-    federation === null ||
-    Array.isArray(federation)
-  )
+  if (typeof federation !== "object" || federation === null)
     reject(source, "declares a metadata.federation that is not an object");
   if (!remoteName.test(name))
     reject(
       source,
       `declares a federated remote named "${name}", which could not be an Nx project or a content-store subtree path`,
     );
-  const alias = /** @type {Record<string, unknown>} */ (federation).alias;
+  const { alias } = federation;
   if (typeof alias !== "string" || !federationAlias.test(alias))
     reject(
       source,
       `declares the federation alias ${JSON.stringify(alias)}, which could not be a Module Federation container name`,
     );
-  const boundaries = /** @type {Record<string, unknown>} */ (metadata)
-    .boundaries;
-  const tags =
-    typeof boundaries === "object" && boundaries !== null
-      ? /** @type {Record<string, unknown>} */ (boundaries)
-          .onlyDependOnLibsWithTags
-      : undefined;
+  const tags = metadata?.boundaries?.onlyDependOnLibsWithTags;
   if (
     !Array.isArray(tags) ||
     tags.length === 0 ||
@@ -85,18 +99,12 @@ export function federationDeclaration({ name, configuration, source }) {
       source,
       "declares no metadata.boundaries.onlyDependOnLibsWithTags list of Nx tags, which is what its scope: module boundary is built from",
     );
-  return {
-    name,
-    alias: /** @type {string} */ (alias),
-    onlyDependOnLibsWithTags: [.../** @type {string[]} */ (tags)],
-  };
+  return { name, alias, onlyDependOnLibsWithTags: [...tags] };
 }
 
 /**
- * Every remote the workspace declares, by project name.
- *
- * @param {readonly DeclaredProject[]} projects
- * @returns {FederationRemote[]}
+ * Every remote the workspace declares, ordered by project name so that what is
+ * derived from them does not depend on the order projects were discovered in.
  */
 export function federationRemotes(projects) {
   const remotes = projects
@@ -107,14 +115,14 @@ export function federationRemotes(projects) {
     throw new Error(
       "No project declares metadata.federation.alias, so the workspace federates nothing. Declare a remote's alias in its own project.json and rerun just check.",
     );
-  const aliases = new Map();
+  const claimedBy = new Map();
   for (const remote of remotes) {
-    const claimed = aliases.get(remote.alias);
+    const claimed = claimedBy.get(remote.alias);
     if (claimed !== undefined)
       throw new Error(
         `${claimed} and ${remote.name} both declare the federation alias "${remote.alias}", so one container would overwrite the other. Give each remote its own alias and rerun just check.`,
       );
-    aliases.set(remote.alias, remote.name);
+    claimedBy.set(remote.alias, remote.name);
   }
   return remotes;
 }
@@ -123,9 +131,6 @@ export function federationRemotes(projects) {
  * The canonical remote registry: each remote's project name mapped to the
  * federation alias it publishes under. This is the fact
  * `libs/build-config/src/remotes.json` serializes.
- *
- * @param {readonly FederationRemote[]} remotes
- * @returns {Record<string, string>}
  */
 export function remoteRegistry(remotes) {
   return Object.fromEntries(remotes.map(({ name, alias }) => [name, alias]));
@@ -134,8 +139,6 @@ export function remoteRegistry(remotes) {
 /**
  * The `@nx/enforce-module-boundaries` constraint each remote declares for its
  * own `scope:` tag.
- *
- * @param {readonly FederationRemote[]} remotes
  */
 export function moduleBoundaryConstraints(remotes) {
   return remotes.map(({ name, onlyDependOnLibsWithTags }) => ({
@@ -145,27 +148,9 @@ export function moduleBoundaryConstraints(remotes) {
 }
 
 /**
- * One project as its `project.json` declares it. The file's own `name` is what
- * Nx registers the project under, so it is what every derived consumer keys on.
- *
- * @param {string} path
- * @returns {DeclaredProject}
- */
-export function declaredProject(path) {
-  const configuration = JSON.parse(readFileSync(path, "utf8"));
-  const name = configuration?.name;
-  if (typeof name !== "string" || !remoteName.test(name))
-    reject(path, "declares no Nx project name");
-  return { name, configuration, source: path };
-}
-
-/**
  * Every app project, read straight from disk. `eslint.config.mjs` resolves its
- * boundary constraints through this: the eslint run is what the project graph
- * is built for, so it cannot wait on one being built.
- *
- * @param {string} [root]
- * @returns {DeclaredProject[]}
+ * boundary constraints through this: the eslint run is one of the things the
+ * project graph is built for, so it cannot wait on one being built.
  */
 export function declaredAppProjects(root = "apps") {
   return readdirSync(root, { withFileTypes: true })
@@ -173,5 +158,5 @@ export function declaredAppProjects(root = "apps") {
     .map((entry) => `${root}/${entry.name}/project.json`)
     .filter((path) => existsSync(path))
     .sort()
-    .map(declaredProject);
+    .map(readDeclaredProject);
 }

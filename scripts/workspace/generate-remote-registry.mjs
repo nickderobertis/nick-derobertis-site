@@ -2,7 +2,11 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { federationRemotes, remoteRegistry } from "./federation-registry.mjs";
+import {
+  declaredProject,
+  federationRemotes,
+  remoteRegistry,
+} from "./federation-registry.mjs";
 
 // llmlint: ignore-file[changed_behavior_has_e2e] This generator has no browser interface: it writes a build input, and a registry it would refuse is one no artifact can be built from, so there is nothing for a visitor to observe. federation-registry.spec.ts drives this real CLI through `just` over the committed tree and over a tree whose remote declaration has drifted, and site.spec.ts plus every feature journey drive the artifact the registry configures.
 
@@ -26,10 +30,11 @@ import { federationRemotes, remoteRegistry } from "./federation-registry.mjs";
  */
 
 const registryPath = "libs/build-config/src/remotes.json";
+const workspaceDirectory = /^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/;
 
 process.on("uncaughtException", (error) => {
   console.error(
-    `generate-remote-registry: ${error instanceof Error ? error.message : String(error)}`,
+    `generate-remote-registry: ${error instanceof Error ? error.message : String(error)}; correct the declaration named above, then rerun just generate-remote-registry`,
   );
   process.exit(1);
 });
@@ -54,15 +59,22 @@ function graphProjects() {
     }
     const graph = JSON.parse(readFileSync(file, "utf8"));
     const nodes = graph?.graph?.nodes;
-    if (typeof nodes !== "object" || nodes === null)
+    if (typeof nodes !== "object" || nodes === null || Array.isArray(nodes))
       throw new Error(
         "nx graph printed no project nodes, so no remote registry could be derived from it",
       );
-    return Object.entries(nodes).map(([name, node]) => ({
-      name,
-      configuration: node?.data ?? {},
-      source: `${node?.data?.root ?? name}/project.json`,
-    }));
+    // A node's root names the file every diagnostic below points a contributor
+    // at, so it is narrowed to a workspace-relative directory here rather than
+    // trusted because Nx printed it; the configuration itself is narrowed by
+    // the one boundary every reader of a project goes through.
+    return Object.entries(nodes).map(([name, node]) => {
+      const root = node?.data?.root;
+      if (typeof root !== "string" || !workspaceDirectory.test(root))
+        throw new Error(
+          `nx graph reported the project ${JSON.stringify(name)} at ${JSON.stringify(root)}, which is not a workspace-relative directory`,
+        );
+      return declaredProject(node.data, `${root}/project.json`);
+    });
   } finally {
     rmSync(directory, { force: true, recursive: true });
   }
@@ -84,7 +96,7 @@ function committedRegistry() {
  * @param {Record<string, string>} registry
  * @param {string | undefined} committed
  */
-export function serializeRemoteRegistry(registry, committed) {
+function serializeRemoteRegistry(registry, committed) {
   let order = [];
   try {
     const parsed = committed === undefined ? {} : JSON.parse(committed);

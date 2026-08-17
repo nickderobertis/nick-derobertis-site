@@ -1,5 +1,8 @@
 import { dirname } from "node:path";
-import { declaredProject, federationRemotes } from "./federation-registry.mjs";
+import {
+  federationRemotes,
+  readDeclaredProject,
+} from "./federation-registry.mjs";
 
 /**
  * Derives the federation task dependencies every app owes the composed site.
@@ -24,12 +27,9 @@ export const name = "nick-derobertis-site/federation";
 
 const projectConfigurations = "apps/*/project.json";
 
-/**
- * @param {readonly string[]} configFiles
- * @returns {import("nx/dist/src/project-graph/plugins/public-api").CreateNodesResultArray}
- */
+/** One entry per matched `project.json`, as `createNodesV2` returns them. */
 function federationDependencies(configFiles) {
-  const projects = configFiles.map(declaredProject);
+  const projects = configFiles.map(readDeclaredProject);
   const remoteBuilds = {
     target: "build",
     projects: federationRemotes(projects).map((remote) => remote.name),
@@ -37,15 +37,18 @@ function federationDependencies(configFiles) {
   // The compose step is named by the projects that declare it rather than by
   // the shell, so the host owning it stays a fact of that project's own file.
   const composeHosts = projects
-    .filter((project) => project.configuration.targets?.prerender)
+    .filter((project) => project.targets.includes("prerender"))
     .map((project) => ({ target: "prerender", projects: [project.name] }));
   const composed = ["build", remoteBuilds];
   const captured = [...composed, ...composeHosts];
   return projects.map((project) => {
-    const declared = project.configuration.targets ?? {};
     const targets = {
-      ...(declared.screenshot ? { screenshot: { dependsOn: captured } } : {}),
-      ...(declared.prerender ? { prerender: { dependsOn: composed } } : {}),
+      ...(project.targets.includes("screenshot")
+        ? { screenshot: { dependsOn: captured } }
+        : {}),
+      ...(project.targets.includes("prerender")
+        ? { prerender: { dependsOn: composed } }
+        : {}),
     };
     return [
       project.source,

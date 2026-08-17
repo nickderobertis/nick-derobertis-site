@@ -34,13 +34,9 @@ afterEach(() => {
     rmSync(root, { force: true, recursive: true });
 });
 
-/** A project as the Nx project graph hands it to the registry. */
+/** One project.json document, as a project reaches the registry's boundary. */
 function project(name: string, metadata: unknown) {
-  return {
-    name,
-    configuration: { metadata },
-    source: `apps/${name}/project.json`,
-  };
+  return { name, metadata };
 }
 
 function remote(name: string, alias: string, tags: readonly string[]) {
@@ -51,10 +47,11 @@ function remote(name: string, alias: string, tags: readonly string[]) {
 }
 
 /**
- * Runs the real registry module in its own Node process against the projects
- * the caller fabricated, the way the plugin and the generator both reach it.
+ * Runs the real registry module in its own Node process against the project
+ * configurations the caller fabricated, entering it through the same
+ * `declaredProject` boundary the plugin and the generator both enter through.
  */
-function derive(projects: readonly unknown[]) {
+function derive(configurations: readonly unknown[]) {
   const root = mkdtempSync(join(tmpdir(), "federation-registry-"));
   scratch.push(root);
   cpSync(
@@ -65,16 +62,36 @@ function derive(projects: readonly unknown[]) {
   writeFileSync(
     probe,
     [
-      'import { federationRemotes, moduleBoundaryConstraints, remoteRegistry } from "./federation-registry.mjs";',
-      "const remotes = federationRemotes(JSON.parse(process.argv[2]));",
+      'import { declaredProject, federationRemotes, moduleBoundaryConstraints, remoteRegistry } from "./federation-registry.mjs";',
+      "const projects = JSON.parse(process.argv[2]).map((configuration) =>",
+      '  declaredProject(configuration, "apps/" + configuration.name + "/project.json"),',
+      ");",
+      "const remotes = federationRemotes(projects);",
       "process.stdout.write(JSON.stringify({ registry: remoteRegistry(remotes), constraints: moduleBoundaryConstraints(remotes) }));",
       "",
     ].join("\n"),
   );
-  return spawnSync(process.execPath, [probe, JSON.stringify(projects)], {
+  return spawnSync(process.execPath, [probe, JSON.stringify(configurations)], {
     encoding: "utf8",
   });
 }
+
+// Both the paths git prints and the declarations they hold are read back as
+// evidence for what the generated registry must contain, so each is narrowed
+// where it enters this spec rather than trusted because a committed file
+// produced it: a declaration this spec cannot read is the finding.
+const workspacePath = z.string().regex(/^[\w.-]+(?:\/[\w.-]+)*$/);
+
+const declaredProjectSchema = z.object({
+  name: z.string().regex(/^[a-z][a-z0-9-]*$/),
+  metadata: z
+    .object({
+      federation: z
+        .object({ alias: z.string().regex(/^[a-z][A-Za-z]*$/) })
+        .optional(),
+    })
+    .optional(),
+});
 
 const derived = z.object({
   registry: z.record(z.string(), z.string()),
@@ -114,6 +131,11 @@ describe("the federation declaration each remote owns", () => {
       "an alias that could not be a Module Federation container name",
       [remote("awards", "awards-container", ["type:shared"])],
       /declares the federation alias "awards-container"/,
+    ],
+    [
+      "a remote name that could not be a content-store subtree path",
+      [remote("home2", "home", ["type:shared"])],
+      /declares a federated remote named "home2"/,
     ],
     [
       "a federation declaration that is not an object",
@@ -163,10 +185,11 @@ describe("the canonical registry the workspace commits", () => {
     expect(readFileSync(registryPath, "utf8")).toBe(committed);
     // The registry is the fact each remote declares, so it has to be exactly
     // the aliases the remotes declare — not merely a file the CLI rewrote.
-    expect(JSON.parse(committed)).toEqual(
+    expect(
+      z.record(z.string(), z.string()).parse(JSON.parse(committed)),
+    ).toEqual(
       Object.fromEntries(
-        z
-          .string()
+        workspacePath
           .array()
           .parse(
             spawnSync("git", ["ls-files", "apps/*/project.json"], {
@@ -175,12 +198,15 @@ describe("the canonical registry the workspace commits", () => {
               .stdout.split("\n")
               .filter(Boolean),
           )
-          .map((path) => JSON.parse(readFileSync(path, "utf8")))
+          .map((path) =>
+            declaredProjectSchema.parse(JSON.parse(readFileSync(path, "utf8"))),
+          )
           .filter((declared) => declared.metadata?.federation)
-          .map((declared) => [
-            declared.name,
-            declared.metadata.federation.alias,
-          ]),
+          .flatMap((declared) =>
+            declared.metadata?.federation
+              ? [[declared.name, declared.metadata.federation.alias]]
+              : [],
+          ),
       ),
     );
   }, 120_000);

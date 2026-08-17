@@ -10,7 +10,7 @@
 
 Use pnpm; never add backend or runtime API infrastructure. The shell owns routing and layout. It consumes five route remotes; Home is itself a host for seven feature remotes. Remotes expose only route pages and compose only declared child remotes. Libraries flow `shared -> layout -> shell`, enforced by Nx tags. See `docs/architecture.md`.
 
-A remote is defined by its own `project.json`: `metadata.federation.alias` is the container it federates under and `metadata.boundaries.onlyDependOnLibsWithTags` is the scope its `@nx/enforce-module-boundaries` constraint admits; `apps/shell` declares neither, because it is the host. Never restate that list in a root file. `scripts/workspace/federation-plugin.mjs` derives every `screenshot.dependsOn` and the shell's `prerender.dependsOn` from it, `eslint.config.mjs` maps it into the `scope:<app>` constraints, and `just generate-remote-registry` writes `libs/build-config/src/remotes.json` from the project graph — that registry stays a real file because five run-time consumers read it as one, and `just lint-workflows` fails when the committed file disagrees with the graph.
+A remote declares its federation alias and its module boundary in its own `project.json` metadata, and no root file may restate which projects are remotes; derive that list instead. `libs/build-config/src/remotes.json` is generated — rerun `just generate-remote-registry` after changing a remote.
 
 Visual regression uses screencomp's canonical reusable workflow
 (`nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5`)
