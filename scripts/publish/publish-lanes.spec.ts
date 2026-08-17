@@ -93,7 +93,6 @@ function headCommit(repository: string): string {
   return head;
 }
 
-/** Whether this checkout actually has the commit a revision names. */
 function resolvesToCommit(revision: string, repository: string): boolean {
   return (
     spawnSync(
