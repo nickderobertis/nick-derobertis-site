@@ -189,12 +189,25 @@ optimization rather than the only safety net.
 The measured integration review is recorded in
 [integration-proof.md](integration-proof.md). Its `nx affected --files` proof
 showed that a design-system change selected all 12 dependent remotes, an Awards
-page change selects only `awards:build` and no prerender target, and domain/core data changes preserve
-the isolation documented there. In the Skills case, 25 browser
-tests passed and only one e2e target ran; the remaining 14 tasks were required
+page change selects no unrelated remote's build, and domain/core data changes preserve
+the isolation documented there. In the Skills case, 27 browser
+tests passed and no other remote's journey ran; the remaining 14 tasks were required
 static build/prerender dependencies. The shell integration target separately
 protects navigation, direct routes, static markup, fallback recovery, and the
 cross-remote state matrix.
+
+Any TypeScript change selects the shell as well, because the shell owns the
+workspace's single `eslint .` run: that target is keyed on every file the
+command reads, and Nx marks a project affected rather than a target. Keyed on
+`apps/shell` alone it would replay a cached pass for rules and files no run had
+seen, so the selection is the point rather than a cost — the shell's own cached
+work replays, and `just check` runs `shell:e2e` outright in any case.
+
+What a cached target is keyed on is otherwise kept to what its command reads:
+`biome.json` keys `lint` alone rather than every project's build, test, and
+typecheck, and the gate never passes `--skip-nx-cache`, so the builds beneath
+its e2e and screenshot targets replay. `scripts/workspace/cache-keying.spec.ts`
+holds both to the graph Nx resolves.
 
 ## Workspace tooling projects
 
@@ -208,8 +221,11 @@ publish lanes no longer waits on a thirteen-app federation build to run.
 `tooling-artifact` is the only one whose `test` target depends on
 `shell:prerender`, because its specs read the assembled artifact. The
 real-browser performance audit needs that artifact too, so it runs as
-`tooling-perf`'s `e2e` target alongside the other Playwright journeys rather
-than holding up that project's own tests.
+`tooling-perf`'s `e2e` target — declaring the same prerender dependency the app
+journeys declare, since `dist/apps/shell` is also `shell:build`'s output
+directory and a cached build restored into it leaves nothing composed behind —
+alongside the other Playwright journeys rather than holding up that project's
+own tests.
 <!-- llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate] -->
 
 No file in `scripts/` imports another one. What two CLIs share lives in a

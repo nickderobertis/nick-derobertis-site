@@ -8,10 +8,7 @@
       "!{projectRoot}/**/*.spec.ts",
       "!{projectRoot}/**/*.spec.tsx"
     ],
-    "sharedGlobals": [
-      "{workspaceRoot}/tsconfig.base.json",
-      "{workspaceRoot}/biome.json"
-    ]
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"]
   },
   "targetDefaults": {
     "build": {
@@ -20,8 +17,13 @@
       "outputs": ["{options.outputPath}"]
     },
     "test": { "cache": true },
-    "lint": { "cache": true },
+    "lint": {
+      "cache": true,
+      "inputs": ["default", "^default", "{workspaceRoot}/biome.json"]
+    },
     "typecheck": { "cache": true },
+    "e2e": { "cache": false },
+    "prerender": { "cache": false },
     "screenshot": {
       "cache": false,
       "dependsOn": [

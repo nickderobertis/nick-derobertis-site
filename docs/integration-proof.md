@@ -1,6 +1,9 @@
 # Microfrontend integration proof
 
-The commands below were run from the repository root on 2026-07-21. Nx's
+The commands below were run from the repository root on 2026-07-21. The single
+remote change, the Awards selection, and the awards shaping change were re-run
+on 2026-08-16, when `apps/shell`'s lint target took on the key covering every
+file its workspace-wide eslint run reads. Nx's
 `--files` mode supplies the named changed file directly, avoiding an artificial
 commit while exercising the same affected-project graph used by `--base` and
 `--head`.
@@ -41,51 +44,67 @@ an `e2e` target in this selection.
 
 ```console
 $ just e2e-affected-files apps/skills/src/page.tsx
-["skills"]
-Running 25 tests using 1 worker
-  ✓  skills renders through its host-composed boundary
-  ✓  skills renders through its standalone boundary
-  ✓  host-composed presents its empty, loading, and error states
-  ✓  standalone remote presents its empty, loading, and error states
-  25 passed (23.6s)
+["skills","shell"]
+Running 27 tests using 1 worker
+  ✓  renders through its host-composed boundary
+  ✓  renders through its standalone boundary
+  ✓  host-composed renders the recursive skills tree
+  ✓  host-composed reveals stats on hover and keyboard focus
+  27 passed (41.4s)
 
- NX   Successfully ran target e2e for project skills and 14 tasks it depends on
+Running 46 tests using 1 worker
+  46 passed (1.7m)
 
-  Run duration:      1m 10s
-  Cache:             1/15 hit (7%)
-  Critical path:     36.6s (3 tasks)
-  Recoverable time:  33.3s (48% of the run)
+ NX   Successfully ran target e2e for 2 projects and 14 tasks they depend on
+
+  Run duration:      2m 26s
+  Cache:             0/16 hit (0%)
+  Critical path:     1m 54s (3 tasks)
+  Recoverable time:  32.0s (22% of the run)
 ```
 
-The dependent tasks are the fixed static-site build and prerender prerequisites;
-the only executed e2e target is `skills:e2e`.
+The dependent tasks are the fixed static-site build and prerender prerequisites.
+No other remote's journey runs. The shell's does, because the shell owns the
+workspace's single `eslint .` run and its `lint` target is therefore keyed on
+every TypeScript file in the tree; Nx marks a project affected rather than a
+target, so selecting that lint selects the shell. `just check` runs `shell:e2e`
+outright anyway, so nothing is spent there that the gate was not already
+spending.
 
 After composition moved to published artifacts, an Awards-only source change
-no longer selects the shell prerender or any unrelated application build:
+selects no unrelated application build. It does select the shell, for a reason
+that has nothing to do with the shell's own bytes: the shell owns the
+workspace's single `eslint .` run, whose cache key covers every TypeScript file
+in the tree, and Nx marks a project affected rather than a target. That
+selection is what makes the boundary rules see the edit; the shell's own build
+replays from cache, because none of its inputs moved.
 
 ```console
-$ pnpm exec nx show projects --affected --files=apps/awards/src/page.tsx --with-target=build --json
-["awards"]
+$ just affected-build-projects apps/awards/src/page.tsx
+["awards","shell"]
 
-$ pnpm exec nx show projects --affected --files=apps/awards/src/page.tsx --with-target=prerender --json
-[]
+$ just affected-prerender-projects apps/awards/src/page.tsx
+["shell"]
 ```
 
 ## Split data-access dependency economics
 
 ```console
 $ just affected-build-projects libs/data-access-awards/src/awards.ts
-["data-access-awards","awards"]
+["data-access-awards","awards","shell"]
 
 $ just affected-build-projects libs/data-access-core/src/client.ts
-["data-access-core","data-access-research","research","data-access-software","software","data-access-timeline","timeline","data-access-courses","courses","data-access-awards","awards","data-access-skills","skills","data-access-home","home","home-carousel","home-contact","home-cards","home-story"]
+["data-access-core","data-access-research","research","data-access-software","software","data-access-timeline","timeline","data-access-courses","courses","data-access-awards","awards","data-access-skills","skills","data-access-home","home-carousel","home-contact","home-cards","home-story","home","build-config","artifact-contracts","visual-harness","bio","shell"]
 ```
 
-An awards shaping change selects only the awards library and remote. A core
+An awards shaping change selects only the awards library and remote, plus the
+shell that carries the workspace-wide eslint run. A core
 client change fans out to every CV-backed feature and all Home composition
-remotes. Bio is correctly absent because it has no CV or site-config dependency.
-The shell-wide route, keyboard, fallback, and state matrix remains the explicit
-`shell:e2e` target run by `just check`.
+remotes, and on through `@site/build-config`, whose federation entry reads that
+client, to the build libraries and Bio — the one remote with no CV or
+site-config data of its own, which is reached by its rspack configuration
+rather than by its content. The shell-wide route, keyboard, fallback, and state
+matrix remains the explicit `shell:e2e` target run by `just check`.
 
 ## Static Pages and visual evidence
 

@@ -26,6 +26,10 @@
     "e2e": {
       "executor": "nx:run-commands",
       "parallelism": false,
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] This declares an Nx task dependency and has no browser interface of its own; the audit it orders is itself the real-browser suite, and performance-audit.browser.spec.ts drives it against the served artifact this dependency guarantees."
+      },
+      "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {
         "command": "scripts/ci/run-tooling-target.sh perf e2e vitest run --reporter=dot --config scripts/perf/vite.browser.config.ts"
       }

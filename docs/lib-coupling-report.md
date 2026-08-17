@@ -27,8 +27,12 @@ selected `design-system` plus thirteen application builds: `home-carousel`,
 `courses`, `awards`, `skills`, `shell`, `home`, and `bio`.
 
 After the move, `just affected-build-projects apps/awards/src/award-emblem.tsx`
-returns only `["awards"]`. This is also asserted through the real `just`/Nx
-subprocess in `affected-build-projects.spec.ts` so graph drift fails the test.
+returns `["awards","shell"]`: no other remote, and the shell only because it
+owns the workspace's single `eslint .` run, whose cache key covers every
+TypeScript file and which Nx selects by marking its project affected rather
+than the target alone. The shell's own build replays from cache, since none of
+its inputs moved. This is also asserted through the real `just`/Nx subprocess
+in `affected-build-projects.spec.ts` so graph drift fails the test.
 
 The same subprocess proof covers presentation ownership. Editing
 `apps/software/src/software.css` selects only `["software"]`; editing the
