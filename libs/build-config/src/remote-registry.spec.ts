@@ -1,5 +1,40 @@
-import { describe, expect, test } from "vitest";
+import { spawnSync } from "node:child_process";
+import { cp, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, expect, test } from "vitest";
 import { remoteRegistry, validatedRemoteRegistry } from "./remote-registry";
+
+const roots: string[] = [];
+
+afterEach(async () => {
+  await Promise.all(
+    roots.splice(0).map((root) => rm(root, { recursive: true, force: true })),
+  );
+});
+
+/**
+ * Copies this module beside a registry of the caller's choosing and imports it
+ * the way every consumer does — a real Node process type-stripping the real
+ * file — so the guard is observed where it actually runs, at import, rather
+ * than only as a function call inside this test process.
+ */
+async function importWithRegistry(registry: string) {
+  const root = await mkdtemp(join(tmpdir(), "remote-registry-"));
+  roots.push(root);
+  await cp(
+    "libs/build-config/src/remote-registry.ts",
+    join(root, "remote-registry.ts"),
+  );
+  await writeFile(join(root, "remotes.json"), registry);
+  const probe = join(root, "probe.ts");
+  await writeFile(probe, 'import "./remote-registry.ts";\n');
+  return spawnSync(
+    process.execPath,
+    ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", probe],
+    { encoding: "utf8" },
+  );
+}
 
 // remotes.json is the one place a remote's project name and its federation
 // alias are written down, and three things downstream read it as trusted input:
@@ -38,5 +73,29 @@ describe("the canonical remote registry", () => {
   test("narrows the committed registry every consumer reads", () => {
     expect(validatedRemoteRegistry(remoteRegistry)).toEqual(remoteRegistry);
     expect(Object.keys(remoteRegistry)).toContain("home");
+  });
+
+  // A registry with no remotes is the one malformed shape that still parses as
+  // a mapping, so nothing downstream would throw on it: rspack would build a
+  // shell federating nothing, the Home frame would publish slots no pane can
+  // fill, and the publish matrix would quietly shrink to the shell alone. There
+  // is no browser state to drive for it — with no remote declared, neither a
+  // standalone remote document nor a host-composed pane exists to render — so
+  // the failure is observed where it happens, in a real process loading the
+  // real module against a real registry file.
+  test("a real process refuses to load a registry that declares no remote", async () => {
+    const result = await importWithRegistry("{}\n");
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      "must map every remote's project name to a federation alias string",
+    );
+  });
+
+  test("a real process loads a registry that declares a well formed remote", async () => {
+    const result = await importWithRegistry('{ "home-cards": "homeCards" }\n');
+
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe("");
   });
 });

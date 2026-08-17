@@ -1,6 +1,5 @@
 import { createRequire } from "node:module";
 
-// llmlint: ignore-block[changed_behavior_has_e2e] The remote registry is a build-time config file with no browser interface: a malformed manifest is rejected before any bundle or publish lane exists, so nothing it refuses can reach a visitor. remote-registry.spec.ts drives every rejection through the real exported function, rspack-remote.spec.ts covers the configuration derived from the accepted registry, and every app's ownership.spec.ts drives the remote that configuration builds through both boundaries.
 /**
  * Narrows the canonical remote registry. `remotes.json` ships in this library,
  * so this is the one grammar it is held to: every consumer that derives a
@@ -31,7 +30,6 @@ export function validatedRemoteRegistry(
   // what the guard above proved rather than assuming anything about the file.
   return value as Record<string, string>;
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // `require` returns `any`, so the checked-in JSON's own inferred type is
 // restored here and its shape is checked before anything below reads it.
