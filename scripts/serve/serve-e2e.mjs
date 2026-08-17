@@ -1,4 +1,5 @@
 import { fileURLToPath } from "node:url";
+import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 import siteConfig from "../../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
@@ -56,6 +57,12 @@ const server = createSiteServer({
   notFound: { file: "404.html" },
   root,
 });
+// Several apps' e2e runs serve this one composed artifact at once, which is
+// only ever reading it. Claiming it as a reader is what makes a compose started
+// by a second, overlapping run refuse rather than replace these bytes midway
+// through the journey reading them.
+const release = holdArtifactRoot(root, "serving");
+process.on("exit", release);
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.
 server.on("error", (error) => {
   console.error(

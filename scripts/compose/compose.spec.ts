@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import {
   mkdir,
   mkdtemp,
@@ -15,6 +16,7 @@ import { afterEach, expect, test } from "vitest";
 // published as a workspace package resolves by alias there; the rest are
 // reached by the direct source path Node itself resolves.
 /* eslint-disable @nx/enforce-module-boundaries -- This CLI integration spec follows the same direct source paths used by Node type stripping, which cannot resolve a tsconfig alias into a library that is not a workspace package. */
+import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 import { remotesForRoute } from "../../libs/artifact-contracts/src/index.ts";
 import { serializeFragmentContract } from "../../libs/build-config/src/fragment-contract.ts";
 /* eslint-enable @nx/enforce-module-boundaries */
@@ -222,6 +224,70 @@ test("compose stages every app's bundle and withholds its fragment inputs", asyn
   );
   for (const entries of staged)
     expect(entries.filter((name) => name.startsWith("fragment."))).toEqual([]);
+});
+
+/**
+ * The composer as `shell:prerender` runs it, which is the only path that claims
+ * the artifact it writes into: the exported API above is reached with a caller
+ * that already owns its output.
+ */
+function composeCommand(fragmentRoot: string, output: string) {
+  return spawnSync(
+    process.execPath,
+    [
+      "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+      "scripts/compose/compose.mjs",
+    ],
+    {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        COMPOSE_OUTPUT: output,
+        FRAGMENT_ROOT: fragmentRoot,
+      },
+    },
+  );
+}
+
+// Two overlapping runs over one working tree are what Nx cannot order: `e2e`
+// depends on `prerender` inside a dispatch, but a second `just check` composes
+// `dist/apps/shell` while the first run's Playwright servers are still reading
+// it, and the browser reports that only as missing headings and unpainted
+// remote styling.
+test("the compose CLI refuses to replace an artifact another run is serving", async () => {
+  const store = await writeContentStore({});
+  await mkdir(store.output, { recursive: true });
+  const served = join(store.output, "index.html");
+  await writeFile(served, "the document the other run is serving");
+  const release = holdArtifactRoot(store.output, "serving");
+
+  try {
+    const refused = composeCommand(store.apps, store.output);
+
+    expect(refused.status).not.toBe(0);
+    expect(refused.stderr).toContain(
+      `held by process ${process.pid}, which is serving it`,
+    );
+    // Refused before the first write, so the run that is serving these bytes
+    // keeps reading the ones it started with.
+    expect(await readFile(served, "utf8")).toBe(
+      "the document the other run is serving",
+    );
+  } finally {
+    release();
+  }
+});
+
+test("the compose CLI composes once the run serving the artifact has released it", async () => {
+  const store = await writeContentStore({});
+  holdArtifactRoot(store.output, "serving")();
+
+  const composed = composeCommand(store.apps, store.output);
+
+  expect(composed.status, `${composed.stdout}${composed.stderr}`).toBe(0);
+  expect(await readFile(join(store.output, "index.html"), "utf8")).toContain(
+    'data-prerendered-route="/"',
+  );
 });
 
 test("compose refuses a content store that is missing an app's published bytes", async () => {

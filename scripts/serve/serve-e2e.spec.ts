@@ -14,6 +14,8 @@ import path from "node:path";
 import { chromium } from "@playwright/test";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+/* eslint-disable-next-line @nx/enforce-module-boundaries -- This spec claims the artifact by the same direct source path Node type stripping resolves for the CLI, which cannot resolve a tsconfig alias into a library that is not a workspace package. */
+import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 
 const workspace = path.resolve(import.meta.dirname, "../..");
 const addressSchema = z.object({
@@ -79,14 +81,24 @@ async function waitUntilReady(url: string) {
   throw new Error(`serve-e2e did not become ready at ${url}`);
 }
 
-function startServer(port: number) {
+function startServer(port: number, stdio: "ignore" | "pipe" = "ignore") {
   const child = spawn(process.execPath, [serverScript], {
     cwd: workspace,
     env: { ...process.env, PORT: String(port) },
-    stdio: "ignore",
+    stdio,
   });
   children.push(child);
   return child;
+}
+
+/** Everything the CLI reported before it gave up, as a supervising run sees it. */
+async function diagnostics(child: ChildProcess) {
+  let reported = "";
+  child.stderr?.on("data", (chunk: Buffer) => {
+    reported += chunk.toString();
+  });
+  const [exitCode] = await once(child, "exit");
+  return { exitCode, reported };
 }
 
 describe("serve-e2e lifecycle", () => {
@@ -133,6 +145,42 @@ describe("serve-e2e lifecycle", () => {
     },
     30_000,
   );
+
+  // `nx affected -t e2e --parallel=3` serves this one composed artifact from
+  // several apps' runs at once, so holding it as a reader has to stay shared.
+  it("serves one artifact from every run an affected dispatch starts", async () => {
+    const ports = [await availablePort(), await availablePort()];
+    for (const port of ports) startServer(port);
+
+    for (const port of ports) {
+      const url = `http://127.0.0.1:${port}/nick-derobertis-site/`;
+      await waitUntilReady(url);
+      expect((await fetch(url)).ok).toBe(true);
+    }
+  }, 30_000);
+
+  // The other half of the same hold: a compose replaces the route documents,
+  // `cv-data`, and `remotes` in place, so a server started midway through one
+  // would answer from a tree that is half two compositions.
+  it("refuses to serve an artifact another run is composing", async () => {
+    const release = holdArtifactRoot(
+      path.join(tree, "dist/apps/shell"),
+      "composing",
+    );
+
+    try {
+      const { exitCode, reported } = await diagnostics(
+        startServer(await availablePort(), "pipe"),
+      );
+
+      expect(exitCode).toBe(1);
+      expect(reported).toContain(
+        `held by process ${process.pid}, which is composing it`,
+      );
+    } finally {
+      release();
+    }
+  }, 30_000);
 
   it("answers an unrouted path with the artifact's recovery document", async () => {
     const port = await availablePort();

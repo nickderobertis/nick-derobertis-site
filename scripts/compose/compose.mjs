@@ -2,6 +2,7 @@ import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
+import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 import {
   inlineRemoteCssPattern,
   parseRemoteManifest,
@@ -490,23 +491,31 @@ export async function compose({
 
 if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
   // llmlint: ignore[boundary_inputs_validated] COMPOSE_OUTPUT intentionally accepts an arbitrary absolute root for isolated artifact and lifecycle tests; compose validates every derived path beneath that caller-owned root, while the public `just compose` recipe confines normal writes beneath dist/.
+  let release = () => {};
   try {
+    const output = requiredPath(
+      process.env.COMPOSE_OUTPUT,
+      "dist/apps/shell",
+      "COMPOSE_OUTPUT",
+    );
+    // Claimed before the first write: composing replaces the route documents,
+    // `cv-data`, and `remotes` in place, so a second run serving this same
+    // directory would read the replacement halfway through.
+    release = holdArtifactRoot(output, "composing");
     await compose({
       fragmentRoot: requiredPath(
         process.env.FRAGMENT_ROOT,
         "dist/apps",
         "FRAGMENT_ROOT",
       ),
-      output: requiredPath(
-        process.env.COMPOSE_OUTPUT,
-        "dist/apps/shell",
-        "COMPOSE_OUTPUT",
-      ),
+      output,
     });
   } catch (error) {
     console.error(
       `compose: ${error instanceof Error ? error.message : String(error)}`,
     );
     process.exitCode = 1;
+  } finally {
+    release();
   }
 }
