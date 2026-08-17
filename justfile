@@ -38,6 +38,7 @@ lint-workflows:
     # recipe's single status line and the rest is dropped. Every verifier writes
     # its diagnostics to stderr, so nothing is hidden on failure.
     node scripts/visual/verify-visual-contract.mjs >/dev/null || { echo "lint-workflows: visual tool pins or capture contracts drifted; update visual-tools.json and every named consumer together" >&2; exit 1; }
+    # llmlint: ignore[changed_behavior_has_e2e] This gate reads committed configuration and has no browser interface: it fails a push before any workflow runs, so a registry it rejects is one no artifact was built from and nothing it does reaches a visitor. federation-registry.spec.ts drives this exact command as a real subprocess over the committed tree and over one whose remote declaration has drifted.
     node scripts/workspace/generate-remote-registry.mjs --check >/dev/null || { echo "lint-workflows: libs/build-config/src/remotes.json disagrees with the remotes the project graph declares; rerun just generate-remote-registry and commit the result" >&2; exit 1; }
     node scripts/visual/verify-reference-migration.mjs >/dev/null || { echo "lint-workflows: PR #12 reference migration verification failed; repair the migration map or its owned baselines and retry" >&2; exit 1; }
     @# llmlint: ignore[changed_behavior_has_e2e] These gates read committed configuration and have no browser interface: they fail a push before any workflow runs, so nothing they reject can reach a visitor. runtime-pins.spec.ts and content-store-contract.spec.ts drive this exact command as a real subprocess over the committed tree and over copies with one pin or one restatement moved.
@@ -72,6 +73,7 @@ format:
 # declares. Run this after adding, renaming, or retiring a remote; the same
 # derivation is checked by just lint-workflows.
 generate-remote-registry:
+    @# llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface: it writes a build input before anything is built, so a declaration it refuses is one no artifact can be built from and there is nothing for a visitor to observe. federation-registry.spec.ts drives this exact recipe as a real subprocess and holds the bytes it writes to the committed registry.
     @node scripts/workspace/generate-remote-registry.mjs || { echo "generate-remote-registry: the remote registry could not be derived from the project graph; fix the declaration reported above, then rerun just generate-remote-registry" >&2; exit 1; }
 
 upgrade:

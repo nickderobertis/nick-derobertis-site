@@ -36,15 +36,23 @@ afterEach(() => {
 });
 
 /** One project.json document, as a project reaches the registry's boundary. */
-function project(name: string, metadata: unknown) {
-  return { name, metadata };
+function project(
+  name: string,
+  metadata: unknown,
+  tags: readonly string[] = [],
+) {
+  return { name, metadata, tags };
 }
 
-function remote(name: string, alias: string, tags: readonly string[]) {
-  return project(name, {
-    federation: { alias },
-    boundaries: { onlyDependOnLibsWithTags: tags },
-  });
+function remote(name: string, alias: string, admits: readonly string[]) {
+  return project(
+    name,
+    {
+      federation: { alias },
+      boundaries: { onlyDependOnLibsWithTags: admits },
+    },
+    ["type:remote", `scope:${name}`],
+  );
 }
 
 /**
@@ -75,6 +83,35 @@ function derive(configurations: readonly unknown[]) {
   return spawnSync(process.execPath, [probe, JSON.stringify(configurations)], {
     encoding: "utf8",
   });
+}
+
+/**
+ * Runs the real registry over an apps directory this spec writes, entering it
+ * through `declaredAppProjects` — the path eslint.config.mjs takes, and the
+ * only one that reads a `project.json` off disk rather than being handed a
+ * document that has already parsed.
+ */
+function readApps(documents: Readonly<Record<string, string>>) {
+  const root = mkdtempSync(join(tmpdir(), "federation-registry-apps-"));
+  scratch.push(root);
+  cpSync(
+    "scripts/workspace/federation-registry.mjs",
+    join(root, "federation-registry.mjs"),
+  );
+  for (const [name, contents] of Object.entries(documents)) {
+    mkdirSync(join(root, "apps", name), { recursive: true });
+    writeFileSync(join(root, "apps", name, "project.json"), contents);
+  }
+  const probe = join(root, "probe.mjs");
+  writeFileSync(
+    probe,
+    [
+      'import { declaredAppProjects, federationRemotes, remoteRegistry } from "./federation-registry.mjs";',
+      'process.stdout.write(JSON.stringify(remoteRegistry(federationRemotes(declaredAppProjects("apps")))));',
+      "",
+    ].join("\n"),
+  );
+  return spawnSync(process.execPath, [probe], { cwd: root, encoding: "utf8" });
 }
 
 /**
@@ -205,6 +242,26 @@ describe("the federation declaration each remote owns", () => {
       /declares no metadata.boundaries.onlyDependOnLibsWithTags/,
     ],
     [
+      "a remote carrying no scope tag for the boundary it publishes",
+      [
+        {
+          ...remote("awards", "awards", ["type:shared"]),
+          tags: ["type:remote", "scope:prizes"],
+        },
+      ],
+      /none of which is the scope:awards tag/,
+    ],
+    [
+      "a tag that could not be an Nx tag",
+      [
+        {
+          ...remote("awards", "awards", ["type:shared"]),
+          tags: ["Scope Awards"],
+        },
+      ],
+      /declares a tags that is not a list of Nx tags/,
+    ],
+    [
       "two remotes claiming one federation container",
       [
         remote("awards", "awards", ["type:shared"]),
@@ -222,6 +279,33 @@ describe("the federation declaration each remote owns", () => {
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toMatch(reason);
+  });
+});
+
+describe("a project.json the registry reads off disk", () => {
+  it("derives the registry from the apps directory eslint resolves", () => {
+    const result = readApps({
+      bio: JSON.stringify(remote("bio", "bio", ["type:shared"])),
+      shell: JSON.stringify(project("shell", { description: "the host" })),
+    });
+
+    expect(result.status, result.stderr).toBe(0);
+    // The shell is read off the same directory and declares no federation, so
+    // reaching the registry through disk must still tell a host from a remote.
+    expect(
+      z.record(z.string(), z.string()).parse(JSON.parse(result.stdout)),
+    ).toEqual({ bio: "bio" });
+  });
+
+  it("names the file and the next action when one cannot be parsed", () => {
+    const result = readApps({ bio: '{ "name": "bio", }' });
+
+    expect(result.status).not.toBe(0);
+    // eslint and the Nx plugin both enter here, and a bare parser diagnostic
+    // reaches them naming neither the project that broke nor what to do next.
+    expect(result.stderr).toMatch(
+      /apps\/bio\/project\.json could not be read as JSON: .+\. Fix that project's declaration and rerun just check\./,
+    );
   });
 });
 

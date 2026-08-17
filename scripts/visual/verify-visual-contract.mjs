@@ -97,11 +97,6 @@ if (
   throw new Error(
     "libs/build-config/src/remotes.json must be an object mapping each remote's project name to its federation alias string; restore that shape, then rerun just lint-workflows",
   );
-// Which remotes a screenshot depends on is no longer written down here to be
-// compared against: scripts/workspace/federation-plugin.mjs derives every
-// screenshot's build dependencies from the remotes themselves, and
-// federation-contract.spec.ts holds that derivation to the registry against the
-// resolved project graph, which is where the dependency now exists.
 if (nxConfig.targetDefaults?.screenshot?.cache !== false)
   throw new Error(
     "Nx screenshot target must not cache: its output path depends on SHOTS_OUT, and the reusable workflow re-runs it into a second tree for the reproducibility gate",

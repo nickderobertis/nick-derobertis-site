@@ -45,7 +45,7 @@ function reject(source, reason) {
 export function declaredProject(configuration, source) {
   if (typeof configuration !== "object" || configuration === null)
     reject(source, "is not an Nx project configuration object");
-  const { name, metadata, targets } = configuration;
+  const { name, metadata, tags, targets } = configuration;
   if (typeof name !== "string" || !projectName.test(name))
     reject(source, "declares no Nx project name");
   if (
@@ -54,6 +54,12 @@ export function declaredProject(configuration, source) {
   )
     reject(source, "declares a metadata that is not an object");
   if (
+    tags !== undefined &&
+    (!Array.isArray(tags) ||
+      tags.some((tag) => typeof tag !== "string" || !libraryTag.test(tag)))
+  )
+    reject(source, "declares a tags that is not a list of Nx tags");
+  if (
     targets !== undefined &&
     (typeof targets !== "object" || targets === null)
   )
@@ -61,19 +67,36 @@ export function declaredProject(configuration, source) {
   const declaredTargets = Object.keys(targets ?? {});
   if (declaredTargets.some((target) => !targetName.test(target)))
     reject(source, "declares a target that could not be an Nx target name");
-  return { name, metadata, targets: declaredTargets, source };
+  return {
+    name,
+    metadata,
+    tags: [...(tags ?? [])],
+    targets: declaredTargets,
+    source,
+  };
 }
 
 /** The same narrowing, for a project read straight off disk. */
 export function readDeclaredProject(path) {
-  return declaredProject(JSON.parse(readFileSync(path, "utf8")), path);
+  let document;
+  try {
+    document = JSON.parse(readFileSync(path, "utf8"));
+  } catch (error) {
+    // eslint and the Nx plugin both enter here, and a bare parser or filesystem
+    // diagnostic reaches them naming neither the file nor what to do about it.
+    reject(
+      path,
+      `could not be read as JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  return declaredProject(document, path);
 }
 
 /**
  * The federation declaration one project makes, or `undefined` when it makes
  * none — which is what tells a host like the shell apart from a remote.
  */
-export function federationDeclaration({ name, metadata, source }) {
+export function federationDeclaration({ name, metadata, tags, source }) {
   const federation = metadata?.federation;
   if (federation === undefined) return undefined;
   if (typeof federation !== "object" || federation === null)
@@ -89,17 +112,27 @@ export function federationDeclaration({ name, metadata, source }) {
       source,
       `declares the federation alias ${JSON.stringify(alias)}, which could not be a Module Federation container name`,
     );
-  const tags = metadata?.boundaries?.onlyDependOnLibsWithTags;
+  const admitted = metadata?.boundaries?.onlyDependOnLibsWithTags;
   if (
-    !Array.isArray(tags) ||
-    tags.length === 0 ||
-    tags.some((tag) => typeof tag !== "string" || !libraryTag.test(tag))
+    !Array.isArray(admitted) ||
+    admitted.length === 0 ||
+    admitted.some((tag) => typeof tag !== "string" || !libraryTag.test(tag))
   )
     reject(
       source,
       "declares no metadata.boundaries.onlyDependOnLibsWithTags list of Nx tags, which is what its scope: module boundary is built from",
     );
-  return { name, alias, onlyDependOnLibsWithTags: [...tags] };
+  // The constraint below is published for scope:<name>, and Nx applies a
+  // constraint only to projects carrying its source tag, so a remote that does
+  // not tag itself that way would get a boundary that silently matches nothing.
+  // The tag is the remote's to declare, so it is checked against the remote
+  // rather than restated here.
+  if (!tags.includes(`scope:${name}`))
+    reject(
+      source,
+      `declares the tags ${JSON.stringify(tags)}, none of which is the scope:${name} tag its module boundary would constrain`,
+    );
+  return { name, alias, onlyDependOnLibsWithTags: [...admitted] };
 }
 
 /**

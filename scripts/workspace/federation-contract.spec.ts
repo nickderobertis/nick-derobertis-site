@@ -33,6 +33,7 @@ const dependsOnSchema = z.array(
 
 const projectSchema = z.object({
   root: workspaceDirectory,
+  tags: z.array(z.string()).optional(),
   targets: z
     .record(z.string(), z.object({ dependsOn: dependsOnSchema.optional() }))
     .optional(),
@@ -263,6 +264,32 @@ describe("the module boundary every remote publishes under", () => {
           remote.metadata?.boundaries?.onlyDependOnLibsWithTags,
       })),
     );
+  });
+
+  it("constrains a scope the remote is actually tagged with", () => {
+    // The assertion above reads both sides from the same declaration, so it
+    // holds just as well when the boundary enforces nothing: @nx/enforce-module-
+    // boundaries applies a constraint only to the projects carrying its
+    // sourceTag, and a remote whose scope: tag was renamed or dropped admits
+    // every dependency the constraint was written to refuse, silently. The tags
+    // come from the resolved graph rather than from project.json, because the
+    // graph is the set the rule matches a source file against.
+    const taggedScopes = new Map(
+      projects.map((project) => [project.name, project.tags ?? []]),
+    );
+    const inert = boundaryConstraints
+      .filter((constraint) => constraint.sourceTag.startsWith("scope:"))
+      .filter(
+        (constraint) =>
+          !taggedScopes
+            .get(constraint.sourceTag.slice("scope:".length))
+            ?.includes(constraint.sourceTag),
+      )
+      .map(
+        (constraint) =>
+          `${constraint.sourceTag} is carried by no project of that name, so the boundary constrains nothing`,
+      );
+    expect(inert).toEqual([]);
   });
 });
 
