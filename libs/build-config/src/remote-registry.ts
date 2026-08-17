@@ -1,31 +1,49 @@
 import { createRequire } from "node:module";
 
+// llmlint: ignore-block[changed_behavior_has_e2e] The remote registry is a build-time config file with no browser interface: a malformed manifest is rejected before any bundle or publish lane exists, so nothing it refuses can reach a visitor. remote-registry.spec.ts drives every rejection through the real exported function, rspack-remote.spec.ts covers the configuration derived from the accepted registry, and every app's ownership.spec.ts drives the remote that configuration builds through both boundaries.
+/**
+ * Narrows the canonical remote registry. `remotes.json` ships in this library,
+ * so this is the one grammar it is held to: every consumer that derives a
+ * federation alias, a route pane, or a publish-lane subtree path reads the
+ * registry through here rather than indexing the serialized file, which is why
+ * a key that could not be a project name is rejected here rather than reaching
+ * rspack or git.
+ */
+export function validatedRemoteRegistry(
+  value: unknown,
+): Record<string, string> {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    Object.keys(value).length === 0 ||
+    Object.entries(value).some(
+      ([name, alias]) =>
+        !/^[a-z][a-z-]+$/.test(name) ||
+        typeof alias !== "string" ||
+        !/^[a-z][A-Za-z]*$/.test(alias),
+    )
+  )
+    throw new Error(
+      "libs/build-config/src/remotes.json must map every remote's project name to a federation alias string. Fix the remote registry and rerun just check.",
+    );
+  // Every key and every value was just checked one by one, so this restates
+  // what the guard above proved rather than assuming anything about the file.
+  return value as Record<string, string>;
+}
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
 // `require` returns `any`, so the checked-in JSON's own inferred type is
-// restored here and the entry shapes are validated below before any use.
+// restored here and its shape is checked before anything below reads it.
 const remoteManifest = createRequire(import.meta.url)(
   "./remotes.json",
 ) as typeof import("./remotes.json");
-/* v8 ignore start -- This guard runs at import over a committed build input that just check already validates through every consumer; only a corrupted checkout reaches its rejection branch, and the named diagnostic is what makes that failure readable. */
-// llmlint: ignore[changed_behavior_has_e2e] This guard rejects a malformed build input before any bundle exists, so nothing it refuses can reach a visitor and there is no browser interface to drive; rspack-remote.spec.ts covers the configuration derived from it, and every app's ownership.spec.ts drives the remote that configuration builds through both boundaries.
-if (
-  typeof remoteManifest !== "object" ||
-  remoteManifest === null ||
-  Array.isArray(remoteManifest) ||
-  Object.entries(remoteManifest).some(
-    ([key, value]) =>
-      !/^[a-z][a-z-]+$/.test(key) ||
-      typeof value !== "string" ||
-      !/^[a-z][A-Za-z]*$/.test(value),
-  )
-)
-  throw new Error("remotes.json must contain string remote-name mappings");
-/* v8 ignore stop */
+/* v8 ignore next -- The committed registry is validated through every consumer by just check, so only a corrupted checkout reaches this call's rejection; remote-registry.spec.ts drives that rejection through the function itself. */
+validatedRemoteRegistry(remoteManifest);
 
 /**
- * The canonical remote registry, narrowed by the guard above. This is the one
- * view of `remotes.json` inside this library: nothing here reads the serialized
- * file itself, so no consumer can index a manifest whose shape was never
- * checked.
+ * The canonical remote registry, narrowed at import. Keeping the manifest's own
+ * inferred type is what lets `RemoteProject` name the remotes that exist.
  */
 export const remoteRegistry = remoteManifest;
 
