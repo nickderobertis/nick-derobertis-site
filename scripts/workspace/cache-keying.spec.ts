@@ -566,8 +566,6 @@ describe("what a rule-file change actually costs when the gate runs", () => {
   it("reruns apps/shell's lint for an eslint configuration change", () => {
     const cacheDirectory = ownCacheDirectory();
 
-    // Against an empty cache this first run is the one that fills it, so it
-    // runs the command rather than replaying anything.
     expect(
       outcomesOf("shell", ["lint"], cacheDirectory).get("shell:lint"),
     ).toBe("ran");
