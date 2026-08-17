@@ -25,8 +25,9 @@ env:
   # NODE_VERSION to the single value every workflow in this repository uses.
   PNPM_VERSION: 10.13.1
   NODE_VERSION: 26.5.0
-  # Storage only. libs/build-config/src/publish-fragment.ts refuses to publish to
-  # any branch GitHub Pages could be pointed at.
+  # Storage only. libs/publish-config/src/publish-fragment.ts refuses to publish to
+  # `master`, `main`, or `gh-pages` — the conventional Pages-served names, not
+  # every branch Pages could be configured to serve.
   CONTENT_STORE_BRANCH: published-fragments
 jobs:
   # Which apps does this push actually change? Libraries with a build target are

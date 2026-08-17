@@ -29,6 +29,7 @@
     "@site/testing": "workspace:*",
     "@site/e2e-harness": "workspace:*",
     "@site/visual-harness": "workspace:*",
+    "@site/publish-config": "workspace:*",
     "@playwright/test": "1.61.1",
     "@swc-node/register": "1.12.1",
     "@swc/core": "1.15.46",

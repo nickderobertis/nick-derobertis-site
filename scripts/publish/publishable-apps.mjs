@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
-import { publishableApps } from "../../libs/build-config/src/publish-fragment.ts";
+import { publishableApps } from "@site/publish-config";
 
 // Turn `nx show projects --affected --with-target build --json` (a JSON array of
 // project names on stdin) into the `publish` matrix of .github/workflows/pages.yml.
 // Only the shell and the federated remotes publish a subtree to the content
 // store, so affected libraries are dropped here rather than in workflow YAML —
-// libs/build-config/src/publish-fragment.ts stays the one list of lanes.
+// libs/publish-config/src/publish-fragment.ts stays the one list of lanes.
 //
 // `--all` ignores stdin and selects every lane. That is what a manual
 // workflow_dispatch uses to seed a content store that has never held a full set

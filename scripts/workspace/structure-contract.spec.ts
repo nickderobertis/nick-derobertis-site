@@ -1,8 +1,9 @@
-import { execFileSync } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { promisify } from "node:util";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -115,6 +116,13 @@ const vitestConfigPath = z
 // pattern that finds the spec driving it, so they are narrowed first.
 const recipeName = z.string().regex(/^[a-z][a-z0-9-]*$/);
 
+// A `typecheck` target names each tsc project on its command line, and every one
+// of them is handed to a real tsc subprocess, so they are narrowed to
+// workspace-relative tsconfig files first.
+const tsconfigPath = z
+  .string()
+  .regex(/^(?:[a-z0-9-]+\/)+tsconfig(?:\.[a-z0-9-]+)?\.json$/);
+
 function targetCommand(project: Project, target: string) {
   const command = project.targets?.[target]?.options?.command;
   if (command === undefined)
@@ -197,6 +205,63 @@ describe("app project structure", () => {
       ]);
     expect(missing).toEqual([]);
   });
+});
+
+/**
+ * `libs/publish-config` writes an app's built bytes to the content-store branch.
+ * No app imports it, so no app should compile it: an app that does pays a
+ * typecheck, and every gate keyed off it, for an edit to a publish lane a
+ * visitor can never see. Every other gate is blind to this, because an app that
+ * compiles the publish path still compiles. tsc follows imports on its own, so
+ * the only way those modules reach an app's program is an `include` that names
+ * them, and the program tsc actually builds is what this reads.
+ */
+describe("app typecheck inputs", () => {
+  const publishPath = "libs/publish-config/";
+  const compile = promisify(execFile);
+
+  /** Every file tsc reads for one project, relative to the workspace root. */
+  async function programFiles(config: string) {
+    const { stdout } = await compile(
+      "pnpm",
+      ["exec", "tsc", "-p", config, "--listFilesOnly"],
+      { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+    );
+    return stdout
+      .split("\n")
+      .filter((line) => line.length > 0)
+      .map((file) => relative(process.cwd(), file));
+  }
+
+  it("compiles no publish module in any app's typecheck", async () => {
+    const findings = await Promise.all(
+      projects.filter(isApp).map(async (project) => {
+        // An app typechecks its own sources and its browser suite through
+        // separate tsc projects; both are the app's typecheck.
+        const configs = tsconfigPath
+          .array()
+          .parse(
+            [...targetCommand(project, "typecheck").matchAll(/tsc -p (\S+)/g)]
+              .map(([, config]) => config)
+              .filter((config) => config !== undefined),
+          );
+        // A typecheck that compiles nothing this contract can read would pass it
+        // by default, so an unreadable command is itself the finding.
+        if (configs.length === 0)
+          return [
+            `${project.name} names no tsc project in its typecheck command, so what it compiles cannot be read`,
+          ];
+        const compiled = (await Promise.all(configs.map(programFiles))).flat();
+        return compiled
+          .filter((file) => file.startsWith(publishPath))
+          .map(
+            (file) =>
+              `${project.name} typechecks ${file}, which no app imports`,
+          );
+      }),
+    );
+    expect(findings.flat()).toEqual([]);
+  }, 120_000);
 });
 
 describe("test target contract", () => {

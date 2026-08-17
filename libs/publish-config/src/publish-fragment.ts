@@ -1,45 +1,30 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
 import { join, normalize, resolve, sep } from "node:path";
-import { fragmentContractSchema } from "./fragment-contract.ts";
+// The publish CLI loads this module through Node's type stripping. This library
+// is a workspace package, so its own entry point resolves by alias there;
+// build-config is not, so the two build contracts this library depends on are
+// reached by the path Node itself resolves.
+/* eslint-disable @nx/enforce-module-boundaries -- This publish path reads the canonical fragment contract and remote registry directly because Node type stripping cannot resolve a tsconfig alias into a library that is not a workspace package. */
+import { fragmentContractSchema } from "../../build-config/src/fragment-contract.ts";
+import {
+  remoteRegistry,
+  validatedRemoteRegistry,
+} from "../../build-config/src/remote-registry.ts";
 
-// llmlint: ignore-block[changed_behavior_has_e2e] The remote registry is a build-time config file with no browser interface: a malformed manifest is rejected before any lane writes bytes, so no artifact and nothing servable exists on that path. publish-fragment.spec.ts drives the derived lane list through the real exported API, and publish-lanes.spec.ts drives it through the real selection CLI.
-/**
- * Narrows the canonical remote registry before any lane name is derived from
- * it. A publish lane's name becomes a branch subtree path, so a manifest key
- * that is not a plain project name must be rejected here rather than reaching
- * git.
- */
-export function validatedRemoteRegistry(
-  value: unknown,
-): Record<string, string> {
-  if (
-    !value ||
-    typeof value !== "object" ||
-    Array.isArray(value) ||
-    Object.keys(value).length === 0 ||
-    Object.keys(value).some((name) => !/^[a-z][a-z0-9-]*$/.test(name)) ||
-    Object.values(value).some((alias) => typeof alias !== "string")
-  )
-    throw new Error(
-      "libs/build-config/src/remotes.json must map every remote's project name to a federation alias string. Fix the remote registry and rerun just publish-fragment.",
-    );
-  // Every key and every value was just checked one by one, so this restates
-  // what the guard above proved rather than assuming anything about the file.
-  return value as Record<string, string>;
-}
-// llmlint: ignore-end[changed_behavior_has_e2e]
+/* eslint-enable @nx/enforce-module-boundaries */
 
-const remoteManifest = validatedRemoteRegistry(
-  createRequire(import.meta.url)("./remotes.json"),
-);
+// A lane's name becomes a branch subtree path, so the registry a lane list is
+// derived from must be narrowed before git sees any of it. build-config ships
+// remotes.json and owns the one grammar it is held to, so this re-exports that
+// boundary rather than restating a second, weaker one here.
+export { validatedRemoteRegistry };
 
 /** The shell plus every federated remote publishes exactly one subtree. */
 export const publishableApps: readonly string[] = [
   "shell",
-  ...Object.keys(remoteManifest),
+  ...Object.keys(remoteRegistry),
 ];
 
 /** Every app's published bytes live under this directory on the branch. */

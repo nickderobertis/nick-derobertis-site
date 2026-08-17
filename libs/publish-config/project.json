@@ -1,0 +1,37 @@
+{
+  "name": "publish-config",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/publish-config/src",
+  "projectType": "library",
+  "tags": ["type:shared", "scope:publish"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "biome lint libs/publish-config"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/publish-config/tsconfig.json"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/publish-config/tsconfig.json"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] This target runs the publish path's own unit gate and has no browser interface; the bytes a lane stores reach a visitor only once the compose lane assembles them, which site.spec.ts drives in a real browser and every app's ownership.spec.ts drives through its standalone and host-composed boundaries."
+      },
+      "outputs": ["{workspaceRoot}/coverage/libs/publish-config"],
+      "options": {
+        "command": "vitest run --config libs/publish-config/vite.config.ts --coverage"
+      }
+    }
+  }
+}

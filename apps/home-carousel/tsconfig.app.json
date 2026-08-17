@@ -7,7 +7,6 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "rspack.config.ts",
-    "vite.config.ts",
-    "../../libs/build-config/src/**/*.ts"
+    "vite.config.ts"
   ]
 }

@@ -9,7 +9,8 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "resolveJsonModule": true,
-    // Build and publish modules under libs/build-config/src are executed by
+    // Build modules under libs/build-config/src and publish modules under
+    // libs/publish-config/src are executed by
     // Node's type stripping from scripts/*/*.mjs, where the ESM resolver requires
     // the real file extension. Every project here already compiles with noEmit,
     // so permitting the `.ts` specifier changes nothing but resolution.
@@ -32,6 +33,7 @@
       "@site/route-state": ["libs/route-state/src/index.ts"],
       "@site/layout": ["libs/layout/src/index.ts"],
       "@site/build-config": ["libs/build-config/src/index.ts"],
+      "@site/publish-config": ["libs/publish-config/src/index.ts"],
       "@site/testing": ["libs/testing/src/index.ts"],
       "@site/visual-harness": ["libs/visual-harness/src/index.ts"]
     }

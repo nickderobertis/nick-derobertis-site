@@ -4,19 +4,19 @@ import {
   contentStoreBranch,
   contentStoreCheckout,
   publishWorkdirDefault,
-} from "../../libs/build-config/src/publish-fragment.ts";
+} from "@site/publish-config";
 
 // The content-store branch, the deploy lane's working copy of it, and the
 // scratch repository a publish lane pushes from are named in five places that
 // cannot import each other: the Pages workflow, the ignore rules, and three
-// documents. libs/build-config/src/publish-fragment.ts is the one source; this
+// documents. libs/publish-config/src/publish-fragment.ts is the one source; this
 // holds every restatement to it, so a renamed branch cannot leave the workflow
 // publishing to one ref while the deploy lane composes another.
 //
 // llmlint: ignore-file[changed_behavior_has_e2e] This is a repository contract verifier with no browser interface: it reads committed configuration and exits non-zero, so nothing it does is observable to a visitor. content-store-contract.spec.ts drives `just lint-workflows`, the gate that runs it, over the committed tree and over the tree with one restatement moved.
 function fail(message) {
   console.error(
-    `verify-content-store-contract: ${message}; libs/build-config/src/publish-fragment.ts owns these names, so align the restatement with it and rerun just lint-workflows`,
+    `verify-content-store-contract: ${message}; libs/publish-config/src/publish-fragment.ts owns these names, so align the restatement with it and rerun just lint-workflows`,
   );
   process.exit(1);
 }
