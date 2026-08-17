@@ -241,6 +241,26 @@ describe("just installer boundary", () => {
     expect(existsSync(path.resolve(workspace, destination))).toBe(false);
   });
 
+  // The token is ambient environment input spent as an HTTP header value, so a
+  // header the caller never wrote cannot be smuggled into the API request
+  // through it, and nothing is downloaded or installed before that is settled.
+  it("installs nothing for a token that would break out of its header", () => {
+    const binDirectory = temporaryDirectory("just-bin.");
+    const result = spawnSync(installJustScript, [], {
+      cwd: workspace,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        XDG_BIN_HOME: binDirectory,
+        GITHUB_TOKEN: "ghp_token\r\nX-Smuggled: 1",
+      },
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("GITHUB_TOKEN must be a GitHub token");
+    expect(existsSync(path.join(binDirectory, "just"))).toBe(false);
+  });
+
   it("reports how to recover when the destination cannot be created", () => {
     const parent = temporaryDirectory("just-unwritable.");
     const file = path.join(parent, "not-a-directory");
