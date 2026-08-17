@@ -41,17 +41,6 @@ const readNoBiomeConfig = ["build", "test", "typecheck"];
  */
 const composeOrDriveTheArtifact = ["e2e", "prerender", "screenshot", "perf"];
 
-const inputSchema = z.union([
-  z.string(),
-  z.object({ fileset: z.string().optional(), input: z.string().optional() }),
-]);
-
-const targetSchema = z.object({
-  cache: z.boolean().optional(),
-  inputs: z.array(inputSchema).optional(),
-  options: z.object({ command: z.string().optional() }).optional(),
-});
-
 // Project roots reach path assertions below, and both project and target names
 // go back to Nx as `project:target` arguments, so each is narrowed where the
 // graph is read rather than trusted because Nx printed it. Files that arrive
@@ -62,6 +51,38 @@ const targetName = z.string().regex(/^[a-z][a-z0-9-]*$/);
 const namedInputName = z.string().regex(/^[a-zA-Z][a-zA-Z0-9-]*$/);
 const workspacePath = z.string().regex(/^[\w.-]+(?:\/[\w.-]+)*$/);
 const workspaceDirectory = z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/);
+
+/**
+ * Every form an Nx input takes, spelled out rather than left open. A name and a
+ * `fileset` are the two that name workspace files, which is what `keyedOn`
+ * measures; the rest key a target on something no file change moves — a runtime
+ * command's output, an environment variable, a package version, another task's
+ * output — and so contribute no fileset by design. A form outside this union is
+ * refused here, because parsing it as an object with nothing recognized in it
+ * would drop whatever files it names and read as a target not keyed on them.
+ */
+const inputSchema = z.union([
+  z.string(),
+  z.object({ fileset: z.string() }),
+  z.object({
+    input: z.string(),
+    projects: z.union([z.string(), z.array(z.string())]).optional(),
+    dependencies: z.boolean().optional(),
+  }),
+  z.object({
+    dependentTasksOutputFiles: z.string(),
+    transitive: z.boolean().optional(),
+  }),
+  z.object({ runtime: z.string() }),
+  z.object({ env: z.string() }),
+  z.object({ externalDependencies: z.array(z.string()) }),
+]);
+
+const targetSchema = z.object({
+  cache: z.boolean().optional(),
+  inputs: z.array(inputSchema).optional(),
+  options: z.object({ command: z.string().optional() }).optional(),
+});
 
 const graphSchema = z.object({
   graph: z.object({
@@ -120,7 +141,12 @@ const declaredInputs = (target: Target) =>
 function keyedOn(inputs: Input[], expanded = new Set<string>()): string[] {
   const filesets: string[] = [];
   for (const input of inputs) {
-    const named = typeof input === "string" ? input : input.input;
+    const named =
+      typeof input === "string"
+        ? input
+        : "input" in input
+          ? input.input
+          : undefined;
     const name = named?.startsWith("^") ? named.slice(1) : named;
     const definition = name === undefined ? undefined : namedInputs[name];
     if (name !== undefined && definition) {
@@ -128,7 +154,7 @@ function keyedOn(inputs: Input[], expanded = new Set<string>()): string[] {
       expanded.add(name);
       filesets.push(...keyedOn(definition, expanded));
     } else if (typeof input === "string") filesets.push(input);
-    else if (input.fileset) filesets.push(input.fileset);
+    else if ("fileset" in input) filesets.push(input.fileset);
   }
   return filesets;
 }
@@ -201,6 +227,47 @@ function selectedFor(target: string, ...files: string[]): string[] {
   );
   return projectName.array().parse(JSON.parse(printed));
 }
+
+// Every claim below is read out of the parsed graph, so what the parse accepts
+// decides what those claims can see. An input form it lets through without
+// understanding contributes no fileset, and a target keyed on a file then reads
+// as a target not keyed on it — a green that means nothing, quietly.
+describe("the graph reading refuses configuration it cannot measure", () => {
+  const graphKeyedOn = (input: unknown) => ({
+    graph: {
+      nodes: {
+        awards: {
+          data: {
+            root: "apps/awards",
+            targets: { lint: { cache: true, inputs: [input] } },
+          },
+        },
+      },
+    },
+  });
+
+  it.each([
+    ["a named input", "default"],
+    ["a fileset", { fileset: "{workspaceRoot}/biome.json" }],
+    ["a named input resolved elsewhere", { input: "production" }],
+    [
+      "another task's outputs",
+      { dependentTasksOutputFiles: "**/*.d.ts", transitive: true },
+    ],
+    ["a runtime command", { runtime: "node --version" }],
+    ["an environment variable", { env: "CI" }],
+    ["an external dependency", { externalDependencies: ["playwright"] }],
+  ])("reads a target keyed on %s", (_, input) => {
+    expect(() => graphSchema.parse(graphKeyedOn(input))).not.toThrow();
+  });
+
+  it.each([
+    ["names nothing at all", {}],
+    ["names files in a form Nx grew later", { workspaceFiles: "**/*.ts" }],
+  ])("refuses a target whose input %s", (_, input) => {
+    expect(() => graphSchema.parse(graphKeyedOn(input))).toThrow();
+  });
+});
 
 describe("the Biome configuration keys only the target that reads it", () => {
   it("keys no project's build, test, or typecheck on biome.json", () => {
