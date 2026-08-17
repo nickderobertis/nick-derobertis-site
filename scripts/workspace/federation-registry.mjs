@@ -30,6 +30,14 @@ const federationAlias = /^[a-z][A-Za-z]*$/;
 const libraryTag = /^[a-z][a-z-]*:[a-z][a-z0-9-]*$/;
 const targetName = /^[a-z][a-z0-9-]*$/;
 
+/**
+ * The two grammars a serialized registry's own keys and values are held to, for
+ * a caller reading back what `remoteRegistry` wrote. They are published rather
+ * than restated there, so the file this module derives is narrowed on the way
+ * in by the same rules it was narrowed by on the way out.
+ */
+export const remoteGrammar = Object.freeze({ remoteName, federationAlias });
+
 function reject(source, reason) {
   throw new Error(
     `${source} ${reason}. Fix that project's declaration and rerun just check.`,

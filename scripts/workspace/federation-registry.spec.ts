@@ -402,6 +402,16 @@ describe("the committed registry the generator compares against", () => {
       /remotes\.json is not a JSON object mapping each remote's project name/,
     ],
     [
+      "a registry naming something no remote could be",
+      (path: string) => writeFileSync(path, '{ "Bio": "bio" }\n'),
+      /remotes\.json maps "Bio" to "bio", which is not a remote's project name/,
+    ],
+    [
+      "a registry whose alias no container could carry",
+      (path: string) => writeFileSync(path, '{ "bio": "bio-container" }\n'),
+      /remotes\.json maps "bio" to "bio-container", which is not a remote's/,
+    ],
+    [
       "a registry that cannot be read at all",
       (path: string) => mkdirSync(path),
       /remotes\.json could not be read: /,

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import {
   declaredProject,
   federationRemotes,
+  remoteGrammar,
   remoteRegistry,
 } from "./federation-registry.mjs";
 
@@ -128,6 +129,19 @@ function committedOrder(committed) {
     throw new Error(
       `${registryPath} is not a JSON object mapping each remote's project name to its federation alias`,
     );
+  // Only the keys are read from here, and only to order the derivation's own,
+  // but this file is an arbitrary document until something narrows it: the
+  // grammars it is held to are the ones it was written under, so a registry a
+  // consumer could not read back is reported here rather than reordering by it.
+  for (const [name, alias] of Object.entries(parsed))
+    if (
+      !remoteGrammar.remoteName.test(name) ||
+      typeof alias !== "string" ||
+      !remoteGrammar.federationAlias.test(alias)
+    )
+      throw new Error(
+        `${registryPath} maps ${JSON.stringify(name)} to ${JSON.stringify(alias)}, which is not a remote's project name and the Module Federation container it publishes under`,
+      );
   return Object.keys(parsed);
 }
 

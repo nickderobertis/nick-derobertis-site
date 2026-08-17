@@ -10,8 +10,6 @@
 
 Use pnpm; never add backend or runtime API infrastructure. The shell owns routing and layout. It consumes five route remotes; Home is itself a host for seven feature remotes. Remotes expose only route pages and compose only declared child remotes. Libraries flow `shared -> layout -> shell`, enforced by Nx tags. See `docs/architecture.md`.
 
-A remote is defined by its own `project.json` metadata — the federation alias it publishes under and the library tags its scope admits — and no root file may restate which projects are remotes; derive that list instead.
-
 Visual regression uses screencomp's canonical reusable workflow
 (`nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5`)
 via `.github/workflows/visual-docs.yml`, superseding the prior hand-rolled
