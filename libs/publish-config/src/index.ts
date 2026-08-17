@@ -19,4 +19,4 @@ export {
   validatedRemote,
   validatedRemoteRegistry,
   validatedWorkdir,
-} from "./publish-fragment";
+} from "./publish-fragment.ts";

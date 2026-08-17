@@ -3,10 +3,11 @@ import { existsSync, writeFileSync } from "node:fs";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join, normalize, resolve, sep } from "node:path";
-// The publish CLI loads this module through Node's type stripping, where a
-// workspace alias does not resolve, so the one build contract this library
-// depends on is reached by the path Node itself resolves.
-// eslint-disable-next-line @nx/enforce-module-boundaries -- This publish path reads the canonical fragment contract directly because Node type stripping cannot resolve workspace aliases.
+// The publish CLI loads this module through Node's type stripping. This library
+// is a workspace package, so its own entry point resolves by alias there;
+// build-config is not, so the one build contract this library depends on is
+// reached by the path Node itself resolves.
+// eslint-disable-next-line @nx/enforce-module-boundaries -- This publish path reads the canonical fragment contract directly because Node type stripping cannot resolve a tsconfig alias into a library that is not a workspace package.
 import { fragmentContractSchema } from "../../build-config/src/fragment-contract.ts";
 
 // llmlint: ignore-block[changed_behavior_has_e2e] The remote registry is a build-time config file with no browser interface: a malformed manifest is rejected before any lane writes bytes, so no artifact and nothing servable exists on that path. publish-fragment.spec.ts drives the derived lane list through the real exported API, and publish-lanes.spec.ts drives it through the real selection CLI.

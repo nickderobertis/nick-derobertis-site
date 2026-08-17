@@ -4,7 +4,7 @@ import {
   contentStoreBranch,
   contentStoreCheckout,
   publishWorkdirDefault,
-} from "../../libs/publish-config/src/publish-fragment.ts";
+} from "@site/publish-config";
 
 // The content-store branch, the deploy lane's working copy of it, and the
 // scratch repository a publish lane pushes from are named in five places that

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { publishableApps } from "../../libs/publish-config/src/publish-fragment.ts";
+import { publishableApps } from "@site/publish-config";
 
 // Turn `nx show projects --affected --with-target build --json` (a JSON array of
 // project names on stdin) into the `publish` matrix of .github/workflows/pages.yml.

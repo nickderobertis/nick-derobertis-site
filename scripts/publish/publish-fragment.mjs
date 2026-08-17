@@ -1,7 +1,4 @@
-import {
-  publishFragment,
-  publishOptionsFromEnv,
-} from "../../libs/publish-config/src/publish-fragment.ts";
+import { publishFragment, publishOptionsFromEnv } from "@site/publish-config";
 
 // One publish lane: write this app's already-built bytes to its own subtree on
 // the content-store branch and nothing else. The compose-and-deploy lane reads
