@@ -1,6 +1,14 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { describe, expect, test } from "vitest";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { describe, expect, onTestFinished, test } from "vitest";
 
 // The affected-only economics of the Pages deploy. `.github/workflows/pages.yml`
 // asks exactly one question — `just publish-lanes` for a manual dispatch that
@@ -68,21 +76,99 @@ function affectedProjects(...range: string[]): string[] {
   );
 }
 
+/** Whether this checkout actually has the commit a revision names. */
+function resolvesToCommit(revision: string, repository: string): boolean {
+  return (
+    spawnSync(
+      "git",
+      ["rev-parse", "--verify", "--quiet", `${revision}^{commit}`],
+      { cwd: repository, encoding: "utf8" },
+    ).status === 0
+  );
+}
+
 /**
  * A push range that provably reaches the shared libraries, which is the case
  * lane selection has to get right. It is derived from history rather than
  * assumed of the last commit, because a documentation-only commit affects no
  * library and would leave the interesting case untested.
+ *
+ * A checkout carries the commits it was fetched with, and the parent of the
+ * newest library commit is not always one of them: a shallow clone stops at a
+ * boundary whose parent was never fetched, and CI has refused `<sha>~1` for a
+ * commit the checkout itself had. So which commit a range can be cut from is
+ * read from the checkout rather than assumed of the newest, and the range is
+ * built from the newest library commit whose parent is actually present.
+ *
+ * A checkout with no such commit is told which one it is missing, instead of
+ * handing an unresolvable revision to Nx and surfacing several layers down as
+ * an ambiguous git argument naming the range but not what is wrong with it.
  */
-function rangeReachingSharedLibraries(): [string, string] {
-  const head = execFileSync("git", ["log", "-1", "--format=%H", "--", "libs"], {
+function rangeReachingSharedLibraries(repository = "."): [string, string] {
+  const commits = execFileSync("git", ["log", "--format=%H", "--", "libs"], {
+    cwd: repository,
     encoding: "utf8",
-  }).trim();
-  if (!/^[0-9a-f]{40}$/.test(head))
+  })
+    .split("\n")
+    .filter((line) => /^[0-9a-f]{40}$/.test(line));
+  const [newest] = commits;
+  if (!newest)
     throw new Error(
       "no commit in the available history touches libs/, so lane selection cannot be proven against an affected library",
     );
+  const head = commits.find((commit) =>
+    resolvesToCommit(`${commit}~1`, repository),
+  );
+  if (!head)
+    throw new Error(
+      `none of the ${commits.length} commit(s) touching libs/ has its parent in this checkout, so no push range reaching a shared library can be built from it. The newest is ${newest}, whose parent ${newest}~1 is missing; deepen the checkout and rerun just test`,
+    );
   return [`${head}~1`, head];
+}
+
+/**
+ * A checkout whose history stops inside the library commits, which is what a
+ * shallow clone hands a CI job and what this workspace's own checkout —
+ * carrying its whole history — can never be. `depth` is how many commits the
+ * clone keeps, so a depth of one leaves the newest library commit grafted with
+ * no parent, and a deeper one leaves that parent present.
+ *
+ * These two are the reachable ends of the search above. A checkout missing a
+ * parent partway up the library history, which is what would make that search
+ * step past its first candidate, cannot be built here: git grafts a shallow
+ * clone at the oldest commit it kept, so the gap is always at the bottom. That
+ * step stays because CI has produced exactly that gap higher up by some means
+ * this fixture cannot reproduce.
+ */
+function checkoutOfLibraryHistory(depth: number): string {
+  const origin = mkdtempSync(join(tmpdir(), "publish-lanes-origin-"));
+  const checkout = mkdtempSync(join(tmpdir(), "publish-lanes-checkout-"));
+  onTestFinished(() => {
+    for (const directory of [origin, checkout])
+      rmSync(directory, { force: true, recursive: true });
+  });
+  const inOrigin = (...args: string[]) =>
+    execFileSync("git", args, { cwd: origin, encoding: "utf8" });
+  inOrigin("init", "--quiet", "--initial-branch=master");
+  inOrigin("config", "user.email", "publish-lanes@example.test");
+  inOrigin("config", "user.name", "Publish lanes fixture");
+  mkdirSync(join(origin, "libs"), { recursive: true });
+  for (const revision of ["first", "second", "third"]) {
+    writeFileSync(
+      join(origin, "libs", "shared.ts"),
+      `export const shared = "${revision}";\n`,
+    );
+    inOrigin("add", "-A");
+    inOrigin("commit", "--quiet", "-m", `feat(libs): the ${revision} revision`);
+  }
+  // A file:// URL rather than a path, because git only honours --depth against
+  // a transport that can serve a shallow history.
+  execFileSync(
+    "git",
+    ["clone", "--quiet", `--depth=${depth}`, `file://${origin}`, checkout],
+    { encoding: "utf8" },
+  );
+  return checkout;
 }
 
 function registeredApps(): string[] {
@@ -122,6 +208,35 @@ describe("publish lane selection", () => {
     // Two Nx graph loads in one test, which the full gate runs alongside three
     // other projects; the default 5s budget is for in-process work, not this.
   }, 180_000);
+
+  // The range above is cut from whatever history the checkout carries, and a
+  // shallow one does not carry the parent it needs. That used to reach Nx as
+  // `<sha>~1` and die inside it as an ambiguous git argument, naming the range
+  // but not what was wrong with it or where to fix it.
+  test("a checkout without the parent it needs names the missing commit", () => {
+    const checkout = checkoutOfLibraryHistory(1);
+    const grafted = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: checkout,
+      encoding: "utf8",
+    }).trim();
+
+    expect(() => rangeReachingSharedLibraries(checkout)).toThrow(
+      `whose parent ${grafted}~1 is missing`,
+    );
+    expect(() => rangeReachingSharedLibraries(checkout)).toThrow(
+      /none of the 1 commit\(s\) touching libs\/.*deepen the checkout/s,
+    );
+  }, 30_000);
+
+  test("a checkout that carries that parent yields the range", () => {
+    const checkout = checkoutOfLibraryHistory(2);
+    const head = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: checkout,
+      encoding: "utf8",
+    }).trim();
+
+    expect(rangeReachingSharedLibraries(checkout)).toEqual([`${head}~1`, head]);
+  }, 30_000);
 
   test("a range that does not resolve to commits is refused before Nx runs", () => {
     const result = spawnSync(
