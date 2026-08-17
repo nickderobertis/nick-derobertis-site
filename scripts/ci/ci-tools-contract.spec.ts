@@ -14,6 +14,10 @@ import { z } from "zod";
 const workspace = path.resolve(import.meta.dirname, "../..");
 const script = path.join(workspace, "scripts/ci/setup-ci-tools.sh");
 const installJustScript = path.join(workspace, "scripts/ci/install-just.sh");
+const resolveJustTagScript = path.join(
+  workspace,
+  "scripts/ci/resolve-just-tag.sh",
+);
 const digestSchema = z.object({
   x86_64: z.string().regex(/^[0-9a-f]{64}$/),
   aarch64: z.string().regex(/^[0-9a-f]{64}$/),
@@ -212,6 +216,10 @@ describe("just installer boundary", () => {
 
     expect(result.status, result.stderr).toBe(0);
     expect(existsSync(path.join(binDirectory, "just"))).toBe(true);
+    // The version installed is the one this run resolved from the live release
+    // document, so hold it to a release tag here: an API URL reaching the
+    // installer downloads a 404 page instead of a release.
+    expect(result.stderr).toMatch(/^install: Tag: +v?\d+\.\d+\.\d+$/m);
   }, 60_000);
 
   // The destination comes from the environment, so it is constrained before the
@@ -246,6 +254,70 @@ describe("just installer boundary", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(
       "set XDG_BIN_HOME to a writable directory and retry",
+    );
+  });
+});
+
+// The release document is the one input a live API cannot be asked to vary, so
+// the resolver's own boundary — a document on stdin, a tag on stdout — is
+// driven directly. The script is the real one; only the document is authored.
+describe("just release tag resolution", () => {
+  // Field order and line breaks as GitHub serves them: the API URL comes first,
+  // which is exactly what a parse that reads by position rather than by name
+  // hands to the installer.
+  const releaseDocument = {
+    url: "https://api.github.com/repos/casey/just/releases/364478524",
+    assets_url:
+      "https://api.github.com/repos/casey/just/releases/364478524/assets",
+    html_url: "https://github.com/casey/just/releases/tag/1.58.0",
+    id: 364478524,
+    tag_name: "1.58.0",
+    name: "1.58.0",
+  };
+
+  function resolveTag(document: string) {
+    return spawnSync(resolveJustTagScript, [], {
+      cwd: workspace,
+      encoding: "utf8",
+      input: document,
+    });
+  }
+
+  it.each([
+    ["as GitHub pretty-prints it", JSON.stringify(releaseDocument, null, 2)],
+    ["re-serialized onto a single line", JSON.stringify(releaseDocument)],
+  ])("resolves the release tag from a document %s", (_, document) => {
+    const result = resolveTag(document);
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout.trim()).toBe("1.58.0");
+  });
+
+  it.each([
+    [
+      "a document carrying no tag",
+      JSON.stringify({ url: releaseDocument.url }),
+    ],
+    [
+      "an error the API answered with instead",
+      JSON.stringify({ message: "API rate limit exceeded", status: "403" }),
+    ],
+    [
+      "a tag that is an API URL rather than a release",
+      JSON.stringify({ tag_name: releaseDocument.url }),
+    ],
+    [
+      "a tag that names a branch rather than a release",
+      JSON.stringify({ tag_name: "master" }),
+    ],
+    ["a body that is not a release document at all", "<html>404</html>"],
+  ])("resolves nothing from %s", (_, document) => {
+    const result = resolveTag(document);
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toContain(
+      "expected a release tag like '1.58.0' under \"tag_name\"",
     );
   });
 });
