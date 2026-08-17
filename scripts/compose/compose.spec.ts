@@ -231,6 +231,7 @@ test("compose stages every app's bundle and withholds its fragment inputs", asyn
  * the artifact it writes into: the exported API above is reached with a caller
  * that already owns its output.
  */
+// llmlint: ignore[work_goes_through_command_surface] This is the command surface the collision happens through: `shell:prerender` runs `node scripts/compose/compose.mjs` itself, and the `just compose` recipe is the deploy lane's separate entry, which confines its output beneath dist/ and so cannot be pointed at the isolated artifact these cases own.
 function composeCommand(fragmentRoot: string, output: string) {
   return spawnSync(
     process.execPath,

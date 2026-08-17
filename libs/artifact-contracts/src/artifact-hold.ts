@@ -10,6 +10,8 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { z } from "zod";
 
+// llmlint: ignore-file[changed_behavior_has_e2e] Nothing here has a browser interface: a hold changes no byte an artifact carries, and it is taken and dropped before and after the window in which anything is served. Every path it adds ends in a run that wrote nothing, so the artifact a visitor reaches is the one the other run composed, unchanged and already driven by site.spec.ts on both render paths. The lifecycle itself is driven through the real compose and serve CLIs by compose.spec.ts and serve-e2e.spec.ts.
+
 /**
  * Who may touch one composed artifact directory at a time.
  *
@@ -34,11 +36,18 @@ import { z } from "zod";
  * `dist/apps/shell` from several apps' Playwright servers at once, and that is
  * correct, because they only read it. Composing while any of them reads is not.
  */
-export type ArtifactActivity = "composing" | "serving";
+const activitySchema = z.enum(["composing", "serving"]);
+
+/**
+ * The activity a run claims an artifact for. Every caller and every hold this
+ * module reads back are held to the one enum, so a third activity is added
+ * where it is checked rather than in a union beside it.
+ */
+export type ArtifactActivity = z.infer<typeof activitySchema>;
 
 const holdSchema = z.object({
   pid: z.number().int().positive(),
-  activity: z.enum(["composing", "serving"]),
+  activity: activitySchema,
   root: z.string().min(1),
 });
 
@@ -77,14 +86,15 @@ function running(pid: number): boolean {
 }
 
 /**
- * Every hold on this directory whose owner is still running.
+ * Drops every hold on this directory that no run still owns, and answers with
+ * the ones that are left.
  *
  * A hold left behind by a killed run, and one that no longer reads back as the
- * record this module wrote, are both removed: neither names a process whose
- * liveness can be checked, so keeping either would block every later compose on
- * the machine.
+ * record this module wrote, are both deleted here rather than merely skipped:
+ * neither names a process whose liveness can be checked, so keeping either
+ * would block every later compose on the machine.
  */
-function liveHolds(directory: string): ArtifactHold[] {
+function pruneToLiveHolds(directory: string): ArtifactHold[] {
   const live: ArtifactHold[] = [];
   for (const entry of readdirSync(directory)) {
     const file = join(directory, entry);
@@ -97,7 +107,15 @@ function liveHolds(directory: string): ArtifactHold[] {
         }
       })(),
     );
-    if (held.success && running(held.data.pid)) live.push(held.data);
+    // The root is checked against the directory the record was found in, not
+    // trusted from the record: a hold naming some other artifact is not a hold
+    // on this one, whatever it says about itself.
+    if (
+      held.success &&
+      artifactHoldDirectory(held.data.root) === directory &&
+      running(held.data.pid)
+    )
+      live.push(held.data);
     else rmSync(file, { force: true, recursive: true });
   }
   return live;
@@ -116,7 +134,7 @@ export function holdArtifactRoot(
 ): () => void {
   const directory = artifactHoldDirectory(root);
   mkdirSync(directory, { recursive: true });
-  const [blocking] = liveHolds(directory).filter(
+  const [blocking] = pruneToLiveHolds(directory).filter(
     (held) =>
       held.pid !== process.pid &&
       (activity === "composing" || held.activity === "composing"),

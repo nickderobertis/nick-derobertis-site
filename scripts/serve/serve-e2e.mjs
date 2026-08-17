@@ -61,6 +61,7 @@ const server = createSiteServer({
 // only ever reading it. Claiming it as a reader is what makes a compose started
 // by a second, overlapping run refuse rather than replace these bytes midway
 // through the journey reading them.
+// llmlint: ignore[changed_behavior_has_e2e] This claim has no browser interface: it changes no byte the server answers with and is taken before it listens, so a browser cannot tell a held artifact from an unheld one. What it protects is exactly what the browser journeys assert — serve-e2e.spec.ts drives this real CLI against the real compose CLI over one artifact, and site.spec.ts plus every feature journey drive that artifact's routes on both render paths.
 const release = holdArtifactRoot(root, "serving");
 process.on("exit", release);
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.

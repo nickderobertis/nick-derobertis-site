@@ -201,9 +201,15 @@ describe("the canonical remote registry", () => {
     // scripts/workspace/federation-plugin.mjs is what puts the fan-in back, so
     // a root file that has stopped naming remotes only because the derivation
     // was dropped would read exactly like one that never named them.
-    expect(JSON.parse(nxConfiguration ?? "").plugins).toContain(
-      "./scripts/workspace/federation-plugin.mjs",
-    );
+    // JSON.parse establishes syntax and nothing else, so the one field this
+    // reads is narrowed before it is read: a nx.json holding null, a list, or a
+    // plugins that is not a list of paths is a finding of its own, not a
+    // registration this assertion should report as missing.
+    expect(
+      z
+        .object({ plugins: z.array(z.string()) })
+        .parse(JSON.parse(nxConfiguration ?? "")).plugins,
+    ).toContain("./scripts/workspace/federation-plugin.mjs");
     const restating = remotes
       .flatMap((remote) => [
         ...(nxConfiguration?.includes(`"${remote.name}"`)

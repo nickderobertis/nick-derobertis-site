@@ -1,4 +1,4 @@
-import { type ChildProcess, spawn } from "node:child_process";
+import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { once } from "node:events";
 import {
   copyFileSync,
@@ -14,8 +14,6 @@ import path from "node:path";
 import { chromium } from "@playwright/test";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
-/* eslint-disable-next-line @nx/enforce-module-boundaries -- This spec claims the artifact by the same direct source path Node type stripping resolves for the CLI, which cannot resolve a tsconfig alias into a library that is not a workspace package. */
-import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 
 const workspace = path.resolve(import.meta.dirname, "../..");
 const addressSchema = z.object({
@@ -81,24 +79,40 @@ async function waitUntilReady(url: string) {
   throw new Error(`serve-e2e did not become ready at ${url}`);
 }
 
-function startServer(port: number, stdio: "ignore" | "pipe" = "ignore") {
+function startServer(port: number) {
   const child = spawn(process.execPath, [serverScript], {
     cwd: workspace,
     env: { ...process.env, PORT: String(port) },
-    stdio,
+    stdio: "ignore",
   });
   children.push(child);
   return child;
 }
 
-/** Everything the CLI reported before it gave up, as a supervising run sees it. */
-async function diagnostics(child: ChildProcess) {
-  let reported = "";
-  child.stderr?.on("data", (chunk: Buffer) => {
-    reported += chunk.toString();
-  });
-  const [exitCode] = await once(child, "exit");
-  return { exitCode, reported };
+/**
+ * A second run reaching the compose step over the artifact this one serves,
+ * run exactly as `shell:prerender` runs it. Its content store is deliberately
+ * absent, so the only thing that can refuse it before it reports a missing
+ * store is the claim the running server took on the directory.
+ */
+// llmlint: ignore[work_goes_through_command_surface] This is the command surface the collision happens through: `shell:prerender` runs `node scripts/compose/compose.mjs` itself, and the `just compose` recipe is the deploy lane's separate entry, which confines its output beneath dist/ and so cannot be pointed at the disposable tree this spec serves.
+function composeOverServedTree() {
+  return spawnSync(
+    process.execPath,
+    [
+      "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+      "scripts/compose/compose.mjs",
+    ],
+    {
+      cwd: workspace,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        COMPOSE_OUTPUT: path.join(tree, "dist/apps/shell"),
+        FRAGMENT_ROOT: path.join(tree, "no-content-store"),
+      },
+    },
+  );
 }
 
 describe("serve-e2e lifecycle", () => {
@@ -159,27 +173,29 @@ describe("serve-e2e lifecycle", () => {
     }
   }, 30_000);
 
-  // The other half of the same hold: a compose replaces the route documents,
-  // `cv-data`, and `remotes` in place, so a server started midway through one
-  // would answer from a tree that is half two compositions.
-  it("refuses to serve an artifact another run is composing", async () => {
-    const release = holdArtifactRoot(
-      path.join(tree, "dist/apps/shell"),
-      "composing",
+  // A compose removes and restages the route documents, `cv-data`, and
+  // `remotes` in place, so one running beside this server would answer a
+  // journey from a tree that is half of two compositions.
+  it("claims its artifact so a second run's compose refuses instead of replacing it", async () => {
+    const port = await availablePort();
+    const child = startServer(port);
+    await waitUntilReady(`http://127.0.0.1:${port}/nick-derobertis-site/`);
+
+    const refused = composeOverServedTree();
+
+    expect(refused.status).not.toBe(0);
+    expect(refused.stderr).toContain(
+      `held by process ${child.pid}, which is serving it`,
     );
 
-    try {
-      const { exitCode, reported } = await diagnostics(
-        startServer(await availablePort(), "pipe"),
-      );
-
-      expect(exitCode).toBe(1);
-      expect(reported).toContain(
-        `held by process ${process.pid}, which is composing it`,
-      );
-    } finally {
-      release();
-    }
+    // Released on shutdown: the claim outlives no run, so the next compose over
+    // this artifact reaches its own inputs and reports on those instead.
+    const exited = once(child, "exit");
+    child.kill("SIGTERM");
+    await exited;
+    expect(composeOverServedTree().stderr).toContain(
+      "Could not read the published shell fragment",
+    );
   }, 30_000);
 
   it("answers an unrouted path with the artifact's recovery document", async () => {

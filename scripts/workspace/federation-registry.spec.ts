@@ -91,7 +91,7 @@ function derive(configurations: readonly unknown[]) {
  * only one that reads a `project.json` off disk rather than being handed a
  * document that has already parsed.
  */
-function readApps(documents: Readonly<Record<string, string>>) {
+function deriveOverWrittenApps(documents: Readonly<Record<string, string>>) {
   const root = mkdtempSync(join(tmpdir(), "federation-registry-apps-"));
   scratch.push(root);
   cpSync(
@@ -300,7 +300,7 @@ describe("the federation declaration each remote owns", () => {
 
 describe("a project.json the registry reads off disk", () => {
   it("derives the registry from the apps directory eslint resolves", () => {
-    const result = readApps({
+    const result = deriveOverWrittenApps({
       bio: JSON.stringify(remote("bio", "bio", ["type:shared"])),
       shell: JSON.stringify(project("shell", { description: "the host" })),
     });
@@ -314,7 +314,7 @@ describe("a project.json the registry reads off disk", () => {
   });
 
   it("names the file and the next action when one cannot be parsed", () => {
-    const result = readApps({ bio: '{ "name": "bio", }' });
+    const result = deriveOverWrittenApps({ bio: '{ "name": "bio", }' });
 
     expect(result.status).not.toBe(0);
     // eslint and the Nx plugin both enter here, and a bare parser diagnostic

@@ -58,7 +58,9 @@ export function declaredProject(configuration, source) {
     reject(source, "declares no Nx project name");
   if (
     metadata !== undefined &&
-    (typeof metadata !== "object" || metadata === null)
+    (typeof metadata !== "object" ||
+      metadata === null ||
+      Array.isArray(metadata))
   )
     reject(source, "declares a metadata that is not an object");
   if (
@@ -69,7 +71,7 @@ export function declaredProject(configuration, source) {
     reject(source, "declares a tags that is not a list of Nx tags");
   if (
     targets !== undefined &&
-    (typeof targets !== "object" || targets === null)
+    (typeof targets !== "object" || targets === null || Array.isArray(targets))
   )
     reject(source, "declares a targets that is not an object");
   const declaredTargets = Object.keys(targets ?? {});

@@ -20,8 +20,8 @@ const roots: string[] = [];
 /** The other live run every case below is held against: this one's parent. */
 const otherRun = process.ppid;
 
-/** A root no run has ever held, so each case starts from no holds at all. */
-function artifactRoot() {
+/** Makes a root no run has ever held, so each case starts from no holds at all. */
+function createArtifactRoot() {
   const root = mkdtempSync(join(tmpdir(), "artifact-hold-"));
   roots.push(root);
   return root;
@@ -69,7 +69,7 @@ describe("holding a composed artifact directory", () => {
   it("lets every run that only serves one artifact hold it together", () => {
     // What `nx affected -t e2e --parallel=3` does: several apps' Playwright
     // servers answer from one composed artifact, and none of them writes to it.
-    const root = artifactRoot();
+    const root = createArtifactRoot();
     writeHold(root, otherRun);
 
     expect(() => hold(root, "serving")).not.toThrow();
@@ -80,7 +80,7 @@ describe("holding a composed artifact directory", () => {
   });
 
   it("refuses to compose an artifact another run is serving", () => {
-    const root = artifactRoot();
+    const root = createArtifactRoot();
     writeHold(root, otherRun);
 
     expect(() => hold(root, "composing")).toThrow(
@@ -91,7 +91,7 @@ describe("holding a composed artifact directory", () => {
   });
 
   it("refuses to serve an artifact another run is composing", () => {
-    const root = artifactRoot();
+    const root = createArtifactRoot();
     writeHold(
       root,
       otherRun,
@@ -104,7 +104,7 @@ describe("holding a composed artifact directory", () => {
   });
 
   it("never blocks a run on the hold it took itself", () => {
-    const root = artifactRoot();
+    const root = createArtifactRoot();
     hold(root, "serving");
 
     expect(() => hold(root, "composing")).not.toThrow();
@@ -115,7 +115,7 @@ describe("holding a composed artifact directory", () => {
     ["a record that no longer reads back as one", "not a hold at all"],
     ["a record naming no process that could be running", '{"pid":0}'],
   ])("composes over the hold left by %s", (_case, contents) => {
-    const root = artifactRoot();
+    const root = createArtifactRoot();
     const abandoned = writeHold(root, abandonedPid(), contents);
 
     expect(() => hold(root, "composing")).not.toThrow();
@@ -126,8 +126,29 @@ describe("holding a composed artifact directory", () => {
     );
   });
 
+  it("composes over a live hold that names some other artifact", () => {
+    const root = createArtifactRoot();
+    // Its process is this run's own parent, so only the root it names can be
+    // what tells this hold apart from one on the artifact being claimed.
+    const misplaced = writeHold(
+      root,
+      otherRun,
+      `${JSON.stringify({
+        pid: otherRun,
+        activity: "serving",
+        root: join(root, "somewhere-else"),
+      })}\n`,
+    );
+
+    expect(() => hold(root, "composing")).not.toThrow();
+
+    expect(readdirSync(artifactHoldDirectory(root))).not.toContain(
+      basename(misplaced),
+    );
+  });
+
   it("frees the artifact once, however often its release is called", () => {
-    const root = artifactRoot();
+    const root = createArtifactRoot();
     const release = hold(root, "serving");
 
     release();
@@ -138,7 +159,7 @@ describe("holding a composed artifact directory", () => {
   });
 
   it("keys one artifact directory apart from another beside it", () => {
-    const root = artifactRoot();
+    const root = createArtifactRoot();
 
     expect(artifactHoldDirectory(join(root, "shell"))).not.toBe(
       artifactHoldDirectory(join(root, "site")),
