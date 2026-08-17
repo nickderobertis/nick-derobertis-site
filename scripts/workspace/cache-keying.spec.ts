@@ -421,6 +421,7 @@ function outcomesOf(
     {
       encoding: "utf8",
       env: {
+        // llmlint: ignore[boundary_inputs_validated] The inherited environment is forwarded, never read: `pnpm exec nx` needs the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. The four values this run's answer depends on are set below it, from directories the test itself created, so they override whatever was inherited.
         ...process.env,
         NX_CACHE_DIRECTORY: join(cacheDirectory, "cache"),
         NX_DAEMON: "false",
