@@ -76,6 +76,23 @@ function affectedProjects(...range: string[]): string[] {
   );
 }
 
+/**
+ * A checkout's HEAD, narrowed to the commit hash the assertions below build
+ * their expected revisions out of. Git's answer is held to the same rule as the
+ * history read above it: a ref that resolved to something else, or to nothing,
+ * would otherwise be interpolated into an expectation and compared against a
+ * diagnostic that had every reason not to match it.
+ */
+function headCommit(repository: string): string {
+  const head = execFileSync("git", ["rev-parse", "HEAD"], {
+    cwd: repository,
+    encoding: "utf8",
+  }).trim();
+  if (!/^[0-9a-f]{40}$/.test(head))
+    throw new Error(`${repository} has no HEAD commit to build a range from`);
+  return head;
+}
+
 /** Whether this checkout actually has the commit a revision names. */
 function resolvesToCommit(revision: string, repository: string): boolean {
   return (
@@ -215,10 +232,7 @@ describe("publish lane selection", () => {
   // but not what was wrong with it or where to fix it.
   test("a checkout without the parent it needs names the missing commit", () => {
     const checkout = checkoutOfLibraryHistory(1);
-    const grafted = execFileSync("git", ["rev-parse", "HEAD"], {
-      cwd: checkout,
-      encoding: "utf8",
-    }).trim();
+    const grafted = headCommit(checkout);
 
     expect(() => rangeReachingSharedLibraries(checkout)).toThrow(
       `whose parent ${grafted}~1 is missing`,
@@ -230,10 +244,7 @@ describe("publish lane selection", () => {
 
   test("a checkout that carries that parent yields the range", () => {
     const checkout = checkoutOfLibraryHistory(2);
-    const head = execFileSync("git", ["rev-parse", "HEAD"], {
-      cwd: checkout,
-      encoding: "utf8",
-    }).trim();
+    const head = headCommit(checkout);
 
     expect(rangeReachingSharedLibraries(checkout)).toEqual([`${head}~1`, head]);
   }, 30_000);
