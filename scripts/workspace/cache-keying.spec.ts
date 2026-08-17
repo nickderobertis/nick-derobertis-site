@@ -628,7 +628,9 @@ describe("the probe measures the cache it established", () => {
     // nothing that changed. The gate passes no such flag, so it is set here
     // rather than left for a caller to set and for the tests below to fail on.
     vi.stubEnv("NX_SKIP_NX_CACHE", "true");
-    onTestFinished(() => vi.unstubAllEnvs());
+    onTestFinished(() => {
+      vi.unstubAllEnvs();
+    });
 
     expect(
       outcomesOf("shell", ["lint"], cacheDirectory).get("shell:lint"),
