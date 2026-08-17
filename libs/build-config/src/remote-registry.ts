@@ -11,6 +11,7 @@ import { createRequire } from "node:module";
 export function validatedRemoteRegistry(
   value: unknown,
 ): Record<string, string> {
+  // llmlint: ignore[changed_behavior_has_e2e] This guard is a build-time rejection, so its only observable effect is a refused build and there is no browser render path to drive. The shape it newly refuses is a registry declaring no remote, and with no remote declared neither a standalone remote document nor a host-composed pane exists to render: the artifact a browser test would assert against is exactly what the refusal prevents from being built. remote-registry.spec.ts covers the rejection both through this function and through a real Node process loading this real module against an empty remotes.json, which is where the guard actually runs.
   if (
     !value ||
     typeof value !== "object" ||
