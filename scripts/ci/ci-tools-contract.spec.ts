@@ -215,11 +215,24 @@ describe("just installer boundary", () => {
     });
 
     expect(result.status, result.stderr).toBe(0);
-    expect(existsSync(path.join(binDirectory, "just"))).toBe(true);
-    // The version installed is the one this run resolved from the live release
-    // document, so hold it to a release tag here: an API URL reaching the
-    // installer downloads a 404 page instead of a release.
-    expect(result.stderr).toMatch(/^install: Tag: +v?\d+\.\d+\.\d+$/m);
+    // A successful run says one thing — the version installed and where it
+    // went — and the verified installer's step-by-step narration stays unspoken
+    // until it is explaining a failure.
+    const reported =
+      /^install-just: installed just v?(\d+\.\d+\.\d+) into (.+)$/.exec(
+        result.stdout.trim(),
+      );
+    expect(reported?.[2], result.stdout).toBe(binDirectory);
+    expect(result.stderr).toBe("");
+    // That version is the one this run resolved from the live release document,
+    // and it is the version the installed binary itself answers with: an API
+    // URL reaching the installer downloads a 404 page rather than a release, so
+    // no `just` would answer here at all.
+    expect(
+      execFileSync(path.join(binDirectory, "just"), ["--version"], {
+        encoding: "utf8",
+      }).trim(),
+    ).toBe(`just ${reported?.[1]}`);
   }, 60_000);
 
   // The destination comes from the environment, so it is constrained before the
@@ -295,8 +308,15 @@ describe("just release tag resolution", () => {
     name: "1.58.0",
   };
 
+  // The resolver keeps no copy of the endpoint — the caller that fetched the
+  // document names it, and the installer is the only place that URL is
+  // declared. So these specs pass a source of their own and hold every
+  // rejection to the source they passed, which is what proves the diagnostic
+  // points at the request that was actually made.
+  const documentSource = "https://api.example.invalid/repos/casey/just/latest";
+
   function resolveTag(document: string) {
-    return spawnSync(resolveJustTagScript, [], {
+    return spawnSync(resolveJustTagScript, [documentSource], {
       cwd: workspace,
       encoding: "utf8",
       input: document,
@@ -354,19 +374,40 @@ describe("just release tag resolution", () => {
     expect(result.stdout).toBe("");
     expect(result.stderr).toContain(diagnosis);
     expect(result.stderr).toContain(
-      "check that https://api.github.com/repos/casey/just/releases/latest answered with a release document",
+      `check that ${documentSource} answered with a release document`,
+    );
+  });
+
+  // Without a source a rejection could only gesture at the request, so the
+  // resolver refuses before it reads anything rather than reporting a document
+  // problem the caller cannot trace back to an endpoint.
+  it("resolves nothing when no endpoint is named", () => {
+    const result = spawnSync(resolveJustTagScript, [], {
+      cwd: workspace,
+      encoding: "utf8",
+      input: JSON.stringify(releaseDocument),
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toContain(
+      "name the endpoint the release document was read from as the only argument",
     );
   });
 
   // The document is parsed rather than pattern-matched, so the parser is a
   // prerequisite the script states outright instead of failing as a missing tag.
   it("reports the missing parser rather than a missing tag", () => {
-    const result = spawnSync("/bin/bash", [resolveJustTagScript], {
-      cwd: workspace,
-      encoding: "utf8",
-      env: { PATH: temporaryDirectory("just-no-node.") },
-      input: JSON.stringify(releaseDocument),
-    });
+    const result = spawnSync(
+      "/bin/bash",
+      [resolveJustTagScript, documentSource],
+      {
+        cwd: workspace,
+        encoding: "utf8",
+        env: { PATH: temporaryDirectory("just-no-node.") },
+        input: JSON.stringify(releaseDocument),
+      },
+    );
 
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");

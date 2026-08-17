@@ -36,5 +36,11 @@ actual_sha256="$(sha256sum "$installer" | cut -d ' ' -f 1)"
 api_auth=()
 if [[ -n "$github_token" ]]; then api_auth=(--header "Authorization: Bearer $github_token"); fi
 curl --proto '=https' --tlsv1.2 -fsSL ${api_auth[@]+"${api_auth[@]}"} -o "$release" "$latest_release" || { echo "install-just: could not read the latest just release from GitHub; check network access and retry" >&2; exit 1; }
-tag="$("$resolve_tag" <"$release")" || exit 1
-bash "$installer" --tag "$tag" --to "$bin_dir" >/dev/null || { echo "install-just: verified installer failed; check $bin_dir permissions and retry" >&2; exit 1; }
+tag="$("$resolve_tag" "$latest_release" <"$release")" || exit 1
+# The verified installer narrates every step it takes, and none of that is
+# something a caller acts on once it has succeeded. Hold the narration until it
+# is a diagnosis — report it with the failure it explains — and answer a
+# successful run with the one fact the caller asked for: the version now
+# installed, and where.
+install_output="$(bash "$installer" --tag "$tag" --to "$bin_dir" 2>&1)" || { printf '%s\n' "$install_output" >&2; echo "install-just: verified installer failed; check $bin_dir permissions and retry" >&2; exit 1; }
+printf 'install-just: installed just %s into %s\n' "$tag" "$bin_dir"
