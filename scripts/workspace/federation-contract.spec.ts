@@ -52,6 +52,44 @@ const graphSchema = z.object({
   }),
 });
 
+// Both the paths git prints and the declarations they hold are read back as
+// evidence for how many remotes the graph must have found, so each is narrowed
+// where it enters this spec rather than trusted because a committed file
+// produced it.
+const workspacePath = z.string().regex(/^[\w.-]+(?:\/[\w.-]+)*$/);
+
+const declaredAppSchema = z.object({
+  name: projectName,
+  metadata: z
+    .object({ federation: z.object({ alias: z.string() }).optional() })
+    .optional(),
+});
+
+/**
+ * The remotes as their own `project.json` files declare them, read off disk the
+ * way `eslint.config.mjs` reads them. Every expectation in this file is checked
+ * against the project graph, so how many remotes that graph should have found
+ * is the one fact it cannot also supply: it comes from the declarations
+ * instead, which is where a remote is added or retired in a single edit.
+ */
+function declaredRemoteNames() {
+  return workspacePath
+    .array()
+    .parse(
+      execFileSync("git", ["ls-files", "apps/*/project.json"], {
+        encoding: "utf8",
+      })
+        .split("\n")
+        .filter(Boolean),
+    )
+    .map((path) =>
+      declaredAppSchema.parse(JSON.parse(readFileSync(path, "utf8"))),
+    )
+    .filter((declared) => declared.metadata?.federation)
+    .map((declared) => declared.name)
+    .sort((one, other) => one.localeCompare(other));
+}
+
 type Project = z.infer<typeof projectSchema> & { name: string };
 
 let projects: Project[] = [];
@@ -146,7 +184,11 @@ describe("the canonical remote registry", () => {
     // The shell hosts remotes rather than being one, so a registry naming it
     // would give it a federation container and a publish lane it cannot fill.
     expect(remotes.map((remote) => remote.name)).not.toContain("shell");
-    expect(remotes).toHaveLength(12);
+    // A count written down here would be a fifth restatement of the list this
+    // change stopped four files from keeping, so it is read from the remotes'
+    // own declarations: a remote that reaches the graph without declaring
+    // itself, or a declaration the graph never picked up, fails here.
+    expect(remotes).toHaveLength(declaredRemoteNames().length);
   });
 
   it("leaves no root file restating which projects are remotes", async () => {
