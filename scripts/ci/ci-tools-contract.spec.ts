@@ -293,31 +293,65 @@ describe("just release tag resolution", () => {
     expect(result.stdout.trim()).toBe("1.58.0");
   });
 
+  // Each rejected body is the shape the API really answers with in that
+  // failure, and each is held to the reason it is rejected for, so a document
+  // turned away for the wrong reason is not mistaken for a passing guard.
   it.each([
     [
-      "a document carrying no tag",
-      JSON.stringify({ url: releaseDocument.url }),
+      "a body that is not a release document at all",
+      "<html>404</html>",
+      "the response body is not JSON",
+    ],
+    [
+      "a body carrying a JSON array rather than a release",
+      JSON.stringify([releaseDocument]),
+      "the response body is JSON, but not the object a GitHub release document is",
     ],
     [
       "an error the API answered with instead",
       JSON.stringify({ message: "API rate limit exceeded", status: "403" }),
+      "these release fields are missing or mistyped: tag_name, html_url, assets_url, id",
+    ],
+    [
+      "a release document carrying no tag",
+      JSON.stringify({ ...releaseDocument, tag_name: undefined }),
+      "these release fields are missing or mistyped: tag_name",
     ],
     [
       "a tag that is an API URL rather than a release",
-      JSON.stringify({ tag_name: releaseDocument.url }),
+      JSON.stringify({ ...releaseDocument, tag_name: releaseDocument.url }),
+      `the tag_name in the release document is "${releaseDocument.url}", which is not a release tag`,
     ],
     [
       "a tag that names a branch rather than a release",
-      JSON.stringify({ tag_name: "master" }),
+      JSON.stringify({ ...releaseDocument, tag_name: "master" }),
+      'the tag_name in the release document is "master", which is not a release tag',
     ],
-    ["a body that is not a release document at all", "<html>404</html>"],
-  ])("resolves nothing from %s", (_, document) => {
+  ])("resolves nothing from %s", (_, document, diagnosis) => {
     const result = resolveTag(document);
 
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
+    expect(result.stderr).toContain(diagnosis);
     expect(result.stderr).toContain(
-      "expected a release tag like '1.58.0' under \"tag_name\"",
+      "check that https://api.github.com/repos/casey/just/releases/latest answered with a release document",
+    );
+  });
+
+  // The document is parsed rather than pattern-matched, so the parser is a
+  // prerequisite the script states outright instead of failing as a missing tag.
+  it("reports the missing parser rather than a missing tag", () => {
+    const result = spawnSync("/bin/bash", [resolveJustTagScript], {
+      cwd: workspace,
+      encoding: "utf8",
+      env: { PATH: temporaryDirectory("just-no-node.") },
+      input: JSON.stringify(releaseDocument),
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toContain(
+      "node is required to read the release document",
     );
   });
 });
