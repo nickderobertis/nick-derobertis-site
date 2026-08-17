@@ -4,10 +4,10 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
-  writeFileSync,
+  statSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { describe, expect, onTestFinished, test } from "vitest";
 
 // The affected-only economics of the Pages deploy. `.github/workflows/pages.yml`
@@ -45,17 +45,21 @@ function buildTargetNames(projectFile: string): string[] {
   return Object.keys(targets);
 }
 
-function publishLanes(...range: string[]): string[] {
+function publishLanes(range: string[] = [], env?: NodeJS.ProcessEnv): string[] {
   return projectNames(
     execFileSync("just", ["publish-lanes", ...range], {
       encoding: "utf8",
       timeout: 120_000,
+      env,
     }),
     "just publish-lanes",
   );
 }
 
-function affectedProjects(...range: string[]): string[] {
+function affectedProjects(
+  [base, head]: PushRange,
+  env: NodeJS.ProcessEnv,
+): string[] {
   return projectNames(
     execFileSync(
       "pnpm",
@@ -65,126 +69,163 @@ function affectedProjects(...range: string[]): string[] {
         "show",
         "projects",
         "--affected",
-        `--base=${range[0]}`,
-        `--head=${range[1]}`,
+        `--base=${base}`,
+        `--head=${head}`,
         "--with-target=build",
         "--json",
       ],
-      { encoding: "utf8", timeout: 120_000 },
+      { encoding: "utf8", timeout: 120_000, env },
     ),
     "nx show projects --affected",
   );
 }
 
 /**
- * A checkout's HEAD, narrowed to the commit hash the assertions below build
- * their expected revisions out of. Git's answer is held to the same rule as the
- * history read above it: a ref that resolved to something else, or to nothing,
- * would otherwise be interpolated into an expectation and compared against a
- * diagnostic that had every reason not to match it.
+ * Git's plumbing hands back object names this file spends as arguments to the
+ * next git command and as one end of the range under test, so each is narrowed
+ * to the hash it has to be before it is spent. An answer that was something
+ * else would otherwise reach Nx as a revision and surface several layers down
+ * as an ambiguous git argument, naming the range but not what is wrong with it.
  */
-function headCommit(repository: string): string {
-  const head = execFileSync("git", ["rev-parse", "HEAD"], {
-    cwd: repository,
-    encoding: "utf8",
-  }).trim();
-  if (!/^[0-9a-f]{40}$/.test(head))
-    throw new Error(`${repository} has no HEAD commit to build a range from`);
-  return head;
+function objectName(output: string, step: string): string {
+  const name = output.trim();
+  if (!/^[0-9a-f]{40}$/.test(name))
+    throw new Error(`git ${step} did not name an object: ${name || "nothing"}`);
+  return name;
 }
 
-function resolvesToCommit(revision: string, repository: string): boolean {
-  return (
-    spawnSync(
-      "git",
-      ["rev-parse", "--verify", "--quiet", `${revision}^{commit}`],
-      { cwd: repository, encoding: "utf8" },
-    ).status === 0
-  );
-}
+type PushRange = [base: string, head: string];
 
 /**
- * A push range that provably reaches the shared libraries, which is the case
- * lane selection has to get right. It is derived from history rather than
- * assumed of the last commit, because a documentation-only commit affects no
- * library and would leave the interesting case untested.
- *
- * A checkout carries the commits it was fetched with, and the parent of the
- * newest library commit is not always one of them: a shallow clone stops at a
- * boundary whose parent was never fetched, and CI has refused `<sha>~1` for a
- * commit the checkout itself had. So which commit a range can be cut from is
- * read from the checkout rather than assumed of the newest, and the range is
- * built from the newest library commit whose parent is actually present.
- *
- * A checkout with no such commit is told which one it is missing, instead of
- * handing an unresolvable revision to Nx and surfacing several layers down as
- * an ambiguous git argument naming the range but not what is wrong with it.
+ * Where this repository keeps its own objects, narrowed before it is spent as
+ * an alternate store. A value that was not an existing absolute directory would
+ * leave the fixture's `read-tree` unable to reach HEAD and fail several commands
+ * later, naming neither the path nor where it came from.
  */
-function rangeReachingSharedLibraries(repository = "."): [string, string] {
-  const commits = execFileSync("git", ["log", "--format=%H", "--", "libs"], {
-    cwd: repository,
-    encoding: "utf8",
-  })
-    .split("\n")
-    .filter((line) => /^[0-9a-f]{40}$/.test(line));
-  const [newest] = commits;
-  if (!newest)
-    throw new Error(
-      "no commit in the available history touches libs/, so lane selection cannot be proven against an affected library",
-    );
-  const head = commits.find((commit) =>
-    resolvesToCommit(`${commit}~1`, repository),
-  );
-  if (!head)
-    throw new Error(
-      `none of the ${commits.length} commit(s) touching libs/ has its parent in this checkout, so no push range reaching a shared library can be built from it. The newest is ${newest}, whose parent ${newest}~1 is missing; deepen the checkout and rerun just test`,
-    );
-  return [`${head}~1`, head];
-}
-
-/**
- * A checkout whose history stops inside the library commits, which is what a
- * shallow clone hands a CI job and what this workspace's own checkout —
- * carrying its whole history — can never be. `depth` is how many commits the
- * clone keeps, so a depth of one leaves the newest library commit grafted with
- * no parent, and a deeper one leaves that parent present.
- *
- * These two are the reachable ends of the search above. A checkout missing a
- * parent partway up the library history, which is what would make that search
- * step past its first candidate, cannot be built here: git grafts a shallow
- * clone at the oldest commit it kept, so the gap is always at the bottom. That
- * step stays because CI has produced exactly that gap higher up by some means
- * this fixture cannot reproduce.
- */
-function checkoutOfLibraryHistory(depth: number): string {
-  const origin = mkdtempSync(join(tmpdir(), "publish-lanes-origin-"));
-  const checkout = mkdtempSync(join(tmpdir(), "publish-lanes-checkout-"));
-  onTestFinished(() => {
-    for (const directory of [origin, checkout])
-      rmSync(directory, { force: true, recursive: true });
-  });
-  const inOrigin = (...args: string[]) =>
-    execFileSync("git", args, { cwd: origin, encoding: "utf8" });
-  inOrigin("init", "--quiet", "--initial-branch=master");
-  inOrigin("config", "user.email", "publish-lanes@example.test");
-  inOrigin("config", "user.name", "Publish lanes fixture");
-  mkdirSync(join(origin, "libs"), { recursive: true });
-  for (const revision of ["first", "second", "third"]) {
-    writeFileSync(
-      join(origin, "libs", "shared.ts"),
-      `export const shared = "${revision}";\n`,
-    );
-    inOrigin("add", "-A");
-    inOrigin("commit", "--quiet", "-m", `feat(libs): the ${revision} revision`);
-  }
-  // A file:// URL rather than a path, because git only honours --depth against
-  // a transport that can serve a shallow history.
-  execFileSync(
+function repositoryObjectStore(): string {
+  const objects = execFileSync(
     "git",
-    ["clone", "--quiet", `--depth=${depth}`, `file://${origin}`, checkout],
+    ["rev-parse", "--path-format=absolute", "--git-path", "objects"],
     { encoding: "utf8" },
+  ).trim();
+  if (
+    !isAbsolute(objects) ||
+    !statSync(objects, { throwIfNoEntry: false })?.isDirectory()
+  )
+    throw new Error(
+      `git rev-parse did not name this repository's object directory: ${objects || "nothing"}`,
+    );
+  return objects;
+}
+
+/**
+ * The caller's environment with every `GIT_*` setting dropped. The fixture
+ * below decides for itself which object store, index, and identity its git
+ * commands use, and an inherited `GIT_DIR`, `GIT_INDEX_FILE`, or object-store
+ * variable would silently redirect exactly those. What remains is forwarded to
+ * start a subprocess — PATH, HOME, and Node's resolution — and is never read,
+ * parsed, or branched on here.
+ */
+function withoutGitSettings(environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  return Object.fromEntries(
+    Object.entries(environment).filter(([name]) => !name.startsWith("GIT_")),
   );
-  return checkout;
+}
+
+/**
+ * The library whose change the range below carries. It owns a build target, so
+ * it is a project Nx reports as affected and would be a plausible lane, and it
+ * is a data-access library behind one remote rather than a workspace-wide one,
+ * so most registered apps stay unaffected and the lanes are a proper subset.
+ */
+const AFFECTED_LIBRARY = "data-access-awards";
+
+/**
+ * A push range that reaches a shared library, which is the case lane selection
+ * has to get right — those projects are affected and buildable, but own no
+ * content-store subtree, so they must never become lanes.
+ *
+ * The range is built, not found. Cutting it from the checkout's own history
+ * made this test a function of how the repository had been cloned: a shallow
+ * clone is grafted at the oldest commit it kept, so the commit touching `libs/`
+ * has no parent to cut `<sha>~1` from, and the test failed for a reason that
+ * says nothing about lane selection. Which library a found range reached varied
+ * with history too, so the assertions could only describe the answer in the
+ * abstract rather than name it.
+ *
+ * So the base is HEAD, which every checkout has however it was fetched, and the
+ * head is a commit composed here: HEAD's tree with one file added under the
+ * library above. Nx diffs the two ends directly, and `git diff` compares their
+ * trees, so neither end needs any history behind it.
+ *
+ * The commit is written to a temporary object store the repository's git reads
+ * through `GIT_ALTERNATE_OBJECT_DIRECTORIES`, so the range exists for the
+ * commands under test without anything being added to the repository's own
+ * objects; the store is removed with the test, and the commit with it.
+ */
+function rangeReachingSharedLibrary(): {
+  range: PushRange;
+  env: NodeJS.ProcessEnv;
+} {
+  const store = mkdtempSync(join(tmpdir(), "publish-lanes-objects-"));
+  onTestFinished(() => rmSync(store, { force: true, recursive: true }));
+  const objects = join(store, "objects");
+  mkdirSync(objects, { recursive: true });
+  // Writes land in the temporary store and reads fall back to the repository's,
+  // which is where HEAD's tree and every blob under it already live. The
+  // identity is fixed because `commit-tree` demands one a CI checkout has no
+  // reason to have configured.
+  const authoring: NodeJS.ProcessEnv = {
+    ...withoutGitSettings(process.env),
+    GIT_OBJECT_DIRECTORY: objects,
+    GIT_ALTERNATE_OBJECT_DIRECTORIES: repositoryObjectStore(),
+    GIT_INDEX_FILE: join(store, "index"),
+    GIT_AUTHOR_NAME: "Publish lanes fixture",
+    GIT_AUTHOR_EMAIL: "publish-lanes@example.test",
+    GIT_COMMITTER_NAME: "Publish lanes fixture",
+    GIT_COMMITTER_EMAIL: "publish-lanes@example.test",
+  };
+  const author = (...args: string[]) =>
+    execFileSync("git", args, { encoding: "utf8", env: authoring });
+
+  author("read-tree", "HEAD");
+  const blob = objectName(
+    execFileSync("git", ["hash-object", "-w", "--stdin"], {
+      encoding: "utf8",
+      env: authoring,
+      input: 'export const laneProbe = "a change only this library carries";\n',
+    }),
+    "hash-object",
+  );
+  author(
+    "update-index",
+    "--add",
+    "--cacheinfo",
+    `100644,${blob},libs/${AFFECTED_LIBRARY}/src/lane-probe.ts`,
+  );
+  const tree = objectName(author("write-tree"), "write-tree");
+  const head = objectName(
+    author(
+      "commit-tree",
+      tree,
+      "-p",
+      "HEAD",
+      "-m",
+      `feat(${AFFECTED_LIBRARY}): a library change no lane may publish`,
+    ),
+    "commit-tree",
+  );
+
+  // The commands under test read the range through this one added setting; the
+  // repository's own object store stays their primary, so they resolve HEAD
+  // exactly as they would without it.
+  return {
+    range: ["HEAD", head],
+    env: {
+      ...withoutGitSettings(process.env),
+      GIT_ALTERNATE_OBJECT_DIRECTORIES: objects,
+    },
+  };
 }
 
 function registeredApps(): string[] {
@@ -205,48 +246,28 @@ describe("publish lane selection", () => {
   }, 30_000);
 
   test("a push range publishes only apps, never the libraries it also affects", () => {
-    const [base, head] = rangeReachingSharedLibraries();
-    const affected = affectedProjects(base, head);
-    const libraries = affected.filter(
-      (project) => !registeredApps().includes(project),
-    );
-    // A range that reaches shared libraries is the interesting case: those
-    // projects have build targets and are affected, but own no content-store
-    // subtree, so they must not become lanes.
-    expect(libraries.length).toBeGreaterThan(0);
+    const { range, env } = rangeReachingSharedLibrary();
+    const apps = registeredApps();
+    const affected = affectedProjects(range, env);
+    const libraries = affected.filter((project) => !apps.includes(project));
+    // The range changes the library itself, so Nx reports it as affected and
+    // it reaches lane selection as a buildable project that owns no lane.
+    expect(libraries).toContain(AFFECTED_LIBRARY);
 
-    const lanes = publishLanes(base, head);
+    const lanes = publishLanes(range, env);
 
     expect(lanes).toEqual(
-      affected.filter((project) => registeredApps().includes(project)).sort(),
+      affected.filter((project) => apps.includes(project)).sort(),
     );
     for (const library of libraries) expect(lanes).not.toContain(library);
+    // The library sits behind one remote rather than the whole workspace, so
+    // the lanes are a proper non-empty subset of the registered apps: the other
+    // side of the same economics, where an unaffected app is never republished.
+    expect(lanes.length).toBeGreaterThan(0);
+    expect(lanes.length).toBeLessThan(apps.length);
     // Two Nx graph loads in one test, which the full gate runs alongside three
     // other projects; the default 5s budget is for in-process work, not this.
   }, 180_000);
-
-  // The range above is cut from whatever history the checkout carries, and a
-  // shallow one does not carry the parent it needs. That used to reach Nx as
-  // `<sha>~1` and die inside it as an ambiguous git argument, naming the range
-  // but not what was wrong with it or where to fix it.
-  test("a checkout without the parent it needs names the missing commit", () => {
-    const checkout = checkoutOfLibraryHistory(1);
-    const grafted = headCommit(checkout);
-
-    expect(() => rangeReachingSharedLibraries(checkout)).toThrow(
-      `whose parent ${grafted}~1 is missing`,
-    );
-    expect(() => rangeReachingSharedLibraries(checkout)).toThrow(
-      /none of the 1 commit\(s\) touching libs\/.*deepen the checkout/s,
-    );
-  }, 30_000);
-
-  test("a checkout that carries that parent yields the range", () => {
-    const checkout = checkoutOfLibraryHistory(2);
-    const head = headCommit(checkout);
-
-    expect(rangeReachingSharedLibraries(checkout)).toEqual([`${head}~1`, head]);
-  }, 30_000);
 
   test("a range that does not resolve to commits is refused before Nx runs", () => {
     const result = spawnSync(
