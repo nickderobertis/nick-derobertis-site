@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { beforeAll, describe, expect, it, onTestFinished } from "vitest";
+import { beforeAll, describe, expect, it, onTestFinished, vi } from "vitest";
 import { z } from "zod";
 
 /**
@@ -627,12 +627,8 @@ describe("the probe measures the cache it established", () => {
     // a probe that inherited it would report `ran` for a target keyed on
     // nothing that changed. The gate passes no such flag, so it is set here
     // rather than left for a caller to set and for the tests below to fail on.
-    const inherited = process.env.NX_SKIP_NX_CACHE;
-    process.env.NX_SKIP_NX_CACHE = "true";
-    onTestFinished(() => {
-      if (inherited === undefined) delete process.env.NX_SKIP_NX_CACHE;
-      else process.env.NX_SKIP_NX_CACHE = inherited;
-    });
+    vi.stubEnv("NX_SKIP_NX_CACHE", "true");
+    onTestFinished(() => vi.unstubAllEnvs());
 
     expect(
       outcomesOf("shell", ["lint"], cacheDirectory).get("shell:lint"),

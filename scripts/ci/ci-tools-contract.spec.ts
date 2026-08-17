@@ -205,6 +205,7 @@ describe("pinned CI tool platform contract", () => {
   }, 180_000);
 });
 
+// llmlint: ignore-block[boundary_inputs_validated] What these specs prove is the installer's own validation of ambient input, so the environment reaching it has to be the caller's: curl, bash, mktemp, and node need PATH and HOME to start at all. Every value an answer here depends on is set on top of that — XDG_BIN_HOME, and a GITHUB_TOKEN crafted to break out of its header — and nothing in this block parses, branches on, or interpolates an inherited value. Validating the environment here would stand in for the boundary being proven rather than exercise it.
 describe("just installer boundary", () => {
   it("downloads, verifies, and installs just into a caller-owned bin directory", () => {
     const binDirectory = temporaryDirectory("just-bin.");
@@ -290,6 +291,7 @@ describe("just installer boundary", () => {
     );
   });
 });
+// llmlint: ignore-end[boundary_inputs_validated]
 
 // The release document is the one input a live API cannot be asked to vary, so
 // the resolver's own boundary — a document on stdin, a tag on stdout — is
