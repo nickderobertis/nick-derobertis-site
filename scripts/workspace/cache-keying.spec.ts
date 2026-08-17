@@ -462,6 +462,24 @@ function probeProject(): string {
 const groupMarker = /^::(?:end)?group::\S*\s*/;
 
 /**
+ * The caller's environment with every Nx setting dropped.
+ *
+ * Nx hands its own settings down to the commands it runs, and this spec runs as
+ * one of them. A dispatch invoked with `--skip-nx-cache` passes every task an
+ * `NX_SKIP_NX_CACHE`, and a probe that inherited it would find Nx replaying
+ * nothing — not because a target is keyed on the file that changed, but because
+ * the run it inherited had switched the cache off. Every other Nx setting is
+ * dropped for the same reason: what these runs answer has to come from the
+ * cache the test filled, so the probe starts from an environment carrying none
+ * of them and sets the four it depends on itself.
+ */
+function withoutNxSettings(environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  return Object.fromEntries(
+    Object.entries(environment).filter(([name]) => !name.startsWith("NX_")),
+  );
+}
+
+/**
  * Whether Nx ran each task or replayed it, against the cache directory the
  * calling test owns. Nx reports one line per task, so the outcome is read from
  * the run rather than inferred, and a target the run never mentions is an error
@@ -488,8 +506,8 @@ function outcomesOf(
     {
       encoding: "utf8",
       env: {
-        // llmlint: ignore[boundary_inputs_validated] The inherited environment is forwarded, never read: `pnpm exec nx` needs the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. The four values this run's answer depends on are set below it, from directories the test itself created, so they override whatever was inherited.
-        ...process.env,
+        // llmlint: ignore[boundary_inputs_validated] What survives the filter is forwarded, never read: `pnpm exec nx` needs the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. Every Nx setting is dropped instead of forwarded, and the four values this run's answer depends on are set below, from directories the test itself created.
+        ...withoutNxSettings(process.env),
         NX_CACHE_DIRECTORY: join(cacheDirectory, "cache"),
         NX_DAEMON: "false",
         NX_SKIP_LOG_GROUPING: "true",
@@ -599,6 +617,31 @@ function oneMoreExclusion(original: string): string {
 /** A comment, which changes no rule the configuration exports. */
 const oneMoreComment = (original: string) =>
   `// A cache-keying probe's inert edit (${probeToken()}), restored before its test returns.\n${original}`;
+
+describe("the probe measures the cache it established", () => {
+  it("replays from its own cache under a run that skips Nx's", () => {
+    const cacheDirectory = ownCacheDirectory();
+    // Every outcome below this line is a claim about the cache the test filled,
+    // and Nx passes the settings of the run that spawned this spec down to it:
+    // a dispatch carrying `--skip-nx-cache` arrives here as this variable, and
+    // a probe that inherited it would report `ran` for a target keyed on
+    // nothing that changed. The gate passes no such flag, so it is set here
+    // rather than left for a caller to set and for the tests below to fail on.
+    const inherited = process.env.NX_SKIP_NX_CACHE;
+    process.env.NX_SKIP_NX_CACHE = "true";
+    onTestFinished(() => {
+      if (inherited === undefined) delete process.env.NX_SKIP_NX_CACHE;
+      else process.env.NX_SKIP_NX_CACHE = inherited;
+    });
+
+    expect(
+      outcomesOf("shell", ["lint"], cacheDirectory).get("shell:lint"),
+    ).toBe("ran");
+    expect(
+      outcomesOf("shell", ["lint"], cacheDirectory).get("shell:lint"),
+    ).toBe("replayed");
+  }, 300_000);
+});
 
 describe("what a rule-file change actually costs when the gate runs", () => {
   it("replays build, test, and typecheck for a Biome change, and reruns lint", () => {

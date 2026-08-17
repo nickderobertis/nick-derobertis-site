@@ -378,11 +378,23 @@ describe("just release tag resolution", () => {
     );
   });
 
-  // Without a source a rejection could only gesture at the request, so the
-  // resolver refuses before it reads anything rather than reporting a document
-  // problem the caller cannot trace back to an endpoint.
-  it("resolves nothing when no endpoint is named", () => {
-    const result = spawnSync(resolveJustTagScript, [], {
+  // The endpoint is caller input the script spends as diagnostic text, so it is
+  // constrained before a document is read: without one a rejection could only
+  // gesture at the request, and a value carrying a line break would end the
+  // diagnostic and have the rest read as a line the script never wrote. Each
+  // case is held to the release document being left unread, which is what makes
+  // this a boundary rather than a message the caller can shape.
+  it.each([
+    ["no endpoint is named", []],
+    ["more is passed than the endpoint", [documentSource, "extra"]],
+    ["the endpoint is empty", [""]],
+    ["the endpoint is not an https URL", ["ftp://example.invalid/latest"]],
+    [
+      "the endpoint would break out of its diagnostic",
+      [`${documentSource}\nresolve-just-tag: installed from somewhere else`],
+    ],
+  ])("resolves nothing when %s", (_, argv) => {
+    const result = spawnSync(resolveJustTagScript, argv, {
       cwd: workspace,
       encoding: "utf8",
       input: JSON.stringify(releaseDocument),
@@ -393,6 +405,7 @@ describe("just release tag resolution", () => {
     expect(result.stderr).toContain(
       "name the endpoint the release document was read from as the only argument",
     );
+    expect(result.stderr).not.toContain(releaseDocument.tag_name);
   });
 
   // The document is parsed rather than pattern-matched, so the parser is a

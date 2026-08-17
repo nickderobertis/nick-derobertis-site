@@ -14,8 +14,13 @@ set -euo pipefail
 # any body that happens to contain one, and, because an intermediary may
 # re-serialize the response onto a single line, a line-oriented search reads
 # whichever field comes first — the API URL — and installs from a 404 naming it.
-[[ $# -eq 1 && -n "$1" ]] || {
-  echo "resolve-just-tag: name the endpoint the release document was read from as the only argument; usage: resolve-just-tag.sh <endpoint-url> <release-document" >&2
+# The endpoint arrives from the caller and is spent as diagnostic text, so
+# constrain it here, before anything is read: a newline or a carriage return in
+# it would end the diagnostic and have whatever followed read as a line this
+# script never wrote, and a value that is not an endpoint at all would send a
+# reader somewhere the request was never made.
+[[ $# -eq 1 && "$1" == https://* && "$1" =~ ^[[:graph:]]+$ ]] || {
+  echo "resolve-just-tag: name the endpoint the release document was read from as the only argument, as an https URL with no spaces or control characters; usage: resolve-just-tag.sh <endpoint-url> <release-document" >&2
   exit 2
 }
 source_url="$1"
