@@ -129,6 +129,39 @@ const navLink = (page: Page, label: string) =>
   page.getByRole("link", { name: label, exact: true });
 
 /**
+ * Hovers a header link until the router acts on it.
+ *
+ * Hover intent is edge-triggered: the router preloads when the pointer enters
+ * the link, so a pointer already resting there when hydration attaches that
+ * listener raises no entry at all, and waiting cannot recover an event that
+ * never fired. `networkidle` reports the network rather than the main thread,
+ * so on a loaded runner it arrives while hydration is still queued behind it
+ * and that single hover is lost for good. The pointer therefore leaves the link
+ * and comes back, the way a visitor's would, until the preload has started. It
+ * rests on the route's own heading in between, which is text rather than a link
+ * and so asks for nothing itself.
+ */
+async function hoverUntilPreloading(
+  page: Page,
+  label: string,
+  preloading: () => boolean,
+) {
+  const link = navLink(page, label);
+  await link.hover();
+  await expect
+    .poll(async () => {
+      if (preloading()) return true;
+      await page.getByRole("heading", { level: 1 }).hover();
+      await link.hover();
+      // The router holds intent behind a short timer, so each entry is given
+      // room to elapse before the next attempt moves the pointer off it again.
+      await page.waitForTimeout(500);
+      return preloading();
+    })
+    .toBe(true);
+}
+
+/**
  * Watches for a hover preload to run to completion. The router holds a preload
  * behind a short pointer-intent timer, and a route whose remote is still
  * deferred keeps fetching in chained steps, so neither an already-quiet page
@@ -261,7 +294,11 @@ for (const route of leafRoutes)
     expect(assetsFor(route.remote)).toContain("remoteEntry.js");
     expect(reached()).toEqual([route.remote]);
 
-    await navLink(page, "Home").hover();
+    await hoverUntilPreloading(
+      page,
+      "Home",
+      () => assetsFor(homeRemote).length > 0,
+    );
 
     // Hover intent fetches the container and the page chunk behind it.
     await expect.poll(() => assetsFor(homeRemote)).toContain("remoteEntry.js");

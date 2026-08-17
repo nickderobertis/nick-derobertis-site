@@ -14,6 +14,10 @@ import { z } from "zod";
 const workspace = path.resolve(import.meta.dirname, "../..");
 const script = path.join(workspace, "scripts/ci/setup-ci-tools.sh");
 const installJustScript = path.join(workspace, "scripts/ci/install-just.sh");
+const resolveJustTagScript = path.join(
+  workspace,
+  "scripts/ci/resolve-just-tag.sh",
+);
 const digestSchema = z.object({
   x86_64: z.string().regex(/^[0-9a-f]{64}$/),
   aarch64: z.string().regex(/^[0-9a-f]{64}$/),
@@ -201,6 +205,7 @@ describe("pinned CI tool platform contract", () => {
   }, 180_000);
 });
 
+// llmlint: ignore-block[boundary_inputs_validated] What these specs prove is the installer's own validation of ambient input, so the environment reaching it has to be the caller's: curl, bash, mktemp, and node need PATH and HOME to start at all. Every value an answer here depends on is set on top of that — XDG_BIN_HOME, and a GITHUB_TOKEN crafted to break out of its header — and nothing in this block parses, branches on, or interpolates an inherited value. Validating the environment here would stand in for the boundary being proven rather than exercise it.
 describe("just installer boundary", () => {
   it("downloads, verifies, and installs just into a caller-owned bin directory", () => {
     const binDirectory = temporaryDirectory("just-bin.");
@@ -211,7 +216,24 @@ describe("just installer boundary", () => {
     });
 
     expect(result.status, result.stderr).toBe(0);
-    expect(existsSync(path.join(binDirectory, "just"))).toBe(true);
+    // A successful run says one thing — the version installed and where it
+    // went — and the verified installer's step-by-step narration stays unspoken
+    // until it is explaining a failure.
+    const reported =
+      /^install-just: installed just v?(\d+\.\d+\.\d+) into (.+)$/.exec(
+        result.stdout.trim(),
+      );
+    expect(reported?.[2], result.stdout).toBe(binDirectory);
+    expect(result.stderr).toBe("");
+    // That version is the one this run resolved from the live release document,
+    // and it is the version the installed binary itself answers with: an API
+    // URL reaching the installer downloads a 404 page rather than a release, so
+    // no `just` would answer here at all.
+    expect(
+      execFileSync(path.join(binDirectory, "just"), ["--version"], {
+        encoding: "utf8",
+      }).trim(),
+    ).toBe(`just ${reported?.[1]}`);
   }, 60_000);
 
   // The destination comes from the environment, so it is constrained before the
@@ -233,6 +255,26 @@ describe("just installer boundary", () => {
     expect(existsSync(path.resolve(workspace, destination))).toBe(false);
   });
 
+  // The token is ambient environment input spent as an HTTP header value, so a
+  // header the caller never wrote cannot be smuggled into the API request
+  // through it, and nothing is downloaded or installed before that is settled.
+  it("installs nothing for a token that would break out of its header", () => {
+    const binDirectory = temporaryDirectory("just-bin.");
+    const result = spawnSync(installJustScript, [], {
+      cwd: workspace,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        XDG_BIN_HOME: binDirectory,
+        GITHUB_TOKEN: "ghp_token\r\nX-Smuggled: 1",
+      },
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("GITHUB_TOKEN must be a GitHub token");
+    expect(existsSync(path.join(binDirectory, "just"))).toBe(false);
+  });
+
   it("reports how to recover when the destination cannot be created", () => {
     const parent = temporaryDirectory("just-unwritable.");
     const file = path.join(parent, "not-a-directory");
@@ -246,6 +288,146 @@ describe("just installer boundary", () => {
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(
       "set XDG_BIN_HOME to a writable directory and retry",
+    );
+  });
+});
+// llmlint: ignore-end[boundary_inputs_validated]
+
+// The release document is the one input a live API cannot be asked to vary, so
+// the resolver's own boundary — a document on stdin, a tag on stdout — is
+// driven directly. The script is the real one; only the document is authored.
+describe("just release tag resolution", () => {
+  // Field order and line breaks as GitHub serves them: the API URL comes first,
+  // which is exactly what a parse that reads by position rather than by name
+  // hands to the installer.
+  const releaseDocument = {
+    url: "https://api.github.com/repos/casey/just/releases/364478524",
+    assets_url:
+      "https://api.github.com/repos/casey/just/releases/364478524/assets",
+    html_url: "https://github.com/casey/just/releases/tag/1.58.0",
+    id: 364478524,
+    tag_name: "1.58.0",
+    name: "1.58.0",
+  };
+
+  // The resolver keeps no copy of the endpoint — the caller that fetched the
+  // document names it, and the installer is the only place that URL is
+  // declared. So these specs pass a source of their own and hold every
+  // rejection to the source they passed, which is what proves the diagnostic
+  // points at the request that was actually made.
+  const documentSource = "https://api.example.invalid/repos/casey/just/latest";
+
+  function resolveTag(document: string) {
+    return spawnSync(resolveJustTagScript, [documentSource], {
+      cwd: workspace,
+      encoding: "utf8",
+      input: document,
+    });
+  }
+
+  it.each([
+    ["as GitHub pretty-prints it", JSON.stringify(releaseDocument, null, 2)],
+    ["re-serialized onto a single line", JSON.stringify(releaseDocument)],
+  ])("resolves the release tag from a document %s", (_, document) => {
+    const result = resolveTag(document);
+
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout.trim()).toBe("1.58.0");
+  });
+
+  // Each rejected body is the shape the API really answers with in that
+  // failure, and each is held to the reason it is rejected for, so a document
+  // turned away for the wrong reason is not mistaken for a passing guard.
+  it.each([
+    [
+      "a body that is not a release document at all",
+      "<html>404</html>",
+      "the response body is not JSON",
+    ],
+    [
+      "a body carrying a JSON array rather than a release",
+      JSON.stringify([releaseDocument]),
+      "the response body is JSON, but not the object a GitHub release document is",
+    ],
+    [
+      "an error the API answered with instead",
+      JSON.stringify({ message: "API rate limit exceeded", status: "403" }),
+      "these release fields are missing or mistyped: tag_name, html_url, assets_url, id",
+    ],
+    [
+      "a release document carrying no tag",
+      JSON.stringify({ ...releaseDocument, tag_name: undefined }),
+      "these release fields are missing or mistyped: tag_name",
+    ],
+    [
+      "a tag that is an API URL rather than a release",
+      JSON.stringify({ ...releaseDocument, tag_name: releaseDocument.url }),
+      `the tag_name in the release document is "${releaseDocument.url}", which is not a release tag`,
+    ],
+    [
+      "a tag that names a branch rather than a release",
+      JSON.stringify({ ...releaseDocument, tag_name: "master" }),
+      'the tag_name in the release document is "master", which is not a release tag',
+    ],
+  ])("resolves nothing from %s", (_, document, diagnosis) => {
+    const result = resolveTag(document);
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toContain(diagnosis);
+    expect(result.stderr).toContain(
+      `check that ${documentSource} answered with a release document`,
+    );
+  });
+
+  // The endpoint is caller input the script spends as diagnostic text, so it is
+  // constrained before a document is read: without one a rejection could only
+  // gesture at the request, and a value carrying a line break would end the
+  // diagnostic and have the rest read as a line the script never wrote. Each
+  // case is held to the release document being left unread, which is what makes
+  // this a boundary rather than a message the caller can shape.
+  it.each([
+    ["no endpoint is named", []],
+    ["more is passed than the endpoint", [documentSource, "extra"]],
+    ["the endpoint is empty", [""]],
+    ["the endpoint is not an https URL", ["ftp://example.invalid/latest"]],
+    [
+      "the endpoint would break out of its diagnostic",
+      [`${documentSource}\nresolve-just-tag: installed from somewhere else`],
+    ],
+  ])("resolves nothing when %s", (_, argv) => {
+    const result = spawnSync(resolveJustTagScript, argv, {
+      cwd: workspace,
+      encoding: "utf8",
+      input: JSON.stringify(releaseDocument),
+    });
+
+    expect(result.status).toBe(2);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toContain(
+      "name the endpoint the release document was read from as the only argument",
+    );
+    expect(result.stderr).not.toContain(releaseDocument.tag_name);
+  });
+
+  // The document is parsed rather than pattern-matched, so the parser is a
+  // prerequisite the script states outright instead of failing as a missing tag.
+  it("reports the missing parser rather than a missing tag", () => {
+    const result = spawnSync(
+      "/bin/bash",
+      [resolveJustTagScript, documentSource],
+      {
+        cwd: workspace,
+        encoding: "utf8",
+        env: { PATH: temporaryDirectory("just-no-node.") },
+        input: JSON.stringify(releaseDocument),
+      },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
+    expect(result.stderr).toContain(
+      "node is required to read the release document",
     );
   });
 });

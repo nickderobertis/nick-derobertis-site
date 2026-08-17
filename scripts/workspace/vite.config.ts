@@ -8,6 +8,7 @@ export default defineConfig({
   test: {
     include: [
       "scripts/workspace/affected-build-projects.spec.ts",
+      "scripts/workspace/cache-keying.spec.ts",
       "scripts/workspace/federation-contract.spec.ts",
       "scripts/workspace/lint-llm-diff.spec.ts",
       "scripts/workspace/module-boundaries.spec.ts",
