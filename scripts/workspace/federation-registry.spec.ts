@@ -126,9 +126,15 @@ function readApps(documents: Readonly<Record<string, string>>) {
  *
  * `commit` writes the registry the CLI compares its derivation against, which
  * the committed tree can never be left holding: a registry that has stopped
- * being readable is only reachable from a workspace this spec builds.
+ * being readable is only reachable from a workspace this spec builds. The
+ * registry it wrote comes back, because the CLI's other path rewrites that file
+ * and what it did to it is the observation.
  */
-function generateFromGraph(graph: unknown, commit?: (path: string) => void) {
+function generateFromGraph(
+  graph: unknown,
+  commit?: (path: string) => void,
+  invocation: readonly string[] = ["--check"],
+) {
   const root = mkdtempSync(join(tmpdir(), "remote-registry-graph-"));
   scratch.push(root);
   for (const module of [
@@ -157,19 +163,22 @@ function generateFromGraph(graph: unknown, commit?: (path: string) => void) {
     ].join("\n"),
     { mode: 0o755 },
   );
-  return spawnSync(
-    process.execPath,
-    ["generate-remote-registry.mjs", "--check"],
-    {
-      cwd: root,
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        GRAPH: JSON.stringify(graph),
-        PATH: `${bin}:${process.env.PATH ?? ""}`,
+  return {
+    registry,
+    ...spawnSync(
+      process.execPath,
+      ["generate-remote-registry.mjs", ...invocation],
+      {
+        cwd: root,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          GRAPH: JSON.stringify(graph),
+          PATH: `${bin}:${process.env.PATH ?? ""}`,
+        },
       },
-    },
-  );
+    ),
+  };
 }
 
 // Both the paths git prints and the declarations they hold are read back as
@@ -374,6 +383,23 @@ describe("the committed registry the generator compares against", () => {
       },
     },
   };
+
+  it("refuses an argument it does not recognise rather than rewriting the file", () => {
+    const committed = '{\n  "bio": "biography"\n}\n';
+
+    const result = generateFromGraph(
+      bioGraph,
+      (path) => writeFileSync(path, committed),
+      ["--chekc"],
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/takes only --check.+not "--chekc"/);
+    // Not recognising --check is what selects the write path, so a flag typed
+    // wrong by a contributor asking whether the registry had drifted would have
+    // answered by making it agree.
+    expect(readFileSync(result.registry, "utf8")).toBe(committed);
+  });
 
   it("reports drift only when the file it read actually disagrees", () => {
     const clean = generateFromGraph(bioGraph, (path) =>

@@ -163,7 +163,17 @@ function serializeRemoteRegistry(registry, order) {
   return `${JSON.stringify(ordered, null, 2)}\n`;
 }
 
-const checking = process.argv.includes("--check");
+// The absence of --check is what selects the mutating path, so an argument this
+// CLI does not recognise cannot be ignored: a misspelled flag would rewrite the
+// committed registry while its author waited to be told whether it had drifted.
+const invocation = process.argv.slice(2);
+const unrecognized = invocation.filter((argument) => argument !== "--check");
+if (unrecognized.length > 0)
+  throw new Error(
+    `takes only --check, which reports whether ${registryPath} still agrees with the project graph, and not ${unrecognized.map((argument) => JSON.stringify(argument)).join(", ")}; with no argument it rewrites that file`,
+  );
+
+const checking = invocation.includes("--check");
 const committed = committedRegistry();
 const generated = serializeRemoteRegistry(
   remoteRegistry(federationRemotes(graphProjects())),
