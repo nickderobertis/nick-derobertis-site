@@ -4,6 +4,12 @@
   "sourceRoot": "apps/home-cards/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:home-cards"],
+  "metadata": {
+    "federation": { "alias": "homeCards" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": ["type:shared", "type:data-core", "data:home"]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

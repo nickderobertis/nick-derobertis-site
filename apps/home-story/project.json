@@ -4,6 +4,12 @@
   "sourceRoot": "apps/home-story/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:home-story"],
+  "metadata": {
+    "federation": { "alias": "homeStory" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": ["type:shared", "type:data-core", "data:home"]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

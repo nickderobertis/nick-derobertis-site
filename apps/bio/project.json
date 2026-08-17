@@ -4,6 +4,12 @@
   "sourceRoot": "apps/bio/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:bio"],
+  "metadata": {
+    "federation": { "alias": "bio" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": ["type:shared"]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

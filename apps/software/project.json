@@ -4,6 +4,16 @@
   "sourceRoot": "apps/software/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:software"],
+  "metadata": {
+    "federation": { "alias": "software" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": [
+        "type:shared",
+        "type:data-core",
+        "data:software"
+      ]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

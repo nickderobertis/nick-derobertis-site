@@ -24,30 +24,7 @@
     "typecheck": { "cache": true },
     "e2e": { "cache": false },
     "prerender": { "cache": false },
-    "screenshot": {
-      "cache": false,
-      "dependsOn": [
-        "build",
-        {
-          "target": "build",
-          "projects": [
-            "home",
-            "home-carousel",
-            "home-contact",
-            "home-cards",
-            "home-story",
-            "timeline",
-            "skills",
-            "awards",
-            "bio",
-            "research",
-            "software",
-            "courses"
-          ]
-        },
-        { "target": "prerender", "projects": ["shell"] }
-      ]
-    }
+    "screenshot": { "cache": false }
   },
-  "plugins": []
+  "plugins": ["./scripts/workspace/federation-plugin.mjs"]
 }

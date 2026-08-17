@@ -11,7 +11,21 @@ exposes only `./Page`; the shell additionally exposes `./App`. This makes a
 feature testable either inside its parent host or directly at its standalone
 URL while preserving route-boundary ownership.
 
-`libs/build-config/src/remotes.json` is the canonical remote registry.
+A remote is defined by its own project. `apps/<remote>/project.json` declares
+`metadata.federation.alias` — the Module Federation container it publishes
+under — and `metadata.boundaries.onlyDependOnLibsWithTags` — the library tags
+its scope admits. `apps/shell` declares neither: it is the host, not a remote.
+Everything that used to restate that list in a root file is derived from those
+declarations. `scripts/workspace/federation-plugin.mjs`, registered in
+`nx.json`, sets each remote's `screenshot.dependsOn` and the shell's
+`prerender.dependsOn`, so every remote's build stays a prerequisite of the
+composed site and of every capture. `eslint.config.mjs` maps the same
+declarations into its `scope:<app>` boundary constraints.
+
+`libs/build-config/src/remotes.json` is the canonical remote registry, and it is
+generated from the project graph by `just generate-remote-registry`; five run-time
+consumers read it as a file, so it stays one, and `just lint-workflows` fails
+when what is committed disagrees with what the graph declares.
 `remoteMap` turns it into project-base URLs, and the compose target uses the
 same registry when staging every `remoteEntry.js`. React and React DOM are
 singleton federation dependencies. Nx project tags and ESLint prevent feature

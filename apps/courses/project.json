@@ -4,6 +4,16 @@
   "sourceRoot": "apps/courses/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:courses"],
+  "metadata": {
+    "federation": { "alias": "courses" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": [
+        "type:shared",
+        "type:data-core",
+        "data:courses"
+      ]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",
