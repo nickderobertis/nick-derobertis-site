@@ -317,14 +317,12 @@ describe("serve-e2e lifecycle", () => {
     })();
 
     expect(refused.status).toBe(1);
-    // The cause: which artifact was refused, and the run that owns it.
     expect(refused.stderr).toContain(
       `Could not claim ${served} for the e2e server`,
     );
     expect(refused.stderr).toContain(
       `held by process ${composing.pid}, which is composing it`,
     );
-    // The next action, in this CLI's own command surface.
     expect(refused.stderr).toContain("run just test-e2e again");
     // Nothing was served: the port it was given is still free to bind.
     const replacement = createServer();
