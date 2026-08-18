@@ -501,7 +501,7 @@ if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
     // Claimed before the first write: composing replaces the route documents,
     // `cv-data`, and `remotes` in place, so a second run serving this same
     // directory would read the replacement halfway through.
-    // llmlint: ignore-block[changed_behavior_has_e2e] Neither this claim nor the release that pairs with it has a browser interface: a compose it refuses is one that wrote nothing, so the only artifact a visitor can reach is the one the run already serving it composed, unchanged, and a released claim leaves that artifact exactly as this run composed it. compose.spec.ts drives this real CLI against a held artifact and against one this run released, and site.spec.ts plus every feature journey drive the composed result on both render paths.
+    // llmlint: ignore[changed_behavior_has_e2e] This claim has no browser interface: a compose it refuses is one that wrote nothing, so the only artifact a visitor can reach is the one the run already serving it composed, unchanged. compose.spec.ts drives this real CLI against a held artifact and a released one, and site.spec.ts plus every feature journey drive the composed result on both render paths.
     release = holdArtifactRoot(output, "composing");
     await compose({
       fragmentRoot: requiredPath(
@@ -519,5 +519,4 @@ if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
   } finally {
     release();
   }
-  // llmlint: ignore-end[changed_behavior_has_e2e]
 }
