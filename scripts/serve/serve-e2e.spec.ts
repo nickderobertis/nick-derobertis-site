@@ -14,6 +14,13 @@ import path from "node:path";
 import { chromium } from "@playwright/test";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+// This spec drives serve-e2e.mjs itself, which Node type-strips, so it reaches
+// the same library module by the same path the CLI resolves. Only a library
+// published as a workspace package resolves by alias there.
+/* eslint-disable @nx/enforce-module-boundaries -- This CLI integration spec follows the same direct source path used by Node type stripping, which cannot resolve a tsconfig alias into a library that is not a workspace package. */
+import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
+
+/* eslint-enable @nx/enforce-module-boundaries */
 
 const workspace = path.resolve(import.meta.dirname, "../..");
 const addressSchema = z.object({
@@ -95,7 +102,7 @@ function startServer(port: number) {
  * absent, so the only thing that can refuse it before it reports a missing
  * store is the claim the running server took on the directory.
  */
-// llmlint: ignore[work_goes_through_command_surface] This is the command surface the collision happens through: `shell:prerender` runs `node scripts/compose/compose.mjs` itself, and the `just compose` recipe is the deploy lane's separate entry, which confines its output beneath dist/ and so cannot be pointed at the disposable tree this spec serves.
+// llmlint: ignore-block[work_goes_through_command_surface] The CLI boundary is the subject here — the exit status and the stderr the composer answers a served artifact with — and this is the command surface the collision happens through: `shell:prerender` runs `node scripts/compose/compose.mjs` itself. The `just compose` recipe is the deploy lane's separate entry: it confines its output beneath dist/, so it cannot be pointed at the disposable tree this spec serves, and it reprints the CLI's stderr beneath its own line rather than emitting it.
 function composeOverServedTree() {
   return spawnSync(
     process.execPath,
@@ -114,6 +121,7 @@ function composeOverServedTree() {
     },
   );
 }
+// llmlint: ignore-end[work_goes_through_command_surface]
 
 describe("serve-e2e lifecycle", () => {
   afterEach(async () => {
@@ -195,6 +203,49 @@ describe("serve-e2e lifecycle", () => {
     await exited;
     expect(composeOverServedTree().stderr).toContain(
       "Could not read the published shell fragment",
+    );
+  }, 30_000);
+
+  // The other half of the collision: a compose is already replacing this
+  // artifact, so serving it would answer journeys out of a tree that is half of
+  // two compositions. The claim is taken before anything listens, and what this
+  // process prints on its way out is the whole of what an operator gets.
+  it("names the run composing its artifact instead of serving one being replaced", async () => {
+    const served = path.join(tree, "dist/apps/shell");
+    const port = await availablePort();
+    const release = holdArtifactRoot(served, "composing");
+
+    const refused = (() => {
+      try {
+        return spawnSync(process.execPath, [serverScript], {
+          cwd: workspace,
+          encoding: "utf8",
+          env: { ...process.env, PORT: String(port) },
+          timeout: 20_000,
+        });
+      } finally {
+        release();
+      }
+    })();
+
+    expect(refused.status).toBe(1);
+    // The cause: which artifact was refused, and the run that owns it.
+    expect(refused.stderr).toContain(
+      `Could not claim ${served} for the e2e server`,
+    );
+    expect(refused.stderr).toContain(
+      `held by process ${process.pid}, which is composing it`,
+    );
+    // The next action, in this CLI's own command surface.
+    expect(refused.stderr).toContain("run just test-e2e again");
+    // Nothing was served: the port it was given is still free to bind.
+    const replacement = createServer();
+    await new Promise<void>((resolve, reject) => {
+      replacement.once("error", reject);
+      replacement.listen(port, "127.0.0.1", resolve);
+    });
+    await new Promise<void>((resolve, reject) =>
+      replacement.close((error) => (error ? reject(error) : resolve())),
     );
   }, 30_000);
 

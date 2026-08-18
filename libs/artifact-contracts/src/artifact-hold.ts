@@ -165,9 +165,9 @@ export function holdArtifactRoot(
     recorded = pruneToLiveHolds(directory);
   } catch (error) {
     // Both callers report a thrown message and nothing else — compose prints
-    // it as `compose: …` and the e2e server as `serve-e2e: …` — so a bare
-    // filesystem diagnostic reaches a contributor naming neither the directory
-    // that refused nor anything to do about it.
+    // it as `compose: …` and the e2e server inside its own `Could not claim …`
+    // line — so a bare filesystem diagnostic reaches a contributor naming
+    // neither the directory that refused nor anything to do about it.
     release();
     throw new Error(
       `${resolve(root)} could not be claimed for ${activity}: ${error instanceof Error ? error.message : String(error)}. Check that ${directory} is writable, or delete it to clear every hold recorded there, then rerun just check.`,
