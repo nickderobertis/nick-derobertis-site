@@ -162,6 +162,37 @@ describe("holding a composed artifact directory", () => {
     expect(() => hold(root, "composing")).not.toThrow();
   });
 
+  it("stays releasable when its own record can no longer be removed", () => {
+    const root = createArtifactRoot();
+    const release = holdArtifactRoot(root, "serving");
+    const record = join(artifactHoldDirectory(root), `${process.pid}.json`);
+    // The e2e server releases from a process exit handler, so a release that
+    // threw would replace whatever that run was already reporting with this.
+    // The record left behind is one the next run prunes: its pid is gone.
+    rmSync(record, { force: true });
+    mkdirSync(join(record, "occupied"), { recursive: true });
+
+    expect(() => release()).not.toThrow();
+  });
+
+  it("names the hold directory and what clears it when it cannot be used", () => {
+    const root = createArtifactRoot();
+    const directory = artifactHoldDirectory(root);
+    // A file where the hold directory belongs is what a wrong umask, a full
+    // disk, or a stray write leaves behind: the claim cannot be recorded, and
+    // compose and the e2e server each print the thrown message and nothing
+    // else, so it has to carry the next action itself.
+    mkdirSync(join(directory, ".."), { recursive: true });
+    writeFileSync(directory, "");
+    roots.push(root);
+
+    expect(() => holdArtifactRoot(root, "composing")).toThrow(
+      new RegExp(
+        `could not be claimed for composing: .+\\. Check that ${directory} is writable, or delete it to clear every hold recorded there, then rerun just check\\.`,
+      ),
+    );
+  });
+
   it("keys one artifact directory apart from another beside it", () => {
     const root = createArtifactRoot();
 

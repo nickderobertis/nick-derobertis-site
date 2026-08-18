@@ -130,6 +130,10 @@ function pruneToLiveHolds(directory: string): ArtifactHold[] {
  * on both. A run refused this way takes its own claim back off before it
  * throws; left behind, it would block the next run on a hold nobody owns.
  *
+ * A hold directory this run cannot create, write, or read is reported as that
+ * directory and what clears it, because both callers print a thrown message and
+ * nothing else.
+ *
  * The returned release drops this run's claim, and is safe to call more than
  * once: a server releases on whichever of process exit and its shutdown signal
  * arrives first, and a compose releases whether or not it threw.
@@ -139,14 +143,34 @@ export function holdArtifactRoot(
   activity: ArtifactActivity,
 ): () => void {
   const directory = artifactHoldDirectory(root);
-  mkdirSync(directory, { recursive: true });
   const file = join(directory, `${process.pid}.json`);
-  writeFileSync(
-    file,
-    `${JSON.stringify({ pid: process.pid, activity, root: resolve(root) })}\n`,
-  );
-  const release = () => rmSync(file, { force: true });
-  const [blocking] = pruneToLiveHolds(directory).filter(
+  const release = () => {
+    try {
+      rmSync(file, { force: true });
+    } catch {
+      // A record this run cannot remove is one the next run drops anyway: it
+      // names a pid that is about to be gone, and pruning is by liveness.
+    }
+  };
+  let recorded: ArtifactHold[];
+  try {
+    mkdirSync(directory, { recursive: true });
+    writeFileSync(
+      file,
+      `${JSON.stringify({ pid: process.pid, activity, root: resolve(root) })}\n`,
+    );
+    recorded = pruneToLiveHolds(directory);
+  } catch (error) {
+    // Both callers report a thrown message and nothing else — compose prints
+    // it as `compose: …` and the e2e server as `serve-e2e: …` — so a bare
+    // filesystem diagnostic reaches a contributor naming neither the directory
+    // that refused nor anything to do about it.
+    release();
+    throw new Error(
+      `${resolve(root)} could not be claimed for ${activity}: ${error instanceof Error ? error.message : String(error)}. Check that ${directory} is writable, or delete it to clear every hold recorded there, then rerun just check.`,
+    );
+  }
+  const [blocking] = recorded.filter(
     (held) =>
       held.pid !== process.pid &&
       (activity === "composing" || held.activity === "composing"),
