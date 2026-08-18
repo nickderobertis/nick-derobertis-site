@@ -26,9 +26,23 @@ import {
 export const name = "nick-derobertis-site/federation";
 
 const projectConfigurations = "apps/*/project.json";
+const projectConfiguration = /^apps\/[a-z][a-z0-9-]*\/project\.json$/;
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This derives the order Nx runs build, prerender, and screenshot in, and it runs while the project graph is being resolved — before rspack has built a single bundle, so there is no site, no route, and no page for a browser to load while it decides anything. What it returns is task scheduling and nothing else: it adds no module, changes no rendered markup, and is gone by the time the composed artifact exists, so a visitor observes only the same artifact the fan-in was already producing. federation-contract.spec.ts drives this exact entry point twice over: through the real `nx graph` for the fan-in every app ends up with, and directly for the file set Nx hands it. A configuration it refuses stops the graph before any build input is derived, so nothing is ever built for a browser to reach.
 /** One entry per matched `project.json`, as `createNodesV2` returns them. */
 function federationDependencies(configFiles) {
+  // Nx matches this set against `projectConfigurations` and hands it straight
+  // in, and every entry below is opened off disk, so the set is held to that
+  // same pattern here rather than trusted because Nx is what produced it.
+  if (
+    !Array.isArray(configFiles) ||
+    configFiles.some(
+      (path) => typeof path !== "string" || !projectConfiguration.test(path),
+    )
+  )
+    throw new Error(
+      `${name} derives federation task dependencies from ${projectConfigurations} files, and was handed ${JSON.stringify(configFiles)}. Register this plugin with that pattern in nx.json and rerun just check.`,
+    );
   const projects = configFiles.map(readDeclaredProject);
   const remoteBuilds = {
     target: "build",
@@ -58,5 +72,6 @@ function federationDependencies(configFiles) {
     ];
   });
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 export const createNodesV2 = [projectConfigurations, federationDependencies];

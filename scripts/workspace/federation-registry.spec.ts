@@ -72,8 +72,18 @@ function derive(configurations: readonly unknown[]) {
     probe,
     [
       'import { declaredProject, federationRemotes, moduleBoundaryConstraints, remoteRegistry } from "./federation-registry.mjs";',
-      "const projects = JSON.parse(process.argv[2]).map((configuration) =>",
-      '  declaredProject(configuration, "apps/" + configuration.name + "/project.json"),',
+      // The probe reads one JSON document out of argv and turns the name inside
+      // it into a path, both of which it does before the module under test is
+      // entered, so both are checked here rather than downstream of them.
+      "const configurations = JSON.parse(process.argv[2]);",
+      "if (!Array.isArray(configurations))",
+      '  throw new Error("probe takes one JSON array of project configurations, not " + process.argv[2]);',
+      "const sourceOf = (configuration, index) =>",
+      '  typeof configuration?.name === "string" && /^[a-z][a-z0-9-]*$/.test(configuration.name)',
+      '    ? "apps/" + configuration.name + "/project.json"',
+      '    : "the fabricated project configuration at index " + index;',
+      "const projects = configurations.map((configuration, index) =>",
+      "  declaredProject(configuration, sourceOf(configuration, index)),",
       ");",
       "const remotes = federationRemotes(projects);",
       "process.stdout.write(JSON.stringify({ registry: remoteRegistry(remotes), constraints: moduleBoundaryConstraints(remotes) }));",

@@ -255,6 +255,62 @@ describe("the federation fan-in every app depends on", () => {
       ).toEqual({ target: "prerender", projects: ["shell"] });
     }
   });
+
+  it("refuses a file set that is not the project configurations it registered for", async () => {
+    const plugin = await import(
+      pathToFileURL(resolve("scripts/workspace/federation-plugin.mjs")).href
+    );
+    const [pattern, deriveDependencies] = z
+      .tuple([
+        z.literal("apps/*/project.json"),
+        z.custom<(configFiles: unknown) => unknown>(
+          (value) => typeof value === "function",
+        ),
+      ])
+      .parse(plugin.createNodesV2);
+
+    // Nx matches that pattern and hands the result straight in, and every entry
+    // is opened off disk, so a set that did not come from it has to stop at the
+    // plugin rather than reaching a read with whatever it holds.
+    expect(() => deriveDependencies("apps/shell/project.json")).toThrow(
+      new RegExp(`${pattern.replace(/[*.]/g, "\\$&")} files`),
+    );
+    expect(() =>
+      deriveDependencies(["apps/shell/project.json", "../elsewhere.json"]),
+    ).toThrow(/"\.\.\/elsewhere\.json"/);
+    // The same call over a set Nx really would match still derives the fan-in,
+    // so the check refuses the malformed set rather than the plugin's own work.
+    const composed = ["build", { target: "build", projects: ["bio"] }];
+    expect(
+      deriveDependencies(["apps/bio/project.json", "apps/shell/project.json"]),
+    ).toEqual([
+      [
+        "apps/bio/project.json",
+        {
+          projects: {
+            "apps/bio": {
+              targets: {
+                screenshot: {
+                  dependsOn: [
+                    ...composed,
+                    { target: "prerender", projects: ["shell"] },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      ],
+      [
+        "apps/shell/project.json",
+        {
+          projects: {
+            "apps/shell": { targets: { prerender: { dependsOn: composed } } },
+          },
+        },
+      ],
+    ]);
+  });
 });
 
 describe("the module boundary every remote publishes under", () => {
