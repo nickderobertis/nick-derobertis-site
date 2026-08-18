@@ -213,6 +213,7 @@ describe("serve-e2e lifecycle", () => {
   it("names the run composing its artifact instead of serving one being replaced", async () => {
     const served = path.join(tree, "dist/apps/shell");
     const port = await availablePort();
+    // llmlint: ignore[tests_mirror_real_usage] This is the entry point the compose CLI itself claims through — compose.mjs calls this exported function with this activity, and the record it writes is byte-identical to the one a real compose leaves. It cannot be produced by running compose here: a compose holds only while it runs and releases before it exits, so there is no moment at which a real one is still composing when the server starts. The subject of the case, serve-e2e, is the real CLI in a real process throughout.
     const release = holdArtifactRoot(served, "composing");
 
     const refused = (() => {
