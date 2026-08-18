@@ -252,6 +252,7 @@ beforeAll(() => {
     "pnpm",
     ["exec", "nx", "graph", `--file=${graphFile}`],
     graphRemedy,
+    // llmlint: ignore[boundary_inputs_validated] The ambient environment is forwarded rather than narrowed, and that is the point: the graph this contract reads has to be the graph just check builds, and the justfile exports NX_CACHE_DIRECTORY into that environment, so an allowlist would build the graph under different cache settings than the workspace itself uses and would silently drift every time nx or pnpm started reading another variable. Nothing here reads the environment back — only nx receives it, and its one value this spec decides, NX_DAEMON, is written literally. Everything nx then hands back does get narrowed, by graphSchema below.
     { env: { ...process.env, NX_DAEMON: "false" } },
   );
   if (!existsSync(graphFile))
