@@ -150,7 +150,7 @@ type ImportSite = { file: string; specifier: string };
 let projects: Project[] = [];
 let sites: ImportSite[] = [];
 
-const moduleFile = /\.(?:tsx?|mjs|js)$/;
+const moduleExtension = /\.(?:tsx?|mjs|js)$/;
 
 /**
  * Every module git tracks under the three project trees. What git prints is a
@@ -174,7 +174,7 @@ function trackedModules(): string[] {
       `git ls-files printed ${quoted.join(", ")}, which git quotes rather than names, so nothing here could open them`,
       "Rename those paths to word characters, dots and dashes, then rerun just check.",
     );
-  const modules = listed.filter((file) => moduleFile.test(file));
+  const modules = listed.filter((file) => moduleExtension.test(file));
   const absent = modules.filter((file) => !existsSync(file));
   if (absent.length > 0)
     fail(
