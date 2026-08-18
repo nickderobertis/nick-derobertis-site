@@ -62,9 +62,18 @@ function graphProjects() {
     } catch (error) {
       // Nx reports a refused federation declaration through the plugin that
       // reads it, on its own stderr. Dropping that here would leave the reason
-      // the registry could not be derived unreported.
+      // the registry could not be derived unreported. What was thrown is
+      // whatever the child process failure carried, so the two streams are read
+      // only where they are the strings `encoding: "utf8"` produces: anything
+      // else falls back to the thrown value itself rather than reaching the
+      // message as "undefined".
+      const printed = (stream) => (typeof stream === "string" ? stream : "");
+      const reported =
+        typeof error === "object" && error !== null
+          ? `${printed(error.stderr)}${printed(error.stdout)}`.trim()
+          : "";
       throw new Error(
-        `the project graph could not be resolved: ${`${error.stderr ?? ""}${error.stdout ?? ""}`.trim() || error.message}`,
+        `the project graph could not be resolved: ${reported || (error instanceof Error ? error.message : String(error))}`,
       );
     }
     const graph = JSON.parse(readFileSync(file, "utf8"));

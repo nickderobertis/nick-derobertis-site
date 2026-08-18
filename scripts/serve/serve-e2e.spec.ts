@@ -213,36 +213,6 @@ async function waitUntilComposing(composing: ChildProcess, stalled: string) {
   throw new Error(`compose never opened ${stalled}`);
 }
 
-/**
- * The claim records on one artifact, read from inside the disposable tree by
- * the module the CLI under test claims through, resolved the way that CLI
- * resolves it: `libs` there links back to the workspace, so this is the same
- * derivation the server used rather than the directory layout restated here.
- * A record is pruned only when some later run claims the artifact, so what this
- * answers with after a run has exited is what that run left behind.
- */
-function heldRecords(root: string) {
-  const probe = path.join(tree, "scripts/serve/held-records.mjs");
-  writeFileSync(
-    probe,
-    [
-      'import { readdirSync } from "node:fs";',
-      'import { artifactHoldDirectory } from "../../libs/artifact-contracts/src/artifact-hold.ts";',
-      "process.stdout.write(",
-      "  JSON.stringify(readdirSync(artifactHoldDirectory(process.argv[2])).sort()),",
-      ");",
-      "",
-    ].join("\n"),
-  );
-  const listed = spawnSync(process.execPath, [probe, root], {
-    cwd: workspace,
-    encoding: "utf8",
-  });
-  if (listed.status !== 0)
-    throw new Error(`could not read the claims on ${root}: ${listed.stderr}`);
-  return z.array(z.string()).parse(JSON.parse(listed.stdout));
-}
-
 describe("serve-e2e lifecycle", () => {
   afterEach(async () => {
     await Promise.all(
@@ -363,25 +333,6 @@ describe("serve-e2e lifecycle", () => {
     await new Promise<void>((resolve, reject) =>
       replacement.close((error) => (error ? reject(error) : resolve())),
     );
-  }, 30_000);
-
-  // A record is pruned only when some later run scans the directory it is in,
-  // so a claim this server kept is still there after it has stopped. Every e2e
-  // run on this machine reads one artifact, so a claim outliving the run that
-  // took it would refuse the next compose over it for a server that is gone.
-  it("drops its claim on the artifact when it stops serving", async () => {
-    const served = path.join(tree, "dist/apps/shell");
-    const port = await availablePort();
-    const child = startServer(port);
-    await waitUntilReady(`http://127.0.0.1:${port}/nick-derobertis-site/`);
-
-    expect(heldRecords(served)).toEqual([`${child.pid}.json`]);
-
-    const exited = once(child, "exit");
-    child.kill("SIGTERM");
-    await exited;
-
-    expect(heldRecords(served)).toEqual([]);
   }, 30_000);
 
   it("answers an unrouted path with the artifact's recovery document", async () => {

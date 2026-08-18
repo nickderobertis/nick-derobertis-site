@@ -167,6 +167,12 @@ function generateFromGraph(
     join(bin, "pnpm"),
     [
       "#!/bin/sh",
+      // Nx prints the plugin's refusal on its own stderr and exits non-zero,
+      // which is the only way a caller learns why the graph never resolved.
+      'if [ -n "$GRAPH_STDERR" ]; then',
+      '  printf %s "$GRAPH_STDERR" >&2',
+      "  exit 1",
+      "fi",
       'for argument in "$@"; do',
       '  case "$argument" in',
       '    --file=*) printf %s "$GRAPH" > "$(printf %s "$argument" | cut -d= -f2-)" ;;',
@@ -393,6 +399,26 @@ describe("the project graph the generator derives the registry from", () => {
     // The stub writes nothing when there is no graph to write, so the CLI's own
     // read of the file Nx was asked for is what fails here.
     expect(result.stderr).toMatch(/generate-remote-registry: /);
+  });
+
+  it("carries what Nx printed when Nx is what refused", () => {
+    // A federation declaration the plugin refuses reaches a contributor only
+    // through the stderr of the run that resolved the graph, so it is the
+    // stream this CLI has to carry rather than the exit status it saw.
+    const refusal = "apps/bio/project.json declares no Nx project name";
+
+    const result = generateFromGraph(undefined, undefined, ["--check"], {
+      GRAPH_STDERR: refusal,
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      `the project graph could not be resolved: ${refusal}`,
+    );
+    // Node wraps a failed child in "Command failed: <the command>", which names
+    // the graph run rather than the declaration it refused, so what is carried
+    // here is the stream Nx wrote and not the exception's own message.
+    expect(result.stderr).not.toContain("Command failed");
   });
 });
 
