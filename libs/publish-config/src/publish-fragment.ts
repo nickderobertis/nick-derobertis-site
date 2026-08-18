@@ -2,18 +2,14 @@ import { spawnSync } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, normalize, resolve, sep } from "node:path";
-// The publish CLI loads this module through Node's type stripping. This library
-// is a workspace package, so its own entry point resolves by alias there;
-// build-config is not, so the two build contracts this library depends on are
-// reached by the path Node itself resolves.
-/* eslint-disable @nx/enforce-module-boundaries -- This publish path reads the canonical fragment contract and remote registry directly because Node type stripping cannot resolve a tsconfig alias into a library that is not a workspace package. */
-import { fragmentContractSchema } from "../../build-config/src/fragment-contract.ts";
+// The publish CLI loads this module through Node's type stripping, and every
+// workspace project is a package there, so the two build contracts this library
+// depends on are reached through the subpaths build-config publishes for them.
+import { fragmentContractSchema } from "@site/build-config/fragment-contract";
 import {
   remoteRegistry,
   validatedRemoteRegistry,
-} from "../../build-config/src/remote-registry.ts";
-
-/* eslint-enable @nx/enforce-module-boundaries */
+} from "@site/build-config/remote-registry";
 
 // A lane's name becomes a branch subtree path, so the registry a lane list is
 // derived from must be narrowed before git sees any of it. build-config ships

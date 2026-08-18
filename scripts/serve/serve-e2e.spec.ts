@@ -29,16 +29,20 @@ let tree: string;
 /**
  * The real CLI over an artifact this spec owns. serve-e2e resolves its document
  * root beside itself, so the script's own bytes are placed in a disposable tree
- * that carries a small built site and links back to the workspace libraries it
- * imports. Nothing about the CLI is replaced, and the shell's real prerendered
- * artifact stays the Playwright integration suite's subject rather than a build
- * this project's tests have to wait for.
+ * that carries a small built site and links back to this project's own package
+ * links, which is how Node resolves the workspace libraries the CLI imports.
+ * Nothing about the CLI is replaced, and the shell's real prerendered artifact
+ * stays the Playwright integration suite's subject rather than a build this
+ * project's tests have to wait for.
  */
 beforeAll(() => {
   tree = mkdtempSync(path.join(tmpdir(), "serve-e2e-"));
   mkdirSync(path.join(tree, "scripts/serve"), { recursive: true });
   mkdirSync(path.join(tree, "dist/apps/shell"), { recursive: true });
-  symlinkSync(path.join(workspace, "libs"), path.join(tree, "libs"));
+  symlinkSync(
+    path.join(workspace, "scripts/serve/node_modules"),
+    path.join(tree, "scripts/serve/node_modules"),
+  );
   serverScript = path.join(tree, "scripts/serve/serve-e2e.mjs");
   copyFileSync(
     path.join(workspace, "scripts/serve/serve-e2e.mjs"),

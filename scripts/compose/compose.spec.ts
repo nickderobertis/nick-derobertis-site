@@ -9,20 +9,17 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { publishableApps } from "@site/publish-config";
-import { afterEach, expect, test } from "vitest";
 // This spec drives compose.mjs itself, which Node type-strips, so it reaches
-// the same library modules by the same paths the CLI resolves. Only a library
-// published as a workspace package resolves by alias there; the rest are
-// reached by the direct source path Node itself resolves.
-/* eslint-disable @nx/enforce-module-boundaries -- This CLI integration spec follows the same direct source paths used by Node type stripping, which cannot resolve a tsconfig alias into a library that is not a workspace package. */
+// the same library modules through the same package specifiers the CLI
+// resolves.
+import { remotesForRoute } from "@site/artifact-contracts";
 import {
   artifactHoldDirectory,
   holdArtifactRoot,
-} from "../../libs/artifact-contracts/src/artifact-hold.ts";
-import { remotesForRoute } from "../../libs/artifact-contracts/src/index.ts";
-import { serializeFragmentContract } from "../../libs/build-config/src/fragment-contract.ts";
-/* eslint-enable @nx/enforce-module-boundaries */
+} from "@site/artifact-contracts/artifact-hold";
+import { serializeFragmentContract } from "@site/build-config/fragment-contract";
+import { publishableApps } from "@site/publish-config";
+import { afterEach, expect, test } from "vitest";
 import {
   compose,
   homePanes,

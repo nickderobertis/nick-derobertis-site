@@ -1,13 +1,12 @@
 {
-  "name": "@site/e2e-harness",
+  "name": "@site/data-access-skills",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@site/e2e-fixtures": "workspace:*",
-    "@site/route-state": "workspace:*",
+    "@site/data-access-core": "workspace:*",
     "@site/testing": "workspace:*"
   }
 }

@@ -1,12 +1,13 @@
 {
-  "name": "@site/e2e-harness",
+  "name": "@site/artifact-contracts",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./artifact-hold": "./src/artifact-hold.ts"
   },
   "dependencies": {
-    "@site/e2e-fixtures": "workspace:*",
+    "@site/build-config": "workspace:*",
     "@site/route-state": "workspace:*",
     "@site/testing": "workspace:*"
   }

@@ -1,20 +1,20 @@
 import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { JSDOM } from "jsdom";
-import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 import {
   inlineRemoteCssPattern,
   parseRemoteManifest,
   routeContracts,
-} from "../../libs/artifact-contracts/src/index.ts";
-import { fragmentContractSchema } from "../../libs/build-config/src/fragment-contract.ts";
-import remoteManifest from "../../libs/build-config/src/remotes.json" with {
+} from "@site/artifact-contracts";
+import { holdArtifactRoot } from "@site/artifact-contracts/artifact-hold";
+import { fragmentContractSchema } from "@site/build-config/fragment-contract";
+import remoteManifest from "@site/build-config/remotes.json" with {
   type: "json",
 };
-import siteConfig from "../../libs/data-access-core/src/site.config.json" with {
+import siteConfig from "@site/data-access-core/site.config.json" with {
   type: "json",
 };
+import { JSDOM } from "jsdom";
 
 const validatedRemoteManifest = parseRemoteManifest(remoteManifest);
 const appNames = ["shell", ...Object.keys(validatedRemoteManifest)];

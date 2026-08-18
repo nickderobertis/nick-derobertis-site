@@ -8,8 +8,8 @@
       "!.nx",
       "!node_modules",
       "!.pnpm-store",
-      "!playwright-report",
-      "!test-results",
+      "!**/playwright-report",
+      "!**/test-results",
       "!reference"
     ]
   },

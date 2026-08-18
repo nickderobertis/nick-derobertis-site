@@ -1,0 +1,11 @@
+{
+  "name": "@site/tooling-compose",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@site/artifact-contracts": "workspace:*",
+    "@site/build-config": "workspace:*",
+    "@site/data-access-core": "workspace:*",
+    "@site/publish-config": "workspace:*"
+  }
+}

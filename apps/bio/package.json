@@ -1,0 +1,13 @@
+{
+  "name": "@site/bio",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@site/build-config": "workspace:*",
+    "@site/design-system": "workspace:*",
+    "@site/e2e-harness": "workspace:*",
+    "@site/route-state": "workspace:*",
+    "@site/testing": "workspace:*",
+    "@site/visual-harness": "workspace:*"
+  }
+}

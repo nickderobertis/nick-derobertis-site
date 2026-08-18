@@ -15,9 +15,15 @@ export interface WorkspaceTestConfigOptions {
   coverageExclude?: string[];
 }
 
+// Every mapping becomes an anchored alias pattern below, so the alias name is
+// narrowed to the workspace package grammar where it is read rather than
+// interpolated into a pattern as whatever tsconfig.base.json happened to spell.
 const baseTsConfigSchema = z.object({
   compilerOptions: z.object({
-    paths: z.record(z.string(), z.array(z.string()).min(1)),
+    paths: z.record(
+      z.string().regex(/^@site\/[a-z][a-z0-9-]*$/),
+      z.array(z.string()).min(1),
+    ),
   }),
 });
 
@@ -65,7 +71,26 @@ export function defineWorkspaceTestConfig({
   return {
     root,
     plugins: [react()],
-    resolve: { alias: { ...aliases, ...remoteAliases } },
+    resolve: {
+      // A tsconfig mapping names a package's entry point and nothing beneath
+      // it, but Vite matches a string alias against every subpath under it too:
+      // `@site/build-config` would swallow `@site/build-config/remotes.json`
+      // and rewrite it onto a path no file sits at. Anchoring each mapping
+      // leaves a subpath to resolve through the `exports` its library
+      // publishes, which is where a subpath is declared. Federated remotes stay
+      // string aliases, because each names one exposed module with nothing
+      // beneath it.
+      alias: [
+        ...Object.entries(aliases).map(([alias, target]) => ({
+          find: new RegExp(`^${alias}$`),
+          replacement: target,
+        })),
+        ...Object.entries(remoteAliases).map(([alias, target]) => ({
+          find: alias,
+          replacement: target,
+        })),
+      ],
+    },
     test: {
       environment: "jsdom",
       setupFiles: ["libs/testing/src/setup.ts"],

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import contractInput from "./contracts.json";
+import contractInput from "./contracts.json" with { type: "json" };
 
 const contracts = z
   .object({

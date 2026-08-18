@@ -3,11 +3,12 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { serializeFragmentContract } from "@site/build-config";
+// The lane list is derived from the canonical registry, which build-config
+// publishes as a serialized build input rather than through its index.
+import remoteRegistry from "@site/build-config/remotes.json" with {
+  type: "json",
+};
 import { afterEach, expect, test } from "vitest";
-// The lane list is derived from the canonical registry, which build-config owns
-// as a serialized build input rather than as part of its public surface.
-// eslint-disable-next-line @nx/enforce-module-boundaries -- This spec reads the canonical serialized remote registry directly because it is a build input, not an exported module.
-import remoteRegistry from "../../build-config/src/remotes.json";
 import {
   assertOwnSubtree,
   contentStoreBranch,

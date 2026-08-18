@@ -1,0 +1,14 @@
+{
+  "name": "@site/home-carousel",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@site/build-config": "workspace:*",
+    "@site/data-access-core": "workspace:*",
+    "@site/data-access-home": "workspace:*",
+    "@site/design-system": "workspace:*",
+    "@site/e2e-harness": "workspace:*",
+    "@site/testing": "workspace:*",
+    "@site/visual-harness": "workspace:*"
+  }
+}

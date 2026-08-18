@@ -1,5 +1,6 @@
 import path from "node:path";
 import { describe, expect, test } from "vitest";
+import { z } from "zod";
 import { defineWorkspaceTestConfig, resolveTsconfigAliases } from "./index.ts";
 
 describe("defineWorkspaceTestConfig", () => {
@@ -13,10 +14,18 @@ describe("defineWorkspaceTestConfig", () => {
     });
 
     expect(config.root).toBe(path.resolve(import.meta.dirname, "../../.."));
-    expect(config.resolve?.alias).toMatchObject({
-      "@site/layout": path.resolve("libs/layout/src/index.ts"),
-      "homeCards/Skeleton": path.resolve("apps/home-cards/src/skeleton.tsx"),
-    });
+    expect(config.resolve?.alias).toEqual(
+      expect.arrayContaining([
+        {
+          find: /^@site\/layout$/,
+          replacement: path.resolve("libs/layout/src/index.ts"),
+        },
+        {
+          find: "homeCards/Skeleton",
+          replacement: path.resolve("apps/home-cards/src/skeleton.tsx"),
+        },
+      ]),
+    );
     expect(config.test).toMatchObject({
       environment: "jsdom",
       setupFiles: ["libs/testing/src/setup.ts"],
@@ -28,6 +37,34 @@ describe("defineWorkspaceTestConfig", () => {
         thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
       },
     });
+  });
+
+  // Vite tests a string alias against every subpath beneath it, so an
+  // unanchored mapping would rewrite `@site/layout/contracts.json` onto
+  // `.../index.tscontracts.json`. Each library declares its own subpaths as
+  // exports, and this is what leaves them to resolve there.
+  test("leaves a library's subpaths to the exports that library declares", () => {
+    const config = defineWorkspaceTestConfig({
+      project: "awards",
+      dir: "apps/awards",
+    });
+    const layout = z
+      .array(
+        z.object({
+          find: z.union([z.string(), z.instanceof(RegExp)]),
+          replacement: z.string(),
+        }),
+      )
+      .parse(config.resolve?.alias)
+      .find(
+        ({ replacement }) =>
+          replacement === path.resolve("libs/layout/src/index.ts"),
+      )?.find;
+    expect(layout).toBeInstanceOf(RegExp);
+    // Vite tests a RegExp alias against the whole specifier, so these two
+    // answers are the ones it gives the imports below.
+    expect((layout as RegExp).test("@site/layout")).toBe(true);
+    expect((layout as RegExp).test("@site/layout/contracts.json")).toBe(false);
   });
 
   test("uses the project source tree as the default coverage boundary", () => {

@@ -1,12 +1,12 @@
 {
-  "name": "@site/publish-config",
+  "name": "@site/route-state",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./contracts.json": "./src/contracts.json"
   },
   "dependencies": {
-    "@site/build-config": "workspace:*",
     "@site/testing": "workspace:*"
   }
 }

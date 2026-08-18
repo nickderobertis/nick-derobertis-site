@@ -1,12 +1,9 @@
 import { fileURLToPath } from "node:url";
-import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
-import siteConfig from "../../libs/data-access-core/src/site.config.json" with {
+import { holdArtifactRoot } from "@site/artifact-contracts/artifact-hold";
+import siteConfig from "@site/data-access-core/site.config.json" with {
   type: "json",
 };
-import {
-  closeOnSignals,
-  createSiteServer,
-} from "../../libs/e2e-fixtures/src/index.ts";
+import { closeOnSignals, createSiteServer } from "@site/e2e-fixtures";
 
 process.on("uncaughtException", (error) => {
   console.error(

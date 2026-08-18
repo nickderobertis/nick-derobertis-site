@@ -1,6 +1,4 @@
 import { access, readFile } from "node:fs/promises";
-import { JSDOM } from "jsdom";
-import routes from "../../apps/shell/src/routes.json" with { type: "json" };
 import {
   inlineRemoteCssPattern,
   parseRemoteManifest,
@@ -8,13 +6,15 @@ import {
   remotesForRoute,
   routeContracts,
   validatePagesBase,
-} from "../../libs/artifact-contracts/src/index.ts";
-import remoteManifest from "../../libs/build-config/src/remotes.json" with {
+} from "@site/artifact-contracts";
+import remoteManifest from "@site/build-config/remotes.json" with {
   type: "json",
 };
-import siteConfig from "../../libs/data-access-core/src/site.config.json" with {
+import siteConfig from "@site/data-access-core/site.config.json" with {
   type: "json",
 };
+import { JSDOM } from "jsdom";
+import routes from "../../apps/shell/src/routes.json" with { type: "json" };
 
 process.on("uncaughtException", (error) => {
   console.error(
