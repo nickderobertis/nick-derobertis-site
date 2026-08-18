@@ -78,7 +78,6 @@ const release = (() => {
   }
 })();
 // llmlint: ignore-end[changed_behavior_has_e2e]
-// llmlint: ignore[changed_behavior_has_e2e] Releasing has no browser interface: it runs at process exit, after this server has stopped answering, and removes only this run's own claim record beneath the temporary directory, so nothing a browser can request changes. serve-e2e.spec.ts drives this real CLI through shutdown and then composes over the artifact it was holding, and artifact-hold.spec.ts drives the release itself, including one whose record can no longer be removed.
 process.on("exit", release);
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.
 server.on("error", (error) => {

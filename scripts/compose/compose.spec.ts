@@ -16,7 +16,10 @@ import { afterEach, expect, test } from "vitest";
 // published as a workspace package resolves by alias there; the rest are
 // reached by the direct source path Node itself resolves.
 /* eslint-disable @nx/enforce-module-boundaries -- This CLI integration spec follows the same direct source paths used by Node type stripping, which cannot resolve a tsconfig alias into a library that is not a workspace package. */
-import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
+import {
+  artifactHoldDirectory,
+  holdArtifactRoot,
+} from "../../libs/artifact-contracts/src/artifact-hold.ts";
 import { remotesForRoute } from "../../libs/artifact-contracts/src/index.ts";
 import { serializeFragmentContract } from "../../libs/build-config/src/fragment-contract.ts";
 /* eslint-enable @nx/enforce-module-boundaries */
@@ -290,6 +293,28 @@ test("the compose CLI composes once the run serving the artifact has released it
   expect(await readFile(join(store.output, "index.html"), "utf8")).toContain(
     'data-prerendered-route="/"',
   );
+});
+
+// A record is pruned only when some later run scans the directory it is in, so
+// a claim this CLI kept is still there after it has exited. The release is in a
+// `finally`, which is what a compose that threw halfway through its inputs
+// needs: it holds the artifact from before its first write, and a claim left
+// behind would refuse the next `just check` on this machine for a run that is
+// already over.
+test("the compose CLI drops its claim whether or not it composed", async () => {
+  const store = await writeContentStore({});
+  const holds = artifactHoldDirectory(store.output);
+
+  const composed = runComposeCommand(store.apps, store.output);
+
+  expect(composed.status, `${composed.stdout}${composed.stderr}`).toBe(0);
+  expect(await readdir(holds)).toEqual([]);
+
+  await rm(join(store.apps, "courses"), { recursive: true, force: true });
+  const failed = runComposeCommand(store.apps, store.output);
+
+  expect(failed.status).not.toBe(0);
+  expect(await readdir(holds)).toEqual([]);
 });
 
 test("compose refuses a content store that is missing an app's published bytes", async () => {

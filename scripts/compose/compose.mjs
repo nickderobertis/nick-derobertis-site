@@ -517,7 +517,6 @@ if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
     );
     process.exitCode = 1;
   } finally {
-    // llmlint: ignore[changed_behavior_has_e2e] Releasing has no browser interface: it removes this run's own claim record beneath the temporary directory and changes no byte of the artifact, so a visitor loads exactly the document this compose left behind, which site.spec.ts and every feature journey drive on both render paths. The release itself, on the run that composed and on the run that threw, is driven through the real module by artifact-hold.spec.ts, and compose.spec.ts drives this CLI through both the refused claim and the completed one.
     release();
   }
 }

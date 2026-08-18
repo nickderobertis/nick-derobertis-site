@@ -7,6 +7,7 @@ import {
   mkdirSync,
   mkdtempSync,
   openSync,
+  readdirSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -17,6 +18,11 @@ import path from "node:path";
 import { chromium } from "@playwright/test";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+// The CLI under test reaches this module by the same direct source path, which
+// is how Node type-strips it: the hold directory is derived from the artifact
+// root rather than restated here, so this spec reads the records the real
+// server wrote where the real server put them.
+import { artifactHoldDirectory } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 
 const workspace = path.resolve(import.meta.dirname, "../..");
 const addressSchema = z.object({
@@ -333,6 +339,27 @@ describe("serve-e2e lifecycle", () => {
     await new Promise<void>((resolve, reject) =>
       replacement.close((error) => (error ? reject(error) : resolve())),
     );
+  }, 30_000);
+
+  // A record is pruned only when some later run scans the directory it is in,
+  // so a claim this server kept is still there after it has stopped. Every e2e
+  // run on this machine reads one artifact, so a claim outliving the run that
+  // took it would refuse the next compose over it for a server that is gone.
+  it("drops its claim on the artifact when it stops serving", async () => {
+    const served = path.join(tree, "dist/apps/shell");
+    const port = await availablePort();
+    const child = startServer(port);
+    await waitUntilReady(`http://127.0.0.1:${port}/nick-derobertis-site/`);
+
+    expect(readdirSync(artifactHoldDirectory(served))).toEqual([
+      `${child.pid}.json`,
+    ]);
+
+    const exited = once(child, "exit");
+    child.kill("SIGTERM");
+    await exited;
+
+    expect(readdirSync(artifactHoldDirectory(served))).toEqual([]);
   }, 30_000);
 
   it("answers an unrouted path with the artifact's recovery document", async () => {
