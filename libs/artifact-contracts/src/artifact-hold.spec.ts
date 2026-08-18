@@ -18,7 +18,7 @@ import {
   holdArtifactRoot,
 } from "./artifact-hold.ts";
 
-const released: (() => void)[] = [];
+const pendingReleases: (() => void)[] = [];
 const roots: string[] = [];
 
 /** The other live run every case below is held against: this one's parent. */
@@ -33,7 +33,7 @@ function createArtifactRoot() {
 
 function hold(root: string, activity: ArtifactActivity) {
   const release = holdArtifactRoot(root, activity);
-  released.push(release);
+  pendingReleases.push(release);
   return release;
 }
 
@@ -65,7 +65,7 @@ function abandonedPid() {
 }
 
 afterEach(() => {
-  for (const release of released.splice(0)) release();
+  for (const release of pendingReleases.splice(0)) release();
   for (const root of roots.splice(0)) {
     rmSync(artifactHoldDirectory(root), { force: true, recursive: true });
     rmSync(root, { force: true, recursive: true });

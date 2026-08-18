@@ -155,14 +155,14 @@ export function holdArtifactRoot(
       // names a pid that is about to be gone, and pruning is by liveness.
     }
   };
-  let recorded: ArtifactHold[];
+  let liveHolds: ArtifactHold[];
   try {
     mkdirSync(directory, { recursive: true });
     writeFileSync(
       file,
       `${JSON.stringify({ pid: process.pid, activity, root: resolve(root) })}\n`,
     );
-    recorded = pruneToLiveHolds(directory);
+    liveHolds = pruneToLiveHolds(directory);
   } catch (error) {
     // Both callers report a thrown message and nothing else — compose prints
     // it as `compose: …` and the e2e server inside its own `Could not claim …`
@@ -173,7 +173,7 @@ export function holdArtifactRoot(
       `${resolve(root)} could not be claimed for ${activity}: ${error instanceof Error ? error.message : String(error)}. Check that ${directory} is writable, or delete it to clear every hold recorded there, then rerun just check.`,
     );
   }
-  const [blocking] = recorded.filter(
+  const [blocking] = liveHolds.filter(
     (held) =>
       held.pid !== process.pid &&
       (activity === "composing" || held.activity === "composing"),
