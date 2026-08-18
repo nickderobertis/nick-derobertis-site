@@ -8,7 +8,8 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -145,6 +146,7 @@ function generateFromGraph(
   graph: unknown,
   commit?: (path: string) => void,
   invocation: readonly string[] = ["--check"],
+  environment: Readonly<Record<string, string>> = {},
 ) {
   const root = mkdtempSync(join(tmpdir(), "remote-registry-graph-"));
   scratch.push(root);
@@ -186,6 +188,7 @@ function generateFromGraph(
           ...process.env,
           GRAPH: JSON.stringify(graph),
           PATH: `${bin}:${process.env.PATH ?? ""}`,
+          ...environment,
         },
       },
     ),
@@ -366,6 +369,23 @@ describe("the project graph the generator derives the registry from", () => {
     expect(result.stderr).toMatch(reason);
   });
 
+  it("names an action for a failure it never anticipated", () => {
+    // The run never reaches a graph: a scratch directory it cannot create is a
+    // bare filesystem diagnostic, naming no declaration, no flag, and no remedy
+    // of its own, which is the one failure the action printed beneath every
+    // message is for.
+    const result = generateFromGraph(undefined, undefined, ["--check"], {
+      TMPDIR: join(tmpdir(), "no-directory-a-remote-registry-run-can-reach"),
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/ENOENT/);
+    expect(result.stderr).toContain(
+      "run just bootstrap to restore the workspace's pinned tooling",
+    );
+    expect(result.stderr).toContain("rerun just generate-remote-registry");
+  });
+
   it("reports the reason Nx itself refused to resolve the graph", () => {
     const result = generateFromGraph(undefined);
 
@@ -409,10 +429,9 @@ describe("the committed registry the generator compares against", () => {
     expect(result.stderr).toMatch(/takes only --check.+not "--chekc"/);
     // The next action is the one that applies: nothing here is a declaration a
     // contributor could correct, so sending them to one names the wrong file.
-    expect(result.stderr).toContain(
-      "Correct the argument, then rerun just generate-remote-registry.",
-    );
-    expect(result.stderr).not.toContain("correct the declaration");
+    expect(result.stderr).toContain("Correct the argument.");
+    expect(result.stderr).toContain("rerun just generate-remote-registry");
+    expect(result.stderr).not.toContain("declaration");
     // Not recognising --check is what selects the write path, so a flag typed
     // wrong by a contributor asking whether the registry had drifted would have
     // answered by making it agree.
@@ -476,6 +495,114 @@ describe("the committed registry the generator compares against", () => {
       expect(result.stderr).not.toContain("correct the declaration");
     },
   );
+});
+
+const grammarVerdict = z.array(
+  z.object({ written: z.boolean(), read: z.boolean() }),
+);
+
+/**
+ * Runs one registry past both modules that hold it to a grammar, as the real
+ * modules in one real Node process.
+ *
+ * This module writes `remotes.json` under `remoteGrammar`, and
+ * `validatedRemoteRegistry` reads the committed file back under a second copy
+ * of the same grammar, so that a consumer indexing the registry is held to it
+ * without building a project graph to ask. Neither loads the other, and drift
+ * is silent in both directions: a producer that starts admitting a name the
+ * consumer refuses writes a registry the build then rejects, and one that
+ * starts refusing a name the consumer admits leaves a committed registry no
+ * regeneration can reproduce.
+ */
+function grammarVerdicts(registries: readonly Record<string, unknown>[]) {
+  const root = mkdtempSync(join(tmpdir(), "registry-grammar-"));
+  scratch.push(root);
+  cpSync(
+    "scripts/workspace/federation-registry.mjs",
+    join(root, "federation-registry.mjs"),
+  );
+  const probe = join(root, "probe.mjs");
+  writeFileSync(
+    probe,
+    [
+      'import { remoteGrammar } from "./federation-registry.mjs";',
+      `import { validatedRemoteRegistry } from ${JSON.stringify(
+        pathToFileURL(resolve("libs/build-config/src/remote-registry.ts")).href,
+      )};`,
+      // The probe reads its registries out of argv before either grammar is
+      // reached, so the one thing it is handed is checked here.
+      "const registries = JSON.parse(process.argv[2]);",
+      "if (!Array.isArray(registries))",
+      '  throw new Error("probe takes one JSON array of registries, not " + process.argv[2]);',
+      "const admits = (verdict) => {",
+      "  try {",
+      "    verdict();",
+      "    return true;",
+      "  } catch {",
+      "    return false;",
+      "  }",
+      "};",
+      "process.stdout.write(",
+      "  JSON.stringify(",
+      "    registries.map((registry) => ({",
+      "      written: Object.entries(registry).every(",
+      "        ([name, alias]) =>",
+      "          remoteGrammar.remoteName.test(name) &&",
+      '          typeof alias === "string" &&',
+      "          remoteGrammar.federationAlias.test(alias),",
+      "      ),",
+      "      read: admits(() => validatedRemoteRegistry(registry)),",
+      "    })),",
+      "  ),",
+      ");",
+      "",
+    ].join("\n"),
+  );
+  return spawnSync(
+    process.execPath,
+    [
+      "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+      probe,
+      JSON.stringify(registries),
+    ],
+    { encoding: "utf8" },
+  );
+}
+
+describe("the one grammar the registry is written and read under", () => {
+  const registries = [
+    { "home-cards": "homeCards" },
+    { bio: "bio" },
+    { Bio: "bio" },
+    { home2: "home" },
+    { h: "home" },
+    { "-home": "home" },
+    { bio: "bio-container" },
+    { bio: "Bio" },
+    { bio: "" },
+    { bio: 1 },
+  ];
+
+  it("refuses and admits exactly what the registry's readers do", () => {
+    const result = grammarVerdicts(registries);
+
+    expect(result.status, result.stderr).toBe(0);
+    const verdicts = grammarVerdict.parse(JSON.parse(result.stdout));
+    expect(
+      verdicts.flatMap((verdict, index) =>
+        verdict.written === verdict.read
+          ? []
+          : [
+              `${JSON.stringify(registries[index])}: the producer ${verdict.written ? "writes" : "refuses"} it and validatedRemoteRegistry ${verdict.read ? "admits" : "refuses"} it`,
+            ],
+      ),
+    ).toEqual([]);
+    // Two sides that refused everything would agree on every row, so the probe
+    // has to have carried a registry both of them let through.
+    expect(
+      verdicts.filter((verdict) => verdict.written && verdict.read),
+    ).not.toHaveLength(0);
+  });
 });
 
 describe("the canonical registry the workspace commits", () => {
