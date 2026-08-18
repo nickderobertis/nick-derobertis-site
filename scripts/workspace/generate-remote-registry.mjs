@@ -33,9 +33,14 @@ import {
 const registryPath = "libs/build-config/src/remotes.json";
 const workspaceDirectory = /^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/;
 
+// Every failure below carries its own next action, because they do not share
+// one: a misspelled flag, a graph Nx would not resolve, a project declaration
+// this CLI refuses, and a committed registry that no longer reads back are each
+// corrected somewhere different. Naming one remedy here sent a contributor to a
+// declaration for failures that name no declaration at all.
 process.on("uncaughtException", (error) => {
   console.error(
-    `generate-remote-registry: ${error instanceof Error ? error.message : String(error)}; correct the declaration named above, then rerun just generate-remote-registry`,
+    `generate-remote-registry: ${error instanceof Error ? error.message : String(error)}`,
   );
   process.exit(1);
 });
@@ -55,14 +60,14 @@ function graphProjects() {
       // reads it, on its own stderr. Dropping that here would leave the reason
       // the registry could not be derived unreported.
       throw new Error(
-        `the project graph could not be resolved: ${`${error.stderr ?? ""}${error.stdout ?? ""}`.trim() || error.message}`,
+        `the project graph could not be resolved: ${`${error.stderr ?? ""}${error.stdout ?? ""}`.trim() || error.message}. Fix what that reason names, then rerun just generate-remote-registry.`,
       );
     }
     const graph = JSON.parse(readFileSync(file, "utf8"));
     const nodes = graph?.graph?.nodes;
     if (typeof nodes !== "object" || nodes === null || Array.isArray(nodes))
       throw new Error(
-        "nx graph printed no project nodes, so no remote registry could be derived from it",
+        "nx graph printed no project nodes, so no remote registry could be derived from it. Run just bootstrap to restore the workspace's pinned Nx, then rerun just generate-remote-registry.",
       );
     // A node carries the configuration every projection below reads and a root
     // that names the file every diagnostic points a contributor at, so each is
@@ -72,17 +77,17 @@ function graphProjects() {
     return Object.entries(nodes).map(([name, node]) => {
       if (typeof node !== "object" || node === null || Array.isArray(node))
         throw new Error(
-          `nx graph reported the project ${JSON.stringify(name)} as ${JSON.stringify(node)}, which is not a project node`,
+          `nx graph reported the project ${JSON.stringify(name)} as ${JSON.stringify(node)}, which is not a project node. Run just bootstrap to restore the workspace's pinned Nx, then rerun just generate-remote-registry.`,
         );
       const data = node.data;
       if (typeof data !== "object" || data === null || Array.isArray(data))
         throw new Error(
-          `nx graph reported the project ${JSON.stringify(name)} with no project configuration to derive a remote from`,
+          `nx graph reported the project ${JSON.stringify(name)} with no project configuration to derive a remote from. Run just bootstrap to restore the workspace's pinned Nx, then rerun just generate-remote-registry.`,
         );
       const root = data.root;
       if (typeof root !== "string" || !workspaceDirectory.test(root))
         throw new Error(
-          `nx graph reported the project ${JSON.stringify(name)} at ${JSON.stringify(root)}, which is not a workspace-relative directory`,
+          `nx graph reported the project ${JSON.stringify(name)} at ${JSON.stringify(root)}, which is not a workspace-relative directory. Run just bootstrap to restore the workspace's pinned Nx, then rerun just generate-remote-registry.`,
         );
       return declaredProject(data, `${root}/project.json`);
     });
@@ -102,7 +107,7 @@ function committedRegistry() {
     // graph, which sends them to a derivation that is correct.
     if (error?.code === "ENOENT") return undefined;
     throw new Error(
-      `${registryPath} could not be read: ${error instanceof Error ? error.message : String(error)}`,
+      `${registryPath} could not be read: ${error instanceof Error ? error.message : String(error)}. Restore that path from git, or delete it to have this run write it, then rerun just generate-remote-registry.`,
     );
   }
 }
@@ -122,12 +127,12 @@ function committedOrder(committed) {
     // The order is cosmetic, but a committed file that does not parse is a
     // finding of its own, and reporting it as drift would name the wrong cause.
     throw new Error(
-      `${registryPath} is not readable as JSON: ${error instanceof Error ? error.message : String(error)}`,
+      `${registryPath} is not readable as JSON: ${error instanceof Error ? error.message : String(error)}. Restore it with git checkout ${registryPath}, then rerun just generate-remote-registry.`,
     );
   }
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
     throw new Error(
-      `${registryPath} is not a JSON object mapping each remote's project name to its federation alias`,
+      `${registryPath} is not a JSON object mapping each remote's project name to its federation alias. Restore it with git checkout ${registryPath}, then rerun just generate-remote-registry.`,
     );
   // Only the keys are read from here, and only to order the derivation's own,
   // but this file is an arbitrary document until something narrows it: the
@@ -140,7 +145,7 @@ function committedOrder(committed) {
       !remoteGrammar.federationAlias.test(alias)
     )
       throw new Error(
-        `${registryPath} maps ${JSON.stringify(name)} to ${JSON.stringify(alias)}, which is not a remote's project name and the Module Federation container it publishes under`,
+        `${registryPath} maps ${JSON.stringify(name)} to ${JSON.stringify(alias)}, which is not a remote's project name and the Module Federation container it publishes under. Restore it with git checkout ${registryPath}, then rerun just generate-remote-registry.`,
       );
   return Object.keys(parsed);
 }
@@ -170,7 +175,7 @@ const invocation = process.argv.slice(2);
 const unrecognized = invocation.filter((argument) => argument !== "--check");
 if (unrecognized.length > 0)
   throw new Error(
-    `takes only --check, which reports whether ${registryPath} still agrees with the project graph, and not ${unrecognized.map((argument) => JSON.stringify(argument)).join(", ")}; with no argument it rewrites that file`,
+    `takes only --check, which reports whether ${registryPath} still agrees with the project graph, and not ${unrecognized.map((argument) => JSON.stringify(argument)).join(", ")}; with no argument it rewrites that file. Correct the argument, then rerun just generate-remote-registry.`,
   );
 
 const checking = invocation.includes("--check");

@@ -407,6 +407,12 @@ describe("the committed registry the generator compares against", () => {
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toMatch(/takes only --check.+not "--chekc"/);
+    // The next action is the one that applies: nothing here is a declaration a
+    // contributor could correct, so sending them to one names the wrong file.
+    expect(result.stderr).toContain(
+      "Correct the argument, then rerun just generate-remote-registry.",
+    );
+    expect(result.stderr).not.toContain("correct the declaration");
     // Not recognising --check is what selects the write path, so a flag typed
     // wrong by a contributor asking whether the registry had drifted would have
     // answered by making it agree.
@@ -464,6 +470,10 @@ describe("the committed registry the generator compares against", () => {
       // send a contributor to a derivation that is doing exactly its job.
       expect(result.stderr).toMatch(reason);
       expect(result.stderr).not.toMatch(/disagrees with the remotes/);
+      // The file this run could not read is the one to restore, and it is the
+      // committed registry rather than any project declaration.
+      expect(result.stderr).toContain("rerun just generate-remote-registry");
+      expect(result.stderr).not.toContain("correct the declaration");
     },
   );
 });
