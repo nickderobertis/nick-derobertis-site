@@ -55,6 +55,9 @@ function abandonedPid() {
     try {
       process.kill(candidate, 0);
     } catch (error) {
+      // The same Node system error the module under test narrows: `code` is
+      // what separates ESRCH, the one code that means no process carries this
+      // id, from an EPERM raised by a live process another user owns.
       if ((error as NodeJS.ErrnoException).code === "ESRCH") return candidate;
     }
   }

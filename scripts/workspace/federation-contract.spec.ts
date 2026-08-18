@@ -359,6 +359,9 @@ describe("the wiring each remote still declares by hand", () => {
   it("builds every remote through its own federated rspack configuration", async () => {
     await expectContract(
       remotes.map(
+        // `as const` because ContractEntry is a readonly two-element tuple:
+        // without it this literal infers as string[], which expectContract
+        // cannot destructure into [path, expected].
         (remote) =>
           [
             `apps/${remote.name}/rspack.config.ts`,

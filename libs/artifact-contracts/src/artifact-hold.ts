@@ -75,6 +75,9 @@ function running(pid: number): boolean {
     process.kill(pid, 0);
     return true;
   } catch (error) {
+    // `process.kill` throws a Node system error, which carries `code`;
+    // asserting that shape is what makes the ESRCH test mean anything, because
+    // the caught value is otherwise `unknown` and has no code to read.
     if ((error as NodeJS.ErrnoException).code === "ESRCH") return false;
     // A hold owned by another user answers EPERM: that process is alive and
     // this run may not signal it, so only ESRCH means the hold is stale.
