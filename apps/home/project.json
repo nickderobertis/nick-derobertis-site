@@ -15,7 +15,9 @@
         "scope:home-cards",
         "scope:home-story",
         "scope:home-contact",
-        "scope:skills"
+        "scope:timeline",
+        "scope:skills",
+        "scope:awards"
       ]
     }
   },

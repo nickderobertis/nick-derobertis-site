@@ -121,6 +121,15 @@ function pruneToLiveHolds(directory: string): ArtifactHold[] {
 /**
  * Claims `root` for `activity`, or throws naming the run that already holds it.
  *
+ * The claim is published before the directory is read, and that order is what
+ * makes the claim exclusive rather than merely likely. Two composers that each
+ * read first would each find the directory empty, each write, and each believe
+ * it held the artifact alone — the exact overlap this module exists to refuse.
+ * Writing first means any run that reaches the scan is already visible to
+ * everyone racing it, so an overlap is refused on both sides instead of missed
+ * on both. A run refused this way takes its own claim back off before it
+ * throws; left behind, it would block the next run on a hold nobody owns.
+ *
  * The returned release drops this run's claim, and is safe to call more than
  * once: a server releases on whichever of process exit and its shutdown signal
  * arrives first, and a compose releases whether or not it threw.
@@ -131,19 +140,22 @@ export function holdArtifactRoot(
 ): () => void {
   const directory = artifactHoldDirectory(root);
   mkdirSync(directory, { recursive: true });
-  const [blocking] = pruneToLiveHolds(directory).filter(
-    (held) =>
-      held.pid !== process.pid &&
-      (activity === "composing" || held.activity === "composing"),
-  );
-  if (blocking !== undefined)
-    throw new Error(
-      `${resolve(root)} is held by process ${blocking.pid}, which is ${blocking.activity} it, so ${activity} it now would read or replace bytes that run owns. Let the other run finish — never run two gates at once — then rerun just check.`,
-    );
   const file = join(directory, `${process.pid}.json`);
   writeFileSync(
     file,
     `${JSON.stringify({ pid: process.pid, activity, root: resolve(root) })}\n`,
   );
-  return () => rmSync(file, { force: true });
+  const release = () => rmSync(file, { force: true });
+  const [blocking] = pruneToLiveHolds(directory).filter(
+    (held) =>
+      held.pid !== process.pid &&
+      (activity === "composing" || held.activity === "composing"),
+  );
+  if (blocking !== undefined) {
+    release();
+    throw new Error(
+      `${resolve(root)} is held by process ${blocking.pid}, which is ${blocking.activity} it, so ${activity} it now would read or replace bytes that run owns. Let the other run finish — never run two gates at once — then rerun just check.`,
+    );
+  }
+  return release;
 }
