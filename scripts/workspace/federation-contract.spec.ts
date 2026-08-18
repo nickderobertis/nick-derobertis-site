@@ -168,6 +168,7 @@ async function expectContract(contract: ReadonlyArray<ContractEntry>) {
     );
 }
 
+/** The `dependsOn` entry naming another project's target, if the task has one. */
 function dependencyOn(project: Project, target: string, on: string) {
   return project.targets?.[target]?.dependsOn?.find(
     (entry) => typeof entry !== "string" && entry.target === on,
