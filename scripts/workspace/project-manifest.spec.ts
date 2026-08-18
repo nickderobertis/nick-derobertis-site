@@ -255,7 +255,10 @@ const probeSource = [
   '  catch (error) { console.log(specifier + ": " + error.message) }',
 ].join("\n");
 
-function resolvedFrom(directory: string, specifiers: string[]): string[] {
+function resolutionFailuresFrom(
+  directory: string,
+  specifiers: string[],
+): string[] {
   const probe = spawnSync(
     "node",
     ["--input-type=module", "-e", probeSource, ...specifiers],
@@ -281,7 +284,7 @@ describe("Node resolves what every import site writes", () => {
     }
     expect(byDirectory.size).toBeGreaterThan(0);
     const findings = [...byDirectory].flatMap(([directory, specifiers]) =>
-      resolvedFrom(directory, [...specifiers]).map(
+      resolutionFailuresFrom(directory, [...specifiers]).map(
         (failure) => `${directory}: ${failure}`,
       ),
     );
