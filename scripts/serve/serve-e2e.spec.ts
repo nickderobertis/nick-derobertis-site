@@ -7,7 +7,6 @@ import {
   mkdirSync,
   mkdtempSync,
   openSync,
-  readdirSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -18,11 +17,6 @@ import path from "node:path";
 import { chromium } from "@playwright/test";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
-// The CLI under test reaches this module by the same direct source path, which
-// is how Node type-strips it: the hold directory is derived from the artifact
-// root rather than restated here, so this spec reads the records the real
-// server wrote where the real server put them.
-import { artifactHoldDirectory } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 
 const workspace = path.resolve(import.meta.dirname, "../..");
 const addressSchema = z.object({
@@ -219,6 +213,36 @@ async function waitUntilComposing(composing: ChildProcess, stalled: string) {
   throw new Error(`compose never opened ${stalled}`);
 }
 
+/**
+ * The claim records on one artifact, read from inside the disposable tree by
+ * the module the CLI under test claims through, resolved the way that CLI
+ * resolves it: `libs` there links back to the workspace, so this is the same
+ * derivation the server used rather than the directory layout restated here.
+ * A record is pruned only when some later run claims the artifact, so what this
+ * answers with after a run has exited is what that run left behind.
+ */
+function heldRecords(root: string) {
+  const probe = path.join(tree, "scripts/serve/held-records.mjs");
+  writeFileSync(
+    probe,
+    [
+      'import { readdirSync } from "node:fs";',
+      'import { artifactHoldDirectory } from "../../libs/artifact-contracts/src/artifact-hold.ts";',
+      "process.stdout.write(",
+      "  JSON.stringify(readdirSync(artifactHoldDirectory(process.argv[2])).sort()),",
+      ");",
+      "",
+    ].join("\n"),
+  );
+  const listed = spawnSync(process.execPath, [probe, root], {
+    cwd: workspace,
+    encoding: "utf8",
+  });
+  if (listed.status !== 0)
+    throw new Error(`could not read the claims on ${root}: ${listed.stderr}`);
+  return z.array(z.string()).parse(JSON.parse(listed.stdout));
+}
+
 describe("serve-e2e lifecycle", () => {
   afterEach(async () => {
     await Promise.all(
@@ -351,15 +375,13 @@ describe("serve-e2e lifecycle", () => {
     const child = startServer(port);
     await waitUntilReady(`http://127.0.0.1:${port}/nick-derobertis-site/`);
 
-    expect(readdirSync(artifactHoldDirectory(served))).toEqual([
-      `${child.pid}.json`,
-    ]);
+    expect(heldRecords(served)).toEqual([`${child.pid}.json`]);
 
     const exited = once(child, "exit");
     child.kill("SIGTERM");
     await exited;
 
-    expect(readdirSync(artifactHoldDirectory(served))).toEqual([]);
+    expect(heldRecords(served)).toEqual([]);
   }, 30_000);
 
   it("answers an unrouted path with the artifact's recovery document", async () => {
