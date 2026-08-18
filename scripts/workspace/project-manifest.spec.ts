@@ -54,22 +54,29 @@ const graphSchema = z.object({
 /**
  * The manifest shape the workspace publishes: private, ESM, and — for a
  * library, the only kind of project anything imports — an `exports` map whose
- * every target is a real file in that library's own tree.
+ * every target is a real file in that library's own tree. Both halves of each
+ * map are held to a grammar, because the checks below read the keys as much as
+ * the values: an export key is matched against the subpath an import asks for,
+ * and a dependency name is compared against the `@site` package that import
+ * names.
  */
+const sitePackageName = z.string().regex(/^@site\/[a-z][a-z0-9-]*$/);
+const exportSubpath = z.string().regex(/^\.(?:\/[\w.-]+)*$/);
+
 const manifestSchema = z.object({
-  name: z.string().regex(/^@site\/[a-z][a-z0-9-]*$/),
+  name: sitePackageName,
   private: z.literal(true),
   type: z.literal("module"),
   exports: z
     .record(
-      z.string(),
+      exportSubpath,
       z
         .string()
         .regex(/^\.\/[\w.-]+(?:\/[\w.-]+)*$/)
         .refine((target) => !target.split("/").includes("..")),
     )
     .optional(),
-  dependencies: z.record(z.string(), z.literal("workspace:*")).optional(),
+  dependencies: z.record(sitePackageName, z.literal("workspace:*")).optional(),
 });
 
 function fail(problem: string, remedy: string): never {
@@ -137,7 +144,7 @@ function documentOf(path: string, remedy: string): unknown {
 }
 
 const manifestRemedy =
-  "Give it the manifest an @site package publishes — a private ESM package.json whose exports name files inside its own tree — then rerun just check.";
+  "Give it the manifest an @site package publishes — a private ESM package.json whose exports name files inside its own tree and whose dependencies are @site packages held at workspace:* — then rerun just check.";
 
 type Project = {
   name: string;
