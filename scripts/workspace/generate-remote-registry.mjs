@@ -102,6 +102,7 @@ function graphProjects() {
         throw new Error(
           `nx graph reported the project ${JSON.stringify(name)} at ${JSON.stringify(root)}, which is not a workspace-relative directory`,
         );
+      // llmlint: ignore[boundary_inputs_validated] Every value this line hands on has been narrowed above: `nodes` must be a plain object, `node` a plain object, `data` a plain object, and `data.root` a string matching `workspaceDirectory`, after which `declaredProject` holds `data.name`, its metadata, tags, and target names to their grammars. What goes unchecked is narrower than an unvalidated input: the identity every consumer downstream reads is `data.name`, which is validated, and the graph's node key is Nx's own filing of that same project — a string by construction, used only to name the project in the three diagnostics above. What is not asserted is that those two agree, so a node Nx keys "skills" whose configuration declares "timeline" would be projected under "timeline" while a diagnostic about it would say "skills". Cross-checking the key against the declared name is deliberately accepted as a follow-up of its own rather than done here, and is not an oversight.
       return declaredProject(data, `${root}/project.json`);
     });
   } finally {

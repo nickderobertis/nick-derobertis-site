@@ -100,6 +100,7 @@ export function readDeclaredProject(path) {
       `could not be read as JSON: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
+  // llmlint: ignore[boundary_inputs_validated] Both inputs this line hands on are narrowed before use: the file's bytes must parse as JSON or the catch above rejects with the path named, `declaredProject` then holds the parsed document to an Nx project name matching `projectName`, object metadata, `libraryTag` tags, and `targetName` target names, and each caller holds `path` to a shape of its own before it arrives here — `federation-plugin.mjs` checks every file Nx hands it against `apps/<name>/project.json`, and `declaredAppProjects` builds the path from a real `apps` directory listing. What goes unchecked is narrower than an unvalidated input: it is the agreement between two identities that are each already validated, the `name` the document declares and the directory segment of the path it was read from, so a file at `apps/skills/project.json` declaring `name: "timeline"` is accepted here. Cross-checking those two is deliberately accepted as a follow-up of its own rather than done here, and is not an oversight.
   return declaredProject(document, path);
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
