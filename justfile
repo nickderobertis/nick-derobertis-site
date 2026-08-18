@@ -74,7 +74,7 @@ format:
 # derivation is checked by just lint-workflows.
 generate-remote-registry:
     @# llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface: it writes a build input before anything is built, so a declaration it refuses is one no artifact can be built from and there is nothing for a visitor to observe. federation-registry.spec.ts drives this exact recipe as a real subprocess and holds the bytes it writes to the committed registry.
-    @node scripts/workspace/generate-remote-registry.mjs || { echo "generate-remote-registry: the remote registry could not be derived from the project graph; fix the declaration reported above, then rerun just generate-remote-registry" >&2; exit 1; }
+    @node scripts/workspace/generate-remote-registry.mjs || { echo "generate-remote-registry: the remote registry could not be derived from the project graph; fix what the reason above names, then rerun just generate-remote-registry" >&2; exit 1; }
 
 upgrade:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm update --latest --recursive >"$log" 2>&1 || { cat "$log" >&2; echo "upgrade: dependency update failed; resolve the reported registry or dependency conflict, then rerun just upgrade" >&2; exit 1; }

@@ -298,23 +298,23 @@ describe("two composers reaching one artifact at the same moment", () => {
       });
       const one = side(0);
       const other = side(1);
-      const paths = [one, other];
-      for (const side of paths)
+      const sides = [one, other];
+      for (const side of sides)
         writeFileSync(side.probe, raceProbe(one.result, other.result));
 
-      const running = paths.map((side) =>
+      const running = sides.map((side) =>
         runProbe(side.probe, root, barrier, side.ready, side.result),
       );
       // The barrier drops only once both children are parked on it, so they
       // contend for the same instant rather than arriving one after the other.
       for (let waited = 0; waited < 4000; waited += 1) {
-        if (paths.every((side) => existsSync(side.ready))) break;
+        if (sides.every((side) => existsSync(side.ready))) break;
         await new Promise((tick) => setTimeout(tick, 5));
       }
       writeFileSync(barrier, "");
       await Promise.all(running);
 
-      const outcomes = paths.map((side) =>
+      const outcomes = sides.map((side) =>
         existsSync(side.result) ? readFileSync(side.result, "utf8") : "absent",
       );
       // Refusing both is a correct answer to a dead heat; composing twice over

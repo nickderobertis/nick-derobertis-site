@@ -232,7 +232,7 @@ test("compose stages every app's bundle and withholds its fragment inputs", asyn
  * that already owns its output.
  */
 // llmlint: ignore-block[work_goes_through_command_surface] The CLI boundary is the subject here — the exit status and the stderr this entry point answers a refused claim with — and this is the command surface the collision happens through: `shell:prerender` runs `node scripts/compose/compose.mjs` itself. The `just compose` recipe is the deploy lane's separate entry: it confines its output beneath dist/, so it cannot be pointed at the isolated artifact these cases own, and it reprints the CLI's stderr beneath its own line rather than emitting it, so routing through it would stop proving what this CLI says.
-function composeCommand(fragmentRoot: string, output: string) {
+function runComposeCommand(fragmentRoot: string, output: string) {
   return spawnSync(
     process.execPath,
     [
@@ -264,7 +264,7 @@ test("the compose CLI refuses to replace an artifact another run is serving", as
   const release = holdArtifactRoot(store.output, "serving");
 
   try {
-    const refused = composeCommand(store.apps, store.output);
+    const refused = runComposeCommand(store.apps, store.output);
 
     expect(refused.status).not.toBe(0);
     expect(refused.stderr).toContain(
@@ -284,7 +284,7 @@ test("the compose CLI composes once the run serving the artifact has released it
   const store = await writeContentStore({});
   holdArtifactRoot(store.output, "serving")();
 
-  const composed = composeCommand(store.apps, store.output);
+  const composed = runComposeCommand(store.apps, store.output);
 
   expect(composed.status, `${composed.stdout}${composed.stderr}`).toBe(0);
   expect(await readFile(join(store.output, "index.html"), "utf8")).toContain(

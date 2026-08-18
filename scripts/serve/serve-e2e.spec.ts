@@ -161,10 +161,10 @@ function startComposeHoldingServedTree() {
   mkdirSync(path.join(store, "shell"), { recursive: true });
   writeFileSync(path.join(store, "shell/fragment.css"), "");
   writeFileSync(path.join(store, "shell/fragment.json"), "{}");
-  const named = spawnSync("mkfifo", [stalled], { encoding: "utf8" });
-  if (named.status !== 0)
+  const created = spawnSync("mkfifo", [stalled], { encoding: "utf8" });
+  if (created.status !== 0)
     throw new Error(
-      `could not create ${stalled}: ${named.error?.message ?? named.stderr}`,
+      `could not create ${stalled}: ${created.error?.message ?? created.stderr}`,
     );
   const child = spawn(
     process.execPath,
