@@ -10,6 +10,7 @@ export default defineConfig({
       "scripts/workspace/affected-build-projects.spec.ts",
       "scripts/workspace/cache-keying.spec.ts",
       "scripts/workspace/federation-contract.spec.ts",
+      "scripts/workspace/federation-registry.spec.ts",
       "scripts/workspace/lint-llm-diff.spec.ts",
       "scripts/workspace/module-boundaries.spec.ts",
       "scripts/workspace/structure-contract.spec.ts",

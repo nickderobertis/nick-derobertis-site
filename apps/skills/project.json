@@ -4,6 +4,16 @@
   "sourceRoot": "apps/skills/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:skills"],
+  "metadata": {
+    "federation": { "alias": "skills" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": [
+        "type:shared",
+        "type:data-core",
+        "data:skills"
+      ]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

@@ -4,6 +4,23 @@
   "sourceRoot": "apps/home/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:home"],
+  "metadata": {
+    "federation": { "alias": "home" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": [
+        "type:shared",
+        "type:data-core",
+        "data:home",
+        "scope:home-carousel",
+        "scope:home-cards",
+        "scope:home-story",
+        "scope:home-contact",
+        "scope:timeline",
+        "scope:skills",
+        "scope:awards"
+      ]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

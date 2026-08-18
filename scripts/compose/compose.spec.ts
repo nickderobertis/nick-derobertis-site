@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import {
   mkdir,
   mkdtemp,
@@ -15,6 +16,10 @@ import { afterEach, expect, test } from "vitest";
 // published as a workspace package resolves by alias there; the rest are
 // reached by the direct source path Node itself resolves.
 /* eslint-disable @nx/enforce-module-boundaries -- This CLI integration spec follows the same direct source paths used by Node type stripping, which cannot resolve a tsconfig alias into a library that is not a workspace package. */
+import {
+  artifactHoldDirectory,
+  holdArtifactRoot,
+} from "../../libs/artifact-contracts/src/artifact-hold.ts";
 import { remotesForRoute } from "../../libs/artifact-contracts/src/index.ts";
 import { serializeFragmentContract } from "../../libs/build-config/src/fragment-contract.ts";
 /* eslint-enable @nx/enforce-module-boundaries */
@@ -222,6 +227,94 @@ test("compose stages every app's bundle and withholds its fragment inputs", asyn
   );
   for (const entries of staged)
     expect(entries.filter((name) => name.startsWith("fragment."))).toEqual([]);
+});
+
+/**
+ * The composer as `shell:prerender` runs it, which is the only path that claims
+ * the artifact it writes into: the exported API above is reached with a caller
+ * that already owns its output.
+ */
+// llmlint: ignore-block[work_goes_through_command_surface] The CLI boundary is the subject here — the exit status and the stderr this entry point answers a refused claim with — and this is the command surface the collision happens through: `shell:prerender` runs `node scripts/compose/compose.mjs` itself. The `just compose` recipe is the deploy lane's separate entry: it confines its output beneath dist/, so it cannot be pointed at the isolated artifact these cases own, and it reprints the CLI's stderr beneath its own line rather than emitting it, so routing through it would stop proving what this CLI says.
+function runComposeCommand(fragmentRoot: string, output: string) {
+  return spawnSync(
+    process.execPath,
+    [
+      "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+      "scripts/compose/compose.mjs",
+    ],
+    {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        COMPOSE_OUTPUT: output,
+        FRAGMENT_ROOT: fragmentRoot,
+      },
+    },
+  );
+}
+// llmlint: ignore-end[work_goes_through_command_surface]
+
+// Two overlapping runs over one working tree are what Nx cannot order: `e2e`
+// depends on `prerender` inside a dispatch, but a second `just check` composes
+// `dist/apps/shell` while the first run's Playwright servers are still reading
+// it, and the browser reports that only as missing headings and unpainted
+// remote styling.
+test("the compose CLI refuses to replace an artifact another run is serving", async () => {
+  const store = await writeContentStore({});
+  await mkdir(store.output, { recursive: true });
+  const served = join(store.output, "index.html");
+  await writeFile(served, "the document the other run is serving");
+  const release = holdArtifactRoot(store.output, "serving");
+
+  try {
+    const refused = runComposeCommand(store.apps, store.output);
+
+    expect(refused.status).not.toBe(0);
+    expect(refused.stderr).toContain(
+      `held by process ${process.pid}, which is serving it`,
+    );
+    // Refused before the first write, so the run that is serving these bytes
+    // keeps reading the ones it started with.
+    expect(await readFile(served, "utf8")).toBe(
+      "the document the other run is serving",
+    );
+  } finally {
+    release();
+  }
+});
+
+test("the compose CLI composes once the run serving the artifact has released it", async () => {
+  const store = await writeContentStore({});
+  holdArtifactRoot(store.output, "serving")();
+
+  const composed = runComposeCommand(store.apps, store.output);
+
+  expect(composed.status, `${composed.stdout}${composed.stderr}`).toBe(0);
+  expect(await readFile(join(store.output, "index.html"), "utf8")).toContain(
+    'data-prerendered-route="/"',
+  );
+});
+
+// A record is pruned only when some later run scans the directory it is in, so
+// a claim this CLI kept is still there after it has exited. The release is in a
+// `finally`, which is what a compose that threw halfway through its inputs
+// needs: it holds the artifact from before its first write, and a claim left
+// behind would refuse the next `just check` on this machine for a run that is
+// already over.
+test("the compose CLI drops its claim whether or not it composed", async () => {
+  const store = await writeContentStore({});
+  const holds = artifactHoldDirectory(store.output);
+
+  const composed = runComposeCommand(store.apps, store.output);
+
+  expect(composed.status, `${composed.stdout}${composed.stderr}`).toBe(0);
+  expect(await readdir(holds)).toEqual([]);
+
+  await rm(join(store.apps, "courses"), { recursive: true, force: true });
+  const failed = runComposeCommand(store.apps, store.output);
+
+  expect(failed.status).not.toBe(0);
+  expect(await readdir(holds)).toEqual([]);
 });
 
 test("compose refuses a content store that is missing an app's published bytes", async () => {

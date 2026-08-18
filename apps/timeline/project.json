@@ -4,6 +4,16 @@
   "sourceRoot": "apps/timeline/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:timeline"],
+  "metadata": {
+    "federation": { "alias": "timeline" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": [
+        "type:shared",
+        "type:data-core",
+        "data:timeline"
+      ]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

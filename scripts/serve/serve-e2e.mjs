@@ -1,4 +1,5 @@
 import { fileURLToPath } from "node:url";
+import { holdArtifactRoot } from "../../libs/artifact-contracts/src/artifact-hold.ts";
 import siteConfig from "../../libs/data-access-core/src/site.config.json" with {
   type: "json",
 };
@@ -56,6 +57,28 @@ const server = createSiteServer({
   notFound: { file: "404.html" },
   root,
 });
+// Several apps' e2e runs serve this one composed artifact at once, which is
+// only ever reading it. Claiming it as a reader is what makes a compose started
+// by a second, overlapping run refuse rather than replace these bytes midway
+// through the journey reading them.
+// llmlint: ignore-block[changed_behavior_has_e2e] This claim has no browser interface: it changes no byte the server answers with and is taken before it listens, so a browser cannot tell a held artifact from an unheld one, and a refused claim serves nothing for a browser to reach. What it protects is exactly what the browser journeys assert — serve-e2e.spec.ts drives this real CLI against the real compose CLI over one artifact, through both the claim it takes and the claim it is refused, and site.spec.ts plus every feature journey drive that artifact's routes on both render paths.
+// A refused claim is this server declining to start, so it is reported here
+// rather than left to the catch-all above: only this site knows the artifact
+// that was refused and that `just test-e2e` is the command an operator reaches
+// it again through. Nothing is listening yet, so the process leaves rather than
+// serving bytes another run owns.
+const release = (() => {
+  try {
+    return holdArtifactRoot(root, "serving");
+  } catch (error) {
+    console.error(
+      `Could not claim ${root} for the e2e server: ${error instanceof Error ? error.message : String(error)} Nothing was served; clear what that names, then run just test-e2e again.`,
+    );
+    return process.exit(1);
+  }
+})();
+// llmlint: ignore-end[changed_behavior_has_e2e]
+process.on("exit", release);
 // llmlint: ignore-block[changed_behavior_has_e2e] Listen failures are exercised through the real serve-e2e subprocess with an occupied port in home.spec.ts; no browser can connect in this state.
 server.on("error", (error) => {
   console.error(

@@ -1,0 +1,77 @@
+import { dirname } from "node:path";
+import {
+  federationRemotes,
+  readDeclaredProject,
+} from "./federation-registry.mjs";
+
+/**
+ * Derives the federation task dependencies every app owes the composed site.
+ *
+ * `shell:prerender` composes the whole site in place over `dist/apps/shell`,
+ * and the e2e server serves those composed bytes, so every remote's build
+ * genuinely is a prerequisite of every app's `screenshot` and of the compose
+ * itself. That fan-in used to be written down twice — once in `nx.json`'s
+ * `targetDefaults.screenshot.dependsOn` and once in `apps/shell/project.json`'s
+ * `prerender.dependsOn` — as two hand-kept lists of the same twelve remotes.
+ * Here it is read out of the remotes themselves: a project declaring
+ * `metadata.federation.alias` is a remote, so a remote added tomorrow is a
+ * prerequisite the day it is added rather than when someone remembers both
+ * lists.
+ *
+ * `createNodesV2` hands the whole matched file set to one call, which is what
+ * makes this possible: a dependency on every remote cannot be derived from one
+ * project's file in isolation.
+ */
+
+export const name = "nick-derobertis-site/federation";
+
+const projectConfigurations = "apps/*/project.json";
+const projectConfiguration = /^apps\/[a-z][a-z0-9-]*\/project\.json$/;
+
+// llmlint: ignore-block[changed_behavior_has_e2e] This derives the order Nx runs build, prerender, and screenshot in, and it runs while the project graph is being resolved — before rspack has built a single bundle, so there is no site, no route, and no page for a browser to load while it decides anything. What it returns is task scheduling and nothing else: it adds no module, changes no rendered markup, and is gone by the time the composed artifact exists, so a visitor observes only the same artifact the fan-in was already producing. federation-contract.spec.ts drives this exact entry point twice over: through the real `nx graph` for the fan-in every app ends up with, and directly for the file set Nx hands it. A configuration it refuses stops the graph before any build input is derived, so nothing is ever built for a browser to reach.
+/** One entry per matched `project.json`, as `createNodesV2` returns them. */
+function federationDependencies(configFiles) {
+  // Nx matches this set against `projectConfigurations` and hands it straight
+  // in, and every entry below is opened off disk, so the set is held to that
+  // same pattern here rather than trusted because Nx is what produced it.
+  if (
+    !Array.isArray(configFiles) ||
+    configFiles.some(
+      (path) => typeof path !== "string" || !projectConfiguration.test(path),
+    )
+  )
+    throw new Error(
+      `${name} derives federation task dependencies from ${projectConfigurations} files, and was handed ${JSON.stringify(configFiles)}. Register this plugin with that pattern in nx.json and rerun just check.`,
+    );
+  const projects = configFiles.map(readDeclaredProject);
+  const remoteBuilds = {
+    target: "build",
+    projects: federationRemotes(projects).map((remote) => remote.name),
+  };
+  // The compose step is named by the projects that declare it rather than by
+  // the shell, so the host owning it stays a fact of that project's own file.
+  const composeHosts = projects
+    .filter((project) => project.targets.includes("prerender"))
+    .map((project) => ({ target: "prerender", projects: [project.name] }));
+  const composed = ["build", remoteBuilds];
+  const captured = [...composed, ...composeHosts];
+  return projects.map((project) => {
+    const targets = {
+      ...(project.targets.includes("screenshot")
+        ? { screenshot: { dependsOn: captured } }
+        : {}),
+      ...(project.targets.includes("prerender")
+        ? { prerender: { dependsOn: composed } }
+        : {}),
+    };
+    return [
+      project.source,
+      Object.keys(targets).length === 0
+        ? {}
+        : { projects: { [dirname(project.source)]: { targets } } },
+    ];
+  });
+}
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
+export const createNodesV2 = [projectConfigurations, federationDependencies];

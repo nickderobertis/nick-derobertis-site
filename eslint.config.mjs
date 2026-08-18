@@ -1,5 +1,26 @@
+import { fileURLToPath } from "node:url";
 import nx from "@nx/eslint-plugin";
 import parser from "@typescript-eslint/parser";
+import {
+  declaredAppProjects,
+  federationRemotes,
+  moduleBoundaryConstraints,
+} from "./scripts/workspace/federation-registry.mjs";
+
+// Each federated remote declares the library tags its own scope admits, in its
+// own project.json, beside the federation alias it publishes under. Restating
+// those twelve constraints here made adding a remote an edit in a root file
+// that a remote added to only three of its four homes would pass silently.
+// The apps are found relative to this file rather than to a working directory,
+// because eslint resolves this configuration by walking up from wherever it was
+// invoked, and a run started inside a project would otherwise silently drop
+// every scope constraint.
+const remoteScopes = moduleBoundaryConstraints(
+  federationRemotes(
+    declaredAppProjects(fileURLToPath(new URL("apps", import.meta.url))),
+  ),
+);
+
 export default [
   { ignores: [".nx/**", "coverage/**", "dist/**", "node_modules/**"] },
   {
@@ -48,103 +69,7 @@ export default [
               sourceTag: "type:data-domain",
               onlyDependOnLibsWithTags: ["type:data-core"],
             },
-            {
-              sourceTag: "scope:bio",
-              onlyDependOnLibsWithTags: ["type:shared"],
-            },
-            {
-              sourceTag: "scope:courses",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:courses",
-              ],
-            },
-            {
-              sourceTag: "scope:software",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:software",
-              ],
-            },
-            {
-              sourceTag: "scope:research",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:research",
-              ],
-            },
-            {
-              sourceTag: "scope:home",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:home",
-                "scope:home-carousel",
-                "scope:home-cards",
-                "scope:home-story",
-                "scope:home-contact",
-                "scope:skills",
-              ],
-            },
-            {
-              sourceTag: "scope:home-carousel",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:home",
-              ],
-            },
-            {
-              sourceTag: "scope:home-cards",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:home",
-              ],
-            },
-            {
-              sourceTag: "scope:home-story",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:home",
-              ],
-            },
-            {
-              sourceTag: "scope:home-contact",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:home",
-              ],
-            },
-            {
-              sourceTag: "scope:timeline",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:timeline",
-              ],
-            },
-            {
-              sourceTag: "scope:skills",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:skills",
-              ],
-            },
-            {
-              sourceTag: "scope:awards",
-              onlyDependOnLibsWithTags: [
-                "type:shared",
-                "type:data-core",
-                "data:awards",
-              ],
-            },
+            ...remoteScopes,
             { sourceTag: "type:e2e", onlyDependOnLibsWithTags: ["type:app"] },
           ],
         },

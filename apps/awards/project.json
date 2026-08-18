@@ -4,6 +4,16 @@
   "sourceRoot": "apps/awards/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:awards"],
+  "metadata": {
+    "federation": { "alias": "awards" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": [
+        "type:shared",
+        "type:data-core",
+        "data:awards"
+      ]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

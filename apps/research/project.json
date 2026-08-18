@@ -4,6 +4,16 @@
   "sourceRoot": "apps/research/src",
   "projectType": "application",
   "tags": ["type:remote", "scope:research"],
+  "metadata": {
+    "federation": { "alias": "research" },
+    "boundaries": {
+      "onlyDependOnLibsWithTags": [
+        "type:shared",
+        "type:data-core",
+        "data:research"
+      ]
+    }
+  },
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",

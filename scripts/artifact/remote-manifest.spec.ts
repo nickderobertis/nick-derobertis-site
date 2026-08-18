@@ -44,14 +44,9 @@ test("remote manifest matches published fragment composition", async () => {
   const targets = project.targets;
   if (!targets || typeof targets !== "object" || !("prerender" in targets))
     throw new Error("Validated prerender target is required");
-  const prerender = targets.prerender;
-  if (
-    !prerender ||
-    typeof prerender !== "object" ||
-    !("dependsOn" in prerender) ||
-    !Array.isArray(prerender.dependsOn)
-  )
-    throw new Error("Validated dependsOn list is required");
+  // scripts/workspace/federation-plugin.mjs derives every remote's build onto
+  // this target, so the fan-in exists only in the resolved graph and there is no
+  // declaration to compare against. What Nx actually schedules is read instead.
   // llmlint: ignore-block[tests_mirror_real_usage] Which builds Nx schedules ahead of shell:prerender is a scheduling contract with no user-visible interface to drive: a prerender that rebuilds every remote from source and one that composes their published fragments emit the same bytes, so nothing a visitor can do distinguishes them, and only the graph reveals that an app-only change no longer drags the other twelve units into the deploy. The artifact those builds produce is driven through the real browser by site.spec.ts and every feature journey.
   const taskGraphOutput = execFileSync(
     "pnpm",
@@ -141,7 +136,4 @@ test("remote manifest matches published fragment composition", async () => {
       },
     });
   }
-  const boundaries = await readFile("eslint.config.mjs", "utf8");
-  expect(boundaries).toContain('sourceTag: "scope:skills"');
-  expect(boundaries).toContain('"scope:skills"');
 });
