@@ -82,6 +82,15 @@ async function waitUntilReady(url: string) {
   throw new Error(`serve-e2e did not become ready at ${url}`);
 }
 
+/**
+ * The e2e server started exactly as the command surface starts it, and the only
+ * place in this spec that starts it. `just test-e2e` reaches this script the
+ * same way: its `shell:e2e` run hands `node scripts/serve/serve-e2e.mjs` to
+ * Playwright's `webServer`, so the CLI below is that command, unreplaced. Only
+ * its document root moves, to the disposable tree above, because the recipe's
+ * own run binds a fixed port over the workspace artifact the browser journeys
+ * are mid-way through, and this spec asserts on how two runs collide over one.
+ */
 function startServer(port: number) {
   const child = spawn(process.execPath, [serverScript], {
     cwd: workspace,
@@ -90,6 +99,23 @@ function startServer(port: number) {
   });
   children.push(child);
   return child;
+}
+
+/**
+ * The same command, for the one case that never becomes a server to talk to:
+ * the script claims its artifact before it listens, so a claim already held is
+ * refused on stderr and the process is over. That refusal is the whole of what
+ * an operator gets, and it is synchronous, which is why this run is read to
+ * completion here instead of being pushed onto `children`: there is no listener
+ * to reach and nothing left to shut down by the time it answers.
+ */
+function runServerExpectingRefusal(port: number) {
+  return spawnSync(process.execPath, [serverScript], {
+    cwd: workspace,
+    encoding: "utf8",
+    env: { ...process.env, PORT: String(port) },
+    timeout: 20_000,
+  });
 }
 
 /**
@@ -282,12 +308,7 @@ describe("serve-e2e lifecycle", () => {
 
     const refused = (() => {
       try {
-        return spawnSync(process.execPath, [serverScript], {
-          cwd: workspace,
-          encoding: "utf8",
-          env: { ...process.env, PORT: String(port) },
-          timeout: 20_000,
-        });
+        return runServerExpectingRefusal(port);
       } finally {
         // Compose reads its way to the end of the stalled fragment from here,
         // fails on it, and drops the claim, so nothing outlives this test.
