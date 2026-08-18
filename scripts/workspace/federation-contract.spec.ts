@@ -19,9 +19,16 @@ import { z } from "zod";
 
 type ContractEntry = readonly [path: string, expected: string];
 
-const remoteRegistry = "libs/build-config/src/remotes.json";
+const registryPath = "libs/build-config/src/remotes.json";
 
 const projectName = z.string().regex(/^[a-z][a-z0-9-]*$/);
+
+// The committed registry is an arbitrary JSON document until something
+// narrows it, and comparing it against the graph is not that: a registry
+// holding a list, or a remote mapped to something that is not an alias at
+// all, would be reported as a set of remotes that disagrees with the graph
+// rather than as the malformed file it is.
+const registrySchema = z.record(projectName, z.string());
 const workspaceDirectory = z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/);
 
 const dependsOnSchema = z.array(
@@ -177,7 +184,9 @@ function dependencyOn(project: Project, target: string, on: string) {
 
 describe("the canonical remote registry", () => {
   it("names exactly the remotes that declare a federation alias", async () => {
-    expect(JSON.parse(await readFile(remoteRegistry, "utf8"))).toEqual(
+    expect(
+      registrySchema.parse(JSON.parse(await readFile(registryPath, "utf8"))),
+    ).toEqual(
       Object.fromEntries(
         remotes.map((remote) => [remote.name, aliasOf(remote)]),
       ),
