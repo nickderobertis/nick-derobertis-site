@@ -48,7 +48,15 @@ const manifestSchema = z.object({
   name: z.string().regex(/^@site\/[a-z][a-z0-9-]*$/),
   private: z.literal(true),
   type: z.literal("module"),
-  exports: z.record(z.string(), z.string()).optional(),
+  exports: z
+    .record(
+      z.string(),
+      z
+        .string()
+        .regex(/^\.\/[\w.-]+(?:\/[\w.-]+)*$/)
+        .refine((target) => !target.split("/").includes("..")),
+    )
+    .optional(),
   dependencies: z.record(z.string(), z.literal("workspace:*")).optional(),
 });
 
@@ -58,13 +66,11 @@ type Project = {
   manifest: z.infer<typeof manifestSchema> | undefined;
 };
 
-/** One import site: the file that wrote the specifier, and the specifier. */
 type ImportSite = { file: string; specifier: string };
 
 let projects: Project[] = [];
 let sites: ImportSite[] = [];
 
-/** Every tracked module in the workspace that can carry an import. */
 function trackedModules(): string[] {
   return execFileSync("git", ["ls-files", "apps", "libs", "scripts"], {
     encoding: "utf8",
@@ -114,7 +120,6 @@ beforeAll(() => {
   );
 });
 
-/** The `@site/…` package a specifier names, or undefined for anything else. */
 function packageOf(specifier: string): string | undefined {
   const [scope, name] = specifier.split("/");
   return scope === "@site" && name ? `@site/${name}` : undefined;
