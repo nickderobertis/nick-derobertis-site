@@ -140,6 +140,7 @@ function deriveOverWrittenApps(documents: Readonly<Record<string, string>>) {
  * registry it wrote comes back, because the CLI's other path rewrites that file
  * and what it did to it is the observation.
  */
+// llmlint: ignore-block[work_goes_through_command_surface] The CLI boundary is the subject of every case below: the arguments it recognises, the exit status it answers with, and the stderr it names a cause in. `just generate-remote-registry` cannot reach any of them — it takes no arguments, runs against the committed workspace rather than a disposable tree whose `pnpm exec nx graph` is stubbed, and rewrites the committed registry, which is exactly the file these cases hold unchanged. The recipe is the surface for the work it performs, and the two cases over the committed tree at the end of this file drive it as one.
 function generateFromGraph(
   graph: unknown,
   commit?: (path: string) => void,
@@ -190,6 +191,7 @@ function generateFromGraph(
     ),
   };
 }
+// llmlint: ignore-end[work_goes_through_command_surface]
 
 // Both the paths git prints and the declarations they hold are read back as
 // evidence for what the generated registry must contain, so each is narrowed

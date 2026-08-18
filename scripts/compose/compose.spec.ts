@@ -231,7 +231,7 @@ test("compose stages every app's bundle and withholds its fragment inputs", asyn
  * the artifact it writes into: the exported API above is reached with a caller
  * that already owns its output.
  */
-// llmlint: ignore[work_goes_through_command_surface] This is the command surface the collision happens through: `shell:prerender` runs `node scripts/compose/compose.mjs` itself, and the `just compose` recipe is the deploy lane's separate entry, which confines its output beneath dist/ and so cannot be pointed at the isolated artifact these cases own.
+// llmlint: ignore-block[work_goes_through_command_surface] The CLI boundary is the subject here — the exit status and the stderr this entry point answers a refused claim with — and this is the command surface the collision happens through: `shell:prerender` runs `node scripts/compose/compose.mjs` itself. The `just compose` recipe is the deploy lane's separate entry: it confines its output beneath dist/, so it cannot be pointed at the isolated artifact these cases own, and it reprints the CLI's stderr beneath its own line rather than emitting it, so routing through it would stop proving what this CLI says.
 function composeCommand(fragmentRoot: string, output: string) {
   return spawnSync(
     process.execPath,
@@ -249,6 +249,7 @@ function composeCommand(fragmentRoot: string, output: string) {
     },
   );
 }
+// llmlint: ignore-end[work_goes_through_command_surface]
 
 // Two overlapping runs over one working tree are what Nx cannot order: `e2e`
 // depends on `prerender` inside a dispatch, but a second `just check` composes
