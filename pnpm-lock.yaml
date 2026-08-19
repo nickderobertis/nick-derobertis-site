@@ -696,7 +696,11 @@ importers:
 
   scripts/visual: {}
 
-  scripts/workspace: {}
+  scripts/workspace:
+    dependencies:
+      '@site/testing':
+        specifier: workspace:*
+        version: link:../../libs/testing
 
 packages:
 
