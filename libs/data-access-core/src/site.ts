@@ -1,5 +1,5 @@
 import { z } from "zod";
-import siteConfigInput from "./site.config.json";
+import siteConfigInput from "./site.config.json" with { type: "json" };
 export const siteBase = z
   .object({ pagesBase: z.string().regex(/^\/[a-z0-9-]+$/) })
   .parse(siteConfigInput).pagesBase;

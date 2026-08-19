@@ -1,0 +1,9 @@
+{
+  "name": "@site/tooling-perf",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@site/route-state": "workspace:*",
+    "@site/visual-harness": "workspace:*"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "@site/tooling-publish",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@site/publish-config": "workspace:*"
+  }
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import rootSchema from "../vendor/codegen/cv.schema.json";
+import rootSchema from "../vendor/codegen/cv.schema.json" with { type: "json" };
 import {
   CvDataValidationError,
   type CvDomainArtifacts,

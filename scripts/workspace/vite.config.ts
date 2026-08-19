@@ -13,6 +13,7 @@ export default defineConfig({
       "scripts/workspace/federation-registry.spec.ts",
       "scripts/workspace/lint-llm-diff.spec.ts",
       "scripts/workspace/module-boundaries.spec.ts",
+      "scripts/workspace/project-manifest.spec.ts",
       "scripts/workspace/structure-contract.spec.ts",
     ],
     environment: "node",

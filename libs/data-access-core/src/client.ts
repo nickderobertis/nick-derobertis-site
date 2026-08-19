@@ -9,14 +9,26 @@ import type {
   SoftwareProjects,
   Timeline,
 } from "../vendor/codegen";
-import rootData from "../vendor/codegen/cv.json";
-import rootSchema from "../vendor/codegen/cv.schema.json";
-import awards from "../vendor/codegen/domains/awards.json";
-import courses from "../vendor/codegen/domains/courses.json";
-import research from "../vendor/codegen/domains/research.json";
-import skills from "../vendor/codegen/domains/skills.json";
-import softwareProjects from "../vendor/codegen/domains/software_projects.json";
-import timeline from "../vendor/codegen/domains/timeline.json";
+import rootData from "../vendor/codegen/cv.json" with { type: "json" };
+import rootSchema from "../vendor/codegen/cv.schema.json" with { type: "json" };
+import awards from "../vendor/codegen/domains/awards.json" with {
+  type: "json",
+};
+import courses from "../vendor/codegen/domains/courses.json" with {
+  type: "json",
+};
+import research from "../vendor/codegen/domains/research.json" with {
+  type: "json",
+};
+import skills from "../vendor/codegen/domains/skills.json" with {
+  type: "json",
+};
+import softwareProjects from "../vendor/codegen/domains/software_projects.json" with {
+  type: "json",
+};
+import timeline from "../vendor/codegen/domains/timeline.json" with {
+  type: "json",
+};
 
 export const domainNames = [
   "awards",

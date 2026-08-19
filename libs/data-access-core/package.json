@@ -1,12 +1,12 @@
 {
-  "name": "@site/publish-config",
+  "name": "@site/data-access-core",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./site.config.json": "./src/site.config.json"
   },
   "dependencies": {
-    "@site/build-config": "workspace:*",
     "@site/testing": "workspace:*"
   }
 }

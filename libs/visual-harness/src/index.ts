@@ -4,10 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Locator, Page } from "@playwright/test";
 import { chromium } from "@playwright/test";
-// eslint-disable-next-line @nx/enforce-module-boundaries -- Node executes the TypeScript capture entry directly, so this shared runtime fixture cannot rely on Vite's tsconfig alias resolution.
-import { validatePagesBase } from "../../artifact-contracts/src/index.ts";
-// eslint-disable-next-line @nx/enforce-module-boundaries -- Node executes the TypeScript capture entry directly, so this shared runtime fixture cannot rely on Vite's tsconfig alias resolution.
-import { createSiteServer } from "../../e2e-fixtures/src/index.ts";
+import { validatePagesBase } from "@site/artifact-contracts";
+import { createSiteServer } from "@site/e2e-fixtures";
 
 // The Pages base has exactly one source, libs/data-access-core/src/site.config.json,
 // and a capture that restated it would serve every remote from a prefix the

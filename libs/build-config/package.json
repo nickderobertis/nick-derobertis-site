@@ -1,0 +1,15 @@
+{
+  "name": "@site/build-config",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fragment-contract": "./src/fragment-contract.ts",
+    "./remote-registry": "./src/remote-registry.ts",
+    "./remotes.json": "./src/remotes.json"
+  },
+  "dependencies": {
+    "@site/data-access-core": "workspace:*",
+    "@site/testing": "workspace:*"
+  }
+}

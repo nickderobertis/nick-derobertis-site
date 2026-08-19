@@ -1,6 +1,4 @@
 import { access, readFile } from "node:fs/promises";
-import { JSDOM } from "jsdom";
-import routes from "../../apps/shell/src/routes.json" with { type: "json" };
 import {
   inlineRemoteCssPattern,
   parseRemoteManifest,
@@ -8,13 +6,16 @@ import {
   remotesForRoute,
   routeContracts,
   validatePagesBase,
-} from "../../libs/artifact-contracts/src/index.ts";
-import remoteManifest from "../../libs/build-config/src/remotes.json" with {
+} from "@site/artifact-contracts";
+import remoteManifest from "@site/build-config/remotes.json" with {
   type: "json",
 };
-import siteConfig from "../../libs/data-access-core/src/site.config.json" with {
+import siteConfig from "@site/data-access-core/site.config.json" with {
   type: "json",
 };
+import { JSDOM } from "jsdom";
+// llmlint: ignore[boundary_inputs_validated] The imported document is never read here. Its only use is `const validatedRoutes = parseRoutes(routes)` below, which holds it to an array of route records each carrying a `path` matching `/^\/(?:[a-z][a-z0-9-]*)?$/`, a `heading` string, a `description` string, and an optional `remote` name before anything downstream reads a field; `parseRoutes` rejects with the path to apps/shell/src/routes.json and the command to rerun.
+import routes from "../../apps/shell/src/routes.json" with { type: "json" };
 
 process.on("uncaughtException", (error) => {
   console.error(
