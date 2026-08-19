@@ -436,12 +436,14 @@ describe("coverage floor", () => {
   });
 
   /**
-   * What each subject's own component config declares, read by importing it —
-   * the same module Vitest loads when that project's `test` target runs, so a
-   * floor stated anywhere other than the config actually in use reads as
-   * missing here.
+   * Every way each subject fails to state the floor, read out of the component
+   * config it names — the same module Vitest loads when that project's `test`
+   * target runs, so a floor stated anywhere other than the config actually in
+   * use reads as unstated here. A metric off 95 in either direction is a
+   * finding: a project silently held above the floor is a project the next
+   * contributor cannot reason about from AGENTS.md either.
    */
-  async function belowFloor(subjects: Project[]) {
+  async function floorFindings(subjects: Project[]) {
     const configured = await Promise.all(
       subjects.map(async (project) => {
         if (!project.targets?.test)
@@ -482,7 +484,7 @@ describe("coverage floor", () => {
 
   it("holds every project outside those exemptions to 95 on all four metrics", async () => {
     expect(
-      await belowFloor(
+      await floorFindings(
         projects.filter((project) => !exemptFromCoverage(project)),
       ),
     ).toEqual([]);
@@ -493,7 +495,7 @@ describe("coverage floor", () => {
     // one a contract that had stopped reading declared thresholds would
     // satisfy. This is the reading held to a config that states 90.
     expect(
-      await belowFloor([
+      await floorFindings([
         {
           name: "probe",
           root: "scripts/workspace",

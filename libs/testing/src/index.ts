@@ -5,6 +5,8 @@ import { z } from "zod";
 
 export type WorkspaceTestConfig = ViteUserConfig & { test?: TestUserConfig };
 
+const coverageMetric = z.number().min(0).max(100);
+
 /**
  * A component config is the one place a project states what its own tests are
  * held to, and nothing else typechecks it, so every option it passes is read
@@ -13,8 +15,6 @@ export type WorkspaceTestConfig = ViteUserConfig & { test?: TestUserConfig };
  * a declared floor into a setting that reads as present and applies to
  * nothing.
  */
-const coverageMetric = z.number().min(0).max(100);
-
 const optionsSchema = z.strictObject({
   project: z.string().regex(/^[a-z][a-z0-9-]*$/),
   dir: z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/),
