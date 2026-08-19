@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, extname, join } from "node:path";
 import ts from "typescript";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -207,7 +207,15 @@ type ImportSite = { file: string; specifier: string };
 let projects: Project[] = [];
 let sites: ImportSite[] = [];
 
-const moduleExtension = /\.(?:tsx?|mjs|js)$/;
+/**
+ * The extensions Node and the bundler load as modules. Matched against a
+ * filename's own final extension rather than against its tail, so a name that
+ * merely carries one of these inside it — `routes.ts.json` — is not read as a
+ * module this workspace imports from.
+ */
+const moduleExtensions = new Set([".ts", ".tsx", ".mjs", ".js"]);
+
+const isModuleFile = (file: string) => moduleExtensions.has(extname(file));
 
 /**
  * Every module git tracks under the three project trees. What git prints is a
@@ -231,7 +239,7 @@ function trackedModules(): string[] {
       `git ls-files printed ${quoted.join(", ")}, which git quotes rather than names, so nothing here could open them`,
       "Rename those paths to word characters, dots and dashes, then rerun just check.",
     );
-  const modules = listed.filter((file) => moduleExtension.test(file));
+  const modules = listed.filter(isModuleFile);
   const absent = modules.filter((file) => !existsSync(file));
   if (absent.length > 0)
     fail(
