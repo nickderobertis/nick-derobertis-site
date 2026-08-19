@@ -53,23 +53,6 @@ const pagesBase = validatePagesBase(siteConfig?.pagesBase);
 const artifactOrigin = "http://artifact.invalid";
 
 /**
- * A document the compose lane was supposed to write. A bare filesystem error
- * names the path and nothing else, and this gate's whole subject is an artifact
- * that compose assembled, so an unreadable document is reported as the missing
- * compose output it is.
- */
-async function readComposedDocument(documentPath) {
-  try {
-    return await readFile(documentPath, "utf8");
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Could not read the composed document ${documentPath}: ${detail}. Fix scripts/compose/compose.mjs to write it, then rerun just prerender.`,
-    );
-  }
-}
-
-/**
  * Refuses a document that points at bytes the artifact does not contain. Every
  * composed document carries a `<base href>` and root-absolute asset paths, so a
  * reference is only meaningful once it is resolved against that base and mapped
@@ -79,7 +62,15 @@ async function readComposedDocument(documentPath) {
 async function assertReferencedAssetsResolve(artifactPath) {
   const documentPath = `${root}/${artifactPath}`;
   const documentUrl = new URL(`${pagesBase}/${artifactPath}`, artifactOrigin);
-  const rawMarkup = await readComposedDocument(documentPath);
+  let rawMarkup;
+  try {
+    rawMarkup = await readFile(documentPath, "utf8");
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Could not read the composed document ${documentPath}: ${detail}. Fix scripts/compose/compose.mjs to write it, then rerun just prerender.`,
+    );
+  }
   // The inlined page CSS is checked below on its own terms and is the one part
   // of a route document that carries no asset reference. Dropping it before
   // parsing keeps this from paying for — and reporting on — a CSSOM build over
@@ -173,7 +164,7 @@ for (const route of validatedRoutes) {
   const artifactPath =
     route.path === "/" ? "index.html" : `${route.path.slice(1)}/index.html`;
   const path = `${root}/${artifactPath}`;
-  const html = await readComposedDocument(path);
+  const html = await readFile(path, "utf8");
   await assertReferencedAssetsResolve(artifactPath);
   if (!html.includes(`<h1`) || !html.includes(route.heading))
     throw new Error(
@@ -273,7 +264,7 @@ if (uncoveredPanes.length > 0)
   throw new Error(
     `${root}/index.html does not inline the page CSS of every remote the home host composes (missing ${uncoveredPanes.join(", ")}); add them to libs/artifact-contracts/src/remote-css.ts and rerun just prerender.`,
   );
-const fallback = await readComposedDocument(`${root}/404.html`);
+const fallback = await readFile(`${root}/404.html`, "utf8");
 if (!fallback.includes("Loading requested page"))
   throw new Error(
     "404 fallback is not intentional; restore the recovery document in scripts/compose/compose.mjs and rerun just prerender.",

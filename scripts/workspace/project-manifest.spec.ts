@@ -26,10 +26,11 @@ import { z } from "zod";
  * no bundler and no tsconfig alias in reach — so a subpath that satisfies tsc
  * and Vite while Node rejects it fails here.
  *
- * Nothing this file reads is its own: it comes from git, from a subprocess, or
- * off disk. So each of those arrives through the narrowing helpers below, and
- * every diagnostic they raise names the workspace edit that clears it — a bare
- * `git`, `nx`, Node or Zod message names none.
+ * Nothing this file reads is its own: it comes from git, from a subprocess,
+ * off disk, or out of the environment this process was run with. So each of
+ * those arrives through the narrowing helpers below, and every diagnostic they
+ * raise names the workspace edit that clears it — a bare `git`, `nx`, Node or
+ * Zod message names none.
  */
 
 const workspaceDirectory = z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/);
@@ -141,6 +142,55 @@ function documentOf(path: string, remedy: string): unknown {
   } catch (error) {
     fail(`${path} is not valid JSON: ${detailOf(error)}`, remedy);
   }
+}
+
+/**
+ * The environment `pnpm exec nx graph` is given. The ambient environment is an
+ * input like any other, so it is not forwarded wholesale: nx needs the
+ * interpreter and package manager on `PATH`, a home directory to resolve its
+ * own configuration under, and the cache settings `just check` runs it with —
+ * `NX_CACHE_DIRECTORY` above all, which the justfile exports so that a
+ * disposable worktree reuses Nx's local cache. Each is held to a grammar here,
+ * and a variable outside this set never reaches the subprocess.
+ */
+const absolutePath = z.string().regex(/^\/[^\0]*$/);
+
+const nxEnvironment = {
+  // pnpm exec prepends its own relative ./node_modules/.bin, which is how the
+  // workspace's pinned binaries are found at all, so a segment is held only to
+  // being a real one: an empty segment silently means the current directory.
+  PATH: {
+    schema: z.string().regex(/^[^\0:]+(?::[^\0:]+)*$/),
+    expected: "a colon-separated list of non-empty directories",
+  },
+  HOME: { schema: absolutePath, expected: "an absolute path" },
+  TMPDIR: { schema: absolutePath, expected: "an absolute path" },
+  XDG_CACHE_HOME: { schema: absolutePath, expected: "an absolute path" },
+  PNPM_HOME: { schema: absolutePath, expected: "an absolute path" },
+  NX_CACHE_DIRECTORY: { schema: absolutePath, expected: "an absolute path" },
+  CI: { schema: z.string().regex(/^[\w-]+$/), expected: "a bare word" },
+};
+
+function graphEnvironment(): NodeJS.ProcessEnv {
+  // The daemon is the one setting this contract decides rather than inherits:
+  // it reads the graph once, and a daemon left running outlives the run.
+  const forwarded: NodeJS.ProcessEnv = { NX_DAEMON: "false" };
+  for (const [name, { schema, expected }] of Object.entries(nxEnvironment)) {
+    const value = process.env[name];
+    if (value === undefined) continue;
+    forwarded[name] = narrowed(
+      schema,
+      value,
+      `the ${name} this process was run with`,
+      `Set ${name} to ${expected} or unset it, then rerun just check.`,
+    );
+  }
+  if (forwarded.PATH === undefined)
+    fail(
+      "this process was run with no PATH, so the nx graph subprocess could find neither pnpm nor node",
+      "Run just check from a shell whose PATH names the pnpm and node this workspace pins.",
+    );
+  return forwarded;
 }
 
 const manifestRemedy =
@@ -259,8 +309,7 @@ beforeAll(() => {
     "pnpm",
     ["exec", "nx", "graph", `--file=${graphFile}`],
     graphRemedy,
-    // llmlint: ignore[boundary_inputs_validated] The ambient environment is forwarded rather than narrowed, and that is the point: the graph this contract reads has to be the graph just check builds, and the justfile exports NX_CACHE_DIRECTORY into that environment, so an allowlist would build the graph under different cache settings than the workspace itself uses and would silently drift every time nx or pnpm started reading another variable. Nothing here reads the environment back — only nx receives it, and its one value this spec decides, NX_DAEMON, is written literally. Everything nx then hands back does get narrowed, by graphSchema below.
-    { env: { ...process.env, NX_DAEMON: "false" } },
+    { env: graphEnvironment() },
   );
   if (!existsSync(graphFile))
     fail(

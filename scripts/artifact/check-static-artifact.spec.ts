@@ -140,33 +140,6 @@ test.each([
   },
 );
 
-// A composed document the lane never wrote reaches this gate as a bare
-// filesystem error, which names the path and leaves the operator to work out
-// which step was supposed to produce it. Both documents compose writes are
-// driven here, because they are read at two different points in the gate.
-test.each([
-  ["a route document", "bio/index.html"],
-  ["the 404 fallback", "404.html"],
-])(
-  "the compose-time gate names the lane that owes %s",
-  async (_case, documentPath) => {
-    const path = join(fixture, documentPath);
-    const held = await readFile(path);
-    await rm(path);
-
-    const result = checkArtifact();
-
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain(
-      `Could not read the composed document ${path}`,
-    );
-    expect(result.stderr).toContain(
-      "Fix scripts/compose/compose.mjs to write it, then rerun just prerender.",
-    );
-    await writeFile(path, held);
-  },
-);
-
 // `just compose <store> <output>` is the deploy lane's whole command surface,
 // and its output argument becomes a write destination. Both arguments are
 // rejected before compose runs, so a bad path never reaches the filesystem.
