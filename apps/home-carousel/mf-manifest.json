@@ -6,7 +6,7 @@
     "type": "app",
     "buildInfo": {
       "buildVersion": "local",
-      "buildName": "nick-derobertis-site"
+      "buildName": "@site/home-carousel"
     },
     "remoteEntry": {
       "name": "remoteEntry.js",
