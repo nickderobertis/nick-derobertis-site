@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { serializeFragmentContract } from "@site/build-config";
 // The lane list is derived from the canonical registry, which build-config
 // publishes as a serialized build input rather than through its index.
+// llmlint: ignore[boundary_inputs_validated] The imported document is never read here. Its only use is `expect(Object.keys(validatedRemoteRegistry(remoteRegistry)).sort())` in "the committed remote registry defines every lane but the shell", which hands it straight to `validatedRemoteRegistry` — build-config's own parser for remotes.json, re-exported by `./publish-fragment` — and asserts on the narrowed result, so the committed registry is held to the same grammar as the fabricated ones the cases above it reject.
 import remoteRegistry from "@site/build-config/remotes.json" with {
   type: "json",
 };

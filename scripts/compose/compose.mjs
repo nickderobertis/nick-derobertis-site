@@ -11,6 +11,7 @@ import { fragmentContractSchema } from "@site/build-config/fragment-contract";
 import remoteManifest from "@site/build-config/remotes.json" with {
   type: "json",
 };
+// llmlint: ignore[boundary_inputs_validated] The imported document is never read here. Its only use is `const pagesBase = validatedPagesBase(validatedSiteConfig(siteConfig).pagesBase)` below, where `validatedSiteConfig` rejects anything that is not a plain object and `validatedPagesBase` holds the one field this module reads to `/[a-z0-9-]+`; `pagesBase` is what the rest of the file uses.
 import siteConfig from "@site/data-access-core/site.config.json" with {
   type: "json",
 };

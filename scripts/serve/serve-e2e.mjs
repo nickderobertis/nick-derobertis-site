@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { holdArtifactRoot } from "@site/artifact-contracts/artifact-hold";
+// llmlint: ignore[boundary_inputs_validated] The imported document is never read here. Its only use is `const base = validateSiteConfig(siteConfig).pagesBase` below, where `validateSiteConfig` rejects anything that is not an object carrying a `pagesBase` string matching `/^\/[a-z0-9-]+$/`; `base` is the only value taken from it.
 import siteConfig from "@site/data-access-core/site.config.json" with {
   type: "json",
 };

@@ -62,7 +62,12 @@ describe("defineWorkspaceTestConfig", () => {
       )?.find;
     expect(layout).toBeInstanceOf(RegExp);
     // Vite tests a RegExp alias against the whole specifier, so these two
-    // answers are the ones it gives the imports below.
+    // answers are the ones it gives the imports below. The schema above types
+    // `layout` as `string | RegExp | undefined` because Vite accepts either
+    // kind of `find`, and `toBeInstanceOf` is a runtime matcher rather than a
+    // type predicate, so it narrows nothing for the compiler. The casts stand
+    // on the assertion immediately above them, which fails first — and names
+    // what it got — if this alias is ever not a RegExp.
     expect((layout as RegExp).test("@site/layout")).toBe(true);
     expect((layout as RegExp).test("@site/layout/contracts.json")).toBe(false);
   });

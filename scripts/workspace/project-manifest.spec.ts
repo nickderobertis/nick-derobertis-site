@@ -115,7 +115,7 @@ function stdoutOf(
 ): string {
   const run = spawnSync(command, argv, {
     ...options,
-    encoding: "utf8" as const,
+    encoding: "utf8",
   });
   if (run.error)
     fail(`${subject} could not be run: ${detailOf(run.error)}`, remedy);
