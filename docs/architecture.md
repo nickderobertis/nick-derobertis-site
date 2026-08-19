@@ -275,10 +275,13 @@ federation journeys every remote owes, and `homePaneJourneys` registers the
 happy, skeleton, empty, error, and breakpoint journeys every Home pane owes, in
 both render paths; the seven pane suites are a single call each.
 
-`@site/testing` owns the Vitest side. `defineWorkspaceTestConfig` resolves the
-workspace path aliases from `tsconfig.base.json`, points coverage at the
-project's own source tree, and declares the 95% four-metric floor, so the floor
-is one value in one library rather than a threshold block per project. A host
+`@site/testing` owns the Vitest side. `defineWorkspaceTestConfig` builds a
+project's whole Vitest configuration from its name and directory — the jsdom
+environment, the shared setup file, the spec glob, and the coverage report —
+and validates the floor that project states, so each component config is one
+call rather than a harness copied per project. Workspace specifiers need no
+alias here: every project publishes itself as a package, so Vitest resolves
+`@site/*` through Node the way every other consumer does. A host
 passes the federation specifiers its component tests must resolve — Home points
 each at the sibling app's real source, and the shell at the stand-ins under
 `apps/shell/test-remotes` — because Vitest has no Module Federation runtime.

@@ -149,7 +149,6 @@ function compileRenderer(name: string, outputPath: string) {
                 ),
               },
         extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
-        tsConfig: resolve("tsconfig.base.json"),
       },
       module: {
         rules: [

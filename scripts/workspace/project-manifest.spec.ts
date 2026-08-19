@@ -12,10 +12,10 @@ import { z } from "zod";
  * Cross-project resolution used to run entirely through `tsconfig.base.json`
  * `paths`: one entry per library, in a file `sharedGlobals` puts in every
  * cached target's key, so adding one library reran every project in the
- * workspace. A manifest per project moves that declaration into the project,
- * and the mechanism only pays off while every project actually carries one — a
- * project added tomorrow with no `package.json` silently falls back to `paths`
- * and nothing else notices, because `paths` still resolves it.
+ * workspace. That map is gone, and a manifest per project is what replaced it,
+ * which leaves every project owing one — a project added tomorrow with no
+ * `package.json` now resolves for nobody, and it fails wherever it is imported
+ * rather than where it is missing.
  *
  * So the subjects here come from the real Nx project graph rather than a list
  * kept in this file, and every claim is made against the resolver that has to
@@ -360,7 +360,7 @@ describe("every project declares itself", () => {
       .filter((project) => project.manifest?.name !== `@site/${project.name}`)
       .map(
         (project) =>
-          `${project.root}/package.json is missing or does not name the project @site/${project.name}, so ${project.name} resolves only through tsconfig.base.json paths; add a private ESM manifest there naming it @site/${project.name}`,
+          `${project.root}/package.json is missing or does not name the project @site/${project.name}, so nothing can resolve @site/${project.name} at all; add a private ESM manifest there naming it @site/${project.name}`,
       );
     expect(findings).toEqual([]);
   });
