@@ -6,7 +6,7 @@
     "type": "app",
     "buildInfo": {
       "buildVersion": "local",
-      "buildName": "nick-derobertis-site"
+      "buildName": "@site/home-story"
     },
     "remoteEntry": {
       "name": "remoteEntry.js",
