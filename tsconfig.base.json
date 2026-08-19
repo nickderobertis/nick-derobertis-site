@@ -15,27 +15,6 @@
     // the real file extension. Every project here already compiles with noEmit,
     // so permitting the `.ts` specifier changes nothing but resolution.
     "allowImportingTsExtensions": true,
-    "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@site/artifact-contracts": ["libs/artifact-contracts/src/index.ts"],
-      "@site/e2e-fixtures": ["libs/e2e-fixtures/src/index.ts"],
-      "@site/e2e-harness": ["libs/e2e-harness/src/index.ts"],
-      "@site/design-system": ["libs/design-system/src/index.ts"],
-      "@site/data-access-core": ["libs/data-access-core/src/index.ts"],
-      "@site/data-access-awards": ["libs/data-access-awards/src/index.ts"],
-      "@site/data-access-skills": ["libs/data-access-skills/src/index.ts"],
-      "@site/data-access-home": ["libs/data-access-home/src/index.ts"],
-      "@site/data-access-timeline": ["libs/data-access-timeline/src/index.ts"],
-      "@site/data-access-research": ["libs/data-access-research/src/index.ts"],
-      "@site/data-access-software": ["libs/data-access-software/src/index.ts"],
-      "@site/data-access-courses": ["libs/data-access-courses/src/index.ts"],
-      "@site/route-state": ["libs/route-state/src/index.ts"],
-      "@site/layout": ["libs/layout/src/index.ts"],
-      "@site/build-config": ["libs/build-config/src/index.ts"],
-      "@site/publish-config": ["libs/publish-config/src/index.ts"],
-      "@site/testing": ["libs/testing/src/index.ts"],
-      "@site/visual-harness": ["libs/visual-harness/src/index.ts"]
-    }
+    "skipLibCheck": true
   }
 }

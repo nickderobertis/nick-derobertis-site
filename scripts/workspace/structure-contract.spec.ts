@@ -1,12 +1,5 @@
 import { execFile, execFileSync } from "node:child_process";
-import {
-  existsSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-  realpathSync,
-} from "node:fs";
-import { createRequire } from "node:module";
+import { existsSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -18,7 +11,6 @@ import {
   isIdentifier,
   isImportDeclaration,
   isObjectLiteralExpression,
-  parseConfigFileTextToJson,
   ScriptTarget,
 } from "typescript";
 import { beforeAll, describe, expect, it } from "vitest";
@@ -661,61 +653,5 @@ describe("tooling subject inventory", () => {
       .filter((recipe) => !recipes.includes(recipe))
       .map((recipe) => `just ${recipe} no longer exists but records a reason`);
     expect([...findings, ...stale]).toEqual([]);
-  });
-});
-
-/**
- * A `@site/*` specifier is resolved two different ways in this workspace. tsc
- * and rspack follow the path mapping in `tsconfig.base.json`; Vitest follows
- * Node's own resolution through the workspace manifests, because a component
- * config carries no path mapping of its own. Nothing reconciles the two, so a
- * library reachable by only one of them typechecks and builds while every spec
- * that imports it fails to resolve — and it fails in whichever project imported
- * it rather than in the library that is missing its manifest.
- */
-describe("workspace library manifests", () => {
-  // Both halves of each mapping are read back off disk, so the alias is
-  // narrowed to a workspace scope name and its target to a workspace-relative
-  // TypeScript entry point before either is resolved.
-  const workspaceAlias = z.string().regex(/^@site\/[a-z][a-z0-9-]*$/);
-  const entryPoint = z.string().regex(/^(?:[a-z0-9-]+\/)+[a-z0-9-]+\.tsx?$/);
-
-  /** The path mapping `tsconfig.base.json` declares, alias by alias. */
-  function pathMappings(): [string, string][] {
-    const file = "tsconfig.base.json";
-    const parsed = parseConfigFileTextToJson(file, readFileSync(file, "utf8"));
-    if (parsed.error) throw new Error(`could not parse ${file}`);
-    const mapped = z
-      .object({
-        compilerOptions: z.object({
-          paths: z.record(workspaceAlias, z.tuple([entryPoint], entryPoint)),
-        }),
-      })
-      .parse(parsed.config);
-    return Object.entries(mapped.compilerOptions.paths).map(
-      ([alias, [target]]) => [alias, target],
-    );
-  }
-
-  it("resolves every path mapping through Node as well", () => {
-    const fromWorkspaceRoot = createRequire(
-      pathToFileURL(resolve("resolution-probe.js")),
-    );
-    const unresolved = pathMappings().flatMap(([alias, target]) => {
-      let resolved: string;
-      try {
-        resolved = fromWorkspaceRoot.resolve(alias);
-      } catch {
-        return [
-          `${alias} is mapped to ${target} in tsconfig.base.json but resolves through no manifest, so every spec that imports it fails to resolve`,
-        ];
-      }
-      return realpathSync(resolve(target)) === resolved
-        ? []
-        : [
-            `${alias} resolves to ${relative(process.cwd(), resolved)} through its manifest and to ${target} through tsconfig.base.json`,
-          ];
-    });
-    expect(unresolved).toEqual([]);
   });
 });

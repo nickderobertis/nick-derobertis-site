@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { parseConfigFileTextToJson } from "typescript";
 import { beforeAll, describe, expect, it, onTestFinished, vi } from "vitest";
 import { z } from "zod";
 
@@ -25,6 +26,9 @@ import { z } from "zod";
  * seen from a dependency rather than a root file: every project reaches it, and
  * only through the Vitest config that runs its tests, so it may key no `build`
  * and no `typecheck` while it has to keep keying every `test` that loads it.
+ * `tsconfig.base.json` is the one file every compile does read, so it keys all
+ * of them — and for exactly that reason it may declare nothing belonging to a
+ * single project.
  *
  * Each claim is read from the graph Nx resolves rather than from a list kept
  * here, so a project added tomorrow is covered the day it is added, and each is
@@ -53,6 +57,25 @@ const readNoTestHarness = ["build", "typecheck"];
  * Replaying one would report a pass over bytes it never served.
  */
 const composeOrDriveTheArtifact = ["e2e", "prerender", "screenshot", "perf"];
+
+/**
+ * The one file `sharedGlobals` puts in every project's key, and so the one
+ * file that may declare nothing belonging to a single project.
+ */
+const globalTsConfig = "tsconfig.base.json";
+
+/** The same file as a fileset, which is the form a key names it in. */
+const globalTsConfigFileset = `{workspaceRoot}/${globalTsConfig}`;
+
+/**
+ * Compiler options that map a module specifier to a file. `paths` carried one
+ * entry per library and `baseUrl` is what rooted it, so either one turns
+ * adding a library into an edit to a file every project is keyed on.
+ */
+const mapModulePaths = ["paths", "baseUrl"];
+
+/** The targets whose commands compile or bundle TypeScript with those options. */
+const compileWithIt = ["build", "test", "typecheck"];
 
 // Project roots reach path assertions below, and both project and target names
 // go back to Nx as `project:target` arguments, so each is narrowed where the
@@ -758,6 +781,67 @@ describe("what a test-harness change actually costs when the gate runs", () => {
     // project would replay a test green from before the harness changed.
     expect(outcomes.get(`${project}:test`)).toBe("ran");
   }, 300_000);
+});
+
+/**
+ * What the workspace's global TypeScript configuration is allowed to say.
+ *
+ * `sharedGlobals` names `tsconfig.base.json` in every project's key, which is
+ * right for what it declares: `target`, `strict`, `noUncheckedIndexedAccess`
+ * and the rest hold for the whole workspace, and a change to one of them
+ * genuinely should recheck all of it. It is wrong for anything scoped to a
+ * single project, and `compilerOptions.paths` was exactly that — one entry per
+ * library, so adding one library rebuilt, retested and rechecked every other.
+ *
+ * Both edges are held here, because the cheap way to clear the cost is to
+ * stop declaring it: nothing per-project may go back into that file, and every
+ * command that compiles under it has to keep naming it. Which specifier a
+ * project's imports resolve to is no longer that file's business at all —
+ * `project-manifest.spec.ts` holds every project to resolving through its own
+ * manifest.
+ */
+describe("the global TypeScript configuration declares nothing per project", () => {
+  it("maps no module path in tsconfig.base.json", () => {
+    const parsed = parseConfigFileTextToJson(
+      globalTsConfig,
+      readFileSync(globalTsConfig, "utf8"),
+    );
+    if (parsed.error)
+      throw new Error(
+        `${globalTsConfig} is not readable as a tsconfig; restore it with git checkout ${globalTsConfig}`,
+      );
+    const { compilerOptions } = z
+      .object({ compilerOptions: z.record(z.string(), z.unknown()) })
+      .parse(parsed.config);
+
+    const declared = mapModulePaths
+      .filter((option) => option in compilerOptions)
+      .map(
+        (option) =>
+          `${globalTsConfig} declares compilerOptions.${option}, which scopes resolution to individual projects from a file every project is keyed on, so adding one library reruns all of them; declare what a project imports in that project's own package.json instead`,
+      );
+    expect(declared).toEqual([]);
+  });
+
+  it("still keys every build, test, and typecheck on it", () => {
+    const compiling = allTargets().filter(({ name }) =>
+      compileWithIt.includes(name),
+    );
+    // Dropping this fileset from sharedGlobals would satisfy the rule above
+    // for free, and what a change to `strict` or `target` costs would stop
+    // being stated anywhere and become whatever Nx happens to infer.
+    expect(compiling.length).toBeGreaterThan(0);
+    const unkeyed = compiling
+      .filter(
+        ({ target }) =>
+          !keyedOn(declaredInputs(target)).includes(globalTsConfigFileset),
+      )
+      .map(
+        ({ task }) =>
+          `${task} compiles under ${globalTsConfig} but is not keyed on it, so a change to a global compiler option replays its last result`,
+      );
+    expect(unkeyed).toEqual([]);
+  });
 });
 
 /**
