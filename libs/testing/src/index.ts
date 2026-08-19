@@ -20,9 +20,9 @@ const optionsSchema = z.strictObject({
   dir: z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/),
   /**
    * The floor this project holds itself to, on all four metrics. It is stated
-   * per project rather than fixed here: AGENTS.md sets the workspace floor at
-   * 95, and `scripts/workspace/structure-contract.spec.ts` holds every project
-   * outside the exemptions it names to exactly that.
+   * per project rather than fixed here: AGENTS.md sets the workspace floor,
+   * and `scripts/workspace/structure-contract.spec.ts` reads it from there and
+   * holds every project outside the exemptions it names to exactly that.
    */
   thresholds: z.strictObject({
     lines: coverageMetric,

@@ -462,16 +462,16 @@ describe("coverage floor", () => {
   });
 
   /**
-   * Every way each subject fails to state the floor, read out of the component
-   * config it names — the same module Vitest loads when that project's `test`
-   * target runs, so a floor stated anywhere other than the config actually in
-   * use reads as unstated here. A metric off 95 in either direction is a
-   * finding: a project silently held above the floor is a project the next
-   * contributor cannot reason about from AGENTS.md either.
+   * Every way each subject fails to state the documented floor, read out of the
+   * component config it names — the same module Vitest loads when that
+   * project's `test` target runs, so a floor stated anywhere other than the
+   * config actually in use reads as unstated here. A metric off that floor in
+   * either direction is a finding: a project silently held above it is a
+   * project the next contributor cannot reason about from AGENTS.md either.
    */
   async function floorFindings(subjects: Project[]) {
     const floor = documentedFloor();
-    const configured = await Promise.all(
+    const findings = await Promise.all(
       subjects.map(async (project) => {
         if (!project.targets?.test)
           return `${project.name} declares no test target to carry a coverage floor, and AGENTS.md exempts only ${coverageExemptions.join(" and ")}`;
@@ -509,7 +509,7 @@ describe("coverage floor", () => {
           : `${project.name} does not hold ${offFloor.join(", ")} at ${floor} in ${named.data}`;
       }),
     );
-    return configured.filter((finding) => finding !== undefined);
+    return findings.filter((finding) => finding !== undefined);
   }
 
   it("holds every project outside those exemptions to that floor on all four metrics", async () => {
