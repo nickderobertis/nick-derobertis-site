@@ -95,12 +95,18 @@ describe("defineWorkspaceTestConfig", () => {
     ],
   ])("refuses %s at the configuration boundary", (_, options, reported) => {
     expect(() =>
+      // The "a metric the floor leaves unstated" row omits
+      // `thresholds.statements`, so the union `test.each` infers over this
+      // table is not assignable to the parameter. That row is invalid on
+      // purpose: the subject here is what the helper does with configuration
+      // the type system would have refused first, and this cast is what carries
+      // it as far as the runtime check that is supposed to catch it.
       defineWorkspaceTestConfig(
         options as Parameters<typeof defineWorkspaceTestConfig>[0],
       ),
     ).toThrow(
       expect.objectContaining({
-        message: expect.stringContaining(reported) as unknown as string,
+        message: expect.stringContaining(reported),
       }),
     );
   });
