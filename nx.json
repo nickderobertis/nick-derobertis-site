@@ -16,15 +16,27 @@
       "inputs": ["production", "^production"],
       "outputs": ["{options.outputPath}"]
     },
-    "test": { "cache": true },
+    "test": {
+      "cache": true,
+      "inputs": ["default", "^default"]
+    },
     "lint": {
       "cache": true,
       "inputs": ["default", "^default", "{workspaceRoot}/biome.json"]
     },
-    "typecheck": { "cache": true },
-    "e2e": { "cache": false },
-    "prerender": { "cache": false },
-    "screenshot": { "cache": false }
+    "typecheck": {
+      "cache": true,
+      "inputs": ["default", "^production"]
+    },
+    "e2e": {
+      "cache": false
+    },
+    "prerender": {
+      "cache": false
+    },
+    "screenshot": {
+      "cache": false
+    }
   },
   "plugins": ["./scripts/workspace/federation-plugin.mjs"]
 }

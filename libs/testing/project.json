@@ -4,14 +4,21 @@
   "sourceRoot": "libs/testing/src",
   "projectType": "library",
   "tags": ["type:shared", "scope:testing"],
+  "namedInputs": {
+    "production": []
+  },
   "targets": {
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": "biome lint libs/testing" }
+      "options": {
+        "command": "biome lint libs/testing"
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/testing/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/testing/tsconfig.json"
+      }
     },
     "test": {
       "executor": "nx:run-commands",
@@ -21,7 +28,10 @@
     },
     "build": {
       "executor": "nx:run-commands",
-      "options": { "command": "tsc -p libs/testing/tsconfig.json" }
+      "options": {
+        "command": "tsc -p libs/testing/tsconfig.json"
+      },
+      "inputs": ["default", "^production"]
     }
   }
 }
