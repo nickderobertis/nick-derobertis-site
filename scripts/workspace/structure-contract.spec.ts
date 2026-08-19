@@ -247,11 +247,13 @@ describe("typecheck inputs", () => {
 
   /** Every file tsc reads for one project, relative to the workspace root. */
   async function programFiles(config: string) {
+    // llmlint: ignore-block[work_goes_through_command_surface] `--listFilesOnly` prints the files in a project's program and stops without checking them, so this runs no typecheck and re-implements no recipe: it asks the compiler which files one project compiles, which is the subject this describe block reads. The workspace typecheck itself stays behind `just check` and `just lint`, and neither reports a file list — both report a verdict — so there is no recipe to route this through, and adding one whose only caller is this spec would put a command surface between the question and the compiler that answers it.
     const { stdout } = await compile(
       "pnpm",
       ["exec", "tsc", "-p", config, "--listFilesOnly"],
       { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
     );
+    // llmlint: ignore-end[work_goes_through_command_surface]
     return compiledFile
       .array()
       .parse(stdout.split("\n").filter((line) => line.length > 0))
