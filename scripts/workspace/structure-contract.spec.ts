@@ -238,6 +238,13 @@ describe("typecheck inputs", () => {
   const harnessPath = "libs/testing/";
   const compile = promisify(execFile);
 
+  // tsc names every file it compiled by absolute path, one per line. Anything
+  // else on that stream is a diagnostic, and a diagnostic read as a compiled
+  // file matches no prefix below, so it reads as a project with nothing to
+  // report — the silent green this whole reading exists to prevent. Each line
+  // is narrowed before it becomes a path.
+  const compiledFile = z.string().regex(/^\//);
+
   /** Every file tsc reads for one project, relative to the workspace root. */
   async function programFiles(config: string) {
     const { stdout } = await compile(
@@ -245,9 +252,9 @@ describe("typecheck inputs", () => {
       ["exec", "tsc", "-p", config, "--listFilesOnly"],
       { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
     );
-    return stdout
-      .split("\n")
-      .filter((line) => line.length > 0)
+    return compiledFile
+      .array()
+      .parse(stdout.split("\n").filter((line) => line.length > 0))
       .map((file) => relative(process.cwd(), file));
   }
 
@@ -424,6 +431,25 @@ describe("test target contract", () => {
 });
 
 describe("coverage floor", () => {
+  /**
+   * The floor AGENTS.md sets, read from the sentence that sets it. Restating
+   * the number here would leave two of them: a workspace that raised its
+   * documented floor would keep passing a gate still holding every project to
+   * the old one, and the disagreement would be visible in neither.
+   */
+  function documentedFloor(): number {
+    return z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .parse(
+        /Coverage is (\d+)% on lines, functions, branches, and statements/.exec(
+          readFileSync("AGENTS.md", "utf8"),
+        )?.[1],
+      );
+  }
+
   it("keeps AGENTS.md naming every project it exempts", () => {
     const instructions = readFileSync("AGENTS.md", "utf8");
     const unstated = coverageExemptions
@@ -444,6 +470,7 @@ describe("coverage floor", () => {
    * contributor cannot reason about from AGENTS.md either.
    */
   async function floorFindings(subjects: Project[]) {
+    const floor = documentedFloor();
     const configured = await Promise.all(
       subjects.map(async (project) => {
         if (!project.targets?.test)
@@ -476,16 +503,16 @@ describe("coverage floor", () => {
           "functions",
           "branches",
           "statements",
-        ].filter((metric) => declared[metric] !== 95);
+        ].filter((metric) => declared[metric] !== floor);
         return offFloor.length === 0
           ? undefined
-          : `${project.name} does not hold ${offFloor.join(", ")} at 95 in ${named.data}`;
+          : `${project.name} does not hold ${offFloor.join(", ")} at ${floor} in ${named.data}`;
       }),
     );
     return configured.filter((finding) => finding !== undefined);
   }
 
-  it("holds every project outside those exemptions to 95 on all four metrics", async () => {
+  it("holds every project outside those exemptions to that floor on all four metrics", async () => {
     expect(
       await floorFindings(
         projects.filter((project) => !exemptFromCoverage(project)),
