@@ -11,7 +11,16 @@ import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
-import { parseConfigFileTextToJson } from "typescript";
+import {
+  createSourceFile,
+  isCallExpression,
+  isExportAssignment,
+  isIdentifier,
+  isImportDeclaration,
+  isObjectLiteralExpression,
+  parseConfigFileTextToJson,
+  ScriptTarget,
+} from "typescript";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -224,8 +233,9 @@ describe("app project structure", () => {
  * the only way those modules reach an app's program is an `include` that names
  * them, and the program tsc actually builds is what this reads.
  */
-describe("app typecheck inputs", () => {
+describe("typecheck inputs", () => {
   const publishPath = "libs/publish-config/";
+  const harnessPath = "libs/testing/";
   const compile = promisify(execFile);
 
   /** Every file tsc reads for one project, relative to the workspace root. */
@@ -241,35 +251,138 @@ describe("app typecheck inputs", () => {
       .map((file) => relative(process.cwd(), file));
   }
 
+  const compiled = new Map<string, Promise<string[]>>();
+
+  /**
+   * Every file the whole of one project's typecheck compiles. An app
+   * typechecks its own sources and its browser suite through separate tsc
+   * projects; both are that app's typecheck. Each project is compiled once and
+   * both readings below share that answer.
+   */
+  function typecheckedBy(project: Project): Promise<string[]> {
+    const known = compiled.get(project.name);
+    if (known) return known;
+    const files = (async () => {
+      const configs = tsconfigPath
+        .array()
+        .parse(
+          [...targetCommand(project, "typecheck").matchAll(/tsc -p (\S+)/g)]
+            .map(([, config]) => config)
+            .filter((config) => config !== undefined),
+        );
+      // A typecheck that compiles nothing this contract can read would pass it
+      // by default, so an unreadable command is itself the failure.
+      if (configs.length === 0)
+        throw new Error(
+          `${project.name} names no tsc project in its typecheck command, so what it compiles cannot be read`,
+        );
+      return (await Promise.all(configs.map(programFiles))).flat();
+    })();
+    compiled.set(project.name, files);
+    return files;
+  }
+
   it("compiles no publish module in any app's typecheck", async () => {
     const findings = await Promise.all(
-      projects.filter(isApp).map(async (project) => {
-        // An app typechecks its own sources and its browser suite through
-        // separate tsc projects; both are the app's typecheck.
-        const configs = tsconfigPath
-          .array()
-          .parse(
-            [...targetCommand(project, "typecheck").matchAll(/tsc -p (\S+)/g)]
-              .map(([, config]) => config)
-              .filter((config) => config !== undefined),
-          );
-        // A typecheck that compiles nothing this contract can read would pass it
-        // by default, so an unreadable command is itself the finding.
-        if (configs.length === 0)
-          return [
-            `${project.name} names no tsc project in its typecheck command, so what it compiles cannot be read`,
-          ];
-        const compiled = (await Promise.all(configs.map(programFiles))).flat();
-        return compiled
-          .filter((file) => file.startsWith(publishPath))
-          .map(
-            (file) =>
-              `${project.name} typechecks ${file}, which no app imports`,
-          );
-      }),
+      projects
+        .filter(isApp)
+        .map(async (project) =>
+          (await typecheckedBy(project))
+            .filter((file) => file.startsWith(publishPath))
+            .map(
+              (file) =>
+                `${project.name} typechecks ${file}, which no app imports`,
+            ),
+        ),
     );
     expect(findings.flat()).toEqual([]);
   }, 120_000);
+
+  /**
+   * The shared test harness is the one library every project reaches, and only
+   * from the component config Vitest loads. Nothing a project builds or
+   * typechecks imports it, so no project's `typecheck` is keyed on it — which
+   * is what lets an edit to it replay every build and every typecheck in the
+   * workspace instead of rerunning them. tsc following an import back into it
+   * would make that key silently wrong, reporting a green typecheck over a
+   * harness no run had read, so what tsc actually compiles is what this reads.
+   */
+  it("compiles the shared test harness into no other project's typecheck", async () => {
+    const findings = await Promise.all(
+      withTarget("typecheck")
+        .filter((project) => project.root !== harnessPath.slice(0, -1))
+        .map(async (project) =>
+          (await typecheckedBy(project))
+            .filter((file) => file.startsWith(harnessPath))
+            .map(
+              (file) =>
+                `${project.name} typechecks ${file}, which only its component config imports and which its typecheck is not keyed on`,
+            ),
+        ),
+    );
+    expect(findings.flat()).toEqual([]);
+  }, 300_000);
+});
+
+/**
+ * A component config is the one file in an app or a library that no tsc project
+ * compiles. It imports the shared test harness, and a typecheck that read it
+ * would have to be keyed on that harness — the whole cost this arrangement
+ * removes. What makes that safe is that these configs carry no logic: each is a
+ * single call whose one argument `defineWorkspaceTestConfig` validates when
+ * Vitest loads it, so the only mistake one can carry is a mistake that boundary
+ * refuses. A config that grows a statement past that is a config nothing
+ * checks, which is why it fails here rather than at whatever it silently got
+ * wrong. Tooling configs are not subjects: they hold real logic and stay in
+ * their own project's typecheck.
+ */
+describe("component configs", () => {
+  it("keeps every component config a single validated declaration", () => {
+    const subjects = withTarget("test").filter(
+      (project) => !project.root.startsWith("scripts/"),
+    );
+    // Reading no config at all would satisfy the assertion below for free.
+    expect(subjects.length).toBeGreaterThan(0);
+
+    const findings = subjects.flatMap((project) => {
+      const path = vitestConfigPath.parse(
+        /--config\s+(\S+)/.exec(targetCommand(project, "test"))?.[1],
+      );
+      const source = createSourceFile(
+        path,
+        readFileSync(path, "utf8"),
+        ScriptTarget.ESNext,
+      );
+      const [imported, exported, ...beyond] = source.statements;
+      if (
+        beyond.length > 0 ||
+        !imported ||
+        !isImportDeclaration(imported) ||
+        !exported ||
+        !isExportAssignment(exported)
+      )
+        return [
+          `${path} is not one import and one default export, and no tsc project compiles it`,
+        ];
+      const call = exported.expression;
+      const [argument, ...arguments_] = isCallExpression(call)
+        ? call.arguments
+        : [];
+      if (
+        !isCallExpression(call) ||
+        !isIdentifier(call.expression) ||
+        call.expression.text !== "defineWorkspaceTestConfig" ||
+        arguments_.length > 0 ||
+        !argument ||
+        !isObjectLiteralExpression(argument)
+      )
+        return [
+          `${path} exports something other than defineWorkspaceTestConfig over one object literal, which is the only form the harness validates`,
+        ];
+      return [];
+    });
+    expect(findings).toEqual([]);
+  });
 });
 
 describe("test target contract", () => {

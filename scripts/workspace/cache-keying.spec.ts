@@ -21,7 +21,10 @@ import { z } from "zod";
  * only eslint run — `eslint .` over the whole tree — so its `lint` key has to
  * cover its own configuration, every file that command lints, and the
  * `project.json` tags `@nx/enforce-module-boundaries` resolves out of the
- * project graph.
+ * project graph. The shared component-test harness is the same pair of edges
+ * seen from a dependency rather than a root file: every project reaches it, and
+ * only through the Vitest config that runs its tests, so it may key no `build`
+ * and no `typecheck` while it has to keep keying every `test` that loads it.
  *
  * Each claim is read from the graph Nx resolves rather than from a list kept
  * here, so a project added tomorrow is covered the day it is added, and each is
@@ -34,6 +37,16 @@ const biomeConfig = "{workspaceRoot}/biome.json";
 
 /** Targets whose commands — rspack, Vitest, tsc — read no Biome configuration. */
 const readNoBiomeConfig = ["build", "test", "typecheck"];
+
+/**
+ * The shared component-test harness. Only a project's Vitest config imports it,
+ * and no tsc project compiles that config, so Vitest is the one command in the
+ * workspace that loads it. `structure-contract.spec.ts` holds tsc to that.
+ */
+const testHarness = "libs/testing/src/index.ts";
+
+/** Targets whose commands — rspack and tsc — never load that harness. */
+const readNoTestHarness = ["build", "typecheck"];
 
 /**
  * Targets that compose the served artifact or drive a browser against it.
@@ -167,6 +180,20 @@ const targetsOf = (project: Project) =>
   }));
 
 const allTargets = () => projects.flatMap(targetsOf);
+
+/**
+ * The first project of each shape the workspace has, by name. Asking Nx itself
+ * about a key costs a process per question, so the claims confirmed that way
+ * are confirmed over an app, a library, and a tooling project rather than over
+ * all of them — and read out of the graph, so none of the three is named here.
+ */
+const oneProjectPerShape = () =>
+  ["apps/", "libs/", "scripts/"].flatMap((prefix) =>
+    projects
+      .filter((project) => project.root.startsWith(prefix))
+      .sort((one, other) => one.name.localeCompare(other.name))
+      .slice(0, 1),
+  );
 
 /**
  * Nx colors the sentence it prints under a task runner and leaves it plain in a
@@ -307,12 +334,7 @@ describe("the Biome configuration keys only the target that reads it", () => {
     // decides a replay. One project per shape is confirmed against Nx itself,
     // so an app, a library, and a tooling project are each covered without
     // naming any of them here, and the graph reading is held to Nx's answer.
-    const shapes = ["apps/", "libs/", "scripts/"].flatMap((prefix) =>
-      projects
-        .filter((project) => project.root.startsWith(prefix))
-        .sort((one, other) => one.name.localeCompare(other.name))
-        .slice(0, 1),
-    );
+    const shapes = oneProjectPerShape();
     expect(shapes).toHaveLength(3);
 
     const miskeyed = shapes
@@ -331,6 +353,24 @@ describe("the Biome configuration keys only the target that reads it", () => {
       );
     expect(miskeyed).toEqual([]);
   }, 60_000);
+});
+
+describe("the shared test harness keys only the commands that load it", () => {
+  it("keys no build or typecheck on it in Nx", () => {
+    // Only Vitest loads this harness, so a project's rspack build and its tsc
+    // typecheck have no reason to be keyed on it — and they were, through the
+    // dependency Nx reads out of each project's Vitest config, until the
+    // harness declared that it contributes no production file to a dependent.
+    const overkeyed = oneProjectPerShape()
+      .flatMap(targetsOf)
+      .filter(({ name }) => readNoTestHarness.includes(name))
+      .filter(({ task }) => nxKeysTaskOn(task, testHarness))
+      .map(
+        ({ task }) =>
+          `Nx keys ${task} on ${testHarness}, which that task's command never loads, so every edit to the test harness reruns it`,
+      );
+    expect(overkeyed).toEqual([]);
+  }, 90_000);
 });
 
 describe("the workspace eslint run is keyed on everything it reads", () => {
@@ -690,6 +730,33 @@ describe("what a rule-file change actually costs when the gate runs", () => {
     // Named by no input, this file used to key nothing: a rule change replayed
     // the pass that had never read it.
     expect(outcomes.get("shell:lint")).toBe("ran");
+  }, 300_000);
+});
+
+describe("what a test-harness change actually costs when the gate runs", () => {
+  it("replays build and typecheck for a libs/testing change, and reruns test", () => {
+    const project = probeProject();
+    const cacheDirectory = ownCacheDirectory();
+
+    // As above, the cache being measured is the one this run fills, and that
+    // every probed target ran here is asserted rather than assumed.
+    const warmed = outcomesOf(project, probedTargets, cacheDirectory);
+    expect(
+      probedTargets.filter(
+        (target) => warmed.get(`${project}:${target}`) !== "ran",
+      ),
+    ).toEqual([]);
+
+    const outcomes = withInertEdit(testHarness, oneMoreComment, () =>
+      outcomesOf(project, probedTargets, cacheDirectory),
+    );
+
+    expect(outcomes.get(`${project}:build`)).toBe("replayed");
+    expect(outcomes.get(`${project}:typecheck`)).toBe("replayed");
+    // The same edit against the one command that loads it. Without this the two
+    // above would also hold for a harness nothing is keyed on, and every
+    // project would replay a test green from before the harness changed.
+    expect(outcomes.get(`${project}:test`)).toBe("ran");
   }, 300_000);
 });
 

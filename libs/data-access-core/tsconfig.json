@@ -4,7 +4,6 @@
   "include": [
     "src/**/*.ts",
     "vendor/codegen/**/*.d.ts",
-    "vendor/codegen/**/*.json",
-    "vite.config.ts"
+    "vendor/codegen/**/*.json"
   ]
 }

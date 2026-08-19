@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "types": ["node", "vitest/globals"] },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "vite.config.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   // The two rspack entry points resolve `@site-fragment/*` through aliases the
   // compilation that owns them declares, so they are typed in that build's
   // graph rather than in this project's.
