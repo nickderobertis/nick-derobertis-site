@@ -1,6 +1,6 @@
 import path from "node:path";
 import { describe, expect, test } from "vitest";
-import { defineWorkspaceTestConfig, resolveTsconfigAliases } from "./index.ts";
+import { defineWorkspaceTestConfig } from "./index.ts";
 
 describe("defineWorkspaceTestConfig", () => {
   test("builds the fixed component-test contract and merges remote aliases", () => {
@@ -13,8 +13,7 @@ describe("defineWorkspaceTestConfig", () => {
     });
 
     expect(config.root).toBe(path.resolve(import.meta.dirname, "../../.."));
-    expect(config.resolve?.alias).toMatchObject({
-      "@site/layout": path.resolve("libs/layout/src/index.ts"),
+    expect(config.resolve?.alias).toEqual({
       "homeCards/Skeleton": path.resolve("apps/home-cards/src/skeleton.tsx"),
     });
     expect(config.test).toMatchObject({
@@ -30,7 +29,7 @@ describe("defineWorkspaceTestConfig", () => {
     });
   });
 
-  test("uses the project source tree as the default coverage boundary", () => {
+  test("uses the project source tree as the default coverage boundary and composes no remote", () => {
     const config = defineWorkspaceTestConfig({
       project: "bio",
       dir: "apps/bio",
@@ -38,19 +37,12 @@ describe("defineWorkspaceTestConfig", () => {
     expect(config.test?.coverage?.include).toEqual([
       "apps/bio/src/**/*.{ts,tsx}",
     ]);
+    expect(config.resolve?.alias).toEqual({});
   });
 
   test("rejects invalid project names at the configuration boundary", () => {
     expect(() =>
       defineWorkspaceTestConfig({ project: "Bad_Name", dir: "apps/bio" }),
     ).toThrow("Invalid test project name");
-  });
-
-  test("rejects malformed tsconfig path mappings at the configuration boundary", () => {
-    expect(() =>
-      resolveTsconfigAliases("/workspace", {
-        compilerOptions: { paths: { "@site/broken": [] } },
-      }),
-    ).toThrow();
   });
 });
