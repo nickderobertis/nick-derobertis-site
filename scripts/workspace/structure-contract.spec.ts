@@ -471,12 +471,15 @@ describe("coverage floor", () => {
         if (!thresholds.success)
           return `${project.name} declares no coverage thresholds in ${named.data}`;
         const declared = thresholds.data.default.test.coverage.thresholds;
-        const below = ["lines", "functions", "branches", "statements"].filter(
-          (metric) => declared[metric] !== 95,
-        );
-        return below.length === 0
+        const offFloor = [
+          "lines",
+          "functions",
+          "branches",
+          "statements",
+        ].filter((metric) => declared[metric] !== 95);
+        return offFloor.length === 0
           ? undefined
-          : `${project.name} does not hold ${below.join(", ")} at 95 in ${named.data}`;
+          : `${project.name} does not hold ${offFloor.join(", ")} at 95 in ${named.data}`;
       }),
     );
     return configured.filter((finding) => finding !== undefined);
