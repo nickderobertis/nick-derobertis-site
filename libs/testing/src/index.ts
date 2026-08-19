@@ -1,66 +1,64 @@
-import { readFileSync } from "node:fs";
 import path from "node:path";
 import react from "@vitejs/plugin-react";
-import { parseConfigFileTextToJson } from "typescript";
 import type { TestUserConfig, ViteUserConfig } from "vitest/config";
 import { z } from "zod";
 
 export type WorkspaceTestConfig = ViteUserConfig & { test?: TestUserConfig };
 
-export interface WorkspaceTestConfigOptions {
-  project: string;
-  dir: string;
-  remotes?: Record<string, string>;
-  coverageInclude?: string[];
-  coverageExclude?: string[];
-}
+const coverageMetric = z.number().min(0).max(100);
 
-// Every mapping becomes an anchored alias pattern below, so the alias name is
-// narrowed to the workspace package grammar where it is read rather than
-// interpolated into a pattern as whatever tsconfig.base.json happened to spell.
-const baseTsConfigSchema = z.object({
-  compilerOptions: z.object({
-    paths: z.record(
-      z.string().regex(/^@site\/[a-z][a-z0-9-]*$/),
-      z.array(z.string()).min(1),
-    ),
+/**
+ * A component config is the one place a project states what its own tests are
+ * held to, and nothing else typechecks it, so every option it passes is read
+ * here rather than trusted. A misspelled key is refused instead of silently
+ * dropped, which is what would otherwise turn a narrowed coverage boundary or
+ * a declared floor into a setting that reads as present and applies to
+ * nothing.
+ */
+const optionsSchema = z.strictObject({
+  project: z.string().regex(/^[a-z][a-z0-9-]*$/),
+  dir: z.string().regex(/^[a-z0-9-]+(?:\/[a-z0-9-]+)*$/),
+  /**
+   * The floor this project holds itself to, on all four metrics. It is stated
+   * per project rather than fixed here: AGENTS.md sets the workspace floor,
+   * and `scripts/workspace/structure-contract.spec.ts` reads it from there and
+   * holds every project outside the exemptions it names to exactly that.
+   */
+  thresholds: z.strictObject({
+    lines: coverageMetric,
+    functions: coverageMetric,
+    branches: coverageMetric,
+    statements: coverageMetric,
   }),
+  /**
+   * Federation specifiers this project's host composes, each pointed at the
+   * source behind it. No manifest publishes them — they exist for the Module
+   * Federation runtime Vitest does not run — so they are the only specifiers
+   * that still need an alias.
+   */
+  remotes: z.record(z.string(), z.string()).optional(),
+  coverageInclude: z.array(z.string()).nonempty().optional(),
+  coverageExclude: z.array(z.string()).nonempty().optional(),
 });
 
-export function resolveTsconfigAliases(
-  root: string,
-  config: unknown,
-): Record<string, string> {
-  const tsconfig = baseTsConfigSchema.parse(config);
-  return Object.fromEntries(
-    Object.entries(tsconfig.compilerOptions.paths).map(([alias, targets]) => {
-      const target = targets[0];
-      /* v8 ignore next -- Zod's min(1) enforces this boundary invariant, but its inferred array type does not retain tuple cardinality. */
-      if (target === undefined)
-        throw new Error(`Missing path target for ${alias}`);
-      return [alias, path.resolve(root, target)];
-    }),
-  );
-}
+export type WorkspaceTestConfigOptions = z.infer<typeof optionsSchema>;
 
-export function defineWorkspaceTestConfig({
-  project,
-  dir,
-  remotes = {},
-  coverageInclude = [`${dir}/src/**/*.{ts,tsx}`],
-  coverageExclude,
-}: WorkspaceTestConfigOptions): WorkspaceTestConfig {
-  if (!/^[a-z][a-z0-9-]*$/.test(project))
-    throw new Error(`Invalid test project name: ${project}`);
+export function defineWorkspaceTestConfig(
+  options: WorkspaceTestConfigOptions,
+): WorkspaceTestConfig {
+  const read = optionsSchema.safeParse(options);
+  if (!read.success)
+    throw new Error(
+      `Invalid workspace test configuration:\n${z.prettifyError(read.error)}`,
+    );
+  const {
+    dir,
+    thresholds,
+    remotes = {},
+    coverageInclude = [`${read.data.dir}/src/**/*.{ts,tsx}`],
+    coverageExclude,
+  } = read.data;
   const root = path.resolve(import.meta.dirname, "../../..");
-  const tsconfigPath = path.join(root, "tsconfig.base.json");
-  const parsed = parseConfigFileTextToJson(
-    tsconfigPath,
-    readFileSync(tsconfigPath, "utf8"),
-  );
-  /* v8 ignore next -- The committed workspace config is validated by TypeScript; this preserves a useful boundary error for corrupted checkouts. */
-  if (parsed.error) throw new Error("Could not parse tsconfig.base.json");
-  const aliases = resolveTsconfigAliases(root, parsed.config);
   const remoteAliases = Object.fromEntries(
     Object.entries(remotes).map(([alias, target]) => [
       alias,
@@ -71,26 +69,7 @@ export function defineWorkspaceTestConfig({
   return {
     root,
     plugins: [react()],
-    resolve: {
-      // A tsconfig mapping names a package's entry point and nothing beneath
-      // it, but Vite matches a string alias against every subpath under it too:
-      // `@site/build-config` would swallow `@site/build-config/remotes.json`
-      // and rewrite it onto a path no file sits at. Anchoring each mapping
-      // leaves a subpath to resolve through the `exports` its library
-      // publishes, which is where a subpath is declared. Federated remotes stay
-      // string aliases, because each names one exposed module with nothing
-      // beneath it.
-      alias: [
-        ...Object.entries(aliases).map(([alias, target]) => ({
-          find: new RegExp(`^${alias}$`),
-          replacement: target,
-        })),
-        ...Object.entries(remoteAliases).map(([alias, target]) => ({
-          find: alias,
-          replacement: target,
-        })),
-      ],
-    },
+    resolve: { alias: remoteAliases },
     test: {
       environment: "jsdom",
       setupFiles: ["libs/testing/src/setup.ts"],
@@ -98,7 +77,7 @@ export function defineWorkspaceTestConfig({
       coverage: {
         provider: "v8",
         reportsDirectory: `coverage/${dir}`,
-        thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
+        thresholds,
         include: coverageInclude,
         ...(coverageExclude ? { exclude: coverageExclude } : {}),
       },

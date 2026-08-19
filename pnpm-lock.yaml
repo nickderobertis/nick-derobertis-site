@@ -66,12 +66,54 @@ importers:
       '@playwright/test':
         specifier: 1.61.1
         version: 1.61.1
+      '@site/artifact-contracts':
+        specifier: workspace:*
+        version: link:libs/artifact-contracts
+      '@site/build-config':
+        specifier: workspace:*
+        version: link:libs/build-config
+      '@site/data-access-awards':
+        specifier: workspace:*
+        version: link:libs/data-access-awards
+      '@site/data-access-core':
+        specifier: workspace:*
+        version: link:libs/data-access-core
+      '@site/data-access-courses':
+        specifier: workspace:*
+        version: link:libs/data-access-courses
+      '@site/data-access-home':
+        specifier: workspace:*
+        version: link:libs/data-access-home
+      '@site/data-access-research':
+        specifier: workspace:*
+        version: link:libs/data-access-research
+      '@site/data-access-skills':
+        specifier: workspace:*
+        version: link:libs/data-access-skills
+      '@site/data-access-software':
+        specifier: workspace:*
+        version: link:libs/data-access-software
+      '@site/data-access-timeline':
+        specifier: workspace:*
+        version: link:libs/data-access-timeline
+      '@site/design-system':
+        specifier: workspace:*
+        version: link:libs/design-system
+      '@site/e2e-fixtures':
+        specifier: workspace:*
+        version: link:libs/e2e-fixtures
       '@site/e2e-harness':
         specifier: workspace:*
         version: link:libs/e2e-harness
+      '@site/layout':
+        specifier: workspace:*
+        version: link:libs/layout
       '@site/publish-config':
         specifier: workspace:*
         version: link:libs/publish-config
+      '@site/route-state':
+        specifier: workspace:*
+        version: link:libs/route-state
       '@site/testing':
         specifier: workspace:*
         version: link:libs/testing
@@ -654,7 +696,11 @@ importers:
 
   scripts/visual: {}
 
-  scripts/workspace: {}
+  scripts/workspace:
+    dependencies:
+      '@site/testing':
+        specifier: workspace:*
+        version: link:../../libs/testing
 
 packages:
 

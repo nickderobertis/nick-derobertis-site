@@ -7,7 +7,6 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "test-remotes/**/*.tsx",
-    "rspack.config.ts",
-    "vite.config.ts"
+    "rspack.config.ts"
   ]
 }

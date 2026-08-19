@@ -1,9 +1,26 @@
 import { execFile, execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+} from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
+import {
+  createSourceFile,
+  isCallExpression,
+  isExportAssignment,
+  isIdentifier,
+  isImportDeclaration,
+  isObjectLiteralExpression,
+  parseConfigFileTextToJson,
+  ScriptTarget,
+} from "typescript";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -216,52 +233,165 @@ describe("app project structure", () => {
  * the only way those modules reach an app's program is an `include` that names
  * them, and the program tsc actually builds is what this reads.
  */
-describe("app typecheck inputs", () => {
+describe("typecheck inputs", () => {
   const publishPath = "libs/publish-config/";
+  const harnessPath = "libs/testing/";
   const compile = promisify(execFile);
+
+  // tsc names every file it compiled by absolute path, one per line. Anything
+  // else on that stream is a diagnostic, and a diagnostic read as a compiled
+  // file matches no prefix below, so it reads as a project with nothing to
+  // report — the silent green this whole reading exists to prevent. Each line
+  // is narrowed before it becomes a path.
+  const compiledFile = z.string().regex(/^\//);
 
   /** Every file tsc reads for one project, relative to the workspace root. */
   async function programFiles(config: string) {
+    // llmlint: ignore-block[work_goes_through_command_surface] `--listFilesOnly` prints the files in a project's program and stops without checking them, so this runs no typecheck and re-implements no recipe: it asks the compiler which files one project compiles, which is the subject this describe block reads. The workspace typecheck itself stays behind `just check` and `just lint`, and neither reports a file list — both report a verdict — so there is no recipe to route this through, and adding one whose only caller is this spec would put a command surface between the question and the compiler that answers it.
     const { stdout } = await compile(
       "pnpm",
       ["exec", "tsc", "-p", config, "--listFilesOnly"],
       { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
     );
-    return stdout
-      .split("\n")
-      .filter((line) => line.length > 0)
+    // llmlint: ignore-end[work_goes_through_command_surface]
+    return compiledFile
+      .array()
+      .parse(stdout.split("\n").filter((line) => line.length > 0))
       .map((file) => relative(process.cwd(), file));
+  }
+
+  const compiled = new Map<string, Promise<string[]>>();
+
+  /**
+   * Every file the whole of one project's typecheck compiles. An app
+   * typechecks its own sources and its browser suite through separate tsc
+   * projects; both are that app's typecheck. Each project is compiled once and
+   * both readings below share that answer.
+   */
+  function typecheckedBy(project: Project): Promise<string[]> {
+    const known = compiled.get(project.name);
+    if (known) return known;
+    const files = (async () => {
+      const configs = tsconfigPath
+        .array()
+        .parse(
+          [...targetCommand(project, "typecheck").matchAll(/tsc -p (\S+)/g)]
+            .map(([, config]) => config)
+            .filter((config) => config !== undefined),
+        );
+      // A typecheck that compiles nothing this contract can read would pass it
+      // by default, so an unreadable command is itself the failure.
+      if (configs.length === 0)
+        throw new Error(
+          `${project.name} names no tsc project in its typecheck command, so what it compiles cannot be read`,
+        );
+      return (await Promise.all(configs.map(programFiles))).flat();
+    })();
+    compiled.set(project.name, files);
+    return files;
   }
 
   it("compiles no publish module in any app's typecheck", async () => {
     const findings = await Promise.all(
-      projects.filter(isApp).map(async (project) => {
-        // An app typechecks its own sources and its browser suite through
-        // separate tsc projects; both are the app's typecheck.
-        const configs = tsconfigPath
-          .array()
-          .parse(
-            [...targetCommand(project, "typecheck").matchAll(/tsc -p (\S+)/g)]
-              .map(([, config]) => config)
-              .filter((config) => config !== undefined),
-          );
-        // A typecheck that compiles nothing this contract can read would pass it
-        // by default, so an unreadable command is itself the finding.
-        if (configs.length === 0)
-          return [
-            `${project.name} names no tsc project in its typecheck command, so what it compiles cannot be read`,
-          ];
-        const compiled = (await Promise.all(configs.map(programFiles))).flat();
-        return compiled
-          .filter((file) => file.startsWith(publishPath))
-          .map(
-            (file) =>
-              `${project.name} typechecks ${file}, which no app imports`,
-          );
-      }),
+      projects
+        .filter(isApp)
+        .map(async (project) =>
+          (await typecheckedBy(project))
+            .filter((file) => file.startsWith(publishPath))
+            .map(
+              (file) =>
+                `${project.name} typechecks ${file}, which no app imports`,
+            ),
+        ),
     );
     expect(findings.flat()).toEqual([]);
   }, 120_000);
+
+  /**
+   * The shared test harness is the one library every project reaches, and only
+   * from the component config Vitest loads. Nothing a project builds or
+   * typechecks imports it, so no project's `typecheck` is keyed on it — which
+   * is what lets an edit to it replay every build and every typecheck in the
+   * workspace instead of rerunning them. tsc following an import back into it
+   * would make that key silently wrong, reporting a green typecheck over a
+   * harness no run had read, so what tsc actually compiles is what this reads.
+   */
+  it("compiles the shared test harness into no other project's typecheck", async () => {
+    const findings = await Promise.all(
+      withTarget("typecheck")
+        .filter((project) => project.root !== harnessPath.slice(0, -1))
+        .map(async (project) =>
+          (await typecheckedBy(project))
+            .filter((file) => file.startsWith(harnessPath))
+            .map(
+              (file) =>
+                `${project.name} typechecks ${file}, which only its component config imports and which its typecheck is not keyed on`,
+            ),
+        ),
+    );
+    expect(findings.flat()).toEqual([]);
+  }, 300_000);
+});
+
+/**
+ * A component config is the one file in an app or a library that no tsc project
+ * compiles. It imports the shared test harness, and a typecheck that read it
+ * would have to be keyed on that harness — the whole cost this arrangement
+ * removes. What makes that safe is that these configs carry no logic: each is a
+ * single call whose one argument `defineWorkspaceTestConfig` validates when
+ * Vitest loads it, so the only mistake one can carry is a mistake that boundary
+ * refuses. A config that grows a statement past that is a config nothing
+ * checks, which is why it fails here rather than at whatever it silently got
+ * wrong. Tooling configs are not subjects: they hold real logic and stay in
+ * their own project's typecheck.
+ */
+describe("component configs", () => {
+  it("keeps every component config a single validated declaration", () => {
+    const subjects = withTarget("test").filter(
+      (project) => !project.root.startsWith("scripts/"),
+    );
+    // Reading no config at all would satisfy the assertion below for free.
+    expect(subjects.length).toBeGreaterThan(0);
+
+    const findings = subjects.flatMap((project) => {
+      const path = vitestConfigPath.parse(
+        /--config\s+(\S+)/.exec(targetCommand(project, "test"))?.[1],
+      );
+      const source = createSourceFile(
+        path,
+        readFileSync(path, "utf8"),
+        ScriptTarget.ESNext,
+      );
+      const [imported, exported, ...beyond] = source.statements;
+      if (
+        beyond.length > 0 ||
+        !imported ||
+        !isImportDeclaration(imported) ||
+        !exported ||
+        !isExportAssignment(exported)
+      )
+        return [
+          `${path} is not one import and one default export, and no tsc project compiles it`,
+        ];
+      const call = exported.expression;
+      const [argument, ...arguments_] = isCallExpression(call)
+        ? call.arguments
+        : [];
+      if (
+        !isCallExpression(call) ||
+        !isIdentifier(call.expression) ||
+        call.expression.text !== "defineWorkspaceTestConfig" ||
+        arguments_.length > 0 ||
+        !argument ||
+        !isObjectLiteralExpression(argument)
+      )
+        return [
+          `${path} exports something other than defineWorkspaceTestConfig over one object literal, which is the only form the harness validates`,
+        ];
+      return [];
+    });
+    expect(findings).toEqual([]);
+  });
 });
 
 describe("test target contract", () => {
@@ -303,6 +433,25 @@ describe("test target contract", () => {
 });
 
 describe("coverage floor", () => {
+  /**
+   * The floor AGENTS.md sets, read from the sentence that sets it. Restating
+   * the number here would leave two of them: a workspace that raised its
+   * documented floor would keep passing a gate still holding every project to
+   * the old one, and the disagreement would be visible in neither.
+   */
+  function documentedFloor(): number {
+    return z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .parse(
+        /Coverage is (\d+)% on lines, functions, branches, and statements/.exec(
+          readFileSync("AGENTS.md", "utf8"),
+        )?.[1],
+      );
+  }
+
   it("keeps AGENTS.md naming every project it exempts", () => {
     const instructions = readFileSync("AGENTS.md", "utf8");
     const unstated = coverageExemptions
@@ -314,45 +463,87 @@ describe("coverage floor", () => {
     expect(unstated).toEqual([]);
   });
 
-  it("holds every project outside those exemptions to 95 on all four metrics", async () => {
-    const configured = await Promise.all(
-      projects
-        .filter((project) => !exemptFromCoverage(project))
-        .map(async (project) => {
-          if (!project.targets?.test)
-            return `${project.name} declares no test target to carry a coverage floor, and AGENTS.md exempts only ${coverageExemptions.join(" and ")}`;
-          const config = /--config\s+(\S+)/.exec(
-            targetCommand(project, "test"),
-          )?.[1];
-          const named = vitestConfigPath.safeParse(config);
-          if (!named.success)
-            return `${project.name} names no workspace Vitest config to read its coverage floor from`;
-          const module: unknown = await import(
-            pathToFileURL(resolve(named.data)).href
-          );
-          const thresholds = z
-            .object({
-              default: z.object({
-                test: z.object({
-                  coverage: z.object({
-                    thresholds: z.record(z.string(), z.unknown()),
-                  }),
+  /**
+   * Every way each subject fails to state the documented floor, read out of the
+   * component config it names — the same module Vitest loads when that
+   * project's `test` target runs, so a floor stated anywhere other than the
+   * config actually in use reads as unstated here. A metric off that floor in
+   * either direction is a finding: a project silently held above it is a
+   * project the next contributor cannot reason about from AGENTS.md either.
+   */
+  async function floorFindings(subjects: Project[]) {
+    const floor = documentedFloor();
+    const findings = await Promise.all(
+      subjects.map(async (project) => {
+        if (!project.targets?.test)
+          return `${project.name} declares no test target to carry a coverage floor, and AGENTS.md exempts only ${coverageExemptions.join(" and ")}`;
+        const config = /--config\s+(\S+)/.exec(
+          targetCommand(project, "test"),
+        )?.[1];
+        const named = vitestConfigPath.safeParse(config);
+        if (!named.success)
+          return `${project.name} names no workspace Vitest config to read its coverage floor from`;
+        const module: unknown = await import(
+          pathToFileURL(resolve(named.data)).href
+        );
+        const thresholds = z
+          .object({
+            default: z.object({
+              test: z.object({
+                coverage: z.object({
+                  thresholds: z.record(z.string(), z.unknown()),
                 }),
               }),
-            })
-            .safeParse(module);
-          if (!thresholds.success)
-            return `${project.name} declares no coverage thresholds in ${named.data}`;
-          const declared = thresholds.data.default.test.coverage.thresholds;
-          const below = ["lines", "functions", "branches", "statements"].filter(
-            (metric) => declared[metric] !== 95,
-          );
-          return below.length === 0
-            ? undefined
-            : `${project.name} does not hold ${below.join(", ")} at 95 in ${named.data}`;
-        }),
+            }),
+          })
+          .safeParse(module);
+        if (!thresholds.success)
+          return `${project.name} declares no coverage thresholds in ${named.data}`;
+        const declared = thresholds.data.default.test.coverage.thresholds;
+        const offFloor = [
+          "lines",
+          "functions",
+          "branches",
+          "statements",
+        ].filter((metric) => declared[metric] !== floor);
+        return offFloor.length === 0
+          ? undefined
+          : `${project.name} does not hold ${offFloor.join(", ")} at ${floor} in ${named.data}`;
+      }),
     );
-    expect(configured.filter((finding) => finding !== undefined)).toEqual([]);
+    return findings.filter((finding) => finding !== undefined);
+  }
+
+  it("holds every project outside those exemptions to that floor on all four metrics", async () => {
+    expect(
+      await floorFindings(
+        projects.filter((project) => !exemptFromCoverage(project)),
+      ),
+    ).toEqual([]);
+  });
+
+  it("reports a project whose own config states less than that floor", async () => {
+    // Every subject above complies, so the assertion they satisfy is also the
+    // one a contract that had stopped reading declared thresholds would
+    // satisfy. This is the reading held to a config that states 90.
+    expect(
+      await floorFindings([
+        {
+          name: "probe",
+          root: "scripts/workspace",
+          targets: {
+            test: {
+              options: {
+                command:
+                  "vitest run --config scripts/workspace/coverage-floor-probe/vite.config.ts --coverage",
+              },
+            },
+          },
+        },
+      ]),
+    ).toEqual([
+      "probe does not hold lines, branches at 95 in scripts/workspace/coverage-floor-probe/vite.config.ts",
+    ]);
   });
 });
 
@@ -470,5 +661,61 @@ describe("tooling subject inventory", () => {
       .filter((recipe) => !recipes.includes(recipe))
       .map((recipe) => `just ${recipe} no longer exists but records a reason`);
     expect([...findings, ...stale]).toEqual([]);
+  });
+});
+
+/**
+ * A `@site/*` specifier is resolved two different ways in this workspace. tsc
+ * and rspack follow the path mapping in `tsconfig.base.json`; Vitest follows
+ * Node's own resolution through the workspace manifests, because a component
+ * config carries no path mapping of its own. Nothing reconciles the two, so a
+ * library reachable by only one of them typechecks and builds while every spec
+ * that imports it fails to resolve — and it fails in whichever project imported
+ * it rather than in the library that is missing its manifest.
+ */
+describe("workspace library manifests", () => {
+  // Both halves of each mapping are read back off disk, so the alias is
+  // narrowed to a workspace scope name and its target to a workspace-relative
+  // TypeScript entry point before either is resolved.
+  const workspaceAlias = z.string().regex(/^@site\/[a-z][a-z0-9-]*$/);
+  const entryPoint = z.string().regex(/^(?:[a-z0-9-]+\/)+[a-z0-9-]+\.tsx?$/);
+
+  /** The path mapping `tsconfig.base.json` declares, alias by alias. */
+  function pathMappings(): [string, string][] {
+    const file = "tsconfig.base.json";
+    const parsed = parseConfigFileTextToJson(file, readFileSync(file, "utf8"));
+    if (parsed.error) throw new Error(`could not parse ${file}`);
+    const mapped = z
+      .object({
+        compilerOptions: z.object({
+          paths: z.record(workspaceAlias, z.tuple([entryPoint], entryPoint)),
+        }),
+      })
+      .parse(parsed.config);
+    return Object.entries(mapped.compilerOptions.paths).map(
+      ([alias, [target]]) => [alias, target],
+    );
+  }
+
+  it("resolves every path mapping through Node as well", () => {
+    const fromWorkspaceRoot = createRequire(
+      pathToFileURL(resolve("resolution-probe.js")),
+    );
+    const unresolved = pathMappings().flatMap(([alias, target]) => {
+      let resolved: string;
+      try {
+        resolved = fromWorkspaceRoot.resolve(alias);
+      } catch {
+        return [
+          `${alias} is mapped to ${target} in tsconfig.base.json but resolves through no manifest, so every spec that imports it fails to resolve`,
+        ];
+      }
+      return realpathSync(resolve(target)) === resolved
+        ? []
+        : [
+            `${alias} resolves to ${relative(process.cwd(), resolved)} through its manifest and to ${target} through tsconfig.base.json`,
+          ];
+    });
+    expect(unresolved).toEqual([]);
   });
 });

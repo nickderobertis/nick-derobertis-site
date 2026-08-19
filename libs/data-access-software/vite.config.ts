@@ -4,5 +4,6 @@ import { defineWorkspaceTestConfig } from "@site/testing";
 export default defineWorkspaceTestConfig({
   project: "data-access-software",
   dir: "libs/data-access-software",
+  thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
   coverageInclude: ["libs/data-access-software/src/**/*.ts"],
 });

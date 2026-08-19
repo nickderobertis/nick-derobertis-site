@@ -1,5 +1,8 @@
 {
   "name": "@site/tooling-workspace",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@site/testing": "workspace:*"
+  }
 }
