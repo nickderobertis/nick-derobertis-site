@@ -7,6 +7,7 @@ import { defineWorkspaceTestConfig } from "@site/testing";
 export default defineWorkspaceTestConfig({
   project: "home",
   dir: "apps/home",
+  thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
   remotes: {
     "homeCarousel/Page": "apps/home-carousel/src/page.tsx",
     "homeCarousel/Skeleton": "apps/home-carousel/src/skeleton.tsx",

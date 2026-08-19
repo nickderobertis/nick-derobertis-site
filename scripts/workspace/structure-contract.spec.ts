@@ -322,45 +322,81 @@ describe("coverage floor", () => {
     expect(unstated).toEqual([]);
   });
 
-  it("holds every project outside those exemptions to 95 on all four metrics", async () => {
+  /**
+   * What each subject's own component config declares, read by importing it —
+   * the same module Vitest loads when that project's `test` target runs, so a
+   * floor stated anywhere other than the config actually in use reads as
+   * missing here.
+   */
+  async function belowFloor(subjects: Project[]) {
     const configured = await Promise.all(
-      projects
-        .filter((project) => !exemptFromCoverage(project))
-        .map(async (project) => {
-          if (!project.targets?.test)
-            return `${project.name} declares no test target to carry a coverage floor, and AGENTS.md exempts only ${coverageExemptions.join(" and ")}`;
-          const config = /--config\s+(\S+)/.exec(
-            targetCommand(project, "test"),
-          )?.[1];
-          const named = vitestConfigPath.safeParse(config);
-          if (!named.success)
-            return `${project.name} names no workspace Vitest config to read its coverage floor from`;
-          const module: unknown = await import(
-            pathToFileURL(resolve(named.data)).href
-          );
-          const thresholds = z
-            .object({
-              default: z.object({
-                test: z.object({
-                  coverage: z.object({
-                    thresholds: z.record(z.string(), z.unknown()),
-                  }),
+      subjects.map(async (project) => {
+        if (!project.targets?.test)
+          return `${project.name} declares no test target to carry a coverage floor, and AGENTS.md exempts only ${coverageExemptions.join(" and ")}`;
+        const config = /--config\s+(\S+)/.exec(
+          targetCommand(project, "test"),
+        )?.[1];
+        const named = vitestConfigPath.safeParse(config);
+        if (!named.success)
+          return `${project.name} names no workspace Vitest config to read its coverage floor from`;
+        const module: unknown = await import(
+          pathToFileURL(resolve(named.data)).href
+        );
+        const thresholds = z
+          .object({
+            default: z.object({
+              test: z.object({
+                coverage: z.object({
+                  thresholds: z.record(z.string(), z.unknown()),
                 }),
               }),
-            })
-            .safeParse(module);
-          if (!thresholds.success)
-            return `${project.name} declares no coverage thresholds in ${named.data}`;
-          const declared = thresholds.data.default.test.coverage.thresholds;
-          const below = ["lines", "functions", "branches", "statements"].filter(
-            (metric) => declared[metric] !== 95,
-          );
-          return below.length === 0
-            ? undefined
-            : `${project.name} does not hold ${below.join(", ")} at 95 in ${named.data}`;
-        }),
+            }),
+          })
+          .safeParse(module);
+        if (!thresholds.success)
+          return `${project.name} declares no coverage thresholds in ${named.data}`;
+        const declared = thresholds.data.default.test.coverage.thresholds;
+        const below = ["lines", "functions", "branches", "statements"].filter(
+          (metric) => declared[metric] !== 95,
+        );
+        return below.length === 0
+          ? undefined
+          : `${project.name} does not hold ${below.join(", ")} at 95 in ${named.data}`;
+      }),
     );
-    expect(configured.filter((finding) => finding !== undefined)).toEqual([]);
+    return configured.filter((finding) => finding !== undefined);
+  }
+
+  it("holds every project outside those exemptions to 95 on all four metrics", async () => {
+    expect(
+      await belowFloor(
+        projects.filter((project) => !exemptFromCoverage(project)),
+      ),
+    ).toEqual([]);
+  });
+
+  it("reports a project whose own config states less than that floor", async () => {
+    // Every subject above complies, so the assertion they satisfy is also the
+    // one a contract that had stopped reading declared thresholds would
+    // satisfy. This is the reading held to a config that states 90.
+    expect(
+      await belowFloor([
+        {
+          name: "probe",
+          root: "scripts/workspace",
+          targets: {
+            test: {
+              options: {
+                command:
+                  "vitest run --config scripts/workspace/coverage-floor-probe/vite.config.ts --coverage",
+              },
+            },
+          },
+        },
+      ]),
+    ).toEqual([
+      "probe does not hold lines, branches at 95 in scripts/workspace/coverage-floor-probe/vite.config.ts",
+    ]);
   });
 });
 
@@ -505,7 +541,7 @@ describe("workspace library manifests", () => {
     const mapped = z
       .object({
         compilerOptions: z.object({
-          paths: z.record(workspaceAlias, entryPoint.array().nonempty()),
+          paths: z.record(workspaceAlias, z.tuple([entryPoint], entryPoint)),
         }),
       })
       .parse(parsed.config);
