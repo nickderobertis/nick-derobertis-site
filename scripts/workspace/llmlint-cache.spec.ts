@@ -421,6 +421,12 @@ describe("the key describes the judge, not the caller", () => {
     expect(refused.output).toContain(
       "lint-llm-diff: the judge configuration changed between keying this run",
     );
+    // A failure carrying neither verdict is one the judge never got to, and is
+    // reported as that rather than as findings a reader could go and clear.
+    expect(refused.output).toContain(
+      "lint-llm-diff: the judged tier failed before the judge could answer",
+    );
+    expect(refused.output).not.toContain("reported the findings above");
     expect(judge.invocations()).toEqual([]);
   }, 300_000);
 });
@@ -434,7 +440,7 @@ describe("only a verdict is recorded", () => {
     const first = lintLlmDiff({ judge, cacheDirectory, environment: findings });
     expect(first.status).toBe(1);
     expect(first.output).toContain(
-      "lint-llm-diff: the LLM judge reported the findings above",
+      "lint-llm-diff: the judge reported the findings above",
     );
 
     const second = lintLlmDiff({
@@ -461,6 +467,7 @@ describe("only a verdict is recorded", () => {
       "lint-llm-diff: the judge never reached a verdict",
     );
     expect(first.output).not.toContain("reported the findings above");
+    expect(first.output).not.toContain("before the judge could answer");
 
     const second = lintLlmDiff({ judge, cacheDirectory, environment: broken });
 
@@ -530,10 +537,12 @@ describe("forcing a fresh judgement", () => {
     });
 
     expect(ambient.replayed).toBe(true);
-    expect(ambient.output).toContain(
-      "lint-llm-diff: ignoring the ambient global Nx cache skip",
+    // Said as part of this run's one status line rather than beside it, so a
+    // green stays one line and still names the flag that does what the exporter
+    // wanted.
+    expect(ambient.output.trim()).toBe(
+      `lint-llm-diff: replayed the recorded verdict for base ${commitOf("origin/master")} (Nx cache hit) [ignoring the ambient global Nx cache skip, which would re-roll this non-deterministic judge from every unrelated command; force one fresh judgement of this tier alone with --rejudge]`,
     );
-    expect(ambient.output).toContain("--rejudge");
     expect(judge.invocations()).toHaveLength(1);
   }, 300_000);
 });

@@ -248,7 +248,7 @@ describe("just lint-llm-diff argument routing", () => {
       commitOf("origin/master"),
     ]);
     expect(invocation.stderr).toContain(
-      "lint-llm-diff: the LLM judge reported the findings above",
+      "lint-llm-diff: the judge reported the findings above",
     );
   }, 120_000);
 });

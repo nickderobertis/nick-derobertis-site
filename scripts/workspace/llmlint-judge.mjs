@@ -127,10 +127,15 @@ const status = judged.status ?? 2;
 if (status !== 0)
   process.stderr.write(`${judged.stdout ?? ""}${judged.stderr ?? ""}`);
 // llmlint answers findings with 1 and a toolchain that never reached a verdict
-// with 2 or more, and Nx collapses both to one failing status on its way out. It
-// is said here, where the difference is still known, so the dispatcher reports a
-// judge that could not answer as that rather than as findings to go clear.
-if (status >= 2)
+// with 2 or more, and Nx collapses both to one failing status on its way out.
+// The verdict is named here, where the difference is still known, so a failure
+// carrying neither name is one the judge never got to and the dispatcher says
+// so rather than sending a reader to clear findings that do not exist.
+if (status === 1)
+  console.error(
+    "lint-llm-diff: the judge reported the findings above; fix each one, or justify it with a narrow ignore directive at its site, then rerun just lint-llm-diff",
+  );
+else if (status >= 2)
   console.error(
     `lint-llm-diff: the judge never reached a verdict (llmlint exited ${status}); its diagnostics are above, nothing was recorded, and the next run judges this diff again`,
   );

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { isAbsolute } from "node:path";
 
 // The llmlint `llmlint-cache.spec.ts` stands in for, copied onto PATH under the
 // name `llmlint` by the journeys that drive `just lint-llm-diff`.
@@ -24,10 +25,35 @@ import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 
 const unitSeparator = String.fromCharCode(31);
 
+/**
+ * A file the journey that started this run created for it to write through.
+ *
+ * Both of them arrive as environment values, which is this stand-in's trust
+ * boundary: it runs on PATH under llmlint's name, so anything on the host could
+ * name one. An absolute path to a file that already exists is the whole
+ * contract — it never creates one — so a value that names something else is
+ * refused here rather than turning into a write somewhere unintended.
+ */
+function scratchFile(name) {
+  const named = process.env[name];
+  if (!named) return null;
+  if (
+    !isAbsolute(named) ||
+    !statSync(named, { throwIfNoEntry: false })?.isFile()
+  )
+    fail(`${name} must name an existing file, not '${named}'`);
+  return named;
+}
+
+function fail(message) {
+  process.stderr.write(`llmlint stub: ${message}\n`);
+  process.exit(64);
+}
+
 /** The rule set this run reports, which is the judge configuration in force. */
 function rules() {
   const shifted = process.env.LLMLINT_STUB_SHIFTED_RULES;
-  const calls = process.env.LLMLINT_STUB_CONFIG_CALLS;
+  const calls = scratchFile("LLMLINT_STUB_CONFIG_CALLS");
   if (!shifted || !calls) return process.env.LLMLINT_STUB_RULES ?? "baseline";
   // Every call after the first answers differently, which moves the judge
   // configuration out from under a dispatcher that has already keyed on it.
@@ -59,24 +85,18 @@ if (question === "config") {
 }
 
 const judged = process.argv.slice(2);
-const record = process.env.LLMLINT_STUB_RECORD;
-if (!record) {
-  process.stderr.write(
-    "llmlint stub: LLMLINT_STUB_RECORD names the file each judgement is recorded in; set it and retry\n",
-  );
-  process.exit(64);
-}
+const record = scratchFile("LLMLINT_STUB_RECORD");
+if (!record)
+  fail("LLMLINT_STUB_RECORD names the file each judgement is recorded in");
 // llmlint answers a clean diff with 0, findings with 1, and a toolchain that
 // never reached a verdict with 2; a journey that asked for anything else is
 // asking this stand-in to report something the real one cannot, so it says so
 // rather than turning an unreadable value into an exit status.
 const verdict = process.env.LLMLINT_STUB_VERDICT ?? "0";
-if (!["0", "1", "2"].includes(verdict)) {
-  process.stderr.write(
-    `llmlint stub: LLMLINT_STUB_VERDICT must be one of the verdicts llmlint reports (0, 1, or 2), not '${verdict}'\n`,
+if (!["0", "1", "2"].includes(verdict))
+  fail(
+    `LLMLINT_STUB_VERDICT must be one of the verdicts llmlint reports (0, 1, or 2), not '${verdict}'`,
   );
-  process.exit(64);
-}
 appendFileSync(record, `${judged.join(unitSeparator)}${unitSeparator}\n`);
 process.stdout.write(`stub judge: judged ${judged.join(" ")}\n`);
 process.exit(Number(verdict));

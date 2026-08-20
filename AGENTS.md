@@ -59,12 +59,8 @@ Dependency freshness is checked with `pnpm outdated`; every dependency's
 updates remain outside those constraints until their Nx integrations support
 them; `just upgrade` deliberately opts into testing latest releases.
 
-The LLM-judge tier is the cached Nx target `tooling-workspace:lint-llm-diff`,
-run by `just lint-llm-diff [base] [files...]` and deliberately outside `just
-check`. The judge is non-deterministic, so one tree, judged against one base
-commit under one judge configuration, must replay its recorded verdict rather
-than sample the judge again; only a green is ever recorded. `scripts/AGENTS.md`
-owns what that key covers and how to force a fresh judgement.
+`just lint-llm-diff` is the LLM-judge tier, deliberately outside `just check`;
+`scripts/AGENTS.md` owns its constraints.
 
 The `justfile` is the authoritative source for the repo-scoped
 `NX_CACHE_DIRECTORY` default beneath the user's standard cache directory, so

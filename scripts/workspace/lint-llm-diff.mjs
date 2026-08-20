@@ -139,10 +139,12 @@ const environment = Object.fromEntries(
     ([name]) => name !== "NX_SKIP_NX_CACHE" && name !== "NX_DISABLE_NX_CACHE",
   ),
 );
-if (process.env.NX_SKIP_NX_CACHE || process.env.NX_DISABLE_NX_CACHE)
-  console.error(
-    `lint-llm-diff: ignoring the ambient global Nx cache skip, which would re-roll this non-deterministic judge from every unrelated command; force a fresh judgement of this tier alone with 'just lint-llm-diff ${named} --rejudge'`,
-  );
+// Reported as part of this run's one status line rather than beside it: the
+// caller asked for something this tier declined, and a green here says one line.
+const declined =
+  process.env.NX_SKIP_NX_CACHE || process.env.NX_DISABLE_NX_CACHE
+    ? " [ignoring the ambient global Nx cache skip, which would re-roll this non-deterministic judge from every unrelated command; force one fresh judgement of this tier alone with --rejudge]"
+    : "";
 
 // Nx reports a replay two ways, and only the per-task note is safe at any size:
 // Nx replays a cache hit as one burst, so a replayed report larger than a pipe
@@ -198,17 +200,20 @@ nx.on("error", (error) =>
 nx.on("close", (status) => {
   const printed = reported.replace(ansi, "");
   const provenance = replayed.some((note) => printed.includes(note))
-    ? `lint-llm-diff: replayed the recorded verdict for base ${baseSha} (Nx cache hit)`
-    : `lint-llm-diff: judged this diff against base ${baseSha} (Nx cache miss)`;
+    ? `lint-llm-diff: replayed the recorded verdict for base ${baseSha} (Nx cache hit)${declined}`
+    : `lint-llm-diff: judged this diff against base ${baseSha} (Nx cache miss)${declined}`;
   if (status === 0) {
     console.log(provenance);
     process.exit(0);
   }
   process.stderr.write(reported);
   console.error(provenance);
-  if (!printed.includes("lint-llm-diff: the judge never reached a verdict"))
+  // The judge names its own verdict, so a failure that carries neither name is
+  // one the judge never got to — Nx, pnpm, or the target's own configuration —
+  // and is reported as that rather than as findings to go and clear.
+  if (!/^lint-llm-diff: the judge (reported|never reached)/m.test(printed))
     console.error(
-      "lint-llm-diff: the LLM judge reported the findings above; fix each one, or justify it with a narrow ignore directive at its site, then rerun just lint-llm-diff",
+      "lint-llm-diff: the judged tier failed before the judge could answer; its output is above, and no verdict was reached or recorded",
     );
   process.exit(status ?? 1);
 });
