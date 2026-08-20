@@ -185,7 +185,7 @@ nx.on("close", (status) => {
   // and is reported as that rather than as findings to go and clear.
   if (!/^lint-llm-diff: the judge (reported|never reached)/m.test(printed))
     console.error(
-      "lint-llm-diff: the judged tier failed before the judge could answer; its output is above, and no verdict was reached or recorded",
+      `lint-llm-diff: the judged tier failed before the judge could answer, so no verdict was reached or recorded; fix the Nx or pnpm error above — 'just bootstrap' if the workspace is not installed — then rerun just lint-llm-diff ${named}`,
     );
   process.exit(status ?? 1);
 });

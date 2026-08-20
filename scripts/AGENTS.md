@@ -1,5 +1,3 @@
-<!-- llmlint: ignore-file[instruction_layer_localized] This subtree instruction file is the localized layer the rule asks for; what it cannot supply is the CODEOWNERS routing, because this repository has carried nested instruction layers — apps/AGENTS.md, libs/AGENTS.md, and one per app — with no CODEOWNERS since long before this file existed. Adding one changes who must approve every pull request in the repository, which is its owner's governance decision rather than the judged tier's, so it is left to them rather than made as a side effect of moving one section out of the root file. -->
-
 # Workspace tooling instructions
 
 ## The LLM-judge tier
@@ -18,8 +16,8 @@ those makes a green a claim about something no judge saw; a symbolic ref in
 particular names a different diff the moment it advances.
 
 Resolve that fingerprint in the judge's environment, never the caller's:
-`llmlint config` renders the oneharness wrapper a dispatcher injects, and
-reading it from the caller hashed one judged diff to a different key per
+`llmlint config` renders the oneharness wrapper a dispatcher injects, so a
+fingerprint that reads it from the caller keys one judged diff differently per
 dispatch. The recipe computes it and passes it as an environment input rather
 than declaring an Nx `runtime` input, because Nx scores a failing runtime input
 as *no contribution* rather than as an error — which would drop the judge
