@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
-import { hoverUntilPreloading, hydrated, navLink } from "@site/e2e-harness";
+import {
+  hoverUntilHydrated,
+  hoverUntilPreloading,
+  navLink,
+} from "@site/e2e-harness";
 import { z } from "zod";
 
 // llmlint: ignore-block[tests_mirror_real_usage] "Hover a link, then click, and the switch is instant" and "startup never fetched that remote at all" are only observable through request and DOM-mutation instrumentation, because a warm arrival is defined by requests that never repeat, a deferred remote by requests that never happen, and both by skeletons that never appear. Every navigation still uses the real header links with real hover and click input.
@@ -299,7 +303,11 @@ test("entering at Home hydrates its prerendered panes and still defers the leaf 
   // Below the line the claim is the opposite one — that the click was an SPA
   // transition — and that is only true once the router owns the document, which
   // none of the prerendered DOM asserted on above reports.
-  const bio = await hydrated(page, "Bio", () => assetsFor("bio").length > 0);
+  const bio = await hoverUntilHydrated(
+    page,
+    "Bio",
+    () => assetsFor("bio").length > 0,
+  );
   let documentRequests = 0;
   page.on("request", (request) => {
     if (request.isNavigationRequest()) documentRequests += 1;

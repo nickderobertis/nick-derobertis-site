@@ -1,6 +1,10 @@
 export { defineAppE2eConfig } from "./config.ts";
 export { homePaneJourneys, paneRenderPaths } from "./home-panes.ts";
-export { hoverUntilPreloading, hydrated, navLink } from "./hydration.ts";
+export {
+  hoverUntilHydrated,
+  hoverUntilPreloading,
+  navLink,
+} from "./hydration.ts";
 export { remoteOwnershipTests } from "./ownership.ts";
 export {
   type AriaRole,

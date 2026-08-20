@@ -41,7 +41,9 @@ function scratchFile(name) {
     !isAbsolute(named) ||
     !statSync(named, { throwIfNoEntry: false })?.isFile()
   )
-    fail(`${name} must name an existing file, not '${named}'`);
+    fail(
+      `${name} must name an existing file, not '${named}'; point it at an absolute path the journey has already created — this stand-in never creates one — then rerun that journey`,
+    );
   return named;
 }
 
@@ -92,7 +94,9 @@ if (question === "config") {
 const judged = process.argv.slice(2);
 const record = scratchFile("LLMLINT_STUB_RECORD");
 if (!record)
-  fail("LLMLINT_STUB_RECORD names the file each judgement is recorded in");
+  fail(
+    "LLMLINT_STUB_RECORD must name the existing file each judgement is recorded in; create it in the journey's scratch directory and export its absolute path before invoking this stand-in",
+  );
 // llmlint answers a clean diff with 0, findings with 1, and a toolchain that
 // never reached a verdict with 2; a journey that asked for anything else is
 // asking this stand-in to report something the real one cannot, so it says so
@@ -100,7 +104,7 @@ if (!record)
 const verdict = process.env.LLMLINT_STUB_VERDICT ?? "0";
 if (!["0", "1", "2"].includes(verdict))
   fail(
-    `LLMLINT_STUB_VERDICT must be one of the verdicts llmlint reports (0, 1, or 2), not '${verdict}'`,
+    `LLMLINT_STUB_VERDICT must be one of the verdicts llmlint reports (0, 1, or 2), not '${verdict}'; set it to the one the journey means — 0 for a clean diff, 1 for findings, 2 for a toolchain that never reached a verdict — or leave it unset for 0, then rerun that journey`,
   );
 appendFileSync(record, `${judged.join(unitSeparator)}${unitSeparator}\n`);
 process.stdout.write(`stub judge: judged ${judged.join(" ")}\n`);
