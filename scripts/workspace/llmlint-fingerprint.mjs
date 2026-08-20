@@ -5,7 +5,7 @@ import { JudgeRuntimeError, judgeFingerprint } from "./llmlint-runtime.mjs";
 // is a changed judge, not a changed diff.
 //
 // It is a command that fails rather than an Nx `runtime` input, which is the one
-// thing about this file `scripts/AGENTS.md` explains and this comment does not
+// thing about this file `scripts/workspace/AGENTS.md` explains and this comment does not
 // repeat.
 //
 // llmlint: ignore-file[changed_behavior_has_e2e] This developer CLI has no

@@ -10,7 +10,7 @@ import {
 // `just lint-llm-diff` — the caller's side of the judged tier: resolve the base
 // to the commit the cache key names, resolve the judge configuration it is keyed
 // on, dispatch the cached Nx target, and report one status line. What that key
-// has to cover, and why, is `scripts/AGENTS.md`.
+// has to cover, and why, is `scripts/workspace/AGENTS.md`.
 //
 // A green says one line, the way every other recipe here reports; a run that has
 // to be cleared keeps every byte Nx and the judge produced.

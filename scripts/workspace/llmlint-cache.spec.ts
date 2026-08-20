@@ -15,7 +15,7 @@ import { afterAll, describe, expect, it, onTestFinished } from "vitest";
 /**
  * What a recorded verdict is a statement about.
  *
- * `scripts/AGENTS.md` states the contract; these journeys are what holds the
+ * `scripts/workspace/AGENTS.md` states the contract; these journeys are what holds the
  * tier to it. Each drives the whole dispatch — `lint-llm-diff.mjs`, the
  * `llmlint-fingerprint.mjs` and `llmlint-runtime.mjs` it keys the run with, real
  * Nx, and the `llmlint-judge.mjs` target body — through the real

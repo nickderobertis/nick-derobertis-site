@@ -16,7 +16,7 @@ import {
 //
 // It records nothing. llmlint runs, its report is this task's output and its
 // exit status is this task's status, and Nx does the rest — see
-// `scripts/AGENTS.md`.
+// `scripts/workspace/AGENTS.md`.
 //
 // llmlint: ignore-file[changed_behavior_has_e2e] This judged tier has no browser
 // interface: it reads a diff and reports an exit status, so nothing it does is

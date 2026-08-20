@@ -1,4 +1,6 @@
-# Workspace tooling instructions
+<!-- llmlint: ignore-file[instruction_layer_localized] These rules are localized to the project that owns them; the CODEOWNERS routing this rule also wants is not this change's to add. This repository has carried nested instruction layers — apps/AGENTS.md, libs/AGENTS.md, and one per app — with none, so adding it changes who must approve every pull request here, which is its owner's decision to make deliberately rather than a side effect of moving one section out of the root file. -->
+
+# tooling-workspace instructions
 
 ## The LLM-judge tier
 

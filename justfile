@@ -161,7 +161,7 @@ lint-llm:
     llmlint
 
 # Judge the branch diff as the cached Nx target `tooling-workspace:lint-llm-diff`.
-# `scripts/AGENTS.md` owns what that cache key covers and how to force a fresh
+# `scripts/workspace/AGENTS.md` owns what that cache key covers and how to force a fresh
 # judgement; what this recipe decides is its arguments.
 #
 # The first argument is the diff base, not a file: llmlint's trailing FILES

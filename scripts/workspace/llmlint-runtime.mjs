@@ -8,7 +8,7 @@ import { z } from "zod";
 // One source for the judge runtime both ends of the cached
 // `tooling-workspace:lint-llm-diff` target resolve — `lint-llm-diff.mjs`, which
 // keys the run, and `llmlint-judge.mjs`, which runs it. Sharing it is the point:
-// the two must never describe different judges. `scripts/AGENTS.md` holds why.
+// the two must never describe different judges. `scripts/workspace/AGENTS.md` holds why.
 
 /** The repository, resolved from this file so no caller's cwd can decide it. */
 export const repositoryRoot = resolve(

@@ -59,9 +59,9 @@ Dependency freshness is checked with `pnpm outdated`; every dependency's
 updates remain outside those constraints until their Nx integrations support
 them; `just upgrade` deliberately opts into testing latest releases.
 
-<!-- llmlint: ignore[instruction_layer_localized] The tooling rules this sentence points at are localized in scripts/AGENTS.md; the CODEOWNERS routing this rule also wants is not. This repository has carried nested instruction layers — apps/AGENTS.md, libs/AGENTS.md, and one per app — with none, so adding it changes who must approve every pull request here and is its owner's decision to make deliberately rather than a side effect of moving one section out of this file. -->
+<!-- llmlint: ignore[instruction_layer_localized] The tooling rules this sentence points at are localized in scripts/workspace/AGENTS.md; the CODEOWNERS routing this rule also wants is not. This repository has carried nested instruction layers — apps/AGENTS.md, libs/AGENTS.md, and one per app — with none, so adding it changes who must approve every pull request here and is its owner's decision to make deliberately rather than a side effect of moving one section out of this file. -->
 `just lint-llm-diff` is the LLM-judge tier, deliberately outside `just check`;
-`scripts/AGENTS.md` owns its constraints.
+`scripts/workspace/AGENTS.md` owns its constraints.
 
 The `justfile` is the authoritative source for the repo-scoped
 `NX_CACHE_DIRECTORY` default beneath the user's standard cache directory, so
