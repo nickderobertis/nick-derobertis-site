@@ -174,23 +174,26 @@ describe("an unchanged tree judged against an unchanged base", () => {
     const judge = stubJudge();
     const cacheDirectory = ownCacheDirectory();
 
+    const base = commitOf("origin/master");
+
     const judged = lintLlmDiff({ judge, cacheDirectory });
     expect(judged.status).toBe(0);
-    expect(judged.replayed).toBe(false);
-    expect(judge.invocations()).toEqual([
-      ["--diff", "--diff-base", commitOf("origin/master")],
-    ]);
+    expect(judge.invocations()).toEqual([["--diff", "--diff-base", base]]);
+    // A green is one line here, as it is for every other recipe in this
+    // repository: which verdict this is, and what base it is a verdict about.
+    expect(judged.output.trim()).toBe(
+      `lint-llm-diff: judged this diff against base ${base} (Nx cache miss)`,
+    );
 
     const replayed = lintLlmDiff({ judge, cacheDirectory });
 
     expect(replayed.status).toBe(0);
-    expect(replayed.replayed).toBe(true);
     // The judge was not asked a second time — read from what it received, not
     // from the wording of the run that replayed it.
     expect(judge.invocations()).toHaveLength(1);
-    // And the replayed run says what the judged one said, so a reader of a
-    // replayed gate is not told less than a reader of a fresh one.
-    expect(replayed.output).toContain("stub judge: judged --diff --diff-base");
+    expect(replayed.output.trim()).toBe(
+      `lint-llm-diff: replayed the recorded verdict for base ${base} (Nx cache hit)`,
+    );
   }, 300_000);
 
   it("re-judges when any byte of the workspace changes", () => {

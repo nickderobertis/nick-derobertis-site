@@ -178,19 +178,14 @@ const nx = spawn(
   },
 );
 
-// Streamed through rather than captured and replayed at the end: a fresh
-// judgement takes minutes, and a caller watching a silent pipe cannot tell it
-// from a hang. What is accumulated alongside is only read for the provenance
-// line below.
+// Kept rather than streamed, the way every other recipe here reports: a green
+// says one line — which verdict this is and what base it is a verdict about —
+// and a run that has to be cleared keeps every byte Nx and the judge produced.
 let reported = "";
-for (const [stream, sink] of [
-  [nx.stdout, process.stdout],
-  [nx.stderr, process.stderr],
-]) {
+for (const stream of [nx.stdout, nx.stderr]) {
   stream.setEncoding("utf8");
   stream.on("data", (chunk) => {
     reported += chunk;
-    sink.write(chunk);
   });
 }
 
@@ -202,15 +197,16 @@ nx.on("error", (error) =>
 );
 nx.on("close", (status) => {
   const printed = reported.replace(ansi, "");
-  console.error(
-    replayed.some((note) => printed.includes(note))
-      ? `lint-llm-diff: replayed the recorded verdict for base ${baseSha} (Nx cache hit)`
-      : `lint-llm-diff: judged this diff against base ${baseSha} (Nx cache miss)`,
-  );
-  const unanswered = printed.includes(
-    "lint-llm-diff: the judge never reached a verdict",
-  );
-  if (status !== 0 && !unanswered)
+  const provenance = replayed.some((note) => printed.includes(note))
+    ? `lint-llm-diff: replayed the recorded verdict for base ${baseSha} (Nx cache hit)`
+    : `lint-llm-diff: judged this diff against base ${baseSha} (Nx cache miss)`;
+  if (status === 0) {
+    console.log(provenance);
+    process.exit(0);
+  }
+  process.stderr.write(reported);
+  console.error(provenance);
+  if (!printed.includes("lint-llm-diff: the judge never reached a verdict"))
     console.error(
       "lint-llm-diff: the LLM judge reported the findings above; fix each one, or justify it with a narrow ignore directive at its site, then rerun just lint-llm-diff",
     );

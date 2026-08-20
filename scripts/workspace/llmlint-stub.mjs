@@ -66,6 +66,17 @@ if (!record) {
   );
   process.exit(64);
 }
+// llmlint answers a clean diff with 0, findings with 1, and a toolchain that
+// never reached a verdict with 2; a journey that asked for anything else is
+// asking this stand-in to report something the real one cannot, so it says so
+// rather than turning an unreadable value into an exit status.
+const verdict = process.env.LLMLINT_STUB_VERDICT ?? "0";
+if (!["0", "1", "2"].includes(verdict)) {
+  process.stderr.write(
+    `llmlint stub: LLMLINT_STUB_VERDICT must be one of the verdicts llmlint reports (0, 1, or 2), not '${verdict}'\n`,
+  );
+  process.exit(64);
+}
 appendFileSync(record, `${judged.join(unitSeparator)}${unitSeparator}\n`);
 process.stdout.write(`stub judge: judged ${judged.join(" ")}\n`);
-process.exit(Number(process.env.LLMLINT_STUB_VERDICT ?? "0"));
+process.exit(Number(verdict));

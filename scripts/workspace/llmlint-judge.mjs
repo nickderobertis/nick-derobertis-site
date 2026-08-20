@@ -102,15 +102,21 @@ for (const file of files) {
 }
 
 // llmlint's own exit status is this task's, which is exactly the record-keeping
-// this tier delegates to Nx: Nx caches a task only when it succeeded.
+// this tier delegates to Nx: Nx caches a task only when it succeeded. Its report
+// is kept for a failure and dropped for a pass, the way every other tooling
+// target here reports: a green says nothing, and the run that has to be cleared
+// keeps every diagnostic byte. Nothing is lost to the cache by that — Nx never
+// records a failing task, so a failure always streams out freshly judged.
 // llmlint: ignore[boundary_inputs_validated] Every value forwarded here was validated above — the base against `resolvedBase`, each file against this repository's tree — and the environment is forwarded rather than read, with this tier's own dispatch plumbing already dropped by `judgeEnvironment`.
 const judged = spawnSync(
   "llmlint",
   ["--diff", "--diff-base", baseSha, ...files],
   {
     cwd: repositoryRoot,
+    encoding: "utf8",
     env: judgeEnvironment(),
-    stdio: "inherit",
+    maxBuffer: 256 * 1024 * 1024,
+    stdio: ["ignore", "pipe", "pipe"],
   },
 );
 if (judged.error)
@@ -118,6 +124,8 @@ if (judged.error)
     `the judge could not be started (${judged.error.message}); run 'just setup-llmlint' and retry`,
   );
 const status = judged.status ?? 2;
+if (status !== 0)
+  process.stderr.write(`${judged.stdout ?? ""}${judged.stderr ?? ""}`);
 // llmlint answers findings with 1 and a toolchain that never reached a verdict
 // with 2 or more, and Nx collapses both to one failing status on its way out. It
 // is said here, where the difference is still known, so the dispatcher reports a
