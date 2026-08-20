@@ -20,11 +20,8 @@ import { afterAll, describe, expect, test } from "vitest";
 // still reports a pass. These tests drive the real recipe and assert the argv it
 // hands over, which is all the recipe decides.
 //
-// The recipe now dispatches the cached Nx target `tooling-workspace:lint-llm-diff`
-// rather than calling llmlint itself, so the base it routes reaches the judge
-// resolved to the commit that target's cache key names. What may and may not be
-// replayed from that cache is llmlint-cache.spec.ts's subject; what reaches the
-// judge at all is this one's.
+// What may and may not be replayed from the tier's cache is
+// llmlint-cache.spec.ts's subject; what reaches the judge at all is this one's.
 
 const workspace = process.cwd();
 

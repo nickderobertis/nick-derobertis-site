@@ -42,7 +42,7 @@
       "cache": true,
       "inputs": [
         "wholeWorkspace",
-        { "env": "LLMLINT_DIFF_BASE_SHA" },
+        { "env": "LLMLINT_DIFF_BASE" },
         { "env": "LLMLINT_DIFF_FILES" },
         { "env": "LLMLINT_JUDGE_FINGERPRINT" }
       ]

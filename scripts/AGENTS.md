@@ -1,3 +1,5 @@
+<!-- llmlint: ignore-file[instruction_layer_localized] This subtree instruction file is the localized layer the rule asks for; what it cannot supply is the CODEOWNERS routing, because this repository has carried nested instruction layers — apps/AGENTS.md, libs/AGENTS.md, and one per app — with no CODEOWNERS since long before this file existed. Adding one changes who must approve every pull request in the repository, which is its owner's governance decision rather than the judged tier's, so it is left to them rather than made as a side effect of moving one section out of the root file. -->
+
 # Workspace tooling instructions
 
 ## The LLM-judge tier

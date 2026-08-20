@@ -7,44 +7,35 @@ import {
   judgeEnvironment,
   judgeFingerprint,
   repositoryRoot,
-  resolvedBase,
+  resolvedBasePattern,
 } from "./llmlint-runtime.mjs";
 
-// The body of the cached Nx `tooling-workspace:lint-llm-diff` target: judge one
-// diff, against one resolved base commit, under this repository's judge runtime.
-// Run it through `just lint-llm-diff <base>`, which resolves that base and keys
-// the cache on it.
+// The body of the cached Nx `tooling-workspace:lint-llm-diff` target. Run it
+// through `just lint-llm-diff <base>`, never directly: every input arrives as an
+// environment value because Nx hashes those and does not hash target arguments,
+// so this refuses anything it was not keyed on.
 //
-// Nothing here records or replays a verdict. llmlint runs, its report is this
-// task's terminal output, and its exit status is this task's exit status — so Nx
-// replays a clean run's report verbatim, while a run that reported findings
-// (exit 1) and one that never reached a verdict (exit >= 2) both stay uncached
-// and re-judge next time, deliberately. A branch working through a red pays a
-// fresh roll each time; only a green sticks.
-//
-// Every input arrives as an environment value rather than an argument because Nx
-// hashes declared environment variables and does not hash target arguments:
-// keying and judging on the same values is what stops a verdict computed against
-// one base, or over one narrowed file list, from being replayed for another.
+// It records nothing. llmlint runs, its report is this task's output and its
+// exit status is this task's status, and Nx does the rest — see
+// `scripts/AGENTS.md`.
 //
 // llmlint: ignore-file[changed_behavior_has_e2e] This judged tier has no browser
 // interface: it reads a diff and reports an exit status, so nothing it does is
 // observable to a visitor. llmlint-cache.spec.ts drives it through the real
-// `just lint-llm-diff` recipe and real Nx — judged, replayed, re-judged after a
-// judge-configuration change, and refusing every input this file rejects.
+// `just lint-llm-diff` recipe and real Nx, including every input it refuses.
 
 function refuse(message) {
   console.error(`lint-llm-diff: ${message}`);
   process.exit(2);
 }
 
-const baseSha = process.env.LLMLINT_DIFF_BASE_SHA ?? "";
-if (!resolvedBase.test(baseSha))
+const judgedBase = process.env.LLMLINT_DIFF_BASE ?? "";
+if (!resolvedBasePattern.test(judgedBase))
   refuse(
-    `LLMLINT_DIFF_BASE_SHA must be a resolved commit id, or two joined by a range operator, not '${baseSha}'; run 'just lint-llm-diff <base>' rather than this target directly`,
+    `LLMLINT_DIFF_BASE must be a resolved commit id, or two joined by a range operator, not '${judgedBase}'; run 'just lint-llm-diff <base>' rather than this target directly`,
   );
-for (const endpoint of baseSha.split(/\.{2,3}/)) {
-  // llmlint: ignore[boundary_inputs_validated] `endpoint` reached here only by matching the 40-hex `resolvedBase` pattern above, and it is passed as one argv entry to a spawn with no shell, so there is nothing left for a second opinion here to narrow.
+for (const endpoint of judgedBase.split(/\.{2,3}/)) {
+  // llmlint: ignore[boundary_inputs_validated] `endpoint` reached here only by matching the 40-hex `resolvedBasePattern` above, and it is passed as one argv entry to a spawn with no shell, so there is nothing left for a second opinion here to narrow.
   const found = spawnSync(
     "git",
     [
@@ -107,10 +98,10 @@ for (const file of files) {
 // target here reports: a green says nothing, and the run that has to be cleared
 // keeps every diagnostic byte. Nothing is lost to the cache by that — Nx never
 // records a failing task, so a failure always streams out freshly judged.
-// llmlint: ignore[boundary_inputs_validated] Every value forwarded here was validated above — the base against `resolvedBase`, each file against this repository's tree — and the environment is forwarded rather than read, with this tier's own dispatch plumbing already dropped by `judgeEnvironment`.
+// llmlint: ignore[boundary_inputs_validated] Every value forwarded here was validated above — the base against `resolvedBasePattern`, each file against this repository's tree — and the environment is forwarded rather than read, with this tier's own dispatch plumbing already dropped by `judgeEnvironment`.
 const judged = spawnSync(
   "llmlint",
-  ["--diff", "--diff-base", baseSha, ...files],
+  ["--diff", "--diff-base", judgedBase, ...files],
   {
     cwd: repositoryRoot,
     encoding: "utf8",

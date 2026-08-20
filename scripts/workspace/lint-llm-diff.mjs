@@ -8,47 +8,19 @@ import {
   repositoryRoot,
 } from "./llmlint-runtime.mjs";
 
-// `just lint-llm-diff` — the diff-scoped LLM-judge tier, dispatched as the cached
-// Nx target `tooling-workspace:lint-llm-diff` rather than as a bare judge call.
+// `just lint-llm-diff` — the caller's side of the judged tier: resolve the base
+// to the commit the cache key names, resolve the judge configuration it is keyed
+// on, dispatch the cached Nx target, and report one status line. What that key
+// has to cover, and why, is `scripts/AGENTS.md`.
 //
-// The judge is non-deterministic, so every bare invocation over one diff took an
-// independent sample: four rolls over one branch named four different verdicts,
-// and fixing the rule one roll reported only changed which rule the next one
-// failed. What this file does is turn one judged diff into one cache key, so an
-// unchanged tree judged against an unchanged base under an unchanged judge
-// replays that run's own report instead of rolling again.
-//
-// Three things decide the key, and each is resolved here, before Nx hashes it:
-//
-//   * the whole workspace, through the target's `wholeWorkspace` input;
-//   * the base, resolved to a commit — a symbolic ref would change meaning under
-//     one key, so a verdict recorded against yesterday's `origin/master` would
-//     replay for today's;
-//   * the judge configuration in force, as `llmlint-fingerprint.mjs` resolves it
-//     in the judge's own environment rather than this caller's.
-//
-// That fingerprint is computed here rather than declared as an Nx `runtime`
-// input on purpose. Nx scores a runtime input that exits non-zero as *no
-// contribution* rather than as an error, so a fingerprint the environment can
-// break would not fail the tier — it would quietly drop the judge configuration
-// out of the key. Computed on this side of the dispatch, a fingerprint that
-// cannot be resolved refuses the run instead.
-//
-// Only a green is cached, because Nx caches successful tasks only: findings and
-// a toolchain that never reached a verdict both re-judge next time. A wrong
-// green sticks until the tree, the base commit, or the judge configuration
-// moves, so `just lint-llm-diff <base> --rejudge` forces one fresh judgement.
-// It is deliberately per-invocation: an ambient `NX_SKIP_NX_CACHE` exported to
-// re-judge this tier would re-roll it from every unrelated command, so this tier
-// reports and ignores that one, and every other Nx target still honours it.
+// A green says one line, the way every other recipe here reports; a run that has
+// to be cleared keeps every byte Nx and the judge produced.
 //
 // llmlint: ignore-file[changed_behavior_has_e2e] This developer CLI has no
 // browser interface: it judges a diff and reports an exit status, so nothing it
 // does is observable to a visitor. lint-llm-diff.spec.ts drives the real recipe
 // through the argv it hands the judge and both of its rejected-input paths, and
-// llmlint-cache.spec.ts drives it through real Nx for a judged run, a replayed
-// one, two callers over one tree, a changed judge configuration, an unresolvable
-// fingerprint, and the verdicts that are deliberately never cached.
+// llmlint-cache.spec.ts drives it through real Nx.
 
 const ansi = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
 
@@ -104,7 +76,7 @@ function commitOf(revision) {
 // A range keys on both of its endpoints for the same reason a single ref keys on
 // one: `HEAD~1..HEAD` names a different diff after every commit.
 const range = /^(.+?)(\.{2,3})(.+)$/.exec(named);
-const baseSha = range
+const judgedBase = range
   ? `${commitOf(range[1])}${range[2]}${commitOf(range[3])}`
   : commitOf(named);
 
@@ -171,7 +143,7 @@ const nx = spawn(
     cwd: repositoryRoot,
     env: {
       ...environment,
-      LLMLINT_DIFF_BASE_SHA: baseSha,
+      LLMLINT_DIFF_BASE: judgedBase,
       LLMLINT_DIFF_FILES: files.join(fileSeparator),
       LLMLINT_JUDGE_FINGERPRINT: fingerprint,
       NX_SKIP_LOG_GROUPING: "true",
@@ -200,8 +172,8 @@ nx.on("error", (error) =>
 nx.on("close", (status) => {
   const printed = reported.replace(ansi, "");
   const provenance = replayed.some((note) => printed.includes(note))
-    ? `lint-llm-diff: replayed the recorded verdict for base ${baseSha} (Nx cache hit)${declined}`
-    : `lint-llm-diff: judged this diff against base ${baseSha} (Nx cache miss)${declined}`;
+    ? `lint-llm-diff: replayed the recorded verdict for base ${judgedBase} (Nx cache hit)${declined}`
+    : `lint-llm-diff: judged this diff against base ${judgedBase} (Nx cache miss)${declined}`;
   if (status === 0) {
     console.log(provenance);
     process.exit(0);

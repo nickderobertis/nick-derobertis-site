@@ -15,34 +15,18 @@ import { describe, expect, it, onTestFinished } from "vitest";
 /**
  * What a recorded verdict is a statement about.
  *
- * The LLM judge is non-deterministic, so a bare `llmlint --diff` took an
- * independent sample every time it was asked: four rolls over one branch's diff
- * named four different rules, and clearing the one a roll reported only changed
- * which rule the next one failed. `just lint-llm-diff` therefore dispatches the
- * cached Nx target `tooling-workspace:lint-llm-diff`, and a green is replayed
- * rather than re-rolled.
+ * `scripts/AGENTS.md` states the contract; these journeys are what holds the
+ * tier to it. Each drives the whole dispatch — `lint-llm-diff.mjs`, the
+ * `llmlint-fingerprint.mjs` and `llmlint-runtime.mjs` it keys the run with, real
+ * Nx, and the `llmlint-judge.mjs` target body — through the real
+ * `just lint-llm-diff` recipe, and reads the verdict's provenance off the run.
+ * A key that stopped covering something, or started covering which caller
+ * asked, fails here rather than replaying a green nothing was checked against.
  *
- * That only holds while the key covers everything the verdict depends on, and
- * nothing it does not:
- *
- *   * the whole workspace, so a green is never replayed for bytes no judge saw;
- *   * the base, resolved to a commit, because a symbolic ref names a different
- *     diff the moment it advances;
- *   * the judged file list, because llmlint's trailing FILES positional replaces
- *     the configured globs, so a narrowed green covers a fraction of the rules;
- *   * the judge configuration in force — the installed llmlint version and the
- *     effective merged config — so a rule change in a plugin fetched from
- *     outside this repository invalidates it;
- *   * and *not* which caller asked, because a worker's gate and the publishing
- *     push that follows it must share the one verdict the worker paid for.
- *
- * Every journey below drives the real recipe and real Nx, so the whole dispatch
- * is exercised: `lint-llm-diff.mjs`, which resolves the base and keys the run;
- * `llmlint-fingerprint.mjs` and the `llmlint-runtime.mjs` both ends share, which
- * decide what the judge configuration hashes to; Nx's own hashing; and
- * `llmlint-judge.mjs`, the target's body. Only llmlint itself — the billed,
- * networked, non-deterministic third party whose re-rolling is the problem —
- * stands in, as `llmlint-stub.mjs` on PATH under its name.
+ * Only llmlint stands in, as `llmlint-stub.mjs` on PATH under its name: it is
+ * the billed, networked third party whose non-determinism is the defect under
+ * test, and a real one could not tell a replayed verdict from a re-rolled one
+ * that happened to agree.
  */
 
 const workspace = process.cwd();

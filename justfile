@@ -161,33 +161,15 @@ lint-llm:
     llmlint
 
 # Judge the branch diff as the cached Nx target `tooling-workspace:lint-llm-diff`.
+# `scripts/AGENTS.md` owns what that cache key covers and how to force a fresh
+# judgement; what this recipe decides is its arguments.
 #
-# The judge is non-deterministic, so a bare `llmlint --diff` took an independent
-# sample every time it was asked: one branch's four rolls over one diff named
-# four different verdicts, and clearing the rule one roll reported only changed
-# which rule the next one failed. Dispatching it as a cached target instead means
-# an unchanged tree, judged against an unchanged base commit, under an unchanged
-# judge configuration, replays that run's own report rather than rolling again.
-#
-# The first argument is still the diff base, not a file: llmlint's trailing FILES
-# positional replaces the configured globs, and a path it cannot match is a silent
-# exit 0, so a ref left there drops most rules and reports a pass over a fraction
-# of the ruleset. Files, when you really want to narrow the run, come after the
-# base; they are keyed on too, so a green over one path can only replay for that
-# same path. With no base at all, the lifecycle's own comparison identity
-# (ONEVCS_COMPARISON_REMOTE / ONEVCS_COMPARISON_BASE) names it, so the worker gate
-# and the publishing push that follows it judge one diff and share one verdict.
-#
-# Only a green is cached — Nx caches successful tasks only — so findings and a
-# toolchain that never reached a verdict both re-judge next time, deliberately.
-# A wrong green sticks until the tree, the base commit, or the judge configuration
-# moves: `just lint-llm-diff <base> --rejudge` is the one supported way to force a
-# single fresh judgement, and it is per-invocation so it re-rolls nothing else.
-# An ambient NX_SKIP_NX_CACHE exported to force this tier is reported and ignored
-# here, because it would re-roll the judge from every unrelated command.
-#
-# Run `node scripts/workspace/llmlint-fingerprint.mjs` when a miss is unexplained:
-# a changed fingerprint over an unchanged tree is a changed judge, not a changed diff.
+# The first argument is the diff base, not a file: llmlint's trailing FILES
+# positional replaces the configured globs, and a path it cannot match is a
+# silent exit 0, so a ref left there drops most rules and reports a pass over a
+# fraction of the ruleset. Files, when you really want to narrow the run, come
+# after the base. With no base at all, the lifecycle's own comparison identity
+# names it. `--rejudge` anywhere forces one fresh judgement.
 # llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; it judges the working tree and reports an exit status, so nothing it does is observable to a visitor. lint-llm-diff.spec.ts drives this exact recipe as a real subprocess through the default base, an explicit ref, a range, pass-through files, both rejected-input paths, and a reported-findings failure, and llmlint-cache.spec.ts drives it through real Nx for the verdicts it may and may not replay.
 @lint-llm-diff *args:
     node scripts/workspace/lint-llm-diff.mjs "$@"

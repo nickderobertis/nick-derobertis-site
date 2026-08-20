@@ -4,16 +4,10 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
-// One source for the environment this repository's LLM-judge tier judges under,
-// and for the fingerprint that keys its cache on that environment.
-//
-// Both ends of the cached `tooling-workspace:lint-llm-diff` target load this:
-// `lint-llm-diff.mjs`, which computes the fingerprint and dispatches Nx, and
-// `llmlint-judge.mjs`, which is the target's body. That sharing is the point.
-// The judge is non-deterministic, so a recorded verdict is only replayable when
-// every caller of one tree and one base arrives at the same key — and
-// `llmlint config` renders values that vary by caller rather than by what is
-// judged. Resolving them here, once, is what keeps one judged diff on one key.
+// One source for the judge runtime both ends of the cached
+// `tooling-workspace:lint-llm-diff` target resolve — `lint-llm-diff.mjs`, which
+// keys the run, and `llmlint-judge.mjs`, which runs it. Sharing it is the point:
+// the two must never describe different judges. `scripts/AGENTS.md` holds why.
 
 /** The repository, resolved from this file so no caller's cwd can decide it. */
 export const repositoryRoot = resolve(
@@ -169,6 +163,13 @@ export function judgeFingerprint(caller = process.env) {
       `'llmlint --version' failed (${reason(error)}); run 'just setup-llmlint' and retry`,
     );
   }
+  // An llmlint that answered with nothing, or with a paragraph, has not named
+  // the judge this key would describe — and an empty answer in particular hashes
+  // to a stable digest that would replay across every version.
+  if (!/^\S[^\n]{0,200}$/.test(version))
+    throw new JudgeRuntimeError(
+      `'llmlint --version' did not name a version to key on ('${version.slice(0, 80)}'); run 'just setup-llmlint' and retry`,
+    );
   let printed;
   try {
     printed = ask(["config"], environment);
@@ -189,7 +190,7 @@ export function judgeFingerprint(caller = process.env) {
  * the moment the base advances, and a verdict recorded against the old one
  * would replay for the new.
  */
-export const resolvedBase = /^[0-9a-f]{40}(?:\.{2,3}[0-9a-f]{40})?$/;
+export const resolvedBasePattern = /^[0-9a-f]{40}(?:\.{2,3}[0-9a-f]{40})?$/;
 
 /** The separator both ends encode `LLMLINT_DIFF_FILES` with. */
 export const fileSeparator = "\n";
