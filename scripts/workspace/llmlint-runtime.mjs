@@ -210,7 +210,8 @@ export function judgedFiles(encoded) {
 }
 
 /**
- * Whether a path names a file llmlint may be narrowed to: one that exists, and
+ * Whether llmlint may be narrowed to a path: one that exists — a directory
+ * narrows to everything under it, which is a narrowing llmlint accepts — and
  * that is inside this repository once every symlink on the way is followed.
  *
  * Both ends check it, because both are a boundary — the dispatcher's comes from
@@ -219,7 +220,7 @@ export function judgedFiles(encoded) {
  * enough: a symlink committed inside the checkout can name a path outside it,
  * and llmlint would judge whatever it points at.
  */
-export function isJudgeableFile(file) {
+export function isJudgeablePath(file) {
   if (file.startsWith("-") || file.includes(fileSeparator) || isAbsolute(file))
     return false;
   const root = realpathSync(repositoryRoot);

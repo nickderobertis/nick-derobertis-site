@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import {
   fileSeparator,
-  isJudgeableFile,
+  isJudgeablePath,
   JudgeRuntimeError,
   judgeFingerprint,
   repositoryRoot,
@@ -80,7 +80,7 @@ const judgedBase = range
   : commitOf(named);
 
 for (const file of files) {
-  if (!isJudgeableFile(file))
+  if (!isJudgeablePath(file))
     refuse(
       `every file after the base must be an existing workspace path, because llmlint reports a clean run for a path it cannot match; correct or drop "${file}", then rerun just lint-llm-diff <base> <files> (to force one fresh judgement instead, pass --rejudge)`,
     );
