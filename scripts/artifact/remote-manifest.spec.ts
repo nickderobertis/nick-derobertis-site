@@ -28,7 +28,18 @@ function isTaskDependencies(value: object): value is Record<string, string[]> {
   );
 }
 
-test("remote manifest matches published fragment composition", async () => {
+// This test spawns the package manager to compute an Nx task graph with the
+// daemon disabled, which is a cold graph computation whose duration tracks the
+// workspace's size and the machine's load, not this test's own work. The
+// runner's 5000ms default ceiling sits inside that range, so the spawn needs an
+// explicit one that is generous against it. The ceiling belongs on the test
+// rather than on a one-time setup hook: this file holds a single test, so
+// hoisting the spawn into `beforeAll` would move it under `hookTimeout`, whose
+// default is the same 5000ms, and the ceiling would still have to be raised —
+// only further from the spawn it bounds.
+test("remote manifest matches published fragment composition", {
+  timeout: 120_000,
+}, async () => {
   const remoteManifest: unknown = JSON.parse(
     await readFile("libs/build-config/src/remotes.json", "utf8"),
   );
