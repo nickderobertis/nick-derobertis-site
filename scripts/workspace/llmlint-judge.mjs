@@ -120,6 +120,6 @@ if (status === 1)
   );
 else if (status >= 2)
   console.error(
-    `lint-llm-diff: the judge never reached a verdict (llmlint exited ${status}); its diagnostics are above, nothing was recorded, and the next run judges this diff again`,
+    `lint-llm-diff: the judge never reached a verdict (llmlint exited ${status}); repair what its diagnostics above name — 'just setup-llmlint' if the judge itself is missing or stale, 'llmlint doctor' if its harness or credentials are — then rerun just lint-llm-diff. Nothing was recorded, so that run judges this diff again`,
   );
 process.exit(status);
