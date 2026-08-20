@@ -77,6 +77,11 @@ if (question === "config") {
       config_files: [`${process.cwd()}/llmlint.yml`],
       config: {
         oneharness: { bin: process.env.LLMLINT_ONEHARNESS_BIN ?? null },
+        // The journey this run belongs to, so its keys cannot collide with
+        // another journey's over the same tree, base, and rule set — which is
+        // what lets them share one Nx workspace and still each start from a key
+        // nothing has recorded.
+        namespace: process.env.LLMLINT_STUB_NAMESPACE ?? null,
         rules: rules(),
       },
     })}\n`,

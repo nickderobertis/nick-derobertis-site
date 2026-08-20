@@ -10,7 +10,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { describe, expect, it, onTestFinished } from "vitest";
+import { afterAll, describe, expect, it, onTestFinished } from "vitest";
 
 /**
  * What a recorded verdict is a statement about.
@@ -76,6 +76,7 @@ function stubJudge(): Judge {
     directory,
     environment: {
       LLMLINT_STUB_CONFIG_CALLS: configCalls,
+      LLMLINT_STUB_NAMESPACE: randomUUID(),
       LLMLINT_STUB_RECORD: record,
     },
     invocations: () =>
@@ -95,35 +96,30 @@ interface Run {
 }
 
 /**
- * A cache directory the calling journey owns, empty until that journey fills it.
+ * The Nx cache and workspace database these journeys share, so none of them
+ * reads or writes a contributor's.
  *
- * Nx keeps a cached result in two places — the outputs under
- * `NX_CACHE_DIRECTORY` and the record naming them in the database under
- * `NX_WORKSPACE_DATA_DIRECTORY` — so both move together for a journey to start
- * from nothing. Nx's daemon lives in that data directory, so these runs go
- * without one rather than start it for a directory about to be discarded.
+ * Shared rather than one per journey because Nx recomputes the project graph for
+ * a database it has not seen, which costs more than every judgement here put
+ * together — and this suite runs beside the browser suites, where that time is
+ * paid in contention. Each journey still starts from a key nothing has recorded:
+ * `stubJudge` gives it a judge configuration of its own, so its keys cannot
+ * collide with another journey's. Nx's daemon lives in that database, so these
+ * runs go without one rather than start it for a directory about to be
+ * discarded.
  */
-function ownCacheDirectory(): string {
-  const directory = mkdtempSync(path.join(tmpdir(), "llmlint-cache-nx-"));
-  onTestFinished(() => rmSync(directory, { force: true, recursive: true }));
-  return directory;
-}
+const nxDirectory = mkdtempSync(path.join(tmpdir(), "llmlint-cache-nx-"));
+afterAll(() => rmSync(nxDirectory, { force: true, recursive: true }));
 
 interface Dispatch {
   args?: string[];
   judge: Judge;
-  cacheDirectory: string;
   environment?: Record<string, string>;
 }
 
 // llmlint: ignore-block[boundary_inputs_validated] What survives the filter is forwarded, never read: `just` and the `pnpm exec nx` it dispatches need the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. Every Nx setting is dropped instead of forwarded, and the ones these journeys depend on are set from a directory the journey itself created.
 /** One `just lint-llm-diff`, exactly as a contributor or a gate runs it. */
-function lintLlmDiff({
-  args = [],
-  judge,
-  cacheDirectory,
-  environment = {},
-}: Dispatch): Run {
+function lintLlmDiff({ args = [], judge, environment = {} }: Dispatch): Run {
   const result = spawnSync("just", ["lint-llm-diff", ...args], {
     cwd: workspace,
     encoding: "utf8",
@@ -132,9 +128,9 @@ function lintLlmDiff({
       ...Object.fromEntries(
         Object.entries(process.env).filter(([name]) => !name.startsWith("NX_")),
       ),
-      NX_CACHE_DIRECTORY: path.join(cacheDirectory, "cache"),
+      NX_CACHE_DIRECTORY: path.join(nxDirectory, "cache"),
       NX_DAEMON: "false",
-      NX_WORKSPACE_DATA_DIRECTORY: path.join(cacheDirectory, "data"),
+      NX_WORKSPACE_DATA_DIRECTORY: path.join(nxDirectory, "data"),
       PATH: `${judge.directory}${path.delimiter}${process.env.PATH ?? ""}`,
       ...judge.environment,
       ...environment,
@@ -156,11 +152,10 @@ function lintLlmDiff({
 describe("an unchanged tree judged against an unchanged base", () => {
   it("replays the recorded verdict instead of asking the judge again", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
 
     const base = commitOf("origin/master");
 
-    const judged = lintLlmDiff({ judge, cacheDirectory });
+    const judged = lintLlmDiff({ judge });
     expect(judged.status).toBe(0);
     expect(judge.invocations()).toEqual([["--diff", "--diff-base", base]]);
     // A green is one line here, as it is for every other recipe in this
@@ -169,7 +164,7 @@ describe("an unchanged tree judged against an unchanged base", () => {
       `lint-llm-diff: judged this diff against base ${base} (Nx cache miss)`,
     );
 
-    const replayed = lintLlmDiff({ judge, cacheDirectory });
+    const replayed = lintLlmDiff({ judge });
 
     expect(replayed.status).toBe(0);
     // The judge was not asked a second time — read from what it received, not
@@ -182,10 +177,9 @@ describe("an unchanged tree judged against an unchanged base", () => {
 
   it("re-judges when any byte of the workspace changes", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
 
-    expect(lintLlmDiff({ judge, cacheDirectory }).replayed).toBe(false);
-    expect(lintLlmDiff({ judge, cacheDirectory }).replayed).toBe(true);
+    expect(lintLlmDiff({ judge }).replayed).toBe(false);
+    expect(lintLlmDiff({ judge }).replayed).toBe(true);
 
     // A file the judge would be handed and no other check reads, added and
     // removed by this journey. The diff it makes is inert; that the key notices
@@ -200,7 +194,7 @@ describe("an unchanged tree judged against an unchanged base", () => {
       "A cache journey's probe file, removed before it returns.\n",
     );
     try {
-      const changed = lintLlmDiff({ judge, cacheDirectory });
+      const changed = lintLlmDiff({ judge });
 
       expect(changed.replayed).toBe(false);
       expect(judge.invocations()).toHaveLength(2);
@@ -209,12 +203,11 @@ describe("an unchanged tree judged against an unchanged base", () => {
     }
 
     // And removing it again returns the tree to the one already judged.
-    expect(lintLlmDiff({ judge, cacheDirectory }).replayed).toBe(true);
+    expect(lintLlmDiff({ judge }).replayed).toBe(true);
   }, 300_000);
 
   it("keys that verdict on the base resolved to a commit, never on the ref", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
     // A remote-tracking ref this journey owns, so what it names can move under
     // the same spelling the way a rebased or advanced base does.
     const ref = `origin/lint-llm-diff-probe-${randomUUID()}`;
@@ -226,7 +219,7 @@ describe("an unchanged tree judged against an unchanged base", () => {
       execFileSync("git", ["update-ref", "-d", moving], { cwd: workspace });
     });
 
-    const first = lintLlmDiff({ args: [ref], judge, cacheDirectory });
+    const first = lintLlmDiff({ args: [ref], judge });
     expect(first.replayed).toBe(false);
     expect(judge.invocations()).toEqual([
       ["--diff", "--diff-base", commitOf("HEAD")],
@@ -235,7 +228,7 @@ describe("an unchanged tree judged against an unchanged base", () => {
     execFileSync("git", ["update-ref", moving, commitOf("HEAD~1")], {
       cwd: workspace,
     });
-    const advanced = lintLlmDiff({ args: [ref], judge, cacheDirectory });
+    const advanced = lintLlmDiff({ args: [ref], judge });
 
     // Same spelling, different commit: the verdict recorded for the old one
     // must not answer for the new one.
@@ -248,7 +241,6 @@ describe("an unchanged tree judged against an unchanged base", () => {
 
   it("names that base from the comparison identity a dispatch already exported", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
     const branch = `lint-llm-diff-comparison-${randomUUID()}`;
     const named = `refs/remotes/origin/${branch}`;
     execFileSync("git", ["update-ref", named, commitOf("HEAD~1")], {
@@ -260,7 +252,6 @@ describe("an unchanged tree judged against an unchanged base", () => {
 
     const run = lintLlmDiff({
       judge,
-      cacheDirectory,
       environment: {
         ONEVCS_COMPARISON_BASE: branch,
         ONEVCS_COMPARISON_REMOTE: "origin",
@@ -279,7 +270,6 @@ describe("an unchanged tree judged against an unchanged base", () => {
 describe("the key describes the judge, not the caller", () => {
   it("gives two callers over one tree and base the same key", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
 
     // Two dispatchers, each injecting its own oneharness wrapper the way an
     // orchestrator checkout and a contributor's shell do. `llmlint config`
@@ -287,7 +277,6 @@ describe("the key describes the judge, not the caller", () => {
     // a different key per dispatch and the judge re-rolled every round.
     const worker = lintLlmDiff({
       judge,
-      cacheDirectory,
       environment: {
         LLMLINT_ONEHARNESS_BIN:
           "/opt/dispatcher-a/scripts/llmlint-oneharness.sh",
@@ -297,7 +286,6 @@ describe("the key describes the judge, not the caller", () => {
 
     const push = lintLlmDiff({
       judge,
-      cacheDirectory,
       environment: {
         LLMLINT_ONEHARNESS_BIN:
           "/srv/dispatcher-b/scripts/llmlint-oneharness.sh",
@@ -310,9 +298,8 @@ describe("the key describes the judge, not the caller", () => {
 
   it("re-judges when the judge configuration alone changes", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
 
-    const before = lintLlmDiff({ judge, cacheDirectory });
+    const before = lintLlmDiff({ judge });
     expect(before.replayed).toBe(false);
 
     // Nothing in the tree and nothing about the base has moved; a rule in a
@@ -320,7 +307,6 @@ describe("the key describes the judge, not the caller", () => {
     // records and only the fingerprint can carry.
     const after = lintLlmDiff({
       judge,
-      cacheDirectory,
       environment: { LLMLINT_STUB_RULES: "plugin-rule-tightened" },
     });
     expect(after.replayed).toBe(false);
@@ -328,19 +314,17 @@ describe("the key describes the judge, not the caller", () => {
 
     // And the entry the first run recorded is still the answer for the
     // configuration it was recorded under.
-    const restored = lintLlmDiff({ judge, cacheDirectory });
+    const restored = lintLlmDiff({ judge });
     expect(restored.replayed).toBe(true);
     expect(judge.invocations()).toHaveLength(2);
   }, 300_000);
 
   it("re-judges when the installed judge changes", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
 
-    expect(lintLlmDiff({ judge, cacheDirectory }).replayed).toBe(false);
+    expect(lintLlmDiff({ judge }).replayed).toBe(false);
     const upgraded = lintLlmDiff({
       judge,
-      cacheDirectory,
       environment: { LLMLINT_STUB_VERSION: "llmlint 0.0.1-stub" },
     });
 
@@ -350,7 +334,6 @@ describe("the key describes the judge, not the caller", () => {
 
   it("refuses the run when the judge configuration cannot be fingerprinted", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
     // An llmlint that cannot report its own configuration. Nx scores a runtime
     // input that exits non-zero as no contribution rather than as an error, so
     // this is the case that would otherwise drop the judge configuration out of
@@ -372,9 +355,9 @@ describe("the key describes the judge, not the caller", () => {
             ([name]) => !name.startsWith("NX_"),
           ),
         ),
-        NX_CACHE_DIRECTORY: path.join(cacheDirectory, "cache"),
+        NX_CACHE_DIRECTORY: path.join(nxDirectory, "cache"),
         NX_DAEMON: "false",
-        NX_WORKSPACE_DATA_DIRECTORY: path.join(cacheDirectory, "data"),
+        NX_WORKSPACE_DATA_DIRECTORY: path.join(nxDirectory, "data"),
         PATH: `${judge.directory}${path.delimiter}${process.env.PATH ?? ""}`,
         ...judge.environment,
       },
@@ -389,7 +372,6 @@ describe("the key describes the judge, not the caller", () => {
 
   it("fails the tier when the judge configuration shifts under a keyed run", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
 
     // The dispatcher keys the run on the configuration it resolves, and the
     // target answers under the one it resolves; this journey moves the second
@@ -397,7 +379,6 @@ describe("the key describes the judge, not the caller", () => {
     // judge other than the one that ran.
     const refused = lintLlmDiff({
       judge,
-      cacheDirectory,
       environment: { LLMLINT_STUB_SHIFTED_RULES: "changed-mid-dispatch" },
     });
 
@@ -418,10 +399,9 @@ describe("the key describes the judge, not the caller", () => {
 describe("only a verdict is recorded", () => {
   it("re-judges a run that reported findings", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
     const findings = { LLMLINT_STUB_VERDICT: "1" };
 
-    const first = lintLlmDiff({ judge, cacheDirectory, environment: findings });
+    const first = lintLlmDiff({ judge, environment: findings });
     expect(first.status).toBe(1);
     expect(first.output).toContain(
       "lint-llm-diff: the judge reported the findings above",
@@ -429,7 +409,6 @@ describe("only a verdict is recorded", () => {
 
     const second = lintLlmDiff({
       judge,
-      cacheDirectory,
       environment: findings,
     });
 
@@ -440,10 +419,9 @@ describe("only a verdict is recorded", () => {
 
   it("re-judges a run that never reached a verdict", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
     const broken = { LLMLINT_STUB_VERDICT: "2" };
 
-    const first = lintLlmDiff({ judge, cacheDirectory, environment: broken });
+    const first = lintLlmDiff({ judge, environment: broken });
     expect(first.status).not.toBe(0);
     // Reported as what it is rather than as findings to go clear, because Nx
     // collapses both to one failing status on the way out.
@@ -453,7 +431,7 @@ describe("only a verdict is recorded", () => {
     expect(first.output).not.toContain("reported the findings above");
     expect(first.output).not.toContain("before the judge could answer");
 
-    const second = lintLlmDiff({ judge, cacheDirectory, environment: broken });
+    const second = lintLlmDiff({ judge, environment: broken });
 
     expect(second.replayed).toBe(false);
     expect(judge.invocations()).toHaveLength(2);
@@ -461,19 +439,14 @@ describe("only a verdict is recorded", () => {
 
   it("replays a narrowed run only for the same narrowing", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
     const narrowed = ["HEAD~1", "justfile"];
 
-    expect(
-      lintLlmDiff({ args: narrowed, judge, cacheDirectory }).replayed,
-    ).toBe(false);
-    expect(
-      lintLlmDiff({ args: narrowed, judge, cacheDirectory }).replayed,
-    ).toBe(true);
+    expect(lintLlmDiff({ args: narrowed, judge }).replayed).toBe(false);
+    expect(lintLlmDiff({ args: narrowed, judge }).replayed).toBe(true);
 
     // llmlint's trailing FILES positional replaces the configured globs, so the
     // green above covers one file's rules. It may not answer for the tree.
-    const whole = lintLlmDiff({ args: ["HEAD~1"], judge, cacheDirectory });
+    const whole = lintLlmDiff({ args: ["HEAD~1"], judge });
 
     expect(whole.replayed).toBe(false);
     expect(judge.invocations()).toEqual([
@@ -486,15 +459,13 @@ describe("only a verdict is recorded", () => {
 describe("forcing a fresh judgement", () => {
   it("re-judges this tier alone for one invocation with --rejudge", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
 
-    expect(lintLlmDiff({ judge, cacheDirectory }).replayed).toBe(false);
-    expect(lintLlmDiff({ judge, cacheDirectory }).replayed).toBe(true);
+    expect(lintLlmDiff({ judge }).replayed).toBe(false);
+    expect(lintLlmDiff({ judge }).replayed).toBe(true);
 
     const forced = lintLlmDiff({
       args: ["origin/master", "--rejudge"],
       judge,
-      cacheDirectory,
     });
 
     expect(forced.status).toBe(0);
@@ -502,21 +473,19 @@ describe("forcing a fresh judgement", () => {
     expect(judge.invocations()).toHaveLength(2);
     // It is one invocation's flag, so the next ordinary run is unaffected and
     // no other command's cache was discarded.
-    expect(lintLlmDiff({ judge, cacheDirectory }).replayed).toBe(true);
+    expect(lintLlmDiff({ judge }).replayed).toBe(true);
     expect(judge.invocations()).toHaveLength(2);
   }, 300_000);
 
   it("reports and ignores an ambient global Nx cache skip", () => {
     const judge = stubJudge();
-    const cacheDirectory = ownCacheDirectory();
 
-    expect(lintLlmDiff({ judge, cacheDirectory }).replayed).toBe(false);
+    expect(lintLlmDiff({ judge }).replayed).toBe(false);
     // Exported to force this tier, it would re-roll a non-deterministic judge
     // from every unrelated command — so this tier declines it and names the
     // per-invocation flag that does what the exporter wanted.
     const ambient = lintLlmDiff({
       judge,
-      cacheDirectory,
       environment: { NX_SKIP_NX_CACHE: "true" },
     });
 
