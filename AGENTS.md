@@ -59,6 +59,36 @@ Dependency freshness is checked with `pnpm outdated`; every dependency's
 updates remain outside those constraints until their Nx integrations support
 them; `just upgrade` deliberately opts into testing latest releases.
 
+The LLM-judge tier is the cached Nx target `tooling-workspace:lint-llm-diff`,
+dispatched by `just lint-llm-diff [base] [files...]` and separate from `just
+check`. The judge is non-deterministic, so a bare `llmlint --diff` sampled it
+again on every worker gate, publication gate, and CI run; one branch's four
+rolls over one diff named four different rules, and clearing the rule one roll
+reported only changed which rule the next one failed. The target's key covers
+the whole workspace, the base resolved to a commit, the judged file list, and a
+fingerprint of the judge configuration in force — the installed llmlint version
+plus the effective merged config, so a rule change in a plugin fetched from
+outside this repository invalidates it. That fingerprint is resolved in the
+judge's own environment, never the caller's: `llmlint config` renders the
+oneharness wrapper a dispatcher injects, which hashed one judged diff to a
+different key per dispatch. It is computed by the recipe and passed as an
+environment input rather than declared as an Nx `runtime` input, because Nx
+scores a failing runtime input as *no contribution* rather than as an error —
+that would drop the judge configuration out of the key silently — and the target
+holds the recipe's answer to what it resolves itself, so a disagreement fails
+the tier. With no base argument the lifecycle's own comparison identity
+(`ONEVCS_COMPARISON_REMOTE` / `ONEVCS_COMPARISON_BASE`) names it, so a worker's
+gate and the publishing push that follows it judge one diff and share one
+verdict. Only a green is cached, because Nx caches successful tasks only:
+findings and a toolchain that never reached a verdict both re-judge next time,
+deliberately. A wrong green sticks until the tree, the base commit, or the judge
+configuration moves, so `just lint-llm-diff <base> --rejudge` is the one
+supported way to force a single fresh judgement — per-invocation, so it re-rolls
+nothing else; an ambient `NX_SKIP_NX_CACHE` is reported and ignored by this tier
+and honoured by every other target. Run `node
+scripts/workspace/llmlint-fingerprint.mjs` when a miss is unexplained: a changed
+fingerprint over an unchanged tree is a changed judge, not a changed diff.
+
 The `justfile` is the authoritative source for the repo-scoped
 `NX_CACHE_DIRECTORY` default beneath the user's standard cache directory, so
 disposable worktrees reuse Nx's content-addressed local cache. An existing
