@@ -2,6 +2,7 @@ import {
   expect,
   type Locator,
   type Page,
+  type Response,
   type Route,
   test,
 } from "@playwright/test";
@@ -380,9 +381,18 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
 // recovery panel rather than a blank pane or a thrown error, on every route
 // that loads a domain.
 // llmlint: ignore-block[changed_behavior_has_e2e,e2e_not_mocked,tests_mirror_real_usage] A visitor reaches these states when the data host is degraded, and a host that is up and serving valid bytes cannot be asked to degrade: forcing the served status and body at the transport is the only way to put a real browser into the state under test. What is steered is the remote data host — the far side of the boundary, and the boundary these loaders exist to guard — not any part of the site. The artifact under test is the real one throughout: the composed shell, its router, its loaders, and every route remote are the deployed bytes, driven by real navigation and asserted through roles and accessible names. preload.spec.ts steers the same boundary the same way.
+const schemaRejectingBody = '[{"name":"not what the CV publishes"}]';
+
+// A route that never asked the data host renders exactly like one the host
+// answered well, so this is what the barrier below says apart.
+const usableAnswerMessage =
+  "the route's own request was answered with usable data, so any recovery panel below is not one this site had to show";
+
 const unusableDomains: readonly {
   name: string;
   serve: (route: Route) => Promise<void>;
+  /** How the steered answer reads on the wire, once the route has asked for it. */
+  expectUnusable: (response: Response) => Promise<void>;
 }[] = [
   {
     // A cache or gateway can answer a failed request with the last payload it
@@ -390,15 +400,23 @@ const unusableDomains: readonly {
     name: "answers a failed request with the payload it last held",
     serve: async (route: Route) =>
       route.fulfill({ response: await route.fetch(), status: 503 }),
+    expectUnusable: async (response: Response) => {
+      expect(response.status(), usableAnswerMessage).toBe(503);
+    },
   },
   {
     name: "answers with a body the CV schema rejects",
     serve: (route: Route) =>
       route.fulfill({
-        body: '[{"name":"not what the CV publishes"}]',
+        body: schemaRejectingBody,
         contentType: "application/json",
         status: 200,
       }),
+    expectUnusable: async (response: Response) => {
+      expect(await response.text(), usableAnswerMessage).toBe(
+        schemaRejectingBody,
+      );
+    },
   },
 ];
 
@@ -433,18 +451,50 @@ const loadedRoutes: readonly {
   },
 ];
 
+/**
+ * Enters the site on a document the router already owns, by way of the /story
+ * redirect. Nothing is prerendered at /story, so reaching Bio is the running
+ * shell having redirected there, and the header links it renders are the
+ * router's. Entering on a prerendered document instead leaves those links
+ * ordinary anchors until hydration lands: a click that arrives first is a
+ * document request for the route, which serves the payload the prerender baked
+ * in and never asks the data host anything. preload.spec.ts enters the same way
+ * for the same reason.
+ */
+async function openRunningShell(page: Page) {
+  await page.goto("story", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/\/bio$/);
+  await expect(
+    page.getByRole("heading", { name: "Optimizing Life" }),
+  ).toBeVisible();
+}
+
 for (const route of loadedRoutes)
   for (const served of unusableDomains)
     test(`${route.link} recovers when the data host ${served.name}`, async ({
       page,
     }) => {
-      await page.goto("", { waitUntil: "networkidle" });
+      // Steer the data host before the document that navigates through it, so
+      // no part of this journey turns on when the interception was installed
+      // relative to a load.
       await page.route(
         `**/cv-data/domains/${route.domain}.json*`,
         served.serve,
       );
+      await openRunningShell(page);
 
+      // Hold at this route's own request to the data host and read the answer
+      // it got, so what follows asserts a recovery the site had to perform
+      // rather than one nothing ever asked it for.
+      const answered = page.waitForResponse(
+        (response: Response) =>
+          new URL(response.url()).pathname.endsWith(
+            `/cv-data/domains/${route.domain}.json`,
+          ),
+        { timeout: 15_000 },
+      );
       await page.getByRole("link", { name: route.link, exact: true }).click();
+      await served.expectUnusable(await answered);
 
       await expect(page).toHaveURL(
         new RegExp(`nick-derobertis-site/${route.path}$`),

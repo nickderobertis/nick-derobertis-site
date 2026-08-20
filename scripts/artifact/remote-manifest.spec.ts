@@ -28,7 +28,13 @@ function isTaskDependencies(value: object): value is Record<string, string[]> {
   );
 }
 
-test("remote manifest matches published fragment composition", async () => {
+// Computing the task graph below is a real spawn with the Nx daemon disabled,
+// and its duration tracks the machine's load rather than this test's own work:
+// it clears the runner's 5000ms default only on an idle host. A setup hook
+// would need the same raise under `hookTimeout`, so the ceiling goes here.
+test("remote manifest matches published fragment composition", {
+  timeout: 120_000,
+}, async () => {
   const remoteManifest: unknown = JSON.parse(
     await readFile("libs/build-config/src/remotes.json", "utf8"),
   );
