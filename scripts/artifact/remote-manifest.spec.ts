@@ -28,15 +28,10 @@ function isTaskDependencies(value: object): value is Record<string, string[]> {
   );
 }
 
-// This test spawns the package manager to compute an Nx task graph with the
-// daemon disabled, which is a cold graph computation whose duration tracks the
-// workspace's size and the machine's load, not this test's own work. The
-// runner's 5000ms default ceiling sits inside that range, so the spawn needs an
-// explicit one that is generous against it. The ceiling belongs on the test
-// rather than on a one-time setup hook: this file holds a single test, so
-// hoisting the spawn into `beforeAll` would move it under `hookTimeout`, whose
-// default is the same 5000ms, and the ceiling would still have to be raised —
-// only further from the spawn it bounds.
+// Computing the task graph below is a real spawn with the Nx daemon disabled,
+// and its duration tracks the machine's load rather than this test's own work:
+// it clears the runner's 5000ms default only on an idle host. A setup hook
+// would need the same raise under `hookTimeout`, so the ceiling goes here.
 test("remote manifest matches published fragment composition", {
   timeout: 120_000,
 }, async () => {

@@ -380,12 +380,12 @@ test("the static 404 is intentional and the router recovers unknown routes", asy
 // served domain can be unusable have to leave the visitor with that route's own
 // recovery panel rather than a blank pane or a thrown error, on every route
 // that loads a domain.
-// llmlint: ignore-block[changed_behavior_has_e2e,e2e_not_mocked,tests_mirror_real_usage] A visitor reaches these states when the data host is degraded, and a host that is up and serving valid bytes cannot be asked to degrade: forcing the served status and body at the transport is the only way to put a real browser into the state under test. What is steered is the remote data host — the far side of the boundary, and the boundary these loaders exist to guard — not any part of the site. The artifact under test is the real one throughout: the composed shell, its router, its loaders, and every route remote are the deployed bytes, driven by real navigation and asserted through roles and accessible names. preload.spec.ts steers the same boundary the same way. Each journey also reads its own request off the wire before asserting the recovery panel: whether the route asked the steered host at all is what these journeys are premised on, and a page showing real content looks the same whether the host answered usably or was never asked.
+// llmlint: ignore-block[changed_behavior_has_e2e,e2e_not_mocked,tests_mirror_real_usage] A visitor reaches these states when the data host is degraded, and a host that is up and serving valid bytes cannot be asked to degrade: forcing the served status and body at the transport is the only way to put a real browser into the state under test. What is steered is the remote data host — the far side of the boundary, and the boundary these loaders exist to guard — not any part of the site. The artifact under test is the real one throughout: the composed shell, its router, its loaders, and every route remote are the deployed bytes, driven by real navigation and asserted through roles and accessible names. preload.spec.ts steers the same boundary the same way. Each journey also reads its own request off the wire first, because a page showing real content looks the same whether the host answered usably or was never asked.
 const schemaRejectingBody = '[{"name":"not what the CV publishes"}]';
 
 // A route that never asked the data host renders exactly like one the host
 // answered well, so this is what the barrier below says apart.
-const wasUsable =
+const usableAnswerMessage =
   "the route's own request was answered with usable data, so any recovery panel below is not one this site had to show";
 
 const unusableDomains: readonly {
@@ -401,7 +401,7 @@ const unusableDomains: readonly {
     serve: async (route: Route) =>
       route.fulfill({ response: await route.fetch(), status: 503 }),
     expectUnusable: async (response: Response) => {
-      expect(response.status(), wasUsable).toBe(503);
+      expect(response.status(), usableAnswerMessage).toBe(503);
     },
   },
   {
@@ -413,7 +413,9 @@ const unusableDomains: readonly {
         status: 200,
       }),
     expectUnusable: async (response: Response) => {
-      expect(await response.text(), wasUsable).toBe(schemaRejectingBody);
+      expect(await response.text(), usableAnswerMessage).toBe(
+        schemaRejectingBody,
+      );
     },
   },
 ];
