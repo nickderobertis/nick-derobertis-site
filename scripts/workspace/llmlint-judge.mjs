@@ -1,7 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { isAbsolute, resolve } from "node:path";
 import {
+  isJudgeableFile,
   JudgeRuntimeError,
   judgedFiles,
   judgeEnvironment,
@@ -79,14 +78,7 @@ if (resolved !== declared)
 
 const files = judgedFiles(process.env.LLMLINT_DIFF_FILES);
 for (const file of files) {
-  const inside =
-    !isAbsolute(file) &&
-    resolve(repositoryRoot, file).startsWith(`${repositoryRoot}/`);
-  if (
-    file.startsWith("-") ||
-    !inside ||
-    !existsSync(resolve(repositoryRoot, file))
-  )
+  if (!isJudgeableFile(file))
     refuse(
       `every judged file must be an existing path inside this repository, because llmlint reports a clean run for a path it cannot match; correct or drop "${file}", then rerun 'just lint-llm-diff <base> <files>'`,
     );

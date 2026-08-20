@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { dirname, resolve } from "node:path";
+import { realpathSync } from "node:fs";
+import { dirname, isAbsolute, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
@@ -206,4 +207,26 @@ export const fileSeparator = "\n";
  */
 export function judgedFiles(encoded) {
   return encoded ? encoded.split(fileSeparator) : [];
+}
+
+/**
+ * Whether a path names a file llmlint may be narrowed to: one that exists, and
+ * that is inside this repository once every symlink on the way is followed.
+ *
+ * Both ends check it, because both are a boundary — the dispatcher's comes from
+ * a command line and the target's from an environment value — and both check it
+ * here so they cannot come to different answers. Lexical containment is not
+ * enough: a symlink committed inside the checkout can name a path outside it,
+ * and llmlint would judge whatever it points at.
+ */
+export function isJudgeableFile(file) {
+  if (file.startsWith("-") || file.includes(fileSeparator) || isAbsolute(file))
+    return false;
+  const root = realpathSync(repositoryRoot);
+  try {
+    const named = realpathSync(resolve(root, file));
+    return named === root || named.startsWith(`${root}${sep}`);
+  } catch {
+    return false;
+  }
 }

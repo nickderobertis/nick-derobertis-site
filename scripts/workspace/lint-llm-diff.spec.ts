@@ -6,6 +6,7 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -202,6 +203,26 @@ describe("just lint-llm-diff argument routing", () => {
 
       expect(invocation.status).toBe(0);
       expect(fileOverrides(judgedArgv(invocation))).toEqual([spaced]);
+    } finally {
+      rmSync(scratch, { recursive: true, force: true });
+    }
+  }, 120_000);
+
+  test("refuses a workspace path that leaves the repository through a symlink", () => {
+    // Lexical containment passes here and the judge would still be handed a file
+    // outside the checkout, so the recipe follows the link before deciding.
+    mkdirSync("test-results", { recursive: true });
+    const scratch = mkdtempSync(path.join("test-results", "lint-llm-diff-"));
+    const escaping = path.join(scratch, "outside.ts");
+    try {
+      symlinkSync("/etc/hostname", escaping);
+      const invocation = runLintLlmDiff(["HEAD~1", escaping]);
+
+      expect(invocation.status).toBe(2);
+      expect(invocation.argv).toBeNull();
+      expect(invocation.stderr).toContain(
+        "lint-llm-diff: every file after the base must be an existing workspace path",
+      );
     } finally {
       rmSync(scratch, { recursive: true, force: true });
     }

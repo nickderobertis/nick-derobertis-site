@@ -1,8 +1,7 @@
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { isAbsolute, resolve } from "node:path";
 import {
   fileSeparator,
+  isJudgeableFile,
   JudgeRuntimeError,
   judgeFingerprint,
   repositoryRoot,
@@ -81,15 +80,7 @@ const judgedBase = range
   : commitOf(named);
 
 for (const file of files) {
-  const inside =
-    !isAbsolute(file) &&
-    resolve(repositoryRoot, file).startsWith(`${repositoryRoot}/`);
-  if (
-    file.startsWith("-") ||
-    file.includes(fileSeparator) ||
-    !inside ||
-    !existsSync(resolve(repositoryRoot, file))
-  )
+  if (!isJudgeableFile(file))
     refuse(
       `every file after the base must be an existing workspace path, because llmlint reports a clean run for a path it cannot match; correct or drop "${file}", then rerun just lint-llm-diff <base> <files> (to force one fresh judgement instead, pass --rejudge)`,
     );
@@ -122,7 +113,7 @@ const declined =
 // Nx replays a cache hit as one burst, so a replayed report larger than a pipe
 // buffer can arrive with its trailing summary cut off. Both are matched so an Nx
 // that prints only one of them still reports the verdict's provenance honestly.
-const replayed = [
+const replayMarkers = [
   "Nx read the output from the cache instead of running the command",
   "[existing outputs match the cache, left as is]",
   "[local cache]",
@@ -171,7 +162,7 @@ nx.on("error", (error) =>
 );
 nx.on("close", (status) => {
   const printed = reported.replace(ansi, "");
-  const provenance = replayed.some((note) => printed.includes(note))
+  const provenance = replayMarkers.some((marker) => printed.includes(marker))
     ? `lint-llm-diff: replayed the recorded verdict for base ${judgedBase} (Nx cache hit)${declined}`
     : `lint-llm-diff: judged this diff against base ${judgedBase} (Nx cache miss)${declined}`;
   if (status === 0) {
