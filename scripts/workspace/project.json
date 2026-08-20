@@ -22,6 +22,12 @@
       "options": {
         "command": "scripts/ci/run-tooling-target.sh workspace test vitest run --reporter=dot --maxWorkers=1 --config scripts/workspace/vite.config.ts"
       }
+    },
+    "lint-llm-diff": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node scripts/workspace/llmlint-judge.mjs"
+      }
     }
   }
 }
