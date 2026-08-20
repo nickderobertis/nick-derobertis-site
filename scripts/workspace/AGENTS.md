@@ -1,3 +1,5 @@
+<!-- llmlint: ignore-file[instruction_layer_localized] `.github/CODEOWNERS` routes `/scripts/`, so this layer is owned. A judge reading only the diff cannot see that unchanged file and reports it as missing. -->
+
 # tooling-workspace instructions
 
 ## The LLM-judge tier
