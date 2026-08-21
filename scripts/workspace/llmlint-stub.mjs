@@ -1,6 +1,13 @@
 #!/usr/bin/env node
-import { appendFileSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { isAbsolute } from "node:path";
+import {
+  appendFileSync,
+  readFileSync,
+  realpathSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { isAbsolute, sep } from "node:path";
 
 // The llmlint `llmlint-cache.spec.ts` stands in for, copied onto PATH under the
 // name `llmlint` by the journeys that drive `just lint-llm-diff`.
@@ -25,26 +32,42 @@ import { isAbsolute } from "node:path";
 
 const unitSeparator = String.fromCharCode(31);
 
+/** The directory a journey's scratch files are created under, symlinks resolved. */
+const scratchRoot = realpathSync(tmpdir());
+
 /**
  * A file the journey that started this run created for it to write through.
  *
  * Both of them arrive as environment values, which is this stand-in's trust
  * boundary: it runs on PATH under llmlint's name, so anything on the host could
- * name one. An absolute path to a file that already exists is the whole
- * contract — it never creates one — so a value that names something else is
- * refused here rather than turning into a write somewhere unintended.
+ * name one, and what comes back is written to. An existing regular file inside
+ * this host's temporary directory is the whole contract — the journeys create
+ * theirs with `mkdtemp` there, and this stand-in creates none — so a value
+ * naming anything else is refused rather than turning into a write somewhere
+ * unintended. Containment is decided after symlinks are resolved, because a
+ * link under the scratch root can name a file anywhere on the host.
  */
 function scratchFile(name) {
   const named = process.env[name];
   if (!named) return null;
+  const resolved = isAbsolute(named) ? realpath(named) : null;
   if (
-    !isAbsolute(named) ||
-    !statSync(named, { throwIfNoEntry: false })?.isFile()
+    !resolved?.startsWith(`${scratchRoot}${sep}`) ||
+    !statSync(resolved, { throwIfNoEntry: false })?.isFile()
   )
     fail(
-      `${name} must name an existing file, not '${named}'; point it at an absolute path the journey has already created — this stand-in never creates one — then rerun that journey`,
+      `${name} must name an existing file under ${scratchRoot}, not '${named}'; create it in the journey's scratch directory — this stand-in creates none — and export its absolute path, then rerun that journey`,
     );
-  return named;
+  return resolved;
+}
+
+/** The path a name really reaches, or null when it reaches nothing. */
+function realpath(named) {
+  try {
+    return realpathSync(named);
+  } catch {
+    return null;
+  }
 }
 
 function fail(message) {

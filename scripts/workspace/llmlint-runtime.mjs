@@ -9,6 +9,13 @@ import { z } from "zod";
 // `tooling-workspace:lint-llm-diff` target resolve — `lint-llm-diff.mjs`, which
 // keys the run, and `llmlint-judge.mjs`, which runs it. Sharing it is the point:
 // the two must never describe different judges. `scripts/workspace/AGENTS.md` holds why.
+//
+// llmlint: ignore-file[changed_behavior_has_e2e] This is the judged tier's own
+// dispatch plumbing, not shipped behavior: it has no browser interface, it runs
+// only when a contributor invokes `just lint-llm-diff`, and nothing it decides
+// reaches a visitor. `llmlint-cache.spec.ts` drives every path here through
+// that real recipe and real Nx, and `lint-llm-diff.spec.ts` drives the CLI over
+// it as a real subprocess.
 
 /** The repository, resolved from this file so no caller's cwd can decide it. */
 export const repositoryRoot = resolve(

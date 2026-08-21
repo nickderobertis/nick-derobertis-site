@@ -5,7 +5,9 @@ import {
   copyFileSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -394,6 +396,62 @@ describe("the key describes the judge, not the caller", () => {
     expect(refused.output).not.toContain("reported the findings above");
     expect(judge.invocations()).toEqual([]);
   }, 300_000);
+});
+
+describe("the stand-in judge's own scratch files", () => {
+  // The stand-in runs on PATH under llmlint's name and appends to whatever
+  // `LLMLINT_STUB_RECORD` points at, so that value is its trust boundary. These
+  // drive it the way every journey above does — as the `llmlint` executable —
+  // and read the refusal off the process, then off the file it did not touch.
+  const runStub = (record: string) => {
+    const judge = stubJudge();
+    return spawnSync(path.join(judge.directory, "llmlint"), ["--diff"], {
+      encoding: "utf8",
+      // llmlint: ignore[boundary_inputs_validated] The value under test is the one being refused; it is handed to the stand-in exactly as a journey's environment would hand it over, which is the boundary these cases exist to drive.
+      env: {
+        ...process.env,
+        ...judge.environment,
+        LLMLINT_STUB_RECORD: record,
+      },
+    });
+  };
+
+  /** A file outside every scratch directory, which nothing may write through. */
+  const offLimitsFile = () => {
+    const directory = mkdtempSync(
+      path.join(workspace, "node_modules", ".llmlint-off-limits-"),
+    );
+    onTestFinished(() => rmSync(directory, { force: true, recursive: true }));
+    const file = path.join(directory, "record");
+    writeFileSync(file, "untouched\n");
+    return file;
+  };
+
+  it("refuses a record outside the scratch directory", () => {
+    const file = offLimitsFile();
+
+    const refused = runStub(file);
+
+    expect(refused.status).toBe(64);
+    expect(refused.stderr).toContain(
+      `LLMLINT_STUB_RECORD must name an existing file under ${realpathSync(tmpdir())}`,
+    );
+    expect(readFileSync(file, "utf8")).toBe("untouched\n");
+  });
+
+  it("refuses a record that reaches outside through a link", () => {
+    const file = offLimitsFile();
+    const directory = mkdtempSync(path.join(tmpdir(), "llmlint-escape-"));
+    onTestFinished(() => rmSync(directory, { force: true, recursive: true }));
+    const link = path.join(directory, "record");
+    symlinkSync(file, link);
+
+    const refused = runStub(link);
+
+    expect(refused.status).toBe(64);
+    expect(refused.stderr).toContain("LLMLINT_STUB_RECORD must name");
+    expect(readFileSync(file, "utf8")).toBe("untouched\n");
+  });
 });
 
 describe("only a verdict is recorded", () => {
