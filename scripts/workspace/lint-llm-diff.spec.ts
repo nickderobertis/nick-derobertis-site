@@ -242,6 +242,20 @@ describe("just lint-llm-diff argument routing", () => {
     120_000,
   );
 
+  // Named on its own rather than in the table above, because an empty argument
+  // is the one unmatched path that resolves to something: the repository root.
+  // Accepted, it would widen the narrowing the caller asked for to the whole
+  // tree and report a pass over it.
+  test("refuses to judge anything when a file after the base is empty", () => {
+    const invocation = runLintLlmDiff(["HEAD~1", ""]);
+
+    expect(invocation.status).toBe(2);
+    expect(invocation.argv).toBeNull();
+    expect(invocation.stderr).toContain(
+      "lint-llm-diff: every file after the base must be an existing workspace path",
+    );
+  }, 120_000);
+
   test.each(["no-such-ref", "--plan-only"])(
     "refuses to judge anything when the base is not a revision: %s",
     (base) => {

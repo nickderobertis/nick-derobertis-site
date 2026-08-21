@@ -225,10 +225,17 @@ export function judgedFiles(encoded) {
  * a command line and the target's from an environment value — and both check it
  * here so they cannot come to different answers. Lexical containment is not
  * enough: a symlink committed inside the checkout can name a path outside it,
- * and llmlint would judge whatever it points at.
+ * and llmlint would judge whatever it points at. Neither is existence alone:
+ * the empty string resolves to the repository root, so accepting it would turn
+ * a narrowing a caller asked for into the whole tree without saying so.
  */
 export function isJudgeablePath(file) {
-  if (file.startsWith("-") || file.includes(fileSeparator) || isAbsolute(file))
+  if (
+    !file ||
+    file.startsWith("-") ||
+    file.includes(fileSeparator) ||
+    isAbsolute(file)
+  )
     return false;
   const root = realpathSync(repositoryRoot);
   try {
