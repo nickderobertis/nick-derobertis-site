@@ -214,6 +214,7 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     });
     page.on("pageerror", (error) => errors.push(error.message));
 
+    // llmlint: ignore-block[tests_mirror_real_usage] The two claims this journey turns on — that the router owns the document before the click, and that the click never left it — have no user-visible form: the DOM is prerendered identically either way, so a visitor and a locator alike see the same page hydrated or not. Counting the router's preload of Home and the browser's navigation requests is the only way to state them. Every navigation below is the real header link driven by real hover and click, and every other assertion reads the page through roles and accessible names.
     // Entering at a leaf route leaves Home's remote deferred, so the router's
     // preload of it is an event this page has not raised yet — which is what
     // makes it usable as the barrier below.
@@ -252,6 +253,7 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     await page.getByRole("link", { name: route.link, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/${route.path}$`));
     expect(documentRequests).toBe(0);
+    // llmlint: ignore-end[tests_mirror_real_usage]
     await page.close();
   }
 });
