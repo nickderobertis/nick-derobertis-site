@@ -17,8 +17,8 @@ export const navLink = (page: Page, label: string) =>
  * and so asks for nothing itself.
  *
  * Observing that request is also this harness's proof that the router owns the
- * document, which is what `hoverUntilHydrated` below is for: it cannot happen
- * until hydration attached the listener that raises it.
+ * document, which is what `hoverUntilRemotePreloaded` below is for: it cannot
+ * happen until hydration attached the listener that raises it.
  */
 export async function hoverUntilPreloading(
   page: Page,
@@ -41,18 +41,20 @@ export async function hoverUntilPreloading(
 }
 
 /**
- * Hovers a link until the router owns the document, then hands it back to
- * click. Before hydration attaches the router's handler an anchor is followed
- * for real, so a journey asserting that a click stayed in the document has to
- * wait for this; nothing it could assert on distinguishes the two, because the
- * DOM it checks is prerendered either way.
+ * Fetches a link's route remote by hovering it, then hands the link back to
+ * click. `requestedRemote` reports whether that remote has been asked for;
+ * install its request recorder first. This leaves the remote loaded, so call it
+ * only where the journey's next claim is that the remote *was* fetched, never
+ * before one that it never was.
  *
- * `requestedRemote` reports whether the hovered route's remote has been asked
- * for; install its request recorder first. The hover leaves that remote
- * fetched, so call this only where the journey's next claim is that the remote
- * *was* loaded, never before one that it never was.
+ * Completing that fetch is what makes this the hydration barrier: only a
+ * hydrated listener can raise the request. Before hydration attaches the
+ * router's handler an anchor is followed for real, so a journey asserting that
+ * a click stayed in the document has to wait for this; nothing it could assert
+ * on distinguishes the two, because the DOM it checks is prerendered either
+ * way.
  */
-export async function hoverUntilHydrated(
+export async function hoverUntilRemotePreloaded(
   page: Page,
   label: string,
   requestedRemote: () => boolean,

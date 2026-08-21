@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 import {
-  hoverUntilHydrated,
   hoverUntilPreloading,
+  hoverUntilRemotePreloaded,
   navLink,
 } from "@site/e2e-harness";
 import { z } from "zod";
@@ -303,7 +303,7 @@ test("entering at Home hydrates its prerendered panes and still defers the leaf 
   // Below the line the claim is the opposite one — that the click was an SPA
   // transition — and that is only true once the router owns the document, which
   // none of the prerendered DOM asserted on above reports.
-  const bio = await hoverUntilHydrated(
+  const bio = await hoverUntilRemotePreloaded(
     page,
     "Bio",
     () => assetsFor("bio").length > 0,
