@@ -9,7 +9,7 @@ import {
 import {
   type HomePaneRemote,
   homePanes,
-  hoverUntilRemotePreloaded,
+  hoverUntilRemoteRequested,
   type RoutePath,
   siteRoutes,
 } from "@site/e2e-harness";
@@ -235,7 +235,7 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     // decides a race the browser wins on a loaded runner, following the href
     // for real. Wait for Home's preload — which only a hydrated listener can
     // raise — and the click that follows is the SPA transition this asserts on.
-    const home = await hoverUntilRemotePreloaded(
+    const home = await hoverUntilRemoteRequested(
       page,
       "Home",
       () => homeRequests > 0,

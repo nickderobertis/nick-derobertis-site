@@ -17,7 +17,7 @@ export const navLink = (page: Page, label: string) =>
  * and so asks for nothing itself.
  *
  * Observing that request is also this harness's proof that the router owns the
- * document, which is what `hoverUntilRemotePreloaded` below is for: it cannot
+ * document, which is what `hoverUntilRemoteRequested` below is for: it cannot
  * happen until hydration attached the listener that raises it.
  */
 export async function hoverUntilPreloading(
@@ -41,20 +41,19 @@ export async function hoverUntilPreloading(
 }
 
 /**
- * Fetches a link's route remote by hovering it, then hands the link back to
- * click. `requestedRemote` reports whether that remote has been asked for;
- * install its request recorder first. This leaves the remote loaded, so call it
- * only where the journey's next claim is that the remote *was* fetched, never
- * before one that it never was.
+ * Hovers a link until its route remote has been asked for, then hands the link
+ * back to click. `requestedRemote` reports whether that request has started;
+ * install its recorder first. The request is real and the browser goes on
+ * loading behind it, so call this only where the journey's next claim is that
+ * the remote *was* requested, never before one that it never was.
  *
- * Completing that fetch is what makes this the hydration barrier: only a
- * hydrated listener can raise the request. Before hydration attaches the
- * router's handler an anchor is followed for real, so a journey asserting that
- * a click stayed in the document has to wait for this; nothing it could assert
- * on distinguishes the two, because the DOM it checks is prerendered either
- * way.
+ * That request is also the hydration barrier: only a hydrated listener can
+ * raise it. Before hydration attaches the router's handler an anchor is
+ * followed for real, so a journey asserting that a click stayed in the document
+ * has to wait for this; nothing it could assert on distinguishes the two,
+ * because the DOM it checks is prerendered either way.
  */
-export async function hoverUntilRemotePreloaded(
+export async function hoverUntilRemoteRequested(
   page: Page,
   label: string,
   requestedRemote: () => boolean,
