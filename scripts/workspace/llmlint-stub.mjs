@@ -108,4 +108,15 @@ if (!["0", "1", "2"].includes(verdict))
   );
 appendFileSync(record, `${judged.join(unitSeparator)}${unitSeparator}\n`);
 process.stdout.write(`stub judge: judged ${judged.join(" ")}\n`);
+// A nonzero verdict is a failure, and the real llmlint says which one it is and
+// what to do about it before exiting — the findings it reported, or the
+// toolchain error that stopped it. Exiting on a line that reads the same either
+// way would leave a journey, and anyone reading its captured output, with only
+// a status to tell them apart.
+if (verdict !== "0")
+  process.stderr.write(
+    verdict === "1"
+      ? "stub judge: the stand-in rule reported a finding; clear it in the tree under judgement or justify it with a narrow ignore directive at its site, then rerun the judged tier\n"
+      : "stub judge: the stand-in toolchain stopped before any rule was judged; repair the harness this run was pointed at, then rerun the judged tier\n",
+  );
 process.exit(Number(verdict));

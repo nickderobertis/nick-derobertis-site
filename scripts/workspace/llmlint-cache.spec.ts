@@ -403,6 +403,11 @@ describe("only a verdict is recorded", () => {
 
     const first = lintLlmDiff({ judge, environment: findings });
     expect(first.status).toBe(1);
+    // The judge names the finding on its way out and the wrapper names what to
+    // do with it, so the captured run carries both halves rather than a status.
+    expect(first.output).toContain(
+      "stub judge: the stand-in rule reported a finding",
+    );
     expect(first.output).toContain(
       "lint-llm-diff: the judge reported the findings above",
     );
@@ -424,7 +429,11 @@ describe("only a verdict is recorded", () => {
     const first = lintLlmDiff({ judge, environment: broken });
     expect(first.status).not.toBe(0);
     // Reported as what it is rather than as findings to go clear, because Nx
-    // collapses both to one failing status on the way out.
+    // collapses both to one failing status on the way out — by the judge, which
+    // is the only side that knows a rule was never reached, and by the wrapper.
+    expect(first.output).toContain(
+      "stub judge: the stand-in toolchain stopped before any rule was judged",
+    );
     expect(first.output).toContain(
       "lint-llm-diff: the judge never reached a verdict",
     );
