@@ -37,6 +37,19 @@ const optionsSchema = z.strictObject({
    * that still need an alias.
    */
   remotes: z.record(z.string(), z.string()).optional(),
+  /**
+   * The ceiling this project's tests are held to, for a project whose tests
+   * share one reason for needing more than the runner's 5000ms default —
+   * evaluating a module graph, or driving a subject as a real process, whose
+   * cost is set by the workspace's size and the host's load rather than by the
+   * assertion that follows. A project with a body of fast tests beside the slow
+   * ones states its ceiling at those tests instead, so the default keeps
+   * detecting a hang everywhere it still can. Left unset, Vitest's default
+   * stands. This is the only channel there is: the component config is the one
+   * file in a project that may import this harness, because a spec that
+   * imported it would key the project's whole typecheck on it.
+   */
+  testTimeout: z.number().int().positive().optional(),
   coverageInclude: z.array(z.string()).nonempty().optional(),
   coverageExclude: z.array(z.string()).nonempty().optional(),
 });
@@ -55,6 +68,7 @@ export function defineWorkspaceTestConfig(
     dir,
     thresholds,
     remotes = {},
+    testTimeout,
     coverageInclude = [`${read.data.dir}/src/**/*.{ts,tsx}`],
     coverageExclude,
   } = read.data;
@@ -74,6 +88,7 @@ export function defineWorkspaceTestConfig(
       environment: "jsdom",
       setupFiles: ["libs/testing/src/setup.ts"],
       include: [`${dir}/src/**/*.spec.{ts,tsx}`],
+      ...(testTimeout === undefined ? {} : { testTimeout }),
       coverage: {
         provider: "v8",
         reportsDirectory: `coverage/${dir}`,

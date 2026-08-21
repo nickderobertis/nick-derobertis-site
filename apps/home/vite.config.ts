@@ -7,6 +7,15 @@ import { defineWorkspaceTestConfig } from "@site/testing";
 export default defineWorkspaceTestConfig({
   project: "home",
   dir: "apps/home",
+  // Fifteen of this project's sixteen tests reach the composed page or its
+  // panes through `await import(...)`, and `vi.resetModules()` makes each pay
+  // for that import afresh — seven remotes' module graphs evaluated again per
+  // test, at a cost set by the workspace's size and the host's load rather than
+  // by the assertion that follows. That is the whole project rather than a few
+  // of its tests, so the ceiling is stated once here instead of at fifteen
+  // sites. It is set far past anything those imports can cost rather than past
+  // today's contention, so it still bounds a genuine hang.
+  testTimeout: 120_000,
   thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
   remotes: {
     "homeCarousel/Page": "apps/home-carousel/src/page.tsx",
