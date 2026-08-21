@@ -8,7 +8,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 const tree = buildSkillTree(cvDataClient.domain("skills"));
 
@@ -33,7 +33,7 @@ afterEach(() => {
 
 test(
   "renders the CV's whole skill tree for a visitor who just arrives",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await renderPane();
 
@@ -51,7 +51,7 @@ test(
 
 test(
   "holds the loading frame for a visitor steering the pane into it",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     openWith("/?skills-state=loading");
 
@@ -68,7 +68,7 @@ test(
 
 test(
   "reports a CV with no skills as a status rather than an empty chart",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     openWith("/?skills-state=empty");
 
@@ -83,24 +83,20 @@ test(
   },
 );
 
-test(
-  "reports unavailable skills as an alert",
-  evaluatesAModuleGraph,
-  async () => {
-    openWith("/?skills-state=error");
+test("reports unavailable skills as an alert", moduleGraphCeiling, async () => {
+  openWith("/?skills-state=error");
 
-    await renderPane();
+  await renderPane();
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Skills unavailable");
-    expect(
-      screen.queryByRole("img", { name: "Skills sunburst chart" }),
-    ).not.toBeInTheDocument();
-  },
-);
+  expect(screen.getByRole("alert")).toHaveTextContent("Skills unavailable");
+  expect(
+    screen.queryByRole("img", { name: "Skills sunburst chart" }),
+  ).not.toBeInTheDocument();
+});
 
 test(
   "ignores a steer it has no state for and shows the tree",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     openWith("/?skills-state=not-a-skills-state");
 
@@ -114,7 +110,7 @@ test(
 
 test(
   "prerenders the settled tree the built fragment ships",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const { default: SkillsPage } = await import("./page");
     vi.stubGlobal("window", undefined);

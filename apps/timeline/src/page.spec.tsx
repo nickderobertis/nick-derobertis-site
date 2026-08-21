@@ -7,7 +7,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 const entries = cvDataClient.domain("timeline");
 
@@ -38,7 +38,7 @@ afterEach(() => {
 
 test(
   "renders the CV's whole history for a visitor who just arrives",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await renderPane();
 
@@ -58,7 +58,7 @@ test(
 
 test(
   "holds the loading frame for a visitor steering the pane into it",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     openWith("/?timeline-state=loading");
 
@@ -73,7 +73,7 @@ test(
 
 test(
   "keeps the pane's heading when the CV records no history",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     openWith("/?timeline-state=empty");
 
@@ -93,7 +93,7 @@ test(
 
 test(
   "reports an unavailable timeline as an alert in place of the pane",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     openWith("/?timeline-state=error");
 
@@ -108,7 +108,7 @@ test(
 
 test(
   "ignores a steer it has no state for and shows the history",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     openWith("/?timeline-state=not-a-timeline-state");
 
@@ -120,7 +120,7 @@ test(
 
 test(
   "prerenders the settled history the built fragment ships",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const { default: TimelinePage } = await import("./page");
     vi.stubGlobal("window", undefined);

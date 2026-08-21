@@ -7,7 +7,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 const awards = cvDataClient.domain("awards");
 
@@ -49,7 +49,7 @@ afterEach(() => {
 
 test(
   "settles from its loading frame onto the selected awards",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards(awards);
 
@@ -79,7 +79,7 @@ test(
 
 test(
   "shows every honour when a visitor asks for the complete set",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     window.history.replaceState(null, "", "/?awards-view=all");
     serveAwards(awards);
@@ -99,7 +99,7 @@ test(
 
 test(
   "reports a CV with no awards as a status rather than an empty grid",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards([]);
 
@@ -118,7 +118,7 @@ test(
 
 test(
   "reports an unavailable awards domain as an alert",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards({ error: "awards unavailable" }, 503);
 
@@ -134,7 +134,7 @@ test(
 
 test(
   "prerenders the loading frame the built fragment ships",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const { default: AwardsPage } = await import("./page");
     vi.stubGlobal("window", undefined);
@@ -155,7 +155,7 @@ test(
 
 test(
   "hands hosts the pane's warm-up through its page module",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const warmed: string[] = [];
     vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {

@@ -8,7 +8,7 @@ import AwardsPage from "./page";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 const awards = cvDataClient.domain("awards");
 
@@ -64,7 +64,7 @@ afterEach(() => {
 
 test(
   "refuses to start against a document with no remote root",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = "<main></main>";
 
@@ -74,7 +74,7 @@ test(
 
 test(
   "hydrates the published fragment into the awards a visitor came for",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
     expect(
@@ -94,7 +94,7 @@ test(
 
 test(
   "renders from scratch when the document ships no prerendered awards",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = '<div id="root"></div>';
 
@@ -108,7 +108,7 @@ test(
 
 test(
   "shows the complete set to a visitor who arrives asking for it",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     // The published fragment can only ever settle onto the selected view, so a
     // visitor arriving with a query has to be given what they asked for instead.
@@ -128,7 +128,7 @@ test(
 
 test(
   "adopts the loading frame a visitor is already looking at",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
     const published = loadingFrame();
@@ -143,7 +143,7 @@ test(
 
 test(
   "throws the published frame away when it was rendered for another view",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     window.history.replaceState(null, "", "/?awards-view=all");
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;

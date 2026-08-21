@@ -5,16 +5,12 @@ import { join } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
 import { remoteRegistry, validatedRemoteRegistry } from "./remote-registry";
 
-/**
- * The ceiling the two tests below are held to, because each drives the registry
- * loader as a real process. What that costs is a Node runtime starting and
- * type-stripping its way to the module before either assertion runs — a cost
- * set by the host rather than by this file, and one the runner's 5000ms default
- * sits inside once `nx affected --parallel=3` contends for the CPU. It is set
- * far past anything that spawn can cost rather than past today's contention, so
- * it still bounds a genuine hang and nothing else.
- */
-const spawnsARealProcess = { timeout: 300_000 };
+// The two tests below each drive the registry loader as a real process, whose
+// cost is a Node runtime starting and type-stripping its way to the module —
+// host-bound, and past Vitest's 5000ms default once `nx affected --parallel=3`
+// contends for the CPU. Far past that rather than just past it, so it still
+// bounds a genuine hang.
+const realProcessCeiling = { timeout: 300_000 };
 
 const roots: string[] = [];
 
@@ -96,7 +92,7 @@ describe("the canonical remote registry", () => {
   // real module against a real registry file.
   test(
     "a real process refuses to load a registry that declares no remote",
-    spawnsARealProcess,
+    realProcessCeiling,
     async () => {
       const result = await importWithRegistry("{}\n");
 
@@ -109,7 +105,7 @@ describe("the canonical remote registry", () => {
 
   test(
     "a real process loads a registry that declares a well formed remote",
-    spawnsARealProcess,
+    realProcessCeiling,
     async () => {
       const result = await importWithRegistry(
         '{ "home-cards": "homeCards" }\n',

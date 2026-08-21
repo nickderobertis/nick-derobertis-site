@@ -6,7 +6,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 type Project = SoftwareProjects[number];
 
@@ -45,7 +45,7 @@ afterEach(() => {
 
 test(
   "warms the logos a card would otherwise fetch when it mounts",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const requested = watchImageRequests();
     const { warmSoftwareLogos } = await import("./warm-software-logos");
@@ -64,7 +64,7 @@ test(
 
 test(
   "leaves an inlined logo alone, because it costs no request",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const requested = watchImageRequests();
     const { warmSoftwareLogos } = await import("./warm-software-logos");
@@ -84,7 +84,7 @@ test(
 
 test(
   "asks for a logo once, however often the route loader runs",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const requested = watchImageRequests();
     const { warmSoftwareLogos } = await import("./warm-software-logos");
@@ -101,7 +101,7 @@ test(
 
 test(
   "warms nothing where there is no browser to decode an image",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const requested = watchImageRequests();
     const { warmSoftwareLogos } = await import("./warm-software-logos");

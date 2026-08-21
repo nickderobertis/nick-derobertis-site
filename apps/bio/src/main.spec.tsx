@@ -5,7 +5,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 /**
  * Starts the remote the way its own index.html does: the entry reads the view
@@ -32,7 +32,7 @@ beforeEach(() => {
 
 test(
   "refuses to start against a document with no remote root",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = "<main></main>";
 
@@ -42,7 +42,7 @@ test(
 
 test(
   "mounts the biography a visitor arriving at the remote came for",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await startRemote();
 
@@ -54,7 +54,7 @@ test(
 
 test(
   "shows the empty state to a visitor who steers the remote into it",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await startRemote("?bio-view=empty");
 
@@ -67,7 +67,7 @@ test(
 
 test(
   "shows the error state to a visitor who steers the remote into it",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await startRemote("?bio-view=error");
 
@@ -80,7 +80,7 @@ test(
 
 test(
   "ignores a view the route does not offer",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await startRemote("?bio-view=whatever");
 

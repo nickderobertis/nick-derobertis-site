@@ -9,7 +9,7 @@ import type { AwardsViewState } from "./use-awards";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 const awards = cvDataClient.domain("awards");
 let requested: URL[] = [];
@@ -48,7 +48,7 @@ afterEach(() => {
 
 test(
   "settles from its loading frame to the awards the CV publishes",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards(async () => awardsResponse(awards));
     const { useAwards } = await import("./use-awards");
@@ -69,7 +69,7 @@ test(
 
 test(
   "reports an error when the awards domain cannot be served",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards(async () =>
       awardsResponse({ error: "awards unavailable" }, 503),
@@ -84,7 +84,7 @@ test(
 
 test(
   "refuses a body the server itself reported as a failure",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     // A cache or gateway can answer a failed request with the last payload it
     // held, so the status is the only thing saying this is not the answer.
@@ -99,7 +99,7 @@ test(
 
 test(
   "reports an error rather than rendering awards that failed the CV schema",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards(async () => awardsResponse([{ id: 42 }]));
     const { useAwards } = await import("./use-awards");
@@ -112,7 +112,7 @@ test(
 
 test(
   "asks for the served scenario a visitor steered the pane into",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     window.history.replaceState(null, "", "/?awards-scenario=empty");
     serveAwards(async () => awardsResponse([]));
@@ -129,7 +129,7 @@ test(
 
 test(
   "ignores a scenario the served data cannot answer",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     window.history.replaceState(null, "", "/?awards-scenario=whatever");
     serveAwards(async () => awardsResponse(awards));
@@ -146,7 +146,7 @@ test(
 
 test(
   "mounts on its awards, with no loading frame, when a host warmed the pane",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards(async () => awardsResponse(awards));
     const { preloadAwards, useAwards } = await import("./use-awards");
@@ -161,7 +161,7 @@ test(
 
 test(
   "lets the pane make its own request after a warm that could not reach the CV",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards(async () =>
       awardsResponse({ error: "awards unavailable" }, 503),
@@ -179,7 +179,7 @@ test(
 
 test(
   "keeps one request alive when a pane unmounts before it settles",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     let serve: (() => void) | undefined;
     serveAwards(async () => {
@@ -208,7 +208,7 @@ test(
 
 test(
   "lets the next mount retry a request that failed after its pane left",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     let refuse: (() => void) | undefined;
     let served = 0;
@@ -239,7 +239,7 @@ test(
 
 test(
   "does not warm from the fragment prerender, which has no browser to fetch from",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     const server = serveAwards(async () => awardsResponse(awards));
     const { preloadAwards } = await import("./use-awards");
@@ -253,7 +253,7 @@ test(
 
 test(
   "starts on its loading frame when the fragment prerender renders it",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveAwards(async () => awardsResponse(awards));
     const { useAwards } = await import("./use-awards");

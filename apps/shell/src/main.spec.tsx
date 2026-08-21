@@ -19,7 +19,7 @@ import { createSiteRouter } from "./router";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 const domains = {
   courses: cvDataClient.domain("courses"),
@@ -141,7 +141,7 @@ afterEach(() => {
 
 test(
   "refuses to start against a document with no application root",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = "<main></main>";
 
@@ -151,7 +151,7 @@ test(
 
 test(
   "adopts the prerendered route a visitor is already looking at",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await serve("/bio");
     const published = screen.getByRole("heading", { name: "Optimizing Life" });
@@ -171,7 +171,7 @@ test(
 
 test(
   "throws the prerendered document away when another view was asked for",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await serve("/bio");
     const published = screen.getByRole("heading", { name: "Optimizing Life" });
@@ -188,7 +188,7 @@ test(
 
 test(
   "renders from scratch when the document ships no prerendered route",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveEmptyDocument("/");
 
@@ -202,7 +202,7 @@ test(
 
 test(
   "loads a route's CV domain through the site's own data host",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveEmptyDocument("/courses");
     serveCvDomains();
@@ -217,7 +217,7 @@ test(
 
 test(
   "fetches each other route's remote only once the visitor goes there",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     serveEmptyDocument("/");
     serveCvDomains();
@@ -243,7 +243,7 @@ test(
 
 test(
   "renders from scratch when the served payload carries no router state",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     // A document whose hydration script never ran leaves the shell with markup it
     // cannot take over, so it renders the route rather than hydrating onto it.
@@ -262,7 +262,7 @@ test(
 
 test(
   "renders from scratch when the served payload is not router state at all",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     await serve("/bio");
     Reflect.set(window, "$_TSR", "not router state");

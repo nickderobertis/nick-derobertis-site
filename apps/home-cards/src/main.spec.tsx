@@ -7,7 +7,7 @@ import HomeCardsPage from "./page";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 /**
  * The markup the remote's build publishes into its own index.html. It is
@@ -40,7 +40,7 @@ beforeEach(() => {
 
 test(
   "refuses to start against a document with no remote root",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = "<main></main>";
 
@@ -50,7 +50,7 @@ test(
 
 test(
   "adopts the cards a visitor is already looking at",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
     const published = pane();
@@ -66,7 +66,7 @@ test(
 
 test(
   "renders from scratch when the document ships no prerendered cards",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = '<div id="root"></div>';
 
@@ -84,7 +84,7 @@ test(
 
 test(
   "throws the published cards away for a visitor previewing another state",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     window.history.replaceState(null, "", "/?state=empty");
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;

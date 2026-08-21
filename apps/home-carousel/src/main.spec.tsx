@@ -7,7 +7,7 @@ import HomeCarouselPage from "./page";
 // that whole module graph again: 1.4s idle here, 12.6s under the contention
 // `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
 // Far past that rather than just past it, so it still bounds a genuine hang.
-const evaluatesAModuleGraph = { timeout: 120_000 };
+const moduleGraphCeiling = { timeout: 120_000 };
 
 /**
  * The markup the remote's build publishes into its own index.html. It is
@@ -40,7 +40,7 @@ beforeEach(() => {
 
 test(
   "refuses to start against a document with no remote root",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = "<main></main>";
 
@@ -50,7 +50,7 @@ test(
 
 test(
   "adopts the story a visitor is already looking at and makes it work",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
     const published = carousel();
@@ -70,7 +70,7 @@ test(
 
 test(
   "renders from scratch when the document ships no prerendered story",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     document.body.innerHTML = '<div id="root"></div>';
 
@@ -87,7 +87,7 @@ test(
 
 test(
   "throws the published story away for a visitor previewing another state",
-  evaluatesAModuleGraph,
+  moduleGraphCeiling,
   async () => {
     window.history.replaceState(null, "", "/?state=error");
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
