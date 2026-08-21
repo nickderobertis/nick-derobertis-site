@@ -1,4 +1,5 @@
 import { spawn, spawnSync } from "node:child_process";
+import { constants } from "node:os";
 import {
   fileSeparator,
   isJudgeablePath,
@@ -160,7 +161,7 @@ nx.on("error", (error) =>
     1,
   ),
 );
-nx.on("close", (status) => {
+nx.on("close", (status, signal) => {
   const printed = reported.replace(ansi, "");
   const provenance = replayMarkers.some((marker) => printed.includes(marker))
     ? `lint-llm-diff: replayed the recorded verdict for base ${judgedBase} (Nx cache hit)${declined}`
@@ -171,6 +172,17 @@ nx.on("close", (status) => {
   }
   process.stderr.write(reported);
   console.error(provenance);
+  // A dispatch the host killed carries no exit status, and the generic message
+  // below would send a reader to Nx, pnpm, or this target's configuration for a
+  // failure none of them caused — a wrong cause costs the session the diff was
+  // supposed to spend on findings. The signal is the cause, so it is what gets
+  // named, and it exits the way a shell reports one: 128 plus the signal number.
+  if (signal) {
+    console.error(
+      `lint-llm-diff: the judged tier was terminated by ${signal} before the judge could answer, so no verdict was reached or recorded; this is the host stopping the run rather than anything it reported, and an unasked-for SIGKILL is most often the out-of-memory killer — check the host, then rerun just lint-llm-diff ${named}`,
+    );
+    process.exit(128 + (constants.signals[signal] ?? 0));
+  }
   // The judge names its own verdict, so a failure that carries neither name is
   // one the judge never got to — Nx, pnpm, or the target's own configuration —
   // and is reported as that rather than as findings to go and clear.

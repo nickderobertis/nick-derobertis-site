@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { constants } from "node:os";
 import {
   isJudgeablePath,
   JudgeRuntimeError,
@@ -106,6 +107,19 @@ if (judged.error)
   refuse(
     `the judge could not be started (${judged.error.message}); run 'just setup-llmlint' and retry`,
   );
+// A judge the host killed reported nothing at all: `spawnSync` gives it no exit
+// status, and reading that absence as llmlint's own "the toolchain stopped"
+// status invents a cause and sends a reader to repair a judge that was working.
+// The signal is the cause, so it is what gets named, and it exits the way a
+// shell reports one — 128 plus the signal number — so nothing downstream reads
+// this run as a verdict either.
+if (judged.signal) {
+  process.stderr.write(`${judged.stdout ?? ""}${judged.stderr ?? ""}`);
+  console.error(
+    `lint-llm-diff: the judge never reached a verdict (llmlint was terminated by ${judged.signal} rather than exiting); this is the host stopping the process, not the judge reporting anything, and an unasked-for SIGKILL is most often the out-of-memory killer — check the host, then rerun just lint-llm-diff. Nothing was recorded, so that run judges this diff again`,
+  );
+  process.exit(128 + (constants.signals[judged.signal] ?? 0));
+}
 const status = judged.status ?? 2;
 if (status !== 0)
   process.stderr.write(`${judged.stdout ?? ""}${judged.stderr ?? ""}`);
