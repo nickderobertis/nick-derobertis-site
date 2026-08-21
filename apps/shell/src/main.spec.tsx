@@ -15,6 +15,20 @@ import ResearchPage from "../test-remotes/research-page";
 import SoftwarePage from "../test-remotes/software-page";
 import { createSiteRouter } from "./router";
 
+/**
+ * The ceiling every test below is held to, because each reaches its subject
+ * through `await import(...)` and `vi.resetModules()` makes it pay for that
+ * import afresh rather than reusing the last test's evaluation. What that costs
+ * is the subject's whole transitive graph being evaluated again — a cost set by
+ * the workspace's size and the host's load, not by this file: 90ms to 1.4s per
+ * test measured idle, reaching 5.6s and then 12.6s under the contention
+ * `nx affected --parallel=3` puts the gate under, which is past the runner's
+ * 5000ms default. It is set far past anything that import can cost rather than
+ * past today's contention — one chosen to clear a busy evening fails again on a
+ * busier one — so it still bounds a genuine hang and nothing else.
+ */
+const evaluatesAModuleGraph = { timeout: 120_000 };
+
 const domains = {
   courses: cvDataClient.domain("courses"),
   research: cvDataClient.domain("research"),
@@ -133,104 +147,138 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-test("refuses to start against a document with no application root", async () => {
-  document.body.innerHTML = "<main></main>";
+test(
+  "refuses to start against a document with no application root",
+  evaluatesAModuleGraph,
+  async () => {
+    document.body.innerHTML = "<main></main>";
 
-  await expect(import("./main")).rejects.toThrow("Missing application root");
-});
+    await expect(import("./main")).rejects.toThrow("Missing application root");
+  },
+);
 
-test("adopts the prerendered route a visitor is already looking at", async () => {
-  await serve("/bio");
-  const published = screen.getByRole("heading", { name: "Optimizing Life" });
+test(
+  "adopts the prerendered route a visitor is already looking at",
+  evaluatesAModuleGraph,
+  async () => {
+    await serve("/bio");
+    const published = screen.getByRole("heading", { name: "Optimizing Life" });
 
-  await startShell();
+    await startShell();
 
-  // Hydration takes over the shipped nodes in place, so the page the visitor
-  // has been reading since first paint is never torn down and repainted.
-  expect(screen.getByRole("heading", { name: "Optimizing Life" })).toBe(
-    published,
-  );
-  expect(
-    screen.getByRole("navigation", { name: "Primary" }),
-  ).toBeInTheDocument();
-});
+    // Hydration takes over the shipped nodes in place, so the page the visitor
+    // has been reading since first paint is never torn down and repainted.
+    expect(screen.getByRole("heading", { name: "Optimizing Life" })).toBe(
+      published,
+    );
+    expect(
+      screen.getByRole("navigation", { name: "Primary" }),
+    ).toBeInTheDocument();
+  },
+);
 
-test("throws the prerendered document away when another view was asked for", async () => {
-  await serve("/bio");
-  const published = screen.getByRole("heading", { name: "Optimizing Life" });
-  window.history.replaceState(null, "", `${siteBase}/bio?bio-view=empty`);
+test(
+  "throws the prerendered document away when another view was asked for",
+  evaluatesAModuleGraph,
+  async () => {
+    await serve("/bio");
+    const published = screen.getByRole("heading", { name: "Optimizing Life" });
+    window.history.replaceState(null, "", `${siteBase}/bio?bio-view=empty`);
 
-  await startShell();
+    await startShell();
 
-  // The document was published for the default view. Adopting it would leave
-  // one view's markup underneath another view's render, so it has to go.
-  expect(published).not.toBeInTheDocument();
-  expect(await screen.findByText("view: empty")).toBeInTheDocument();
-});
+    // The document was published for the default view. Adopting it would leave
+    // one view's markup underneath another view's render, so it has to go.
+    expect(published).not.toBeInTheDocument();
+    expect(await screen.findByText("view: empty")).toBeInTheDocument();
+  },
+);
 
-test("renders from scratch when the document ships no prerendered route", async () => {
-  serveEmptyDocument("/");
+test(
+  "renders from scratch when the document ships no prerendered route",
+  evaluatesAModuleGraph,
+  async () => {
+    serveEmptyDocument("/");
 
-  await startShell();
+    await startShell();
 
-  expect(
-    await screen.findByRole("heading", { name: "Finance researcher" }),
-  ).toBeInTheDocument();
-});
+    expect(
+      await screen.findByRole("heading", { name: "Finance researcher" }),
+    ).toBeInTheDocument();
+  },
+);
 
-test("loads a route's CV domain through the site's own data host", async () => {
-  serveEmptyDocument("/courses");
-  serveCvDomains();
+test(
+  "loads a route's CV domain through the site's own data host",
+  evaluatesAModuleGraph,
+  async () => {
+    serveEmptyDocument("/courses");
+    serveCvDomains();
 
-  await startShell();
+    await startShell();
 
-  expect(
-    await screen.findByText(`courses: ${domains.courses.length}`),
-  ).toBeInTheDocument();
-});
+    expect(
+      await screen.findByText(`courses: ${domains.courses.length}`),
+    ).toBeInTheDocument();
+  },
+);
 
-test("fetches each other route's remote only once the visitor goes there", async () => {
-  serveEmptyDocument("/");
-  serveCvDomains();
-  await startShell();
-  await screen.findByRole("heading", { name: "Finance researcher" });
+test(
+  "fetches each other route's remote only once the visitor goes there",
+  evaluatesAModuleGraph,
+  async () => {
+    serveEmptyDocument("/");
+    serveCvDomains();
+    await startShell();
+    await screen.findByRole("heading", { name: "Finance researcher" });
 
-  const deferredRoutes: [link: string, heading: string][] = [
-    ["Bio", "Optimizing Life"],
-    ["Research", "Research"],
-    ["Software", "Open-Source Software"],
-    ["Courses", "Courses"],
-  ];
+    const deferredRoutes: [link: string, heading: string][] = [
+      ["Bio", "Optimizing Life"],
+      ["Research", "Research"],
+      ["Software", "Open-Source Software"],
+      ["Courses", "Courses"],
+    ];
 
-  for (const [label, heading] of deferredRoutes) {
-    fireEvent.click(screen.getByRole("link", { name: label }));
+    for (const [label, heading] of deferredRoutes) {
+      fireEvent.click(screen.getByRole("link", { name: label }));
 
-    expect(await screen.findByRole("heading", { name: heading })).toBeVisible();
-  }
-});
+      expect(
+        await screen.findByRole("heading", { name: heading }),
+      ).toBeVisible();
+    }
+  },
+);
 
-test("renders from scratch when the served payload carries no router state", async () => {
-  // A document whose hydration script never ran leaves the shell with markup it
-  // cannot take over, so it renders the route rather than hydrating onto it.
-  await serve("/bio");
-  const published = screen.getByRole("heading", { name: "Optimizing Life" });
-  Reflect.set(window, "$_TSR", {});
+test(
+  "renders from scratch when the served payload carries no router state",
+  evaluatesAModuleGraph,
+  async () => {
+    // A document whose hydration script never ran leaves the shell with markup it
+    // cannot take over, so it renders the route rather than hydrating onto it.
+    await serve("/bio");
+    const published = screen.getByRole("heading", { name: "Optimizing Life" });
+    Reflect.set(window, "$_TSR", {});
 
-  await startShell();
+    await startShell();
 
-  expect(published).not.toBeInTheDocument();
-  expect(
-    await screen.findByRole("heading", { name: "Optimizing Life" }),
-  ).toBeInTheDocument();
-});
+    expect(published).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Optimizing Life" }),
+    ).toBeInTheDocument();
+  },
+);
 
-test("renders from scratch when the served payload is not router state at all", async () => {
-  await serve("/bio");
-  Reflect.set(window, "$_TSR", "not router state");
+test(
+  "renders from scratch when the served payload is not router state at all",
+  evaluatesAModuleGraph,
+  async () => {
+    await serve("/bio");
+    Reflect.set(window, "$_TSR", "not router state");
 
-  await startShell();
+    await startShell();
 
-  expect(
-    await screen.findByRole("heading", { name: "Optimizing Life" }),
-  ).toBeInTheDocument();
-});
+    expect(
+      await screen.findByRole("heading", { name: "Optimizing Life" }),
+    ).toBeInTheDocument();
+  },
+);

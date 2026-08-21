@@ -4,6 +4,20 @@ import { beforeEach, expect, test, vi } from "vitest";
 import TimelinePage from "./page";
 
 /**
+ * The ceiling every test below is held to, because each reaches its subject
+ * through `await import(...)` and `vi.resetModules()` makes it pay for that
+ * import afresh rather than reusing the last test's evaluation. What that costs
+ * is the subject's whole transitive graph being evaluated again — a cost set by
+ * the workspace's size and the host's load, not by this file: 90ms to 1.4s per
+ * test measured idle, reaching 5.6s and then 12.6s under the contention
+ * `nx affected --parallel=3` puts the gate under, which is past the runner's
+ * 5000ms default. It is set far past anything that import can cost rather than
+ * past today's contention — one chosen to clear a busy evening fails again on a
+ * busier one — so it still bounds a genuine hang and nothing else.
+ */
+const evaluatesAModuleGraph = { timeout: 120_000 };
+
+/**
  * The markup the remote's build publishes into its own index.html. Producing it
  * from the page itself is what makes the hydration below the real one: a
  * hand-written stand-in would prove nothing about the bytes a visitor receives.
@@ -34,47 +48,63 @@ beforeEach(() => {
   window.history.replaceState(null, "", "/");
 });
 
-test("refuses to start against a document with no remote root", async () => {
-  document.body.innerHTML = "<main></main>";
+test(
+  "refuses to start against a document with no remote root",
+  evaluatesAModuleGraph,
+  async () => {
+    document.body.innerHTML = "<main></main>";
 
-  await expect(import("./main")).rejects.toThrow("Missing remote root");
-});
+    await expect(import("./main")).rejects.toThrow("Missing remote root");
+  },
+);
 
-test("adopts the published history a visitor is already looking at", async () => {
-  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  const published = pane();
+test(
+  "adopts the published history a visitor is already looking at",
+  evaluatesAModuleGraph,
+  async () => {
+    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+    const published = pane();
 
-  await startRemote();
+    await startRemote();
 
-  // Hydration takes over the shipped nodes in place, so the chart the visitor
-  // has been looking at since first paint is never torn down and repainted.
-  expect(pane()).toBe(published);
-  expect(
-    screen.getByRole("checkbox", { name: "Employment" }),
-  ).toBeInTheDocument();
-});
+    // Hydration takes over the shipped nodes in place, so the chart the visitor
+    // has been looking at since first paint is never torn down and repainted.
+    expect(pane()).toBe(published);
+    expect(
+      screen.getByRole("checkbox", { name: "Employment" }),
+    ).toBeInTheDocument();
+  },
+);
 
-test("renders from scratch when the document ships no prerendered history", async () => {
-  document.body.innerHTML = '<div id="root"></div>';
+test(
+  "renders from scratch when the document ships no prerendered history",
+  evaluatesAModuleGraph,
+  async () => {
+    document.body.innerHTML = '<div id="root"></div>';
 
-  await startRemote();
+    await startRemote();
 
-  expect(
-    await screen.findByRole("region", { name: "Educated and Experienced" }),
-  ).toBeInTheDocument();
-});
+    expect(
+      await screen.findByRole("region", { name: "Educated and Experienced" }),
+    ).toBeInTheDocument();
+  },
+);
 
-test("throws the published history away when another state was asked for", async () => {
-  window.history.replaceState(null, "", "/?timeline-state=error");
-  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  const published = pane();
+test(
+  "throws the published history away when another state was asked for",
+  evaluatesAModuleGraph,
+  async () => {
+    window.history.replaceState(null, "", "/?timeline-state=error");
+    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+    const published = pane();
 
-  await startRemote();
+    await startRemote();
 
-  // The fragment was published for the settled history. Adopting it would leave
-  // one state's markup underneath another state's render, so it has to go.
-  expect(published).not.toBeInTheDocument();
-  expect(await screen.findByRole("alert")).toHaveTextContent(
-    "Timeline unavailable",
-  );
-});
+    // The fragment was published for the settled history. Adopting it would leave
+    // one state's markup underneath another state's render, so it has to go.
+    expect(published).not.toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Timeline unavailable",
+    );
+  },
+);

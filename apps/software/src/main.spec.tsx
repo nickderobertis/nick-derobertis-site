@@ -2,15 +2,18 @@ import { act, screen } from "@testing-library/react";
 import { beforeEach, expect, test, vi } from "vitest";
 
 /**
- * Every test here imports the remote's entry, and `vi.resetModules()` makes
- * each pay for that import afresh, so what each is bounded by is the remote's
- * whole module graph being evaluated — a cost that tracks the workspace's size
- * and the machine's load rather than the test's own work, and one the runner's
- * 5000ms default sits inside once `nx affected --parallel=3` contends for the
- * CPU. The ceiling is set far past what that import can cost rather than past
- * the contention of the day, so it still bounds a genuine hang.
+ * The ceiling every test below is held to, because each reaches its subject
+ * through `await import(...)` and `vi.resetModules()` makes it pay for that
+ * import afresh rather than reusing the last test's evaluation. What that costs
+ * is the subject's whole transitive graph being evaluated again — a cost set by
+ * the workspace's size and the host's load, not by this file: 90ms to 1.4s per
+ * test measured idle, reaching 5.6s and then 12.6s under the contention
+ * `nx affected --parallel=3` puts the gate under, which is past the runner's
+ * 5000ms default. It is set far past anything that import can cost rather than
+ * past today's contention — one chosen to clear a busy evening fails again on a
+ * busier one — so it still bounds a genuine hang and nothing else.
  */
-const entryImportCeiling = { timeout: 120_000 };
+const evaluatesAModuleGraph = { timeout: 120_000 };
 
 /**
  * Starts the remote the way its own index.html does: the entry reads the view
@@ -37,7 +40,7 @@ beforeEach(() => {
 
 test(
   "refuses to start against a document with no remote root",
-  entryImportCeiling,
+  evaluatesAModuleGraph,
   async () => {
     document.body.innerHTML = "<main></main>";
 
@@ -47,7 +50,7 @@ test(
 
 test(
   "mounts the portfolio a visitor arriving at the remote came for",
-  entryImportCeiling,
+  evaluatesAModuleGraph,
   async () => {
     await startRemote();
 
@@ -60,7 +63,7 @@ test(
 
 test(
   "shows the empty state to a visitor who steers the remote into it",
-  entryImportCeiling,
+  evaluatesAModuleGraph,
   async () => {
     await startRemote("?software-view=empty");
 
@@ -75,7 +78,7 @@ test(
 
 test(
   "shows the error state to a visitor who steers the remote into it",
-  entryImportCeiling,
+  evaluatesAModuleGraph,
   async () => {
     await startRemote("?software-view=error");
 
@@ -90,7 +93,7 @@ test(
 
 test(
   "ignores a view the route does not offer",
-  entryImportCeiling,
+  evaluatesAModuleGraph,
   async () => {
     await startRemote("?software-view=whatever");
 

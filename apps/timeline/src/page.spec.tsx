@@ -3,6 +3,20 @@ import { render, screen } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
+/**
+ * The ceiling every test below is held to, because each reaches its subject
+ * through `await import(...)` and `vi.resetModules()` makes it pay for that
+ * import afresh rather than reusing the last test's evaluation. What that costs
+ * is the subject's whole transitive graph being evaluated again — a cost set by
+ * the workspace's size and the host's load, not by this file: 90ms to 1.4s per
+ * test measured idle, reaching 5.6s and then 12.6s under the contention
+ * `nx affected --parallel=3` puts the gate under, which is past the runner's
+ * 5000ms default. It is set far past anything that import can cost rather than
+ * past today's contention — one chosen to clear a busy evening fails again on a
+ * busier one — so it still bounds a genuine hang and nothing else.
+ */
+const evaluatesAModuleGraph = { timeout: 120_000 };
+
 const entries = cvDataClient.domain("timeline");
 
 async function renderPane() {
@@ -30,76 +44,103 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-test("renders the CV's whole history for a visitor who just arrives", async () => {
-  await renderPane();
+test(
+  "renders the CV's whole history for a visitor who just arrives",
+  evaluatesAModuleGraph,
+  async () => {
+    await renderPane();
 
-  expect(
-    screen.getByRole("region", { name: "Educated and Experienced" }),
-  ).toBeInTheDocument();
-  expect(
-    screen.getByRole("heading", { level: 2, name: "Educated and Experienced" }),
-  ).toBeInTheDocument();
-  expect(chart()).toBeInTheDocument();
-  expect(screen.getAllByRole("article")).toHaveLength(entries.length);
-});
+    expect(
+      screen.getByRole("region", { name: "Educated and Experienced" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Educated and Experienced",
+      }),
+    ).toBeInTheDocument();
+    expect(chart()).toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(entries.length);
+  },
+);
 
-test("holds the loading frame for a visitor steering the pane into it", async () => {
-  openWith("/?timeline-state=loading");
+test(
+  "holds the loading frame for a visitor steering the pane into it",
+  evaluatesAModuleGraph,
+  async () => {
+    openWith("/?timeline-state=loading");
 
-  await renderPane();
+    await renderPane();
 
-  expect(
-    screen.getByRole("status", { name: "Loading timeline" }),
-  ).toBeInTheDocument();
-  expect(chart()).not.toBeInTheDocument();
-});
+    expect(
+      screen.getByRole("status", { name: "Loading timeline" }),
+    ).toBeInTheDocument();
+    expect(chart()).not.toBeInTheDocument();
+  },
+);
 
-test("keeps the pane's heading when the CV records no history", async () => {
-  openWith("/?timeline-state=empty");
+test(
+  "keeps the pane's heading when the CV records no history",
+  evaluatesAModuleGraph,
+  async () => {
+    openWith("/?timeline-state=empty");
 
-  await renderPane();
+    await renderPane();
 
-  // The empty report sits inside the pane rather than replacing it, so a
-  // visitor still knows which pane is telling them there is nothing to show.
-  expect(
-    screen.getByRole("region", { name: "Educated and Experienced" }),
-  ).toBeInTheDocument();
-  expect(screen.getByRole("status")).toHaveTextContent(
-    "No education or employment entries are available.",
-  );
-  expect(chart()).not.toBeInTheDocument();
-});
+    // The empty report sits inside the pane rather than replacing it, so a
+    // visitor still knows which pane is telling them there is nothing to show.
+    expect(
+      screen.getByRole("region", { name: "Educated and Experienced" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "No education or employment entries are available.",
+    );
+    expect(chart()).not.toBeInTheDocument();
+  },
+);
 
-test("reports an unavailable timeline as an alert in place of the pane", async () => {
-  openWith("/?timeline-state=error");
+test(
+  "reports an unavailable timeline as an alert in place of the pane",
+  evaluatesAModuleGraph,
+  async () => {
+    openWith("/?timeline-state=error");
 
-  await renderPane();
+    await renderPane();
 
-  expect(screen.getByRole("alert")).toHaveTextContent("Timeline unavailable");
-  expect(
-    screen.queryByRole("region", { name: "Educated and Experienced" }),
-  ).not.toBeInTheDocument();
-});
+    expect(screen.getByRole("alert")).toHaveTextContent("Timeline unavailable");
+    expect(
+      screen.queryByRole("region", { name: "Educated and Experienced" }),
+    ).not.toBeInTheDocument();
+  },
+);
 
-test("ignores a steer it has no state for and shows the history", async () => {
-  openWith("/?timeline-state=not-a-timeline-state");
+test(
+  "ignores a steer it has no state for and shows the history",
+  evaluatesAModuleGraph,
+  async () => {
+    openWith("/?timeline-state=not-a-timeline-state");
 
-  await renderPane();
+    await renderPane();
 
-  expect(chart()).toBeInTheDocument();
-});
+    expect(chart()).toBeInTheDocument();
+  },
+);
 
-test("prerenders the settled history the built fragment ships", async () => {
-  const { default: TimelinePage } = await import("./page");
-  vi.stubGlobal("window", undefined);
+test(
+  "prerenders the settled history the built fragment ships",
+  evaluatesAModuleGraph,
+  async () => {
+    const { default: TimelinePage } = await import("./page");
+    vi.stubGlobal("window", undefined);
 
-  const { prelude } = await prerender(<TimelinePage />);
-  const html = await new Response(prelude).text();
+    const { prelude } = await prerender(<TimelinePage />);
+    const html = await new Response(prelude).text();
 
-  vi.unstubAllGlobals();
-  // The build writes this markup straight into the published fragment, so parse
-  // it the way a browser does before asking what a visitor finds in it.
-  document.body.innerHTML = html;
-  expect(chart()).toBeInTheDocument();
-  expect(screen.getAllByRole("article")).toHaveLength(entries.length);
-});
+    vi.unstubAllGlobals();
+    // The build writes this markup straight into the published fragment, so parse
+    // it the way a browser does before asking what a visitor finds in it.
+    document.body.innerHTML = html;
+    expect(chart()).toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(entries.length);
+  },
+);
