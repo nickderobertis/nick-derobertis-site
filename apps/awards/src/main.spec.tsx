@@ -4,6 +4,12 @@ import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import AwardsPage from "./page";
 
+// `vi.resetModules()` makes every test below re-import its subject, evaluating
+// that whole module graph again: 1.4s idle here, 12.6s under the contention
+// `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
+// Far past that rather than just past it, so it still bounds a genuine hang.
+const moduleGraphCeiling = { timeout: 120_000 };
+
 const awards = cvDataClient.domain("awards");
 
 /**
@@ -56,75 +62,99 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-test("refuses to start against a document with no remote root", async () => {
-  document.body.innerHTML = "<main></main>";
+test(
+  "refuses to start against a document with no remote root",
+  moduleGraphCeiling,
+  async () => {
+    document.body.innerHTML = "<main></main>";
 
-  await expect(import("./main")).rejects.toThrow("Missing remote root");
-});
+    await expect(import("./main")).rejects.toThrow("Missing remote root");
+  },
+);
 
-test("hydrates the published fragment into the awards a visitor came for", async () => {
-  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  expect(
-    screen.getByRole("status", { name: "Loading awards" }),
-  ).toBeInTheDocument();
+test(
+  "hydrates the published fragment into the awards a visitor came for",
+  moduleGraphCeiling,
+  async () => {
+    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+    expect(
+      screen.getByRole("status", { name: "Loading awards" }),
+    ).toBeInTheDocument();
 
-  await startRemote();
+    await startRemote();
 
-  expect(
-    await screen.findByRole("region", { name: "Selected awards" }),
-  ).toBeInTheDocument();
-  expect(
-    screen.queryByRole("status", { name: "Loading awards" }),
-  ).not.toBeInTheDocument();
-});
+    expect(
+      await screen.findByRole("region", { name: "Selected awards" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("status", { name: "Loading awards" }),
+    ).not.toBeInTheDocument();
+  },
+);
 
-test("renders from scratch when the document ships no prerendered awards", async () => {
-  document.body.innerHTML = '<div id="root"></div>';
+test(
+  "renders from scratch when the document ships no prerendered awards",
+  moduleGraphCeiling,
+  async () => {
+    document.body.innerHTML = '<div id="root"></div>';
 
-  await startRemote();
+    await startRemote();
 
-  expect(
-    await screen.findByRole("region", { name: "Selected awards" }),
-  ).toBeInTheDocument();
-});
+    expect(
+      await screen.findByRole("region", { name: "Selected awards" }),
+    ).toBeInTheDocument();
+  },
+);
 
-test("shows the complete set to a visitor who arrives asking for it", async () => {
-  // The published fragment can only ever settle onto the selected view, so a
-  // visitor arriving with a query has to be given what they asked for instead.
-  window.history.replaceState(null, "", "/?awards-view=all");
-  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+test(
+  "shows the complete set to a visitor who arrives asking for it",
+  moduleGraphCeiling,
+  async () => {
+    // The published fragment can only ever settle onto the selected view, so a
+    // visitor arriving with a query has to be given what they asked for instead.
+    window.history.replaceState(null, "", "/?awards-view=all");
+    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
 
-  await startRemote();
+    await startRemote();
 
-  expect(
-    await screen.findByRole("region", { name: "Awards & honors" }),
-  ).toBeInTheDocument();
-  expect(
-    screen.queryByRole("region", { name: "Selected awards" }),
-  ).not.toBeInTheDocument();
-});
+    expect(
+      await screen.findByRole("region", { name: "Awards & honors" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Selected awards" }),
+    ).not.toBeInTheDocument();
+  },
+);
 
-test("adopts the loading frame a visitor is already looking at", async () => {
-  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  const published = loadingFrame();
+test(
+  "adopts the loading frame a visitor is already looking at",
+  moduleGraphCeiling,
+  async () => {
+    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+    const published = loadingFrame();
 
-  await startRemoteOnPendingAwards();
+    await startRemoteOnPendingAwards();
 
-  // Hydration takes over the shipped nodes in place, so the frame the visitor
-  // has been watching since first paint is never torn down and repainted.
-  expect(loadingFrame()).toBe(published);
-});
+    // Hydration takes over the shipped nodes in place, so the frame the visitor
+    // has been watching since first paint is never torn down and repainted.
+    expect(loadingFrame()).toBe(published);
+  },
+);
 
-test("throws the published frame away when it was rendered for another view", async () => {
-  window.history.replaceState(null, "", "/?awards-view=all");
-  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  const published = loadingFrame();
+test(
+  "throws the published frame away when it was rendered for another view",
+  moduleGraphCeiling,
+  async () => {
+    window.history.replaceState(null, "", "/?awards-view=all");
+    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+    const published = loadingFrame();
 
-  await startRemoteOnPendingAwards();
+    await startRemoteOnPendingAwards();
 
-  // The fragment was published for the selected view. Adopting it would leave
-  // one view's markup underneath another view's render, so this visitor's
-  // frame has to be a fresh one.
-  expect(published).not.toBeInTheDocument();
-  expect(loadingFrame()).not.toBe(published);
-});
+    // The fragment was published for the selected view. Adopting it would leave
+    // one view's markup underneath another view's render, so this visitor's
+    // frame has to be a fresh one.
+    expect(published).not.toBeInTheDocument();
+    expect(loadingFrame()).not.toBe(published);
+  },
+);

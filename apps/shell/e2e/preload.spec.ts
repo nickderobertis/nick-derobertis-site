@@ -1,5 +1,10 @@
 import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
+import {
+  hoverUntilPreloading,
+  hoverUntilRemoteRequested,
+  navLink,
+} from "@site/e2e-harness";
 import { z } from "zod";
 
 // llmlint: ignore-block[tests_mirror_real_usage] "Hover a link, then click, and the switch is instant" and "startup never fetched that remote at all" are only observable through request and DOM-mutation instrumentation, because a warm arrival is defined by requests that never repeat, a deferred remote by requests that never happen, and both by skeletons that never appear. Every navigation still uses the real header links with real hover and click input.
@@ -123,42 +128,6 @@ async function openBio(page: Page) {
   await expect(
     page.getByRole("heading", { name: "Optimizing Life" }),
   ).toBeVisible();
-}
-
-const navLink = (page: Page, label: string) =>
-  page.getByRole("link", { name: label, exact: true });
-
-/**
- * Hovers a header link until the router acts on it.
- *
- * Hover intent is edge-triggered: the router preloads when the pointer enters
- * the link, so a pointer already resting there when hydration attaches that
- * listener raises no entry at all, and waiting cannot recover an event that
- * never fired. `networkidle` reports the network rather than the main thread,
- * so on a loaded runner it arrives while hydration is still queued behind it
- * and that single hover is lost for good. The pointer therefore leaves the link
- * and comes back, the way a visitor's would, until the preload has started. It
- * rests on the route's own heading in between, which is text rather than a link
- * and so asks for nothing itself.
- */
-async function hoverUntilPreloading(
-  page: Page,
-  label: string,
-  preloading: () => boolean,
-) {
-  const link = navLink(page, label);
-  await link.hover();
-  await expect
-    .poll(async () => {
-      if (preloading()) return true;
-      await page.getByRole("heading", { level: 1 }).hover();
-      await link.hover();
-      // The router holds intent behind a short timer, so each entry is given
-      // room to elapse before the next attempt moves the pointer off it again.
-      await page.waitForTimeout(500);
-      return preloading();
-    })
-    .toBe(true);
 }
 
 /**
@@ -328,11 +297,22 @@ test("entering at Home hydrates its prerendered panes and still defers the leaf 
 
   // The deferred remotes cost nothing because the document really did hydrate:
   // its header links navigate in place and pull Bio's remote in on demand.
+  //
+  // Every assertion above this line is about remotes that were never fetched,
+  // so the barrier belongs here and nowhere earlier: hovering Bio fetches it.
+  // Below the line the claim is the opposite one — that the click was an SPA
+  // transition — and that is only true once the router owns the document, which
+  // none of the prerendered DOM asserted on above reports.
+  const bio = await hoverUntilRemoteRequested(
+    page,
+    "Bio",
+    () => assetsFor("bio").length > 0,
+  );
   let documentRequests = 0;
   page.on("request", (request) => {
     if (request.isNavigationRequest()) documentRequests += 1;
   });
-  await navLink(page, "Bio").click();
+  await bio.click();
 
   await expect(
     page.getByRole("heading", { name: "Optimizing Life" }),

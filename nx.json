@@ -3,6 +3,7 @@
   "defaultBase": "master",
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "wholeWorkspace": ["{workspaceRoot}/**/*"],
     "production": [
       "default",
       "!{projectRoot}/**/*.spec.ts",
@@ -36,6 +37,15 @@
     },
     "screenshot": {
       "cache": false
+    },
+    "lint-llm-diff": {
+      "cache": true,
+      "inputs": [
+        "wholeWorkspace",
+        { "env": "LLMLINT_DIFF_BASE" },
+        { "env": "LLMLINT_DIFF_FILES" },
+        { "env": "LLMLINT_JUDGE_FINGERPRINT" }
+      ]
     }
   },
   "plugins": ["./scripts/workspace/federation-plugin.mjs"]

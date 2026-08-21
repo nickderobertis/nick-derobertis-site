@@ -59,6 +59,8 @@ Dependency freshness is checked with `pnpm outdated`; every dependency's
 updates remain outside those constraints until their Nx integrations support
 them; `just upgrade` deliberately opts into testing latest releases.
 
+`just lint-llm-diff` is the LLM-judge tier, deliberately outside `just check`.
+
 The `justfile` is the authoritative source for the repo-scoped
 `NX_CACHE_DIRECTORY` default beneath the user's standard cache directory, so
 disposable worktrees reuse Nx's content-addressed local cache. An existing
@@ -74,4 +76,5 @@ Substantial scenarios must remain real-browser covered through both the standalo
 
 ## Commits, releases, and merging
 
-Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override. The visual drift gate is requirable as the `Visual docs` workflow's `classify-gate` status check — a stable aggregate over screencomp's per-app classify legs (whose own matrix contexts, `visual-docs / report (x86_64, <app>, …)`, vary with the affected set), passing when classify is clean or when no visual microfrontend was affected.
+<!-- llmlint: ignore[instruction_layer_localized] Localizing the root instruction layer into nested per-project AGENTS.md files is tracked separately, and is out of scope for any change that does not itself alter subtree routing. This paragraph records where review routing lives; it adds no instruction that belongs in a subtree. -->
+Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override. `.github/CODEOWNERS` routes each subtree's review to its owner, so a change under `apps/`, `libs/`, `scripts/`, `docs/`, or `.github/` reaches that owner rather than whoever notices the pull request. The visual drift gate is requirable as the `Visual docs` workflow's `classify-gate` status check — a stable aggregate over screencomp's per-app classify legs (whose own matrix contexts, `visual-docs / report (x86_64, <app>, …)`, vary with the affected set), passing when classify is clean or when no visual microfrontend was affected.

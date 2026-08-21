@@ -9,6 +9,7 @@ import {
 import {
   type HomePaneRemote,
   homePanes,
+  hoverUntilRemoteRequested,
   type RoutePath,
   siteRoutes,
 } from "@site/e2e-harness";
@@ -213,6 +214,15 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     });
     page.on("pageerror", (error) => errors.push(error.message));
 
+    // llmlint: ignore-block[tests_mirror_real_usage] The two claims this journey turns on — that the router owns the document before the click, and that the click never left it — have no user-visible form: the DOM is prerendered identically either way, so a visitor and a locator alike see the same page hydrated or not. Counting the router's preload of Home and the browser's navigation requests is the only way to state them. Every navigation below is the real header link driven by real hover and click, and every other assertion reads the page through roles and accessible names.
+    // Entering at a leaf route leaves Home's remote deferred, so the router's
+    // preload of it is an event this page has not raised yet — which is what
+    // makes it usable as the barrier below.
+    let homeRequests = 0;
+    page.on("request", (request) => {
+      if (/\/remotes\/home\//.test(request.url())) homeRequests += 1;
+    });
+
     await page.goto(`${route.path}#main-content`, { waitUntil: "networkidle" });
     await expect(
       page.getByRole("heading", { name: route.heading }),
@@ -220,15 +230,30 @@ test("leaf routes reuse prerendered DOM without hydration warnings and navigate 
     await expect(page.getByRole("main")).toBeFocused();
     expect(errors).toEqual([]);
 
+    // Nothing asserted above reports that the router owns the document: the
+    // heading and the focused main are prerendered, and `networkidle` reports
+    // the network rather than the main thread. Clicking straight from here
+    // decides a race the browser wins on a loaded runner, following the href
+    // for real. Wait for Home's preload — which only a hydrated listener can
+    // raise — and the click that follows is the SPA transition this asserts on.
+    const home = await hoverUntilRemoteRequested(
+      page,
+      "Home",
+      () => homeRequests > 0,
+    );
+
     let documentRequests = 0;
     page.on("request", (request) => {
       if (request.isNavigationRequest()) documentRequests += 1;
     });
-    await page.getByRole("link", { name: "Home", exact: true }).click();
+    await home.click();
     await expect(page).toHaveURL(/nick-derobertis-site\/$/);
+    // The route's own link needs no second barrier: the click above stayed in
+    // the document, so the router that served it is still the one running.
     await page.getByRole("link", { name: route.link, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/${route.path}$`));
     expect(documentRequests).toBe(0);
+    // llmlint: ignore-end[tests_mirror_real_usage]
     await page.close();
   }
 });

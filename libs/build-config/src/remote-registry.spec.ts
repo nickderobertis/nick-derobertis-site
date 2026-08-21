@@ -5,6 +5,13 @@ import { join } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
 import { remoteRegistry, validatedRemoteRegistry } from "./remote-registry";
 
+// The two tests below each drive the registry loader as a real process, whose
+// cost is a Node runtime starting and type-stripping its way to the module —
+// host-bound, and past Vitest's 5000ms default once `nx affected --parallel=3`
+// contends for the CPU. Far past that rather than just past it, so it still
+// bounds a genuine hang.
+const realProcessCeiling = { timeout: 300_000 };
+
 const roots: string[] = [];
 
 afterEach(async () => {
@@ -83,19 +90,29 @@ describe("the canonical remote registry", () => {
   // standalone remote document nor a host-composed pane exists to render — so
   // the failure is observed where it happens, in a real process loading the
   // real module against a real registry file.
-  test("a real process refuses to load a registry that declares no remote", async () => {
-    const result = await importWithRegistry("{}\n");
+  test(
+    "a real process refuses to load a registry that declares no remote",
+    realProcessCeiling,
+    async () => {
+      const result = await importWithRegistry("{}\n");
 
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain(
-      "must map every remote's project name to a federation alias string",
-    );
-  });
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain(
+        "must map every remote's project name to a federation alias string",
+      );
+    },
+  );
 
-  test("a real process loads a registry that declares a well formed remote", async () => {
-    const result = await importWithRegistry('{ "home-cards": "homeCards" }\n');
+  test(
+    "a real process loads a registry that declares a well formed remote",
+    realProcessCeiling,
+    async () => {
+      const result = await importWithRegistry(
+        '{ "home-cards": "homeCards" }\n',
+      );
 
-    expect(result.status).toBe(0);
-    expect(result.stderr).toBe("");
-  });
+      expect(result.status).toBe(0);
+      expect(result.stderr).toBe("");
+    },
+  );
 });

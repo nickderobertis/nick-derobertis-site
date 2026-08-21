@@ -5,6 +5,12 @@ import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import type { AwardsViewState } from "./use-awards";
 
+// `vi.resetModules()` makes every test below re-import its subject, evaluating
+// that whole module graph again: 1.4s idle here, 12.6s under the contention
+// `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
+// Far past that rather than just past it, so it still bounds a genuine hang.
+const moduleGraphCeiling = { timeout: 120_000 };
+
 const awards = cvDataClient.domain("awards");
 let requested: URL[] = [];
 
@@ -40,177 +46,229 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-test("settles from its loading frame to the awards the CV publishes", async () => {
-  serveAwards(async () => awardsResponse(awards));
-  const { useAwards } = await import("./use-awards");
+test(
+  "settles from its loading frame to the awards the CV publishes",
+  moduleGraphCeiling,
+  async () => {
+    serveAwards(async () => awardsResponse(awards));
+    const { useAwards } = await import("./use-awards");
 
-  const { result } = renderHook(() => useAwards());
+    const { result } = renderHook(() => useAwards());
 
-  expect(result.current).toEqual({ name: "loading" });
-  await waitFor(() =>
-    expect(result.current).toEqual({ name: "ready", awards }),
-  );
-  expect(requested).toHaveLength(1);
-  expect(requested[0]?.pathname).toBe(
-    "/nick-derobertis-site/cv-data/domains/awards.json",
-  );
-  expect(requested[0]?.search).toBe("");
-});
+    expect(result.current).toEqual({ name: "loading" });
+    await waitFor(() =>
+      expect(result.current).toEqual({ name: "ready", awards }),
+    );
+    expect(requested).toHaveLength(1);
+    expect(requested[0]?.pathname).toBe(
+      "/nick-derobertis-site/cv-data/domains/awards.json",
+    );
+    expect(requested[0]?.search).toBe("");
+  },
+);
 
-test("reports an error when the awards domain cannot be served", async () => {
-  serveAwards(async () => awardsResponse({ error: "awards unavailable" }, 503));
-  const { useAwards } = await import("./use-awards");
+test(
+  "reports an error when the awards domain cannot be served",
+  moduleGraphCeiling,
+  async () => {
+    serveAwards(async () =>
+      awardsResponse({ error: "awards unavailable" }, 503),
+    );
+    const { useAwards } = await import("./use-awards");
 
-  const { result } = renderHook(() => useAwards());
+    const { result } = renderHook(() => useAwards());
 
-  await waitFor(() => expect(result.current).toEqual({ name: "error" }));
-});
+    await waitFor(() => expect(result.current).toEqual({ name: "error" }));
+  },
+);
 
-test("refuses a body the server itself reported as a failure", async () => {
-  // A cache or gateway can answer a failed request with the last payload it
-  // held, so the status is the only thing saying this is not the answer.
-  serveAwards(async () => awardsResponse(awards, 503));
-  const { useAwards } = await import("./use-awards");
+test(
+  "refuses a body the server itself reported as a failure",
+  moduleGraphCeiling,
+  async () => {
+    // A cache or gateway can answer a failed request with the last payload it
+    // held, so the status is the only thing saying this is not the answer.
+    serveAwards(async () => awardsResponse(awards, 503));
+    const { useAwards } = await import("./use-awards");
 
-  const { result } = renderHook(() => useAwards());
+    const { result } = renderHook(() => useAwards());
 
-  await waitFor(() => expect(result.current).toEqual({ name: "error" }));
-});
+    await waitFor(() => expect(result.current).toEqual({ name: "error" }));
+  },
+);
 
-test("reports an error rather than rendering awards that failed the CV schema", async () => {
-  serveAwards(async () => awardsResponse([{ id: 42 }]));
-  const { useAwards } = await import("./use-awards");
+test(
+  "reports an error rather than rendering awards that failed the CV schema",
+  moduleGraphCeiling,
+  async () => {
+    serveAwards(async () => awardsResponse([{ id: 42 }]));
+    const { useAwards } = await import("./use-awards");
 
-  const { result } = renderHook(() => useAwards());
+    const { result } = renderHook(() => useAwards());
 
-  await waitFor(() => expect(result.current).toEqual({ name: "error" }));
-});
+    await waitFor(() => expect(result.current).toEqual({ name: "error" }));
+  },
+);
 
-test("asks for the served scenario a visitor steered the pane into", async () => {
-  window.history.replaceState(null, "", "/?awards-scenario=empty");
-  serveAwards(async () => awardsResponse([]));
-  const { useAwards } = await import("./use-awards");
+test(
+  "asks for the served scenario a visitor steered the pane into",
+  moduleGraphCeiling,
+  async () => {
+    window.history.replaceState(null, "", "/?awards-scenario=empty");
+    serveAwards(async () => awardsResponse([]));
+    const { useAwards } = await import("./use-awards");
 
-  const { result } = renderHook(() => useAwards());
+    const { result } = renderHook(() => useAwards());
 
-  await waitFor(() =>
-    expect(result.current).toEqual({ name: "ready", awards: [] }),
-  );
-  expect(requested[0]?.searchParams.get("scenario")).toBe("empty");
-});
+    await waitFor(() =>
+      expect(result.current).toEqual({ name: "ready", awards: [] }),
+    );
+    expect(requested[0]?.searchParams.get("scenario")).toBe("empty");
+  },
+);
 
-test("ignores a scenario the served data cannot answer", async () => {
-  window.history.replaceState(null, "", "/?awards-scenario=whatever");
-  serveAwards(async () => awardsResponse(awards));
-  const { useAwards } = await import("./use-awards");
+test(
+  "ignores a scenario the served data cannot answer",
+  moduleGraphCeiling,
+  async () => {
+    window.history.replaceState(null, "", "/?awards-scenario=whatever");
+    serveAwards(async () => awardsResponse(awards));
+    const { useAwards } = await import("./use-awards");
 
-  const { result } = renderHook(() => useAwards());
+    const { result } = renderHook(() => useAwards());
 
-  await waitFor(() =>
-    expect(result.current).toEqual({ name: "ready", awards }),
-  );
-  expect(requested[0]?.searchParams.get("scenario")).toBeNull();
-});
+    await waitFor(() =>
+      expect(result.current).toEqual({ name: "ready", awards }),
+    );
+    expect(requested[0]?.searchParams.get("scenario")).toBeNull();
+  },
+);
 
-test("mounts on its awards, with no loading frame, when a host warmed the pane", async () => {
-  serveAwards(async () => awardsResponse(awards));
-  const { preloadAwards, useAwards } = await import("./use-awards");
-  await preloadAwards();
+test(
+  "mounts on its awards, with no loading frame, when a host warmed the pane",
+  moduleGraphCeiling,
+  async () => {
+    serveAwards(async () => awardsResponse(awards));
+    const { preloadAwards, useAwards } = await import("./use-awards");
+    await preloadAwards();
 
-  const { result } = renderHook(() => useAwards());
+    const { result } = renderHook(() => useAwards());
 
-  expect(result.current).toEqual({ name: "ready", awards });
-  expect(requested).toHaveLength(1);
-});
+    expect(result.current).toEqual({ name: "ready", awards });
+    expect(requested).toHaveLength(1);
+  },
+);
 
-test("lets the pane make its own request after a warm that could not reach the CV", async () => {
-  serveAwards(async () => awardsResponse({ error: "awards unavailable" }, 503));
-  const { preloadAwards, useAwards } = await import("./use-awards");
+test(
+  "lets the pane make its own request after a warm that could not reach the CV",
+  moduleGraphCeiling,
+  async () => {
+    serveAwards(async () =>
+      awardsResponse({ error: "awards unavailable" }, 503),
+    );
+    const { preloadAwards, useAwards } = await import("./use-awards");
 
-  await expect(preloadAwards()).resolves.toBeUndefined();
+    await expect(preloadAwards()).resolves.toBeUndefined();
 
-  expect(requested).toHaveLength(1);
-  const { result } = renderHook(() => useAwards());
-  await waitFor(() => expect(result.current).toEqual({ name: "error" }));
-  expect(requested).toHaveLength(2);
-});
+    expect(requested).toHaveLength(1);
+    const { result } = renderHook(() => useAwards());
+    await waitFor(() => expect(result.current).toEqual({ name: "error" }));
+    expect(requested).toHaveLength(2);
+  },
+);
 
-test("keeps one request alive when a pane unmounts before it settles", async () => {
-  let serve: (() => void) | undefined;
-  serveAwards(async () => {
-    await new Promise<void>((resolve) => {
-      serve = resolve;
-    });
-    return awardsResponse(awards);
-  });
-  const { useAwards } = await import("./use-awards");
-
-  const abandoned = renderHook(() => useAwards());
-  expect(abandoned.result.current).toEqual({ name: "loading" });
-  abandoned.unmount();
-  const remounted = renderHook(() => useAwards());
-  await act(async () => {
-    serve?.();
-  });
-
-  await waitFor(() =>
-    expect(remounted.result.current).toEqual({ name: "ready", awards }),
-  );
-  expect(abandoned.result.current).toEqual({ name: "loading" });
-  expect(requested).toHaveLength(1);
-});
-
-test("lets the next mount retry a request that failed after its pane left", async () => {
-  let refuse: (() => void) | undefined;
-  let served = 0;
-  serveAwards(async () => {
-    served += 1;
-    if (served === 1)
-      await new Promise<void>((_resolve, reject) => {
-        refuse = () => reject(new Error("awards unavailable"));
+test(
+  "keeps one request alive when a pane unmounts before it settles",
+  moduleGraphCeiling,
+  async () => {
+    let serve: (() => void) | undefined;
+    serveAwards(async () => {
+      await new Promise<void>((resolve) => {
+        serve = resolve;
       });
-    return awardsResponse(awards);
-  });
-  const { useAwards } = await import("./use-awards");
+      return awardsResponse(awards);
+    });
+    const { useAwards } = await import("./use-awards");
 
-  const abandoned = renderHook(() => useAwards());
-  abandoned.unmount();
-  await act(async () => {
-    refuse?.();
-  });
+    const abandoned = renderHook(() => useAwards());
+    expect(abandoned.result.current).toEqual({ name: "loading" });
+    abandoned.unmount();
+    const remounted = renderHook(() => useAwards());
+    await act(async () => {
+      serve?.();
+    });
 
-  expect(abandoned.result.current).toEqual({ name: "loading" });
-  const remounted = renderHook(() => useAwards());
-  await waitFor(() =>
-    expect(remounted.result.current).toEqual({ name: "ready", awards }),
-  );
-  expect(requested).toHaveLength(2);
-});
+    await waitFor(() =>
+      expect(remounted.result.current).toEqual({ name: "ready", awards }),
+    );
+    expect(abandoned.result.current).toEqual({ name: "loading" });
+    expect(requested).toHaveLength(1);
+  },
+);
 
-test("does not warm from the fragment prerender, which has no browser to fetch from", async () => {
-  const server = serveAwards(async () => awardsResponse(awards));
-  const { preloadAwards } = await import("./use-awards");
-  vi.stubGlobal("window", undefined);
+test(
+  "lets the next mount retry a request that failed after its pane left",
+  moduleGraphCeiling,
+  async () => {
+    let refuse: (() => void) | undefined;
+    let served = 0;
+    serveAwards(async () => {
+      served += 1;
+      if (served === 1)
+        await new Promise<void>((_resolve, reject) => {
+          refuse = () => reject(new Error("awards unavailable"));
+        });
+      return awardsResponse(awards);
+    });
+    const { useAwards } = await import("./use-awards");
 
-  await expect(preloadAwards()).resolves.toBeUndefined();
+    const abandoned = renderHook(() => useAwards());
+    abandoned.unmount();
+    await act(async () => {
+      refuse?.();
+    });
 
-  expect(server).not.toHaveBeenCalled();
-});
+    expect(abandoned.result.current).toEqual({ name: "loading" });
+    const remounted = renderHook(() => useAwards());
+    await waitFor(() =>
+      expect(remounted.result.current).toEqual({ name: "ready", awards }),
+    );
+    expect(requested).toHaveLength(2);
+  },
+);
 
-test("starts on its loading frame when the fragment prerender renders it", async () => {
-  serveAwards(async () => awardsResponse(awards));
-  const { useAwards } = await import("./use-awards");
-  const Probe = () => {
-    const state: AwardsViewState = useAwards();
-    return createElement("output", null, state.name);
-  };
-  vi.stubGlobal("window", undefined);
+test(
+  "does not warm from the fragment prerender, which has no browser to fetch from",
+  moduleGraphCeiling,
+  async () => {
+    const server = serveAwards(async () => awardsResponse(awards));
+    const { preloadAwards } = await import("./use-awards");
+    vi.stubGlobal("window", undefined);
 
-  const { prelude } = await prerender(createElement(Probe));
-  const html = await new Response(prelude).text();
+    await expect(preloadAwards()).resolves.toBeUndefined();
 
-  vi.unstubAllGlobals();
-  const container = document.createElement("div");
-  container.innerHTML = html;
-  expect(within(container).getByRole("status")).toHaveTextContent("loading");
-});
+    expect(server).not.toHaveBeenCalled();
+  },
+);
+
+test(
+  "starts on its loading frame when the fragment prerender renders it",
+  moduleGraphCeiling,
+  async () => {
+    serveAwards(async () => awardsResponse(awards));
+    const { useAwards } = await import("./use-awards");
+    const Probe = () => {
+      const state: AwardsViewState = useAwards();
+      return createElement("output", null, state.name);
+    };
+    vi.stubGlobal("window", undefined);
+
+    const { prelude } = await prerender(createElement(Probe));
+    const html = await new Response(prelude).text();
+
+    vi.unstubAllGlobals();
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    expect(within(container).getByRole("status")).toHaveTextContent("loading");
+  },
+);

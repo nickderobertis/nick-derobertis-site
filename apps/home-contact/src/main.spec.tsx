@@ -3,6 +3,12 @@ import { prerender } from "react-dom/static";
 import { beforeEach, expect, test, vi } from "vitest";
 import HomeContactPage from "./page";
 
+// `vi.resetModules()` makes every test below re-import its subject, evaluating
+// that whole module graph again: 1.4s idle here, 12.6s under the contention
+// `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
+// Far past that rather than just past it, so it still bounds a genuine hang.
+const moduleGraphCeiling = { timeout: 120_000 };
+
 /**
  * The markup the remote's build publishes into its own index.html. It is
  * produced from the page itself, with no window to read a preview query from,
@@ -32,51 +38,67 @@ beforeEach(() => {
   window.history.replaceState(null, "", "/");
 });
 
-test("refuses to start against a document with no remote root", async () => {
-  document.body.innerHTML = "<main></main>";
+test(
+  "refuses to start against a document with no remote root",
+  moduleGraphCeiling,
+  async () => {
+    document.body.innerHTML = "<main></main>";
 
-  await expect(import("./main")).rejects.toThrow("Missing remote root");
-});
+    await expect(import("./main")).rejects.toThrow("Missing remote root");
+  },
+);
 
-test("adopts the contact options a visitor is already looking at", async () => {
-  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  const published = channels();
+test(
+  "adopts the contact options a visitor is already looking at",
+  moduleGraphCeiling,
+  async () => {
+    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+    const published = channels();
 
-  await startRemote();
+    await startRemote();
 
-  // Hydration takes over the shipped nodes in place, so the channels the
-  // visitor saw at first paint are never torn down and repainted.
-  expect(channels()).toBe(published);
-  expect(
-    screen.getByRole("link", { name: "Email Nick →" }),
-  ).toBeInTheDocument();
-});
+    // Hydration takes over the shipped nodes in place, so the channels the
+    // visitor saw at first paint are never torn down and repainted.
+    expect(channels()).toBe(published);
+    expect(
+      screen.getByRole("link", { name: "Email Nick →" }),
+    ).toBeInTheDocument();
+  },
+);
 
-test("renders from scratch when the document ships no prerendered options", async () => {
-  document.body.innerHTML = '<div id="root"></div>';
+test(
+  "renders from scratch when the document ships no prerendered options",
+  moduleGraphCeiling,
+  async () => {
+    document.body.innerHTML = '<div id="root"></div>';
 
-  await startRemote();
+    await startRemote();
 
-  // Nothing was shipped to adopt, so the pane arrives behind Suspense with the
-  // skeleton standing in until its page chunk resolves.
-  expect(
-    await screen.findByRole("navigation", { name: "Contact options" }),
-  ).toBeInTheDocument();
-  expect(screen.queryByRole("status")).not.toBeInTheDocument();
-});
+    // Nothing was shipped to adopt, so the pane arrives behind Suspense with the
+    // skeleton standing in until its page chunk resolves.
+    expect(
+      await screen.findByRole("navigation", { name: "Contact options" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  },
+);
 
-test("throws the published options away for a visitor previewing another state", async () => {
-  window.history.replaceState(null, "", "/?state=empty");
-  document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-  const published = channels();
+test(
+  "throws the published options away for a visitor previewing another state",
+  moduleGraphCeiling,
+  async () => {
+    window.history.replaceState(null, "", "/?state=empty");
+    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
+    const published = channels();
 
-  await startRemote();
+    await startRemote();
 
-  // The fragment was published for the happy pane. Adopting it would leave one
-  // state's markup underneath another state's render.
-  expect(published).not.toBeInTheDocument();
-  expect(
-    await screen.findByText("No contact options are available."),
-  ).toBeInTheDocument();
-  expect(screen.queryByRole("link")).not.toBeInTheDocument();
-});
+    // The fragment was published for the happy pane. Adopting it would leave one
+    // state's markup underneath another state's render.
+    expect(published).not.toBeInTheDocument();
+    expect(
+      await screen.findByText("No contact options are available."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  },
+);

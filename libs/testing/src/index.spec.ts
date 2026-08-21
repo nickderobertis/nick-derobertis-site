@@ -59,6 +59,28 @@ describe("defineWorkspaceTestConfig", () => {
     expect(config.resolve?.alias).toEqual({});
   });
 
+  test("carries the ceiling a project states for tests the runner's default cannot bound", () => {
+    const config = defineWorkspaceTestConfig({
+      project: "home",
+      dir: "apps/home",
+      thresholds: floor,
+      testTimeout: 120_000,
+    });
+    expect(config.test?.testTimeout).toBe(120_000);
+  });
+
+  test("leaves the runner's own default standing for a project that states none", () => {
+    // Absent rather than restated: a project whose tests the 5000ms default
+    // still bounds keeps it as its hang detector, and this harness is not the
+    // place that number is decided.
+    const config = defineWorkspaceTestConfig({
+      project: "bio",
+      dir: "apps/bio",
+      thresholds: floor,
+    });
+    expect(config.test).not.toHaveProperty("testTimeout");
+  });
+
   test.each([
     [
       "an invalid project name",
@@ -82,6 +104,11 @@ describe("defineWorkspaceTestConfig", () => {
         thresholds: { lines: 95, functions: 95, branches: 95 },
       },
       "at thresholds.statements",
+    ],
+    [
+      "a ceiling that would bound nothing",
+      { project: "bio", dir: "apps/bio", thresholds: floor, testTimeout: 0 },
+      "at testTimeout",
     ],
     [
       "an option this harness does not define",
