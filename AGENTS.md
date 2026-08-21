@@ -59,8 +59,7 @@ Dependency freshness is checked with `pnpm outdated`; every dependency's
 updates remain outside those constraints until their Nx integrations support
 them; `just upgrade` deliberately opts into testing latest releases.
 
-`just lint-llm-diff` is the LLM-judge tier, deliberately outside `just check`;
-`scripts/workspace/AGENTS.md` owns its constraints.
+`just lint-llm-diff` is the LLM-judge tier, deliberately outside `just check`.
 
 The `justfile` is the authoritative source for the repo-scoped
 `NX_CACHE_DIRECTORY` default beneath the user's standard cache directory, so
