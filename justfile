@@ -170,8 +170,8 @@ lint-llm:
 # fraction of the ruleset. Files, when you really want to narrow the run, come
 # after the base. With no base at all, the lifecycle's own comparison identity
 # names it. `--rejudge` anywhere forces one fresh judgement.
-# llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; it judges the working tree and reports an exit status, so nothing it does is observable to a visitor. lint-llm-diff.spec.ts drives this exact recipe as a real subprocess through the default base, an explicit ref, a range, pass-through files, both rejected-input paths, and a reported-findings failure, and llmlint-cache.spec.ts drives it through real Nx for the verdicts it may and may not replay.
 @lint-llm-diff *args:
+    # llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; it judges the working tree and reports an exit status, so nothing it does is observable to a visitor. lint-llm-diff.spec.ts drives this exact recipe as a real subprocess through the default base, an explicit ref, a range, pass-through files, both rejected-input paths, and a reported-findings failure, and llmlint-cache.spec.ts drives it through real Nx for the verdicts it may and may not replay.
     node scripts/workspace/lint-llm-diff.mjs "$@"
 
 lint-llm-validate *args:
