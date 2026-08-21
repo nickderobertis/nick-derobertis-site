@@ -3,18 +3,10 @@ import { prerender } from "react-dom/static";
 import { beforeEach, expect, test, vi } from "vitest";
 import TimelinePage from "./page";
 
-/**
- * The ceiling every test below is held to, because each reaches its subject
- * through `await import(...)` and `vi.resetModules()` makes it pay for that
- * import afresh rather than reusing the last test's evaluation. What that costs
- * is the subject's whole transitive graph being evaluated again — a cost set by
- * the workspace's size and the host's load, not by this file: 90ms to 1.4s per
- * test measured idle, reaching 5.6s and then 12.6s under the contention
- * `nx affected --parallel=3` puts the gate under, which is past the runner's
- * 5000ms default. It is set far past anything that import can cost rather than
- * past today's contention — one chosen to clear a busy evening fails again on a
- * busier one — so it still bounds a genuine hang and nothing else.
- */
+// `vi.resetModules()` makes every test below re-import its subject, evaluating
+// that whole module graph again: 1.4s idle here, 12.6s under the contention
+// `nx affected --parallel=3` puts the gate under, past Vitest's 5000ms default.
+// Far past that rather than just past it, so it still bounds a genuine hang.
 const evaluatesAModuleGraph = { timeout: 120_000 };
 
 /**
