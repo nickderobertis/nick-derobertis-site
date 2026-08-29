@@ -35,6 +35,16 @@ import { z } from "zod";
  * Serving is shared and composing is exclusive: `nx affected -t e2e` serves
  * `dist/apps/shell` from several apps' Playwright servers at once, and that is
  * correct, because they only read it. Composing while any of them reads is not.
+ *
+ * That split is why this is hand-rolled rather than delegated to
+ * `proper-lockfile`, which covers the rest of what is written below — a
+ * filesystem lock, taken before the resource is touched, reclaimed from a run
+ * that died holding it. What it does not have is a shared hold: `lock()` grants
+ * one holder at a time and fails every other caller, so the `serving` side
+ * would either serialize the e2e servers that are right to read one artifact
+ * together, or hold nothing at all and leave a compose free to replace bytes
+ * underneath them. A readers-writer lock is not in that library's surface, and
+ * the half of this module it would replace is the smaller half.
  */
 const activitySchema = z.enum(["composing", "serving"]);
 
