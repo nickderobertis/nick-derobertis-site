@@ -4,6 +4,10 @@
 // lifecycle is the real one while the app it prerenders stays inside this
 // library's own tree — the same substitution the rspack compilation makes, and
 // the reason nothing in this library's module graph points at an app.
+//
+// Every route here is built from the table in `./shell-fragment-routes.fixture`,
+// which the entry loops over: the fixture states each path, page and loader
+// domain once, so the routers it builds are the routes the entry renders.
 // eslint-disable-next-line @nx/enforce-module-boundaries -- This fixture is a build-only alias target for the shell fragment entry's spec, and takes the site base from the same module the shell router takes it from.
 import { siteBase } from "@site/data-access-core";
 import {
@@ -14,21 +18,17 @@ import {
   useMatches,
 } from "@tanstack/react-router";
 import type { FunctionComponent } from "react";
-
-/** The CV domains the shell's route loaders fetch, named as the CV publishes them. */
-export type FragmentDomainName = "courses" | "research" | "software_projects";
+import {
+  type FragmentDomainName,
+  type FragmentPageName,
+  routes,
+} from "./shell-fragment-routes.fixture";
 
 export interface FragmentPage {
   component: FunctionComponent;
 }
 
-export interface FragmentPages {
-  home: FragmentPage;
-  bio: FragmentPage;
-  research: FragmentPage;
-  software: FragmentPage;
-  courses: FragmentPage;
-}
+export type FragmentPages = Record<FragmentPageName, FragmentPage>;
 
 export interface FragmentRouterContext {
   loadDomain: <Name extends FragmentDomainName>(name: Name) => Promise<unknown>;
@@ -70,34 +70,19 @@ export function createSiteRouter({
   const Root = createRootRouteWithContext<FragmentRouterContext>()({
     component: FragmentRoot,
   });
-  const home = createRoute({
-    getParentRoute: () => Root,
-    path: "/",
-    component: pages.home.component,
-  });
-  const bio = createRoute({
-    getParentRoute: () => Root,
-    path: "/bio",
-    component: pages.bio.component,
-  });
-  const research = createRoute({
-    getParentRoute: () => Root,
-    path: "/research",
-    loader: ({ context: ctx }) => ctx.loadDomain("research"),
-    component: pages.research.component,
-  });
-  const software = createRoute({
-    getParentRoute: () => Root,
-    path: "/software",
-    loader: ({ context: ctx }) => ctx.loadDomain("software_projects"),
-    component: pages.software.component,
-  });
-  const courses = createRoute({
-    getParentRoute: () => Root,
-    path: "/courses",
-    loader: ({ context: ctx }) => ctx.loadDomain("courses"),
-    component: pages.courses.component,
-  });
-  const routeTree = Root.addChildren([home, bio, research, software, courses]);
+  const children = routes.map(({ path, page, domain }) =>
+    createRoute({
+      getParentRoute: () => Root,
+      path,
+      component: pages[page].component,
+      ...(domain === undefined
+        ? {}
+        : {
+            loader: ({ context: ctx }: { context: FragmentRouterContext }) =>
+              ctx.loadDomain(domain),
+          }),
+    }),
+  );
+  const routeTree = Root.addChildren(children);
   return createRouter({ routeTree, context, basepath: siteBase });
 }

@@ -17,7 +17,9 @@ import { routes } from "./shell-fragment-routes.fixture";
  * whatever the framework happens to do — the drift this spec exists to catch.
  * `cleanup` before `settled` is the entry running it itself.
  */
-const { lifecycle } = vi.hoisted(() => ({ lifecycle: [] as string[] }));
+const { lifecycle } = vi.hoisted((): { lifecycle: string[] } => ({
+  lifecycle: [],
+}));
 
 vi.mock("@tanstack/react-router/ssr/server", async (importOriginal) => {
   const actual =

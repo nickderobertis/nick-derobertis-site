@@ -67,7 +67,10 @@ export async function renderShellFragment() {
     // resolves rather than inheriting it through `@tanstack/react-router`. A
     // direct dependency is chosen over a `pnpm.overrides` entry because
     // AGENTS.md holds every dependency's `pnpm outdated` `current` to its
-    // `wanted`, and only a declared dependency is reported there at all.
+    // `wanted`, and only a declared dependency is reported there at all. What
+    // keeps that declaration from becoming a second, drifting statement of the
+    // resolved version is router-core-pin.spec.ts, which holds it to the copy
+    // `@tanstack/react-router` itself loads.
     await handler(async ({ router }) => {
       try {
         while (!router.serverSsr?.isSerializationFinished())
@@ -80,6 +83,7 @@ export async function renderShellFragment() {
         };
         return new Response(rendered.html);
       } finally {
+        // llmlint: ignore[changed_behavior_has_e2e] This build-time step has no browser interface of its own to drive: it runs in the publish build, releases router state after the markup is already taken, and adds nothing to that markup and removes nothing from it. Both render paths stay covered where they are observable — apps/shell/e2e/site.spec.ts drives the composed published bytes with JavaScript disabled and then through hydration, and every journey spec drives the same artifact host-composed — so those journeys are what proves this leaves the render unchanged. shell-fragment-entry.spec.tsx drives this real entry and records this call against every router it renders, including one whose route throws.
         router.serverSsr?.cleanup();
       }
     });
