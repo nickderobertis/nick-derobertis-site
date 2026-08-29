@@ -1,4 +1,8 @@
 export {
+  consumeFederatedTypes,
+  FederatedTypesPlugin,
+} from "./federated-types";
+export {
   type FragmentContract,
   fragmentContractSchema,
   fragmentContractSchemaVersion,

@@ -1,2 +1,2 @@
 import { remoteConfig } from "@site/build-config";
-export default remoteConfig("home-story");
+export default remoteConfig("home-story", { skeleton: true });

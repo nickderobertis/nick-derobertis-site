@@ -33,6 +33,9 @@
       "executor": "@nx/rspack:rspack",
       "outputs": [
         "{options.outputPath}",
+        "{workspaceRoot}/dist/mf-types/hosts/home",
+        "{workspaceRoot}/dist/mf-types/remotes/home",
+        "{workspaceRoot}/dist/mf-types/remotes/home.zip",
         "{options.outputPath}/fragment.html",
         "{options.outputPath}/fragment.css",
         "{options.outputPath}/fragment.json"

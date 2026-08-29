@@ -26,6 +26,8 @@
       "executor": "@nx/rspack:rspack",
       "outputs": [
         "{options.outputPath}",
+        "{workspaceRoot}/dist/mf-types/remotes/courses",
+        "{workspaceRoot}/dist/mf-types/remotes/courses.zip",
         "{options.outputPath}/fragment.html",
         "{options.outputPath}/fragment.css",
         "{options.outputPath}/fragment.json"

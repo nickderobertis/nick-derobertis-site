@@ -1,4 +1,5 @@
-import { dirname } from "node:path";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import {
   federationRemotes,
   readDeclaredProject,
@@ -21,12 +22,42 @@ import {
  * `createNodesV2` hands the whole matched file set to one call, which is what
  * makes this possible: a dependency on every remote cannot be derived from one
  * project's file in isolation.
+ *
+ * A host owes a narrower dependency than that fan-in, and it is derived here
+ * too. Each remote's build compiles its own exposes into declarations and
+ * publishes the archive of them; a host's build consumes those archives and
+ * type checks the sources it bundles against what it consumed. So a host is
+ * built after the remotes it composes, and typechecked after its own build.
+ * Which remotes those are is read from the `remoteMap` call in that host's own
+ * rspack configuration, which is the one place a host declares them; naming
+ * them again in a project.json would be the second list this plugin exists to
+ * avoid.
  */
 
 export const name = "nick-derobertis-site/federation";
 
 const projectConfigurations = "apps/*/project.json";
 const projectConfiguration = /^apps\/[a-z][a-z0-9-]*\/project\.json$/;
+const federatedRemoteMap = /\bremoteMap\(\s*\[([\s\S]*?)\]/;
+const federatedRemoteName = /"([a-z][a-z0-9-]*)"/g;
+
+/**
+ * The remotes one app composes, read from its own rspack configuration. An app
+ * that federates nothing has no `remoteMap` call and owes no such dependency.
+ */
+function composedRemotes(source) {
+  const configuration = join(dirname(source), "rspack.config.ts");
+  const composed = federatedRemoteMap.exec(readFileSync(configuration, "utf8"));
+  if (composed === null) return [];
+  const names = [...composed[1].matchAll(federatedRemoteName)].map(
+    (match) => match[1],
+  );
+  if (names.length === 0)
+    throw new Error(
+      `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which names none. Pass each child remote there as a string literal and rerun just check.`,
+    );
+  return names;
+}
 
 // llmlint: ignore-block[changed_behavior_has_e2e] This derives the order Nx runs build, prerender, and screenshot in, and it runs while the project graph is being resolved — before rspack has built a single bundle, so there is no site, no route, and no page for a browser to load while it decides anything. What it returns is task scheduling and nothing else: it adds no module, changes no rendered markup, and is gone by the time the composed artifact exists, so a visitor observes only the same artifact the fan-in was already producing. federation-contract.spec.ts drives this exact entry point twice over: through the real `nx graph` for the fan-in every app ends up with, and directly for the file set Nx hands it. A configuration it refuses stops the graph before any build input is derived, so nothing is ever built for a browser to reach.
 /** One entry per matched `project.json`, as `createNodesV2` returns them. */
@@ -56,12 +87,25 @@ function federationDependencies(configFiles) {
   const composed = ["build", remoteBuilds];
   const captured = [...composed, ...composeHosts];
   return projects.map((project) => {
+    const composedBuilds = composedRemotes(project.source);
+    const federated = composedBuilds.length
+      ? [{ target: "build", projects: composedBuilds }]
+      : [];
     const targets = {
       ...(project.targets.includes("screenshot")
         ? { screenshot: { dependsOn: captured } }
         : {}),
       ...(project.targets.includes("prerender")
         ? { prerender: { dependsOn: composed } }
+        : {}),
+      // A host consumes those declarations during its own build, so its
+      // typecheck reads what that build wrote rather than reaching for the
+      // remotes itself.
+      ...(federated.length && project.targets.includes("typecheck")
+        ? { typecheck: { dependsOn: ["build"] } }
+        : {}),
+      ...(federated.length && project.targets.includes("build")
+        ? { build: { dependsOn: federated } }
         : {}),
     };
     return [

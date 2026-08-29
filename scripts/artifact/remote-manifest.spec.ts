@@ -1,11 +1,12 @@
 import { execFileSync } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { expect, test } from "vitest";
 
 /**
  * remotes.json maps each remote's Nx project name to its federation alias, so
  * validating that both sides are strings is what lets this test compare the
- * manifest against the composition and declaration files as text.
+ * manifest against the composition file as text and against the declarations
+ * each remote's build compiles from its exposes.
  */
 function isRemoteManifest(value: unknown): value is Record<string, string> {
   return (
@@ -104,15 +105,24 @@ test("remote manifest matches published fragment composition", {
   const compose = await readFile("scripts/compose/compose.mjs", "utf8");
   expect(compose).toContain("Object.keys(validatedRemoteManifest)");
   // llmlint: ignore-end[tests_mirror_real_usage]
-  const declarations = `${await readFile("apps/home/src/remotes.d.ts", "utf8")}\n${await readFile("apps/shell/src/remotes.d.ts", "utf8")}`;
-  const aliases = [
-    ...declarations.matchAll(/declare module "([^/]+)\/Page"/g),
-  ].map((match) => match[1]);
+  // Every remote's build compiles its own exposes into this tree, keyed by the
+  // federation alias its hosts import, so the declarations a host typechecks
+  // against are exactly the set this manifest names. The prerender this test
+  // depends on builds every remote, so the tree is complete by the time it runs.
+  const publishedAliases = (await readdir("dist/mf-types/remotes")).filter(
+    (entry) => !entry.endsWith(".zip"),
+  );
   const manifestAliases = Object.values(remoteManifest);
-  for (const alias of aliases) expect(manifestAliases).toContain(alias);
+  for (const alias of publishedAliases)
+    expect(manifestAliases).toContain(alias);
   const remoteNames = Object.keys(remoteManifest);
   for (const remote of remoteNames) {
-    expect(declarations).toContain(`${remoteManifest[remote]}/Page`);
+    await expect(
+      readFile(
+        `dist/mf-types/remotes/${remoteManifest[remote]}/Page.d.ts`,
+        "utf8",
+      ),
+    ).resolves.toContain("./compiled-types/src/page");
     // llmlint: ignore-block[tests_mirror_real_usage] Same cache-and-wiring contract per remote: nothing a visitor can do reveals whether this remote is named in the composition map or declares its fragment files as build outputs, and both are already driven end to end by each app's ownership.spec.ts through the standalone and host-composed artifacts.
     expect(compose).toContain(`"${remote}"`);
     const remoteProject: unknown = JSON.parse(

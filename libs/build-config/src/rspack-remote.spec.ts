@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
 import { z } from "zod";
 import { remoteConfig, remoteMap } from "./rspack-remote";
@@ -51,9 +52,12 @@ describe("federation remote map", () => {
 describe("remote build configuration", () => {
   test("pins a remote's entry, public path, and exposed route boundary", () => {
     inBuildTaskFor("awards");
-    const config = remoteConfig("awards");
+    const config = remoteConfig("awards", { skeleton: true });
 
     expect(config.entry).toBe("./apps/awards/src/main.tsx");
+    // The declaration generator resolves each expose from the compiler's
+    // context, which rspack captures when the compiler is constructed.
+    expect(config.context).toBe(resolve("apps/awards"));
     expect(config.output).toMatchObject({
       publicPath: `${pagesBase}/remotes/awards/`,
       uniqueName: "awards",
@@ -68,6 +72,39 @@ describe("remote build configuration", () => {
           "./Skeleton": "./src/skeleton.tsx",
         },
         remotes: {},
+      },
+    });
+  });
+
+  test("exposes no skeleton for a remote no host renders one from", () => {
+    inBuildTaskFor("bio");
+
+    expect(remoteConfig("bio").plugins.at(-1)).toMatchObject({
+      _options: { exposes: { "./Page": "./src/page.tsx" } },
+    });
+    expect(
+      (
+        remoteConfig("bio").plugins.at(-1) as unknown as {
+          _options: { exposes: object };
+        }
+      )._options.exposes,
+    ).not.toHaveProperty("./Skeleton");
+  });
+
+  test("compiles the exposes it declares into declarations for its hosts", () => {
+    inBuildTaskFor("bio");
+
+    expect(remoteConfig("bio").plugins.at(-1)).toMatchObject({
+      _options: {
+        dts: {
+          generateTypes: {
+            tsConfigPath: "tsconfig.app.json",
+            generateAPITypes: false,
+            deleteTypesFolder: false,
+            abortOnError: true,
+          },
+          consumeTypes: false,
+        },
       },
     });
   });
