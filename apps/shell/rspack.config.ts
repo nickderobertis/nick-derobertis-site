@@ -23,7 +23,6 @@ export default {
     new ModuleFederationPlugin({
       name: "shell",
       filename: "remoteEntry.js",
-      exposes: { "./App": "./src/app.tsx" },
       remotes: remoteMap(["home", "bio", "research", "software", "courses"]),
       // The default `version-first` strategy loads every declared remote's
       // remoteEntry.js during share-scope startup to negotiate versions, which
