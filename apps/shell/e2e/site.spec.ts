@@ -308,6 +308,41 @@ async function watchPrerenderedMain(page: Page) {
 }
 // llmlint: ignore-end[tests_mirror_real_usage]
 
+// The mirror image of the same ambiguity, at the standalone boundary. A remote's
+// own document is served as one prerendered element inside the application root
+// compose writes, and its entry mounts with `createRoot` rather than hydrating,
+// so the bundle having run is exactly what removes that element. Counting those
+// removals is what tells the two render states apart on a page whose content is
+// the same either way.
+const remoteRootRemovalKey = "__prerenderedRemoteRootRemovals";
+
+// llmlint: ignore-block[tests_mirror_real_usage] Reading a remote's prerendered document and watching its bundle render the same page over it produce identical output, so the prerendered DOM's fate cannot be read through user-visible output. This helper observes only removals from the remote's application root; what the page shows is still asserted through roles.
+async function watchPrerenderedRemoteRoot(page: Page) {
+  // llmlint: ignore-block[e2e_uses_accessible_selectors] A MutationObserver reports the container a node was removed from, which no role-based locator addresses; the application root compose writes is the only handle on it. Every assertion about what the visitor sees still uses getByRole.
+  await page.addInitScript((key: string) => {
+    Reflect.set(window, key, 0);
+    new MutationObserver((records) => {
+      for (const record of records)
+        if (
+          record.target instanceof Element &&
+          record.target.matches("#root[data-prerendered-remote]")
+        )
+          Reflect.set(
+            window,
+            key,
+            Number(Reflect.get(window, key)) + record.removedNodes.length,
+          );
+    }).observe(document, { childList: true, subtree: true });
+  }, remoteRootRemovalKey);
+  // llmlint: ignore-end[e2e_uses_accessible_selectors]
+  return () =>
+    page.evaluate(
+      (key: string) => Number(Reflect.get(window, key)),
+      remoteRootRemovalKey,
+    );
+}
+// llmlint: ignore-end[tests_mirror_real_usage]
+
 // Each leaf route owns a view-override parameter, and every one of them is
 // reachable from search, social, and email with tracking parameters attached.
 const leafRoutes = pages.flatMap((route) =>
@@ -430,14 +465,20 @@ test("every prerendered route hydrates onto the render its own router produced",
 });
 
 // The same routes through their other boundary: each is also published as the
-// standalone document its own remote prerenders. Home's is a host of slots
-// federated in at runtime, so it prerenders no landmark and is asserted hydrated.
+// standalone document its own remote prerenders, by the remote fragment entry
+// rather than the shell's five-router loop. That document is the visitor's whole
+// page without JavaScript and a first paint with it — every remote's entry
+// mounts with `createRoot`, discarding it and rendering the page again — so
+// driving both states is what keeps a route from being provable through only one
+// of the two build steps that write it. Home's prerendered document holds only
+// the slots its child remotes are federated into once its bundle runs, which is
+// why it carries no landmark of its own to read without JavaScript.
 const routeRemotes = pages.map((route) => ({
   ...route,
   remote: remoteContract(route.path === "" ? "home" : route.path),
 }));
 
-test("every route's standalone remote serves its own render and hydrates it", async ({
+test("every route's standalone remote serves its own render and then renders over it", async ({
   browser,
 }) => {
   const noScript = await browser.newContext({ javaScriptEnabled: false });
@@ -458,13 +499,19 @@ test("every route's standalone remote serves its own render and hydrates it", as
       if (message.type() === "error") errors.push(message.text());
     });
     page.on("pageerror", (error) => errors.push(error.message));
+    const removedRootChildren = await watchPrerenderedRemoteRoot(page);
 
     await page.goto(remote.standalone, { waitUntil: "networkidle" });
     await expect(
       page.getByRole(remote.role, { name: remote.name }),
-      `${link} standalone hydrated`,
+      `${link} standalone with JavaScript`,
     ).toBeVisible();
-    expect(errors, `${link} standalone hydrated`).toEqual([]);
+    // llmlint: ignore[tests_mirror_real_usage] The prerendered document and the one the bundle renders over it are visibly identical, so this removal count is the only form the claim that the remote's own bundle took the page over has; every other assertion here reads the page through roles.
+    expect(
+      await removedRootChildren(),
+      `${link} standalone with JavaScript`,
+    ).toBeGreaterThan(0);
+    expect(errors, `${link} standalone with JavaScript`).toEqual([]);
     await page.close();
   }
 });
