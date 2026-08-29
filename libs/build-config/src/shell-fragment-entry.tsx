@@ -54,16 +54,34 @@ export async function renderShellFragment() {
           },
         }),
     });
+    // `router.serverSsr` is router-core's framework-only SSR lifecycle. It is
+    // driven by hand because the public `renderRouterToString` renders with
+    // `renderToString`, which never resolves Suspense; `prerender` does, so the
+    // lifecycle around it is this entry's to run. That means running all of it,
+    // including the `cleanup()` the public helper runs in a `finally`: five
+    // routers are rendered in this one process, and a router left uncleaned
+    // keeps its SSR buffers and listeners for the rest of it.
+    //
+    // That surface is framework-only, so package.json depends on
+    // `@tanstack/router-core` directly at the exact version the lockfile
+    // resolves rather than inheriting it through `@tanstack/react-router`. A
+    // direct dependency is chosen over a `pnpm.overrides` entry because
+    // AGENTS.md holds every dependency's `pnpm outdated` `current` to its
+    // `wanted`, and only a declared dependency is reported there at all.
     await handler(async ({ router }) => {
-      while (!router.serverSsr?.isSerializationFinished())
-        await new Promise<void>((resolve) => setImmediate(resolve));
-      const { prelude } = await prerender(<RouterServer router={router} />);
-      router.serverSsr?.setRenderFinished();
-      rendered = {
-        html: await new Response(prelude).text(),
-        hydration: router.serverSsr?.takeBufferedHtml() ?? "",
-      };
-      return new Response(rendered.html);
+      try {
+        while (!router.serverSsr?.isSerializationFinished())
+          await new Promise<void>((resolve) => setImmediate(resolve));
+        const { prelude } = await prerender(<RouterServer router={router} />);
+        router.serverSsr?.setRenderFinished();
+        rendered = {
+          html: await new Response(prelude).text(),
+          hydration: router.serverSsr?.takeBufferedHtml() ?? "",
+        };
+        return new Response(rendered.html);
+      } finally {
+        router.serverSsr?.cleanup();
+      }
     });
     if (!rendered)
       throw new Error(
