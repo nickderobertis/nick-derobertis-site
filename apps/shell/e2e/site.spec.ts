@@ -380,6 +380,58 @@ test("Home reuses prerendered content without hydration warnings", async ({
   ).toBeVisible();
   expect(errors).toEqual([]);
 });
+// The shell fragment entry prerenders one router per route in a single build
+// process and releases each one before it builds the next, so every route's
+// document has to be that route's own render — markup a visitor can read with
+// JavaScript off, and SSR state the client can adopt without rebuilding the
+// page. A router still holding the previous route's state shows up here rather
+// than at the build: the document is served, but the client cannot hydrate onto
+// it, so the prerendered main landmark is replaced or the console carries a
+// hydration error. Every prerendered route is driven through both paths,
+// including Home, whose hydration identity no other journey asserts.
+test("every prerendered route hydrates onto the render its own router produced", async ({
+  browser,
+}) => {
+  const noScript = await browser.newContext({ javaScriptEnabled: false });
+  const staticPage = await noScript.newPage();
+  for (const route of pages) {
+    await staticPage.goto(route.path);
+    await expect(
+      staticPage.getByRole("heading", { name: route.heading }),
+      `${route.link} without JavaScript`,
+    ).toBeVisible();
+    await expect(
+      staticPage.getByText(route.feature, { exact: false }).first(),
+      `${route.link} without JavaScript`,
+    ).toBeVisible();
+  }
+  await noScript.close();
+
+  for (const route of pages) {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    page.on("pageerror", (error) => errors.push(error.message));
+    const removedMainLandmarks = await watchPrerenderedMain(page);
+
+    await page.goto(route.path, { waitUntil: "networkidle" });
+    await expect(
+      page.getByRole("heading", { name: route.heading }),
+      `${route.link} hydrated`,
+    ).toBeVisible();
+    await expect(
+      page.getByText(route.feature, { exact: false }).first(),
+      `${route.link} hydrated`,
+    ).toBeVisible();
+    // llmlint: ignore[tests_mirror_real_usage] Adopting the prerendered DOM and replacing it with the same content are visibly identical, so the removal count is the only form this route-owned-SSR-state claim has; every other assertion here reads the page through roles and text.
+    expect(await removedMainLandmarks(), `${route.link} hydrated`).toBe(0);
+    expect(errors, `${route.link} hydrated`).toEqual([]);
+    await page.close();
+  }
+});
+
 test("the static 404 is intentional and the router recovers unknown routes", async ({
   browser,
   page,
