@@ -170,13 +170,17 @@ describe("the host served from source", () => {
     await page.goto(`${base}/`, { waitUntil: "networkidle" });
 
     // The document is the one rspack is building — it names no content hash,
-    // which every published bundle does — while the panes rendering inside it
-    // are the built remotes it resolved over the same origin.
+    // which every published bundle does — while the pane rendering inside it is
+    // a built remote it resolved over the same origin. The pane is waited for
+    // rather than read at `networkidle`, because it fetches its own slice after
+    // its page code arrives; and it is a pane that renders one settled thing,
+    // rather than the carousel beside it, whose visible story rotates on a
+    // timer no assertion should be racing.
     expect(await page.locator("script[src$='/main.js']").count()).toBe(1);
     expect(await page.getByRole("banner").isVisible()).toBe(true);
-    expect(
-      await page.getByText("Finance researcher & educator").isVisible(),
-    ).toBe(true);
+    const builtRemotePane = page.locator(".awards-pane");
+    await builtRemotePane.waitFor({ timeout: 60_000 });
+    expect(await builtRemotePane.isVisible()).toBe(true);
     expect(failures).toEqual([]);
   }, 120_000);
 
