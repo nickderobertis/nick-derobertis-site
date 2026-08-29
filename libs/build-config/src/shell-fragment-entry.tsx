@@ -54,16 +54,29 @@ export async function renderShellFragment() {
           },
         }),
     });
+    // `router.serverSsr` is router-core's framework-only SSR lifecycle, driven
+    // by hand because the public `renderRouterToString` renders with
+    // `renderToString`, which never resolves Suspense. `prerender` does, so
+    // every step around it is this entry's to run — including the `cleanup()`
+    // the public helper runs in a `finally`. router-core-pin.spec.ts is what
+    // holds that framework-only surface to a version this workspace declares.
     await handler(async ({ router }) => {
-      while (!router.serverSsr?.isSerializationFinished())
-        await new Promise<void>((resolve) => setImmediate(resolve));
-      const { prelude } = await prerender(<RouterServer router={router} />);
-      router.serverSsr?.setRenderFinished();
-      rendered = {
-        html: await new Response(prelude).text(),
-        hydration: router.serverSsr?.takeBufferedHtml() ?? "",
-      };
-      return new Response(rendered.html);
+      try {
+        while (!router.serverSsr?.isSerializationFinished())
+          await new Promise<void>((resolve) => setImmediate(resolve));
+        const { prelude } = await prerender(<RouterServer router={router} />);
+        router.serverSsr?.setRenderFinished();
+        rendered = {
+          html: await new Response(prelude).text(),
+          hydration: router.serverSsr?.takeBufferedHtml() ?? "",
+        };
+        return new Response(rendered.html);
+      } finally {
+        // Releasing this router keeps the next route's render out of its SSR
+        // state; apps/shell/e2e/site.spec.ts asserts what that has to leave
+        // behind, in the browser, over the artifact this loop writes.
+        router.serverSsr?.cleanup();
+      }
     });
     if (!rendered)
       throw new Error(
