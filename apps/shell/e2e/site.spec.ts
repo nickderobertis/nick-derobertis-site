@@ -11,6 +11,7 @@ import {
   homePanes,
   hoverUntilRemoteRequested,
   type RoutePath,
+  remoteContract,
   siteRoutes,
 } from "@site/e2e-harness";
 
@@ -428,6 +429,51 @@ test("every prerendered route hydrates onto the render its own router produced",
     // llmlint: ignore[tests_mirror_real_usage] Adopting the prerendered DOM and replacing it with the same content are visibly identical, so the removal count is the only form this route-owned-SSR-state claim has; every other assertion here reads the page through roles and text.
     expect(await removedMainLandmarks(), `${route.link} hydrated`).toBe(0);
     expect(errors, `${route.link} hydrated`).toEqual([]);
+    await page.close();
+  }
+});
+
+// The other half of the same content contract: every route the shell composes
+// is also published as its own standalone remote document, prerendered by the
+// remote fragment entry rather than the shell one. Driving both boundaries is
+// what keeps a route from being provable through only the path its own build
+// step writes — the shell's five-router loop above, or the remote's own render
+// here. Home is the exception the shell shares: its standalone document is a
+// host of slots whose panes are federated in at runtime, so it prerenders no
+// landmark of its own and is asserted once its bundle has run.
+const routeRemotes = pages.map((route) => ({
+  ...route,
+  remote: remoteContract(route.path === "" ? "home" : route.path),
+}));
+
+test("every route's standalone remote serves its own render and hydrates it", async ({
+  browser,
+}) => {
+  const noScript = await browser.newContext({ javaScriptEnabled: false });
+  const staticPage = await noScript.newPage();
+  for (const { link, remote } of routeRemotes.filter(({ path }) => path)) {
+    await staticPage.goto(remote.standalone);
+    await expect(
+      staticPage.getByRole(remote.role, { name: remote.name }),
+      `${link} standalone without JavaScript`,
+    ).toBeVisible();
+  }
+  await noScript.close();
+
+  for (const { link, remote } of routeRemotes) {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await page.goto(remote.standalone, { waitUntil: "networkidle" });
+    await expect(
+      page.getByRole(remote.role, { name: remote.name }),
+      `${link} standalone hydrated`,
+    ).toBeVisible();
+    expect(errors, `${link} standalone hydrated`).toEqual([]);
     await page.close();
   }
 });
