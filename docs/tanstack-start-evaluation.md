@@ -173,8 +173,8 @@ four entries Start's plan aliases — client, server, start, router
 (`package/src/rsbuild/planning.ts:66-86`) — and a generated route tree, which
 Start resolves from a `routesDirectory` defaulting to `src/routes` into a
 `generatedRouteTree` defaulting to `src/routeTree.gen.ts`
-(`package/src/schema.ts:69-79`). Neither is opt-out at Start's level: the
-generator is registered unconditionally in the client environment
+(`package/src/schema.ts:69-79`). Generating it is not optional at Start's level:
+the generator is registered unconditionally in the client environment
 (`package/src/rsbuild/start-router-plugin.ts:39-63`), handed `startConfig.router`
 verbatim (`:40-47`), so any route source other than a directory of route files
 is the router generator's own option rather than something Start declares.
