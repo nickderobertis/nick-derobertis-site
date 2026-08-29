@@ -44,15 +44,39 @@ lint-workflows:
     @# llmlint: ignore[changed_behavior_has_e2e] These gates read committed configuration and have no browser interface: they fail a push before any workflow runs, so nothing they reject can reach a visitor. runtime-pins.spec.ts and content-store-contract.spec.ts drive this exact command as a real subprocess over the committed tree and over copies with one pin or one restatement moved.
     @pins=$(node scripts/ci/verify-runtime-pins.mjs) || { echo "lint-workflows: workflow runtime pins drifted; align every workflow with package.json's packageManager and one Node version, then rerun just lint-workflows" >&2; exit 1; }; names=$({{node_typestrip}} scripts/publish/verify-content-store-contract.mjs) || { echo "lint-workflows: the content-store branch, checkout, or workdir names drifted; align every restatement with libs/publish-config/src/publish-fragment.ts, then rerun just lint-workflows" >&2; exit 1; }; echo "lint-workflows: $pins; $names"
 
-check: test lint-workflows
+# `test` is not a dependency here: this recipe's own affected batch below runs
+# the `test` target, and the `test` recipe's other half is an `e2e` batch, which
+# is the composed host's suite a second time. What that dependency contributed
+# beyond this recipe was exactly the duplicate the browser lanes exist to end.
+check: lint-workflows
     # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
     # bundler, prerender, Playwright, and screenshot executors in this workspace.
+    #
+    # The browser and visual suites are one dispatch over the lanes
+    # `just gate-browser-lanes` selects, which is the affected selection unioned
+    # with the project that composes the served artifact. That union is what
+    # gates the composed artifact when the affected selection is empty, and it
+    # is also why the composed host's suite is dispatched exactly once: it used
+    # to run inside `nx affected -t e2e,screenshot` — which selects the shell
+    # for nearly any TypeScript change, because the shell owns the workspace's
+    # single `eslint .` run — and then again as an unconditional `nx run
+    # shell:e2e`, so the heaviest suite in the repository ran twice per commit.
     # llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
-    base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t e2e,screenshot --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx run shell:e2e >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
+    base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 pnpm exec nx run-many -t e2e,screenshot -p "$lanes" --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
 # Canonical full pre-push gate used by orchestration and contributors.
 # llmlint: ignore[changed_behavior_has_e2e] This command-only alias has no browser interface and delegates unchanged to check, whose dispatched Playwright targets own real-browser coverage.
 gate: check
+
+# Print the browser and visual lanes `just check` dispatches for a push range:
+# every affected project owning one of those suites, and the project that
+# composes the served artifact, whose suite is gated on every push whether the
+# affected selection reached it or not. `check` substitutes this recipe's output
+# straight into its one `nx run-many`, so what this prints is what it runs. With
+# no arguments it answers for the range `check` itself would use.
+@gate-browser-lanes base="" head="":
+    # llmlint: ignore[changed_behavior_has_e2e] This selection command has no browser interface; gate-browser-lanes.spec.ts drives this exact recipe as a real subprocess over a range reaching the composed host, one reaching only a remote, and one reaching nothing, and drives Nx's own task graph for the dispatch its output produces.
+    base="${1:-${NX_BASE:-HEAD~1}}"; head="${2:-${NX_HEAD:-HEAD}}"; [[ "$base" != -* && "$head" != -* ]] && git rev-parse --verify "$base^{commit}" >/dev/null 2>&1 && git rev-parse --verify "$head^{commit}" >/dev/null 2>&1 || { echo "gate-browser-lanes: base and head must resolve to commits; pass the push range (for example just gate-browser-lanes HEAD~1 HEAD after fetching it), or pass no arguments to use the range just check would" >&2; exit 2; }; err=$(mktemp); trap 'rm -f "$err"' EXIT; affected=$(pnpm exec nx show projects --affected --base="$base" --head="$head" --json 2>"$err") || { cat "$err" >&2; echo "gate-browser-lanes: Nx could not resolve the affected projects between $base and $head; fix the error above, or fetch the missing commits, then rerun just gate-browser-lanes $base $head" >&2; exit 1; }; printf '%s' "$affected" | node scripts/workspace/gate-browser-lanes.mjs || { echo "gate-browser-lanes: the gate's browser lanes could not be derived from the affected selection; fix what the reason above names, then rerun just gate-browser-lanes $base $head" >&2; exit 1; }
 
 # CI runs this non-PR safety sweep so affected detection is never the only gate.
 check-all: lint-workflows
