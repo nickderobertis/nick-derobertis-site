@@ -23,6 +23,13 @@ $ npm pack @tanstack/react-start @tanstack/start-plugin-core
 $ tar xzf tanstack-start-plugin-core-1.171.39.tgz   # sources under package/src
 ```
 
+`@tanstack/router-core` is cited from the copy this repository resolves, which
+also ships its sources, so those citations are file paths inside it:
+
+```console
+$ ls node_modules/.pnpm/@tanstack+router-core@1.171.15/node_modules/@tanstack/router-core/src
+```
+
 Repository claims are of two kinds, and each is labelled where it is made.
 A claim about **how the repository is wired** cites the configuration or
 workflow file that wires it. A claim about **what the repository does** was
@@ -43,10 +50,11 @@ output). Both are quoted below by file count and by byte size.
 is 77 lines that build one `Request` per route (`:40-56`), spin on
 `router.serverSsr?.isSerializationFinished()` (`:58-59`), call `prerender` from
 `react-dom/static` (`:60`), then `setRenderFinished()` and `takeBufferedHtml()`
-(`:61-64`) — the two members `@tanstack/router-core` annotates framework-only,
-and which resolve here through an unpinned transitive `@tanstack/router-core@1.171.15`
-(`pnpm-lock.yaml:3103`) rather than the pinned `@tanstack/react-router@1.170.18`
-(`package.json:12`). Start owns exactly that loop. Its rsbuild adapter loads the
+(`:61-64`) — the two members whose declarations on `@tanstack/router-core`'s
+`ServerSsr` interface carry `/** Framework-only. */` (`src/router.ts:806-807`
+and `:825-826`), and which resolve here through an unpinned transitive
+`@tanstack/router-core@1.171.15` (`pnpm-lock.yaml:3103`) rather than the pinned
+`@tanstack/react-router@1.170.18` (`package.json:12`). Start owns exactly that loop. Its rsbuild adapter loads the
 built server bundle's default fetch handler
 (`package/src/rsbuild/post-build.ts:77-96`), issues one `Request` per page
 against it (`:55-65`), and its crawler writes each page's HTML
@@ -155,15 +163,19 @@ has no Start equivalent and stays.
 consumed by the `@nx/rspack:rspack` executor (`apps/shell/project.json`
 `build.options.rspackConfig`; `apps/awards/rspack.config.ts` is two lines
 delegating to `remoteConfig`). `tanStackStartRsbuild` returns an `RsbuildPlugin`
-(`package/src/rsbuild/plugin.ts:68`) registered through `RsbuildPluginAPI`, so
+(`package/src/rsbuild/plugin.ts:68-71`) registered through `RsbuildPluginAPI`, so
 each `rspack.config.ts` becomes an `rsbuild.config.ts` and the executor changes
 with it (`@nx/rsbuild` exists at 23.1.2; this workspace declares `@nx/rspack`
 at `package.json:26` and no Rsbuild package). Each app additionally owes the
 four entries Start's plan aliases — client, server, start, router
-(`package/src/rsbuild/planning.ts:66-86`) — and a generated `src/routeTree.gen.ts`
-from either a `src/routes/` directory or a `virtualRouteConfig`
-(`package/src/schema.ts:69-79`; the generator is registered unconditionally in
-the client environment at `package/src/rsbuild/start-router-plugin.ts:36-63`).
+(`package/src/rsbuild/planning.ts:66-86`) — and a generated route tree, which
+Start resolves from a `routesDirectory` defaulting to `src/routes` into a
+`generatedRouteTree` defaulting to `src/routeTree.gen.ts`
+(`package/src/schema.ts:69-79`). Neither is opt-out at Start's level: the
+generator is registered unconditionally in the client environment
+(`package/src/rsbuild/start-router-plugin.ts:39-63`), handed `startConfig.router`
+verbatim (`:40-47`), so any route source other than a directory of route files
+is the router generator's own option rather than something Start declares.
 The shell builds its routes in code instead, inside `createSiteRouter`
 (`apps/shell/src/router.tsx:75-252`) from `apps/shell/src/routes.json`, so that
 whole surface is rewritten. Twelve of the thirteen apps are remotes whose
@@ -173,8 +185,9 @@ reason to exist is `exposes`, which Start does not model.
 `@tanstack/react-router@1.170.32` exactly (`package.json:158`), against this
 repository's pin of `1.170.18` (`package.json:12`), so adopting Start takes the
 router bump out of the repository's hands. `@rsbuild/core ^2.0.0` becomes a real
-dependency (declared optional peer at `@tanstack/react-start` `package.json:167-172`
-and `@tanstack/start-plugin-core` `package.json:106-114`), and
+dependency — each package declares it in `peerDependencies` and marks it optional
+in `peerDependenciesMeta` (`@tanstack/react-start` `package.json:167-172` and
+`:173-183`; `@tanstack/start-plugin-core` `package.json:106-114`) — and
 `@module-federation/enhanced` is swapped for `@module-federation/rsbuild-plugin`.
 The Node floor both packages declare — `engines.node: ">=22.12.0"` — is already
 met by the 26.5.0 pinned at `.github/workflows/pages.yml:27`.
