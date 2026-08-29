@@ -61,6 +61,14 @@
       "options": {
         "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON apps/awards/visual/capture.ts \"${SHOTS_OUT:-shots/current/awards/x86_64}\""
       }
+    },
+    "serve": {
+      "executor": "@nx/rspack:dev-server",
+      "options": {
+        "buildTarget": "awards:build",
+        "port": 4200,
+        "host": "127.0.0.1"
+      }
     }
   }
 }

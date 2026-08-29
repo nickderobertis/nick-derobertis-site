@@ -4,6 +4,7 @@ import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
 import { PublishedFragmentPlugin } from "./published-fragment";
 import { type RemoteProject, remoteRegistry } from "./remote-registry";
+import { servedInDevelopment } from "./rspack-dev";
 
 const siteConfig: unknown = createRequire(import.meta.url)(
   "../../data-access-core/src/site.config.json",
@@ -41,38 +42,47 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
   // narrow an arbitrary string to a manifest key, so the branch says so.
   const federationName =
     name in remoteRegistry ? remoteRegistry[name as RemoteProject] : name;
-  return {
-    entry: `./${root}/src/main.tsx`,
-    output: { publicPath, uniqueName: name, clean: true },
-    optimization: { runtimeChunk: false },
-    plugins: [
-      new NxAppRspackPlugin({
-        tsConfig: `${root}/tsconfig.app.json`,
-        main: `${root}/src/main.tsx`,
-        index: `${root}/src/index.html`,
-        baseHref: publicPath,
-        assets: [],
-        outputHashing: "all",
-        optimization: true,
-        runtimeChunk: false,
-      }),
-      new NxReactRspackPlugin(),
-      // llmlint: ignore[changed_behavior_has_e2e] Each app's ownership.spec.ts drives its published remote through standalone and host-composed browser boundaries, and the feature journey specs cover their happy and recovery states.
-      new PublishedFragmentPlugin(name),
-      new ModuleFederationPlugin({
-        name: federationName,
-        filename: "remoteEntry.js",
-        // llmlint: ignore[microfrontends_split_aggressively] Skeleton is the declared dependency-light loading boundary consumed by the shell while the route-level Page chunk resolves; no feature implementation internals are exposed.
-        exposes: {
-          "./Page": "./src/page.tsx",
-          "./Skeleton": "./src/skeleton.tsx",
-        },
-        remotes: options.remotes ?? {},
-        shared: {
-          react: { singleton: true, requiredVersion: false, eager: true },
-          "react-dom": { singleton: true, requiredVersion: false, eager: true },
-        },
-      }),
-    ],
-  };
+  // Unchanged unless this remote is the one a development server is building
+  // from source; nothing a production build emits passes through the branch.
+  return servedInDevelopment(
+    {
+      entry: `./${root}/src/main.tsx`,
+      output: { publicPath, uniqueName: name, clean: true },
+      optimization: { runtimeChunk: false },
+      plugins: [
+        new NxAppRspackPlugin({
+          tsConfig: `${root}/tsconfig.app.json`,
+          main: `${root}/src/main.tsx`,
+          index: `${root}/src/index.html`,
+          baseHref: publicPath,
+          assets: [],
+          outputHashing: "all",
+          optimization: true,
+          runtimeChunk: false,
+        }),
+        new NxReactRspackPlugin(),
+        // llmlint: ignore[changed_behavior_has_e2e] Each app's ownership.spec.ts drives its published remote through standalone and host-composed browser boundaries, and the feature journey specs cover their happy and recovery states.
+        new PublishedFragmentPlugin(name),
+        new ModuleFederationPlugin({
+          name: federationName,
+          filename: "remoteEntry.js",
+          // llmlint: ignore[microfrontends_split_aggressively] Skeleton is the declared dependency-light loading boundary consumed by the shell while the route-level Page chunk resolves; no feature implementation internals are exposed.
+          exposes: {
+            "./Page": "./src/page.tsx",
+            "./Skeleton": "./src/skeleton.tsx",
+          },
+          remotes: options.remotes ?? {},
+          shared: {
+            react: { singleton: true, requiredVersion: false, eager: true },
+            "react-dom": {
+              singleton: true,
+              requiredVersion: false,
+              eager: true,
+            },
+          },
+        }),
+      ],
+    },
+    { publicPath, siteBase: `${pagesBase}/` },
+  );
 }

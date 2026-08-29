@@ -152,6 +152,14 @@ perf-check-report:
 serve: prerender
     {{node_typestrip}} scripts/serve/serve-e2e.mjs
 
+# Serve one named app from source with hot module replacement, against every
+# other app's built output, at the same base path Pages publishes. The argument
+# is validated before anything is built, so a name this workspace cannot serve
+# costs a diagnostic rather than thirteen production builds.
+@serve-dev app:
+    # llmlint: ignore[changed_behavior_has_e2e] This developer command has no browser interface of its own: it validates a name, claims the artifact, and hands the serving to the real Nx dev-server target. serve-dev.spec.ts drives this exact recipe as a real subprocess and drives the page it serves — and the edit it hot-replaces into that page — through a real browser.
+    status=0; app=$({{node_typestrip}} scripts/serve/serve-dev.mjs --app "$1") || status=$?; if (( status != 0 )); then if (( status == 2 )); then echo "serve-dev: app must name an app this workspace serves from source; the reason above lists every one, so pass one and rerun just serve-dev <app>" >&2; else echo "serve-dev: the servable apps could not be resolved; fix the error above and rerun just serve-dev <app>" >&2; fi; exit "$status"; fi; just prerender; {{node_typestrip}} scripts/serve/serve-dev.mjs "$app" || { echo "serve-dev: the $app development server stopped; fix the error above and rerun just serve-dev $app" >&2; exit 1; }
+
 e2e-affected-files file:
     # llmlint: ignore[tool_output_is_signal] This proof command intentionally preserves unedited Nx selection and execution output for docs/integration-proof.md.
     file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "e2e-affected-files: file must be a tracked workspace-relative file" >&2; exit 2; }; pnpm exec nx show projects --affected --files="$file" --with-target=e2e --json && pnpm exec nx affected -t e2e --files="$file" --parallel=3

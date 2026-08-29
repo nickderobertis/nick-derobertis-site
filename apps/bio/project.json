@@ -56,6 +56,14 @@
       "options": {
         "command": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON apps/bio/visual/capture.ts \"${SHOTS_OUT:-shots/current/bio/x86_64}\""
       }
+    },
+    "serve": {
+      "executor": "@nx/rspack:dev-server",
+      "options": {
+        "buildTarget": "bio:build",
+        "port": 4200,
+        "host": "127.0.0.1"
+      }
     }
   }
 }
