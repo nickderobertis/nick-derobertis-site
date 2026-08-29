@@ -52,7 +52,7 @@ vi.mock("@tanstack/react-router/ssr/server", async (importOriginal) => {
   return { ...actual, createRequestHandler };
 });
 
-const cleanedUp = (path: string) => [
+const cleanupThenSettle = (path: string) => [
   `cleanup ${siteBase}${path === "/" ? "/" : path}`,
   `settled ${siteBase}${path === "/" ? "/" : path}`,
 ];
@@ -68,7 +68,9 @@ afterEach(() => {
 test("every router the fragment entry renders is cleaned up once, by the entry", async () => {
   const html = await renderShellFragment();
 
-  expect(lifecycle).toEqual(routes.flatMap((route) => cleanedUp(route.path)));
+  expect(lifecycle).toEqual(
+    routes.flatMap((route) => cleanupThenSettle(route.path)),
+  );
   for (const route of routes)
     expect(html).toContain(`<template data-shell-route="${route.path}"`);
 });
@@ -83,6 +85,6 @@ test("a router whose route throws while rendering is cleaned up before the failu
   expect(lifecycle).toEqual(
     routes
       .slice(0, routes.findIndex((route) => route.path === "/research") + 1)
-      .flatMap((route) => cleanedUp(route.path)),
+      .flatMap((route) => cleanupThenSettle(route.path)),
   );
 });

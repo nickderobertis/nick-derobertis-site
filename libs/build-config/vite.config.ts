@@ -4,13 +4,9 @@ export default defineWorkspaceTestConfig({
   project: "build-config",
   dir: "libs/build-config",
   thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
-  // `@site-fragment/*` is not a package: it is how the shell fragment entry
-  // reaches the app it prerenders, resolved by whichever compilation owns the
-  // entry. The publish build points the pair at the shell's own router and
-  // routes; this run points them at the fixtures beside the entry, so
-  // shell-fragment-entry.spec.tsx drives the real entry. They travel through
-  // the harness's alias channel because that is the one it has, and because
-  // they are the same kind of thing a remote specifier is: a specifier no
+  // Where this run resolves `@site-fragment/*` (see
+  // src/shell-fragment-modules.d.ts). They travel through the harness's alias
+  // channel because they are the same kind of specifier a remote is: one no
   // manifest publishes, pointed at the source behind it.
   remotes: {
     "@site-fragment/router":
@@ -21,13 +17,10 @@ export default defineWorkspaceTestConfig({
   coverageInclude: ["libs/build-config/src/**/*.{ts,tsx}"],
   coverageExclude: [
     "libs/build-config/src/index.ts",
-    // rspack entry points, not modules this library imports: each is compiled
-    // in its own build with `@site-fragment/*` aliased to the app it
-    // prerenders, so nothing outside that compilation can resolve them. Every
-    // app build drives both, and every route journey drives what they render.
-    // The shell entry's SSR lifecycle is driven directly by
-    // shell-fragment-entry.spec.tsx through the aliases above; the rest of both
-    // entries stays owned by the builds that compile them.
+    // rspack entry points, not modules this library imports: every app build
+    // drives both, and every route journey drives what they render. The shell
+    // entry's SSR lifecycle is the exception, driven here through the aliases
+    // above.
     "libs/build-config/src/remote-fragment-entry.tsx",
     "libs/build-config/src/shell-fragment-entry.tsx",
   ],

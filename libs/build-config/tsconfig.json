@@ -2,10 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "types": ["node", "vitest/globals"] },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
-  // The two rspack entry points resolve `@site-fragment/*` through aliases the
-  // compilation that owns them declares, so neither is a root file of this
-  // project's program. shell-fragment-entry.spec.tsx pulls the shell entry back
-  // in and src/shell-fragment-modules.d.ts resolves those two specifiers for
-  // it, so the entry the spec drives is typechecked here too.
+  // Neither rspack entry is a root file of this program. The shell one is
+  // still typechecked here: its spec pulls it back in, and
+  // src/shell-fragment-modules.d.ts resolves what it imports.
   "exclude": ["src/remote-fragment-entry.tsx", "src/shell-fragment-entry.tsx"]
 }

@@ -5,24 +5,14 @@ import { expect, test } from "vitest";
 import { z } from "zod";
 
 /**
- * The drift gate over the `@tanstack/router-core` pin.
- *
- * `shell-fragment-entry.tsx` drives `router.serverSsr`, which router-core's own
- * declarations annotate "Framework-only". That surface does not live in the
- * exactly pinned `@tanstack/react-router`, so the workspace declares
- * `@tanstack/router-core` itself — and a declared version is a second statement
- * of something the package manager was already resolving, which is exactly the
- * kind of restatement that drifts. Two things keep it from drifting: the
- * declared version has to be the version that is installed, and the copy it
- * names has to be the copy `@tanstack/react-router` itself loads. Without the
- * second, a react-router upgrade that moves its own router-core requirement
- * leaves the declaration pinning a package nothing renders with, while the
- * entry keeps driving whichever copy react-router resolved — the private
- * surface moving underneath a pin, which is the failure the pin exists to stop.
- *
- * This gate lives beside the entry rather than with the workspace's manifest
- * contracts because it is that entry's dependency on a framework-only API that
- * makes the declaration necessary at all.
+ * The drift gate over the `@tanstack/router-core` pin, which exists because
+ * `shell-fragment-entry.tsx` drives that package's framework-only `serverSsr`
+ * and `@tanstack/react-router` does not carry it. It is declared as a direct
+ * dependency rather than a `pnpm.overrides` entry because AGENTS.md holds every
+ * dependency's `pnpm outdated` `current` to its `wanted`, and only a declared
+ * one is reported there. A react-router upgrade that moved its own router-core
+ * requirement would leave that declaration pinning a copy nothing renders with,
+ * so both halves are asserted below.
  */
 const installedPackage = z.object({
   version: z.string().regex(/^\d+\.\d+\.\d+$/),

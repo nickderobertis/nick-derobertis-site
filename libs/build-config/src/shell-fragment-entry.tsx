@@ -54,23 +54,12 @@ export async function renderShellFragment() {
           },
         }),
     });
-    // `router.serverSsr` is router-core's framework-only SSR lifecycle. It is
-    // driven by hand because the public `renderRouterToString` renders with
-    // `renderToString`, which never resolves Suspense; `prerender` does, so the
-    // lifecycle around it is this entry's to run. That means running all of it,
-    // including the `cleanup()` the public helper runs in a `finally`: five
-    // routers are rendered in this one process, and a router left uncleaned
-    // keeps its SSR buffers and listeners for the rest of it.
-    //
-    // That surface is framework-only, so package.json depends on
-    // `@tanstack/router-core` directly at the exact version the lockfile
-    // resolves rather than inheriting it through `@tanstack/react-router`. A
-    // direct dependency is chosen over a `pnpm.overrides` entry because
-    // AGENTS.md holds every dependency's `pnpm outdated` `current` to its
-    // `wanted`, and only a declared dependency is reported there at all. What
-    // keeps that declaration from becoming a second, drifting statement of the
-    // resolved version is router-core-pin.spec.ts, which holds it to the copy
-    // `@tanstack/react-router` itself loads.
+    // `router.serverSsr` is router-core's framework-only SSR lifecycle, driven
+    // by hand because the public `renderRouterToString` renders with
+    // `renderToString`, which never resolves Suspense. `prerender` does, so
+    // every step around it is this entry's to run — including the `cleanup()`
+    // the public helper runs in a `finally`. router-core-pin.spec.ts is what
+    // holds that framework-only surface to a version this workspace declares.
     await handler(async ({ router }) => {
       try {
         while (!router.serverSsr?.isSerializationFinished())
@@ -83,12 +72,9 @@ export async function renderShellFragment() {
         };
         return new Response(rendered.html);
       } finally {
-        // Releasing this router before the next one is built is what keeps the
-        // five renders in this process independent. What that has to leave
-        // behind is asserted in the browser, over the artifact this loop
-        // writes: apps/shell/e2e/site.spec.ts drives every prerendered route
-        // with JavaScript disabled and then hydrates onto that same markup,
-        // which a route served another router's leftover SSR state cannot do.
+        // Releasing this router keeps the next route's render out of its SSR
+        // state; apps/shell/e2e/site.spec.ts asserts what that has to leave
+        // behind, in the browser, over the artifact this loop writes.
         router.serverSsr?.cleanup();
       }
     });

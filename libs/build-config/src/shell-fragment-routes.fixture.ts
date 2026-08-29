@@ -1,15 +1,7 @@
-// The route table the shell fragment entry's spec drives it over, and the one
-// source the fixture router beside it builds its routes from: a path, a page
-// and a domain named here reach the router only from this array, so the two
-// halves of the fixture cannot disagree about what the entry renders.
-//
-// The publish build aliases `@site-fragment/routes` to the shell's own
-// `routes.ts`; this file is what that alias points at under Vitest, so the
-// entry itself stays the real one while the app it prerenders stays inside
-// this library's own tree. These entries are this fixture's own rather than a
-// copy of the shell's table — nothing here is asserted to match a shell route,
-// and what proves the entry renders the shell's real table is the composed
-// artifact, which tooling-artifact and the shell's own journeys drive.
+// What `@site-fragment/routes` resolves to under Vitest, and the one source
+// the fixture router builds from: a path, page and domain reach it only from
+// here. These routes are the fixture's own rather than a copy of the shell's
+// table — the shell's real table reaches the entry through the publish build.
 export type FragmentPageName =
   | "home"
   | "bio"

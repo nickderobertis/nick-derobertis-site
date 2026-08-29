@@ -1,13 +1,7 @@
-// The router the shell fragment entry's spec compiles it against. The publish
-// build aliases `@site-fragment/router` to the shell's own `router.tsx`; this
-// file is what that alias points at under Vitest, so the entry driving the SSR
-// lifecycle is the real one while the app it prerenders stays inside this
-// library's own tree — the same substitution the rspack compilation makes, and
-// the reason nothing in this library's module graph points at an app.
-//
-// Every route here is built from the table in `./shell-fragment-routes.fixture`,
-// which the entry loops over: the fixture states each path, page and loader
-// domain once, so the routers it builds are the routes the entry renders.
+// What `@site-fragment/router` resolves to under Vitest (see
+// ./shell-fragment-modules.d.ts), so the entry driving the SSR lifecycle stays
+// real while the app it prerenders stays in this library's tree. Its routes are
+// built from ./shell-fragment-routes.fixture, the table the entry loops over.
 // eslint-disable-next-line @nx/enforce-module-boundaries -- This fixture is a build-only alias target for the shell fragment entry's spec, and takes the site base from the same module the shell router takes it from.
 import { siteBase } from "@site/data-access-core";
 import {

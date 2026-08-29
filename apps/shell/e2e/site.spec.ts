@@ -381,15 +381,11 @@ test("Home reuses prerendered content without hydration warnings", async ({
   ).toBeVisible();
   expect(errors).toEqual([]);
 });
-// The shell fragment entry prerenders one router per route in a single build
-// process and releases each one before it builds the next, so every route's
-// document has to be that route's own render — markup a visitor can read with
-// JavaScript off, and SSR state the client can adopt without rebuilding the
-// page. A router still holding the previous route's state shows up here rather
-// than at the build: the document is served, but the client cannot hydrate onto
-// it, so the prerendered main landmark is replaced or the console carries a
-// hydration error. Every prerendered route is driven through both paths,
-// including Home, whose hydration identity no other journey asserts.
+// The five routes are prerendered by five routers in one build process, so a
+// route served another router's leftover SSR state would still paint but could
+// not be hydrated onto: the main landmark would be replaced, or the console
+// would carry a hydration error. Home is here because no other journey asserts
+// its hydration identity.
 test("every prerendered route hydrates onto the render its own router produced", async ({
   browser,
 }) => {
@@ -433,14 +429,9 @@ test("every prerendered route hydrates onto the render its own router produced",
   }
 });
 
-// The other half of the same content contract: every route the shell composes
-// is also published as its own standalone remote document, prerendered by the
-// remote fragment entry rather than the shell one. Driving both boundaries is
-// what keeps a route from being provable through only the path its own build
-// step writes — the shell's five-router loop above, or the remote's own render
-// here. Home is the exception the shell shares: its standalone document is a
-// host of slots whose panes are federated in at runtime, so it prerenders no
-// landmark of its own and is asserted once its bundle has run.
+// The same routes through their other boundary: each is also published as the
+// standalone document its own remote prerenders. Home's is a host of slots
+// federated in at runtime, so it prerenders no landmark and is asserted hydrated.
 const routeRemotes = pages.map((route) => ({
   ...route,
   remote: remoteContract(route.path === "" ? "home" : route.path),
