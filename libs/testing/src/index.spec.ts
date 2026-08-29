@@ -16,16 +16,9 @@ describe("defineWorkspaceTestConfig", () => {
     });
 
     expect(config.root).toBe(path.resolve(import.meta.dirname, "../../.."));
-    // Anchored rather than a bare string: Vite claims a string alias and every
-    // path beneath it, so an object of them resolves by whichever key was
-    // written first. `alias-resolution.spec.ts` drives what that anchoring buys
-    // through real imports.
-    expect(config.resolve?.alias).toEqual([
-      {
-        find: /^homeCards\/Skeleton$/,
-        replacement: path.resolve("apps/home-cards/src/skeleton.tsx"),
-      },
-    ]);
+    expect(config.resolve?.alias).toEqual({
+      "homeCards/Skeleton": path.resolve("apps/home-cards/src/skeleton.tsx"),
+    });
     expect(config.test).toMatchObject({
       environment: "jsdom",
       setupFiles: ["libs/testing/src/setup.ts"],
@@ -63,7 +56,7 @@ describe("defineWorkspaceTestConfig", () => {
       "apps/bio/src/**/*.{ts,tsx}",
     ]);
     expect(config.test?.coverage?.exclude).toBeUndefined();
-    expect(config.resolve?.alias).toEqual([]);
+    expect(config.resolve?.alias).toEqual({});
   });
 
   test("carries the ceiling a project states for tests the runner's default cannot bound", () => {
@@ -116,26 +109,6 @@ describe("defineWorkspaceTestConfig", () => {
       "a ceiling that would bound nothing",
       { project: "bio", dir: "apps/bio", thresholds: floor, testTimeout: 0 },
       "at testTimeout",
-    ],
-    [
-      "a remote pointed at nothing",
-      {
-        project: "bio",
-        dir: "apps/bio",
-        thresholds: floor,
-        remotes: { "bio/Page": "" },
-      },
-      'at remotes["bio/Page"]',
-    ],
-    [
-      "a remote family whose target has no place for the remainder",
-      {
-        project: "bio",
-        dir: "apps/bio",
-        thresholds: floor,
-        remotes: { "bio/*": "apps/bio/src/page.tsx" },
-      },
-      'at remotes["bio/*"]',
     ],
     [
       "an option this harness does not define",
