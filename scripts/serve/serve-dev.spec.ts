@@ -17,8 +17,10 @@ import { z } from "zod";
  * and resolve against this server unchanged.
  *
  * Nothing below inspects configuration. Each case starts the real recipe as a
- * subprocess, opens what it serves in a real browser, edits a real source file
- * of the app under development, and waits for the running page to show it.
+ * subprocess — which validates its app, claims the artifact and starts the
+ * server through `scripts/serve/serve-dev.mjs` — opens what it serves in a real
+ * browser, edits a real source file of the app under development, and waits for
+ * the running page to show it.
  */
 
 const workspace = process.cwd();

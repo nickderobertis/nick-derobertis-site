@@ -22,7 +22,8 @@ import { z } from "zod";
  * So this drives the real command surface rather than reading the recipe. Each
  * scenario is a real commit built with git plumbing — no working tree is
  * touched — and `just gate-browser-lanes` resolves it through the real Nx
- * project graph. `just check` itself is then run with its dispatcher recorded,
+ * project graph before handing the affected selection to
+ * `scripts/workspace/gate-browser-lanes.mjs`, which decides the lanes. `just check` itself is then run with its dispatcher recorded,
  * which is the only way to observe that one selection is dispatched once rather
  * than assumed to be, and the selection it dispatches is handed back to Nx for
  * the task graph it actually produces.
