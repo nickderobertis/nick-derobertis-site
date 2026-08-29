@@ -20,6 +20,9 @@ importers:
       '@tanstack/react-router':
         specifier: 1.170.18
         version: 1.170.18(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      '@tanstack/router-core':
+        specifier: 1.171.15
+        version: 1.171.15
       ajv:
         specifier: 8.17.1
         version: 8.17.1
