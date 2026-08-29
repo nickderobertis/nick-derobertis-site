@@ -11,4 +11,15 @@ export default defineWorkspaceTestConfig({
   project: "subpath-resolution-probe",
   dir: "scripts/workspace/subpath-resolution-probe",
   thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
+  // The remotes a host states are the only aliases this harness still merges,
+  // and each of these is a stand-in the way every host's own test config states
+  // them. The second one is deliberately a specifier `@site/build-config` also
+  // publishes: it is the one place a remote and a package manifest could both
+  // answer, and the remote the caller stated has to win there.
+  remotes: {
+    "homeCards/Skeleton":
+      "scripts/workspace/subpath-resolution-probe/src/stands-in-for-a-remote.ts",
+    "@site/build-config/remote-registry":
+      "scripts/workspace/subpath-resolution-probe/src/shadows-a-published-subpath.ts",
+  },
 });

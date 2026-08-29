@@ -1,11 +1,17 @@
 import { execFile } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import {
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
-import { type Resolve, rspack } from "@rspack/core";
+import { rspack, type Stats, type StatsCompilation } from "@rspack/core";
 import { remoteConfig } from "@site/build-config";
 import { remoteRegistry } from "@site/build-config/remote-registry";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
 /**
@@ -21,19 +27,26 @@ import { z } from "zod";
  * holds the workspace to that, so a return to prefix matching fails here.
  *
  * Two resolvers have to agree and they are configured separately, so agreement
- * in one says nothing about the other:
+ * in one says nothing about the other. Both halves below are real runs of the
+ * thing that resolves — nothing here asks a resolver a question the pipeline
+ * around it might answer differently:
  *
- * - the production build's, which is rspack's, configured by the very
- *   `remoteConfig` every app's `rspack.config.ts` builds its compiler from;
+ * - the production build's, driven as a real rspack build of the very
+ *   configuration `remoteConfig` hands every app's `rspack.config.ts`, over an
+ *   entry that imports the subpath specifiers for real. What the build produced
+ *   is what is read back: the module graph's answer for each specifier, and the
+ *   bytes of the chunk it emitted;
  * - the test runner's, which is Vite's, configured by the shared harness every
  *   app and library states its test configuration through. That one cannot be
  *   answered from this process — these tooling specs run under a hand-written
  *   node config rather than under that harness — so it is driven as a real
  *   Vitest run over the probe beside this file.
  *
- * Both halves resolve real specifiers rather than reading configuration, and
- * both derive their subjects from the manifests that publish them, so a subpath
- * added tomorrow is covered the day it is added.
+ * Both halves derive their subjects from the manifests that publish them, so a
+ * subpath added tomorrow is covered the day it is added. Between them every
+ * published subpath is resolved for real: the test runner imports all of them,
+ * and the build imports the ones a browser bundle can hold, which is every
+ * subpath a build ever asks for.
  */
 
 const packageName = z.string().regex(/^@site\/[a-z][a-z0-9-]*$/);
@@ -94,26 +107,23 @@ function overlappingSpecifiers(): Overlap[] {
 }
 
 /**
- * One such subpath, for the readings below that have to be held to an input
- * they should report rather than to the compliant workspace.
+ * Whether a browser bundle can hold what a subpath publishes. rspack polyfills
+ * no Node builtin, so a module that imports one is never bundled and no
+ * production build ever asks for it; the test-runner half below imports every
+ * published subpath, which is where those are covered.
  */
-function anOverlappingSpecifier(): Overlap {
-  const [subject] = overlappingSpecifiers();
-  if (subject === undefined)
-    throw new Error(
-      "no @site package publishes a subpath beside its bare specifier, so there is no overlapping specifier to hold this reading to. Confirm the workspace still publishes the subpath exports this contract reads, then rerun just check.",
-    );
-  return subject;
+function bundlable(target: string) {
+  return (
+    target.endsWith(".json") ||
+    !/from "node:/.test(readFileSync(target, "utf8"))
+  );
 }
 
 /**
- * The compiler an app's production build runs, built from the configuration
- * that build reads. `@nx/rspack`'s app plugin takes the app it is configuring
- * from the task environment Nx sets around a build, so the build task is stood
- * in for here rather than the plugin stubbed out. Every remote is configured by
- * the same call, so one of them answers for all; it is taken from the registry
- * rather than named here so a renamed remote cannot leave this reading a
- * project that no longer exists.
+ * The remote whose production build resolves these specifiers. Every remote is
+ * configured by the same `remoteConfig` call, so one of them answers for all;
+ * it is taken from the registry rather than named here so a renamed remote
+ * cannot leave this building a project that no longer exists.
  */
 function aRemoteUnderBuild(): string {
   const [name] = Object.keys(remoteRegistry).sort();
@@ -125,86 +135,212 @@ function aRemoteUnderBuild(): string {
 }
 
 const remoteUnderBuild = aRemoteUnderBuild();
+const subjects = overlappingSpecifiers();
+const builtSubjects = subjects.filter((subject) => bundlable(subject.target));
 
-function productionCompiler() {
-  process.env.NX_TASK_TARGET_PROJECT = remoteUnderBuild;
-  process.env.NX_TASK_TARGET_TARGET = "build";
-  return rspack(remoteConfig(remoteUnderBuild));
-}
-
-const compiler = productionCompiler();
-
-afterAll(async () => {
-  delete process.env.NX_TASK_TARGET_PROJECT;
-  delete process.env.NX_TASK_TARGET_TARGET;
-  await new Promise<void>((done) => compiler.close(() => done()));
-});
+/** Where each build writes the entry it compiles and the artifact it emits. */
+const buildRoot = resolve("dist/tooling-workspace/subpath-build");
+/** The entry name the extra import sits under, beside the app's own `main`. */
+const probeEntry = "subpathProbe";
 
 /**
- * What a resolver holding these options answers a request with, asked from the
- * directory that compilation resolves from. `false` is rspack's answer for a
- * request it was told to ignore, and a request it cannot resolve at all
- * throws; both are folded into a reported answer rather than raised, so a
- * finding names the specifier that produced it.
+ * A module that imports each specifier for real. Every namespace is assigned
+ * somewhere the bundler cannot see through, so nothing it pulled in is dropped
+ * again before the chunk is emitted.
  */
-function answerFor(options: Resolve, specifier: string): string {
-  const resolver = compiler.resolverFactory.get("normal", options);
-  try {
-    const answer = resolver.resolveSync(
-      {},
-      compiler.options.context ?? process.cwd(),
-      specifier,
-    );
-    return answer === false ? "no module, because rspack ignores it" : answer;
-  } catch (error) {
-    return `no module: ${error instanceof Error ? error.message : String(error)}`;
-  }
+function entryImporting(specifiers: readonly string[]): string {
+  return [
+    ...specifiers.map(
+      (specifier, index) =>
+        `import * as subject${index} from ${JSON.stringify(specifier)};`,
+    ),
+    `globalThis.subpathProbe = [${specifiers.map((_, index) => `subject${index}`).join(", ")}];`,
+    "",
+  ].join("\n");
 }
 
-/** What the production build itself answers, under its own resolve options. */
-const productionAnswer = (specifier: string) =>
-  answerFor(compiler.options.resolve, specifier);
+/** What one real build produced, read back from its own output. */
+type Build = {
+  errors: string[];
+  /** Every file the build answered a given request with. */
+  answers: Map<string, Set<string>>;
+  /** The bytes of the chunk emitted for the entry that did the importing. */
+  emitted: string;
+};
+
+/**
+ * Runs the production build of `remoteUnderBuild` — the configuration that
+ * app's `rspack.config.ts` exports, unchanged except for the entry that does
+ * the importing and an output directory of this lane's own — and reads its
+ * result back. `@nx/rspack`'s app plugin takes the app it is configuring from
+ * the task environment Nx sets around a build, so the build task is stood in
+ * for here rather than the plugin stubbed out.
+ */
+async function build(
+  lane: string,
+  specifiers: readonly string[],
+): Promise<Build> {
+  const laneRoot = resolve(buildRoot, lane);
+  rmSync(laneRoot, { recursive: true, force: true });
+  mkdirSync(laneRoot, { recursive: true });
+  const entry = resolve(laneRoot, "entry.js");
+  writeFileSync(entry, entryImporting(specifiers));
+  const outputPath = resolve(laneRoot, "out");
+  process.env.NX_TASK_TARGET_PROJECT = remoteUnderBuild;
+  process.env.NX_TASK_TARGET_TARGET = "build";
+  const production = remoteConfig(remoteUnderBuild);
+  const compiler = rspack({
+    ...production,
+    entry: { main: production.entry, [probeEntry]: entry },
+    output: { ...production.output, path: outputPath },
+  });
+  const stats = await new Promise<Stats>((done, fail) => {
+    compiler.run((failure, produced) => {
+      if (failure) fail(failure);
+      else if (produced === undefined)
+        fail(new Error(`the ${remoteUnderBuild} build produced no stats`));
+      else done(produced);
+    });
+  });
+  const report = stats.toJson({
+    all: false,
+    errors: true,
+    assets: true,
+    modules: true,
+    reasons: true,
+  });
+  await new Promise<void>((done) => compiler.close(() => done()));
+  return {
+    errors: (report.errors ?? []).map((error) => error.message),
+    answers: answersIn(report),
+    emitted: emittedFor(report, outputPath),
+  };
+}
+
+/**
+ * What the build's own module graph says each request resolved to. A request
+ * appears once per module that made it, and every one of them has to have been
+ * answered with the same file, so the answers are collected as a set.
+ */
+function answersIn(report: StatsCompilation): Map<string, Set<string>> {
+  const answers = new Map<string, Set<string>>();
+  for (const module of report.modules ?? []) {
+    const answer = module.nameForCondition;
+    if (answer === undefined) continue;
+    for (const reason of module.reasons ?? []) {
+      const request = reason.userRequest;
+      if (request === undefined) continue;
+      const answered = answers.get(request) ?? new Set<string>();
+      answered.add(answer);
+      answers.set(request, answered);
+    }
+  }
+  return answers;
+}
+
+/**
+ * The bytes of the JavaScript chunk the build emitted for the importing entry.
+ * A build that reported no error can still have emitted nothing for it, so the
+ * asset is located through the stats rather than guessed at from the directory.
+ */
+function emittedFor(report: StatsCompilation, outputPath: string): string {
+  const asset = (report.assets ?? []).find(
+    (candidate) =>
+      candidate.name.endsWith(".js") &&
+      (candidate.chunkNames ?? []).includes(probeEntry),
+  );
+  if (asset === undefined) return "";
+  return readFileSync(resolve(outputPath, asset.name), "utf8");
+}
+
+/** Every string a JSON document is built from, keys and values alike. */
+function stringsIn(value: unknown): string[] {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value)) return value.flatMap(stringsIn);
+  if (typeof value === "object" && value !== null)
+    return Object.entries(value).flatMap(([key, member]) => [
+      key,
+      ...stringsIn(member),
+    ]);
+  return [];
+}
+
+let built: Build;
+
+beforeAll(async () => {
+  built = await build(
+    "published",
+    builtSubjects.map((subject) => subject.specifier),
+  );
+});
+
+afterAll(() => {
+  delete process.env.NX_TASK_TARGET_PROJECT;
+  delete process.env.NX_TASK_TARGET_TARGET;
+  rmSync(buildRoot, { recursive: true, force: true });
+});
 
 describe("the production build resolves published subpaths", () => {
-  it("answers every longer specifier with its own target, not the shorter one's", () => {
-    const subjects = overlappingSpecifiers();
+  it("builds an import of every published subpath a bundle can hold", () => {
     expect(
-      subjects.length,
-      "no @site package publishes a subpath beside its bare specifier, so no overlapping specifier was resolved; confirm the workspace still publishes the subpath exports this contract reads",
+      builtSubjects.length,
+      "no @site package publishes a subpath beside its bare specifier that a browser bundle can hold, so this build imported nothing; confirm the workspace still publishes the subpath exports this contract reads",
     ).toBeGreaterThan(0);
-    const findings = subjects.flatMap((subject) => {
-      const answer = productionAnswer(subject.specifier);
-      return answer === resolve(subject.target)
-        ? []
-        : [
-            `the ${remoteUnderBuild} build answers ${subject.specifier} with ${answer}, not ${resolve(subject.target)}, which its package publishes for it${answer === resolve(subject.shorterTarget) ? ` — it is being answered by ${subject.shorter} itself` : ""}; give rspack a resolution that reads the package's exports map rather than matching specifiers by prefix`,
-          ];
+    expect(built.errors).toEqual([]);
+  });
+
+  it("answers every longer specifier with its own target, not the shorter one's", () => {
+    const findings = builtSubjects.flatMap((subject) => {
+      const answered = [...(built.answers.get(subject.specifier) ?? [])];
+      const target = resolve(subject.target);
+      if (answered.length === 1 && answered[0] === target) return [];
+      return [
+        `the ${remoteUnderBuild} build resolved ${subject.specifier} to ${answered.join(", ") || "no module"}, not to ${target}, which its package publishes for it${answered.includes(resolve(subject.shorterTarget)) ? ` — it was answered by ${subject.shorter} itself` : ""}; give rspack a resolution that reads the package's exports map rather than matching specifiers by prefix`,
+      ];
     });
     expect(findings).toEqual([]);
   });
 
-  it("answers nothing for a subpath no package publishes", () => {
-    // Every subject above resolves, so the assertion they satisfy is also the
-    // one a resolver that answered every request with the same file would
-    // satisfy. This is that reading held to a subpath outside the exports map.
-    const subject = anOverlappingSpecifier();
-    expect(productionAnswer(`${subject.shorter}/published-by-nothing`)).toMatch(
-      /^no module/,
-    );
+  it("carries each JSON subpath's own content into the chunk it emitted", () => {
+    // The module graph above says what was resolved; this says what was built
+    // from it. A JSON target's own strings survive into the emitted bytes
+    // verbatim, where a TypeScript target's are minified away, so those are the
+    // subjects whose content can be read back out of the artifact.
+    const findings = builtSubjects
+      .filter((subject) => subject.target.endsWith(".json"))
+      .flatMap((subject) => {
+        const missing = stringsIn(
+          JSON.parse(readFileSync(subject.target, "utf8")),
+        ).filter((content) => !built.emitted.includes(content));
+        return missing.length === 0
+          ? []
+          : [
+              `the chunk the ${remoteUnderBuild} build emitted for ${subject.specifier} is missing ${missing.join(", ")}, which ${subject.target} is built from; the build resolved that specifier somewhere other than the file its package publishes for it`,
+            ];
+      });
+    expect(findings).toEqual([]);
   });
 
-  it("reports a resolution that has stopped reading exports maps", () => {
-    // The property above is carried by the manifests alone: no alias map backs
-    // it up any more. So this is the same reading held to the one option that
-    // would take the manifests back out of it, which is what a resolution
-    // configured to match specifiers some other way would amount to.
-    const subject = anOverlappingSpecifier();
-    expect(
-      answerFor(
-        { ...compiler.options.resolve, exportsFields: [] },
-        subject.specifier,
-      ),
-    ).not.toBe(resolve(subject.target));
+  it("refuses a subpath no package publishes", async () => {
+    // Every subject above resolves, so the assertions they satisfy are also the
+    // ones a build that answered every request with the same file would
+    // satisfy. This is the same build held to a subpath outside the exports
+    // map, which a resolution matching by prefix would answer rather than
+    // refuse.
+    const [subject] = builtSubjects;
+    if (subject === undefined)
+      throw new Error(
+        "no @site package publishes a subpath a browser bundle can hold, so there is no package to ask for one it does not publish. Confirm the workspace still publishes the subpath exports this contract reads, then rerun just check.",
+      );
+    const subpath = "./published-by-nothing";
+    const unpublished = `${subject.shorter}${subpath.slice(1)}`;
+    const refused = await build("unpublished", [unpublished]);
+    // The refusal names the exports map it consulted, which is the mechanism
+    // this whole contract rests on rather than an incidental detail of it.
+    expect(refused.errors.join("\n")).toContain(
+      `Package subpath '${subpath}' is not defined by "exports"`,
+    );
+    expect(refused.answers.get(unpublished)).toBeUndefined();
   });
 });
 

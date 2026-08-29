@@ -23,6 +23,17 @@ import { z } from "zod";
 /** Where the workspace root sits relative to this file. */
 const toWorkspaceRoot = "../../../..";
 
+/**
+ * The specifier the config beside this file states as a remote even though
+ * `@site/build-config` publishes it too. It is the one subject whose answer is
+ * not its package's target, so the sweep below leaves it to the reading that
+ * owns it.
+ */
+const shadowedByARemote = "@site/build-config/remote-registry";
+
+/** The federation specifier that config states, which no manifest publishes. */
+const federated = "homeCards/Skeleton";
+
 const packageName = z.string().regex(/^@site\/[a-z][a-z0-9-]*$/);
 
 const manifestSchema = z.object({
@@ -74,7 +85,9 @@ function overlappingSpecifiers(): Overlap[] {
 
 describe("the workspace test runner resolves published subpaths", () => {
   it("answers every longer specifier with its own target, not the shorter one's", async () => {
-    const subjects = overlappingSpecifiers();
+    const subjects = overlappingSpecifiers().filter(
+      (subject) => subject.specifier !== shadowedByARemote,
+    );
     expect(
       subjects.length,
       "no @site package publishes a subpath beside its bare specifier, so no overlapping specifier was resolved; confirm the workspace still publishes the subpath exports this contract reads",
@@ -104,5 +117,23 @@ describe("the workspace test runner resolves published subpaths", () => {
         );
     }
     expect(findings).toEqual([]);
+  });
+});
+
+describe("the workspace test runner resolves the remotes a caller states", () => {
+  it("answers a federation specifier no manifest publishes", async () => {
+    // Nothing but the merged `remotes` map can answer this one, so resolving it
+    // at all is what says the merge survived into the configuration the runner
+    // actually resolves through.
+    const stood: Record<string, unknown> = await import(federated);
+    expect(stood.standsInForARemote).toBe(true);
+  });
+
+  it("answers with the remote where a package publishes the same specifier", async () => {
+    const shadowed: Record<string, unknown> = await import(shadowedByARemote);
+    expect(shadowed.shadowsAPublishedSubpath).toBe(true);
+    // The package's own module is what would answer without the merge, so its
+    // export standing here would mean the remote lost.
+    expect(shadowed.validatedRemoteRegistry).toBeUndefined();
   });
 });
