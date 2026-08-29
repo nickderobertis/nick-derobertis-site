@@ -36,13 +36,15 @@ workflow file that wires it. A claim about **what the repository does** was
 checked against the artifact a real build produced, not against its source:
 
 ```console
-$ pnpm install --frozen-lockfile && CI=1 pnpm exec nx run shell:prerender
- NX   Successfully ran target prerender for project shell and 13 tasks it depends on
+$ just bootstrap
+$ just prerender
 ```
 
-That run — 50.3s, cold cache, 2026-08-29 — produced `dist/apps/shell` (the
-deployed artifact) and `dist/fragment-renderers` (the second compilation's
-output). Both are quoted below by file count and by byte size.
+`just prerender` is silent on success, so the figures below come from the
+`dist/` it leaves behind: `dist/apps/shell` (the deployed artifact) and
+`dist/fragment-renderers` (the second compilation's output). Every one of them
+is a file count, a byte size, or an occurrence count, taken on 2026-08-29 from
+a cold-cache run and quoted at the claim it grounds.
 
 ## What it absorbs
 
