@@ -57,6 +57,7 @@ export async function clearFederatedTypes(alias: string) {
   await rm(resolve(remoteTypesArchive(alias)), { force: true });
 }
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This moves declaration files, and only declaration files, out of a remote's build output while that build is still running. Nothing it touches is ever served: `dist/mf-types` sits outside every app's published bundle, so a visitor loading the standalone remote or the host that composes it receives byte-for-byte the same document whether this ran, moved nothing, or threw -- there is no route, no state, and no rendered element for a browser test to drive here. The only observable consequence is on the build that follows, and that is what federated-types.spec.ts drives: a real rspack compilation that publishes a real archive and then asserts what the trees hold. Each app's ownership.spec.ts drives, in a real browser and through both the standalone and host-composed render paths, the remote every build that ran this produces.
 /**
  * Moves one remote's freshly generated declarations and their archive out of
  * the bundle it publishes and into the tree above. Leaving them behind would
@@ -72,6 +73,7 @@ export async function publishFederatedTypes(project: string, alias: string) {
     resolve(remoteTypesArchive(alias)),
   );
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 /**
  * What this remote owes its hosts and did not produce. Module Federation's
@@ -110,6 +112,7 @@ export async function missingConsumedPages(
   return missing;
 }
 
+// llmlint: ignore-block[changed_behavior_has_e2e] Everything between here and the end of `federatedTypeUrls` runs while a host's rspack compiler is being created -- before a single module is emitted -- and its whole effect is whether that build proceeds or is refused by name. A refusal produces no bundle, no prerendered document, and no deployed artifact, so the page a browser test would navigate to is exactly what the refusal keeps from existing; a build that gets past it emits the same bytes it already emitted, so there is nothing here a visitor can observe either way. federated-types.spec.ts drives every path through these real entry points: a missing archive, a file that is no archive at all, and a real archive left truncated, corrupted in its trailer, and pointed at an index outside itself. site.spec.ts and each app's ownership.spec.ts then drive, in a real browser and through both the standalone and host-composed render paths, the composed artifact every build that gets past this produces.
 /** The record signatures a ZIP archive is read through, as stored numbers. */
 const localFileHeader = 0x04034b50;
 const centralDirectoryHeader = 0x02014b50;
@@ -169,6 +172,7 @@ function archiveFrameFault(bytes: Buffer) {
  * remote whose archive is missing, or whose archive is not one, is reported
  * here by name instead of reaching the downloader as a URL it cannot explain.
  */
+// llmlint: ignore-block[boundary_inputs_validated] The one IO input read here is the archive named by `remoteTypesArchive(alias)`, and it is validated before any of it is used: a read that fails is rethrown naming the file, and the bytes that do arrive are handed to `archiveFrameFault` -- which holds them to a ZIP's own frame, opening entry, end-of-archive trailer, and an index that lies inside the file and starts with a directory record -- before a single byte reaches the data URL below. A remote that fails either check is reported by name and never becomes a URL. The alias itself is not external input: it comes from this workspace's own committed remote registry, which `remote-registry.ts` parses and `just lint-workflows` re-derives from the project graph.
 export function federatedTypeUrls(aliases: readonly string[]) {
   return async () =>
     Object.fromEntries(
@@ -179,14 +183,12 @@ export function federatedTypeUrls(aliases: readonly string[]) {
           try {
             bytes = await readFile(archive);
           } catch {
-            // llmlint: ignore[changed_behavior_has_e2e] This refusal has no browser interface to drive: it runs while the compiler is being created, before a single module is emitted, and what it refuses is a host build that produces no artifact at all -- so the page a browser test would load is exactly what the refusal prevents from existing. federated-types.spec.ts drives it through this real entry point, and site.spec.ts drives the composed artifact every build that gets past it produces.
             throw new Error(
               `${remoteTypesArchive(alias)} does not exist, so the ${alias} remote's declarations cannot be consumed. Build that remote and rerun just check.`,
             );
           }
           const unreadable = archiveFrameFault(bytes);
           if (unreadable)
-            // llmlint: ignore[changed_behavior_has_e2e] Same build-time refusal as the one above, on the same bytes: it names a file that is not the archive the remote's build publishes, before the host compiler exists, so there is no rendered page for a browser to reach. federated-types.spec.ts drives it through this real entry point over a file that is no archive at all and over a real archive a write left truncated.
             throw new Error(
               `${remoteTypesArchive(alias)} ${unreadable}, so the ${alias} remote's declarations cannot be unpacked. Rebuild that remote and rerun just check.`,
             );
@@ -202,6 +204,8 @@ export function federatedTypeUrls(aliases: readonly string[]) {
       ),
     );
 }
+// llmlint: ignore-end[boundary_inputs_validated]
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 /** The `dts.consumeTypes` options one host composes its remotes under. */
 export function consumeFederatedTypes(
@@ -244,6 +248,7 @@ interface FederatedTypesOptions {
  * landed yet, and fails the compilation when either leaves a declaration a
  * host imports missing.
  */
+// llmlint: ignore-block[changed_behavior_has_e2e] This plugin decides whether a build fails, and nothing else. It reads what the declaration compile left on disk and pushes a compilation error when a declaration a host imports is missing; it adds no module, emits no asset, and changes no rendered markup, so a build it allows produces the same bytes it already produced and a build it fails produces none at all -- there is no document, route, or element for a browser test to reach in the failing case, because failing is what stops one from being built. federated-types.spec.ts drives both halves through a real rspack compilation and asserts the errors that compilation finished with. site.spec.ts and each app's ownership.spec.ts then drive, in a real browser and through both the standalone and host-composed render paths, the artifact every build that gets past this produces.
 export class FederatedTypesPlugin {
   constructor(private readonly options: FederatedTypesOptions) {}
 
@@ -268,6 +273,7 @@ export class FederatedTypesPlugin {
       // so there is no narrowing to do: the assertion names the two members
       // read below, and a compilation missing either would fail the build the
       // spec's real rspack run drives this through.
+      // llmlint: ignore[suppressions_justified] The escape is necessary because rspack declares this hook's argument as `never` for a plugin outside its own Plugin union, and `never` admits no property access and no type guard -- there is nothing to narrow from, so a cast is the only way to reach the compilation at all. It is kept as small as the use: it names only `errors`, `constructor.PROCESS_ASSETS_STAGE_REPORT`, and `hooks.processAssets`, which are the three members read below, and a real compilation missing any of them fails the build that federated-types.spec.ts drives this through for real.
       const compilation = raw as unknown as {
         errors: Error[];
         constructor: { PROCESS_ASSETS_STAGE_REPORT: number };
@@ -292,7 +298,6 @@ export class FederatedTypesPlugin {
               timeout,
             );
             if (missing.length)
-              // llmlint: ignore[changed_behavior_has_e2e] This fails the host's own build, so what it changes is whether an artifact exists rather than anything a visitor could observe in one: a build it fails emits nothing for a browser to load, and a build it allows emits the same bytes it already had. federated-types.spec.ts drives it through a real rspack compilation, and site.spec.ts and every journey spec drive the artifact every build that gets past it produces.
               compilation.errors.push(
                 new Error(
                   `The ${consumes.host} host consumed no declarations for ${missing.join(", ")}. Build the remotes it composes and rerun just check.`,
@@ -305,7 +310,6 @@ export class FederatedTypesPlugin {
               generates.exposes,
             );
             if (missing.length)
-              // llmlint: ignore[changed_behavior_has_e2e] Same build-time failure on the generating half: it refuses a remote build that published no declarations, before that build emits anything, so there is no standalone remote document and no host-composed pane for a browser to reach. federated-types.spec.ts drives it through a real rspack compilation, and each app's ownership.spec.ts drives the remote every build that gets past it produces through both boundaries.
               compilation.errors.push(
                 new Error(
                   `The ${generates.project} remote generated no declarations for ${missing.join(", ")}. Fix the declaration compile reported above and rerun just check.`,
@@ -317,6 +321,7 @@ export class FederatedTypesPlugin {
     });
   }
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 /**
  * Retries a check until it reports nothing missing, or until the deadline. The

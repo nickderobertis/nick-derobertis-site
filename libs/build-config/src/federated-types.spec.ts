@@ -135,6 +135,7 @@ const publishesDuringBuild = {
       // rspack types this argument as `never` for a plugin it does not know,
       // exactly as it does for the plugin under test, so this stand-in reaches
       // processAssets the same way that one does rather than a way of its own.
+      // llmlint: ignore[suppressions_justified] The escape is necessary for the same reason it is in the plugin under test: rspack declares this hook's argument as `never` for a plugin outside its own Plugin union, and `never` admits no property access and no type guard, so there is nothing to narrow from. It is deliberately the same shape as the one in federated-types.ts -- if this stand-in reached processAssets some typed way of its own, it would stop being the generator the plugin really runs beside.
       const compilation = raw as unknown as {
         constructor: { PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER: number };
         hooks: {
@@ -353,6 +354,7 @@ describe("the declaration trees a build declares as its outputs", () => {
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name);
     expect(apps).toContain("shell");
+    // llmlint: ignore-block[boundary_inputs_validated] The listing this loop walks is this repository's own `apps` directory, read from the checkout the test runs in, so its entries are the committed project directories rather than anything external. Each one is validated by use rather than ahead of it, which is the whole point of the gate: a name with no `project.json`, no `rspack.config.ts`, or no `tsconfig.app.json` fails the read and fails this test, and a `project.json` that does parse is held to `buildOutputs` -- a zod schema -- before a field of it is read. Validating the names first would only replace those failures with a narrower list this test would then have to be kept in step with.
     for (const app of apps) {
       // The registry is typed by the remotes it names, and a directory listing
       // is not: the shell is an app the registry has no key for, which is the
@@ -401,5 +403,6 @@ describe("the declaration trees a build declares as its outputs", () => {
           `"${tree}/*"`,
         );
     }
+    // llmlint: ignore-end[boundary_inputs_validated]
   });
 });

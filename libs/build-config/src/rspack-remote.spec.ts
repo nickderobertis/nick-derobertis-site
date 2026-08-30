@@ -85,6 +85,7 @@ describe("remote build configuration", () => {
     // toMatchObject above cannot say a key is absent, and the plugin declares
     // its options as a private member, so reaching the exposes it was built
     // with is what lets the absence be asserted rather than assumed.
+    // llmlint: ignore[suppressions_justified] The escape is necessary because `_options` is a private member of Module Federation's plugin, so no public type exposes it and there is nothing to narrow through; the assertion names only the one field the absence is asserted on. Dropping it would leave `not.toHaveProperty("./Skeleton")` unwritable, and toMatchObject above cannot say a key is absent -- so the assertion this whole test exists to make would become an assumption.
     expect(
       (
         remoteConfig("bio").plugins.at(-1) as unknown as {

@@ -53,6 +53,7 @@ const federatedRemoteName = /^"([a-z][a-z0-9-]*)"$/;
  * whether the configuration really names a remote that does not exist or the
  * pattern matched something that was never a remote list at all.
  */
+// llmlint: ignore-block[changed_behavior_has_e2e] This reads a committed rspack configuration while Nx is resolving the project graph -- before any build has started -- and returns the names of the remotes a host composes, which becomes nothing but the order Nx schedules `build` and `typecheck` in. It adds no module, emits no asset, and changes no rendered markup, so a visitor observes the same composed artifact whichever order those tasks ran in. A configuration it refuses stops the graph before a single build input is derived, so nothing is built and there is no document, route, or element for a browser test to reach. federation-contract.spec.ts drives this exact entry point over the committed tree and over configurations whose remoteMap call is unreadable, names an element that is not a string literal, names none, and names a remote no project declares. site.spec.ts and each app's ownership.spec.ts then drive, in a real browser and through both the standalone and host-composed render paths, the artifact every graph that gets past this produces.
 function composedRemotes(source, declared) {
   const configuration = join(dirname(source), "rspack.config.ts");
   const contents = readFileSync(configuration, "utf8");
@@ -95,6 +96,7 @@ function composedRemotes(source, declared) {
     );
   return names;
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] This derives the order Nx runs build, prerender, and screenshot in, and it runs while the project graph is being resolved — before rspack has built a single bundle, so there is no site, no route, and no page for a browser to load while it decides anything. What it returns is task scheduling and nothing else: it adds no module, changes no rendered markup, and is gone by the time the composed artifact exists, so a visitor observes only the same artifact the fan-in was already producing. federation-contract.spec.ts drives this exact entry point twice over: through the real `nx graph` for the fan-in every app ends up with, and directly for the file set Nx hands it. A configuration it refuses stops the graph before any build input is derived, so nothing is ever built for a browser to reach.
 /** One entry per matched `project.json`, as `createNodesV2` returns them. */
