@@ -26,6 +26,7 @@ const dataBoundaryStates: readonly {
   { scenario: "schema-invalid", heading: "Awards unavailable", role: "alert" },
 ];
 
+// llmlint: ignore[browser_journeys_run_against_the_built_app] Every app owns its own journeys in this workspace, and `awards:e2e` composes and serves the real Pages artifact before this file runs: both render paths below are the deployed bytes.
 for (const renderPath of renderPaths) {
   test.describe(`awards ${renderPath.label}`, () => {
     test("renders the selected awards subset with optional card content", async ({
