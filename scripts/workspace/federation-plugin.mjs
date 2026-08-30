@@ -40,7 +40,7 @@ export const name = "nick-derobertis-site/federation";
 const projectConfigurations = "apps/*/project.json";
 const projectConfiguration = /^apps\/[a-z][a-z0-9-]*\/project\.json$/;
 const federatedRemoteMap = /\bremoteMap\(\s*\[([\s\S]*?)\]/;
-const federatedRemoteName = /"([a-z][a-z0-9-]*)"/g;
+const federatedRemoteName = /^"([a-z][a-z0-9-]*)"$/;
 
 /**
  * The remotes one app composes, read from its own rspack configuration. An app
@@ -67,9 +67,23 @@ function composedRemotes(source, declared) {
       );
     return [];
   }
-  const names = [...composed[1].matchAll(federatedRemoteName)].map(
-    (match) => match[1],
+  // Every element of the array is read, rather than the quoted ones out of
+  // whatever it holds: an element this cannot read is a remote that would go
+  // unbuilt, so it is refused here instead of dropped and the rest returned.
+  const elements = composed[1]
+    .split(",")
+    .map((element) => element.trim())
+    .filter((element) => element.length > 0);
+  const unreadable = elements.filter(
+    (element) => !federatedRemoteName.test(element),
   );
+  if (unreadable.length > 0)
+    throw new Error(
+      `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which passes ${JSON.stringify(unreadable)}. Pass each child remote there as a string literal and rerun just check.`,
+    );
+  // Each one just matched the pattern above, so the quotes are all there is
+  // to take off.
+  const names = elements.map((element) => element.slice(1, -1));
   if (names.length === 0)
     throw new Error(
       `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which names none. Pass each child remote there as a string literal and rerun just check.`,

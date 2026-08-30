@@ -120,10 +120,10 @@ const endRecordLength = 22;
 const maxComment = 0xffff;
 
 /**
- * The structural fault that stops these bytes from being an archive a host can
- * read declarations out of, or `undefined` when there is none. What it reads is
- * the frame of a ZIP -- its first entry, its end record, and the directory that
- * record points back at -- rather than every record inside it.
+ * The fault in a ZIP's frame -- its first entry, its end record, and the head
+ * of the directory that record points back at -- or `undefined` when the frame
+ * is whole. The records inside that frame are the unpacker's to read, and this
+ * reports nothing about them.
  *
  * Module Federation's downloader unpacks whatever these URLs carry, so what
  * reaches it is held to a ZIP's own structure here, where the file that failed
@@ -133,7 +133,7 @@ const maxComment = 0xffff;
  * signature at the front cannot see: it survives losing everything after it.
  * So the trailer is read too, and the directory it points back at.
  */
-function archiveStructureFault(bytes: Buffer) {
+function archiveFrameFault(bytes: Buffer) {
   if (
     bytes.length < endRecordLength ||
     bytes.readUInt32LE(0) !== localFileHeader
@@ -184,7 +184,7 @@ export function federatedTypeUrls(aliases: readonly string[]) {
               `${remoteTypesArchive(alias)} does not exist, so the ${alias} remote's declarations cannot be consumed. Build that remote and rerun just check.`,
             );
           }
-          const unreadable = archiveStructureFault(bytes);
+          const unreadable = archiveFrameFault(bytes);
           if (unreadable)
             // llmlint: ignore[changed_behavior_has_e2e] Same build-time refusal as the one above, on the same bytes: it names a file that is not the archive the remote's build publishes, before the host compiler exists, so there is no rendered page for a browser to reach. federated-types.spec.ts drives it through this real entry point over a file that is no archive at all and over a real archive a write left truncated.
             throw new Error(

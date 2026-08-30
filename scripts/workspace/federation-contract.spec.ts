@@ -433,6 +433,19 @@ describe("the federation fan-in every app depends on", () => {
     expect(derived.stderr).toContain("must pass an array literal of remote");
   });
 
+  it("refuses a remoteMap array holding anything but remote names", () => {
+    // Reading the quoted elements out of whatever the array holds would drop
+    // the rest and return a shorter list, which is the same missing dependency
+    // as above wearing a plausible answer.
+    const derived = deriveOverWrittenApps({
+      bio: { federation: { alias: "bio" }, rspack: 'remoteConfig("bio")' },
+      shell: { rspack: 'remoteMap(["bio", dynamicRemote])' },
+    });
+
+    expect(derived.status, derived.stdout).not.toBe(0);
+    expect(derived.stderr).toContain('passes ["dynamicRemote"]');
+  });
+
   it("builds the remotes a host imports before the host itself", async () => {
     for (const name of ["shell", "home"]) {
       const host = projects.find((project) => project.name === name);
