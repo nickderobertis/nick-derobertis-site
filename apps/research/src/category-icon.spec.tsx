@@ -1,9 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { research } from "@site/data-access-research";
 import { render } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { CategoryIcon } from "./category-icon";
 
-const categories = cvDataClient.domain("research").categories ?? [];
+const categories = research.categories ?? [];
 
 function drawMark(id: string) {
   const { container } = render(<CategoryIcon id={id} />);

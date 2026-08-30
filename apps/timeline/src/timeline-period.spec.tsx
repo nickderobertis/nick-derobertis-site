@@ -1,10 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
-import type { TimelineEntry } from "@site/data-access-timeline";
+import { type TimelineEntry, timeline } from "@site/data-access-timeline";
 import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { TimelinePeriod } from "./timeline-period";
 
-const entries = cvDataClient.domain("timeline");
+const entries = timeline;
 // The axis the deployed pane draws reaches at least the current year, so every
 // spell below is placed against the same span a visitor sees.
 const FINAL_YEAR = 2026;

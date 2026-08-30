@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { timeline } from "@site/data-access-timeline";
 import { render, screen } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
@@ -9,7 +9,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 // Far past that rather than just past it, so it still bounds a genuine hang.
 const moduleGraphCeiling = { timeout: 120_000 };
 
-const entries = cvDataClient.domain("timeline");
+const entries = timeline;
 
 async function renderPane() {
   const { default: TimelinePage } = await import("./page");

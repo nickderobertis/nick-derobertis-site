@@ -1,9 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { timeline } from "@site/data-access-timeline";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { TimelineChart } from "./timeline-chart";
 
-const entries = cvDataClient.domain("timeline");
+const entries = timeline;
 
 function chart() {
   return screen.queryByRole("region", {

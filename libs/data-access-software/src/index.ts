@@ -1,5 +1,7 @@
 import type { SoftwareProject } from "@site/data-access-core";
 
+export { softwareProjects } from "./data";
+
 export interface SoftwareStats {
   commits: number;
   linesOfCode: number;

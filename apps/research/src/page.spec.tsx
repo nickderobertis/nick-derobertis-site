@@ -1,11 +1,11 @@
 import type { ResearchStatus } from "@site/data-access-core";
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { research } from "@site/data-access-research";
 import { act, render, screen, within } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import ResearchPage from "./page";
 
-const published = cvDataClient.domain("research");
+const published = research;
 const sectionStatuses: ResearchStatus[] = ["working_paper", "work_in_progress"];
 const publishedCounts = sectionStatuses.map(
   (status) =>

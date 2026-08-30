@@ -9,6 +9,7 @@ export default defineConfig({
     include: [
       "scripts/artifact/bundle-budgets.spec.ts",
       "scripts/artifact/check-static-artifact.spec.ts",
+      "scripts/artifact/cv-data-reachability.spec.ts",
       "scripts/artifact/remote-manifest.spec.ts",
     ],
     environment: "node",

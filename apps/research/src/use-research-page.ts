@@ -1,5 +1,5 @@
 import type { Research } from "@site/data-access-core";
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { research } from "@site/data-access-research";
 import type { AsyncViewState } from "@site/route-state";
 import { useEffect, useState } from "react";
 
@@ -12,7 +12,7 @@ export function useResearchPage(
     () =>
       initialState ?? {
         name: "ready",
-        value: cvDataClient.domain("research"),
+        value: research,
       },
   );
   useEffect(() => {
@@ -21,7 +21,7 @@ export function useResearchPage(
       () =>
         setState({
           name: "ready",
-          value: cvDataClient.domain("research"),
+          value: research,
         }),
       1_500,
     );

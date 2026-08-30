@@ -5,6 +5,12 @@
   "exports": {
     ".": "./src/index.ts",
     "./bundled": "./src/bundled.ts",
+    "./domains/awards": "./src/domains/awards.ts",
+    "./domains/courses": "./src/domains/courses.ts",
+    "./domains/research": "./src/domains/research.ts",
+    "./domains/skills": "./src/domains/skills.ts",
+    "./domains/software_projects": "./src/domains/software_projects.ts",
+    "./domains/timeline": "./src/domains/timeline.ts",
     "./site": "./src/site.ts",
     "./site.config.json": "./src/site.config.json",
     "./validators": "./src/validators.ts"

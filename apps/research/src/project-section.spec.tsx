@@ -1,10 +1,11 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
-import { buildResearchProjectModels } from "@site/data-access-research";
+import {
+  buildResearchProjectModels,
+  research,
+} from "@site/data-access-research";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { ProjectSection } from "./project-section";
 
-const research = cvDataClient.domain("research");
 const workingPapers = buildResearchProjectModels(research, "working_paper");
 
 test("heads the section and counts the papers filed under it", () => {

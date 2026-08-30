@@ -1,10 +1,10 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { softwareProjects } from "@site/data-access-software";
 import { act, render, screen, within } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import SoftwarePage from "./page";
 
-const published = cvDataClient.domain("software_projects");
+const published = softwareProjects;
 
 function pageHeading() {
   return screen.getByRole("heading", {

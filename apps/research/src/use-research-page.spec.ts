@@ -1,9 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { research } from "@site/data-access-research";
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { useResearchPage } from "./use-research-page";
 
-const published = cvDataClient.domain("research");
+const published = research;
 
 beforeEach(() => {
   vi.useFakeTimers();

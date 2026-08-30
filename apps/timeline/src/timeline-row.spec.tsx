@@ -1,9 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { timeline } from "@site/data-access-timeline";
 import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { TimelineRow } from "./timeline-row";
 
-const entries = cvDataClient.domain("timeline");
+const entries = timeline;
 const FINAL_YEAR = 2026;
 
 function entriesAt(organization: string) {
