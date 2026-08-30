@@ -197,9 +197,29 @@ function diagnosticLine(stderr: string, prefix: string) {
   return lines[0];
 }
 
+/**
+ * The targets one dispatch runs, read off the words that name a target.
+ *
+ * Nx names them in exactly two places — `-t <targets>` and `run
+ * <project>:<target>` — and every other word on the line is a flag, a project
+ * selection, or a commit sha. Reading a target name out of the whole line
+ * instead made the answer a function of the range the gate was given: a sha is
+ * hex, so about one in a hundred spells `e2e` somewhere inside it, and the
+ * `lint` and `typecheck,test,build,prerender` dispatches carrying
+ * `--head=…ae2e6…` were then counted as browser suites this gate never
+ * dispatched.
+ */
+function dispatchedTargets(dispatch: string) {
+  const words = dispatch.split(" ");
+  const targets = words.indexOf("-t");
+  if (targets !== -1) return (words[targets + 1] ?? "").split(",");
+  const run = words.indexOf("run");
+  return run === -1 ? [] : (words[run + 1] ?? "").split(":").slice(1);
+}
+
 /** The dispatches that would run a browser suite, of everything a gate ran. */
 const browserDispatches = (dispatched: readonly string[]) =>
-  dispatched.filter((dispatch) => dispatch.includes("e2e"));
+  dispatched.filter((dispatch) => dispatchedTargets(dispatch).includes("e2e"));
 
 describe("the gate's browser lanes", () => {
   it("runs the composed artifact's suite once for a change that affects it", () => {
@@ -258,6 +278,27 @@ describe("the gate's browser lanes", () => {
       "exec nx run-many -t e2e,screenshot -p shell --parallel=3",
     ]);
     expect(browserTasks(lanes)).toEqual(["shell:e2e"]);
+  });
+
+  it("reads a browser lane off the targets a dispatch names, not off its range", () => {
+    // A commit sha is hex, so roughly one push range in a hundred spells `e2e`
+    // somewhere inside it. The dispatch carrying the range is a lint run either
+    // way, and the scenarios above are only about the browser lanes if this
+    // holds for every range they can be handed rather than for most of them.
+    expect(
+      browserDispatches([
+        "exec nx affected -t lint --base=HEAD" +
+          " --head=23e25e5709b76d0fe3c6ae2e61a820ec9db6b53b" +
+          " --parallel=3 --args=--error-on-warnings",
+        "exec nx affected -t typecheck,test,build,prerender --base=HEAD" +
+          " --head=23e25e5709b76d0fe3c6ae2e61a820ec9db6b53b --parallel=3",
+        "exec nx run-many -t e2e,screenshot -p shell --parallel=3",
+        "exec nx run shell:e2e",
+      ]),
+    ).toEqual([
+      "exec nx run-many -t e2e,screenshot -p shell --parallel=3",
+      "exec nx run shell:e2e",
+    ]);
   });
 
   it("leaves the non-affected sweep dispatching every project and the composed artifact", () => {

@@ -10,8 +10,8 @@ for the one slice it renders. Each now reads its domain through its own
 and validates it against the CV schema as it loads. This records the evidence for
 each property the change owes, over the tree that carries it.
 
-Everything below was run in this worktree over the artifact
-`nx run shell:prerender` composes from it.
+Everything below was run in this worktree through `just`, this repository's
+only command surface, over the artifact `just prerender` composes from it.
 
 ## Where the plan's naming had moved
 
@@ -180,8 +180,9 @@ Nothing was widened and nothing was disabled. Each of the five apps already
 declares the `data:<domain>` tag it needs in its own `project.json`
 `metadata.boundaries.onlyDependOnLibsWithTags`, and each domain library is
 `type:data-domain`, which the root `depConstraints` already lets depend on
-`type:data-core`. `nx run shell:lint` — this workspace's whole-workspace
-`eslint . --max-warnings=0` plus Biome — is green.
+`type:data-core`. The `lint` lane of `just check` — the workspace-wide
+`eslint . --max-warnings=0` run the shell owns, dispatched with warnings as
+errors, plus Biome — is green over this tree.
 
 `apps/skills` no longer names `@site/data-access-core` in any module, so its
 manifest no longer declares it; `scripts/workspace/project-manifest.spec.ts`
@@ -189,9 +190,10 @@ holds every project to declaring exactly the `@site` packages it imports.
 
 ## The payload, measured
 
-Re-derived by `node scripts/artifact/check-bundle-budgets.mjs --rederive` over
-the artifact this tree composes, and gated at that new floor by the same script
-with no arguments, which `shell:prerender` runs.
+Re-derived over the artifact `just prerender` composes from this tree, by the
+re-derivation `scripts/artifact/bundle-budgets.json` documents beside the
+ceilings it writes, and gated at that new floor by the same check with no
+arguments, which `just prerender` runs.
 
 | app | entry before | entry after | `./Page` before | after |
 | --- | ---: | ---: | ---: | ---: |

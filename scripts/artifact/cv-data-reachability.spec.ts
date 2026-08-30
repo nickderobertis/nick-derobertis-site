@@ -45,6 +45,10 @@ const featureLibraries = {
   timeline: "data-access-timeline",
 };
 
+// `Object.keys` is typed `string[]` because a value can carry keys its type does
+// not declare. This object is the literal above and carries no others, so the
+// assertion narrows back to what that literal already says rather than claiming
+// anything the compiler cannot see.
 const features = Object.keys(featureDomains) as (keyof typeof featureDomains)[];
 
 function domainFile(domain: string) {
