@@ -421,16 +421,16 @@ test("growth one byte past the declared margin is refused", async () => {
   const budgets = await measuredBudgets();
   // The largest eager entry this tree measures, derived rather than named: it
   // is the app with the most room for growth to hide in, so it is the one worth
-  // moving one byte past what the margin forgives.
-  const [grown = "", measured = 0] = [...ceilings(budgets)]
+  // moving one byte past what the margin forgives. Reducing without a seed
+  // takes the entry's own type from the map, so no assertion is needed, and an
+  // artifact that measured no eager entry at all fails here loudly rather than
+  // budgeting a label that does not exist.
+  const [grown, largest] = [...ceilings(budgets)]
     .filter(([label]) => label.endsWith(" eager entry"))
-    .reduce(
-      (largest, [label, ceiling]) =>
-        ceiling.measuredBytes > largest[1]
-          ? [label, ceiling.measuredBytes]
-          : largest,
-      ["", 0] as [string, number],
+    .reduce((widest, entry) =>
+      entry[1].measuredBytes > widest[1].measuredBytes ? entry : widest,
     );
+  const measured = largest.measuredBytes;
   const path = await budgetsPredatingGrowth((measuredBytes, label) =>
     label === grown ? pastMargin(measuredBytes, budgets.marginPercent) : 0,
   );
