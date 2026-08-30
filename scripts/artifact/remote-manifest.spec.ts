@@ -109,6 +109,7 @@ test("remote manifest matches published fragment composition", {
   // federation alias its hosts import, so the declarations a host typechecks
   // against are exactly the set this manifest names. The prerender this test
   // depends on builds every remote, so the tree is complete by the time it runs.
+  // llmlint: ignore-block[boundary_inputs_validated] Neither listing read below is external input: `dist/mf-types/remotes` is written by this workspace's own remote builds, which the prerender this test depends on has just run, and `remoteManifest` is the committed registry `remote-registry.ts` parses and `just lint-workflows` re-derives from the project graph. Both are then validated by use rather than ahead of it, which is what this gate is: an alias naming no published declaration tree, or a remote naming no `apps/<name>/project.json`, fails its read and fails this test with the path it looked for. Holding them to a name grammar first would only turn those failures into a narrower list restating the grammar `federation-registry.mjs` already enforces on the same names before they reach the registry.
   const publishedAliases = (await readdir("dist/mf-types/remotes")).filter(
     (entry) => !entry.endsWith(".zip"),
   );
@@ -152,4 +153,5 @@ test("remote manifest matches published fragment composition", {
       },
     });
   }
+  // llmlint: ignore-end[boundary_inputs_validated]
 });

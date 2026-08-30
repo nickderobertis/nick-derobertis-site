@@ -93,8 +93,6 @@ function composedRemotes(source, declared) {
     throw new Error(
       `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which passes ${JSON.stringify(unreadable)}. Pass each child remote there as a string literal and rerun just check.`,
     );
-  // Each one just matched the pattern above, so the quotes are all there is
-  // to take off.
   const names = elements.map((element) => element.slice(1, -1));
   if (names.length === 0)
     throw new Error(
