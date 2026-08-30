@@ -37,7 +37,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.1b556542cdcea297.js"
+            "main.af3a0642acb28cae.js"
           ]
         },
         "css": {
@@ -64,7 +64,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.1b556542cdcea297.js"
+            "main.af3a0642acb28cae.js"
           ]
         },
         "css": {
@@ -94,9 +94,8 @@
       "assets": {
         "js": {
           "sync": [
-            "239.ee394d454508214e.js",
-            "266.8f0502bf700b01f3.js",
-            "__federation_expose_Page.4febdb4ff024ef2c.js"
+            "521.dfb21128515c9188.js",
+            "__federation_expose_Page.444aed11c41ed11a.js"
           ],
           "async": []
         },
