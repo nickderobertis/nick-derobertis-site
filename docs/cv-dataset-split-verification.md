@@ -184,13 +184,12 @@ dispatched the work below.
 | `just e2e-project awards` | the `awards` project's `e2e` target, driving the standalone remote and the host-composed page in a real browser | pass, 34 journeys |
 | `just test-e2e` | the `shell` project's `e2e` target, driving the composed artifact in a real browser | pass |
 
+<!-- llmlint: ignore-block[work_goes_through_command_surface] `just test` dispatches `test` and `e2e` in one parallel run, which this workspace refuses: compose reports `dist/apps/shell is held by process N, which is serving it` as soon as a serving lane and an e2e lane overlap. `just check` sequences the two tiers, and is what dispatches these on the merge path. -->
 The unit tier has no recipe narrower than the gate, so these targets were run as
-themselves and passed:
-
-<!-- llmlint: ignore[work_goes_through_command_surface] `just test` dispatches `test` and `e2e` in one parallel run, which this workspace refuses: compose reports `dist/apps/shell is held by process N, which is serving it` as soon as a serving lane and an e2e lane overlap. `just check` sequences the two tiers, and is what dispatches these on the merge path. -->
-`data-access-core`, `build-config`, `shell`, `awards`, `skills`, `timeline`,
-`research`, `software`, `courses`, `home`, `e2e-fixtures`, `tooling-artifact`
-and `tooling-workspace`.
+themselves and passed: `data-access-core`, `build-config`, `shell`, `awards`,
+`skills`, `timeline`, `research`, `software`, `courses`, `home`, `e2e-fixtures`,
+`tooling-artifact` and `tooling-workspace`.
+<!-- llmlint: ignore-end[work_goes_through_command_surface] -->
 
 The shell's two `@nx/enforce-module-boundaries` disables moved onto their new
 specifiers and no project gained one; the `shell` project's `lint` target is
