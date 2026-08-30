@@ -704,6 +704,9 @@ importers:
 
   scripts/workspace:
     dependencies:
+      '@site/build-config':
+        specifier: workspace:*
+        version: link:../../libs/build-config
       '@site/testing':
         specifier: workspace:*
         version: link:../../libs/testing

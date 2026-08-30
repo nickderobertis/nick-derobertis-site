@@ -16,6 +16,7 @@ export default defineConfig({
       "scripts/workspace/module-boundaries.spec.ts",
       "scripts/workspace/project-manifest.spec.ts",
       "scripts/workspace/structure-contract.spec.ts",
+      "scripts/workspace/subpath-resolution.spec.ts",
     ],
     environment: "node",
     // A test here costs whatever its subject's real work costs — set by the
