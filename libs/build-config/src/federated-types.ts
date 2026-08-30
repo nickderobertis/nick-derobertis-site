@@ -92,8 +92,13 @@ export async function missingRemoteTypes(
   return missing;
 }
 
-/** What this host was meant to consume and does not have. */
-export async function missingHostTypes(
+/**
+ * The route pages this host was meant to consume and does not have, one per
+ * alias. A host reaches every remote it composes through that remote's `Page`,
+ * so its presence is what says the archive was unpacked; a pane's `Skeleton`
+ * arrives in the same archive and is not checked again here.
+ */
+export async function missingConsumedPages(
   host: string,
   aliases: readonly string[],
 ) {
@@ -115,8 +120,10 @@ const endRecordLength = 22;
 const maxComment = 0xffff;
 
 /**
- * Why these bytes are not an archive a host can read declarations out of, or
- * `undefined` when they are.
+ * The structural fault that stops these bytes from being an archive a host can
+ * read declarations out of, or `undefined` when there is none. What it reads is
+ * the frame of a ZIP -- its first entry, its end record, and the directory that
+ * record points back at -- rather than every record inside it.
  *
  * Module Federation's downloader unpacks whatever these URLs carry, so what
  * reaches it is held to a ZIP's own structure here, where the file that failed
@@ -126,7 +133,7 @@ const maxComment = 0xffff;
  * signature at the front cannot see: it survives losing everything after it.
  * So the trailer is read too, and the directory it points back at.
  */
-function notAnArchive(bytes: Buffer) {
+function archiveStructureFault(bytes: Buffer) {
   if (
     bytes.length < endRecordLength ||
     bytes.readUInt32LE(0) !== localFileHeader
@@ -177,7 +184,7 @@ export function federatedTypeUrls(aliases: readonly string[]) {
               `${remoteTypesArchive(alias)} does not exist, so the ${alias} remote's declarations cannot be consumed. Build that remote and rerun just check.`,
             );
           }
-          const unreadable = notAnArchive(bytes);
+          const unreadable = archiveStructureFault(bytes);
           if (unreadable)
             // llmlint: ignore[changed_behavior_has_e2e] Same build-time refusal as the one above, on the same bytes: it names a file that is not the archive the remote's build publishes, before the host compiler exists, so there is no rendered page for a browser to reach. federated-types.spec.ts drives it through this real entry point over a file that is no archive at all and over a real archive a write left truncated.
             throw new Error(
@@ -281,7 +288,7 @@ export class FederatedTypesPlugin {
         async () => {
           if (consumes) {
             const missing = await settle(
-              () => missingHostTypes(consumes.host, consumes.aliases),
+              () => missingConsumedPages(consumes.host, consumes.aliases),
               timeout,
             );
             if (missing.length)
