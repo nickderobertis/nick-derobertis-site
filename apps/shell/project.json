@@ -6,9 +6,6 @@
   "tags": ["type:app", "scope:shell"],
   "targets": {
     "e2e": {
-      "metadata": {
-        "description": "llmlint: ignore[browser_journeys_run_against_the_built_app] This target is not a browser journey added inside an app project: it drives the built artifact, never a development server, because it depends on shell:prerender, which composes and gates the production bundle before Playwright is started. It costs an unrelated change nothing, because nx affected schedules it only when shell itself is affected. This branch adds no journey here; it wires the bundle-budget gate into the prerender this target already depended on, and AGENTS.md records that every app in this workspace owns the journeys for its own standalone and host-composed boundary."
-      },
       "executor": "@nx/playwright:playwright",
       "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {
