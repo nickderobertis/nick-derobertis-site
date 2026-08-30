@@ -156,6 +156,20 @@ function browserTasks(lanes: readonly string[]) {
   );
 }
 
+/**
+ * The one diagnostic a recipe wrote, of everything on its standard error.
+ *
+ * A recipe without a `@` prefix echoes each line of its own body to standard
+ * error before running it, so the recipe's source — including the text of every
+ * other diagnostic it could have written — is on the stream beside the one it
+ * did. Reading the refusal as the line it is keeps that from answering for it.
+ */
+function diagnosticLine(stderr: string, prefix: string) {
+  const lines = stderr.split("\n").filter((line) => line.startsWith(prefix));
+  expect(lines).toHaveLength(1);
+  return lines[0];
+}
+
 /** The dispatches that would run a browser suite, of everything a gate ran. */
 const browserDispatches = (dispatched: readonly string[]) =>
   dispatched.filter((dispatch) => dispatch.includes("e2e"));
@@ -242,6 +256,29 @@ describe("the gate's browser lanes", () => {
     });
 
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain("base and head must resolve to commits");
+    // The refusal itself has to carry both halves, so it is read as the one
+    // line a caller sees rather than as anything else on the stream: what
+    // failed, and the command to run once it is not.
+    const refusal = diagnosticLine(result.stderr, "gate-browser-lanes: ");
+    expect(refusal).toContain("base and head must resolve to commits");
+    expect(refusal).toContain("just gate-browser-lanes HEAD~1 HEAD");
+  });
+
+  it("tells the gate's own caller what failed and what to rerun for a range that names no commit", () => {
+    // The gate takes its range from the environment rather than arguments, so
+    // its refusal has to name both halves itself: which variables are wrong,
+    // and the command to run once they are not. It is read as one line for a
+    // second reason here — an unprefixed recipe echoes its own body to the
+    // same stream, so the recipe's other diagnostics are on it too.
+    const result = spawnSync("just", ["check"], {
+      cwd: workspace,
+      encoding: "utf8",
+      env: { ...process.env, NX_BASE: "not-a-commit", NX_HEAD: "HEAD" },
+    });
+
+    expect(result.status).toBe(2);
+    const refusal = diagnosticLine(result.stderr, "check: ");
+    expect(refusal).toContain("NX_BASE and NX_HEAD must resolve to commits");
+    expect(refusal).toContain("rerun just check");
   });
 });
