@@ -1,5 +1,4 @@
 import type { SoftwareProject } from "@site/data-access-core";
-import "@site/design-system";
 import type { SoftwarePageProps } from "@site/route-state";
 import "./software.css";
 import Skeleton from "./skeleton";

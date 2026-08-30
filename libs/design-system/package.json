@@ -1,6 +1,7 @@
 {
   "name": "@site/design-system",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"

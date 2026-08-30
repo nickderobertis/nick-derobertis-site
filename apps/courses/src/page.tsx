@@ -1,5 +1,4 @@
 import type { Course } from "@site/data-access-core";
-import "@site/design-system";
 import type { CoursesPageProps } from "@site/route-state";
 import "./courses.css";
 import { CourseCollection } from "./course-collection";

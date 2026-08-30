@@ -1,4 +1,3 @@
-import "@site/design-system";
 import "./bio.css";
 import type { BioPageProps } from "@site/route-state";
 import { BioState } from "./bio-state";
