@@ -258,10 +258,11 @@ if (flags.length > 0 && !rederiving)
     `check-bundle-budgets accepts no arguments, or --rederive to rewrite ${budgetsPath} from the tree in front of it; it was given ${flags.join(" ")}.`,
   );
 
-const budgets = parseBundleBudgets(
-  JSON.parse(await readFile(budgetsPath, "utf8")),
-  budgetsPath,
-);
+// The file is read once and validated once: the re-derive below rewrites this
+// same value rather than reading it again, so nothing is serialized from a
+// parse no boundary checked, or from a file that changed between two reads.
+const declared = JSON.parse(await readFile(budgetsPath, "utf8"));
+const budgets = parseBundleBudgets(declared, budgetsPath);
 const declaredRemotes = Object.keys(parseRemoteManifest(remoteManifest));
 // Staged app subtrees are resolved through `stat` rather than by directory
 // entry type, because an isolated artifact fixture links the app subtrees it
@@ -328,7 +329,7 @@ const measuredRoutes = Object.fromEntries(
 // every ceiling recomputed from the tree in front of it, so a change that
 // alters a payload deliberately lands as a diff a reader can weigh.
 if (rederiving) {
-  const rederived = JSON.parse(await readFile(budgetsPath, "utf8"));
+  const rederived = { ...declared };
   rederived.apps = Object.fromEntries(
     artifactApps
       .toSorted()
@@ -348,6 +349,9 @@ if (rederiving) {
       deriveCeiling(bytes, budgets.marginPercent),
     ]),
   );
+  // What is written has to be a file this gate would accept on the next run, so
+  // it goes back through the same boundary before it reaches the disk.
+  parseBundleBudgets(rederived, budgetsPath);
   await writeFile(budgetsPath, `${JSON.stringify(rederived, null, 2)}\n`);
   console.log(
     `check-bundle-budgets: re-derived ${artifactApps.length} app and ${routePaths.length} route ceilings into ${budgetsPath}`,
