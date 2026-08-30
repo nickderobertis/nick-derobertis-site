@@ -1,7 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node"],
+    // bundle-budgets.spec.ts reads the committed budgets through the same
+    // validator the gate reads them with, so that module's inferred types are
+    // what this project checks that spec against.
+    "allowJs": true
   },
   "include": ["*.spec.ts", "vite.config.ts"]
 }

@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { runInNewContext } from "node:vm";
 import { parseRemoteManifest } from "@site/artifact-contracts";
@@ -11,6 +11,7 @@ import remoteManifest from "@site/build-config/remotes.json" with {
 // sibling tooling module reached by path, the way this project already
 // reaches apps/shell/src/routes.json from check-static-artifact.mjs.
 import { routeFragments } from "../compose/compose.mjs";
+import { deriveCeiling, parseBundleBudgets } from "./bundle-budgets.mjs";
 
 process.on("uncaughtException", (error) => {
   console.error(
@@ -91,8 +92,8 @@ function chunkFileResolver(source) {
  * dropped below rather than counted against this app's budget.
  */
 function requestedChunkIds(source) {
-  return [...source.matchAll(/\.e\("([^"\\]{1,32})"\)/g)].map(
-    ([, id]) => /** @type {string} */ (id),
+  return [...source.matchAll(/\.e\("([^"\\]{1,32})"\)/g)].flatMap(([, id]) =>
+    id === undefined ? [] : [id],
   );
 }
 
@@ -105,10 +106,11 @@ function requestedChunkIds(source) {
 async function reachableJsFiles(directory, files, emitted) {
   const reached = new Set();
   const queue = files.map((file) => ({ file, resolve: undefined }));
-  while (queue.length > 0) {
-    const { file, resolve } = /** @type {{file: string, resolve: unknown}} */ (
-      queue.shift()
-    );
+  // Draining with `pop` hands each entry over already narrowed, so the closure
+  // below needs no assertion about what an empty queue would have yielded. Which
+  // end it drains from is free: this walks a reachability set, not an order.
+  for (let next = queue.pop(); next !== undefined; next = queue.pop()) {
+    const { file, resolve } = next;
     if (reached.has(file)) continue;
     reached.add(file);
     const source = await readFile(join(directory, file), "utf8");
@@ -201,80 +203,70 @@ async function measureApp(directory) {
   };
 }
 
-// llmlint: ignore-block[changed_behavior_has_e2e] The budget file is a committed build input read before any artifact is served: a file this rejects gates the compose lane, so nothing it refuses reaches a visitor. bundle-budgets.spec.ts drives this exact CLI as a real subprocess over isolated artifact fixtures and over a budget file with an app removed.
-function parsedBudgets(value, path) {
-  const refuse = (detail) => {
-    throw new Error(
-      `${path} is invalid: ${detail}. Fix the committed budgets and rerun just prerender.`,
-    );
-  };
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    refuse("it must contain an object");
-  const { marginPercent, apps, routes } = value;
-  if (
-    typeof marginPercent !== "number" ||
-    !Number.isFinite(marginPercent) ||
-    marginPercent < 0
-  )
-    refuse("marginPercent must be a non-negative number");
-  const readCeiling = (entry, label) => {
-    if (!entry || typeof entry !== "object" || Array.isArray(entry))
-      refuse(`${label} must declare an object`);
-    const { measuredBytes, ceilingBytes } = entry;
-    for (const [field, bytes] of [
-      ["measuredBytes", measuredBytes],
-      ["ceilingBytes", ceilingBytes],
-    ])
-      if (!Number.isInteger(bytes) || bytes < 0)
-        refuse(`${label} ${field} must be a non-negative integer`);
-    // One margin covers every ceiling in the file, so a ceiling cannot be
-    // widened for a single app or route to make room for a regression there.
-    const derived = Math.ceil(measuredBytes * (1 + marginPercent / 100));
-    if (ceilingBytes !== derived)
-      refuse(
-        `${label} declares a ${ceilingBytes}-byte ceiling, but ${measuredBytes} bytes at the ${marginPercent}% margin derives ${derived}`,
-      );
-    return { measuredBytes, ceilingBytes };
-  };
-  const readGroup = (group, label, shape) => {
-    if (!group || typeof group !== "object" || Array.isArray(group))
-      refuse(`${label} must declare an object`);
-    return Object.fromEntries(
-      Object.entries(group).map(([key, entry]) => [
-        key,
-        shape(entry, `${label} ${key}`),
-      ]),
-    );
-  };
-  return {
-    marginPercent,
-    apps: readGroup(apps, "apps", (entry, label) => {
-      if (!entry || typeof entry !== "object" || Array.isArray(entry))
-        refuse(`${label} must declare an object`);
-      const budget = { entry: readCeiling(entry.entry, `${label} entry`) };
-      return "page" in entry
-        ? { ...budget, page: readCeiling(entry.page, `${label} ./Page`) }
-        : budget;
-    }),
-    routes: readGroup(routes, "routes", readCeiling),
-  };
-}
-// llmlint: ignore-end[changed_behavior_has_e2e]
+// llmlint: ignore-block[changed_behavior_has_e2e] Every refusal below happens before the artifact is served and fails the compose lane, so a payload it rejects never reaches a visitor; bundle-budgets.spec.ts drives each one — the unrecognised argument, the chunk over its ceiling, and the budget file missing an app — as a real subprocess over isolated artifact fixtures, and site.spec.ts drives the artifact this gate passes.
+// The CLI shape is validated before anything is read: an unrecognised flag is
+// a caller asking for something this gate does not do, and silently gating
+// instead would report a pass the caller never requested.
+const flags = process.argv.slice(2);
+const rederiving = flags.length === 1 && flags[0] === "--rederive";
+if (flags.length > 0 && !rederiving)
+  throw new Error(
+    `check-bundle-budgets accepts no arguments, or --rederive to rewrite ${budgetsPath} from the tree in front of it; it was given ${flags.join(" ")}.`,
+  );
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Every refusal below happens before the artifact is served and fails the compose lane, so a payload it rejects never reaches a visitor; bundle-budgets.spec.ts drives each one over a real artifact fixture, and site.spec.ts drives the artifact this gate passes.
-const budgets = parsedBudgets(
+const budgets = parseBundleBudgets(
   JSON.parse(await readFile(budgetsPath, "utf8")),
   budgetsPath,
 );
 const declaredRemotes = Object.keys(parseRemoteManifest(remoteManifest));
 // Staged app subtrees are resolved through `stat` rather than by directory
 // entry type, because an isolated artifact fixture links the app subtrees it
-// does not corrupt instead of copying them.
+// does not corrupt instead of copying them. Each name is checked against the
+// declared registry as it is read, so nothing measures a directory the
+// workspace never declared as a remote.
 const stagedRemotes = [];
-for (const entry of await readdir(join(root, "remotes")))
-  if ((await stat(join(root, "remotes", entry))).isDirectory())
-    stagedRemotes.push(entry);
+for (const entry of await readdir(join(root, "remotes"))) {
+  if (!(await stat(join(root, "remotes", entry))).isDirectory()) continue;
+  if (!declaredRemotes.includes(entry))
+    throw new Error(
+      `${root}/remotes carries ${entry}, which libs/build-config/src/remotes.json does not declare as a remote; rebuild the artifact and rerun just prerender.`,
+    );
+  stagedRemotes.push(entry);
+}
 const artifactApps = [shellApp, ...stagedRemotes];
+const routePaths = Object.keys(routeFragments);
+
+// Coverage is settled before a byte is measured. Every app the registry
+// declares owes a budget, and no app may reach the artifact unbudgeted: an app
+// missing from either side is refused rather than measured against nothing.
+// Re-deriving is exempt, because the file it is about to rewrite is the very
+// one whose coverage these checks would be reading.
+if (!rederiving) {
+  const unbudgeted = [...new Set([...declaredRemotes, ...artifactApps])].filter(
+    (app) => !(app in budgets.apps),
+  );
+  if (unbudgeted.length > 0)
+    throw new Error(
+      `${budgetsPath} declares no budget for ${unbudgeted.join(", ")}; re-derive the ceilings with node scripts/artifact/check-bundle-budgets.mjs --rederive and commit the result, then rerun just prerender.`,
+    );
+  const unknownApps = Object.keys(budgets.apps).filter(
+    (app) => !artifactApps.includes(app),
+  );
+  if (unknownApps.length > 0)
+    throw new Error(
+      `${budgetsPath} budgets ${unknownApps.join(", ")}, which the artifact at ${root} does not contain; align the budgets with libs/build-config/src/remotes.json and rerun just prerender.`,
+    );
+  const unbudgetedRoutes = routePaths.filter(
+    (route) => !(route in budgets.routes),
+  );
+  const unknownRoutes = Object.keys(budgets.routes).filter(
+    (route) => !routePaths.includes(route),
+  );
+  if (unbudgetedRoutes.length > 0 || unknownRoutes.length > 0)
+    throw new Error(
+      `${budgetsPath} budgets the routes ${Object.keys(budgets.routes).join(", ")}, but compose composes ${routePaths.join(", ")}; align the budgets with scripts/compose/compose.mjs and rerun just prerender.`,
+    );
+}
 
 const measuredApps = {};
 for (const app of artifactApps)
@@ -288,16 +280,12 @@ const measuredRoutes = Object.fromEntries(
   ]),
 );
 
-// Re-deriving is how a ceiling moves: this prints the whole committed file
-// with every ceiling recomputed from the tree in front of it, so a change that
+// Re-deriving is how a ceiling moves: this rewrites the committed file with
+// every ceiling recomputed from the tree in front of it, so a change that
 // alters a payload deliberately lands as a diff a reader can weigh.
-if (process.argv.includes("--print")) {
-  const ceiling = (measuredBytes) => ({
-    measuredBytes,
-    ceilingBytes: Math.ceil(measuredBytes * (1 + budgets.marginPercent / 100)),
-  });
-  const printed = JSON.parse(await readFile(budgetsPath, "utf8"));
-  printed.apps = Object.fromEntries(
+if (rederiving) {
+  const rederived = JSON.parse(await readFile(budgetsPath, "utf8"));
+  rederived.apps = Object.fromEntries(
     artifactApps
       .toSorted()
       .map((app) => [
@@ -305,49 +293,23 @@ if (process.argv.includes("--print")) {
         Object.fromEntries(
           Object.entries(measuredApps[app]).map(([kind, bytes]) => [
             kind,
-            ceiling(bytes),
+            deriveCeiling(bytes, budgets.marginPercent),
           ]),
         ),
       ]),
   );
-  printed.routes = Object.fromEntries(
+  rederived.routes = Object.fromEntries(
     Object.entries(measuredRoutes).map(([route, bytes]) => [
       route,
-      ceiling(bytes),
+      deriveCeiling(bytes, budgets.marginPercent),
     ]),
   );
-  console.log(JSON.stringify(printed, null, 2));
+  await writeFile(budgetsPath, `${JSON.stringify(rederived, null, 2)}\n`);
+  console.log(
+    `check-bundle-budgets: re-derived ${artifactApps.length} app and ${routePaths.length} route ceilings into ${budgetsPath}`,
+  );
   process.exit(0);
 }
-
-// Every app the registry declares owes a budget, and no app may reach the
-// artifact unbudgeted: an app missing from either side is refused rather than
-// measured against nothing.
-const unbudgeted = [...new Set([...declaredRemotes, ...artifactApps])].filter(
-  (app) => !(app in budgets.apps),
-);
-if (unbudgeted.length > 0)
-  throw new Error(
-    `${budgetsPath} declares no budget for ${unbudgeted.join(", ")}; derive the ceilings with node scripts/artifact/check-bundle-budgets.mjs --print and commit the result, then rerun just prerender.`,
-  );
-const unknownApps = Object.keys(budgets.apps).filter(
-  (app) => !artifactApps.includes(app),
-);
-if (unknownApps.length > 0)
-  throw new Error(
-    `${budgetsPath} budgets ${unknownApps.join(", ")}, which the artifact at ${root} does not contain; align the budgets with libs/build-config/src/remotes.json and rerun just prerender.`,
-  );
-const routePaths = Object.keys(routeFragments);
-const unbudgetedRoutes = routePaths.filter(
-  (route) => !(route in budgets.routes),
-);
-const unknownRoutes = Object.keys(budgets.routes).filter(
-  (route) => !routePaths.includes(route),
-);
-if (unbudgetedRoutes.length > 0 || unknownRoutes.length > 0)
-  throw new Error(
-    `${budgetsPath} budgets the routes ${Object.keys(budgets.routes).join(", ")}, but compose composes ${routePaths.join(", ")}; align the budgets with scripts/compose/compose.mjs and rerun just prerender.`,
-  );
 
 const violations = [];
 for (const [app, measured] of Object.entries(measuredApps)) {
@@ -377,6 +339,6 @@ for (const [route, bytes] of Object.entries(measuredRoutes))
 
 if (violations.length > 0)
   throw new Error(
-    `The composed artifact exceeds its committed bundle budgets:\n${violations.map((violation) => `  ${violation}`).join("\n")}\nRemove the payload, or re-derive every ceiling with node scripts/artifact/check-bundle-budgets.mjs --print and commit the result.`,
+    `The composed artifact exceeds its committed bundle budgets:\n${violations.map((violation) => `  ${violation}`).join("\n")}\nRemove the payload, or re-derive every ceiling with node scripts/artifact/check-bundle-budgets.mjs --rederive and commit the result.`,
   );
 // llmlint: ignore-end[changed_behavior_has_e2e]

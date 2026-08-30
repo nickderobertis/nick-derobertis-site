@@ -7,26 +7,23 @@ import {
   readdir,
   readFile,
   rm,
+  stat,
   symlink,
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterAll, expect, test } from "vitest";
+// The gate validates the committed budgets at the boundary that reads them,
+// and this spec reaches them through that same validator rather than through a
+// type annotation over unchecked JSON: what it proves is then about the shape
+// the gate itself accepted.
+import { parseBundleBudgets } from "./bundle-budgets.mjs";
 
 const artifact = "dist/apps/shell";
 const budgetsPath = "scripts/artifact/bundle-budgets.json";
-/**
- * The smallest CV domain there is, so a margin that cannot absorb this one
- * cannot absorb any of them.
- */
-const smallestDomain =
-  "libs/data-access-core/vendor/codegen/domains/awards.json";
-/**
- * The app whose `./Page` chunk is the largest this file budgets, so the one
- * whose ceiling carries the most headroom for a domain to hide in.
- */
-const largestPageApp = "awards";
+/** Where the CV domains this gate exists to keep out of a pane are vendored. */
+const domainsDirectory = "libs/data-access-core/vendor/codegen/domains";
 
 const fixtures: string[] = [];
 
@@ -34,6 +31,52 @@ afterAll(async () => {
   for (const fixture of fixtures)
     await rm(fixture, { recursive: true, force: true });
 });
+
+function readBudgets(path = budgetsPath) {
+  return readFile(path, "utf8").then((source) =>
+    parseBundleBudgets(JSON.parse(source), path),
+  );
+}
+
+/**
+ * The smallest CV domain there is, derived rather than named: a margin that
+ * cannot absorb the smallest one cannot absorb any of them, and a smaller
+ * domain added later is picked up here instead of quietly going unproven.
+ */
+async function smallestDomain() {
+  const sized = await Promise.all(
+    (await readdir(domainsDirectory)).map(async (file) => {
+      const path = join(domainsDirectory, file);
+      return { path, bytes: (await stat(path)).size };
+    }),
+  );
+  const [first, ...rest] = sized;
+  if (!first) throw new Error(`${domainsDirectory} carries no CV domain`);
+  return rest.reduce(
+    (smallest, domain) => (domain.bytes < smallest.bytes ? domain : smallest),
+    first,
+  );
+}
+
+/**
+ * The app whose `./Page` chunk is the largest the committed file budgets, read
+ * from that file: it is the ceiling carrying the most headroom for a domain to
+ * hide in, so it is the one the margin has to be proven against.
+ */
+function largestPageApp(budgets: Awaited<ReturnType<typeof readBudgets>>) {
+  const budgeted = Object.entries(budgets.apps).flatMap(([app, budget]) =>
+    budget.page ? [{ app, page: budget.page }] : [],
+  );
+  const [first, ...rest] = budgeted;
+  if (!first) throw new Error(`${budgetsPath} budgets no ./Page chunk`);
+  return rest.reduce(
+    (largest, candidate) =>
+      candidate.page.measuredBytes > largest.page.measuredBytes
+        ? candidate
+        : largest,
+    first,
+  );
+}
 
 /**
  * An isolated artifact whose every app subtree is linked to the composed build
@@ -67,10 +110,10 @@ async function pageChunk(fixture: string, app: string) {
   return join(directory, chunks[0] ?? "");
 }
 
-function checkBudgets(root: string, budgets = budgetsPath) {
+function checkBudgets(root: string, budgets = budgetsPath, ...args: string[]) {
   return spawnSync(
     process.execPath,
-    ["scripts/artifact/check-bundle-budgets.mjs"],
+    ["scripts/artifact/check-bundle-budgets.mjs", ...args],
     {
       env: {
         ...process.env,
@@ -96,13 +139,7 @@ test("a ./Page chunk over its ceiling is refused by app and by route", async () 
   const result = checkBudgets(fixture);
 
   expect(result.status).not.toBe(0);
-  const budgets: {
-    apps: Record<
-      string,
-      { page: { measuredBytes: number; ceilingBytes: number } }
-    >;
-  } = JSON.parse(await readFile(budgetsPath, "utf8"));
-  const page = budgets.apps["home-cards"]?.page;
+  const page = (await readBudgets()).apps["home-cards"]?.page;
   expect(result.stderr).toContain(
     `home-cards ./Page chunk is ${(page?.measuredBytes ?? 0) + 200_000} bytes, over its ${page?.ceilingBytes}-byte ceiling`,
   );
@@ -116,23 +153,32 @@ test("a ./Page chunk over its ceiling is refused by app and by route", async () 
 // version of the regression the budgets exist for, so a margin wide enough to
 // let that through is one this suite refuses to let anyone commit.
 test("re-adding one CV domain's data to a ./Page chunk is refused", async () => {
-  const fixture = await isolatedArtifact([largestPageApp]);
-  const chunk = await pageChunk(fixture, largestPageApp);
-  await appendFile(chunk, await readFile(smallestDomain));
+  const budgets = await readBudgets();
+  const largest = largestPageApp(budgets);
+  const domain = await smallestDomain();
+  // The bound the committed margin has to sit under, derived from the same two
+  // facts the append below uses, so neither can drift away from this proof.
+  expect(budgets.marginPercent).toBeLessThan(
+    (domain.bytes / largest.page.measuredBytes) * 100,
+  );
+  const fixture = await isolatedArtifact([largest.app]);
+  await appendFile(
+    await pageChunk(fixture, largest.app),
+    await readFile(domain.path),
+  );
 
   const result = checkBudgets(fixture);
 
   expect(result.status).not.toBe(0);
-  expect(result.stderr).toContain(`${largestPageApp} ./Page chunk is`);
-  expect(result.stderr).toContain("-byte ceiling");
+  expect(result.stderr).toContain(
+    `${largest.app} ./Page chunk is ${largest.page.measuredBytes + domain.bytes} bytes, over its ${largest.page.ceilingBytes}-byte ceiling`,
+  );
 });
 
 test("a budget file that omits an app the artifact contains is refused", async () => {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-file-"));
   fixtures.push(fixture);
-  const budgets: { apps: Record<string, unknown> } = JSON.parse(
-    await readFile(budgetsPath, "utf8"),
-  );
+  const budgets = await readBudgets();
   delete budgets.apps["home-cards"];
   const path = join(fixture, "bundle-budgets.json");
   await writeFile(path, JSON.stringify(budgets));
@@ -141,4 +187,29 @@ test("a budget file that omits an app the artifact contains is refused", async (
 
   expect(result.status).not.toBe(0);
   expect(result.stderr).toContain("declares no budget for home-cards");
+});
+
+// Raising a ceiling is meant to be a re-derivation somebody commits, so this
+// drives that mode over the artifact the gate above just passed: it has to
+// reproduce the committed ceilings exactly, which is what makes the committed
+// file a record of this tree rather than of the one it was written against.
+test("--rederive reproduces the committed ceilings from this tree", async () => {
+  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-rederive-"));
+  fixtures.push(fixture);
+  const path = join(fixture, "bundle-budgets.json");
+  await cp(budgetsPath, path);
+
+  const result = checkBudgets(artifact, path, "--rederive");
+
+  expect(result.status).toBe(0);
+  expect(result.stdout.trimEnd().split("\n")).toHaveLength(1);
+  expect(result.stdout).toContain("re-derived");
+  expect(await readBudgets(path)).toEqual(await readBudgets());
+});
+
+test("an unrecognised argument is refused rather than gated silently", () => {
+  const result = checkBudgets(artifact, budgetsPath, "--print");
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain("it was given --print");
 });
