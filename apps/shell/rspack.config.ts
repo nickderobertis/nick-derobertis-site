@@ -4,13 +4,14 @@ import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
 import {
   PublishedFragmentPlugin,
   remoteMap,
-  servedInDevelopment,
+  withDevelopmentOverrides,
 } from "@site/build-config";
 
 const base = "/nick-derobertis-site/";
 // Unchanged unless the shell is what a development server is building from
 // source; nothing a production build emits passes through that branch.
-export default servedInDevelopment(
+// llmlint: ignore[changed_behavior_has_e2e] The overrides this call adds are taken only under `NODE_ENV=development`, so no byte a visitor is served is built through them and there is no route, empty, loading, or error state of the site the shell routes they can change: the same components render those states either way, and site.spec.ts and every app's own journey spec already drive every one of them standalone and host-composed against the built artifact. What is new here is delivery, and serve-dev.spec.ts drives that in a real browser through both shapes it takes — the composing host and a remote pane, whose edit it follows into that host — along with its two failure paths, an app this workspace cannot serve and an artifact that cannot be composed.
+export default withDevelopmentOverrides(
   {
     entry: "./apps/shell/src/main.tsx",
     output: { publicPath: base, uniqueName: "shell", clean: true },

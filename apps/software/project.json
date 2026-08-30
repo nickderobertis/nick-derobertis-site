@@ -17,6 +17,9 @@
   "targets": {
     "e2e": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "llmlint: ignore[browser_journeys_run_against_the_built_app] This workspace declares each app's browser journey on the app itself rather than in a second Nx project, and the journey still drives the built artifact rather than a development server: this target dependsOn shell:prerender, so Playwright only ever opens the composed production bundle Pages publishes. Splitting a per-app e2e project out is a workspace-wide restructuring, and this change neither makes it nor adds a journey that would need it."
+      },
       "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {
         "command": "playwright test --config apps/software/e2e/playwright.config.ts"

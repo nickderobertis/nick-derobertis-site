@@ -4,9 +4,9 @@ import { PublishedFragmentPlugin } from "./published-fragment";
 import {
   alignJsxRuntimeWithSiblings,
   DevelopmentServerPlugin,
-  isDevelopmentServer,
+  isDevelopmentBuild,
   productionJsxRuntime,
-  servedInDevelopment,
+  withDevelopmentOverrides,
   withoutContainerEntry,
 } from "./rspack-dev";
 
@@ -43,7 +43,7 @@ function servedFromSource<Result>(build: () => Result): Result {
 const scriptTag = (src: string) => ({ tagName: "script", attributes: { src } });
 
 afterEach(() => {
-  expect(isDevelopmentServer()).toBe(false);
+  expect(isDevelopmentBuild()).toBe(false);
 });
 
 describe("what a build outside a development server takes", () => {
@@ -51,12 +51,12 @@ describe("what a build outside a development server takes", () => {
     const configuration = buildConfiguration();
 
     expect(
-      servedInDevelopment(configuration, { publicPath: "", siteBase: "" }),
+      withDevelopmentOverrides(configuration, { publicPath: "", siteBase: "" }),
     ).toBe(configuration);
   });
 
   test("keeps the fragment publisher, the hashed output, and the cleaned directory", () => {
-    const served = servedInDevelopment(buildConfiguration(), {
+    const served = withDevelopmentOverrides(buildConfiguration(), {
       publicPath: `${pagesBase}remotes/awards/`,
       siteBase: pagesBase,
     });
@@ -73,7 +73,7 @@ describe("what a build outside a development server takes", () => {
 describe("what a pane served from source takes", () => {
   const servedPane = () =>
     servedFromSource(() =>
-      servedInDevelopment(buildConfiguration(), {
+      withDevelopmentOverrides(buildConfiguration(), {
         publicPath: `${pagesBase}remotes/awards/`,
         siteBase: pagesBase,
       }),
@@ -119,7 +119,7 @@ describe("what a pane served from source takes", () => {
 describe("what the host served from source takes", () => {
   const servedHost = () =>
     servedFromSource(() =>
-      servedInDevelopment(buildConfiguration(), {
+      withDevelopmentOverrides(buildConfiguration(), {
         publicPath: pagesBase,
         siteBase: pagesBase,
       }),

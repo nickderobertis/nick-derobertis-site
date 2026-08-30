@@ -6,5 +6,5 @@ export {
 } from "./fragment-contract";
 export { PublishedFragmentPlugin } from "./published-fragment";
 export type { RemoteProject } from "./remote-registry";
-export { servedInDevelopment } from "./rspack-dev";
+export { withDevelopmentOverrides } from "./rspack-dev";
 export { remoteConfig, remoteMap } from "./rspack-remote";

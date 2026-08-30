@@ -14,14 +14,19 @@ export interface ServedApp {
 }
 
 /**
- * True only inside a development server. `@nx/rspack:dev-server` sets
- * `NODE_ENV=development` before it builds anything and the build executor sets
- * `production`, so no artifact-producing build can reach the overrides below;
- * `serve-dev.mjs` sets it explicitly rather than relying on that default, so an
- * ambient `NODE_ENV` cannot leave a development server building production
- * output it then fails to hot-update.
+ * Whether this is a development-mode build: `NODE_ENV` says `development`, and
+ * nothing narrower is read, so a plain `NODE_ENV=development` rspack run
+ * answers true here exactly as a development server does.
+ *
+ * That is the whole condition the overrides below are guarded by, and it is
+ * enough for what they must never reach: `@nx/rspack:dev-server` sets
+ * `development` before it builds anything and the build executor sets
+ * `production`, so no artifact-producing build can take them. `serve-dev.mjs`
+ * sets it explicitly rather than relying on that default, so an ambient
+ * `NODE_ENV` cannot leave a development server building production output it
+ * then fails to hot-update.
  */
-export const isDevelopmentServer = () => process.env.NODE_ENV === "development";
+export const isDevelopmentBuild = () => process.env.NODE_ENV === "development";
 
 /**
  * One `<script>`/`<link>` the document plugin below decides about, narrowed to
@@ -214,18 +219,28 @@ export function developmentServer({
  * configuration is held to it on the way in and carries it on the way out, so a
  * caller reads back what a development server was given rather than what a
  * production build declared.
+ *
+ * The three fields this module can add to a configuration that never declared
+ * them — `resolve`, `devServer`, `watchOptions` — are rspack's own types rather
+ * than looser stand-ins, because for those the stand-in is what the returned
+ * intersection ends up carrying, and a caller handing that result straight to
+ * `rspack()` would stop typechecking against a shape rspack never uses. The two
+ * every caller here already declares stay loose: the intersection keeps the
+ * caller's own type for them.
  */
 export interface DevelopmentOverrides {
   output?: Record<string, unknown>;
-  resolve?: { alias?: Record<string, unknown> };
   plugins?: unknown[];
+  resolve?: Configuration["resolve"];
   devServer?: Configuration["devServer"];
   watchOptions?: Configuration["watchOptions"];
 }
 
 /**
- * One app's build configuration, unchanged unless it is being served from
- * source by the development server.
+ * One app's build configuration, unchanged unless this is a development-mode
+ * build — which in practice is the development server serving that app from
+ * source, since it is the only thing in this workspace that builds under
+ * `NODE_ENV=development`.
  *
  * Three of the overrides are what make an edit reach the running page at all,
  * and each was measured against a server that did not have it:
@@ -244,11 +259,11 @@ export interface DevelopmentOverrides {
  *   above rather than dropped, so the federation container stays the last
  *   plugin a host's configuration declares.
  */
-export function servedInDevelopment<Config extends DevelopmentOverrides>(
+export function withDevelopmentOverrides<Config extends DevelopmentOverrides>(
   config: Config,
   served: ServedApp,
 ): Config & DevelopmentOverrides {
-  if (!isDevelopmentServer()) return config;
+  if (!isDevelopmentBuild()) return config;
   // A pane renders against the composed host's production React, so both halves
   // of the JSX runtime it reaches that instance through have to be production
   // too: the calls its own source compiles to, and the React module those calls

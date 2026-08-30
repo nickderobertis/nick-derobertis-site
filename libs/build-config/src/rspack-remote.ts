@@ -4,7 +4,7 @@ import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
 import { PublishedFragmentPlugin } from "./published-fragment";
 import { type RemoteProject, remoteRegistry } from "./remote-registry";
-import { servedInDevelopment } from "./rspack-dev";
+import { withDevelopmentOverrides } from "./rspack-dev";
 
 const siteConfig: unknown = createRequire(import.meta.url)(
   "../../data-access-core/src/site.config.json",
@@ -44,7 +44,8 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
     name in remoteRegistry ? remoteRegistry[name as RemoteProject] : name;
   // Unchanged unless this remote is the one a development server is building
   // from source; nothing a production build emits passes through the branch.
-  return servedInDevelopment(
+  // llmlint: ignore[changed_behavior_has_e2e] The overrides this call adds are taken only under `NODE_ENV=development`, so no byte a visitor is served is built through them and there is no route, empty, loading, or error state of the remote's page they can change: the same components render those states either way, and apps/<name>/e2e/<name>.spec.ts and apps/<name>/e2e/ownership.spec.ts already drive every one of them standalone and host-composed against the built artifact. What is new here is delivery, and serve-dev.spec.ts drives that in a real browser through both shapes it takes — the composing host and a remote pane, whose edit it follows into that host — along with its two failure paths, an app this workspace cannot serve and an artifact that cannot be composed.
+  return withDevelopmentOverrides(
     {
       entry: `./${root}/src/main.tsx`,
       output: { publicPath, uniqueName: name, clean: true },
