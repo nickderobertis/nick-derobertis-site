@@ -47,17 +47,20 @@ import { overlappingSpecifiers } from "./published-subpaths";
  */
 
 /**
- * Whether a target's source text contains no quoted `node:` specifier. That
- * substring is all this reads, and it is what the build half selects its
- * subjects by: rspack polyfills no Node builtin, so a module that reaches one
- * is never bundled and no production build ever asks for it. The reading is
- * deliberately loose in the safe direction — it matches a `node:` string that
- * is not an import and misses one a target reaches indirectly — because a
- * target it excludes is one the test-runner half below still resolves for
- * real, and between the two halves every published subpath is covered.
+ * Whether a target's source text holds no quoted `node:` specifier — a `node:`
+ * preceded by any of the three quote characters, which is the whole reading.
+ *
+ * That reading is what the build half selects its subjects by. rspack
+ * polyfills no Node builtin, so a module that reaches one is never bundled and
+ * no production build ever asks for it, and this text is the cheapest thing
+ * that answers approximately. It is approximate in both directions: it matches
+ * a quoted `node:` that is not an import, and misses a builtin a target reaches
+ * through some other module. Neither costs this contract anything, because a
+ * target it excludes is one the test-runner half below still resolves for real
+ * — between the two halves every published subpath is covered.
  */
-function mentionsNoNodeBuiltin(target: string) {
-  return !/["']node:/.test(readFileSync(target, "utf8"));
+function hasNoQuotedNodeSpecifier(target: string) {
+  return !/["'`]node:/.test(readFileSync(target, "utf8"));
 }
 
 /**
@@ -78,7 +81,7 @@ function aRemoteUnderBuild(): string {
 const remoteUnderBuild = aRemoteUnderBuild();
 const subjects = overlappingSpecifiers();
 const builtSubjects = subjects.filter((subject) =>
-  mentionsNoNodeBuiltin(subject.target),
+  hasNoQuotedNodeSpecifier(subject.target),
 );
 
 const buildRoot = resolve("dist/tooling-workspace/subpath-build");
@@ -365,7 +368,7 @@ describe("the workspace test runner resolves published subpaths", () => {
         { encoding: "utf8" },
       ).catch((error: unknown) => {
         throw new Error(
-          `${probeConfig} reported a resolution the shared test harness does not answer as its package publishes it:\n${printedBy(error)}`,
+          `${probeConfig} reported a resolution the shared test harness does not answer as its package publishes it. Its output below names each specifier and the file its package publishes for it: give the shared harness a resolution that reads that package's exports map rather than matching specifiers by prefix, or, where the probe's own \`remotes\` map is what answered, restate that map in subpath-resolution-probe/probe-config.ts; then rerun just test.\n${printedBy(error)}`,
         );
       });
       // llmlint: ignore-end[work_goes_through_command_surface]
