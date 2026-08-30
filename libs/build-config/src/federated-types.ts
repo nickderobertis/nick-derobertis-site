@@ -105,12 +105,53 @@ export async function missingHostTypes(
   return missing;
 }
 
+/** The record signatures a ZIP archive is read through, as stored numbers. */
+const localFileHeader = 0x04034b50;
+const centralDirectoryHeader = 0x02014b50;
+const endOfCentralDirectory = 0x06054b50;
+/** The fixed part of an end-of-central-directory record, before its comment. */
+const endRecordLength = 22;
+/** The longest comment that record may carry, so the scan below is bounded. */
+const maxComment = 0xffff;
+
 /**
- * The four bytes a ZIP archive's first local file header starts with. Module
- * Federation's downloader unpacks whatever these URLs carry, so the bytes are
- * held to being an archive here, where the file that failed can still be named.
+ * Why these bytes are not an archive a host can read declarations out of, or
+ * `undefined` when they are.
+ *
+ * Module Federation's downloader unpacks whatever these URLs carry, so what
+ * reaches it is held to a ZIP's own structure here, where the file that failed
+ * can still be named. A truncated write is the failure this is really for --
+ * the generator publishes an archive as a whole file, so a partial one is what
+ * an interrupted build leaves behind -- and truncation is exactly what the
+ * signature at the front cannot see: it survives losing everything after it.
+ * So the trailer is read too, and the directory it points back at.
  */
-const zipSignature = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+function notAnArchive(bytes: Buffer) {
+  if (
+    bytes.length < endRecordLength ||
+    bytes.readUInt32LE(0) !== localFileHeader
+  )
+    return "does not begin with a ZIP entry";
+  // The record sits at the very end unless the archive carries a comment, so
+  // the scan starts there and walks back over the longest one that is allowed.
+  const earliest = Math.max(0, bytes.length - endRecordLength - maxComment);
+  let end = -1;
+  for (let at = bytes.length - endRecordLength; at >= earliest; at -= 1)
+    if (bytes.readUInt32LE(at) === endOfCentralDirectory) {
+      end = at;
+      break;
+    }
+  if (end === -1) return "is truncated: it carries no end-of-archive record";
+  const entries = bytes.readUInt16LE(end + 10);
+  const size = bytes.readUInt32LE(end + 12);
+  const offset = bytes.readUInt32LE(end + 16);
+  if (entries === 0) return "declares no entries";
+  if (offset + size > end)
+    return "is truncated: its index runs past the bytes that are there";
+  if (bytes.readUInt32LE(offset) !== centralDirectoryHeader)
+    return "is corrupt: its index does not start with an entry";
+  return undefined;
+}
 
 /**
  * The `remoteTypeUrls` a host's `dts.consumeTypes` resolves each archive
@@ -135,10 +176,11 @@ export function federatedTypeUrls(aliases: readonly string[]) {
               `${remoteTypesArchive(alias)} does not exist, so the ${alias} remote's declarations cannot be consumed. Build that remote and rerun just check.`,
             );
           }
-          if (!bytes.subarray(0, zipSignature.length).equals(zipSignature))
-            // llmlint: ignore[changed_behavior_has_e2e] Same build-time refusal as the one above, on the same bytes: it names a file that is not the archive the remote's build publishes, before the host compiler exists, so there is no rendered page for a browser to reach. federated-types.spec.ts drives it through this real entry point over a published file that is not an archive.
+          const unreadable = notAnArchive(bytes);
+          if (unreadable)
+            // llmlint: ignore[changed_behavior_has_e2e] Same build-time refusal as the one above, on the same bytes: it names a file that is not the archive the remote's build publishes, before the host compiler exists, so there is no rendered page for a browser to reach. federated-types.spec.ts drives it through this real entry point over a file that is no archive at all and over a real archive a write left truncated.
             throw new Error(
-              `${remoteTypesArchive(alias)} is not a ZIP archive, so the ${alias} remote's declarations cannot be unpacked. Rebuild that remote and rerun just check.`,
+              `${remoteTypesArchive(alias)} ${unreadable}, so the ${alias} remote's declarations cannot be unpacked. Rebuild that remote and rerun just check.`,
             );
           return [
             alias,

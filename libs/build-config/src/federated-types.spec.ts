@@ -8,6 +8,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { crc32 } from "node:zlib";
 import { rspack } from "@rspack/core";
 import { afterEach, describe, expect, test } from "vitest";
 import { z } from "zod";
@@ -36,22 +37,54 @@ const archive = resolve(remoteTypesArchive(alias));
 const consumed = resolve(hostTypesPath(host));
 
 /**
- * An archive as Module Federation's generator writes one: the bytes below are
- * a stand-in for its contents, but they open with the ZIP local file header
- * every real archive opens with, which is the part the consumer reads.
+ * A real ZIP archive holding one stored entry, which is what the generator
+ * publishes and what the consumer reads: the entry, the central directory
+ * indexing it, and the end record a reader finds that directory through.
+ * Building it here is what lets the corruptions below be real ones.
  */
-const archiveBytes = Buffer.concat([
-  Buffer.from([0x50, 0x4b, 0x03, 0x04]),
-  Buffer.from("Page.d.ts"),
-]);
+function zipArchive(name: string, contents: string) {
+  const named = Buffer.from(name);
+  const stored = Buffer.from(contents);
+  const local = Buffer.alloc(30);
+  local.writeUInt32LE(0x04034b50, 0);
+  local.writeUInt16LE(20, 4);
+  local.writeUInt32LE(crc32(stored), 14);
+  local.writeUInt32LE(stored.length, 18);
+  local.writeUInt32LE(stored.length, 22);
+  local.writeUInt16LE(named.length, 26);
+  const central = Buffer.alloc(46);
+  central.writeUInt32LE(0x02014b50, 0);
+  central.writeUInt16LE(20, 4);
+  central.writeUInt16LE(20, 6);
+  central.writeUInt32LE(crc32(stored), 16);
+  central.writeUInt32LE(stored.length, 20);
+  central.writeUInt32LE(stored.length, 24);
+  central.writeUInt16LE(named.length, 28);
+  const entry = Buffer.concat([local, named, stored]);
+  const index = Buffer.concat([central, named]);
+  const end = Buffer.alloc(22);
+  end.writeUInt32LE(0x06054b50, 0);
+  end.writeUInt16LE(1, 8);
+  end.writeUInt16LE(1, 10);
+  end.writeUInt32LE(index.length, 12);
+  end.writeUInt32LE(entry.length, 16);
+  return Buffer.concat([entry, index, end]);
+}
+
+const declaration = "export { default } from './compiled-types/src/page';\n";
+const archiveBytes = zipArchive("Page.d.ts", declaration);
+
+/** That archive with one field of its end record rewritten in place. */
+function edited(rewrite: (zip: Buffer, end: number) => void) {
+  const copy = Buffer.from(archiveBytes);
+  rewrite(copy, copy.length - 22);
+  return copy;
+}
 
 /** What a remote's declaration generator leaves behind for the publish step. */
 async function generated() {
   await mkdir(join(built, "@mf-types"), { recursive: true });
-  await writeFile(
-    join(built, "@mf-types", "Page.d.ts"),
-    "export { default } from './compiled-types/src/page';\n",
-  );
+  await writeFile(join(built, "@mf-types", "Page.d.ts"), declaration);
   await writeFile(join(built, "@mf-types.zip"), archiveBytes);
 }
 
@@ -248,14 +281,46 @@ describe("the archives a host consumes", () => {
     );
   });
 
-  test("reports a published file that is not an archive at all", async () => {
+  // Each of these is what an interrupted or misdirected publish leaves on
+  // disk, and every one of them would otherwise reach Module Federation's
+  // downloader as a URL it could only fail on, naming nothing to act on.
+  test.each([
+    {
+      name: "a file that is no archive at all",
+      published: Buffer.from("nothing"),
+      reason: "does not begin with a ZIP entry",
+    },
+    {
+      name: "a file long enough to have been one",
+      published: Buffer.alloc(64),
+      reason: "does not begin with a ZIP entry",
+    },
+    {
+      name: "an archive truncated to its first entry",
+      published: archiveBytes.subarray(0, 40),
+      reason: "is truncated: it carries no end-of-archive record",
+    },
+    {
+      name: "an archive declaring no entries",
+      published: edited((zip, end) => zip.writeUInt16LE(0, end + 10)),
+      reason: "declares no entries",
+    },
+    {
+      name: "an archive whose index runs past its bytes",
+      published: edited((zip, end) => zip.writeUInt32LE(end, end + 12)),
+      reason: "is truncated: its index runs past the bytes that are there",
+    },
+    {
+      name: "an archive whose index is not one",
+      published: edited((zip, end) => zip.writeUInt32LE(4, end + 16)),
+      reason: "is corrupt: its index does not start with an entry",
+    },
+  ])("reports $name", async ({ published, reason }) => {
     await mkdir(resolve(`${remoteTypesPath(alias)}/..`), { recursive: true });
-    // A truncated write, or a generator that reported an archive it never
-    // finished, leaves bytes here that the downloader cannot unpack.
-    await writeFile(archive, "not an archive");
+    await writeFile(archive, published);
 
     await expect(federatedTypeUrls([alias])()).rejects.toThrow(
-      `${remoteTypesArchive(alias)} is not a ZIP archive`,
+      `${remoteTypesArchive(alias)} ${reason}`,
     );
   });
 
