@@ -3,5 +3,14 @@
   "compilerOptions": {
     "types": ["node"]
   },
-  "include": ["*.spec.ts", "vite.config.ts"]
+  "include": [
+    "*.spec.ts",
+    "vite.config.ts",
+    // The probe subpath-resolution.spec.ts drives is a spec of its own, so it
+    // is typed here even though it belongs to no project. Its component config
+    // is not: that file imports the shared harness, which only a component
+    // config may do, and typing it here would key this project's whole
+    // typecheck on the harness.
+    "subpath-resolution-probe/src/**/*.ts"
+  ]
 }
