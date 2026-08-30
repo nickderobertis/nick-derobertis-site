@@ -16,7 +16,7 @@
     "types": {
       "path": "",
       "name": "",
-      "zip": "",
+      "zip": "@mf-types.zip",
       "api": ""
     },
     "globalName": "bio",
@@ -36,7 +36,7 @@
         "js": {
           "async": [],
           "sync": [
-            "main.97e27761fd569c19.js",
+            "main.cf8758dcc24fea0c.js",
             "remoteEntry.js"
           ]
         },
@@ -63,7 +63,7 @@
         "js": {
           "async": [],
           "sync": [
-            "main.97e27761fd569c19.js",
+            "main.cf8758dcc24fea0c.js",
             "remoteEntry.js"
           ]
         },
@@ -94,32 +94,15 @@
       "assets": {
         "js": {
           "sync": [
-            "common.bb755dcebee3688f.js"
+            "common.c0c3877b42c95acb.js",
+            "__federation_expose_Page.94d66972940cad37.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "common.01757086d2a7ba1a.css",
-            "__federation_expose_Page.7fc66cd77766a671.css"
+            "__federation_expose_Page.d3cda19026929826.css"
           ],
-          "async": []
-        }
-      }
-    },
-    {
-      "path": "./Skeleton",
-      "id": "bio:Skeleton",
-      "name": "Skeleton",
-      "requires": [],
-      "file": "src/skeleton.tsx",
-      "assets": {
-        "js": {
-          "sync": [],
-          "async": []
-        },
-        "css": {
-          "sync": [],
           "async": []
         }
       }
