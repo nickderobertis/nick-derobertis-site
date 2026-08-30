@@ -1,11 +1,5 @@
 import { execFile } from "node:child_process";
-import {
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 import { rspack, type Stats, type StatsCompilation } from "@rspack/core";
@@ -13,6 +7,7 @@ import { remoteConfig } from "@site/build-config";
 import { remoteRegistry } from "@site/build-config/remote-registry";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
+import { overlappingSpecifiers } from "./published-subpaths";
 
 /**
  * A specifier that begins with a shorter one this workspace also publishes —
@@ -42,69 +37,14 @@ import { z } from "zod";
  *   node config rather than under that harness — so it is driven as a real
  *   Vitest run over the probe beside this file.
  *
- * Both halves derive their subjects from the manifests that publish them, so a
- * subpath added tomorrow is covered the day it is added. Between them every
+ * Both halves take their subjects from `./published-subpaths.ts`, the one
+ * derivation over the manifests that publish them, so a subpath added tomorrow
+ * is covered the day it is added and neither half can drift into asking about
+ * a different set of them than the other. Between them every
  * published subpath is resolved for real: the test runner imports all of them,
  * and the build imports the ones a browser bundle can hold, which is every
  * subpath a build ever asks for.
  */
-
-const packageName = z.string().regex(/^@site\/[a-z][a-z0-9-]*$/);
-
-// Both halves of an exports map are read here: a key is the subpath a
-// specifier asks for, and a value is the file the answer has to be.
-const manifestSchema = z.object({
-  name: packageName,
-  exports: z
-    .record(
-      z.string().regex(/^\.(?:\/[\w.-]+)*$/),
-      z.string().regex(/^\.\/[\w.-]+(?:\/[\w.-]+)*$/),
-    )
-    .optional(),
-});
-
-/**
- * A subpath a package publishes beside the bare specifier it begins with. Both
- * are carried, because the finding is the longer one being answered with the
- * shorter one's target.
- */
-type Overlap = {
-  shorter: string;
-  shorterTarget: string;
-  specifier: string;
-  target: string;
-};
-
-function overlappingSpecifiers(): Overlap[] {
-  return ["apps", "libs", "scripts"].flatMap((tree) =>
-    readdirSync(tree, { withFileTypes: true })
-      .filter((entry) => entry.isDirectory())
-      .flatMap((entry) => {
-        const root = `${tree}/${entry.name}`;
-        let document: string;
-        try {
-          document = readFileSync(`${root}/package.json`, "utf8");
-        } catch {
-          // A directory under a project tree with no manifest publishes
-          // nothing; project-manifest.spec.ts is what holds every Nx project
-          // to having one.
-          return [];
-        }
-        const manifest = manifestSchema.parse(JSON.parse(document));
-        const exported = manifest.exports ?? {};
-        const bare = exported["."];
-        if (bare === undefined) return [];
-        return Object.entries(exported)
-          .filter(([subpath]) => subpath !== ".")
-          .map(([subpath, target]) => ({
-            shorter: manifest.name,
-            shorterTarget: `${root}/${bare.slice(2)}`,
-            specifier: `${manifest.name}${subpath.slice(1)}`,
-            target: `${root}/${target.slice(2)}`,
-          }));
-      }),
-  );
-}
 
 /**
  * Whether a browser bundle can hold what a subpath publishes. rspack polyfills

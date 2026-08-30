@@ -5,23 +5,9 @@
 // hand-written node configs the tooling projects use, so the probe runs under
 // its own harness-produced config rather than beside the contract that drives
 // it. It belongs to no Nx project and is run by that contract alone.
-import { defineWorkspaceTestConfig } from "@site/testing";
+//
+// Everything this config is made of lives in `probe-config.ts`; this file is
+// only the choice of which order the `remotes` map is stated in.
+import { probeConfig, probeRemotes } from "./probe-config";
 
-export default defineWorkspaceTestConfig({
-  project: "subpath-resolution-probe",
-  dir: "scripts/workspace/subpath-resolution-probe",
-  thresholds: { lines: 95, functions: 95, branches: 95, statements: 95 },
-  // The remotes a host states are the only aliases this harness still merges,
-  // and each of these is a stand-in the way every host's own test config states
-  // them. The second one is deliberately a specifier `@site/build-config` also
-  // publishes: it is the one place a remote and a package manifest could both
-  // answer, and the remote the caller stated has to win there. The reversed
-  // config beside this file states the same map in the opposite order and the
-  // contract runs the probe under both, so keep the two entries in step.
-  remotes: {
-    "homeCards/Skeleton":
-      "scripts/workspace/subpath-resolution-probe/src/stands-in-for-a-remote.ts",
-    "@site/build-config/remote-registry":
-      "scripts/workspace/subpath-resolution-probe/src/shadows-a-published-subpath.ts",
-  },
-});
+export default probeConfig(probeRemotes);

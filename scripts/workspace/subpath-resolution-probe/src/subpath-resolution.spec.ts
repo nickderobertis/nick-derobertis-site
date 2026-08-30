@@ -1,6 +1,5 @@
-import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { z } from "zod";
+import { overlappingSpecifiers } from "../../published-subpaths";
 
 /**
  * The half of the subpath resolution contract only the test runner can answer,
@@ -13,11 +12,15 @@ import { z } from "zod";
  * specifier that resolves to a file other than the one its package publishes
  * for it, which no reading of a configuration object reports.
  *
- * Two roots are in play and they are not the same one: the manifests are read
- * from the workspace root, which is where this run's Vitest root and working
- * directory both sit, while a relative `import()` is resolved against this
- * file. So a target is carried as a workspace-relative path and prefixed only
- * where it is imported.
+ * Its subjects come from `scripts/workspace/published-subpaths.ts`, the one
+ * derivation the build half reads too, so neither half can drift into asking
+ * about a different set of published subpaths than the other.
+ *
+ * Two roots are in play and they are not the same one: that derivation reads
+ * the manifests from the workspace root, which is where this run's Vitest root
+ * and working directory both sit, while a relative `import()` is resolved
+ * against this file. So a target is carried as a workspace-relative path and
+ * prefixed only where it is imported.
  */
 
 /** Where the workspace root sits relative to this file. */
@@ -33,55 +36,6 @@ const shadowedByARemote = "@site/build-config/remote-registry";
 
 /** The federation specifier that config states, which no manifest publishes. */
 const federated = "homeCards/Skeleton";
-
-const packageName = z.string().regex(/^@site\/[a-z][a-z0-9-]*$/);
-
-const manifestSchema = z.object({
-  name: packageName,
-  exports: z
-    .record(
-      z.string().regex(/^\.(?:\/[\w.-]+)*$/),
-      z.string().regex(/^\.\/[\w.-]+(?:\/[\w.-]+)*$/),
-    )
-    .optional(),
-});
-
-/**
- * A subpath a package publishes beside the bare specifier that subpath begins
- * with. Both halves are carried, because the failure being ruled out is the
- * longer specifier being answered with the shorter one's target.
- */
-type Overlap = {
-  shorter: string;
-  specifier: string;
-  target: string;
-};
-
-function overlappingSpecifiers(): Overlap[] {
-  return ["apps", "libs", "scripts"].flatMap((tree) =>
-    readdirSync(tree, { withFileTypes: true })
-      .filter((entry) => entry.isDirectory())
-      .flatMap((entry) => {
-        const root = `${tree}/${entry.name}`;
-        let document: string;
-        try {
-          document = readFileSync(`${root}/package.json`, "utf8");
-        } catch {
-          return [];
-        }
-        const manifest = manifestSchema.parse(JSON.parse(document));
-        const exported = manifest.exports ?? {};
-        if (exported["."] === undefined) return [];
-        return Object.entries(exported)
-          .filter(([subpath]) => subpath !== ".")
-          .map(([subpath, target]) => ({
-            shorter: manifest.name,
-            specifier: `${manifest.name}${subpath.slice(1)}`,
-            target: `${root}/${target.slice(2)}`,
-          }));
-      }),
-  );
-}
 
 describe("the workspace test runner resolves published subpaths", () => {
   it("answers every longer specifier with its own target, not the shorter one's", async () => {
