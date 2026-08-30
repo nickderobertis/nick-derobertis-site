@@ -57,6 +57,27 @@ test("publishes the accessible contract of every route the shell serves", () => 
   ]);
 });
 
+// The routes that render a CV domain each show every entry that domain lists,
+// so the contract that hands them to the browser journeys has to carry all of
+// them: one title per course, per paper, per project, not just the first.
+test("carries every title the CV data gives a route that renders a domain", () => {
+  const routes = siteRoutes();
+  const featuresOf = (published: string) =>
+    routes.find(({ path: routePath }) => routePath === published)?.features;
+
+  // Home and Bio render no CV domain, so their own remote's prose is all a
+  // journey has to read on them.
+  expect(featuresOf("")).toEqual(["Who am I?"]);
+  expect(featuresOf("bio")).toEqual(["Reproducible Research"]);
+  // The other three each list more than one entry, so a contract that stopped
+  // at the first would leave the rest of the route unproven.
+  expect(featuresOf("research")?.length).toBeGreaterThan(1);
+  expect(featuresOf("software")?.length).toBeGreaterThan(1);
+  expect(featuresOf("courses")?.length).toBeGreaterThan(1);
+  for (const { features, link } of routes)
+    for (const feature of features) expect(feature, link).not.toBe("");
+});
+
 test("rejects a route the shell publishes without a journey contract", async () => {
   const routes = JSON.parse(await readFile(routeManifest, "utf8"));
   const root = await fixtureRoot({
