@@ -16,7 +16,7 @@
     "types": {
       "path": "",
       "name": "",
-      "zip": "",
+      "zip": "@mf-types.zip",
       "api": ""
     },
     "globalName": "courses",
@@ -35,7 +35,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.183c3a3f1b2d0b05.js"
+            "main.087720bef4ff0ae5.js"
           ]
         },
         "css": {
@@ -58,7 +58,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.183c3a3f1b2d0b05.js"
+            "main.087720bef4ff0ae5.js"
           ]
         },
         "css": {
@@ -79,36 +79,20 @@
       "assets": {
         "js": {
           "sync": [
-            "439.1e9ec1e10b85d387.js",
-            "common.cf001499cb943664.js",
-            "754.4fe4a3025663518a.js"
+            "439.797d03dcafbe1a9c.js",
+            "266.9e3dee40adb86b28.js",
+            "__federation_expose_Page.b0e918ae829c941d.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "common.e00d2b0e57982d7a.css",
-            "__federation_expose_Page.7fc66cd77766a671.css"
+            "__federation_expose_Page.52f8612df6cbea2d.css"
           ],
           "async": []
         }
       },
       "path": "./Page"
-    },
-    {
-      "id": "courses:Skeleton",
-      "name": "Skeleton",
-      "assets": {
-        "js": {
-          "sync": [],
-          "async": []
-        },
-        "css": {
-          "sync": [],
-          "async": []
-        }
-      },
-      "path": "./Skeleton"
     }
   ]
 }
