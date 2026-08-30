@@ -70,6 +70,11 @@ slices; they are named in this node's task as expected to stay.
 `apps/courses/src/use-courses-page.ts` — by the build-time fragment renderer
 `libs/build-config/src/shell-fragment-entry.tsx`, and by specs. Nothing else.
 
+Those five have since moved onto their own domain slices — issue #92's A3, whose
+evidence is in `docs/cv-domain-slice-verification.md` — so the tree this section
+describes is the one that carried #102, not the one in front of you. The
+fragment renderer and the specs are what import the bundled client now.
+
 ## What the browser now pays on load
 
 `src/validators.ts` imports no CV data and runs no aggregate-versus-domain

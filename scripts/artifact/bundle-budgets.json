@@ -9,12 +9,12 @@
   "apps": {
     "awards": {
       "entry": {
-        "measuredBytes": 591312,
-        "ceilingBytes": 591608
+        "measuredBytes": 591329,
+        "ceilingBytes": 591625
       },
       "page": {
-        "measuredBytes": 155424,
-        "ceilingBytes": 155502
+        "measuredBytes": 155441,
+        "ceilingBytes": 155519
       }
     },
     "bio": {
@@ -29,18 +29,18 @@
     },
     "courses": {
       "entry": {
-        "measuredBytes": 2124031,
-        "ceilingBytes": 2125094
+        "measuredBytes": 654608,
+        "ceilingBytes": 654936
       },
       "page": {
-        "measuredBytes": 1629863,
-        "ceilingBytes": 1630678
+        "measuredBytes": 160442,
+        "ceilingBytes": 160523
       }
     },
     "home": {
       "entry": {
-        "measuredBytes": 514876,
-        "ceilingBytes": 515134
+        "measuredBytes": 514872,
+        "ceilingBytes": 515130
       },
       "page": {
         "measuredBytes": 65712,
@@ -89,12 +89,12 @@
     },
     "research": {
       "entry": {
-        "measuredBytes": 2120930,
-        "ceilingBytes": 2121991
+        "measuredBytes": 669285,
+        "ceilingBytes": 669620
       },
       "page": {
-        "measuredBytes": 1626626,
-        "ceilingBytes": 1627440
+        "measuredBytes": 174981,
+        "ceilingBytes": 175069
       }
     },
     "shell": {
@@ -105,55 +105,55 @@
     },
     "skills": {
       "entry": {
-        "measuredBytes": 2069029,
-        "ceilingBytes": 2070064
+        "measuredBytes": 671712,
+        "ceilingBytes": 672048
       },
       "page": {
-        "measuredBytes": 1633050,
-        "ceilingBytes": 1633867
+        "measuredBytes": 235733,
+        "ceilingBytes": 235851
       }
     },
     "software": {
       "entry": {
-        "measuredBytes": 2119800,
-        "ceilingBytes": 2120860
+        "measuredBytes": 1256328,
+        "ceilingBytes": 1256957
       },
       "page": {
-        "measuredBytes": 1625551,
-        "ceilingBytes": 1626364
+        "measuredBytes": 762079,
+        "ceilingBytes": 762461
       }
     },
     "timeline": {
       "entry": {
-        "measuredBytes": 2064919,
-        "ceilingBytes": 2065952
+        "measuredBytes": 597955,
+        "ceilingBytes": 598254
       },
       "page": {
-        "measuredBytes": 1628939,
-        "ceilingBytes": 1629754
+        "measuredBytes": 161971,
+        "ceilingBytes": 162052
       }
     }
   },
   "routes": {
     "/": {
-      "measuredBytes": 3698118,
-      "ceilingBytes": 3699968
+      "measuredBytes": 833850,
+      "ceilingBytes": 834267
     },
     "/bio": {
       "measuredBytes": 6762,
       "ceilingBytes": 6766
     },
     "/research": {
-      "measuredBytes": 1626626,
-      "ceilingBytes": 1627440
+      "measuredBytes": 174981,
+      "ceilingBytes": 175069
     },
     "/software": {
-      "measuredBytes": 1625551,
-      "ceilingBytes": 1626364
+      "measuredBytes": 762079,
+      "ceilingBytes": 762461
     },
     "/courses": {
-      "measuredBytes": 1629863,
-      "ceilingBytes": 1630678
+      "measuredBytes": 160442,
+      "ceilingBytes": 160523
     }
   }
 }

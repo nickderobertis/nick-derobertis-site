@@ -1,10 +1,10 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
 import { describe, expect, it } from "vitest";
+import { softwareProjects } from "./data";
 import { calculateSoftwareStats, softwareProjectLogo } from "./index";
 
 describe("software shaping", () => {
   it("calculates portfolio totals and chooses logos", () => {
-    const projects = cvDataClient.domain("software_projects");
+    const projects = softwareProjects;
     const stats = calculateSoftwareStats(projects);
     expect(stats.projects).toBe(projects.length);
     expect(stats.linesOfCode).toBeGreaterThanOrEqual(0);

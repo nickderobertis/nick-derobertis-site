@@ -20,9 +20,9 @@ describe("the committed timeline slice", () => {
     const { timeline } = await import("./data");
 
     expect(timeline.length).toBeGreaterThan(0);
-    expect(timeline.every((entry) => typeof entry.organization === "string")).toBe(
-      true,
-    );
+    expect(
+      timeline.every((entry) => typeof entry.organization === "string"),
+    ).toBe(true);
   });
 
   it("refuses at import when the slice does not satisfy the schema", async () => {

@@ -11,4 +11,7 @@ import { validateCvDomain } from "@site/data-access-core/validators";
  * committed file and one answer about it: a slice the schema rejects fails the
  * import, so no consumer can render from data nothing checked.
  */
-export const softwareProjects = validateCvDomain("software_projects", softwareProjectsArtifact);
+export const softwareProjects = validateCvDomain(
+  "software_projects",
+  softwareProjectsArtifact,
+);
