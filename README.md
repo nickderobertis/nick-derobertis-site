@@ -25,13 +25,12 @@ Reach for this while you are writing code. It builds the complete artifact
 once, then serves the app you named from source with hot module replacement
 while every other app is answered for out of that build, all on one origin at
 the Pages base path. Editing a source file of the app under development updates
-the running page — no workspace rebuild, no restart. The address it listens on
-is `nx.json`'s one `serve` target default, `127.0.0.1:4200`; open
-<http://127.0.0.1:4200/nick-derobertis-site/> for the shell, or
-`http://127.0.0.1:4200/nick-derobertis-site/remotes/<remote>/` for a pane.
-Either way the shell's routes resolve across the mix. `PORT` moves the server
-off that port, and an app name the workspace cannot serve is refused before
-anything is built.
+the running page — no workspace rebuild, no restart. It listens on the address
+`nx.json` gives every `serve` target, which is the one `just serve` uses below,
+and answers there for the shell and for each standalone pane alike; either way
+the shell's routes resolve across the mix. `PORT` moves the server off that
+port, and an app name the workspace cannot serve is refused before anything is
+built.
 
 Reach for the production-shaped path when you want the artifact rather than the
 source — the bytes GitHub Pages serves, prerendered and composed:
