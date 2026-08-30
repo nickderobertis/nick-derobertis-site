@@ -1,7 +1,21 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node", "vitest/globals", "@testing-library/jest-dom/vitest"]
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom/vitest"],
+    // Every pane compiles its own exposes to declarations as part of its build
+    // and publishes the archive of them. Home's build consumes those archives
+    // into the first directory below, which is what this typecheck target
+    // reads, so `awards/Page` is the type the awards remote really exposes
+    // rather than a restatement of it.
+    //
+    // The second directory is what the build's own type check reads, and it is
+    // needed because @nx/rspack:rspack runs that check before it creates the
+    // compiler that consumes -- so on a tree where nothing has been consumed
+    // yet, a host would have nothing to typecheck against. Both hold the same
+    // declarations, compiled once by the remote that owns them.
+    "paths": {
+      "*": ["../../dist/mf-types/hosts/home/*", "../../dist/mf-types/remotes/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "rspack.config.ts"]
 }

@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./composed-artifact": "./src/composed-artifact.ts",
     "./fragment-contract": "./src/fragment-contract.ts",
     "./remote-registry": "./src/remote-registry.ts",
     "./remotes.json": "./src/remotes.json"

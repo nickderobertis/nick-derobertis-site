@@ -33,6 +33,19 @@ const scenarios = standardVisualScenarios({
     // other shot shows.
     if (state === "education-only" || state === "no-results")
       await page.getByRole("checkbox", { name: "Employment" }).uncheck();
+    // Unchecking leaves the pointer on the last filter it clicked, and
+    // Chromium paints a hovered checkbox differently from a resting one. Park
+    // it away so the pane is captured at rest however that paint lands.
+    await page.mouse.move(0, 0);
+    // Unchecking also scrolls that filter into view, and the pane then loses
+    // the rows it was showing, so the page settles at a scroll chosen for a
+    // layout that no longer exists -- far enough down, once, that the pane's
+    // bottom edge fell off-screen and rasterized as white. Settle the scroll
+    // on the pane once the rows it is captured with are the ones there.
+    if (FILTERED.includes(state))
+      await page
+        .getByRole("region", { name: "Educated and Experienced" })
+        .evaluate((pane) => pane.scrollIntoView({ block: "center" }));
   },
 });
 

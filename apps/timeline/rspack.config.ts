@@ -1,2 +1,2 @@
 import { remoteConfig } from "@site/build-config";
-export default remoteConfig("timeline");
+export default remoteConfig("timeline", { skeleton: true });

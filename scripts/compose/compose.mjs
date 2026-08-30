@@ -7,6 +7,7 @@ import {
   routeContracts,
 } from "@site/artifact-contracts";
 import { holdArtifactRoot } from "@site/artifact-contracts/artifact-hold";
+import { composedArtifactRoot } from "@site/build-config/composed-artifact";
 import { fragmentContractSchema } from "@site/build-config/fragment-contract";
 import remoteManifest from "@site/build-config/remotes.json" with {
   type: "json",
@@ -246,7 +247,7 @@ function replaceSlot(markup, name, fragment) {
 // llmlint: ignore-block[changed_behavior_has_e2e] Published-input rejection happens before a browser artifact exists and compose.spec.ts exercises that real CLI boundary; site.spec.ts drives successful assembled routes with JavaScript disabled and through hydration, preload.spec.ts covers deferral, and every journey spec drives both standalone and host-composed artifact boundaries.
 export async function compose({
   fragmentRoot = "dist/apps",
-  output = "dist/apps/shell",
+  output = composedArtifactRoot,
 } = {}) {
   const fragments = new Map();
   const contracts = [];
@@ -496,7 +497,7 @@ if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
   try {
     const output = requiredPath(
       process.env.COMPOSE_OUTPUT,
-      "dist/apps/shell",
+      composedArtifactRoot,
       "COMPOSE_OUTPUT",
     );
     // Claimed before the first write: composing replaces the route documents,

@@ -1,5 +1,7 @@
-import { dirname } from "node:path";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import {
+  declaredAppProjects,
   federationRemotes,
   readDeclaredProject,
 } from "./federation-registry.mjs";
@@ -21,12 +23,89 @@ import {
  * `createNodesV2` hands the whole matched file set to one call, which is what
  * makes this possible: a dependency on every remote cannot be derived from one
  * project's file in isolation.
+ *
+ * A host owes a narrower dependency than that fan-in, and it is derived here
+ * too. Each remote's build compiles its own exposes into declarations and
+ * publishes the archive of them; a host's build consumes those archives and
+ * type checks the sources it bundles against what it consumed. So a host is
+ * built after the remotes it composes, and typechecked after its own build.
+ * Which remotes those are is read from the `remoteMap` call in that host's own
+ * rspack configuration, which is the one place a host declares them; naming
+ * them again in a project.json would be the second list this plugin exists to
+ * avoid.
  */
 
 export const name = "nick-derobertis-site/federation";
 
 const projectConfigurations = "apps/*/project.json";
 const projectConfiguration = /^apps\/[a-z][a-z0-9-]*\/project\.json$/;
+const federatedRemoteMap = /\bremoteMap\(\s*\[([\s\S]*?)\]/;
+const federatedRemoteName = /^"([a-z][a-z0-9-]*)"$/;
+
+/**
+ * The remotes one app composes, read from its own rspack configuration. An app
+ * that federates nothing has no `remoteMap` call and owes no such dependency.
+ *
+ * A TypeScript source read by regex is text until something narrows it, so
+ * every name it yields is held to `declared` — the remotes the workspace's own
+ * project files declare — before it becomes an Nx dependency. What that
+ * refuses is a name the extraction produced that no project answers to,
+ * whether the configuration really names a remote that does not exist or the
+ * pattern matched something that was never a remote list at all.
+ */
+// llmlint: ignore-block[changed_behavior_has_e2e] This reads a committed rspack configuration while Nx is resolving the project graph -- before any build has started -- and returns the names of the remotes a host composes, which becomes nothing but the order Nx schedules `build` and `typecheck` in. It adds no module, emits no asset, and changes no rendered markup, so a visitor observes the same composed artifact whichever order those tasks ran in. A configuration it refuses stops the graph before a single build input is derived, so nothing is built and there is no document, route, or element for a browser test to reach. federation-contract.spec.ts drives this exact entry point over the committed tree and over configurations whose remoteMap call is unreadable, names an element that is not a string literal, names none, and names a remote no project declares. site.spec.ts and each app's ownership.spec.ts then drive, in a real browser and through both the standalone and host-composed render paths, the artifact every graph that gets past this produces.
+function composedRemotes(source, declared) {
+  const configuration = join(dirname(source), "rspack.config.ts");
+  let contents;
+  try {
+    contents = readFileSync(configuration, "utf8");
+  } catch (unreadable) {
+    // Every app in this workspace builds through rspack, so a project whose
+    // configuration cannot be read is one whose remotes cannot be known --
+    // reported here with the reason the read failed, rather than as a raw
+    // filesystem error the graph would surface without naming what wanted it.
+    throw new Error(
+      `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which it could not open: ${unreadable.message}. Restore that file, or delete the project.json beside it if the app is gone, and rerun just check.`,
+    );
+  }
+  const composed = federatedRemoteMap.exec(contents);
+  if (composed === null) {
+    // An app that federates nothing never writes the call, so a file that
+    // writes it in a form this cannot read is a host whose remotes would go
+    // unbuilt -- which is a missing dependency rather than an absent one.
+    if (contents.includes("remoteMap("))
+      throw new Error(
+        `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which it could not read: the call must pass an array literal of remote names. Write it that way and rerun just check.`,
+      );
+    return [];
+  }
+  // Every element of the array is read, rather than the quoted ones out of
+  // whatever it holds: an element this cannot read is a remote that would go
+  // unbuilt, so it is refused here instead of dropped and the rest returned.
+  const elements = composed[1]
+    .split(",")
+    .map((element) => element.trim())
+    .filter((element) => element.length > 0);
+  const unreadable = elements.filter(
+    (element) => !federatedRemoteName.test(element),
+  );
+  if (unreadable.length > 0)
+    throw new Error(
+      `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which passes ${JSON.stringify(unreadable)}. Pass each child remote there as a string literal and rerun just check.`,
+    );
+  const names = elements.map((element) => element.slice(1, -1));
+  if (names.length === 0)
+    throw new Error(
+      `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which names none. Pass each child remote there as a string literal and rerun just check.`,
+    );
+  const undeclared = names.filter((remote) => !declared.has(remote));
+  if (undeclared.length > 0)
+    throw new Error(
+      `${name} read ${JSON.stringify(undeclared)} from the remoteMap call in ${configuration}, and no project declares metadata.federation.alias under that name. Name only declared remotes there and rerun just check.`,
+    );
+  return names;
+}
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] This derives the order Nx runs build, prerender, and screenshot in, and it runs while the project graph is being resolved — before rspack has built a single bundle, so there is no site, no route, and no page for a browser to load while it decides anything. What it returns is task scheduling and nothing else: it adds no module, changes no rendered markup, and is gone by the time the composed artifact exists, so a visitor observes only the same artifact the fan-in was already producing. federation-contract.spec.ts drives this exact entry point twice over: through the real `nx graph` for the fan-in every app ends up with, and directly for the file set Nx hands it. A configuration it refuses stops the graph before any build input is derived, so nothing is ever built for a browser to reach.
 /** One entry per matched `project.json`, as `createNodesV2` returns them. */
@@ -55,13 +134,31 @@ function federationDependencies(configFiles) {
     .map((project) => ({ target: "prerender", projects: [project.name] }));
   const composed = ["build", remoteBuilds];
   const captured = [...composed, ...composeHosts];
+  // Read from the apps directory rather than from the handed set, because a
+  // host composes remotes whether or not this call was handed their files.
+  const declared = new Set(
+    federationRemotes(declaredAppProjects()).map((remote) => remote.name),
+  );
   return projects.map((project) => {
+    const composedBuilds = composedRemotes(project.source, declared);
+    const federated = composedBuilds.length
+      ? [{ target: "build", projects: composedBuilds }]
+      : [];
     const targets = {
       ...(project.targets.includes("screenshot")
         ? { screenshot: { dependsOn: captured } }
         : {}),
       ...(project.targets.includes("prerender")
         ? { prerender: { dependsOn: composed } }
+        : {}),
+      // A host consumes those declarations during its own build, so its
+      // typecheck reads what that build wrote rather than reaching for the
+      // remotes itself.
+      ...(federated.length && project.targets.includes("typecheck")
+        ? { typecheck: { dependsOn: ["build"] } }
+        : {}),
+      ...(federated.length && project.targets.includes("build")
+        ? { build: { dependsOn: federated } }
         : {}),
     };
     return [

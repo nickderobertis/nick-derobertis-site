@@ -44,15 +44,44 @@ lint-workflows:
     @# llmlint: ignore[changed_behavior_has_e2e] These gates read committed configuration and have no browser interface: they fail a push before any workflow runs, so nothing they reject can reach a visitor. runtime-pins.spec.ts and content-store-contract.spec.ts drive this exact command as a real subprocess over the committed tree and over copies with one pin or one restatement moved.
     @pins=$(node scripts/ci/verify-runtime-pins.mjs) || { echo "lint-workflows: workflow runtime pins drifted; align every workflow with package.json's packageManager and one Node version, then rerun just lint-workflows" >&2; exit 1; }; names=$({{node_typestrip}} scripts/publish/verify-content-store-contract.mjs) || { echo "lint-workflows: the content-store branch, checkout, or workdir names drifted; align every restatement with libs/publish-config/src/publish-fragment.ts, then rerun just lint-workflows" >&2; exit 1; }; echo "lint-workflows: $pins; $names"
 
-check: test lint-workflows
-    # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
-    # bundler, prerender, Playwright, and screenshot executors in this workspace.
-    # llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
-    base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t e2e,screenshot --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && CI=1 pnpm exec nx run shell:e2e >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
+# `test` is not a dependency here: this recipe's own affected batch below runs
+# the `test` target, and the `test` recipe's other half is an `e2e` batch, which
+# is the composed host's suite a second time. What that dependency contributed
+# beyond this recipe was exactly the duplicate the browser lanes exist to end.
+#
+# CI=1 is the supported warnings-as-errors contract for the Nx compiler,
+# bundler, prerender, Playwright, and screenshot executors in this workspace.
+#
+# The browser and visual suites are one dispatch over the lanes
+# `just gate-browser-lanes` selects, which is the affected selection unioned
+# with the project that composes the served artifact. That union is what
+# gates the composed artifact when the affected selection is empty, and it
+# is also why the composed host's suite is dispatched exactly once: it used
+# to run inside `nx affected -t e2e,screenshot` — which selects the shell
+# for nearly any TypeScript change, because the shell owns the workspace's
+# single `eslint .` run — and then again as an unconditional `nx run
+# shell:e2e`, so the heaviest suite in the repository ran twice per commit.
+#
+# The body below is `@`-prefixed, and its comments live here rather than in it,
+# so a passing gate says one line: what it dispatched is fixed by this file, and
+# what it found is what a reader is here for.
+check: lint-workflows
+    @# llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
+    @base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just check" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 pnpm exec nx run-many -t e2e,screenshot -p "$lanes" --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
 # Canonical full pre-push gate used by orchestration and contributors.
 # llmlint: ignore[changed_behavior_has_e2e] This command-only alias has no browser interface and delegates unchanged to check, whose dispatched Playwright targets own real-browser coverage.
 gate: check
+
+# Print the browser and visual lanes `just check` dispatches for a push range:
+# every affected project owning one of those suites, and the project that
+# composes the served artifact, whose suite is gated on every push whether the
+# affected selection reached it or not. `check` substitutes this recipe's output
+# straight into its one `nx run-many`, so what this prints is what it runs. With
+# no arguments it answers for the range `check` itself would use.
+@gate-browser-lanes base="" head="":
+    # llmlint: ignore[changed_behavior_has_e2e] This selection command has no browser interface; gate-browser-lanes.spec.ts drives this exact recipe as a real subprocess over a range reaching the composed host, one reaching only a remote, and one reaching nothing, and drives Nx's own task graph for the dispatch its output produces.
+    base="${1:-${NX_BASE:-HEAD~1}}"; head="${2:-${NX_HEAD:-HEAD}}"; [[ "$base" != -* && "$head" != -* ]] && git rev-parse --verify "$base^{commit}" >/dev/null 2>&1 && git rev-parse --verify "$head^{commit}" >/dev/null 2>&1 || { echo "gate-browser-lanes: base and head must resolve to commits; pass the push range (for example just gate-browser-lanes HEAD~1 HEAD after fetching it), or pass no arguments to use the range just check would, then rerun just gate-browser-lanes <base> <head>" >&2; exit 2; }; err=$(mktemp); trap 'rm -f "$err"' EXIT; affected=$(pnpm exec nx show projects --affected --base="$base" --head="$head" --json 2>"$err") || { cat "$err" >&2; echo "gate-browser-lanes: Nx could not resolve the affected projects between $base and $head; fix the error above, or fetch the missing commits, then rerun just gate-browser-lanes $base $head" >&2; exit 1; }; printf '%s' "$affected" | node scripts/workspace/gate-browser-lanes.mjs || { echo "gate-browser-lanes: the gate's browser lanes could not be derived from the affected selection; fix what the reason above names, then rerun just gate-browser-lanes $base $head" >&2; exit 1; }
 
 # CI runs this non-PR safety sweep so affected detection is never the only gate.
 check-all: lint-workflows
@@ -92,7 +121,8 @@ prerender:
     # llmlint: ignore[changed_behavior_has_e2e] This selection command has no browser interface; publish-lanes.spec.ts drives the real CLI it delegates to through affected selection, the seed-everything path, and invalid input.
     base="$1"; head="$2"; if [[ -z "$base" ]]; then {{node_typestrip}} scripts/publish/publishable-apps.mjs --all; else [[ "$base" != -* && "$head" != -* ]] && git rev-parse --verify "$base^{commit}" >/dev/null 2>&1 && git rev-parse --verify "$head^{commit}" >/dev/null 2>&1 || { echo "publish-lanes: base and head must resolve to commits; pass the push range (for example just publish-lanes HEAD~1 HEAD after fetching it), or pass no arguments to select every lane" >&2; exit 2; }; err=$(mktemp); trap 'rm -f "$err"' EXIT; affected=$(pnpm exec nx show projects --affected --with-target build --base="$base" --head="$head" --json 2>"$err") || { cat "$err" >&2; echo "publish-lanes: Nx could not resolve the affected projects between $base and $head; fix the error above, or fetch the missing commits, then rerun just publish-lanes $base $head" >&2; exit 1; }; printf '%s' "$affected" | {{node_typestrip}} scripts/publish/publishable-apps.mjs; fi
 
-# Build exactly one app, which is all a publish lane is allowed to build.
+# Build one app's own bundle, which is all a publish lane is allowed to publish.
+# Nx adds the remote builds a host resolves its federated declarations from.
 @build-app app:
     # llmlint: ignore[changed_behavior_has_e2e] This build command has no browser interface; it dispatches the real Nx build target whose published output every standalone and host-composed browser journey drives.
     status=0; lane=$({{node_typestrip}} scripts/publish/publishable-apps.mjs --lane "$1") || status=$?; if (( status != 0 )); then if (( status == 2 )); then echo "build-app: app must name a publish lane; the reason above lists every lane, so pass one from just publish-lanes and rerun just build-app <app>" >&2; else echo "build-app: the publish lanes could not be resolved; fix the error above and rerun just build-app <app>" >&2; fi; exit "$status"; fi; log=$(mktemp); trap 'rm -f "$log"' EXIT; CI=1 pnpm exec nx run "$lane:build" >"$log" 2>&1 || { cat "$log" >&2; echo "build-app: building $lane failed; fix the errors above and rerun just build-app $lane" >&2; exit 1; }
@@ -127,6 +157,25 @@ perf-check-report:
 # Build the complete federated artifact before serving it at the Pages base path.
 serve: prerender
     {{node_typestrip}} scripts/serve/serve-e2e.mjs
+
+# Serve one named app from source with hot module replacement, against every
+# other app's built output, at the same base path Pages publishes. The argument
+# is validated before anything is built, so a name this workspace cannot serve
+# costs a diagnostic rather than thirteen production builds.
+#
+# The compose below pins NODE_ENV, for the mirror of the reason
+# scripts/serve/serve-dev.mjs pins it to `development` for the server itself:
+# these two builds want opposite modes out of one command, and both read the
+# ambient value. The artifact the siblings come from is the production one Pages
+# publishes, whatever NODE_ENV the caller happened to carry — and a caller does
+# carry one, because Vitest sets NODE_ENV=test for every spec, including the one
+# that drives this recipe. Left ambient, that composed a development artifact
+# into dist/apps/shell and into the Nx cache entry `shell:prerender` shares with
+# every browser suite in the gate, which then hydrated the built site against
+# development bundles and failed on mismatched render output.
+@serve-dev app:
+    # llmlint: ignore[changed_behavior_has_e2e, tool_output_is_signal] This developer command has no browser interface of its own, and it has no success to be quiet about either: the last thing it runs is a foreground development server whose stream — compilations, hot replacements, build and type errors — is the whole reason a developer starts it, so scripts/serve/serve-dev.mjs inherits that stream and this recipe passes it through. It validates a name, claims the artifact, and hands the serving to the real Nx dev-server target. serve-dev.spec.ts drives this exact recipe as a real subprocess and drives the page it serves — and the edit it hot-replaces into that page — through a real browser.
+    status=0; app=$({{node_typestrip}} scripts/serve/serve-dev.mjs --app "$1") || status=$?; if (( status != 0 )); then if (( status == 2 )); then echo "serve-dev: app must name an app this workspace serves from source; the reason above lists every one, so pass one and rerun just serve-dev <app>" >&2; else echo "serve-dev: the servable apps could not be resolved; fix the error above and rerun just serve-dev <app>" >&2; fi; exit "$status"; fi; log=$(mktemp); trap 'rm -f "$log"' EXIT; NODE_ENV=production just prerender >"$log" 2>&1 || { cat "$log" >&2; echo "serve-dev: the built output the sibling apps are served from could not be composed; fix what the prerender failure above names, then rerun just serve-dev $app" >&2; exit 1; }; {{node_typestrip}} scripts/serve/serve-dev.mjs "$app" || { echo "serve-dev: the $app development server stopped; fix the error above and rerun just serve-dev $app" >&2; exit 1; }
 
 e2e-affected-files file:
     # llmlint: ignore[tool_output_is_signal] This proof command intentionally preserves unedited Nx selection and execution output for docs/integration-proof.md.

@@ -16,30 +16,43 @@ import { afterAll, beforeAll, expect, test } from "vitest";
 
 let fixture: string;
 const corruptibleRemote = "bio";
+const fixtures: string[] = [];
 
-beforeAll(async () => {
-  fixture = await mkdtemp(join(tmpdir(), "static-artifact-"));
+/**
+ * A complete artifact of this run's own, assembled beside the shared build
+ * output rather than out of it: every document a test rewrites is the
+ * fixture's own bytes, and everything it only reads is linked.
+ *
+ * `writableSubtrees` names the parts a caller is going to change — the remote
+ * whose asset one test removes, the `cv-data` another test renames a course
+ * in — so those arrive as copies. Nothing any test does can reach
+ * `dist/apps/shell`, which the e2e suites serve from at the same time.
+ */
+async function createArtifactFixture(
+  writableSubtrees: readonly string[] = [],
+): Promise<string> {
+  const built = await mkdtemp(join(tmpdir(), "static-artifact-"));
+  fixtures.push(built);
+  const stage = async (name: string) => {
+    const source = resolve("dist/apps/shell", name);
+    const destination = join(built, name);
+    if (writableSubtrees.includes(name))
+      await cp(source, destination, { recursive: true });
+    else await symlink(source, destination);
+  };
   for (const route of ["", "bio", "research", "software", "courses"]) {
-    const destination = join(fixture, route);
+    const destination = join(built, route);
     await mkdir(destination, { recursive: true });
     await cp(
       join("dist/apps/shell", route, "index.html"),
       join(destination, "index.html"),
     );
   }
-  await cp("dist/apps/shell/404.html", join(fixture, "404.html"));
-  await symlink(resolve("dist/apps/shell/cv-data"), join(fixture, "cv-data"));
-  // Every remote is linked rather than copied, except the one a test below
-  // corrupts: that subtree has to be the fixture's own bytes so removing an
-  // asset from it never reaches the shared build output.
-  await mkdir(join(fixture, "remotes"), { recursive: true });
-  for (const name of await readdir("dist/apps/shell/remotes")) {
-    const source = resolve("dist/apps/shell/remotes", name);
-    const destination = join(fixture, "remotes", name);
-    if (name === corruptibleRemote)
-      await cp(source, destination, { recursive: true });
-    else await symlink(source, destination);
-  }
+  await cp("dist/apps/shell/404.html", join(built, "404.html"));
+  await stage("cv-data");
+  await mkdir(join(built, "remotes"), { recursive: true });
+  for (const name of await readdir("dist/apps/shell/remotes"))
+    await stage(join("remotes", name));
   // The composed documents copied above reference the shell's bundle at the
   // artifact root, so the fixture is only a complete artifact once those bytes
   // are reachable. Linking whatever the shell build emitted, rather than a list
@@ -56,21 +69,27 @@ beforeAll(async () => {
       continue;
     await symlink(
       resolve("dist/apps/shell", entry.name),
-      join(fixture, entry.name),
+      join(built, entry.name),
     );
   }
+  return built;
+}
+
+beforeAll(async () => {
+  fixture = await createArtifactFixture([join("remotes", corruptibleRemote)]);
 });
 
 afterAll(async () => {
-  await rm(fixture, { recursive: true, force: true });
+  for (const built of fixtures.splice(0))
+    await rm(built, { recursive: true, force: true });
 });
 
-function checkArtifact() {
+function checkArtifact(root: string = fixture) {
   return spawnSync(
     process.execPath,
     ["scripts/artifact/check-static-artifact.mjs"],
     {
-      env: { ...process.env, STATIC_ARTIFACT_ROOT: fixture },
+      env: { ...process.env, STATIC_ARTIFACT_ROOT: root },
       encoding: "utf8",
     },
   );
@@ -139,6 +158,83 @@ test.each([
     await writeFile(staged, held);
   },
 );
+
+// The gate names no CV content of its own, so an artifact carrying CV data that
+// differs from the committed data — the most ordinary edit this repository
+// takes — is still a correct artifact. The ampersand below is deliberate: React
+// escapes it into the markup, so this also holds the gate to the text a visitor
+// reads rather than to the bytes the document happens to spell it in.
+const renamedCourse = "Valuation & Reproducible Modeling";
+const renamedCourseInMarkup = "Valuation &amp; Reproducible Modeling";
+
+function isTitledCourse(value: unknown): value is { title: string } {
+  if (typeof value !== "object" || value === null || !("title" in value))
+    return false;
+  const { title } = value;
+  return typeof title === "string" && title.length > 0;
+}
+
+/**
+ * An artifact whose staged CV data renames the first course it carries.
+ *
+ * `carriedByDocument` says whether the composed `/courses` document was
+ * rerendered from that data or left holding the title the CV data no longer
+ * has, which is the difference between an artifact the gate should pass and one
+ * it should refuse. Its `cv-data` is this fixture's own copy, so the rename
+ * never reaches the shared build output the e2e suites serve.
+ */
+async function createRenamedCourseFixture(carriedByDocument: boolean) {
+  const root = await createArtifactFixture(["cv-data"]);
+  const coursesPath = join(root, "cv-data/domains/courses.json");
+  const parsed: unknown = JSON.parse(await readFile(coursesPath, "utf8"));
+  // The rename below only means anything if the file it edits really is the
+  // staged courses domain, so its shape is established before an entry is read.
+  const staged =
+    Array.isArray(parsed) && parsed.every(isTitledCourse) ? parsed : [];
+  const [committedCourse, ...rest] = staged;
+  if (committedCourse === undefined)
+    throw new Error(
+      `${coursesPath} does not read back as a staged courses domain carrying a titled course; rebuild the artifact and rerun this spec.`,
+    );
+  const committed = committedCourse.title;
+  const renamed = [{ ...committedCourse, title: renamedCourse }, ...rest];
+  await writeFile(coursesPath, `${JSON.stringify(renamed, null, 2)}\n`);
+  if (carriedByDocument) {
+    const page = join(root, "courses/index.html");
+    await writeFile(
+      page,
+      (await readFile(page, "utf8")).replaceAll(
+        committed,
+        renamedCourseInMarkup,
+      ),
+    );
+  }
+  return { committed, root };
+}
+
+test("the compose-time gate passes an artifact whose CV data is not the committed data", async () => {
+  const { committed, root } = await createRenamedCourseFixture(true);
+
+  const result = checkArtifact(root);
+
+  expect(result.stderr).toBe("");
+  expect(result.status).toBe(0);
+  // Neither the staged data nor the document still carries the committed
+  // title, so nothing in this artifact could satisfy a gate that named it.
+  expect(
+    await readFile(join(root, "courses/index.html"), "utf8"),
+  ).not.toContain(committed);
+});
+
+test("the compose-time gate refuses a document holding a CV value the artifact dropped", async () => {
+  const { root } = await createRenamedCourseFixture(false);
+
+  const result = checkArtifact(root);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(join(root, "courses/index.html"));
+  expect(result.stderr).toContain(renamedCourse);
+});
 
 // `just compose <store> <output>` is the deploy lane's whole command surface,
 // and its output argument becomes a write destination. Both arguments are

@@ -1,0 +1,200 @@
+import { readFileSync } from "node:fs";
+import Ajv, { type ValidateFunction } from "ajv";
+import addFormats from "ajv-formats";
+
+/**
+ * The substantive content one route's document has to carry.
+ *
+ * Two consumers read this: the compose-time gate, which refuses a prerendered
+ * document that does not contain its route's content, and `@site/e2e-harness`,
+ * whose route contract hands the same content to the browser journeys that
+ * drive every route through its prerendered, hydrated, and standalone-remote
+ * boundaries. One source is what keeps the gate from asserting something no
+ * browser has ever been shown.
+ */
+
+/**
+ * Copy a route's own remote writes, for the routes that render no CV data.
+ *
+ * Home shows the story pane's heading and Bio the prose it owns; neither reads
+ * a CV domain, so there is nothing under `cv-data` to derive their content
+ * from. These move when the remote that writes them does.
+ */
+export const routeProseContent: Readonly<Record<string, string>> = {
+  "/": "Who am I?",
+  "/bio": "Reproducible Research",
+};
+
+/** The CV schema that travels with the data in every staged CV data root. */
+const cvSchemaFile = "cv.schema.json";
+const rebuild = "Rebuild the CV data artifact and rerun just prerender.";
+
+// `discriminator` is an OpenAPI annotation in this schema; `oneOf` remains the
+// validator. This mirrors how @site/data-access-core compiles the same schema,
+// which is the other place these CV domains enter the workspace.
+const ajv = new Ajv({ allErrors: true, strict: true, strictTypes: false });
+ajv.addKeyword({ keyword: "discriminator", schemaType: "object" });
+addFormats(ajv);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readJson(file: string): unknown {
+  try {
+    return JSON.parse(readFileSync(file, "utf8"));
+  } catch (error) {
+    throw new Error(
+      `Could not read the CV data at ${file}: ${String(error)}. ${rebuild}`,
+    );
+  }
+}
+
+/**
+ * A validator for one domain of the CV schema staged at `cvDataRoot`.
+ *
+ * The schema file is itself IO, so it is read as an unknown document and has to
+ * hold up structurally before a subschema can be taken out of it; `ajv.compile`
+ * is then the validator for what that subschema actually says, and a schema it
+ * refuses is reported here rather than thrown raw at a caller.
+ */
+function compileDomainValidator<Shape>(
+  cvDataRoot: string,
+  name: string,
+): ValidateFunction<Shape> {
+  const schemaPath = `${cvDataRoot}/${cvSchemaFile}`;
+  const schema = readJson(schemaPath);
+  const domainSchema =
+    isRecord(schema) && isRecord(schema.properties)
+      ? schema.properties[name]
+      : undefined;
+  if (!isRecord(domainSchema))
+    throw new Error(
+      `${schemaPath} defines no ${name} domain to validate against; ${rebuild}`,
+    );
+  // Every domain subschema refers to the root's shared definitions, so it can
+  // only be compiled on its own once they travel with it.
+  const defs = isRecord(schema) && isRecord(schema.$defs) ? schema.$defs : {};
+  try {
+    return ajv.compile<Shape>({ $defs: defs, ...domainSchema });
+  } catch (error) {
+    throw new Error(
+      `${schemaPath} does not define a usable ${name} domain schema: ${String(error)}. ${rebuild}`,
+    );
+  }
+}
+
+/**
+ * Reads one staged CV domain, validated whole against the CV schema staged
+ * beside it before a single field of it is read.
+ *
+ * This is the boundary the CV data crosses into the compose-time gate and the
+ * browser contract. A domain that does not conform never reaches the extractor
+ * above it: it becomes a diagnostic naming the file and what the schema
+ * rejected in it, rather than a route whose content nobody can account for.
+ *
+ * The validator is kept per staged root, because the gate and the browser
+ * contract each ask for several routes out of one root and compiling the CV
+ * schema again for every one of them buys nothing.
+ */
+function cvDomainReader<Shape>(
+  name: string,
+  file: string,
+): (cvDataRoot: string) => Shape {
+  const validators = new Map<string, ValidateFunction<Shape>>();
+  return (cvDataRoot) => {
+    let validate = validators.get(cvDataRoot);
+    if (validate === undefined) {
+      validate = compileDomainValidator<Shape>(cvDataRoot, name);
+      validators.set(cvDataRoot, validate);
+    }
+    const domainPath = `${cvDataRoot}/${file}`;
+    const parsed = readJson(domainPath);
+    if (!validate(parsed))
+      throw new Error(
+        `${domainPath} is not a valid ${name} CV domain: ${ajv.errorsText(validate.errors)}. ${rebuild}`,
+      );
+    return parsed;
+  };
+}
+
+/** Every non-empty title, in the order the domain lists them, without repeats. */
+function distinctTitles(titles: readonly string[]): string[] {
+  return [...new Set(titles.filter((title) => title.length > 0))];
+}
+
+/** How one route's CV domain titles the entries that route renders. */
+interface CvDomain {
+  /** The domain file, relative to a staged CV data root. */
+  file: string;
+  /** Every title the validated domain carries, in the order the file lists them. */
+  titles: (cvDataRoot: string) => string[];
+}
+
+// Naming the titles themselves here would fail the gate on an ordinary CV edit
+// — a new paper, a renamed course — for a reason that has nothing to do with
+// the artifact, so each route names only the domain file it renders and how
+// that file titles its entries. Each shape below names only the fields its
+// route reads, every one of them required of that domain by the CV schema the
+// reader validates against.
+const researchFile = "domains/research.json";
+const softwareFile = "domains/software_projects.json";
+const coursesFile = "domains/courses.json";
+const readResearch = cvDomainReader<{
+  projects?: readonly { title: string }[];
+}>("research", researchFile);
+const readSoftware = cvDomainReader<
+  readonly { name: string; display_name?: string | null }[]
+>("software_projects", softwareFile);
+const readCourses = cvDomainReader<readonly { title: string }[]>(
+  "courses",
+  coursesFile,
+);
+const routeCvDomains: Readonly<Record<string, CvDomain>> = {
+  "/research": {
+    file: researchFile,
+    titles: (root) =>
+      distinctTitles((readResearch(root).projects ?? []).map((p) => p.title)),
+  },
+  // ProjectCard titles a project by its display name, falling back to the
+  // package's own name for the projects that carry none.
+  "/software": {
+    file: softwareFile,
+    titles: (root) =>
+      distinctTitles(readSoftware(root).map((p) => p.display_name || p.name)),
+  },
+  "/courses": {
+    file: coursesFile,
+    titles: (root) => distinctTitles(readCourses(root).map((c) => c.title)),
+  },
+};
+
+/**
+ * What a visitor has to be able to read on `routePath`, in the order the CV
+ * lists it: the route's own prose when its remote renders no CV data, and
+ * otherwise every title the route's CV domain carries, read from `cvDataRoot`.
+ *
+ * `cvDataRoot` is the staged CV data — `cv-data` inside a composed artifact,
+ * `libs/data-access-core/vendor/codegen` in the workspace — so the content
+ * asserted is always the content that artifact was built from, and it is that
+ * root's own `cv.schema.json` the domain is validated against before any field
+ * of it is read.
+ */
+export function routeSubstantiveContent(
+  cvDataRoot: string,
+  routePath: string,
+): string[] {
+  const prose = routeProseContent[routePath];
+  if (prose !== undefined) return [prose];
+  const domain = routeCvDomains[routePath];
+  if (domain === undefined)
+    throw new Error(
+      `${routePath} has no substantive content to check; give it a CV domain in routeCvDomains, or a marker in routeProseContent if its remote renders no CV data, in libs/artifact-contracts/src/route-content.ts and rerun just check.`,
+    );
+  const titles = domain.titles(cvDataRoot);
+  if (titles.length === 0)
+    throw new Error(
+      `${cvDataRoot}/${domain.file} carries no titles for ${routePath}; ${rebuild}`,
+    );
+  return titles;
+}

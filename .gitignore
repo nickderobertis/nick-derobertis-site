@@ -13,3 +13,6 @@ test-results/
 # checkout, and the scratch repository each publish lane pushes from.
 .content-store/
 .publish-store/
+
+# Module Federation writes its diagnostics here on a failed build.
+.mf/

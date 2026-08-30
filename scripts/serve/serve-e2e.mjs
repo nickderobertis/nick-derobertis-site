@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { holdArtifactRoot } from "@site/artifact-contracts/artifact-hold";
+import { composedArtifactRoot } from "@site/build-config/composed-artifact";
 // llmlint: ignore[boundary_inputs_validated] The imported document is never read here. Its only use is `const base = validateSiteConfig(siteConfig).pagesBase` below, where `validateSiteConfig` rejects anything that is not an object carrying a `pagesBase` string matching `/^\/[a-z0-9-]+$/`; `base` is the only value taken from it.
 import siteConfig from "@site/data-access-core/site.config.json" with {
   type: "json",
@@ -26,7 +27,9 @@ function validateSiteConfig(value) {
   return value;
 }
 
-const root = fileURLToPath(new URL("../../dist/apps/shell", import.meta.url));
+const root = fileURLToPath(
+  new URL(`../../${composedArtifactRoot}`, import.meta.url),
+);
 const base = validateSiteConfig(siteConfig).pagesBase;
 // llmlint: ignore-block[changed_behavior_has_e2e] Server startup validation is exercised through the real serve-e2e subprocess in home.spec.ts; it occurs before a browser interface exists.
 const portValue = process.env.PORT ?? "4200";

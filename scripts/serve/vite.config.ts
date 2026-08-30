@@ -6,7 +6,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   root: fileURLToPath(new URL("../..", import.meta.url)),
   test: {
-    include: ["scripts/serve/serve-e2e.spec.ts"],
+    include: [
+      "scripts/serve/serve-dev.spec.ts",
+      "scripts/serve/serve-e2e.spec.ts",
+    ],
     environment: "node",
     // A test here costs whatever its subject's real work costs — set by the
     // workspace's size and the host's load, not by the assertion after it:
