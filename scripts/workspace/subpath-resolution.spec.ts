@@ -359,23 +359,37 @@ function printedBy(error: unknown): string {
     : String(error);
 }
 
-describe("the workspace test runner resolves published subpaths", () => {
-  const probeConfig =
-    "scripts/workspace/subpath-resolution-probe/vite.config.ts";
+/**
+ * The probe's config and its twin, which states the same `remotes` map in the
+ * opposite order and differs in nothing else. That map is the last ordered map
+ * a resolution here still depends on: the `paths` map whose key order used to
+ * decide which of two overlapping aliases won is gone, and an `exports` map is
+ * keyed by exact subpath rather than ordered. Running the probe under both is
+ * what says every answer it reads is the same one either way round, so no
+ * resolution below can be broken by somebody sorting a map.
+ */
+const probeConfigs = [
+  "scripts/workspace/subpath-resolution-probe/vite.config.ts",
+  "scripts/workspace/subpath-resolution-probe/vite.config.reversed.ts",
+];
 
-  it("answers every longer specifier the same way under the shared test harness", async () => {
-    // The probe states the same contract against Vite's resolver, under a
-    // config the shared harness produced. Its own diagnostics are the report,
-    // so everything it printed is carried into the failure here.
-    const run = await promisify(execFile)(
-      "pnpm",
-      ["exec", "vitest", "run", "--config", probeConfig],
-      { encoding: "utf8" },
-    ).catch((error: unknown) => {
-      throw new Error(
-        `${probeConfig} reported a resolution the shared test harness does not answer as its package publishes it:\n${printedBy(error)}`,
-      );
-    });
-    expect(`${run.stdout}${run.stderr}`).toContain("Test Files");
-  });
+describe("the workspace test runner resolves published subpaths", () => {
+  it.each(probeConfigs)(
+    "answers every longer specifier the same way under the shared test harness configured by %s",
+    async (probeConfig) => {
+      // The probe states the same contract against Vite's resolver, under a
+      // config the shared harness produced. Its own diagnostics are the report,
+      // so everything it printed is carried into the failure here.
+      const run = await promisify(execFile)(
+        "pnpm",
+        ["exec", "vitest", "run", "--config", probeConfig],
+        { encoding: "utf8" },
+      ).catch((error: unknown) => {
+        throw new Error(
+          `${probeConfig} reported a resolution the shared test harness does not answer as its package publishes it:\n${printedBy(error)}`,
+        );
+      });
+      expect(`${run.stdout}${run.stderr}`).toContain("Test Files");
+    },
+  );
 });

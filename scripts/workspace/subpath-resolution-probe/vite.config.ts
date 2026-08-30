@@ -15,7 +15,9 @@ export default defineWorkspaceTestConfig({
   // and each of these is a stand-in the way every host's own test config states
   // them. The second one is deliberately a specifier `@site/build-config` also
   // publishes: it is the one place a remote and a package manifest could both
-  // answer, and the remote the caller stated has to win there.
+  // answer, and the remote the caller stated has to win there. The reversed
+  // config beside this file states the same map in the opposite order and the
+  // contract runs the probe under both, so keep the two entries in step.
   remotes: {
     "homeCards/Skeleton":
       "scripts/workspace/subpath-resolution-probe/src/stands-in-for-a-remote.ts",
