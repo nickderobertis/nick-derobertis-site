@@ -78,10 +78,9 @@ if (
  * all seven; building the engine and each validator on first use means a page
  * pays only for what it validates.
  *
- * `ajv/dist/standalone` was measured and not taken: it inlines the schema each
- * validator closes over — 24,324 bytes for awards alone — so it would add
- * copies of `cv.schema.json` rather than remove the one `cvSchema` exports.
- * docs/cv-dataset-split-verification.md carries the measurement.
+ * `ajv/dist/standalone` was measured and not taken: it would add copies of
+ * `cv.schema.json` here rather than remove the one `cvSchema` exports. The
+ * measurement is in docs/cv-dataset-split-verification.md.
  */
 let engine: Ajv | undefined;
 function validatorEngine(): Ajv {
