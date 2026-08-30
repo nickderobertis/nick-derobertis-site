@@ -171,13 +171,18 @@ describe("the host served from source", () => {
 
     // The document is the one rspack is building — it names no content hash,
     // which every published bundle does — while the pane rendering inside it is
-    // a built remote it resolved over the same origin. The pane is waited for
-    // rather than read at `networkidle`, because it fetches its own slice after
-    // its page code arrives; and it is a pane that renders one settled thing,
-    // rather than the carousel beside it, whose visible story rotates on a
-    // timer no assertion should be racing.
+    // a built remote it resolved over the same origin. Both rendered elements
+    // are waited for rather than read at `networkidle`: this is the first load
+    // of a freshly started server, whose type-checker is still running beside
+    // it, so the document can go quiet before the development bundle it just
+    // delivered has painted anything. The pane additionally fetches its own
+    // slice after its page code arrives; and it is a pane that renders one
+    // settled thing, rather than the carousel beside it, whose visible story
+    // rotates on a timer no assertion should be racing.
     expect(await page.locator("script[src$='/main.js']").count()).toBe(1);
-    expect(await page.getByRole("banner").isVisible()).toBe(true);
+    const chrome = page.getByRole("banner");
+    await chrome.waitFor({ timeout: 60_000 });
+    expect(await chrome.isVisible()).toBe(true);
     const builtRemotePane = page.locator(".awards-pane");
     await builtRemotePane.waitFor({ timeout: 60_000 });
     expect(await builtRemotePane.isVisible()).toBe(true);
@@ -236,10 +241,17 @@ describe("a pane served from source", () => {
   it("updates its own page and the composed host from one edit", async () => {
     const pane = await browser.newPage();
     const host = await browser.newPage();
+    // Waited for rather than read at `networkidle`, for the same reason the
+    // host's own first load is: a server this freshly started can answer the
+    // document and go quiet before the bundle it delivered has painted.
     await pane.goto(`${base}/remotes/awards/`, { waitUntil: "networkidle" });
-    expect(await pane.locator(".awards-pane").isVisible()).toBe(true);
+    const servedPane = pane.locator(".awards-pane");
+    await servedPane.waitFor({ timeout: 60_000 });
+    expect(await servedPane.isVisible()).toBe(true);
     await host.goto(`${base}/`, { waitUntil: "networkidle" });
-    expect(await host.getByRole("banner").isVisible()).toBe(true);
+    const chrome = host.getByRole("banner");
+    await chrome.waitFor({ timeout: 60_000 });
+    expect(await chrome.isVisible()).toBe(true);
 
     const restore = edit(paneEdit);
     try {
