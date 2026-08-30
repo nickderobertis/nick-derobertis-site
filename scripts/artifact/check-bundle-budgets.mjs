@@ -17,6 +17,7 @@ import {
   parseBundleBudgets,
 } from "./bundle-budgets.mjs";
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This handler formats the gate's own diagnostic and sets its exit status; it has no browser interface, and it runs inside shell:prerender, before the compose lane can assemble an artifact, so what it reports is never something a visitor could observe. bundle-budgets.spec.ts drives its output as a real subprocess for both branches — a deliberate refusal and the unexpected failure a corrupted container raises.
 // A refusal already ends with the action that clears it. Anything else landing
 // here is unexpected — an unreadable chunk, a budget file that is not JSON — and
 // says nothing about what to do next, so the recovery step is appended to it.
@@ -29,6 +30,7 @@ process.on("uncaughtException", (error) => {
   );
   process.exit(1);
 });
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] This override exists only so bundle-budgets.spec.ts can point the gate at an isolated artifact fixture and exercise its refusals; the artifact it passes is driven in a real browser by site.spec.ts and every feature journey.
 const root = process.env.STATIC_ARTIFACT_ROOT ?? "dist/apps/shell";
@@ -255,7 +257,7 @@ const flags = process.argv.slice(2);
 const rederiving = flags.length === 1 && flags[0] === "--rederive";
 if (flags.length > 0 && !rederiving)
   throw new BudgetRefusal(
-    `check-bundle-budgets accepts no arguments, or --rederive to rewrite ${budgetsPath} from the tree in front of it; it was given ${flags.join(" ")}.`,
+    `check-bundle-budgets accepts no arguments, or --rederive to rewrite ${budgetsPath} from the tree in front of it; it was given ${flags.join(" ")}. Rerun node scripts/artifact/check-bundle-budgets.mjs with no arguments to gate the artifact, or with --rederive to move the ceilings.`,
   );
 
 // The file is read once and validated once: the re-derive below rewrites this

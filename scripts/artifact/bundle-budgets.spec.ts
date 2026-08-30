@@ -229,6 +229,22 @@ test("--rederive reproduces the committed ceilings from this tree", async () => 
   expect(await readBudgets(path)).toEqual(await readBudgets());
 });
 
+// A refusal names the step that clears it, so an unexpected failure has to as
+// well: a budget file that is not JSON fails inside the JSON parser, which says
+// nothing about this gate, and the reader is told what to do anyway.
+test("a budget file that is not JSON still names the step that clears it", async () => {
+  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-unparsable-"));
+  fixtures.push(fixture);
+  const path = join(fixture, "bundle-budgets.json");
+  await writeFile(path, "these are not the budgets you are looking for");
+
+  const result = checkBudgets(artifact, path);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain("could not be read as expected");
+  expect(result.stderr).toContain("rebuild with just prerender");
+});
+
 test("an unrecognised argument is refused rather than gated silently", () => {
   const result = checkBudgets(artifact, budgetsPath, "--print");
 
