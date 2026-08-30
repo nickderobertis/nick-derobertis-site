@@ -60,11 +60,7 @@
     },
     "serve": {
       "executor": "@nx/rspack:dev-server",
-      "options": {
-        "buildTarget": "home-cards:build",
-        "port": 4200,
-        "host": "127.0.0.1"
-      }
+      "options": { "buildTarget": "home-cards:build" }
     }
   }
 }

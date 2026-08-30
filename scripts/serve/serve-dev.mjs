@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { holdArtifactRoot } from "@site/artifact-contracts/artifact-hold";
+import { composedArtifactRoot } from "@site/build-config/composed-artifact";
 
 // The development server: one named app built from source with hot module
 // replacement, every other app served from the composed artifact's built
@@ -22,9 +23,19 @@ process.on("uncaughtException", (error) => {
   process.exit(1);
 });
 
+// The composed artifact, as an absolute path: this claims it as a reader while
+// it serves, and a hold names the directory it is over. Which directory that is
+// belongs to `@site/build-config/composed-artifact`, not to this command.
 const artifactRoot = fileURLToPath(
-  new URL("../../dist/apps/shell", import.meta.url),
+  new URL(`../../${composedArtifactRoot}`, import.meta.url),
 );
+
+/**
+ * The one executor that serves an app from source with hot module replacement,
+ * which is what this command promises. A `serve` target running anything else
+ * is some other command's, so it does not make its app servable here.
+ */
+const devServerExecutor = "@nx/rspack:dev-server";
 
 /**
  * Whether one app's own declaration names the dev-server target this command
@@ -34,10 +45,10 @@ const artifactRoot = fileURLToPath(
  * decides both which names `validatedApp` accepts and which Nx target this
  * command then runs. So the parsed document is held to the Nx shape this reads
  * — an object, whose `targets` is an object, whose `serve` is a target
- * configuration naming an executor — before any of it decides anything. A
- * directory holding no readable project.json is not an Nx project at all and is
- * simply not an app; a directory holding one that is not an Nx project
- * configuration is a declaration to fix, and says so.
+ * configuration running `devServerExecutor` — before any of it decides
+ * anything. A directory holding no readable project.json is not an Nx project
+ * at all and is simply not an app; a directory holding one that is not an Nx
+ * project configuration is a declaration to fix, and says so.
  */
 function declaresServeTarget(path) {
   let document;
@@ -69,7 +80,7 @@ function declaresServeTarget(path) {
     reject("declares a serve target that is not an Nx target configuration");
   if (typeof serve.executor !== "string")
     reject("declares a serve target naming no executor to run it");
-  return true;
+  return serve.executor === devServerExecutor;
 }
 
 /**
@@ -86,7 +97,7 @@ function servableApps() {
     .sort();
   if (apps.length === 0)
     throw new Error(
-      "no app under apps/ declares a serve target, so there is nothing a development server could build from source",
+      `no app under apps/ declares a ${devServerExecutor} serve target, so there is nothing a development server could build from source`,
     );
   return apps;
 }
@@ -154,6 +165,16 @@ process.on("exit", release);
 // development overrides, so it is set here rather than left to the executor's
 // default: an ambient production NODE_ENV would otherwise leave this server
 // building production output it could not hot-update.
+//
+// llmlint: ignore[tool_output_is_signal] The dev server's stream is the signal a
+// developer runs this for, so it is passed through rather than captured: what it
+// prints is which compilation is running, which module was just hot-replaced,
+// and the type and build errors as they happen, on a command that stays in the
+// foreground until it is stopped. There is no success to be quiet about — the
+// only output this could withhold is the output the recipe exists to show — and
+// withholding it would leave a developer editing against a server whose last
+// compile failed with nothing said. The paths this command owns are the ones
+// above, and each of those is one diagnostic line and an exit status.
 const server = spawn(
   "pnpm",
   [

@@ -64,11 +64,7 @@
     },
     "serve": {
       "executor": "@nx/rspack:dev-server",
-      "options": {
-        "buildTarget": "timeline:build",
-        "port": 4200,
-        "host": "127.0.0.1"
-      }
+      "options": { "buildTarget": "timeline:build" }
     }
   }
 }

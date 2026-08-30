@@ -2,16 +2,8 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import type { Compiler, Configuration } from "@rspack/core";
 import { HtmlRspackPlugin } from "@rspack/core";
+import { composedArtifactRoot } from "./composed-artifact";
 import { PublishedFragmentPlugin } from "./published-fragment";
-
-/**
- * The composed artifact every app the development server is not building from
- * source is served out of. `shell:build` writes this tree and
- * `shell:prerender` composes the whole site into it in place, which is the same
- * tree `scripts/serve/serve-dev.mjs` claims before it starts a server over it
- * and `scripts/serve/serve-e2e.mjs` serves for the browser journeys.
- */
-const composedArtifact = "dist/apps/shell";
 
 /** Where the app the server is building from source is mounted. */
 export interface ServedApp {
@@ -203,15 +195,15 @@ export function developmentServer({
     static: servesTheHost
       ? [
           {
-            directory: `${composedArtifact}/remotes`,
+            directory: `${composedArtifactRoot}/remotes`,
             publicPath: `${siteBase}remotes/`,
           },
           {
-            directory: `${composedArtifact}/cv-data`,
+            directory: `${composedArtifactRoot}/cv-data`,
             publicPath: `${siteBase}cv-data/`,
           },
         ]
-      : [{ directory: composedArtifact, publicPath: siteBase }],
+      : [{ directory: composedArtifactRoot, publicPath: siteBase }],
     historyApiFallback: { index: `${siteBase}index.html` },
     headers: { "Access-Control-Allow-Origin": "*" },
   };
