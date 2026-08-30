@@ -23,7 +23,7 @@ const dataBoundaryStates: readonly {
   { scenario: "error", heading: "Awards unavailable", role: "alert" },
   // A 200 the CV schema rejects: the pane's validator is the only thing between
   // that answer and a visitor, so it has to land on the same recovery panel.
-  // llmlint: ignore[browser_journeys_run_against_the_built_app, expensive_tests_stay_behind_their_own_edge] This workspace gives each remote one journey suite of its own, and `awards:e2e` composes and serves the real Pages artifact before it runs, so these cases drive the deployed bytes on both render paths. The edge they sit behind is the remote's: Nx selects `awards:e2e` only for changes reaching awards, and a scenario-specific project would split one remote's coverage across two boundaries for four cases.
+  // llmlint: ignore[browser_journeys_run_against_the_built_app, expensive_tests_stay_behind_their_own_edge] Each remote owns one suite behind its own Nx edge, and `awards:e2e` serves the composed artifact.
   { scenario: "schema-invalid", heading: "Awards unavailable", role: "alert" },
 ];
 

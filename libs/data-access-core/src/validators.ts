@@ -78,16 +78,10 @@ if (
  * all seven; building the engine and each validator on first use means a page
  * pays only for what it validates.
  *
- * `ajv/dist/standalone` was measured here and not taken: it precompiles a
- * validator to source, but it does so by inlining the schema the validator
- * closes over, and the smallest domain — awards, with this schema's `$defs` —
- * emits 24,324 bytes of that inlined schema on its own. It therefore does not
- * remove `cv.schema.json` from a browser: this module exports `cvSchema` as
- * part of the contract its callers are written against, so the document stays
- * reachable, and precompiled validators would be a second copy of it per
- * domain beside the first rather than a replacement for it. It would also owe
- * a generated artifact and a freshness gate holding that artifact to
- * `cv.schema.json`, which is its own change rather than a line of this one.
+ * `ajv/dist/standalone` was measured and not taken: it inlines the schema each
+ * validator closes over — 24,324 bytes for awards alone — so it would add
+ * copies of `cv.schema.json` rather than remove the one `cvSchema` exports.
+ * docs/cv-dataset-split-verification.md carries the measurement.
  */
 let engine: Ajv | undefined;
 function validatorEngine(): Ajv {

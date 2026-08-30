@@ -45,7 +45,7 @@ test("refuses a body the server itself reported as a failure", async () => {
   );
 });
 
-// llmlint: ignore-block[changed_behavior_has_e2e] A browser cannot see this: reading a failed body and refusing to leaves the same route recovery panel, which site.spec.ts already drives on every loaded route for both the failed status and the schema-rejected body. Only a response that throws when read tells the two apart.
+// llmlint: ignore-block[changed_behavior_has_e2e] Not browser-observable: a read body and an unread one leave the same recovery panel site.spec.ts already drives.
 test("refuses a failed response without reading its body", async () => {
   // The body of a failed response is not an answer, so nothing here may read
   // it. This one refuses to be read, and counts the attempt, so a loader that

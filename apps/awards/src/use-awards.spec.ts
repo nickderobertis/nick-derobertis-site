@@ -97,7 +97,7 @@ test(
   },
 );
 
-// llmlint: ignore-block[changed_behavior_has_e2e] A browser cannot see this: reading a failed body and refusing to leaves the same visible error state, which awards.spec.ts already drives standalone and host-composed on both the 503 and the schema-rejected answer. Only a response that throws when read tells the two apart.
+// llmlint: ignore-block[changed_behavior_has_e2e] Not browser-observable: a read body and an unread one leave the same error state awards.spec.ts already drives.
 test(
   "refuses a failed response without reading its body",
   moduleGraphCeiling,

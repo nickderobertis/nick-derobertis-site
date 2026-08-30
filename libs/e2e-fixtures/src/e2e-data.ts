@@ -69,7 +69,7 @@ export async function handleE2eDataRequest({
   try {
     // Read before answering: writing the status line first would leave a failed
     // read unable to report itself, because the headers are already sent.
-    // llmlint: ignore[boundary_inputs_validated] Not a trust boundary: this is the artifact this workspace just composed, under a root the caller named, and serving it byte for byte is the point — the journeys downstream assert each pane's own validator over exactly these bytes, so checking them here would hide the answer that matters. An unreadable one is reported below with its path.
+    // llmlint: ignore[boundary_inputs_validated] The artifact this workspace just composed; the journeys downstream validate these bytes themselves.
     const fixture = await readFile(
       join(root, `cv-data/domains/${dataDomain}.json`),
     );
