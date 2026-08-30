@@ -1,4 +1,5 @@
 import type { AwardCardModel } from "@site/data-access-awards";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { Card } from "@site/design-system";
 import { AwardEmblem } from "./award-emblem";
 

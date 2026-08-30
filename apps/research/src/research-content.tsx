@@ -1,5 +1,6 @@
 import type { Research } from "@site/data-access-core";
 import { buildResearchProjectModels } from "@site/data-access-research";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { ActionLink, PageShell, SectionHeading } from "@site/design-system";
 import { ProjectSection } from "./project-section";
 

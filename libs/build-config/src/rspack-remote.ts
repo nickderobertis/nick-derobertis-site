@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
+import type { Compiler } from "@rspack/core";
 import { consumeFederatedTypes, FederatedTypesPlugin } from "./federated-types";
 import { PublishedFragmentPlugin } from "./published-fragment";
 import { type RemoteProject, remoteRegistry } from "./remote-registry";
@@ -23,6 +24,94 @@ if (
   throw new Error("site.config.json must define a valid pagesBase");
 /* v8 ignore stop */
 const pagesBase = siteConfig.pagesBase;
+
+/**
+ * The share scope every container in this workspace is built with, and the one
+ * the shell declares as well: the host is what supplies these instances to the
+ * containers it composes, so the two declarations have to name the same modules
+ * and are therefore the same declaration.
+ *
+ * Everything here is a singleton with version checking off, because there is
+ * one version of each in this repository -- these are workspace libraries and
+ * one pinned dependency, not a range negotiated with anybody -- so the instance
+ * that loaded first is always the right one.
+ *
+ * `react` and `react-dom` are eager because each container's own entry uses
+ * them before it can reach an async boundary. The rest are deliberately not:
+ * an eager share is resolved during share-scope startup, which is the moment
+ * the shell's `loaded-first` strategy exists to keep free of work no route has
+ * asked for. Left non-eager, a container reaches for one of them only when a
+ * route it is rendering does, and finds the host's copy already in the scope.
+ *
+ * A container loaded standalone has no host to find one from, so each build
+ * still emits its own fallback copy of every module here and resolves to that.
+ *
+ * A share reached from a container's initial chunk is resolved synchronously,
+ * before that container has a scope to resolve it in, so an entry has to reach
+ * these modules through a dynamic import. Every remote's `main.tsx` does; the
+ * shell, whose entry reaches route state through its own router, declares
+ * `asyncShareStartup` instead.
+ *
+ * The share scope keys an instance on a package's name and version, so each
+ * workspace library named here declares a version in its own manifest. Without
+ * one Module Federation registers nothing for it, and every container falls
+ * back to its own copy -- which is the duplication this scope exists to end,
+ * with none of the configuration above looking wrong.
+ */
+// `as const` because `requiredVersion: false` is the literal that turns version
+// checking off; widened to `boolean` it is no longer a value the share scope
+// accepts.
+export const sharedSingletons = {
+  react: { singleton: true, requiredVersion: false, eager: true },
+  "react-dom": { singleton: true, requiredVersion: false, eager: true },
+  "@site/route-state": { singleton: true, requiredVersion: false },
+  "@site/design-system": { singleton: true, requiredVersion: false },
+  "@site/data-access-core/validators": {
+    singleton: true,
+    requiredVersion: false,
+  },
+  zod: { singleton: true, requiredVersion: false },
+} as const;
+
+/**
+ * Module Federation's own way of putting a container's startup behind share
+ * initialization, which is what lets an entry chunk reach a non-eager share
+ * directly. Only the shell declares it, and only the shell may: a remote built
+ * with it hands a host that composes it a container whose eager react share
+ * resolves to nothing, so every route the shell composed failed on the first
+ * hook a remote's page called. A remote's own entry reaches the shares above
+ * through an awaited dynamic import instead, which its `main.tsx` shows.
+ */
+// Keep the literal `true`: without the assertion TypeScript widens it to
+// `boolean`, which is not assignable to Module Federation's startup option.
+export const asyncShareStartup = { asyncStartup: true } as const;
+
+/**
+ * Keeps a remote's exposes in chunks of their own.
+ *
+ * Nx gives every build a `common` cache group that pulls each module two of its
+ * async chunks share into one chunk, enforced, with no minimum size. With the
+ * libraries above out of each container, what a pane's `./Page` and
+ * `./Skeleton` have left is small enough that the group collapsed both exposes
+ * into a single chunk -- which makes the per-pane fallback Home composes
+ * unobservable, because the skeleton would arrive in the same request as the
+ * page it stands in for. Only that group is dropped: Nx's `default` group beside
+ * it takes the same modules once they are worth a chunk, which is what keeps a
+ * page's own payload from being emitted twice.
+ *
+ * `NxAppRspackPlugin` replaces this build's whole `optimization` when it
+ * applies, so declaring it in the configuration above would be overwritten;
+ * this runs after that plugin, which is what makes it stick.
+ */
+class SeparateExposedChunksPlugin {
+  apply(compiler: Compiler) {
+    const splitChunks = compiler.options.optimization?.splitChunks;
+    /* v8 ignore start -- Reachable only inside a real rspack build, where Nx's app plugin has already put a splitChunks object here; rspack-remote.spec.ts asserts the plugin is in the build, and every app's ownership.spec.ts drives the exposes it keeps apart through both boundaries. */
+    if (typeof splitChunks !== "object" || !splitChunks.cacheGroups) return;
+    splitChunks.cacheGroups.common = false;
+    /* v8 ignore stop */
+  }
+}
 
 export function remoteMap(names: readonly RemoteProject[]) {
   return Object.fromEntries(
@@ -104,6 +193,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
           optimization: true,
           runtimeChunk: false,
         }),
+        new SeparateExposedChunksPlugin(),
         new NxReactRspackPlugin(),
         // llmlint: ignore[changed_behavior_has_e2e] Each app's ownership.spec.ts drives its published remote through standalone and host-composed browser boundaries, and the feature journey specs cover their happy and recovery states.
         new PublishedFragmentPlugin(name),
@@ -141,14 +231,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
               : false,
           },
           remotes: options.remotes ?? {},
-          shared: {
-            react: { singleton: true, requiredVersion: false, eager: true },
-            "react-dom": {
-              singleton: true,
-              requiredVersion: false,
-              eager: true,
-            },
-          },
+          shared: sharedSingletons,
         }),
       ],
     },

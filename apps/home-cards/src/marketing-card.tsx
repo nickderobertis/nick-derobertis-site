@@ -1,4 +1,5 @@
 import { siteBase } from "@site/data-access-core/site";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { ActionLink, Card } from "@site/design-system";
 
 /** One area of work, as the bundled home content records it. */

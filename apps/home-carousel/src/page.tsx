@@ -1,5 +1,6 @@
 import { siteBase } from "@site/data-access-core/site";
 import { homeContent, readPaneState } from "@site/data-access-home";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { ActionLink, PageShell } from "@site/design-system";
 import { CarouselState } from "./carousel-state";
 import Skeleton from "./skeleton";

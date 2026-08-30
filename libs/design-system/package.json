@@ -1,9 +1,11 @@
 {
   "name": "@site/design-system",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
   },
   "dependencies": {
     "@site/testing": "workspace:*"

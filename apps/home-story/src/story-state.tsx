@@ -1,3 +1,4 @@
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { PaneState } from "@site/design-system";
 
 type StoryStateName = "error" | "empty";
