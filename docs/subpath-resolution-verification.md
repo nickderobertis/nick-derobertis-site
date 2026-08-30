@@ -78,9 +78,15 @@ resolved for real.
 
 ## Checks run over this tree
 
-| Command | Result |
-| --- | --- |
-| `nx run tooling-workspace:test` | `Test Files 10 passed (10)`, `Tests 141 passed (141)` — the project that owns both halves of the contract |
-| `nx run-many -t typecheck,lint -p tooling-workspace` | `Successfully ran targets typecheck, lint for project tooling-workspace` |
-| `biome check --error-on-warnings .` | `Checked 635 files in 421ms. No fixes applied.` |
-| `nx run shell:lint --args=--error-on-warnings` (`eslint .` over every project plus Biome) | `Successfully ran target lint for project shell` |
+| Project | `test` | `typecheck` | `lint` |
+| --- | --- | --- | --- |
+| `tooling-workspace` (owns both halves of the contract) | `Test Files 10 passed (10)`, `Tests 141 passed (141)` | `tsc -p scripts/workspace/tsconfig.json` clean | `Checked 28 files. No fixes applied.` |
+| `testing` (`libs/testing`, the harness the probe runs under) | `Test Files 1 passed (1)`, `Tests 10 passed (10)`, coverage 100/100/100/100 | clean | `Checked 7 files. No fixes applied.` |
+| `build-config` (`libs/build-config`, publisher of three of the subpaths) | `Test Files 7 passed (7)`, `Tests 43 passed (43)`, coverage 100/100/100/100 | clean | `Checked 26 files. No fixes applied.` |
+| `awards` (the app whose `remoteConfig` the build half compiles) | `Test Files 10 passed (10)`, `Tests 39 passed (39)` | clean | `Checked 34 files. No fixes applied.` |
+| `shell` | `Test Files 10 passed (10)`, `Tests 51 passed (51)`, coverage 100/100/100/100 | clean | `eslint . --max-warnings=0` plus `Checked 39 files. No fixes applied.` |
+
+Run as `nx run-many -t test,typecheck -p testing build-config awards shell tooling-workspace
+--skip-nx-cache` and `nx run-many -t lint -p … --args=--error-on-warnings`, plus
+`biome check --error-on-warnings .` over the whole tree (`Checked 635 files. No
+fixes applied.`). `just check` is left to the merge path.
