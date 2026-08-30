@@ -48,21 +48,26 @@ lint-workflows:
 # the `test` target, and the `test` recipe's other half is an `e2e` batch, which
 # is the composed host's suite a second time. What that dependency contributed
 # beyond this recipe was exactly the duplicate the browser lanes exist to end.
+#
+# CI=1 is the supported warnings-as-errors contract for the Nx compiler,
+# bundler, prerender, Playwright, and screenshot executors in this workspace.
+#
+# The browser and visual suites are one dispatch over the lanes
+# `just gate-browser-lanes` selects, which is the affected selection unioned
+# with the project that composes the served artifact. That union is what
+# gates the composed artifact when the affected selection is empty, and it
+# is also why the composed host's suite is dispatched exactly once: it used
+# to run inside `nx affected -t e2e,screenshot` — which selects the shell
+# for nearly any TypeScript change, because the shell owns the workspace's
+# single `eslint .` run — and then again as an unconditional `nx run
+# shell:e2e`, so the heaviest suite in the repository ran twice per commit.
+#
+# The body below is `@`-prefixed, and its comments live here rather than in it,
+# so a passing gate says one line: what it dispatched is fixed by this file, and
+# what it found is what a reader is here for.
 check: lint-workflows
-    # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
-    # bundler, prerender, Playwright, and screenshot executors in this workspace.
-    #
-    # The browser and visual suites are one dispatch over the lanes
-    # `just gate-browser-lanes` selects, which is the affected selection unioned
-    # with the project that composes the served artifact. That union is what
-    # gates the composed artifact when the affected selection is empty, and it
-    # is also why the composed host's suite is dispatched exactly once: it used
-    # to run inside `nx affected -t e2e,screenshot` — which selects the shell
-    # for nearly any TypeScript change, because the shell owns the workspace's
-    # single `eslint .` run — and then again as an unconditional `nx run
-    # shell:e2e`, so the heaviest suite in the repository ran twice per commit.
-    # llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
-    base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just check" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 pnpm exec nx run-many -t e2e,screenshot -p "$lanes" --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
+    @# llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
+    @base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just check" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 pnpm exec nx run-many -t e2e,screenshot -p "$lanes" --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
 # Canonical full pre-push gate used by orchestration and contributors.
 # llmlint: ignore[changed_behavior_has_e2e] This command-only alias has no browser interface and delegates unchanged to check, whose dispatched Playwright targets own real-browser coverage.

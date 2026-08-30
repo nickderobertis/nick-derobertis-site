@@ -157,10 +157,11 @@ function browserTasks(lanes: readonly string[]) {
 /**
  * The one diagnostic a recipe wrote, of everything on its standard error.
  *
- * A recipe without a `@` prefix echoes each line of its own body to standard
- * error before running it, so the recipe's source — including the text of every
- * other diagnostic it could have written — is on the stream beside the one it
- * did. Reading the refusal as the line it is keeps that from answering for it.
+ * A recipe line without a `@` prefix is echoed to standard error before it runs,
+ * so the line's source — including the text of every other diagnostic it could
+ * have written — can be on the stream beside the one it did, and what a
+ * dependency wrote is there too. Reading the refusal as the line it is keeps
+ * either from answering for it.
  */
 function diagnosticLine(stderr: string, prefix: string) {
   const lines = stderr.split("\n").filter((line) => line.startsWith(prefix));
@@ -267,8 +268,8 @@ describe("the gate's browser lanes", () => {
     // The gate takes its range from the environment rather than arguments, so
     // its refusal has to name both halves itself: which variables are wrong,
     // and the command to run once they are not. It is read as one line for a
-    // second reason here — an unprefixed recipe echoes its own body to the
-    // same stream, so the recipe's other diagnostics are on it too.
+    // second reason here — the gate's dependency reports on the same stream
+    // ahead of it, so the refusal is not the only thing on it.
     const result = spawnSync("just", ["check"], {
       cwd: workspace,
       encoding: "utf8",
