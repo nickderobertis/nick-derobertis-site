@@ -49,6 +49,7 @@ const shellApp = "shell";
 /** The one expose whose payload every route composes, so the one budgeted. */
 const pageExpose = "./Page";
 
+// llmlint: ignore-block[changed_behavior_has_e2e] The measurement helpers below refuse a bundle they cannot measure, and none of those refusals has a browser interface: each one fails shell:prerender before the compose lane can assemble an artifact, so a bundle they reject is one no visitor ever receives. bundle-budgets.spec.ts drives the reachable refusal — a container whose chunk resolver reads a host global — as a real subprocess over an isolated artifact fixture; the rest guard against a bundler emitting a runtime or a document this workspace has never produced, which no browser could be pointed at. The artifact these helpers do measure is driven in a real browser by site.spec.ts on both render paths.
 /**
  * The resolver expression, checked before it is evaluated rather than after.
  * It comes out of a build artifact, so what may be executed is stated here as a
@@ -244,6 +245,7 @@ async function measureApp(directory) {
     ),
   };
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Every refusal below happens before the artifact is served and fails the compose lane, so a payload it rejects never reaches a visitor; bundle-budgets.spec.ts drives each one — the unrecognised argument, the chunk over its ceiling, and the budget file missing an app — as a real subprocess over isolated artifact fixtures, and site.spec.ts drives the artifact this gate passes.
 // The CLI shape is validated before anything is read: an unrecognised flag is
