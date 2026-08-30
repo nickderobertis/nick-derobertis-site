@@ -19,6 +19,10 @@
     },
     "test": {
       "executor": "nx:run-commands",
+      "metadata": {
+        "description": "serve-dev.spec.ts drives the real `just serve-dev`, whose first step is `NODE_ENV=production just prerender` — a compose that removes and restages `dist/apps/shell/remotes` in place. Nothing else in the unit tier writes that artifact, and `tooling-artifact:test` reads it, so without this edge `nx affected -t test --parallel=3` runs the two at once and the compose pulls `remotes` out from under a fixture mid-read: `ENOENT ... stat 'remotes/awards'` from the budget gate, or `ENOENT ... scandir 'dist/apps/shell/remotes'`. The reader goes first over what `shell:prerender` composed, and this recompose follows it. Declared on the writer so a second reader needs no edit of its own, and pointed at the reader rather than the reverse so a change reaching only `tooling-artifact` does not drag this Playwright suite in behind it."
+      },
+      "dependsOn": [{ "target": "test", "projects": ["tooling-artifact"] }],
       "options": {
         "command": "scripts/ci/run-tooling-target.sh serve test vitest run --reporter=dot --maxWorkers=1 --config scripts/serve/vite.config.ts"
       }

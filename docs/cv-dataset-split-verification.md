@@ -172,6 +172,32 @@ either: this plan's shared contract has the validators module export
 generated artifact and a gate holding that artifact to `cv.schema.json`, which
 is its own change. Left for whoever revisits the shared contract.
 
+## One gate defect this branch's own run surfaced
+
+`just check` dispatches `typecheck`, `test`, `build` and `prerender` in one
+`nx affected --parallel=3` run, and two of the projects in it write and read one
+directory. `scripts/serve/serve-dev.spec.ts` drives the real `just serve-dev`,
+whose first step is `NODE_ENV=production just prerender` — a compose that
+removes and restages `dist/apps/shell/remotes` in place. `scripts/artifact`'s
+two specs build their fixtures out of that same directory. Nx had no edge
+between them, so it ran them at once and the compose took `remotes` away
+mid-fixture; the reader then reported it as its own subject failing, with
+`check-bundle-budgets: ENOENT … stat '<fixture>/remotes/awards'` and
+`ENOENT: no such file or directory, scandir 'dist/apps/shell/remotes'`.
+
+That is a race rather than something this change caused — neither
+`scripts/artifact/bundle-budgets.spec.ts` nor
+`scripts/artifact/check-bundle-budgets.mjs` differs from `master` — but it is
+what `check` reported on this branch, and it reproduces: a watch over
+`dist/apps/shell/remotes` across a `just check` recorded the directory absent
+for two windows of about two seconds each, with `scripts/compose/compose.mjs`
+running under `just prerender` under `tooling-serve:test` both times.
+
+`scripts/serve/project.json` now declares the edge Nx was missing, so
+`tooling-serve:test` runs after `tooling-artifact:test`: the reader goes first
+over what `shell:prerender` composed, and the recompose follows it. The same
+watch over the passing `just check` below recorded no such window at all.
+
 ## Checks run over this tree
 
 `just` is this repository's only command surface, and these recipes are what
@@ -183,6 +209,7 @@ dispatched the work below.
 | `just prerender` | the shell's `prerender` target: compose, the static-artifact gate, and the bundle-budget gate at the re-derived floor | pass |
 | `just e2e-project awards` | the `awards` project's `e2e` target, driving the standalone remote and the host-composed page in a real browser | pass, 34 journeys |
 | `just test-e2e` | the `shell` project's `e2e` target, driving the composed artifact in a real browser | pass |
+| `just check` | the whole pre-push gate over the range this branch adds to `master`: workflow validation, Biome, and the affected `lint`, `typecheck`, `test`, `build` and `prerender` targets, then the thirteen browser and visual lanes `just gate-browser-lanes` selects | pass |
 
 <!-- llmlint: ignore-block[work_goes_through_command_surface] `just test` dispatches `test` and `e2e` in one parallel run, which this workspace refuses: compose reports `dist/apps/shell is held by process N, which is serving it` as soon as a serving lane and an e2e lane overlap. `just check` sequences the two tiers, and is what dispatches these on the merge path. -->
 The unit tier has no recipe narrower than the gate, so these targets were run as
