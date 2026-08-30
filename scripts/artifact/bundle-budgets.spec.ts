@@ -339,6 +339,47 @@ test("a budget file that omits an app the artifact contains is refused", async (
   expect(result.stderr).toContain("declares no budget for home-cards");
 });
 
+// A property nothing here reads is a budget file asking for something this gate
+// would not act on, and --rederive would copy it back out as though a boundary
+// had checked it, so it is refused where every field it does read is.
+test("a budget file carrying a property nothing reads is refused", async () => {
+  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-unread-"));
+  fixtures.push(fixture);
+  const path = join(fixture, "bundle-budgets.json");
+  const committed = JSON.parse(await readFile(budgetsPath, "utf8"));
+  await writeFile(
+    path,
+    JSON.stringify({ ...committed, ceilingOverride: 4_000_000 }),
+  );
+
+  const result = checkBudgets(artifact, path);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    "it declares ceilingOverride, which nothing here reads",
+  );
+});
+
+// The derivation prose is rewritten by --rederive, so it is read at the same
+// boundary the numbers are rather than carried across unchecked.
+test("a budget file whose derivation is not prose is refused", async () => {
+  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-derivation-"));
+  fixtures.push(fixture);
+  const path = join(fixture, "bundle-budgets.json");
+  const committed = JSON.parse(await readFile(budgetsPath, "utf8"));
+  await writeFile(
+    path,
+    JSON.stringify({ ...committed, derivation: "measured by the gate itself" }),
+  );
+
+  const result = checkBudgets(artifact, path);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    "derivation, when present, must be an array of non-empty strings",
+  );
+});
+
 // Raising a ceiling is meant to be a re-derivation somebody commits, so this
 // drives that mode over the artifact the gate above just passed. What it owes
 // is not that a byte count comes back equal to one written down earlier: a
@@ -386,6 +427,20 @@ test("--rederive derives ceilings the committed ones still cover", async () => {
         : [];
     }),
   ).toEqual([]);
+});
+
+// And it writes back exactly the properties that boundary reads: the committed
+// file's derivation prose survives a re-derivation, and nothing the gate never
+// read is carried across into the file a reviewer then weighs.
+test("--rederive writes back only the properties the boundary reads", async () => {
+  const committed = JSON.parse(await readFile(budgetsPath, "utf8"));
+
+  const { path, result } = await rederive(budgetsPath);
+
+  expect(result.status).toBe(0);
+  const rewritten = JSON.parse(await readFile(path, "utf8"));
+  expect(Object.keys(rewritten)).toEqual(Object.keys(committed));
+  expect(rewritten.derivation).toEqual(committed.derivation);
 });
 
 // The margin is what keeps the gate from firing on drift it was never meant to

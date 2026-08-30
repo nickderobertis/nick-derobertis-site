@@ -8,7 +8,7 @@ export class BudgetRefusal extends Error {}
 /**
  * @typedef {{measuredBytes: number, ceilingBytes: number}} Ceiling
  * @typedef {{entry: Ceiling, page?: Ceiling}} AppBudget
- * @typedef {{marginPercent: number, apps: Record<string, AppBudget>, routes: Record<string, Ceiling>}} BundleBudgets
+ * @typedef {{derivation?: string[], marginPercent: number, apps: Record<string, AppBudget>, routes: Record<string, Ceiling>}} BundleBudgets
  */
 
 /**
@@ -28,7 +28,26 @@ export function parseBundleBudgets(value, path) {
   };
   if (!value || typeof value !== "object" || Array.isArray(value))
     refuse("it must contain an object");
-  const { marginPercent, apps, routes } = value;
+  // What --rederive writes back is what this function returns, so every property
+  // the file carries has to be read here or refused here: one that is neither
+  // would be copied into the rewritten file as though a boundary had checked it.
+  const read = ["derivation", "marginPercent", "apps", "routes"];
+  const unread = Object.keys(value).filter((key) => !read.includes(key));
+  if (unread.length > 0)
+    refuse(
+      `it declares ${unread.join(", ")}, which nothing here reads; ${path} may declare only ${read.join(", ")}`,
+    );
+  const { derivation, marginPercent, apps, routes } = value;
+  // The prose recording how these ceilings were derived is optional, because a
+  // budget file assembled for one gate run carries none, but a file that does
+  // carry it is rewritten with it, so it is read rather than passed through.
+  if (
+    derivation !== undefined &&
+    (!Array.isArray(derivation) ||
+      derivation.length === 0 ||
+      derivation.some((note) => typeof note !== "string" || note.length === 0))
+  )
+    refuse("derivation, when present, must be an array of non-empty strings");
   if (
     typeof marginPercent !== "number" ||
     !Number.isFinite(marginPercent) ||
@@ -65,6 +84,7 @@ export function parseBundleBudgets(value, path) {
     );
   };
   return {
+    ...(derivation === undefined ? {} : { derivation }),
     marginPercent,
     apps: readGroup(apps, "apps", (entry, label) => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry))

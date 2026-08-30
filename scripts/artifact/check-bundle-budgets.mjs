@@ -254,6 +254,7 @@ async function measureApp(directory) {
   };
 }
 
+// llmlint: ignore-block[changed_behavior_has_e2e] Everything from here to the re-derivation below runs inside shell:prerender, before compose can assemble an artifact: the argument surface, the coverage refusals and the measurement have no browser interface, and a tree they refuse is one no visitor is ever served. bundle-budgets.spec.ts drives each of them as a real subprocess over isolated artifact fixtures — the unrecognised argument, the budget file missing an app, the container whose chunk resolver reads a host global — and site.spec.ts drives the artifact they pass in a real browser with and without JavaScript.
 // The CLI shape is validated before anything is read: an unrecognised flag is
 // a caller asking for something this gate does not do, and silently gating
 // instead would report a pass the caller never requested.
@@ -331,30 +332,41 @@ const measuredRoutes = Object.fromEntries(
   ]),
 );
 
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
+// llmlint: ignore-block[changed_behavior_has_e2e] Re-deriving rewrites a committed build input for a reviewer to weigh; it runs from a developer's terminal and never inside a lane that serves anything, so it has no browser interface. bundle-budgets.spec.ts drives it as a real subprocess over the composed artifact and reads the file it wrote back through the same boundary the gate reads it through.
 // Re-deriving is how a ceiling moves: this rewrites the committed file with
 // every ceiling recomputed from the tree in front of it, so a change that
 // alters a payload deliberately lands as a diff a reader can weigh.
 if (rederiving) {
-  const rederived = { ...declared };
-  rederived.apps = Object.fromEntries(
-    artifactApps
-      .toSorted()
-      .map((app) => [
-        app,
-        Object.fromEntries(
-          Object.entries(measuredApps[app]).map(([kind, bytes]) => [
-            kind,
-            deriveCeiling(bytes, budgets.marginPercent),
-          ]),
-        ),
+  // Built from what the boundary read, never from the raw parse: a property
+  // `declared` carries that nothing validated would otherwise be written back
+  // into the committed file as though something had.
+  const rederived = {
+    ...(budgets.derivation === undefined
+      ? {}
+      : { derivation: budgets.derivation }),
+    marginPercent: budgets.marginPercent,
+    apps: Object.fromEntries(
+      artifactApps
+        .toSorted()
+        .map((app) => [
+          app,
+          Object.fromEntries(
+            Object.entries(measuredApps[app]).map(([kind, bytes]) => [
+              kind,
+              deriveCeiling(bytes, budgets.marginPercent),
+            ]),
+          ),
+        ]),
+    ),
+    routes: Object.fromEntries(
+      Object.entries(measuredRoutes).map(([route, bytes]) => [
+        route,
+        deriveCeiling(bytes, budgets.marginPercent),
       ]),
-  );
-  rederived.routes = Object.fromEntries(
-    Object.entries(measuredRoutes).map(([route, bytes]) => [
-      route,
-      deriveCeiling(bytes, budgets.marginPercent),
-    ]),
-  );
+    ),
+  };
   // What is written has to be a file this gate would accept on the next run, so
   // it goes back through the same boundary before it reaches the disk.
   parseBundleBudgets(rederived, budgetsPath);
@@ -365,6 +377,9 @@ if (rederiving) {
   process.exit(0);
 }
 
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
+// llmlint: ignore-block[changed_behavior_has_e2e] This refusal fails shell:prerender before the compose lane runs, so a payload it names is one no artifact was assembled from and no visitor could observe. bundle-budgets.spec.ts drives it as a real subprocess for a pane over its ceiling, for the route that composes it, and for growth one byte past the declared margin; site.spec.ts drives the artifact it passes in a real browser.
 const violations = [];
 for (const [app, measured] of Object.entries(measuredApps)) {
   const budget = budgets.apps[app];
@@ -395,3 +410,4 @@ if (violations.length > 0)
   throw new BudgetRefusal(
     `The composed artifact exceeds its committed bundle budgets:\n${violations.map((violation) => `  ${violation}`).join("\n")}\nRemove the payload, or re-derive every ceiling with node scripts/artifact/check-bundle-budgets.mjs --rederive and commit the result.`,
   );
+// llmlint: ignore-end[changed_behavior_has_e2e]
