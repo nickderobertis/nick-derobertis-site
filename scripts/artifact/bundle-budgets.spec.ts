@@ -197,6 +197,29 @@ test("a bundle resolver that reads a host global is refused, not evaluated", asy
   expect(result.stderr).toContain("reads process, which is not its parameter");
 });
 
+// Naming only the parameter is not enough on its own, because a string literal
+// is removed before the names are read: reaching a host global through a
+// bracketed property and calling it names nothing else at all.
+test("a bundle resolver that calls through a bracket is refused too", async () => {
+  const fixture = await isolatedArtifact(["bio"]);
+  const container = join(fixture, "remotes", "bio", "remoteEntry.js");
+  const source = await readFile(container, "utf8");
+  await writeFile(
+    container,
+    source.replace(
+      "__webpack_require__.u=",
+      '__webpack_require__.u=e=>e["constructor"]["constructor"]("return 1")()+',
+    ),
+  );
+
+  const result = checkBudgets(fixture);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    "indexes a value that is not the object literal before it",
+  );
+});
+
 test("a budget file that omits an app the artifact contains is refused", async () => {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-file-"));
   fixtures.push(fixture);

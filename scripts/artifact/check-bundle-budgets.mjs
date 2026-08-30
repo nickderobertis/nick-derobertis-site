@@ -79,6 +79,17 @@ function validatedResolverExpression(expression) {
     .replace(/'(?:[^'\\]|\\.)*'/g, "");
   for (const [name] of withoutStrings.matchAll(/[A-Za-z_$][\w$]*/g))
     if (name !== parameter) refuse(`reads ${name}, which is not its parameter`);
+  // Naming nothing but the parameter is not enough on its own: a string
+  // literal is removed above, so `e["constructor"]("…")()` would reach the
+  // evaluator naming only `e`. What a bundler actually writes never opens a
+  // bracket after a name — it groups after `+` and indexes the object literal
+  // it just closed — so each opener is required to sit where those do.
+  for (const [, before, opener] of withoutStrings.matchAll(/(\S)\s*([([])/g)) {
+    if (opener === "(" && !"+(?:,".includes(before))
+      refuse("calls something rather than only grouping a concatenation");
+    if (opener === "[" && !")}".includes(before))
+      refuse("indexes a value that is not the object literal before it");
+  }
   return expression;
 }
 
