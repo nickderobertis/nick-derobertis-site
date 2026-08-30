@@ -203,12 +203,88 @@ if [ "${#apps[@]}" -eq 0 ]; then
   exit 0
 fi
 
+# A worktree captured by an earlier, root-running copy of this hook still holds a
+# shots/ tree this user cannot write into, and that alone wedges every push from
+# it: the capture below and the review gallery further down both create
+# directories inside it. Reclaim it rather than fail on it. shots/ holds nothing
+# but regenerable capture output — baselines live under apps/<app>/visual/baseline
+# — so clearing it is always safe. Entries this user owns come back with a chmod;
+# entries another user owns can only be unlinked by that user, so the same kind of
+# root container that wrote them removes them.
+# llmlint: ignore[changed_behavior_has_e2e] This local Git-hook filesystem preflight has no browser or render path; visual-guard-hook.spec.ts drives the real executable over a worktree holding capture output it cannot write beside and asserts that it reclaims and reaches its own verdict.
+reclaim_capture_tree() {
+  # Nothing to reclaim, and nothing to create either: the capture makes its own
+  # output directories, and as the invoking user they are this user's.
+  if [ ! -e shots ]; then
+    return
+  fi
+  # Either signal wedges the steps below: an entry this user does not own, which
+  # is what a root-running capture left behind, or a directory this user does own
+  # but cannot write into.
+  local blocked
+  blocked="$(find shots \( ! -user "$(id -u)" -o -type d ! -perm -u+w \) -print 2>/dev/null | head -n 1 || true)"
+  if [ -z "$blocked" ]; then
+    return
+  fi
+  echo "pre-push: $blocked cannot be written by $(id -un), so this worktree holds" >&2
+  echo "          capture output the steps below cannot write beside; reclaiming it." >&2
+  chmod -R u+rwX shots 2>/dev/null || true
+  rm -rf shots 2>/dev/null || true
+  if [ -e shots ]; then
+    # Renaming the tree aside instead is not available: moving a directory to a
+    # new parent rewrites its own '..' entry, which needs write permission on the
+    # directory this user does not have. Emptying it from inside a root container
+    # — the only writer it ever had — does.
+    docker run --rm --platform="linux/amd64" -v "$PWD/shots:/shots" "$CONTAINER" \
+      find /shots -mindepth 1 -delete >/dev/null 2>&1 || true
+    rmdir shots 2>/dev/null || true
+  fi
+  if [ -e shots ]; then
+    block_push \
+      "This worktree's shots/ directory holds capture output owned by another user" \
+      "that could not be removed, so the capture below cannot write into it." \
+      "Remove it with elevated permissions (sudo rm -rf shots) and push again."
+  fi
+  mkdir -p shots ||
+    block_push "Could not recreate this worktree's shots/ directory (error above)."
+  echo "pre-push: reclaimed shots/; the steps below can write into it again." >&2
+}
+reclaim_capture_tree
+
 if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
   # llmlint: ignore[changed_behavior_has_e2e] This local Git-hook refusal has no browser render path; visual-guard-hook.spec.ts drives the real hook to this public failure outcome and asserts its exit and diagnostic.
   block_push \
     "Screenshot-relevant files changed in ${apps[*]}, but Docker is not available" \
     "to re-capture them. Start Docker and retry."
 fi
+
+# Everything the capture writes lands in this bind-mounted worktree, so the
+# container runs as the user invoking the hook instead of as root. As root it
+# created shots/ and shots/current/ owned by root at 0755; control then came back
+# to this host-side script, which has to create shots/review/<app> beside them
+# below, and that failed with EACCES — a filesystem-ownership problem wearing a
+# visual-drift diagnostic. Running as the pusher keeps every artifact the
+# pusher's, so each later step can write next to it.
+host_user="$(id -u):$(id -g)"
+
+# The container's /work/node_modules mask has to be a directory this user owns.
+# The anonymous Docker volume that used to provide it is created root-owned, so a
+# container running as the pusher cannot install into it. This scratch directory
+# supplies that mask and, because an arbitrary uid has no home inside the image,
+# the container HOME and corepack shim directory as well. It is removed when the
+# hook exits, however it exits.
+container_scratch=""
+# llmlint: ignore[changed_behavior_has_e2e] This local Git-hook cleanup handler has no browser or render path; it only removes the hook's own host-side scratch directory.
+# shellcheck disable=SC2329  # invoked by the EXIT trap below, not by name.
+remove_container_scratch() {
+  if [ -n "$container_scratch" ]; then rm -rf "$container_scratch"; fi
+}
+trap remove_container_scratch EXIT
+if ! container_scratch="$(mktemp -d "${TMPDIR:-/tmp}/screencomp-guard-XXXXXX")"; then
+  # llmlint: ignore[changed_behavior_has_e2e] This local Git-hook failure has no browser render path; it guards scratch storage before any browser capture can start.
+  block_push "Could not create a scratch directory for the capture container (error above)."
+fi
+mkdir -p "$container_scratch/node_modules" "$container_scratch/home" "$container_scratch/bin"
 
 # Pass the host CA bundle into the container so a TLS-intercepting proxy does not
 # break `pnpm install`; no-op when none is configured.
@@ -220,8 +296,8 @@ fi
 
 # Capture every affected app into shots/current/<app>/<arch> using the SAME
 # container and Nx screenshot target as CI, so local bytes match. One install,
-# then loop; the `-v /work/node_modules` volume masks the host tree for a clean
-# install matching CI's fresh checkout.
+# then loop; the scratch mount over /work/node_modules masks the host tree for a
+# clean install matching CI's fresh checkout.
 echo "pre-push: capturing affected microfrontends (${apps[*]}) in $CONTAINER…" >&2
 # Resolved before the run: a command substitution inside a simple command's
 # arguments cannot fail the command, so an unresolvable HEAD would otherwise
@@ -232,14 +308,23 @@ if ! source_revision="$(git rev-parse HEAD)"; then
   block_push "Could not resolve HEAD to stamp the capture's source revision (git's error is above)."
 fi
 if ! docker run --rm --platform="linux/amd64" --ipc=host --shm-size=2g \
-  -v "$PWD:/work" -v /work/node_modules -w /work \
+  --user "$host_user" \
+  -v "$PWD:/work" -v "$container_scratch/node_modules:/work/node_modules" \
+  -v "$container_scratch:/guard" -w /work \
+  -e HOME=/guard/home -e COREPACK_SHIMS=/guard/bin \
   -e "SCREENCOMP_APPS=${apps[*]}" -e "ARCH=$ARCH" \
   -e "SOURCE_REVISION=$source_revision" \
   ${ca_args[@]+"${ca_args[@]}"} \
   "$CONTAINER" \
   bash -lc '
     set -euo pipefail
-    corepack enable
+    # The uid this runs as has no entry in the image passwd file, so HOME, the
+    # pnpm store beneath it, and the corepack shims all live in the scratch mount
+    # the hook owns: a non-root user cannot write corepack shims into the image
+    # global bin directory.
+    mkdir -p "$HOME" "$COREPACK_SHIMS"
+    corepack enable --install-directory "$COREPACK_SHIMS"
+    export PATH="$COREPACK_SHIMS:$PATH"
     pnpm install --frozen-lockfile
     for app in $SCREENCOMP_APPS; do
       echo "::capture $app::"
