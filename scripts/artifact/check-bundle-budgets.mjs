@@ -217,9 +217,13 @@ async function entryScripts(directory, emitted) {
   // directory, would otherwise be counted against this app's ceiling whenever
   // its last path segment happened to match a chunk this app did emit.
   const scripts = [];
-  for (const [, reference = ""] of document.matchAll(
-    /<script\b[^>]*\bsrc="([^"]+)"/g,
+  // Every form HTML allows for the attribute is read, not just the one this
+  // workspace's bundler happens to emit: a source this gate cannot see is
+  // payload it would leave out of the ceiling rather than budget.
+  for (const [, quoted, singleQuoted, bare] of document.matchAll(
+    /<script\b[^>]*\bsrc=(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g,
   )) {
+    const reference = quoted ?? singleQuoted ?? bare ?? "";
     const elsewhere = /^[A-Za-z][A-Za-z\d+.-]*:/.test(reference)
       ? "is served from another origin"
       : reference.startsWith("//")

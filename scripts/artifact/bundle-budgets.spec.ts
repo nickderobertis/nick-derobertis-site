@@ -348,6 +348,25 @@ test("a document loading its entry from another origin is refused", async () => 
   );
 });
 
+// And a source quoted any other way HTML allows is measured rather than passed
+// over: a script this gate cannot see is payload that never reaches a ceiling.
+test("an entry script quoted another way is measured, not skipped", async () => {
+  const fixture = await isolatedArtifact(["bio"]);
+  const documentPath = join(fixture, "remotes", "bio", "index.html");
+  const document = await readFile(documentPath, "utf8");
+  await writeFile(
+    documentPath,
+    document
+      .replace(/<script([^>]*)src="([^"]+)"/, "<script$1src='$2'")
+      .replace(/<script([^>]*)src="([^"]+)"/, "<script$1src=$2"),
+  );
+
+  const result = checkBudgets(fixture);
+
+  expect(result.stderr).not.toContain("check-bundle-budgets:");
+  expect(result.status).toBe(0);
+});
+
 test("a budget file that omits an app the artifact contains is refused", async () => {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-file-"));
   fixtures.push(fixture);
