@@ -20,7 +20,6 @@ export class BudgetRefusal extends Error {}
  * @param {string} path where those contents were read from, for diagnostics
  * @returns {BundleBudgets}
  */
-// llmlint: ignore-block[changed_behavior_has_e2e] The budget file is a committed build input read before any artifact is served: a file this rejects gates the compose lane, so nothing it refuses reaches a visitor. bundle-budgets.spec.ts drives the CLI that calls this as a real subprocess over isolated artifact fixtures and over a budget file with an app removed.
 export function parseBundleBudgets(value, path) {
   const refuse = (detail) => {
     throw new BudgetRefusal(
@@ -78,7 +77,6 @@ export function parseBundleBudgets(value, path) {
     routes: readGroup(routes, "routes", readCeiling),
   };
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 /**
  * The ceiling a measurement earns at the file's one margin. Both the gate that
