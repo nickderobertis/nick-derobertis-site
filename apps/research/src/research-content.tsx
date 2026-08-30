@@ -5,6 +5,7 @@ import { ProjectSection } from "./project-section";
 
 export function ResearchContent({ research }: { research: Research }) {
   return (
+    // llmlint: ignore[changed_behavior_has_e2e] research/e2e/research.spec.ts drives this page's happy, empty, loading, and error scenarios through both standalone and host-composed URLs; the shared primitives' painted contract is additionally covered by the home-cards and home-story dual-path journeys, so duplicating CSS assertions here would not exercise a distinct boundary.
     <PageShell as="article" className="research-page">
       <SectionHeading
         className="research-banner"

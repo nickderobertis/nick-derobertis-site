@@ -272,9 +272,10 @@ export async function readRouteRemoteStyles({
 }): Promise<InlineRemoteStyle[]> {
   const base = validatePagesBase(pagesBase);
   const sheets: RemoteStyleSheet[] = [];
-  for (const name of remotesForRoute(routePath))
-    // llmlint: ignore[boundary_inputs_validated] These bytes are the output of this workspace's rspack build, not an external stylesheet: mainStylesheetName above accepts only the build's single hashed main CSS asset, and readRemoteCss rejects markup that would escape the style element before rewriting only relative url() values. splitCssBlocks deliberately preserves every byte rather than pretending to be a CSS parser; rspack is the syntax boundary, while the artifact check and browser journeys verify the emitted inline CSS through the consumer that actually parses it.
+  for (const name of remotesForRoute(routePath)) {
+    // llmlint: ignore[boundary_inputs_validated] readRemoteCss accepts only this workspace's single hashed rspack CSS asset and rejects style-breaking markup; rspack is the syntax boundary, while artifact checks and browser journeys send the resulting inline CSS through the consumer's real CSS parser.
     sheets.push({ name, css: await readRemoteCss(remoteRoot, name, base) });
+  }
   return groupRemoteStyles(sheets);
 }
 

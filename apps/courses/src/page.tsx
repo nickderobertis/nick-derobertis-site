@@ -12,6 +12,7 @@ export default function CoursesPage({
 }: CoursesPageProps<Course[]>) {
   const { courses, view } = useCoursesPage(initialView, initialCourses);
   return (
+    // llmlint: ignore[changed_behavior_has_e2e] courses/e2e/courses.spec.ts drives this page's happy, empty, loading, and error scenarios through both standalone and host-composed URLs; the shared primitives' painted contract is additionally covered by the home-cards and home-story dual-path journeys, so duplicating CSS assertions here would not exercise a distinct boundary.
     <PageShell className="courses-page">
       <SectionHeading
         className="courses-banner"

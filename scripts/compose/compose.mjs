@@ -261,6 +261,7 @@ export async function compose({
     try {
       [html, css, contractText] = await Promise.all([
         readFile(join(directory, "fragment.html"), "utf8"),
+        // llmlint: ignore[boundary_inputs_validated] fragment.css is trusted output from this workspace's rspack build, not visitor input; the check below rejects style-breaking markup, and the composed-artifact browser journeys exercise these bytes through Chromium's real CSS parser.
         readFile(join(directory, "fragment.css"), "utf8"),
         readFile(join(directory, "fragment.json"), "utf8"),
       ]);

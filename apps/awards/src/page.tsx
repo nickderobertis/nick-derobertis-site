@@ -29,6 +29,7 @@ export default function AwardsPage() {
   const awards = showAll ? state.awards : selectedAwards(state.awards);
   const label = showAll ? "Awards & honors" : "Selected awards";
   return (
+    // llmlint: ignore[changed_behavior_has_e2e] awards/e2e/awards.spec.ts drives this pane's happy, empty, loading, and error scenarios through both standalone and host-composed URLs; the shared primitive's painted contract is additionally covered by the home-cards dual-path journey, so duplicating CSS assertions here would not exercise a distinct boundary.
     <PageShell className="awards-pane" aria-label={label}>
       <h2 className="visually-hidden">{label}</h2>
       <AwardsStatistics stats={calculateAwardsStats(awards)} />

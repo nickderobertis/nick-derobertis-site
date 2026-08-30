@@ -12,6 +12,7 @@ export default function TimelinePage() {
   if (state === "error") return <TimelineState name="error" />;
   const entries = state === "empty" ? [] : timeline;
   return (
+    // llmlint: ignore[changed_behavior_has_e2e] timeline/e2e/timeline.spec.ts drives this page's happy, empty, loading, and error scenarios through both standalone and host-composed URLs; the shared primitives' painted contract is additionally covered by the home-cards and home-story dual-path journeys, so duplicating CSS assertions here would not exercise a distinct boundary.
     <PageShell className="timeline-pane" aria-labelledby="timeline-heading">
       <SectionHeading
         title="Educated and Experienced"

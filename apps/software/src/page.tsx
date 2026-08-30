@@ -12,6 +12,7 @@ export default function SoftwarePage({
 }: SoftwarePageProps<SoftwareProject[]>) {
   const { projects, view } = useSoftwarePage(initialView, initialProjects);
   return (
+    // llmlint: ignore[changed_behavior_has_e2e] software/e2e/software.spec.ts drives this page's happy, empty, loading, and error scenarios through both standalone and host-composed URLs; the shared primitives' painted contract is additionally covered by the home-cards and home-story dual-path journeys, so duplicating CSS assertions here would not exercise a distinct boundary.
     <PageShell className="software-page">
       <SectionHeading
         className="software-banner"
