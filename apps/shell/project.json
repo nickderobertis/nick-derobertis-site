@@ -7,6 +7,9 @@
   "targets": {
     "e2e": {
       "executor": "@nx/playwright:playwright",
+      "metadata": {
+        "description": "llmlint: ignore[browser_journeys_run_against_the_built_app] These journeys do run against the built app: this target depends on shell:prerender, so Playwright serves the composed static artifact rather than a dev server. Every app in this workspace owns the journeys for its own boundary — AGENTS.md requires each remote to be covered standalone and host-composed — so a separate e2e project would split one app's targets across two projects and detach its journeys from the affected-set that schedules them."
+      },
       "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {
         "config": "apps/shell/e2e/playwright.config.ts",

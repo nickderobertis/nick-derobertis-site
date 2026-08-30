@@ -1,4 +1,11 @@
 /**
+ * A refusal this gate raises on purpose. Every message carries the action that
+ * clears it, which is what lets the CLI tell a deliberate refusal apart from an
+ * unexpected failure that needs a recovery step appended to it.
+ */
+export class BudgetRefusal extends Error {}
+
+/**
  * @typedef {{measuredBytes: number, ceilingBytes: number}} Ceiling
  * @typedef {{entry: Ceiling, page?: Ceiling}} AppBudget
  * @typedef {{marginPercent: number, apps: Record<string, AppBudget>, routes: Record<string, Ceiling>}} BundleBudgets
@@ -16,7 +23,7 @@
 // llmlint: ignore-block[changed_behavior_has_e2e] The budget file is a committed build input read before any artifact is served: a file this rejects gates the compose lane, so nothing it refuses reaches a visitor. bundle-budgets.spec.ts drives the CLI that calls this as a real subprocess over isolated artifact fixtures and over a budget file with an app removed.
 export function parseBundleBudgets(value, path) {
   const refuse = (detail) => {
-    throw new Error(
+    throw new BudgetRefusal(
       `${path} is invalid: ${detail}. Fix the committed budgets and rerun just prerender.`,
     );
   };

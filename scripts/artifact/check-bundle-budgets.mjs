@@ -11,11 +11,21 @@ import remoteManifest from "@site/build-config/remotes.json" with {
 // sibling tooling module reached by path, the way this project already
 // reaches apps/shell/src/routes.json from check-static-artifact.mjs.
 import { routeFragments } from "../compose/compose.mjs";
-import { deriveCeiling, parseBundleBudgets } from "./bundle-budgets.mjs";
+import {
+  BudgetRefusal,
+  deriveCeiling,
+  parseBundleBudgets,
+} from "./bundle-budgets.mjs";
 
+// A refusal already ends with the action that clears it. Anything else landing
+// here is unexpected — an unreadable chunk, a budget file that is not JSON — and
+// says nothing about what to do next, so the recovery step is appended to it.
 process.on("uncaughtException", (error) => {
+  const reason = error instanceof Error ? error.message : String(error);
   console.error(
-    `check-bundle-budgets: ${error instanceof Error ? error.message : String(error)}`,
+    error instanceof BudgetRefusal
+      ? `check-bundle-budgets: ${reason}`
+      : `check-bundle-budgets: ${reason}. The artifact at ${root} or the budgets at ${budgetsPath} could not be read as expected; rebuild with just prerender, and rerun this gate.`,
   );
   process.exit(1);
 });
@@ -29,7 +39,7 @@ for (const [name, value] of [
   ["BUNDLE_BUDGETS", budgetsPath],
 ])
   if (typeof value !== "string" || value.length === 0 || value.includes("\0"))
-    throw new Error(
+    throw new BudgetRefusal(
       `${name} must be a non-empty filesystem path; fix it and rerun just prerender.`,
     );
 // llmlint: ignore-end[changed_behavior_has_e2e]
@@ -77,7 +87,7 @@ function chunkFileResolver(source) {
     timeout: 1000,
   });
   if (typeof resolve !== "function")
-    throw new Error(
+    throw new BudgetRefusal(
       `A bundle runtime declares a chunk filename resolver that is not a function. Rebuild the artifact and rerun just prerender.`,
     );
   return (id) => {
@@ -147,12 +157,12 @@ async function entryScripts(directory, emitted) {
     ([, reference]) => basename(reference),
   );
   if (scripts.length === 0)
-    throw new Error(
+    throw new BudgetRefusal(
       `${documentPath} loads no script, so its eager entry cannot be measured; rebuild that app and rerun just prerender.`,
     );
   for (const script of scripts)
     if (!emitted.has(script))
-      throw new Error(
+      throw new BudgetRefusal(
         `${documentPath} loads ${script}, which ${directory} does not contain; rebuild that app and rerun just prerender.`,
       );
   return scripts;
@@ -210,7 +220,7 @@ async function measureApp(directory) {
 const flags = process.argv.slice(2);
 const rederiving = flags.length === 1 && flags[0] === "--rederive";
 if (flags.length > 0 && !rederiving)
-  throw new Error(
+  throw new BudgetRefusal(
     `check-bundle-budgets accepts no arguments, or --rederive to rewrite ${budgetsPath} from the tree in front of it; it was given ${flags.join(" ")}.`,
   );
 
@@ -228,7 +238,7 @@ const stagedRemotes = [];
 for (const entry of await readdir(join(root, "remotes"))) {
   if (!(await stat(join(root, "remotes", entry))).isDirectory()) continue;
   if (!declaredRemotes.includes(entry))
-    throw new Error(
+    throw new BudgetRefusal(
       `${root}/remotes carries ${entry}, which libs/build-config/src/remotes.json does not declare as a remote; rebuild the artifact and rerun just prerender.`,
     );
   stagedRemotes.push(entry);
@@ -246,14 +256,14 @@ if (!rederiving) {
     (app) => !(app in budgets.apps),
   );
   if (unbudgeted.length > 0)
-    throw new Error(
+    throw new BudgetRefusal(
       `${budgetsPath} declares no budget for ${unbudgeted.join(", ")}; re-derive the ceilings with node scripts/artifact/check-bundle-budgets.mjs --rederive and commit the result, then rerun just prerender.`,
     );
   const unknownApps = Object.keys(budgets.apps).filter(
     (app) => !artifactApps.includes(app),
   );
   if (unknownApps.length > 0)
-    throw new Error(
+    throw new BudgetRefusal(
       `${budgetsPath} budgets ${unknownApps.join(", ")}, which the artifact at ${root} does not contain; align the budgets with libs/build-config/src/remotes.json and rerun just prerender.`,
     );
   const unbudgetedRoutes = routePaths.filter(
@@ -263,7 +273,7 @@ if (!rederiving) {
     (route) => !routePaths.includes(route),
   );
   if (unbudgetedRoutes.length > 0 || unknownRoutes.length > 0)
-    throw new Error(
+    throw new BudgetRefusal(
       `${budgetsPath} budgets the routes ${Object.keys(budgets.routes).join(", ")}, but compose composes ${routePaths.join(", ")}; align the budgets with scripts/compose/compose.mjs and rerun just prerender.`,
     );
 }
@@ -338,7 +348,7 @@ for (const [route, bytes] of Object.entries(measuredRoutes))
     );
 
 if (violations.length > 0)
-  throw new Error(
+  throw new BudgetRefusal(
     `The composed artifact exceeds its committed bundle budgets:\n${violations.map((violation) => `  ${violation}`).join("\n")}\nRemove the payload, or re-derive every ceiling with node scripts/artifact/check-bundle-budgets.mjs --rederive and commit the result.`,
   );
 // llmlint: ignore-end[changed_behavior_has_e2e]
