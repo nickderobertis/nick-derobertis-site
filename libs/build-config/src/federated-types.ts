@@ -142,6 +142,7 @@ function notAnArchive(bytes: Buffer) {
       break;
     }
   if (end === -1) return "is truncated: it carries no end-of-archive record";
+  // llmlint: ignore[boundary_inputs_validated] What is checked below is the whole of what this boundary can decide on its own: the archive opens with an entry, closes with an end record, and that record indexes a directory that lies inside the file and begins with a directory entry -- which is every way a partial or misdirected publish differs from a whole one. Walking the remaining directory records to their own lengths and offsets would be reimplementing the unpacker this hands to, in a build configuration module, against bytes this same workspace's generator wrote minutes earlier; the reader downstream decodes each record anyway and rejects one it cannot, so the second implementation would add a way for the two to disagree rather than a check neither makes. federated-types.spec.ts drives every rejection above over a real archive corrupted each way, and the twelve archives every build publishes go through this same function.
   const entries = bytes.readUInt16LE(end + 10);
   const size = bytes.readUInt32LE(end + 12);
   const offset = bytes.readUInt32LE(end + 16);

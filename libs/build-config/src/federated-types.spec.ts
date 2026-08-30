@@ -7,7 +7,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { crc32 } from "node:zlib";
 import { rspack } from "@rspack/core";
 import { afterEach, describe, expect, test } from "vitest";
@@ -18,6 +18,7 @@ import {
   FederatedTypesPlugin,
   federatedTypesRoot,
   federatedTypeUrls,
+  hostTypesFolder,
   hostTypesPath,
   missingRemoteTypes,
   publishFederatedTypes,
@@ -372,6 +373,28 @@ describe("the declaration trees a build declares as its outputs", () => {
         );
 
       expect(declared.sort(), `apps/${app}/project.json`).toEqual(owed.sort());
+      if (!composes) continue;
+
+      // A host's typecheck resolves its federated imports through the same two
+      // trees, named relative to its own project root because that is where
+      // its tsconfig sits. Those are restated in a file TypeScript reads and
+      // this module never does, so a tree renamed here without being renamed
+      // there would leave the typecheck resolving nothing -- and resolving
+      // nothing is what a `paths` entry reports as no error at all.
+      const configuration = await readFile(
+        `apps/${app}/tsconfig.app.json`,
+        "utf8",
+      );
+      for (const tree of [
+        hostTypesFolder(app),
+        relative(
+          resolve(`apps/${app}`),
+          resolve(`${federatedTypesRoot}/remotes`),
+        ),
+      ])
+        expect(configuration, `apps/${app}/tsconfig.app.json`).toContain(
+          `"${tree}/*"`,
+        );
     }
   });
 });
