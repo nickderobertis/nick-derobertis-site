@@ -50,6 +50,36 @@ const shellApp = "shell";
 const pageExpose = "./Page";
 
 /**
+ * The resolver expression, checked before it is evaluated rather than after.
+ * It comes out of a build artifact, so what may be executed is stated here as a
+ * shape: an arrow function of one parameter whose body, once its string
+ * literals are removed, names nothing but that parameter. That admits the
+ * concatenations and chunk-id maps a bundler emits — `e=>"common.9f2.js"`,
+ * `e=>""+({5:"a"})[e]+".js"` — and refuses anything that could call out to a
+ * host global, so nothing unvalidated ever reaches runInNewContext.
+ */
+function validatedResolverExpression(expression) {
+  const refuse = (detail) => {
+    throw new BudgetRefusal(
+      `A bundle runtime declares a chunk filename resolver that ${detail}. Rebuild the artifact and rerun just prerender.`,
+    );
+  };
+  if (expression.length > 8192) refuse("is longer than any bundler emits");
+  const arrow = /^\(?\s*([A-Za-z_$][\w$]*)\s*\)?\s*=>([\s\S]*)$/.exec(
+    expression,
+  );
+  const [, parameter = "", body = ""] = arrow ?? [];
+  if (!parameter) refuse("is not an arrow function of one parameter");
+  if (body.includes("`")) refuse("interpolates a template literal");
+  const withoutStrings = body
+    .replace(/"(?:[^"\\]|\\.)*"/g, "")
+    .replace(/'(?:[^'\\]|\\.)*'/g, "");
+  for (const [name] of withoutStrings.matchAll(/[A-Za-z_$][\w$]*/g))
+    if (name !== parameter) refuse(`reads ${name}, which is not its parameter`);
+  return expression;
+}
+
+/**
  * Reads the chunk-id-to-filename function a bundle's own runtime carries.
  * Which file a chunk id names is the bundler's decision, not a naming
  * convention: an id can be renamed (`5` becomes `common`), can carry no
@@ -82,7 +112,9 @@ function chunkFileResolver(source) {
       depth -= 1;
     } else if (depth === 0 && (character === ";" || character === ",")) break;
   }
-  const expression = source.slice(start + marker.length, index);
+  const expression = validatedResolverExpression(
+    source.slice(start + marker.length, index),
+  );
   const resolve = runInNewContext(`(${expression})`, Object.create(null), {
     timeout: 1000,
   });

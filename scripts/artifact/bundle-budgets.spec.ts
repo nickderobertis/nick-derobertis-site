@@ -175,6 +175,28 @@ test("re-adding one CV domain's data to a ./Page chunk is refused", async () => 
   );
 });
 
+// Measuring a `./Page` chunk means resolving chunk ids with the bundle's own
+// resolver, so this gate evaluates an expression it read out of a build
+// artifact. It is validated before it runs, and a resolver that reaches for
+// anything but its own parameter is refused rather than evaluated.
+test("a bundle resolver that reads a host global is refused, not evaluated", async () => {
+  const fixture = await isolatedArtifact(["bio"]);
+  const container = join(fixture, "remotes", "bio", "remoteEntry.js");
+  const source = await readFile(container, "utf8");
+  await writeFile(
+    container,
+    source.replace(
+      "__webpack_require__.u=",
+      "__webpack_require__.u=e=>process.env.HOME+",
+    ),
+  );
+
+  const result = checkBudgets(fixture);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain("reads process, which is not its parameter");
+});
+
 test("a budget file that omits an app the artifact contains is refused", async () => {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-file-"));
   fixtures.push(fixture);
