@@ -105,7 +105,7 @@ class SeparateExposedChunksPlugin {
   apply(compiler: Compiler) {
     const splitChunks = compiler.options.optimization?.splitChunks;
     /* v8 ignore start -- Reachable only inside a real rspack build, where Nx's app plugin has already put a splitChunks object here; rspack-remote.spec.ts asserts the plugin is in the build, and every app's ownership.spec.ts drives the exposes it keeps apart through both boundaries. */
-    if (!splitChunks || !splitChunks.cacheGroups) return;
+    if (typeof splitChunks !== "object" || !splitChunks.cacheGroups) return;
     splitChunks.cacheGroups.common = false;
     /* v8 ignore stop */
   }
