@@ -12,7 +12,6 @@
  * rather than merely similar.
  */
 
-/* Page shell — the container a route or pane mounts into. */
 .pane {
   position: relative;
 }
@@ -21,7 +20,6 @@
   margin: auto;
 }
 
-/* Section heading — an optional eyebrow, a title, an optional description. */
 .section-heading {
   display: var(--heading-layout, block);
 }
@@ -40,7 +38,6 @@
   line-height: var(--title-line-height, normal);
 }
 
-/* Card — one padded surface carrying one record. */
 .card {
   padding: var(--card-padding, 1.25rem);
   border: var(--card-border, 1px solid var(--line));
@@ -49,7 +46,6 @@
   box-shadow: var(--card-shadow, 0 0.2rem 0.7rem rgb(18 50 74 / 8%));
 }
 
-/* Action link — the affordance that leaves the current pane. */
 .action {
   display: inline-block;
   padding: var(--action-padding, 0.65rem 1rem);
@@ -68,7 +64,6 @@
   outline-offset: 3px;
 }
 
-/* Pane state — what a pane shows instead of its content. */
 .pane-state {
   width: min(1100px, calc(100% - 2 * var(--space)));
   margin: 3rem auto;
@@ -81,7 +76,6 @@
   color: var(--muted);
 }
 
-/* Skeleton — the shimmering stand-in a remote renders while it loads. */
 .remote-skeleton {
   display: grid;
   gap: 1.5rem;

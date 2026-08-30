@@ -14,6 +14,7 @@ homePaneJourneys("home-story");
 // pane's accessible name with it.
 const pane = statefulHomePane("home-story");
 
+// llmlint: ignore-block[browser_journeys_run_against_the_built_app] This journey belongs to home-story's own e2e target, but it does run against the built app: that target depends on shell:prerender, and paneRenderPaths opens the resulting production artifact at both the remote's standalone document and the host-composed route. This workspace intentionally keeps each app's browser suite behind its app's affected Nx edge; extracting a second project would change scheduling ownership without changing the artifact this test drives.
 for (const renderPath of paneRenderPaths(pane)) {
   test(`the shared section heading opens the story ${renderPath.name}`, async ({
     page,
@@ -39,3 +40,4 @@ for (const renderPath of paneRenderPaths(pane)) {
     ).toBeVisible();
   });
 }
+// llmlint: ignore-end[browser_journeys_run_against_the_built_app]

@@ -16,6 +16,9 @@ export function elementProps<Props extends object>(
   own: readonly string[],
   className: string,
 ): Record<string, unknown> {
+  // `Props extends object` accepts the React attribute interfaces callers use but
+  // gives the generic no string index signature; this view permits the own keys
+  // returned by `Object.keys` to be copied without weakening the public input.
   const source = props as Record<string, unknown>;
   const attributes: Record<string, unknown> = { className };
   for (const key of Object.keys(source))
