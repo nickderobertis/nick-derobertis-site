@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@site/build-config": "workspace:*",
     "@site/testing": "workspace:*"
   }
 }
