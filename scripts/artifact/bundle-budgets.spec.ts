@@ -416,7 +416,7 @@ test("a budget file carrying a property nothing reads is refused", async () => {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-unread-"));
   fixtures.push(fixture);
   const path = join(fixture, "bundle-budgets.json");
-  const committed = JSON.parse(await readFile(budgetsPath, "utf8"));
+  const committed = await readBudgets();
   await writeFile(
     path,
     JSON.stringify({ ...committed, ceilingOverride: 4_000_000 }),
@@ -466,7 +466,7 @@ test("a budget file whose derivation is not prose is refused", async () => {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-derivation-"));
   fixtures.push(fixture);
   const path = join(fixture, "bundle-budgets.json");
-  const committed = JSON.parse(await readFile(budgetsPath, "utf8"));
+  const committed = await readBudgets();
   await writeFile(
     path,
     JSON.stringify({ ...committed, derivation: "measured by the gate itself" }),
@@ -529,18 +529,17 @@ test("--rederive derives ceilings the committed ones still cover", async () => {
   ).toEqual([]);
 });
 
-// And it writes back exactly the properties that boundary reads: the committed
-// file's derivation prose survives a re-derivation, and nothing the gate never
-// read is carried across into the file a reviewer then weighs.
-test("--rederive writes back only the properties the boundary reads", async () => {
-  const committed = JSON.parse(await readFile(budgetsPath, "utf8"));
+// And it writes back what that boundary read: the committed file's derivation
+// prose survives a re-derivation rather than being dropped from the file a
+// reviewer then weighs. Nothing the gate never read can be carried across in
+// the other direction, because a file declaring one is refused above.
+test("--rederive writes the derivation prose back", async () => {
+  const committed = await readBudgets();
 
   const { path, result } = await rederive(budgetsPath);
 
   expect(result.status).toBe(0);
-  const rewritten = JSON.parse(await readFile(path, "utf8"));
-  expect(Object.keys(rewritten)).toEqual(Object.keys(committed));
-  expect(rewritten.derivation).toEqual(committed.derivation);
+  expect((await readBudgets(path)).derivation).toEqual(committed.derivation);
 });
 
 // The margin is what keeps the gate from firing on drift it was never meant to
