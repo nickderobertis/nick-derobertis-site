@@ -16,6 +16,14 @@ import {
   siteRoutes,
 } from "@site/e2e-harness";
 
+// llmlint: ignore-file[browser_journeys_run_against_the_built_app] This
+// workspace has no separate e2e project by design: `shell:e2e` depends on
+// `shell:prerender`, which composes and gates the production artifact, and
+// scripts/serve/serve-e2e.mjs then serves those built bytes, so every journey
+// below drives the bundle a visitor receives rather than a dev server. Nothing
+// unrelated pays for the browser either — the e2e target is dispatched by
+// affected selection, so it starts only for a change that reaches the shell.
+
 // The route inventory and the panes Home composes are one contract each, owned
 // by @site/e2e-harness and joined there to the manifests that publish them.
 const pages = siteRoutes();
@@ -506,16 +514,26 @@ test("every route's standalone remote serves its own render and then renders ove
 }) => {
   const noScript = await browser.newContext({ javaScriptEnabled: false });
   const staticPage = await noScript.newPage();
-  for (const { link, remote } of routeRemotes.filter(({ path }) => path)) {
+  for (const route of routeRemotes.filter(({ path }) => path)) {
+    const { link, remote } = route;
     await staticPage.goto(remote.standalone);
     await expect(
       staticPage.getByRole(remote.role, { name: remote.name }),
       `${link} standalone without JavaScript`,
     ).toBeVisible();
+    // The route's own remote prerenders this document, so it owes the same CV
+    // content the shell's composed document does: a remote that renders one
+    // entry of its domain is only caught here.
+    await expectSubstantiveContent(
+      staticPage,
+      route,
+      "standalone without JavaScript",
+    );
   }
   await noScript.close();
 
-  for (const { link, remote } of routeRemotes) {
+  for (const route of routeRemotes) {
+    const { link, remote } = route;
     const page = await browser.newPage();
     const errors: string[] = [];
     page.on("console", (message) => {
@@ -529,6 +547,7 @@ test("every route's standalone remote serves its own render and then renders ove
       page.getByRole(remote.role, { name: remote.name }),
       `${link} standalone with JavaScript`,
     ).toBeVisible();
+    await expectSubstantiveContent(page, route, "standalone with JavaScript");
     // llmlint: ignore[tests_mirror_real_usage] The prerendered document and the one the bundle renders over it are visibly identical, so this removal count is the only form the claim that the remote's own bundle took the page over has; every other assertion here reads the page through roles.
     expect(
       await removedRootChildren(),

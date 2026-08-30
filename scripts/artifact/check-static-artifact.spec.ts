@@ -16,7 +16,6 @@ import { afterAll, beforeAll, expect, test } from "vitest";
 
 let fixture: string;
 const corruptibleRemote = "bio";
-/** Every fixture built here, torn down together once the file is done. */
 const fixtures: string[] = [];
 
 /**

@@ -162,6 +162,18 @@ describe("substantive route content", () => {
     );
   });
 
+  test("refuses a staged CV schema that cannot be compiled into a validator", async () => {
+    const root = await cvDataRoot(
+      "domains/courses.json",
+      "[]",
+      JSON.stringify({ properties: { courses: { type: "not-a-json-type" } } }),
+    );
+
+    expect(() => routeSubstantiveContent(root, "/courses")).toThrow(
+      /does not define a usable courses domain schema/,
+    );
+  });
+
   // A staged schema is the whole contract the domain beside it is held to, so
   // one that carries its definitions inline validates on its own terms.
   test("validates a staged domain against the staged schema's own definitions", async () => {

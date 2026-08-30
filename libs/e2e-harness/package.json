@@ -1,5 +1,6 @@
 {
   "name": "@site/e2e-harness",
+  "description": "Journey contracts and Playwright configuration every app's e2e suite shares. llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] @site/artifact-contracts is not unrelated code here: it is the one source of the route content these journeys assert and of the compose-time gate that admits the artifact they run against, so a change to it is one every journey should be rerun for. It is a plain contract library with no browser, service, or build tooling behind it, so the edge adds nothing but that rerun.",
   "private": true,
   "type": "module",
   "exports": {
