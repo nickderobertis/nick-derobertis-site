@@ -4,15 +4,7 @@ import { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import type { ResearchViewState } from "./use-research-page";
 
-// A share cannot be reached from an entry's own chunk: Module Federation
-// resolves an initial consume synchronously, before this container has a share
-// scope to resolve it in, and refuses. Importing it dynamically is the boundary
-// that puts the consume in a chunk the runtime can await instead, which is what
-// lets the modules below be singletons one page evaluates once rather than once
-// per container.
-//
-// The extracted skeleton primitive consumes the same non-eager share, so load
-// the local skeleton through this async boundary as the theme initializes.
+// Non-eager shares require an async import boundary before scope initialization.
 const [{ default: Skeleton }] = await Promise.all([
   import("./skeleton"),
   import("@site/design-system"),

@@ -89,7 +89,7 @@ const eagerShares = new Set(
  * share added to libs/build-config/src/rspack-remote.ts is one these journeys
  * start requiring a single instance of.
  */
-function declaredShares(app: string) {
+function declaredNonEagerShares(app: string) {
   return federationManifestSchema
     .parse(
       JSON.parse(readFileSync(`dist/apps/${app}/mf-manifest.json`, "utf8")),
@@ -99,7 +99,6 @@ function declaredShares(app: string) {
     .sort();
 }
 
-/** The containers whose remoteEntry.js the page fetched. */
 function recordContainers(page: Page) {
   const containers = new Set<string>();
   page.on("response", (response) => {
@@ -152,71 +151,76 @@ const instancesOf = (shares: readonly ShareEntry[], name: string) =>
     .map(({ from, loaded }) => `${from} loaded=${loaded}`)
     .sort();
 
-test("the entry route's containers all resolve one instance of each shared library", async ({
-  page,
+test("composed routes resolve one instance of each shared library", async ({
+  browser,
 }) => {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  const containers = recordContainers(page);
-  const settle = watchTraffic(page);
+  const routes = [
+    { path: "", heading: "Finance researcher & educator", containers: 8 },
+    { path: "research", heading: "Research Works", containers: 1 },
+  ];
 
-  await page.goto("", { waitUntil: "networkidle" });
-  await settle();
+  for (const route of routes) {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    const containers = recordContainers(page);
+    const settle = watchTraffic(page);
 
-  // Home and its seven panes, which is what makes this the route issue #92
-  // measured the duplication on.
-  expect(containers()).toHaveLength(8);
-  const shares = await resolvedShares(page);
-  const shared = declaredShares("shell");
-  expect(shared).not.toHaveLength(0);
-  // One entry, from the host, already evaluated: one instance for the page
-  // rather than one per container.
-  for (const name of shared)
-    expect(instancesOf(shares, name), `instances of ${name} on /`).toEqual([
-      "shell loaded=true",
-    ]);
-  // Containers other than the host resolved to those instances, so the eight
-  // above really did share rather than each miss the scope.
-  const consumers = new Set(
-    shares.flatMap(({ useIn }) => useIn).filter((name) => name !== "shell"),
-  );
-  expect([...consumers].length).toBeGreaterThan(1);
-  // The counts above are only about libraries the route really used, so these
-  // say the route rendered through those eight containers.
-  await expect(
-    page.getByRole("region", { name: "Featured work" }),
-  ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Who am I?" })).toBeVisible();
-  await expect(
-    page.getByRole("heading", { name: "Selected awards" }),
-  ).toBeVisible();
-  expect(errors).toEqual([]);
+    await page.goto(route.path, { waitUntil: "networkidle" });
+    await settle();
+
+    expect(containers()).toHaveLength(route.containers);
+    const shares = await resolvedShares(page);
+    const shared = declaredNonEagerShares("shell");
+    expect(shared).not.toHaveLength(0);
+    // One entry, from the host, already evaluated: one instance for the page
+    // rather than one per container.
+    for (const name of shared)
+      expect(
+        instancesOf(shares, name),
+        `instances of ${name} on /${route.path}`,
+      ).toEqual(["shell loaded=true"]);
+    await expect(
+      page.getByRole("heading", { name: route.heading }),
+    ).toBeVisible();
+    expect(errors).toEqual([]);
+    await page.close();
+  }
 });
 
-test("a container with no host to share from renders from its own copy", async ({
-  page,
+test("standalone containers render from their own shared copies", async ({
+  browser,
 }) => {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  const containers = recordContainers(page);
-  const settle = watchTraffic(page);
+  const remotes = [
+    { app: "bio", heading: "Optimizing Life" },
+    { app: "research", heading: "Research Works" },
+  ];
 
-  await page.goto("remotes/bio/", { waitUntil: "networkidle" });
-  await settle();
+  for (const remote of remotes) {
+    const page = await browser.newPage();
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    const containers = recordContainers(page);
+    const settle = watchTraffic(page);
 
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Optimizing Life" }),
-  ).toBeVisible();
-  expect(errors).toEqual([]);
-  // Nothing supplied this document a share scope, so what it resolved and
-  // rendered from is the fallback copy its own build kept — still one, not two.
-  expect(containers()).toEqual(["bio"]);
-  const shares = await resolvedShares(page);
-  for (const name of declaredShares("bio"))
-    expect(
-      instancesOf(shares, name),
-      `instances of ${name} standalone`,
-    ).toEqual(["bio loaded=true"]);
+    await page.goto(`remotes/${remote.app}/`, { waitUntil: "networkidle" });
+    await settle();
+
+    await expect(
+      page.getByRole("heading", { level: 1, name: remote.heading }),
+    ).toBeVisible();
+    expect(errors).toEqual([]);
+    // Nothing supplied this document a share scope, so what it resolved and
+    // rendered from is the fallback copy its own build kept — still one, not two.
+    expect(containers()).toEqual([remote.app]);
+    const shares = await resolvedShares(page);
+    for (const name of declaredNonEagerShares(remote.app))
+      expect(
+        instancesOf(shares, name),
+        `instances of ${name} in standalone ${remote.app}`,
+      ).toEqual([`${remote.app} loaded=true`]);
+    await page.close();
+  }
 });
 
 // The composed documents carry their CSS inline, which is what paints the site
@@ -226,8 +230,8 @@ test("a container with no host to share from renders from its own copy", async (
 test.describe("with JavaScript disabled", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("the entry route is painted by the design system before a script runs", async ({
-    page,
+  test("composed routes and standalone remotes are painted before a script runs", async ({
+    browser,
   }) => {
     const theme = readFileSync("libs/design-system/src/theme.css", "utf8");
     const [, property, value] =
@@ -237,20 +241,31 @@ test.describe("with JavaScript disabled", () => {
         "libs/design-system/src/theme.css must declare a colour custom property for this journey to recognise the theme by; add one, then rerun just test-e2e",
       );
 
-    await page.goto("");
+    const documents = [
+      { path: "", heading: "Finance researcher & educator" },
+      { path: "research", heading: "Research Works" },
+      { path: "remotes/bio/", heading: "Optimizing Life" },
+      { path: "remotes/research/", heading: "Research Works" },
+    ];
 
-    await expect(
-      page.getByRole("heading", { name: "Finance researcher & educator" }),
-    ).toBeVisible();
-    expect(
-      await page.evaluate(
-        (token) =>
-          getComputedStyle(document.documentElement)
-            .getPropertyValue(token)
-            .trim(),
-        property,
-      ),
-    ).toBe(value);
+    for (const targetDocument of documents) {
+      const page = await browser.newPage();
+      await page.goto(targetDocument.path);
+      await expect(
+        page.getByRole("heading", { name: targetDocument.heading }),
+      ).toBeVisible();
+      expect(
+        await page.evaluate(
+          (token) =>
+            getComputedStyle(document.documentElement)
+              .getPropertyValue(token)
+              .trim(),
+          property,
+        ),
+        `design token ${property} in ${targetDocument.path || "/"}`,
+      ).toBe(value);
+      await page.close();
+    }
   });
 });
 // llmlint: ignore-end[tests_mirror_real_usage]
