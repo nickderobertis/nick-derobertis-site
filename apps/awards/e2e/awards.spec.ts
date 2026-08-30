@@ -123,7 +123,13 @@ for (const renderPath of renderPaths) {
       await expect(
         alert.getByRole("heading", { name: "Awards unavailable" }),
       ).toBeVisible();
-      await expect(page.getByRole("article")).toHaveCount(0);
+      // Named awards rather than every article on the page: the host-composed
+      // path renders six other panes' cards beside this one.
+      await expect(
+        page.getByRole("article", {
+          name: /GMAT Score|Finance Student of the Year/,
+        }),
+      ).toHaveCount(0);
     });
 
     test("renders its skeleton while the awards boundary is pending", async ({
