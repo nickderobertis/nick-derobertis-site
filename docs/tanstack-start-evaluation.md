@@ -43,20 +43,21 @@ $ just prerender
 `just prerender` is silent on success, so the figures below come from the
 `dist/` it leaves behind: `dist/apps/shell` (the deployed artifact) and
 `dist/fragment-renderers` (the second compilation's output). Every one of them
-is a file count, a byte size, or an occurrence count, taken on 2026-08-29 from
-a cold-cache run and quoted at the claim it grounds.
+is a file count, a byte size, or an occurrence count, taken on 2026-08-30 from
+a cold-cache run over this branch and quoted at the claim it grounds.
 
 ## What it absorbs
 
 **The hand-driven SSR lifecycle.** `libs/build-config/src/shell-fragment-entry.tsx`
-is 77 lines that build one `Request` per route (`:40-56`), spin on
-`router.serverSsr?.isSerializationFinished()` (`:58-59`), call `prerender` from
-`react-dom/static` (`:60`), then `setRenderFinished()` and `takeBufferedHtml()`
-(`:61-64`) — the two members whose declarations on `@tanstack/router-core`'s
-`ServerSsr` interface carry `/** Framework-only. */` (`src/router.ts:806-807`
-and `:825-826`), and which resolve here through an unpinned transitive
-`@tanstack/router-core@1.171.15` (`pnpm-lock.yaml:3103`) rather than the pinned
-`@tanstack/react-router@1.170.18` (`package.json:12`). Start owns exactly that loop. Its rsbuild adapter loads the
+is 90 lines that build one `Request` per route (`:40-56`), spin on
+`router.serverSsr?.isSerializationFinished()` (`:65-66`), call `prerender` from
+`react-dom/static` (`:67`), then `setRenderFinished()` (`:68`),
+`takeBufferedHtml()` (`:71`) and `cleanup()` (`:78`) — the three members whose
+declarations on `@tanstack/router-core`'s `ServerSsr` interface carry
+`/** Framework-only. */` (`src/router.ts:806-807`, `:808-809` and `:825-826`),
+reached through the `@tanstack/router-core@1.171.15` this repository pins
+directly (`package.json:13`) beside `@tanstack/react-router@1.170.18`
+(`package.json:12`). Start owns exactly that loop. Its rsbuild adapter loads the
 built server bundle's default fetch handler
 (`package/src/rsbuild/post-build.ts:77-96`), issues one `Request` per page
 against it (`:55-65`), and its crawler writes each page's HTML
@@ -69,7 +70,7 @@ second `rspack({ mode: "production", target: "node", … })` build — its own
 swc-loader rule, its own CSS rule, its own `@site-fragment/*` aliases — inside
 an `afterEmit` hook. It runs once per app: the build above left 13 directories
 under `dist/fragment-renderers/`, each holding a `render.cjs`
-(`shell/render.cjs` 2,746,619 bytes; `awards/render.cjs` 2,388,735 bytes).
+(`shell/render.cjs` 2,748,900 bytes; `awards/render.cjs` 2,388,735 bytes).
 Start's rsbuild adapter declares the same thing as a first-class `ssr`
 environment beside `client` (`package/src/rsbuild/planning.ts:12-15`, `:164-196`),
 configured by the same tool that builds the client rather than by a compiler
@@ -138,7 +139,7 @@ Static-only output is therefore supported and Pages is not ruled out. But what t
 repository deploys is not one app's prerendered pages. The composed
 `dist/apps/shell` from the build above holds five route documents
 (`index.html`, `bio/`, `research/`, `software/`, `courses/`), a `remotes/`
-tree with twelve `remoteEntry.js` files totalling 1,547,145 bytes, a `cv-data/`
+tree with twelve `remoteEntry.js` files totalling 1,547,149 bytes, a `cv-data/`
 copy, and `404.html` — assembled from thirteen independently published
 subtrees.
 
@@ -168,7 +169,7 @@ delegating to `remoteConfig`). `tanStackStartRsbuild` returns an `RsbuildPlugin`
 (`package/src/rsbuild/plugin.ts:68-71`) registered through `RsbuildPluginAPI`, so
 each `rspack.config.ts` becomes an `rsbuild.config.ts` and the executor changes
 with it (`@nx/rsbuild` exists at 23.1.2; this workspace declares `@nx/rspack`
-at `package.json:26` and no Rsbuild package). Each app additionally owes the
+at `package.json:27` and no Rsbuild package). Each app additionally owes the
 four entries Start's plan aliases — client, server, start, router
 (`package/src/rsbuild/planning.ts:66-86`) — and a generated route tree, which
 Start resolves from a `routesDirectory` defaulting to `src/routes` into a
@@ -215,27 +216,30 @@ where the thirteen-app cost above comes from.
 **Do not schedule it today.**
 
 What Start absorbs is small, and measurably so. Adopting it would retire, against
-this tree: `libs/build-config/src/shell-fragment-entry.tsx` (77 lines),
+this tree: `libs/build-config/src/shell-fragment-entry.tsx` (90 lines),
 `remote-fragment-entry.tsx` (7), `home-fragment-page.tsx` (13), `compileRenderer`
 (`libs/build-config/src/published-fragment.ts:117-188`, 72 lines), and 24 of
 `scripts/compose/compose.mjs`'s 523 — the per-route CSS dedup and inlining at
 `:410-422` and `:437`, and the title, description, and canonical rewrites at
-`:423-432`. **193 lines in total, of which compose contributes under 5%**; the
-rest of that 523-line script, including every row of the table above, stays,
-because it exists to assemble one document from thirteen apps rather than to
-hand-roll SSR.
+`:423-432`. **206 lines in total, and compose's 24 of them are under 5% of
+that script**; the rest of its 523 lines, including every row of the table
+above, stays, because it exists to assemble one document from thirteen apps
+rather than to hand-roll SSR.
 
 What it does not absorb — the twelve-remote federation split — is where the
 cost is, and that split is a stated invariant of `AGENTS.md` ("all 12 remotes
 must render without failed assets through both") that issue #92 puts out of
 scope by decision. So the migration pays thirteen apps' build-system rewrite to
-retire 193 lines, and leaves the larger, federation-shaped half standing.
+retire 206 lines, and leaves the larger, federation-shaped half standing.
 
-Issue #92's F1a is the cheap alternative and is not foreclosed by deferring
-this: adding the missing `router.serverSsr?.cleanup()` and pinning
-`@tanstack/router-core` explicitly removes the latent risk that motivates the
-SSR half of F1b, and leaves `shell-fragment-entry.tsx` in a state a later Start
-migration would delete anyway.
+Issue #92's F1a was the cheap alternative and has already landed as #93: the
+`router.serverSsr?.cleanup()` in the entry's `finally`
+(`libs/build-config/src/shell-fragment-entry.tsx:74-79`) and the explicit
+`@tanstack/router-core` pin (`package.json:13`, held by
+`libs/build-config/src/router-core-pin.spec.ts`). That removed the latent risk
+motivating the SSR half of F1b, and left `shell-fragment-entry.tsx` in a state
+a later Start migration would delete anyway — so deferring this forecloses
+nothing.
 
 ### What would change this recommendation
 
@@ -261,7 +265,7 @@ knowable, not what is worth doing.
 per-app publish lanes, and GitHub Pages stay exactly as they are; a spike on
 two of this repository's apps — one remote and the shell — has to show all four
 of the following. Any one of them failing means the migration is paying
-thirteen apps' build-system rewrite for less than 193 lines, which is the
+thirteen apps' build-system rewrite for less than 206 lines, which is the
 answer this record already gives.
 
 - **The fragment contract survives without new hand-written glue.** Each app
@@ -271,8 +275,8 @@ answer this record already gives.
   writes documents (`package/src/prerender.ts:181,198`), so an adapter is
   needed, and it has to be **smaller than the 72-line `compileRenderer` it
   replaces** — otherwise the hand-written code moved rather than went away, and
-  the 193-line benefit is not real.
-- **The net deletion holds and per-app cost does not grow.** At least those 193
+  the 206-line benefit is not real.
+- **The net deletion holds and per-app cost does not grow.** At least those 206
   lines retire, and no app's new build configuration is larger than today's:
   `apps/awards/rspack.config.ts` is 2 lines.
 - **The artifact is unchanged in shape.** The spike's composed output passes
@@ -285,19 +289,19 @@ answer this record already gives.
   reports today (`docs/lib-coupling-report.md`, "Boundary and
   affected-economics proof"). A Start build that couples the shell's SSR
   environment to every remote's source would collapse the per-app lanes into
-  one, which is a cost the 193 lines cannot pay for.
+  one, which is a cost the 206 lines cannot pay for.
 
 **The independent trigger.** Both conditions above are moot if the choice stops
 being discretionary: if the framework-only `@tanstack/router-core` surface
-`shell-fragment-entry.tsx:61-64` depends on is removed or changed rather than
-merely unpinned, and F1a's `cleanup()`-and-pin no longer holds it. The public
+`shell-fragment-entry.tsx:65-78` depends on is removed or changed rather than
+merely re-released, so that #93's `cleanup()`-and-pin no longer holds it. The public
 lifecycle that would replace it — `renderRouterToString`, exported from
 `@tanstack/react-router/ssr/server` beside the `createRequestHandler` and
 `RouterServer` the entry already imports (`shell-fragment-entry.tsx:12-15`) —
 cannot be substituted verbatim, because this repository correctly uses
 `prerender` from `react-dom/static` rather than `renderToString`, and only
-`prerender` resolves Suspense (`shell-fragment-entry.tsx:16,60`). At
-that point the comparison is no longer Start against 193 lines; it is Start
+`prerender` resolves Suspense (`shell-fragment-entry.tsx:16,67`). At
+that point the comparison is no longer Start against 206 lines; it is Start
 against writing and owning a replacement for a lifecycle TanStack no longer
 exposes, and Start wins it.
 
