@@ -34,14 +34,14 @@
         "js": {
           "async": [],
           "sync": [
-            "main.cf8758dcc24fea0c.js",
+            "main.8d86342531a1154f.js",
             "remoteEntry.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.d3cda19026929826.css"
+            "main.a35adde09d408f7d.css"
           ]
         }
       },
@@ -57,14 +57,14 @@
         "js": {
           "async": [],
           "sync": [
-            "main.cf8758dcc24fea0c.js",
+            "main.8d86342531a1154f.js",
             "remoteEntry.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.d3cda19026929826.css"
+            "main.a35adde09d408f7d.css"
           ]
         }
       },
@@ -79,14 +79,14 @@
       "assets": {
         "js": {
           "sync": [
-            "common.c0c3877b42c95acb.js",
-            "__federation_expose_Page.94d66972940cad37.js"
+            "common.a51c4a05b807903e.js",
+            "__federation_expose_Page.083cbbde33e64f50.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.d3cda19026929826.css"
+            "__federation_expose_Page.a35adde09d408f7d.css"
           ],
           "async": []
         }
