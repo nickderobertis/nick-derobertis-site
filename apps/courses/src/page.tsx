@@ -1,5 +1,5 @@
 import type { Course } from "@site/data-access-core";
-import "@site/design-system";
+import { PageShell, SectionHeading } from "@site/design-system";
 import type { CoursesPageProps } from "@site/route-state";
 import "./courses.css";
 import { CourseCollection } from "./course-collection";
@@ -12,15 +12,14 @@ export default function CoursesPage({
 }: CoursesPageProps<Course[]>) {
   const { courses, view } = useCoursesPage(initialView, initialCourses);
   return (
-    <section className="courses-page">
-      <header className="courses-banner">
-        <p className="eyebrow">Teaching</p>
-        <h1>Courses</h1>
-        <p>
-          I’ve taught hundreds of students at multiple universities. Browse my
-          courses, topics, and teaching resources below.
-        </p>
-      </header>
+    <PageShell className="courses-page">
+      <SectionHeading
+        className="courses-banner"
+        level={1}
+        eyebrow="Teaching"
+        title="Courses"
+        description="I’ve taught hundreds of students at multiple universities. Browse my courses, topics, and teaching resources below."
+      />
       {view === "loading" ? (
         <Skeleton />
       ) : view === "error" ? (
@@ -36,6 +35,6 @@ export default function CoursesPage({
       ) : (
         <CourseCollection courses={courses} />
       )}
-    </section>
+    </PageShell>
   );
 }

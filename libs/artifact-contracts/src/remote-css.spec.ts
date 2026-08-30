@@ -3,11 +3,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
 import {
+  groupRemoteStyles,
   inlineRemoteCssAttribute,
   inlineRemoteCssPattern,
   readRouteRemoteStyles,
   remotesForRoute,
   renderInlineRemoteCss,
+  splitCssBlocks,
   validatePagesBase,
 } from "./remote-css.ts";
 
@@ -108,14 +110,66 @@ describe("reading a route's remote page CSS", () => {
     expect(style?.css).toContain("url()");
   });
 
-  test("collapses the theme several remotes re-bundle into one style element", async () => {
-    const shared = ":root{--navy:#12324a}";
+  test("collapses the design-system blocks every remote re-bundles into one style element", async () => {
+    // What a real remote ships: the shared design system first, then the page
+    // CSS only that remote has.
+    const shared = ":root{--navy:#12324a}.card{padding:1.25rem}";
     const styles = await readRouteRemoteStyles({
       remoteRoot: remoteRoot({
-        home: { css: shared },
+        home: { css: `${shared}.home-main{display:grid}` },
+        "home-carousel": { css: `${shared}.home-carousel{color:#fff}` },
+        "home-cards": { css: `${shared}.home-cards{display:grid}` },
+        "home-story": { css: `${shared}.story-pane{display:grid}` },
+        "home-contact": { css: `${shared}.contact-pane{display:grid}` },
+        timeline: { css: `${shared}.timeline-pane{color:#27272a}` },
+        skills: { css: `${shared}.skills-pane{display:grid}` },
+        awards: { css: `${shared}.awards-pane{background:#f5eded}` },
+      }),
+      pagesBase: "/nick-derobertis-site",
+      routePath: "/",
+    });
+
+    const [first, ...rest] = styles;
+    expect(first?.names).toEqual([
+      "home",
+      "home-carousel",
+      "home-cards",
+      "home-story",
+      "home-contact",
+      "timeline",
+      "skills",
+      "awards",
+    ]);
+    expect(first?.css).toBe(shared);
+    // Every other group is one remote's own CSS, still attributed to it, and
+    // the shared blocks appear in the document exactly once.
+    expect(rest.map((style) => style.names)).toEqual([
+      ["home"],
+      ["home-carousel"],
+      ["home-cards"],
+      ["home-story"],
+      ["home-contact"],
+      ["timeline"],
+      ["skills"],
+      ["awards"],
+    ]);
+    expect(
+      styles
+        .map((style) => style.css)
+        .join("")
+        .split(".card{").length - 1,
+    ).toBe(1);
+  });
+
+  test("keeps a block two of eight remotes share out of the other six", async () => {
+    const shared = ":root{--navy:#12324a}";
+    const pair = ".skeleton-grid{display:grid}";
+    const styles = await readRouteRemoteStyles({
+      remoteRoot: remoteRoot({
+        home: { css: `${shared}${pair}` },
         "home-carousel": { css: shared },
-        "home-cards": { css: shared },
-        "home-story": { css: ".story{color:red}" },
+        "home-cards": { css: `${shared}${pair}` },
+        "home-story": { css: shared },
         "home-contact": { css: shared },
         timeline: { css: shared },
         skills: { css: shared },
@@ -125,17 +179,22 @@ describe("reading a route's remote page CSS", () => {
       routePath: "/",
     });
 
-    expect(styles).toHaveLength(2);
-    expect(styles[0]?.names).toEqual([
-      "home",
-      "home-carousel",
-      "home-cards",
-      "home-contact",
-      "timeline",
-      "skills",
-      "awards",
+    expect(styles).toEqual([
+      {
+        css: shared,
+        names: [
+          "home",
+          "home-carousel",
+          "home-cards",
+          "home-story",
+          "home-contact",
+          "timeline",
+          "skills",
+          "awards",
+        ],
+      },
+      { css: pair, names: ["home", "home-cards"] },
     ]);
-    expect(styles[1]?.names).toEqual(["home-story"]);
   });
 
   test("refuses a remote that was never built", async () => {
@@ -210,5 +269,64 @@ describe("rendering inlined remote CSS", () => {
     expect(document.replace(inlineRemoteCssPattern, "")).toBe(
       "<style>.untouched{}</style>",
     );
+  });
+});
+
+describe("splitting a built stylesheet into blocks", () => {
+  test("reproduces the stylesheet it split", () => {
+    const css =
+      '@charset "utf-8";@media (max-width:48rem){.a{color:red}.b{color:blue}}@keyframes p{to{background-position:-200% 0}}.c{content:"}"}.d{background:url("x{y}.png")}';
+
+    expect(splitCssBlocks(css).join("")).toBe(css);
+  });
+
+  test("cuts one block per top-level rule rather than per brace", () => {
+    expect(
+      splitCssBlocks(
+        '@media (max-width:48rem){.a{color:red}}.c{content:"}"}.d{color:blue}',
+      ),
+    ).toEqual([
+      "@media (max-width:48rem){.a{color:red}}",
+      '.c{content:"}"}',
+      ".d{color:blue}",
+    ]);
+  });
+
+  test("steps over a comment rather than counting the braces inside it", () => {
+    expect(splitCssBlocks("/* } */.a{color:red}")).toEqual([
+      "/* } */.a{color:red}",
+    ]);
+    expect(splitCssBlocks(".a{color:red}/* unterminated {")).toEqual([
+      ".a{color:red}",
+      "/* unterminated {",
+    ]);
+  });
+
+  test("steps over an escaped quote inside a string rather than ending there", () => {
+    expect(splitCssBlocks('.a{content:"\\"}"}.b{color:red}')).toEqual([
+      '.a{content:"\\"}"}',
+      ".b{color:red}",
+    ]);
+  });
+});
+
+describe("grouping several remotes' blocks", () => {
+  test("attributes a block to every remote that ships it, once", () => {
+    expect(
+      groupRemoteStyles([
+        { name: "home", css: ".a{color:red}.b{color:blue}" },
+        { name: "awards", css: ".a{color:red}.c{color:green}" },
+      ]),
+    ).toEqual([
+      { css: ".a{color:red}", names: ["home", "awards"] },
+      { css: ".b{color:blue}", names: ["home"] },
+      { css: ".c{color:green}", names: ["awards"] },
+    ]);
+  });
+
+  test("emits a block once, and names its remote once, where one remote repeats it", () => {
+    expect(
+      groupRemoteStyles([{ name: "bio", css: ".a{color:red}.a{color:red}" }]),
+    ).toEqual([{ css: ".a{color:red}", names: ["bio"] }]);
   });
 });

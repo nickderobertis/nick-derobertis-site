@@ -1,4 +1,5 @@
 import type { Timeline } from "@site/data-access-core";
+import { Card } from "@site/design-system";
 import { TimelineFilters } from "./timeline-filters";
 import { TimelineRow } from "./timeline-row";
 import { useTimelineModel } from "./use-timeline-model";
@@ -19,7 +20,11 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
     years,
   } = useTimelineModel(entries);
   return (
-    <section className="timeline-card" aria-label="Timeline visualization">
+    <Card
+      as="section"
+      className="timeline-card"
+      aria-label="Timeline visualization"
+    >
       <TimelineFilters
         education={education}
         employment={employment}
@@ -45,6 +50,6 @@ export function TimelineChart({ entries }: { entries: Timeline }) {
           </div>
         </section>
       )}
-    </section>
+    </Card>
   );
 }

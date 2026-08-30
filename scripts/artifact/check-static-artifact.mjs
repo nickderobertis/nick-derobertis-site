@@ -30,11 +30,16 @@ process.on("uncaughtException", (error) => {
 // itself ships: compose stages libs/data-access-core/vendor/codegen at
 // `cv-data`. The browser journeys read the same contract, so what this refuses
 // at compose time is what a visitor is shown.
+// What each route document must contain to prove the real remote rendered into
+// it rather than a stand-in. Each is the class list that route's own page shell
+// renders: the `pane` class the shared design-system primitive publishes,
+// followed by the class the remote adds. A route whose markup lost either half
+// is a route composed from something other than the shipped component.
 const realRouteMarkers = {
-  "/bio": 'class="bio-page"',
-  "/research": 'class="research-page"',
-  "/software": 'class="software-page"',
-  "/courses": 'class="courses-page"',
+  "/bio": 'class="pane bio-page"',
+  "/research": 'class="pane research-page"',
+  "/software": 'class="pane software-page"',
+  "/courses": 'class="pane courses-page"',
 };
 
 // llmlint: ignore-block[changed_behavior_has_e2e] This override exists only so static-artifact.spec.ts can corrupt an isolated assembled artifact and exercise its failure diagnostics; site.spec.ts drives the successful default artifact in a real browser with and without JavaScript.

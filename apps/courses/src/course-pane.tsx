@@ -1,5 +1,6 @@
 import type { Course } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
+import { ActionLink, Card } from "@site/design-system";
 import { CourseDetails } from "./course-details";
 
 export function CoursePane({
@@ -12,7 +13,7 @@ export function CoursePane({
   const detailsId = `course-${course.id}-details`;
   const { hasDetails } = buildCourseDetails(course);
   return (
-    <article className={`course-card ${index % 2 ? "course-card-dark" : ""}`}>
+    <Card className={`course-card ${index % 2 ? "course-card-dark" : ""}`}>
       <div className="course-summary">
         <div>
           <p className="course-code">{course.id.replace("-", " ")}</p>
@@ -48,9 +49,9 @@ export function CoursePane({
             ) : null}
           </dl>
           {course.website_url ? (
-            <a className="course-action" href={course.website_url}>
+            <ActionLink className="course-action" href={course.website_url}>
               Course website
-            </a>
+            </ActionLink>
           ) : null}
         </div>
         {course.topics?.length ? (
@@ -61,7 +62,9 @@ export function CoursePane({
             <h3>Topics covered</h3>
             <ul>
               {course.topics.map((topic) => (
-                <li key={topic}>{topic}</li>
+                <Card as="li" key={topic}>
+                  {topic}
+                </Card>
               ))}
             </ul>
           </section>
@@ -73,6 +76,6 @@ export function CoursePane({
           <CourseDetails course={course} />
         </details>
       ) : null}
-    </article>
+    </Card>
   );
 }

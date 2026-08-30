@@ -1,4 +1,5 @@
 import { siteBase } from "@site/data-access-core/site";
+import { ActionLink, Card } from "@site/design-system";
 
 /** One area of work, as the bundled home content records it. */
 export interface MarketingCardModel {
@@ -16,15 +17,13 @@ export interface MarketingCardModel {
  */
 export function MarketingCard({ card }: { card: MarketingCardModel }) {
   return (
-    <article className="marketing-card">
+    <Card className="marketing-card">
       <span className="card-icon" aria-hidden="true">
         {card.icon}
       </span>
       <h2>{card.title}</h2>
       <p>{card.description}</p>
-      <a className="action" href={`${siteBase}${card.link}`}>
-        {card.linkLabel}
-      </a>
-    </article>
+      <ActionLink href={`${siteBase}${card.link}`}>{card.linkLabel}</ActionLink>
+    </Card>
   );
 }

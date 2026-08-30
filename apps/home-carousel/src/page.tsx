@@ -1,5 +1,6 @@
 import { siteBase } from "@site/data-access-core/site";
 import { homeContent, readPaneState } from "@site/data-access-home";
+import { ActionLink, PageShell } from "@site/design-system";
 import { CarouselState } from "./carousel-state";
 import Skeleton from "./skeleton";
 import { useCarousel } from "./use-carousel";
@@ -18,8 +19,8 @@ export default function HomeCarouselPage() {
   /* v8 ignore next -- useCarousel only ever writes `active` modulo the story count, so it always names one of them; the fallback restores the type that indexing by a number drops. */
   const slide = homeContent.carousel[active] ?? homeContent.carousel[0];
   return (
-    <section
-      className="pane home-carousel"
+    <PageShell
+      className="home-carousel"
       data-tone={slide.tone}
       aria-roledescription="carousel"
       aria-label="Featured work"
@@ -35,9 +36,9 @@ export default function HomeCarouselPage() {
       <div className="carousel-copy" aria-live="polite">
         <h1>{slide.title}</h1>
         <p>{slide.description}</p>
-        <a className="action" href={`${siteBase}${slide.link}`}>
+        <ActionLink href={`${siteBase}${slide.link}`}>
           {slide.linkLabel}
-        </a>
+        </ActionLink>
       </div>
       <button
         className="carousel-control next"
@@ -50,6 +51,6 @@ export default function HomeCarouselPage() {
       <span className="carousel-position">
         Story {active + 1} of {homeContent.carousel.length}
       </span>
-    </section>
+    </PageShell>
   );
 }

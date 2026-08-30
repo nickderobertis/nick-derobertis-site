@@ -1,10 +1,13 @@
 export {
+  groupRemoteStyles,
   type InlineRemoteStyle,
   inlineRemoteCssAttribute,
   inlineRemoteCssPattern,
+  type RemoteStyleSheet,
   readRouteRemoteStyles,
   remotesForRoute,
   renderInlineRemoteCss,
+  splitCssBlocks,
   validatePagesBase,
 } from "./remote-css.ts";
 export {

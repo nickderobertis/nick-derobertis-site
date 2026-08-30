@@ -3,6 +3,7 @@ import {
   calculateAwardsStats,
   selectedAwards,
 } from "@site/data-access-awards";
+import { PageShell } from "@site/design-system";
 import { AwardCard } from "./award-card";
 import { AwardsState } from "./awards-state";
 import { AwardsStatistics } from "./awards-statistics";
@@ -28,7 +29,7 @@ export default function AwardsPage() {
   const awards = showAll ? state.awards : selectedAwards(state.awards);
   const label = showAll ? "Awards & honors" : "Selected awards";
   return (
-    <section className="awards-pane" aria-label={label}>
+    <PageShell className="awards-pane" aria-label={label}>
       <h2 className="visually-hidden">{label}</h2>
       <AwardsStatistics stats={calculateAwardsStats(awards)} />
       <div className="award-grid">
@@ -36,6 +37,6 @@ export default function AwardsPage() {
           <AwardCard award={award} key={award.id} />
         ))}
       </div>
-    </section>
+    </PageShell>
   );
 }

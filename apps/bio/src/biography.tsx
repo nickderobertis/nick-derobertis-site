@@ -1,8 +1,9 @@
+import { PageShell } from "@site/design-system";
 import { Marker } from "./marker";
 
 export function Biography() {
   return (
-    <article className="bio-page" aria-labelledby="bio-heading">
+    <PageShell as="article" className="bio-page" aria-labelledby="bio-heading">
       <div className="bio-cover" aria-hidden="true" />
       <div className="bio-content">
         <h1 id="bio-heading">Optimizing Life</h1>
@@ -94,6 +95,6 @@ export function Biography() {
           </p>
         </section>
       </div>
-    </article>
+    </PageShell>
   );
 }

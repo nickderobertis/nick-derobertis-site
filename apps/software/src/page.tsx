@@ -1,5 +1,5 @@
 import type { SoftwareProject } from "@site/data-access-core";
-import "@site/design-system";
+import { PageShell, SectionHeading } from "@site/design-system";
 import type { SoftwarePageProps } from "@site/route-state";
 import "./software.css";
 import Skeleton from "./skeleton";
@@ -12,15 +12,14 @@ export default function SoftwarePage({
 }: SoftwarePageProps<SoftwareProject[]>) {
   const { projects, view } = useSoftwarePage(initialView, initialProjects);
   return (
-    <section className="software-page">
-      <header className="software-banner">
-        <p className="eyebrow">Nick DeRobertis</p>
-        <h1>Open-Source Software</h1>
-        <p>
-          I am a strong believer in free and open-source software. Explore my
-          projects for finance, research, data, and Python.
-        </p>
-      </header>
+    <PageShell className="software-page">
+      <SectionHeading
+        className="software-banner"
+        level={1}
+        eyebrow="Nick DeRobertis"
+        title="Open-Source Software"
+        description="I am a strong believer in free and open-source software. Explore my projects for finance, research, data, and Python."
+      />
       {view === "loading" ? (
         <Skeleton />
       ) : view === "error" ? (
@@ -36,6 +35,6 @@ export default function SoftwarePage({
       ) : (
         <SoftwareCollection projects={projects} />
       )}
-    </section>
+    </PageShell>
   );
 }

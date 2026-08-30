@@ -1,5 +1,6 @@
 import { siteBase } from "@site/data-access-core/site";
 import { homeContent } from "@site/data-access-home";
+import { PageShell } from "@site/design-system";
 import { Suspense, useState } from "react";
 import { homePanes, resolvedPanes } from "./panes";
 import "./home.css";
@@ -18,19 +19,19 @@ export default function HomePage() {
   const [panes] = useState(resolvedPanes);
   if (panes)
     return (
-      <div className="home-main">
+      <PageShell as="div" className="home-main">
         {panes.map(({ name, Page }) => (
           <Page key={name} />
         ))}
-      </div>
+      </PageShell>
     );
   return (
-    <div className="home-main">
+    <PageShell as="div" className="home-main">
       {homePanes.map(({ name, Skeleton, Page }) => (
         <Suspense key={name} fallback={<Skeleton />}>
           <Page />
         </Suspense>
       ))}
-    </div>
+    </PageShell>
   );
 }

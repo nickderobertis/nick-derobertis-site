@@ -58,11 +58,18 @@ configuration and the versioned published-fragment schema. Each
 `data-access-<domain>` library owns only its feature's data
 shaping and depends only on the core. Nx module boundaries allow remotes to
 import core plus their own domain library and reject cross-domain imports.
-`design-system` owns only cross-cutting tokens, the reset, the `.main`
-container used by every standalone and host route, and accessibility
-primitives. `layout` owns shell header/footer/navigation presentation. Each remote
-owns its page and loading-skeleton CSS, so feature styling does not create a
-shared dependency edge. The former unused `ui` and `analytics` placeholders
+`design-system` owns cross-cutting tokens, the reset, the `.main`
+container used by every standalone and host route, accessibility
+primitives, and the shared UI primitives every remote composes its pages
+from — the page shell, the section heading, the card, the action link, the
+pane state, and the loading skeleton — each published as a React component
+beside the one rule that paints it, parameterised through `--card-*`,
+`--title-*`, `--action-*` and `--eyebrow-*` custom properties so a pane that
+looks different sets a token instead of restating the primitive. `layout` owns
+shell header/footer/navigation presentation. Each remote owns the page CSS that
+is genuinely its own, so feature styling does not create a shared dependency
+edge; every remote already depends on `design-system`, so adopting a primitive
+adds no edge either. The former unused `ui` and `analytics` placeholders
 were removed. `build-config` owns federation build configuration, which every
 app's rspack config imports; `publish-config` owns the content-store publish
 path, which only workspace tooling imports, so an edit to a publish lane never

@@ -1,12 +1,13 @@
 import type { SoftwareProject } from "@site/data-access-core";
 import { softwareProjectLogo } from "@site/data-access-software";
+import { Card } from "@site/design-system";
 import { formatNumber } from "./format-number";
 
 export function ProjectCard({ project }: { project: SoftwareProject }) {
   const title = project.display_name ?? project.name;
   const logo = softwareProjectLogo(project);
   return (
-    <article className="software-card">
+    <Card className="software-card">
       <div className="software-card-heading">
         {logo ? (
           <img
@@ -49,6 +50,6 @@ export function ProjectCard({ project }: { project: SoftwareProject }) {
           <a href={project.site_url}>Project site</a>
         ) : null}
       </div>
-    </article>
+    </Card>
   );
 }

@@ -583,7 +583,11 @@ importers:
         specifier: workspace:*
         version: link:../testing
 
-  libs/design-system: {}
+  libs/design-system:
+    dependencies:
+      '@site/testing':
+        specifier: workspace:*
+        version: link:../testing
 
   libs/e2e-fixtures:
     dependencies:

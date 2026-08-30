@@ -1,3 +1,5 @@
+import { PaneState } from "@site/design-system";
+
 type ContactStateName = "error" | "empty";
 
 const copy: Record<ContactStateName, string> = {
@@ -12,5 +14,5 @@ const copy: Record<ContactStateName, string> = {
  * what they came for.
  */
 export function ContactState({ name }: { name: ContactStateName }) {
-  return <output className="pane-state">{copy[name]}</output>;
+  return <PaneState>{copy[name]}</PaneState>;
 }

@@ -1,17 +1,14 @@
-.hero {
-  max-width: 760px;
-}
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--blue);
-  font-weight: 700;
-}
 .software-page {
   display: grid;
   gap: clamp(2rem, 5vw, 4rem);
 }
 .software-banner {
+  --eyebrow-color: #8ed2f0;
+  --title-color: inherit;
+  --title-margin: 0.25rem 0 1rem;
+  --title-size: clamp(2.5rem, 7vw, 5rem);
+  --title-line-height: 1;
+
   position: relative;
   overflow: hidden;
   margin: calc(-1 * clamp(3rem, 8vw, 7rem)) calc(50% - 50vw) 0;
@@ -33,15 +30,6 @@
 .software-banner > * {
   position: relative;
   z-index: 1;
-}
-.software-banner .eyebrow {
-  color: #8ed2f0;
-}
-.software-banner h1 {
-  margin: 0.25rem 0 1rem;
-  font:
-    700 clamp(2.5rem, 7vw, 5rem) / 1 Georgia,
-    serif;
 }
 .software-banner > p:last-child {
   max-width: 720px;
@@ -88,10 +76,6 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  padding: 1.25rem;
-  border: 1px solid var(--line);
-  background: var(--paper);
-  box-shadow: 0 0.2rem 0.7rem rgb(18 50 74 / 8%);
 }
 .software-card-heading {
   display: flex;
@@ -173,51 +157,6 @@
   border-color: #ba5b5b;
   background: #fff3f3;
 }
-.remote-skeleton {
-  display: grid;
-  gap: 1.5rem;
-  width: 100%;
-  padding: clamp(1.5rem, 4vw, 4rem);
-  overflow: hidden;
-}
-.remote-skeleton :is(i, b, div) {
-  border-radius: 0.75rem;
-}
-.remote-skeleton :is(i, b),
-.skeleton-heading,
-.skeleton-banner,
-.skeleton-hero,
-.skeleton-cover,
-.skeleton-portrait,
-.skeleton-circle,
-.skeleton-stats {
-  display: block;
-  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
-  background-size: 200% 100%;
-  animation: skeleton-pulse 1.4s ease-in-out infinite;
-}
-@keyframes skeleton-pulse {
-  to {
-    background-position: -200% 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .remote-skeleton :is(i, b, div) {
-    animation: none;
-  }
-}
-.skeleton-hero,
-.skeleton-banner {
-  min-height: 16rem;
-}
-.skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-.skeleton-grid > i {
-  min-height: 12rem;
-}
 .skeleton-stats {
   height: 6rem;
 }
@@ -229,11 +168,6 @@
   .software-stats div + div {
     border-top: 1px solid var(--line);
     border-left: 0;
-  }
-}
-@media (max-width: 48rem) {
-  .skeleton-grid {
-    grid-template-columns: 1fr;
   }
 }
 @media (min-width: 701px) and (max-width: 960px) {

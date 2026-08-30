@@ -1,3 +1,5 @@
+import { PaneState } from "@site/design-system";
+
 type CardsStateName = "error" | "empty";
 
 const copy: Record<CardsStateName, string> = {
@@ -11,5 +13,5 @@ const copy: Record<CardsStateName, string> = {
  * an empty CV nor an unreachable one interrupts what they came for.
  */
 export function CardsState({ name }: { name: CardsStateName }) {
-  return <output className="pane-state">{copy[name]}</output>;
+  return <PaneState>{copy[name]}</PaneState>;
 }

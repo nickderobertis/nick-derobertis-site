@@ -1,4 +1,5 @@
 import type { AwardCardModel } from "@site/data-access-awards";
+import { Card } from "@site/design-system";
 import { AwardEmblem } from "./award-emblem";
 
 /**
@@ -7,7 +8,7 @@ import { AwardEmblem } from "./award-emblem";
  */
 export function AwardCard({ award }: { award: AwardCardModel }) {
   return (
-    <article className="award-card" aria-labelledby={`${award.id}-title`}>
+    <Card className="award-card" aria-labelledby={`${award.id}-title`}>
       <div className="award-visual">
         <time dateTime={award.received}>{award.received}</time>
         <AwardEmblem icon={award.icon} />
@@ -20,6 +21,6 @@ export function AwardCard({ award }: { award: AwardCardModel }) {
           ))}
         </ul>
       ) : null}
-    </article>
+    </Card>
   );
 }

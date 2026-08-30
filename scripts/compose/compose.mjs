@@ -2,8 +2,10 @@ import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  groupRemoteStyles,
   inlineRemoteCssPattern,
   parseRemoteManifest,
+  renderInlineRemoteCss,
   routeContracts,
 } from "@site/artifact-contracts";
 import { holdArtifactRoot } from "@site/artifact-contracts/artifact-hold";
@@ -408,19 +410,17 @@ export async function compose({
         fragments.get(names[0])?.html ?? "",
       );
     }
-    const styles = new Map();
-    for (const name of names) {
-      const css = fragments.get(name)?.css ?? "";
-      const existing = styles.get(css);
-      if (existing) existing.push(name);
-      else styles.set(css, [name]);
-    }
-    const inlineCss = [...styles]
-      .map(
-        ([css, cssNames]) =>
-          `<style data-prerender-remote-css="${cssNames.join(" ")}">${css}</style>`,
-      )
-      .join("");
+    // Every remote on this route re-bundles the shared design-system
+    // stylesheet, so the blocks are grouped by which remotes own them rather
+    // than by whole payload: what several remotes ship is inlined once, and
+    // what one remote ships stays attributed to it. artifact-contracts owns
+    // that grouping so the artifact gate reading this document back derives
+    // the same groups from the built remotes.
+    const inlineCss = renderInlineRemoteCss(
+      groupRemoteStyles(
+        names.map((name) => ({ name, css: fragments.get(name)?.css ?? "" })),
+      ),
+    );
     const title =
       routePath === "/"
         ? "Nick DeRobertis"

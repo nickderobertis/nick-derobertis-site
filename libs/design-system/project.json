@@ -17,6 +17,13 @@
         "command": "tsc -p libs/design-system/tsconfig.json"
       }
     },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/libs/design-system"],
+      "options": {
+        "command": "vitest run --config libs/design-system/vite.config.ts --coverage"
+      }
+    },
     "build": {
       "executor": "nx:run-commands",
       "options": {
@@ -25,6 +32,6 @@
     }
   },
   "metadata": {
-    "description": "llmlint: ignore[changed_behavior_has_e2e] This project publishes only theme.css, which has no unit-testable interface: its tokens, reset, shared .main container, and visually-hidden primitive are verified in the browser by site.spec.ts, by each remote's standalone design-system journey, and by every app's screencomp capture. A Vitest target here could only ever pass vacuously, so it declares none; AGENTS.md records that exemption and structure-contract.spec.ts holds every other project to a test target and the coverage floor."
+    "description": "llmlint: ignore[changed_behavior_has_e2e] This project publishes React primitives beside theme.css, and each primitive's rendered markup, roles, and class contract are covered by its co-located spec here while the painted result is covered in the browser by site.spec.ts, by home-cards' design-system-primitives journey through both the standalone and host-composed render paths, by each remote's standalone design-system journey, and by every app's screencomp capture. The stylesheet half of this project still has no unit-testable interface, so the coverage floor is stated over the components: libs/design-system/vite.config.ts holds all four metrics at 95, which is the same floor every other project owes."
   }
 }
