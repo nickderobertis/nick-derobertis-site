@@ -5,6 +5,7 @@
   "projectType": "application",
   "tags": ["type:remote", "scope:research"],
   "metadata": {
+    "description": "llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] This project's browser and visual suites sit behind this project's own affected edge, and just check dispatches each of them exactly once per push through just gate-browser-lanes rather than once per selection that reached the app. Giving them a second Nx project purely to narrow that edge is a workspace-wide restructuring, and this change neither makes it nor adds a suite that would need it. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about.",
     "federation": { "alias": "research" },
     "boundaries": {
       "onlyDependOnLibsWithTags": [
@@ -18,7 +19,7 @@
     "e2e": {
       "executor": "nx:run-commands",
       "metadata": {
-        "description": "llmlint: ignore[browser_journeys_run_against_the_built_app, expensive_tests_stay_behind_their_own_edge] This workspace declares each app's browser journey on the app itself rather than in a second Nx project, and the journey still drives the built artifact rather than a development server: this target dependsOn shell:prerender, so Playwright only ever opens the composed production bundle Pages publishes. Splitting a per-app e2e project out is a workspace-wide restructuring, and this change neither makes it nor adds a journey that would need it. The affected edge this suite sits behind is the app's own, and `just check` dispatches it once through `just gate-browser-lanes` rather than once per selection that reached the app."
+        "description": "llmlint: ignore-file[browser_journeys_run_against_the_built_app] This workspace declares each app's browser journey on the app itself rather than in a second Nx project, and the journey still drives the built artifact rather than a development server: the e2e target here dependsOn shell:prerender, so Playwright only ever opens the composed production bundle Pages publishes. Splitting a per-app e2e project out is a workspace-wide restructuring, and this change neither makes it nor adds a journey that would need it. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about."
       },
       "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {
@@ -67,7 +68,7 @@
     "serve": {
       "executor": "@nx/rspack:dev-server",
       "metadata": {
-        "description": "llmlint: ignore[changed_behavior_has_e2e] This target only declares the shared @nx/rspack:dev-server executor for research; it builds no byte a visitor is served, because just serve-dev composes the published artifact for every app it is not developing. The one code path the declaration reaches is scripts/serve/serve-dev.mjs, and serve-dev.spec.ts drives that path in a real browser through both shapes an app can take under it \u2014 the composing host (shell) and a remote pane (awards), whose edit it also follows into the composed host \u2014 while apps/research/e2e/research.spec.ts and apps/research/e2e/ownership.spec.ts keep research's published bytes covered standalone and host-composed."
+        "description": "llmlint: ignore-file[changed_behavior_has_e2e] The serve target here only declares the shared @nx/rspack:dev-server executor for research; it builds no byte a visitor is served, because just serve-dev composes the published artifact for every app it is not developing. The one code path the declaration reaches is scripts/serve/serve-dev.mjs, and serve-dev.spec.ts drives that path in a real browser through both shapes an app can take under it — the composing host (shell) and a remote pane (awards), whose edit it also follows into the composed host — while apps/research/e2e/research.spec.ts and apps/research/e2e/ownership.spec.ts keep research's published bytes covered standalone and host-composed. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about."
       },
       "options": { "buildTarget": "research:build" }
     }

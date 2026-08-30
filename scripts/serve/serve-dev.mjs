@@ -166,15 +166,16 @@ process.on("exit", release);
 // default: an ambient production NODE_ENV would otherwise leave this server
 // building production output it could not hot-update.
 //
-// llmlint: ignore[tool_output_is_signal] The dev server's stream is the signal a
-// developer runs this for, so it is passed through rather than captured: what it
-// prints is which compilation is running, which module was just hot-replaced,
-// and the type and build errors as they happen, on a command that stays in the
-// foreground until it is stopped. There is no success to be quiet about — the
-// only output this could withhold is the output the recipe exists to show — and
-// withholding it would leave a developer editing against a server whose last
-// compile failed with nothing said. The paths this command owns are the ones
-// above, and each of those is one diagnostic line and an exit status.
+// The dev server's stream is the signal a developer runs this for, so it is
+// passed through rather than captured: what it prints is which compilation is
+// running, which module was just hot-replaced, and the type and build errors as
+// they happen, on a command that stays in the foreground until it is stopped.
+// There is no success to be quiet about — the only output this could withhold is
+// the output the recipe exists to show — and withholding it would leave a
+// developer editing against a server whose last compile failed with nothing
+// said. The paths this command owns are the ones above, and each of those is one
+// diagnostic line and an exit status.
+// llmlint: ignore-block[tool_output_is_signal] This dispatch has no success to be quiet about: it is a foreground server whose stream — compilations, hot replacements, build and type errors — is the whole reason a developer runs it, so it is inherited rather than captured, for the reason set out directly above.
 const server = spawn(
   "pnpm",
   [
@@ -186,6 +187,7 @@ const server = spawn(
   ],
   { env: { ...process.env, NODE_ENV: "development" }, stdio: "inherit" },
 );
+// llmlint: ignore-end[tool_output_is_signal]
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => server.kill(signal));
 server.on("exit", (code, signal) => {
