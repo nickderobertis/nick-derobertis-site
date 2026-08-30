@@ -367,6 +367,23 @@ test("an entry script quoted another way is measured, not skipped", async () => 
   expect(result.status).toBe(0);
 });
 
+// A container this gate cannot read the ./Page expose out of is refused rather
+// than measured as a remote with no page at all: budgeting it at zero is what
+// --rederive would then write down as the ceiling a host's route composes.
+test("a container with no readable ./Page expose is refused", async () => {
+  const fixture = await isolatedArtifact(["bio"]);
+  const container = join(fixture, "remotes", "bio", "remoteEntry.js");
+  const source = await readFile(container, "utf8");
+  await writeFile(container, source.replace("moduleMap:{", "moduleMaps:{"));
+
+  const result = checkBudgets(fixture);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    "declares no ./Page in its expose module map",
+  );
+});
+
 test("a budget file that omits an app the artifact contains is refused", async () => {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-file-"));
   fixtures.push(fixture);

@@ -154,16 +154,19 @@ function chunkFileResolver(source) {
  * another container resolves to a filename this app never emitted, and is
  * dropped below rather than counted against this app's budget.
  */
-// llmlint: ignore[boundary_inputs_validated] This finds the chunk requests a
-// bundle makes; it is not a boundary that admits or refuses one. Text it does
-// not match is not a malformed request but the rest of the bundle, and every id
-// it does yield is validated where it is used: resolved by the bundle's own
-// checked resolver and then required to name a file the app emitted.
+// llmlint: ignore-block[boundary_inputs_validated] This finds the chunk requests
+// a bundle makes; it is not a boundary that admits or refuses one. What it does
+// not match is not a malformed request but the rest of the bundle — minified
+// application code, string data, the runtime's own scaffolding — so there is
+// nothing here to refuse. Every id it does yield is validated where it is used:
+// resolved by the bundle's own checked resolver, then required to name a file
+// the app emitted before a byte of it is counted.
 function requestedChunkIds(source) {
   return [...source.matchAll(/\.e\("([^"\\]{1,32})"\)/g)].flatMap(([, id]) =>
     id === undefined ? [] : [id],
   );
 }
+// llmlint: ignore-end[boundary_inputs_validated]
 
 /**
  * Everything loading `files` pulls in: each file, plus every chunk reachable
@@ -217,11 +220,12 @@ async function entryScripts(directory, emitted) {
   // directory, would otherwise be counted against this app's ceiling whenever
   // its last path segment happened to match a chunk this app did emit.
   const scripts = [];
-  // Every form HTML allows for the attribute is read, not just the one this
+  // Every spelling HTML allows for the attribute is read — either quote, none
+  // at all, either case, whitespace around the `=` — not just the one this
   // workspace's bundler happens to emit: a source this gate cannot see is
   // payload it would leave out of the ceiling rather than budget.
   for (const [, quoted, singleQuoted, bare] of document.matchAll(
-    /<script\b[^>]*\bsrc=(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g,
+    /<script\b[^>]*\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi,
   )) {
     const reference = quoted ?? singleQuoted ?? bare ?? "";
     const elsewhere = /^[A-Za-z][A-Za-z\d+.-]*:/.test(reference)
@@ -281,7 +285,18 @@ async function measureApp(directory) {
   const container = await readFile(join(directory, "remoteEntry.js"), "utf8");
   const resolve = chunkFileResolver(container);
   const exposed = exposedChunkIds(container, pageExpose);
-  if (!exposed || !resolve) return measured;
+  // A container whose expose map or chunk resolver cannot be read is refused
+  // rather than measured as an app with no page: passing it through would
+  // budget a remote at zero, and --rederive would write that zero down as the
+  // ceiling a host's route composes.
+  if (!resolve)
+    throw new BudgetRefusal(
+      `${join(directory, "remoteEntry.js")} carries no chunk filename resolver, so the ${pageExpose} payload a host composes from it cannot be measured; rebuild that app and rerun just prerender.`,
+    );
+  if (!exposed)
+    throw new BudgetRefusal(
+      `${join(directory, "remoteEntry.js")} declares no ${pageExpose} in its expose module map, so the payload a host composes from it cannot be measured; rebuild that app and rerun just prerender.`,
+    );
   const chunks = exposed
     .map((id) => resolve(id))
     .filter((chunk) => chunk !== undefined && emitted.has(chunk));
