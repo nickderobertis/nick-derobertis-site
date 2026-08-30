@@ -23,7 +23,6 @@ import { overlappingSpecifiers } from "../../published-subpaths";
  * prefixed only where it is imported.
  */
 
-/** Where the workspace root sits relative to this file. */
 const toWorkspaceRoot = "../../../..";
 
 /**
