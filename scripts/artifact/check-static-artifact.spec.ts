@@ -163,8 +163,8 @@ test.each([
 // The gate names no CV content of its own, so an artifact carrying CV data that
 // differs from the committed data — the most ordinary edit this repository
 // takes — is still a correct artifact. The ampersand below is deliberate: React
-// escapes it when it serializes the title into the document, so a gate that
-// only looked for the raw CV value would refuse this artifact.
+// escapes it into the markup, so this also holds the gate to the text a visitor
+// reads rather than to the bytes the document happens to spell it in.
 const renamedCourse = "Valuation & Reproducible Modeling";
 const renamedCourseInMarkup = "Valuation &amp; Reproducible Modeling";
 

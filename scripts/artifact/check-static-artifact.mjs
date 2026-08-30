@@ -5,6 +5,7 @@ import {
   readRouteRemoteStyles,
   remotesForRoute,
   routeContracts,
+  routeSubstantiveContent,
   validatePagesBase,
 } from "@site/artifact-contracts";
 import remoteManifest from "@site/build-config/remotes.json" with {
@@ -24,53 +25,11 @@ process.on("uncaughtException", (error) => {
   process.exit(1);
 });
 
-// llmlint: ignore-block[changed_behavior_has_e2e] This gate has no browser interface: it reads the artifact's own staged CV data at compose time and every route it rejects fails the compose before anything is served. site.spec.ts drives the documents it passes in a real browser on the prerendered and hydrated paths, and check-static-artifact.spec.ts drives this map through the real verifier over an artifact whose CV data was changed.
-// Every prerendered document has to carry its own route's real content, and the
-// artifact already ships the data that content is rendered from: compose stages
-// libs/data-access-core/vendor/codegen at `cv-data`. Naming the titles here
-// instead would fail this gate on an ordinary CV edit — a new paper, a renamed
-// course — for a reason that has nothing to do with the artifact, so each route
-// names only the domain file it renders and how that file titles its entries.
-const routeCvContent = {
-  // Home is a host, and the timeline pane it composes names every organization
-  // the CV records.
-  "/": {
-    file: "domains/timeline.json",
-    titles: (data) =>
-      Array.isArray(data)
-        ? data.map((entry) => entry?.organization)
-        : undefined,
-  },
-  "/research": {
-    file: "domains/research.json",
-    titles: (data) =>
-      Array.isArray(data?.projects)
-        ? data.projects.map((project) => project?.title)
-        : undefined,
-  },
-  "/software": {
-    // ProjectCard titles a project by its display name, falling back to the
-    // package's own name for the projects that carry none.
-    file: "domains/software_projects.json",
-    titles: (data) =>
-      Array.isArray(data)
-        ? data.map((project) => project?.display_name ?? project?.name)
-        : undefined,
-  },
-  "/courses": {
-    file: "domains/courses.json",
-    titles: (data) =>
-      Array.isArray(data) ? data.map((course) => course?.title) : undefined,
-  },
-};
-// The bio remote renders prose it owns and reads no CV domain, so there is
-// nothing under `cv-data` its substantive content could be derived from. It is
-// the one route whose marker is still a literal, and it moves when
-// apps/bio/src/biography.tsx does rather than when the CV data does.
-const remoteProseContent = {
-  "/bio": "Reproducible Research",
-};
-// llmlint: ignore-end[changed_behavior_has_e2e]
+// Every prerendered document has to carry its own route's real content, and
+// @site/artifact-contracts derives that content from the CV data the artifact
+// itself ships: compose stages libs/data-access-core/vendor/codegen at
+// `cv-data`. The browser journeys read the same contract, so what this refuses
+// at compose time is what a visitor is shown.
 const realRouteMarkers = {
   "/bio": 'class="bio-page"',
   "/research": 'class="research-page"',
@@ -173,60 +132,20 @@ async function assertReferencedAssetsResolve(artifactPath) {
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
-// llmlint: ignore-block[changed_behavior_has_e2e] This spells a CV value the way the prerendered markup already carries it; it changes what the compose-time gate accepts, never what a visitor is served. check-static-artifact.spec.ts drives it through the real verifier over an artifact whose renamed course carries an ampersand.
 /**
- * A CV value as the prerendered markup carries it.
+ * The text a visitor reads in a composed document.
  *
- * React escapes these five characters when it serializes a text node, so a
- * paper titled `Risk & Return` reaches the document as `Risk &amp; Return` and
- * is only found by looking for that spelling too. Without this the gate would
- * refuse a correct artifact the first time the CV data grew an ampersand —
- * exactly the kind of unrelated failure deriving these values is meant to end.
+ * Reading the parsed DOM rather than the raw markup is what makes this the same
+ * question the browser journeys ask: a title React escaped into `Risk &amp;
+ * Return` reads back as `Risk & Return`, and a value that only appears inside a
+ * script the page ships is not something anyone was shown.
  */
-function escapeMarkupText(value) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;");
+function renderedText(markup) {
+  const { document } = new JSDOM(markup.replace(inlineRemoteCssPattern, ""))
+    .window;
+  for (const script of document.querySelectorAll("script")) script.remove();
+  return document.body?.textContent ?? "";
 }
-// llmlint: ignore-end[changed_behavior_has_e2e]
-
-// llmlint: ignore-block[changed_behavior_has_e2e] This reads the artifact's staged CV data before anything is served, and every branch it adds ends in a compose that failed; site.spec.ts drives the documents it passes in a real browser on both render paths.
-/**
- * The titles one route's document has to carry, read from the CV data the
- * artifact itself ships rather than restated in this script.
- *
- * The parsed domain is held to a non-empty list of non-empty strings before a
- * single title is compared, because a domain that read back as anything else
- * would otherwise assert nothing at all and pass every document silently.
- */
-async function readRouteCvContent(routePath) {
-  const source = routeCvContent[routePath];
-  if (source === undefined) return [];
-  const cvPath = `${root}/cv-data/${source.file}`;
-  let parsed;
-  try {
-    parsed = JSON.parse(await readFile(cvPath, "utf8"));
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `Could not read the CV data at ${cvPath}: ${detail}. Rebuild the CV data artifact and rerun just prerender.`,
-    );
-  }
-  const titles = source.titles(parsed);
-  if (
-    !Array.isArray(titles) ||
-    titles.length === 0 ||
-    titles.some((title) => typeof title !== "string" || title.length === 0)
-  )
-    throw new Error(
-      `${cvPath} carries no titles for ${routePath}; rebuild the CV data artifact and rerun just prerender.`,
-    );
-  return [...new Set(titles)];
-}
-// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
 // llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] routes.json is the serialized source; this plain-Node artifact boundary cannot import the TypeScript parser, and just check runs both validators against that same source.
@@ -270,16 +189,9 @@ for (const route of validatedRoutes) {
     throw new Error(
       `${path} lacks the Pages base path; fix the route renderer and rerun just prerender.`,
     );
-  const cvContent = await readRouteCvContent(route.path);
-  const prose = remoteProseContent[route.path];
-  if (cvContent.length === 0 && prose === undefined)
-    throw new Error(
-      `${path} has no substantive route content to check; give ${route.path} a CV domain in routeCvContent, or a marker in remoteProseContent if its remote renders no CV data, in scripts/artifact/check-static-artifact.mjs and rerun just check.`,
-    );
-  for (const expected of prose === undefined
-    ? cvContent
-    : [...cvContent, prose])
-    if (!html.includes(expected) && !html.includes(escapeMarkupText(expected)))
+  const rendered = renderedText(html);
+  for (const expected of routeSubstantiveContent(`${root}/cv-data`, route.path))
+    if (!rendered.includes(expected))
       throw new Error(
         `${path} lacks substantive route content (${expected}); fix scripts/compose/compose.mjs and rerun just check.`,
       );

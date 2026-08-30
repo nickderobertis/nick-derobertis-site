@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Page } from "@playwright/test";
+import { routeSubstantiveContent } from "@site/artifact-contracts";
 import { parseSiteRoutes } from "@site/route-state";
 
 /**
@@ -14,6 +15,11 @@ const routeManifest = "apps/shell/src/routes.json";
 const remoteManifest = "libs/build-config/src/remotes.json";
 const homeComposition = "apps/home/rspack.config.ts";
 const contractSource = "libs/e2e-harness/src/site-contract.ts";
+// The CV data every route the site builds from, which @site/artifact-contracts
+// turns into the content each route has to show. Reading it here is what makes
+// the browser journeys assert the CV the site was built from, rather than a
+// copy of it that an ordinary CV edit would leave behind.
+const cvDataSource = "libs/data-access-core/vendor/codegen";
 
 /** What a visitor can observe on one of the site's published routes. */
 export interface RouteContract {
@@ -23,7 +29,10 @@ export interface RouteContract {
   link: string;
   /** Heading the route's own page shows. */
   heading: string;
-  /** Prerendered copy only this route's feature can supply. */
+  /**
+   * Copy only this route's feature can supply, derived from the CV data the
+   * site is built from by the same contract the compose-time gate reads.
+   */
   feature: string;
   /** The empty view this route publishes through its own query parameter. */
   emptyView?: { query: string; heading: string };
@@ -36,18 +45,15 @@ const routeContent = [
   {
     path: "",
     heading: "Finance researcher & educator",
-    feature: "Who am I?",
   },
   {
     path: "bio",
     heading: "Optimizing Life",
-    feature: "Reproducible Research",
     emptyView: { query: "bio-view=empty", heading: "Biography coming soon" },
   },
   {
     path: "research",
     heading: "Research Works",
-    feature: "Valuation without Cash Flows",
     emptyView: {
       query: "research-scenario=empty",
       heading: "No research projects yet",
@@ -56,7 +62,6 @@ const routeContent = [
   {
     path: "software",
     heading: "Open-Source Software",
-    feature: "Python Tools for Working with Data",
     emptyView: {
       query: "software-view=empty",
       heading: "No software projects to show",
@@ -65,7 +70,6 @@ const routeContent = [
   {
     path: "courses",
     heading: "Courses",
-    feature: "Financial Modeling",
     emptyView: { query: "courses-view=empty", heading: "No courses to show" },
   },
 ] as const;
@@ -279,7 +283,14 @@ export function siteRoutes(root: string = process.cwd()): RouteContract[] {
     /* v8 ignore next 2 -- assertSameInventory has already joined both sides. */
     if (!content)
       throw new Error(`No journey contract for the ${route.path} route`);
-    return { ...content, link: route.label };
+    const [feature] = routeSubstantiveContent(
+      path.join(root, cvDataSource),
+      `/${route.path}`,
+    );
+    /* v8 ignore next 2 -- routeSubstantiveContent throws before returning none. */
+    if (feature === undefined)
+      throw new Error(`No substantive content for the ${route.path} route`);
+    return { ...content, link: route.label, feature };
   });
 }
 

@@ -6,6 +6,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@site/artifact-contracts": "workspace:*",
     "@site/e2e-fixtures": "workspace:*",
     "@site/route-state": "workspace:*",
     "@site/testing": "workspace:*"
