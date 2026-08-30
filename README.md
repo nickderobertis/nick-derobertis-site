@@ -14,7 +14,26 @@ pnpm workspace:
 just bootstrap
 ```
 
-Start the complete shell and federated graph for interactive development:
+Develop one app against the rest of the graph:
+
+```bash
+just serve-dev shell     # the shell and its routes, from source
+just serve-dev awards    # one pane, from source
+```
+
+Reach for this while you are writing code. It builds the complete artifact
+once, then serves the app you named from source with hot module replacement
+while every other app is answered for out of that build, all on one origin at
+the Pages base path. Editing a source file of the app under development updates
+the running page — no workspace rebuild, no restart. It listens on the address
+`nx.json` gives every `serve` target, which is the one `just serve` uses below,
+and answers there for the shell and for each standalone pane alike; either way
+the shell's routes resolve across the mix. `PORT` moves the server off that
+port, and an app name the workspace cannot serve is refused before anything is
+built.
+
+Reach for the production-shaped path when you want the artifact rather than the
+source — the bytes GitHub Pages serves, prerendered and composed:
 
 ```bash
 just serve
@@ -45,7 +64,8 @@ just test-e2e             # complete shell browser journeys
 just e2e-project skills   # one remote, standalone and host-composed
 just prerender            # build every app, then compose dist/apps/shell
 just compose store out    # compose only, from already-published fragments
-just serve                # interactive static development server
+just serve                # the composed production artifact, served
+just serve-dev <app>      # one app from source with hot module replacement
 just lint                 # all-project lint and typecheck
 just format               # apply Biome formatting
 ```

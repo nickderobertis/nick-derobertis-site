@@ -32,6 +32,10 @@
     "e2e": {
       "cache": false
     },
+    "serve": {
+      "cache": false,
+      "options": { "host": "127.0.0.1", "port": 4200 }
+    },
     "prerender": {
       "cache": false
     },
