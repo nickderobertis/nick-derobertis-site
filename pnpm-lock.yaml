@@ -596,6 +596,9 @@ importers:
 
   libs/e2e-harness:
     dependencies:
+      '@site/artifact-contracts':
+        specifier: workspace:*
+        version: link:../artifact-contracts
       '@site/e2e-fixtures':
         specifier: workspace:*
         version: link:../e2e-fixtures

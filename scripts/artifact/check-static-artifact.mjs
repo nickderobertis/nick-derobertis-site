@@ -5,6 +5,7 @@ import {
   readRouteRemoteStyles,
   remotesForRoute,
   routeContracts,
+  routeSubstantiveContent,
   validatePagesBase,
 } from "@site/artifact-contracts";
 import remoteManifest from "@site/build-config/remotes.json" with {
@@ -24,13 +25,11 @@ process.on("uncaughtException", (error) => {
   process.exit(1);
 });
 
-const substantiveRouteContent = {
-  "/": "Who am I?",
-  "/bio": "Reproducible Research",
-  "/research": "Valuation without Cash Flows",
-  "/software": "Python Tools for Working with Data",
-  "/courses": "Financial Modeling",
-};
+// Every prerendered document has to carry its own route's real content, and
+// @site/artifact-contracts derives that content from the CV data the artifact
+// itself ships: compose stages libs/data-access-core/vendor/codegen at
+// `cv-data`. The browser journeys read the same contract, so what this refuses
+// at compose time is what a visitor is shown.
 const realRouteMarkers = {
   "/bio": 'class="bio-page"',
   "/research": 'class="research-page"',
@@ -133,6 +132,21 @@ async function assertReferencedAssetsResolve(artifactPath) {
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
+/**
+ * The text a visitor reads in a composed document.
+ *
+ * Reading the parsed DOM rather than the raw markup is what makes this the same
+ * question the browser journeys ask: a title React escaped into `Risk &amp;
+ * Return` reads back as `Risk & Return`, and a value that only appears inside a
+ * script the page ships is not something anyone was shown.
+ */
+function renderedText(markup) {
+  const { document } = new JSDOM(markup.replace(inlineRemoteCssPattern, ""))
+    .window;
+  for (const script of document.querySelectorAll("script")) script.remove();
+  return document.body?.textContent ?? "";
+}
+
 // llmlint: ignore-block[changed_behavior_has_e2e] Route configuration is validated before the browser artifact exists; successful routes are exercised with JavaScript disabled in site.spec.ts.
 // llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] routes.json is the serialized source; this plain-Node artifact boundary cannot import the TypeScript parser, and just check runs both validators against that same source.
 function parseRoutes(value) {
@@ -175,11 +189,12 @@ for (const route of validatedRoutes) {
     throw new Error(
       `${path} lacks the Pages base path; fix the route renderer and rerun just prerender.`,
     );
-  const expected = substantiveRouteContent[route.path];
-  if (!expected || !html.includes(expected))
-    throw new Error(
-      `${path} lacks substantive route content; fix scripts/compose/compose.mjs and rerun just check.`,
-    );
+  const rendered = renderedText(html);
+  for (const expected of routeSubstantiveContent(`${root}/cv-data`, route.path))
+    if (!rendered.includes(expected))
+      throw new Error(
+        `${path} lacks substantive route content (${expected}); fix scripts/compose/compose.mjs and rerun just check.`,
+      );
   // The prerendered markup only paints styled at first load when every remote
   // it renders has its page CSS inline ahead of the deferred federation scripts.
   const deferredScripts = html.indexOf("<script defer");
