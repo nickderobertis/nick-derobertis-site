@@ -555,6 +555,7 @@ describe("the module boundary every remote publishes under", () => {
  * specifiers it imports. The hosts no longer restate what their remotes expose,
  * so what a host consumes is read out of the imports it actually writes.
  */
+// llmlint: ignore-block[boundary_inputs_validated] The tree walked here is this repository's own checkout: `directory` is built from a host's name inside this spec, and the entries are the committed sources under it, so nothing external reaches the read. Each entry is validated by the read that uses it -- a name the listing produced that cannot be opened relative to the same directory it was listed from fails this test with that path -- and there is no path for one to escape, because a recursive `readdir` yields only descendants of the directory it was given. Re-checking each name against a grammar would restate what the listing already guarantees rather than reject anything it can produce.
 async function hostModules(directory: string) {
   const entries = await readdir(directory, { recursive: true });
   const sources = await Promise.all(
@@ -564,6 +565,7 @@ async function hostModules(directory: string) {
   );
   return sources.join("\n");
 }
+// llmlint: ignore-end[boundary_inputs_validated]
 
 describe("the wiring each remote still declares by hand", () => {
   it("builds every remote through its own federated rspack configuration", async () => {
