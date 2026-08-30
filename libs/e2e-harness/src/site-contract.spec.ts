@@ -25,6 +25,7 @@ interface FixtureOverrides {
 const routeManifest = "apps/shell/src/routes.json";
 const remoteManifest = "libs/build-config/src/remotes.json";
 const homeComposition = "apps/home/rspack.config.ts";
+const cvDataSource = "libs/data-access-core/vendor/codegen";
 
 /** A workspace whose three wiring sources can each be perturbed on their own. */
 async function fixtureRoot(overrides: FixtureOverrides = {}): Promise<string> {
@@ -55,6 +56,29 @@ test("publishes the accessible contract of every route the shell serves", () => 
     expect.objectContaining({ path: "software", link: "Software" }),
     expect.objectContaining({ path: "courses", link: "Courses" }),
   ]);
+});
+
+// The routes that render a CV domain each show every entry that domain lists,
+// so the contract that hands them to the browser journeys has to carry all of
+// them: one title per course, per paper, per project, not just the first.
+test("carries every title the CV data gives a route that renders a domain", async () => {
+  const courses: { title: string }[] = JSON.parse(
+    await readFile(`${cvDataSource}/domains/courses.json`, "utf8"),
+  );
+  const routes = siteRoutes();
+
+  const featuresOf = (published: string) =>
+    routes.find(({ path: routePath }) => routePath === published)?.features;
+
+  expect(featuresOf("courses")).toEqual(courses.map(({ title }) => title));
+  // Home and Bio render no CV domain, so their own remote's prose is all a
+  // journey has to read on them.
+  expect(featuresOf("")).toEqual(["Who am I?"]);
+  expect(featuresOf("bio")).toEqual(["Reproducible Research"]);
+  // The other two domains are read the same way, and each lists more than one
+  // entry, so a contract that stopped at the first would drop what follows it.
+  expect(featuresOf("research")?.length).toBeGreaterThan(1);
+  expect(featuresOf("software")?.length).toBeGreaterThan(1);
 });
 
 test("rejects a route the shell publishes without a journey contract", async () => {

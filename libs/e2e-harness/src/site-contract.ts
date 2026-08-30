@@ -30,10 +30,13 @@ export interface RouteContract {
   /** Heading the route's own page shows. */
   heading: string;
   /**
-   * Copy only this route's feature can supply, derived from the CV data the
-   * site is built from by the same contract the compose-time gate reads.
+   * Every piece of copy only this route's feature can supply, derived from the
+   * CV data the site is built from by the same contract the compose-time gate
+   * reads. A route rendering a CV domain carries one entry per title that
+   * domain lists, so a journey that reads them all asserts the whole of what
+   * the route was built to show.
    */
-  feature: string;
+  features: readonly string[];
   /** The empty view this route publishes through its own query parameter. */
   emptyView?: { query: string; heading: string };
 }
@@ -283,14 +286,11 @@ export function siteRoutes(root: string = process.cwd()): RouteContract[] {
     /* v8 ignore next 2 -- assertSameInventory has already joined both sides. */
     if (!content)
       throw new Error(`No journey contract for the ${route.path} route`);
-    const [feature] = routeSubstantiveContent(
+    const features = routeSubstantiveContent(
       path.join(root, cvDataSource),
       `/${route.path}`,
     );
-    /* v8 ignore next 2 -- routeSubstantiveContent throws before returning none. */
-    if (feature === undefined)
-      throw new Error(`No substantive content for the ${route.path} route`);
-    return { ...content, link: route.label, feature };
+    return { ...content, link: route.label, features };
   });
 }
 

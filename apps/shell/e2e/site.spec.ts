@@ -10,6 +10,7 @@ import {
   type HomePaneRemote,
   homePanes,
   hoverUntilRemoteRequested,
+  type RouteContract,
   type RoutePath,
   remoteContract,
   siteRoutes,
@@ -54,6 +55,28 @@ test("every route has useful HTML with JavaScript disabled", async ({
   await context.close();
 });
 
+/**
+ * Every piece of substantive content the route contract names, read off the
+ * page the way a visitor reads it.
+ *
+ * A route that renders a CV domain carries one entry per title that domain
+ * lists, so reading only the first would leave most of what the route was built
+ * to show unproven: a document that dropped every paper but the first, or every
+ * project below the fold, would still pass. `where` names the render path, so a
+ * missing title says which of them lost it.
+ */
+async function expectSubstantiveContent(
+  page: Page,
+  route: RouteContract,
+  where: string,
+): Promise<void> {
+  for (const feature of route.features)
+    await expect(
+      page.getByText(feature, { exact: false }).first(),
+      `${route.link} ${where}: ${feature}`,
+    ).toBeVisible();
+}
+
 test("every prerendered route contains substantive feature content", async ({
   browser,
 }) => {
@@ -61,9 +84,7 @@ test("every prerendered route contains substantive feature content", async ({
   const page = await context.newPage();
   for (const route of pages) {
     await page.goto(route.path);
-    await expect(
-      page.getByText(route.feature, { exact: false }).first(),
-    ).toBeVisible();
+    await expectSubstantiveContent(page, route, "prerendered");
   }
   await context.close();
 });
@@ -432,10 +453,7 @@ test("every prerendered route hydrates onto the render its own router produced",
       staticPage.getByRole("heading", { name: route.heading }),
       `${route.link} without JavaScript`,
     ).toBeVisible();
-    await expect(
-      staticPage.getByText(route.feature, { exact: false }).first(),
-      `${route.link} without JavaScript`,
-    ).toBeVisible();
+    await expectSubstantiveContent(staticPage, route, "without JavaScript");
   }
   await noScript.close();
 
@@ -453,10 +471,7 @@ test("every prerendered route hydrates onto the render its own router produced",
       page.getByRole("heading", { name: route.heading }),
       `${route.link} hydrated`,
     ).toBeVisible();
-    await expect(
-      page.getByText(route.feature, { exact: false }).first(),
-      `${route.link} hydrated`,
-    ).toBeVisible();
+    await expectSubstantiveContent(page, route, "hydrated");
     // llmlint: ignore[tests_mirror_real_usage] Adopting the prerendered DOM and replacing it with the same content are visibly identical, so the removal count is the only form this route-owned-SSR-state claim has; every other assertion here reads the page through roles and text.
     expect(await removedMainLandmarks(), `${route.link} hydrated`).toBe(0);
     expect(errors, `${route.link} hydrated`).toEqual([]);
