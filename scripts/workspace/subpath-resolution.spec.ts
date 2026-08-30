@@ -47,22 +47,17 @@ import { overlappingSpecifiers } from "./published-subpaths";
  */
 
 /**
- * Whether a target's own source names no Node builtin. rspack polyfills none of
- * them, so a module that imports one is never bundled and no production build
- * ever asks for it; the test-runner half below imports every published subpath,
- * which is where those are covered. A JSON target imports nothing at all.
- *
- * What is read is the source text, so this is named after that reading rather
- * than after a verdict on bundling it cannot reach: a `node:` specifier is a
- * quoted string under every import form there is — static, dynamic, or a
- * re-export — but a module could still reach one indirectly through another
- * module. Erring towards excluding a target is the safe direction: the build
- * half skips it and the test-runner half resolves it for real either way.
+ * Whether a target's source text contains no quoted `node:` specifier. That
+ * substring is all this reads, and it is what the build half selects its
+ * subjects by: rspack polyfills no Node builtin, so a module that reaches one
+ * is never bundled and no production build ever asks for it. The reading is
+ * deliberately loose in the safe direction — it matches a `node:` string that
+ * is not an import and misses one a target reaches indirectly — because a
+ * target it excludes is one the test-runner half below still resolves for
+ * real, and between the two halves every published subpath is covered.
  */
-function importsNoNodeBuiltin(target: string) {
-  return (
-    target.endsWith(".json") || !/["']node:/.test(readFileSync(target, "utf8"))
-  );
+function mentionsNoNodeBuiltin(target: string) {
+  return !/["']node:/.test(readFileSync(target, "utf8"));
 }
 
 /**
@@ -83,12 +78,11 @@ function aRemoteUnderBuild(): string {
 const remoteUnderBuild = aRemoteUnderBuild();
 const subjects = overlappingSpecifiers();
 const builtSubjects = subjects.filter((subject) =>
-  importsNoNodeBuiltin(subject.target),
+  mentionsNoNodeBuiltin(subject.target),
 );
 
-/** Where each build writes the entry it compiles and the artifact it emits. */
 const buildRoot = resolve("dist/tooling-workspace/subpath-build");
-/** The entry name the extra import sits under, beside the app's own `main`. */
+// Beside the app's own `main`, so the build under test is still the whole one.
 const probeEntry = "subpathProbe";
 
 /**
@@ -238,7 +232,6 @@ function emittedFor(report: Report, outputPath: string): string {
   return readFileSync(resolve(outputPath, asset.name), "utf8");
 }
 
-/** Every string a JSON document is built from, keys and values alike. */
 function stringsIn(value: unknown): string[] {
   if (typeof value === "string") return [value];
   if (Array.isArray(value)) return value.flatMap(stringsIn);
@@ -365,12 +358,7 @@ describe("the workspace test runner resolves published subpaths", () => {
       // The probe states the same contract against Vite's resolver, under a
       // config the shared harness produced. Its own diagnostics are the report,
       // so everything it printed is carried into the failure here.
-      // llmlint: ignore[work_goes_through_command_surface] No documented recipe
-      // runs the probe: it belongs to no Nx project, and what this needs is one
-      // Vitest run per component config so the same subject is answered under
-      // each order of the `remotes` map — which is the contract, not a step a
-      // recipe wraps. `just test` runs this file, through the `test` target of
-      // the project that owns it, and this subprocess is that subject.
+      // llmlint: ignore-block[work_goes_through_command_surface] No documented recipe reaches this run and none should: the probe belongs to no Nx project, so no `test` target selects it, and what this case needs is one Vitest run per component config so that one subject is answered under each order of the `remotes` map. That pair is the contract itself, not a step a recipe wraps. The recipe surface still owns the work: `just test` dispatches `tooling-workspace:test`, which runs this file, and this subprocess is the subject it drives.
       const run = await promisify(execFile)(
         "pnpm",
         ["exec", "vitest", "run", "--config", probeConfig],
@@ -380,6 +368,7 @@ describe("the workspace test runner resolves published subpaths", () => {
           `${probeConfig} reported a resolution the shared test harness does not answer as its package publishes it:\n${printedBy(error)}`,
         );
       });
+      // llmlint: ignore-end[work_goes_through_command_surface]
       expect(`${run.stdout}${run.stderr}`).toContain("Test Files");
     },
   );

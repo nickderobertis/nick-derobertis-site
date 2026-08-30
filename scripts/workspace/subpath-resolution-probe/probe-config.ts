@@ -26,14 +26,12 @@ export const probeRemotes: Record<string, string> = {
     "scripts/workspace/subpath-resolution-probe/src/shadows-a-published-subpath.ts",
 };
 
-/** The same map, stated the other way round. This is the whole difference. */
 export function reversed(
   remotes: Record<string, string>,
 ): Record<string, string> {
   return Object.fromEntries(Object.entries(remotes).reverse());
 }
 
-/** The probe's config, under whichever order of that map is asked for. */
 export function probeConfig(
   remotes: Record<string, string>,
 ): WorkspaceTestConfig {
