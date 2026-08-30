@@ -18,7 +18,7 @@ import { afterAll, expect, test } from "vitest";
 // and this spec reaches them through that same validator rather than through a
 // type annotation over unchecked JSON: what it proves is then about the shape
 // the gate itself accepted.
-import { parseBundleBudgets } from "./bundle-budgets.mjs";
+import { deriveCeiling, parseBundleBudgets } from "./bundle-budgets.mjs";
 
 const artifact = "dist/apps/shell";
 const budgetsPath = "scripts/artifact/bundle-budgets.json";
@@ -36,6 +36,109 @@ function readBudgets(path = budgetsPath) {
   return readFile(path, "utf8").then((source) =>
     parseBundleBudgets(JSON.parse(source), path),
   );
+}
+
+type Budgets = Awaited<ReturnType<typeof readBudgets>>;
+type Ceiling = Budgets["routes"][string];
+
+/**
+ * Every ceiling a budget file declares, keyed by the thing it budgets, so two
+ * files can be compared over what they budget rather than over a nesting shape.
+ */
+function ceilings(budgets: Budgets) {
+  const byLabel = new Map<string, Ceiling>();
+  for (const [app, budget] of Object.entries(budgets.apps)) {
+    byLabel.set(`${app} eager entry`, budget.entry);
+    if (budget.page) byLabel.set(`${app} ./Page chunk`, budget.page);
+  }
+  for (const [route, ceiling] of Object.entries(budgets.routes))
+    byLabel.set(`route ${route}`, ceiling);
+  return byLabel;
+}
+
+/** Re-derives a budget file over the composed artifact, into a fixture. */
+async function rederive(source: string) {
+  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-rederive-"));
+  fixtures.push(fixture);
+  const path = join(fixture, "bundle-budgets.json");
+  await cp(source, path);
+  return { path, result: checkBudgets(artifact, path, "--rederive") };
+}
+
+/**
+ * What this tree measures right now, read from the gate's own re-derivation
+ * over the composed artifact. Every test that needs a byte count takes it from
+ * here rather than from the committed file: a committed measurement records the
+ * tree its ceiling was derived against, and a build that moves a handful of
+ * bytes for reasons that have nothing to do with payload must not fail a test
+ * that was never about those bytes. A committed *ceiling* is a different thing
+ * — it is what the gate reads and reports — so those are still quoted from the
+ * file.
+ */
+let measurement: Promise<Budgets> | undefined;
+function measuredBudgets() {
+  measurement ??= rederive(budgetsPath).then(({ path, result }) => {
+    if (result.status !== 0)
+      throw new Error(
+        `--rederive could not measure the artifact: ${result.stderr}`,
+      );
+    return readBudgets(path);
+  });
+  return measurement;
+}
+
+/**
+ * The smallest number of bytes a measurement can have grown by, since the
+ * budget covering it was committed, that the file's one margin no longer
+ * covers. Derived from the margin rather than restated, so a margin that moves
+ * moves both halves of the pair of tests below with it.
+ */
+function pastMargin(measuredBytes: number, marginPercent: number) {
+  return Math.ceil(
+    measuredBytes - (measuredBytes - 1) / (1 + marginPercent / 100),
+  );
+}
+
+/**
+ * A budget file recording what this tree measures now, less `growth` bytes on
+ * each ceiling: the file somebody would have committed back when the payload
+ * was that much smaller. Whether this tree is still inside it is precisely the
+ * question the margin exists to answer.
+ */
+async function budgetsPredatingGrowth(
+  growth: (measuredBytes: number, label: string) => number,
+) {
+  const budgets = await measuredBudgets();
+  const shrink = (ceiling: Ceiling, label: string) =>
+    deriveCeiling(
+      ceiling.measuredBytes - growth(ceiling.measuredBytes, label),
+      budgets.marginPercent,
+    );
+  const written = {
+    marginPercent: budgets.marginPercent,
+    apps: Object.fromEntries(
+      Object.entries(budgets.apps).map(([app, budget]) => [
+        app,
+        {
+          entry: shrink(budget.entry, `${app} eager entry`),
+          ...(budget.page
+            ? { page: shrink(budget.page, `${app} ./Page chunk`) }
+            : {}),
+        },
+      ]),
+    ),
+    routes: Object.fromEntries(
+      Object.entries(budgets.routes).map(([route, ceiling]) => [
+        route,
+        shrink(ceiling, `route ${route}`),
+      ]),
+    ),
+  };
+  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-predating-"));
+  fixtures.push(fixture);
+  const path = join(fixture, "bundle-budgets.json");
+  await writeFile(path, JSON.stringify(written));
+  return path;
 }
 
 /**
@@ -139,9 +242,10 @@ test("a ./Page chunk over its ceiling is refused by app and by route", async () 
   const result = checkBudgets(fixture);
 
   expect(result.status).not.toBe(0);
-  const page = (await readBudgets()).apps["home-cards"]?.page;
+  const measured = (await measuredBudgets()).apps["home-cards"]?.page;
+  const committed = (await readBudgets()).apps["home-cards"]?.page;
   expect(result.stderr).toContain(
-    `home-cards ./Page chunk is ${(page?.measuredBytes ?? 0) + 200_000} bytes, over its ${page?.ceilingBytes}-byte ceiling`,
+    `home-cards ./Page chunk is ${(measured?.measuredBytes ?? 0) + 200_000} bytes, over its ${committed?.ceilingBytes}-byte ceiling`,
   );
   // The route budget is what per-app ceilings alone would have missed, so it
   // has to name the route it blew as well as the pane that grew.
@@ -170,8 +274,9 @@ test("re-adding one CV domain's data to a ./Page chunk is refused", async () => 
   const result = checkBudgets(fixture);
 
   expect(result.status).not.toBe(0);
+  const measured = (await measuredBudgets()).apps[largest.app]?.page;
   expect(result.stderr).toContain(
-    `${largest.app} ./Page chunk is ${largest.page.measuredBytes + domain.bytes} bytes, over its ${largest.page.ceilingBytes}-byte ceiling`,
+    `${largest.app} ./Page chunk is ${(measured?.measuredBytes ?? 0) + domain.bytes} bytes, over its ${largest.page.ceilingBytes}-byte ceiling`,
   );
 });
 
@@ -235,21 +340,110 @@ test("a budget file that omits an app the artifact contains is refused", async (
 });
 
 // Raising a ceiling is meant to be a re-derivation somebody commits, so this
-// drives that mode over the artifact the gate above just passed: it has to
-// reproduce the committed ceilings exactly, which is what makes the committed
-// file a record of this tree rather than of the one it was written against.
-test("--rederive reproduces the committed ceilings from this tree", async () => {
-  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-rederive-"));
-  fixtures.push(fixture);
-  const path = join(fixture, "bundle-budgets.json");
-  await cp(budgetsPath, path);
+// drives that mode over the artifact the gate above just passed. What it owes
+// is not that a byte count comes back equal to one written down earlier: a
+// build moves by a handful of bytes for reasons that have nothing to do with
+// payload, and a gate that fails on that teaches everyone to re-derive without
+// reading the diff, which is the same as having no gate. It owes that the
+// ceilings it derives and the ones committed describe the same tree — the same
+// apps, kinds and routes, and each side's ceiling covering the other side's
+// measurement at the one margin the file declares.
+//
+// It starts from a file whose measurements are all doubled, so a re-derivation
+// that quietly left the file alone would fail every comparison below instead of
+// passing them by having copied the answer in.
+test("--rederive derives ceilings the committed ones still cover", async () => {
+  const committed = await readBudgets();
+  const doubled = await budgetsPredatingGrowth(
+    (measuredBytes) => -measuredBytes,
+  );
 
-  const result = checkBudgets(artifact, path, "--rederive");
+  const { path, result } = await rederive(doubled);
 
   expect(result.status).toBe(0);
   expect(result.stdout.trimEnd().split("\n")).toHaveLength(1);
   expect(result.stdout).toContain("re-derived");
-  expect(await readBudgets(path)).toEqual(await readBudgets());
+  const rederived = await readBudgets(path);
+  expect(rederived.marginPercent).toBe(committed.marginPercent);
+  // Spreading already copies, so sorting in place here reorders nothing shared.
+  expect([...ceilings(rederived).keys()].sort()).toEqual(
+    [...ceilings(committed).keys()].sort(),
+  );
+  const declared = ceilings(committed);
+  // Each file's ceiling has to cover the other file's measurement. A payload
+  // that genuinely grew breaks the first half and a payload that genuinely
+  // shrank breaks the second; a build that moved inside the declared margin
+  // breaks neither, which is the whole point of declaring one.
+  expect(
+    [...ceilings(rederived)].flatMap(([label, fresh]) => {
+      const before = declared.get(label);
+      if (!before) return [`${label} is budgeted by only one of the two files`];
+      return fresh.measuredBytes > before.ceilingBytes ||
+        before.measuredBytes > fresh.ceilingBytes
+        ? [
+            `${label} measures ${fresh.measuredBytes} bytes now against ${before.measuredBytes} committed, which the ${committed.marginPercent}% margin does not cover`,
+          ]
+        : [];
+    }),
+  ).toEqual([]);
+});
+
+// The margin is what keeps the gate from firing on drift it was never meant to
+// catch, so it is proven from both sides against a real re-measurement of this
+// tree: budgets written when every bundle measured exactly as much less as the
+// margin covers still pass over the artifact those bundles grew into.
+test("growth the declared margin covers is not refused", async () => {
+  const budgets = await measuredBudgets();
+  const path = await budgetsPredatingGrowth(
+    (measuredBytes) => pastMargin(measuredBytes, budgets.marginPercent) - 1,
+  );
+  // The file has to be the one this test means to gate against, so what it
+  // declares is read back rather than assumed: every ceiling in it sits at or
+  // above what this tree measures, and at least one of them moved at all.
+  const written = ceilings(await readBudgets(path));
+  const moved = [...ceilings(budgets)].filter(([label, measured]) => {
+    expect(written.get(label)?.ceilingBytes).toBeGreaterThanOrEqual(
+      measured.measuredBytes,
+    );
+    return written.get(label)?.measuredBytes !== measured.measuredBytes;
+  });
+  expect(moved.length).toBeGreaterThan(0);
+
+  const result = checkBudgets(artifact, path);
+
+  expect(result.stderr).not.toContain("check-bundle-budgets:");
+  expect(result.status).toBe(0);
+});
+
+// And one byte past that margin is refused, so what the test above proves is a
+// margin doing its job rather than a gate that never fires.
+test("growth one byte past the declared margin is refused", async () => {
+  const budgets = await measuredBudgets();
+  // The largest eager entry this tree measures, derived rather than named: it
+  // is the app with the most room for growth to hide in, so it is the one worth
+  // moving one byte past what the margin forgives.
+  const [grown = "", measured = 0] = [...ceilings(budgets)]
+    .filter(([label]) => label.endsWith(" eager entry"))
+    .reduce(
+      (largest, [label, ceiling]) =>
+        ceiling.measuredBytes > largest[1]
+          ? [label, ceiling.measuredBytes]
+          : largest,
+      ["", 0] as [string, number],
+    );
+  const path = await budgetsPredatingGrowth((measuredBytes, label) =>
+    label === grown ? pastMargin(measuredBytes, budgets.marginPercent) : 0,
+  );
+  const ceiling =
+    ceilings(await readBudgets(path)).get(grown)?.ceilingBytes ?? 0;
+  expect(ceiling).toBeLessThan(measured);
+
+  const result = checkBudgets(artifact, path);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    `${grown} is ${measured} bytes, over its ${ceiling}-byte ceiling`,
+  );
 });
 
 // A refusal names the step that clears it, so an unexpected failure has to as
