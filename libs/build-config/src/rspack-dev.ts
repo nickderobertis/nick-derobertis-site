@@ -210,7 +210,6 @@ export function developmentServer({
         ]
       : [{ directory: composedArtifactRoot, publicPath: siteBase }],
     historyApiFallback: { index: `${siteBase}index.html` },
-    headers: { "Access-Control-Allow-Origin": "*" },
   };
 }
 

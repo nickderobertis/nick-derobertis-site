@@ -118,21 +118,21 @@ function validatedApp(name, apps) {
 }
 
 const argv = process.argv.slice(2);
-const [flag, named, ...surplus] = argv;
+const [first, second, ...surplus] = argv;
 if (
   surplus.length > 0 ||
-  (flag === "--app" ? typeof named !== "string" : named !== undefined)
+  (first === "--app" ? typeof second !== "string" : second !== undefined)
 )
   throw new Error(
     `the only accepted arguments are <app> and --app <app>; received ${JSON.stringify(argv)}`,
   );
 
 const apps = servableApps();
-if (flag === "--app") {
-  process.stdout.write(`${validatedApp(named, apps)}\n`);
+if (first === "--app") {
+  process.stdout.write(`${validatedApp(second, apps)}\n`);
   process.exit(0);
 }
-const app = validatedApp(flag, apps);
+const app = validatedApp(first, apps);
 
 // The port is this command's one environment input, and it reaches Nx as a
 // command-line argument, so it is held to a port before it is passed on.
