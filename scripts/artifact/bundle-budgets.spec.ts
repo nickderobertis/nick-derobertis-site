@@ -12,7 +12,9 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { parseRemoteManifest } from "@site/artifact-contracts";
+import { siteBase } from "@site/data-access-core/site";
 import { afterAll, expect, test } from "vitest";
 // The gate validates the committed budgets at the boundary that reads them,
 // and this spec reaches them through that same validator rather than through a
@@ -212,6 +214,65 @@ async function pageChunk(fixture: string, app: string) {
   return join(directory, chunks[0] ?? "");
 }
 
+/**
+ * Every remote the registry declares, read through the same validator the gate
+ * reads it through, so an artifact written below carries exactly the apps the
+ * gate will require a budget for.
+ */
+const declaredRemotes = Object.keys(
+  parseRemoteManifest(
+    JSON.parse(await readFile("libs/build-config/src/remotes.json", "utf8")),
+  ),
+);
+
+/** A document loading one script, the way every app's built one does. */
+function documentLoading(source: string) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Written app</title></head><body><div id="root"></div><script defer src="${source}"></script></body></html>`;
+}
+
+/**
+ * A container in the two shapes this gate reads one through: the chunk filename
+ * resolver a bundle runtime carries, and the expose module map a host reads
+ * `./Page` out of, naming the one chunk written beside it.
+ */
+const containerSource =
+  '__webpack_require__.u=e=>e+".chunk.js";' +
+  'var container={moduleMap:{"./Page":()=>__webpack_require__.e("page").then(()=>()=>__webpack_require__("./src/page.tsx"))},shareScope:"default"};';
+
+/** Rewrites one file of a written artifact, keyed by its path inside it. */
+type ArtifactEdits = Readonly<Record<string, (contents: string) => string>>;
+
+/**
+ * A whole artifact this spec writes itself: the shell at the root and one
+ * directory per declared remote, each carrying the document, eager entry,
+ * container and `./Page` chunk a build emits, referenced from the same served
+ * paths the builds emit. Nothing here is read out of `dist/apps/shell`, so a
+ * refusal proven over it is proven on a tree that has never been built — and a
+ * test that names one is answering about the gate rather than about whether
+ * somebody ran a prerender first.
+ */
+async function writtenArtifact(edits: ArtifactEdits = {}) {
+  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-written-"));
+  fixtures.push(fixture);
+  const files: Record<string, string> = {
+    "index.html": documentLoading(`${siteBase}/main.js`),
+    "main.js": "console.log('shell eager entry');\n",
+  };
+  for (const app of declaredRemotes) {
+    const served = `${siteBase}/remotes/${app}/`;
+    files[`remotes/${app}/index.html`] = documentLoading(`${served}main.js`);
+    files[`remotes/${app}/main.js`] = `console.log('${app} eager entry');\n`;
+    files[`remotes/${app}/remoteEntry.js`] = containerSource;
+    files[`remotes/${app}/page.chunk.js`] = `console.log('${app} page');\n`;
+  }
+  for (const [path, contents] of Object.entries(files)) {
+    const written = join(fixture, path);
+    await mkdir(dirname(written), { recursive: true });
+    await writeFile(written, edits[path]?.(contents) ?? contents);
+  }
+  return fixture;
+}
+
 function checkBudgets(root: string, budgets = budgetsPath, ...args: string[]) {
   return spawnSync(
     process.execPath,
@@ -383,9 +444,9 @@ test.each([
       ),
   ],
 ])("a container that %s is refused", async (_case, corrupt) => {
-  const fixture = await isolatedArtifact(["bio"]);
-  const container = join(fixture, "remotes", "bio", "remoteEntry.js");
-  await writeFile(container, corrupt(await readFile(container, "utf8")));
+  const fixture = await writtenArtifact({
+    "remotes/bio/remoteEntry.js": corrupt,
+  });
 
   const result = checkBudgets(fixture);
 
@@ -403,10 +464,29 @@ test("a budget file that omits an app the artifact contains is refused", async (
   const path = join(fixture, "bundle-budgets.json");
   await writeFile(path, JSON.stringify(budgets));
 
-  const result = checkBudgets(artifact, path);
+  const result = checkBudgets(await writtenArtifact(), path);
 
   expect(result.status).not.toBe(0);
   expect(result.stderr).toContain("declares no budget for home-cards");
+});
+
+// An eager entry is the bytes a browser loads out of the app's own directory,
+// so a reference is resolved the way the browser resolves it rather than
+// reduced to its last path segment. A document reaching into a sibling app's
+// directory for a filename this app also emitted is the case that reduction
+// would have counted: the same name, the same origin, another app's bytes.
+test("a document loading another app's script is refused, not counted", async () => {
+  const fixture = await writtenArtifact({
+    "remotes/bio/index.html": () =>
+      documentLoading(`${siteBase}/remotes/home/main.js`),
+  });
+
+  const result = checkBudgets(fixture);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    `loads ${siteBase}/remotes/home/main.js, which resolves to ${siteBase}/remotes/home/main.js, outside the ${siteBase}/remotes/bio/ directory this app emitted`,
+  );
 });
 
 // A property nothing here reads is a budget file asking for something this gate

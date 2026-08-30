@@ -1,10 +1,14 @@
 import { readdir, readFile, stat, writeFile } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { join } from "node:path";
 import { runInNewContext } from "node:vm";
 import { parseRemoteManifest } from "@site/artifact-contracts";
 import remoteManifest from "@site/build-config/remotes.json" with {
   type: "json",
 };
+// The Pages base path arrives already held to `/[a-z0-9-]+` by the module that
+// owns it, so this gate resolves references against the same validated base the
+// builds emitting them were configured with.
+import { siteBase } from "@site/data-access-core/site";
 // Compose owns the route composition this gate sums over, so the route
 // budgets are derived from the same declaration compose builds documents
 // from rather than a second list that could drift away from it. This is a
@@ -58,6 +62,69 @@ for (const [name, value] of [
 const shellApp = "shell";
 /** The one expose whose payload every route composes, so the one budgeted. */
 const pageExpose = "./Page";
+
+// Pages serves the artifact under the project base path, so resolving a script
+// reference the way the browser does means resolving it against the URL the
+// document is served from. Any origin stands in for github.io here; only the
+// path matters, and a reference that leaves this one left the artifact.
+const artifactOrigin = "http://artifact.invalid";
+
+/**
+ * Where a browser fetches an app's own bytes from — the `publicPath` its build
+ * emits references against. The shell is served at the Pages base itself and
+ * every remote from its own directory beneath it, exactly as
+ * libs/build-config/src/rspack-remote.ts publishes them.
+ */
+function appPublicPath(app) {
+  return app === shellApp ? `${siteBase}/` : `${siteBase}/remotes/${app}/`;
+}
+
+/**
+ * The path a reference names once it is decoded, or `undefined` when it carries
+ * an escape the browser would not resolve to a path at all.
+ */
+function decodedPath(pathname) {
+  try {
+    return decodeURIComponent(pathname);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Which file, if any, a document's script reference names among the bytes the
+ * app emitted beside that document: `{ file }` when the browser would load it
+ * out of the app's own served directory, and `{ elsewhere }` — a clause naming
+ * where it would go instead — when it would not.
+ *
+ * The reference is resolved and then mapped back through that directory rather
+ * than reduced to its last path segment. `<site base>/main.js` and
+ * `../home/main.js` both end in a name a sibling app's directory may well
+ * contain, so a gate reading the segment alone would count another app's bytes,
+ * or bytes no app emitted, against this app's ceiling.
+ */
+function resolvedEntryScript(reference, publicPath, documentUrl) {
+  let resolved;
+  try {
+    resolved = new URL(reference, documentUrl);
+  } catch {
+    return {
+      elsewhere: "is not a URL a browser could resolve against this document",
+    };
+  }
+  if (resolved.origin !== artifactOrigin)
+    return { elsewhere: "is served from another origin" };
+  // The URL parser already resolved `..` against the served path, so only a
+  // percent-encoded traversal could still reach outside the app's directory.
+  const file = resolved.pathname.startsWith(publicPath)
+    ? decodedPath(resolved.pathname.slice(publicPath.length))
+    : undefined;
+  return file === undefined || file === "" || file.includes("/")
+    ? {
+        elsewhere: `resolves to ${resolved.pathname}, outside the ${publicPath} directory this app emitted`,
+      }
+    : { file };
+}
 
 /**
  * The resolver expression, checked before it is evaluated rather than after.
@@ -211,14 +278,16 @@ async function totalBytes(directory, files) {
  * the eager entry: what a visitor pays for reaching the app at all, ahead of
  * any route or pane it goes on to resolve.
  */
-async function entryScripts(directory, emitted) {
+async function entryScripts(directory, emitted, publicPath) {
   const documentPath = join(directory, "index.html");
   const document = await readFile(documentPath, "utf8");
-  // A reference is reduced to the filename this app emitted beside its own
-  // document, so one that does not name a file there is refused rather than
-  // reduced: a script served from another origin, or reached through a parent
-  // directory, would otherwise be counted against this app's ceiling whenever
-  // its last path segment happened to match a chunk this app did emit.
+  // A reference is resolved the way the browser resolves it, against the URL
+  // this document is served from, and is only an entry script when it comes
+  // back naming a file inside this app's own directory. One that does not is
+  // refused rather than counted: a script served from another origin, or from
+  // another app's directory beside this one, would otherwise land on this app's
+  // ceiling whenever its last path segment matched a file this app did emit.
+  const documentUrl = new URL(`${publicPath}index.html`, artifactOrigin);
   const scripts = [];
   // Every spelling HTML allows for the attribute is read — either quote, none
   // at all, either case, whitespace around the `=` — not just the one this
@@ -228,18 +297,16 @@ async function entryScripts(directory, emitted) {
     /<script\b[^>]*\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi,
   )) {
     const reference = quoted ?? singleQuoted ?? bare ?? "";
-    const elsewhere = /^[A-Za-z][A-Za-z\d+.-]*:/.test(reference)
-      ? "is served from another origin"
-      : reference.startsWith("//")
-        ? "is served from another host"
-        : reference.split("/").includes("..")
-          ? "reaches outside the directory this app emitted"
-          : undefined;
-    if (elsewhere)
+    const { file, elsewhere } = resolvedEntryScript(
+      reference,
+      publicPath,
+      documentUrl,
+    );
+    if (file === undefined)
       throw new BudgetRefusal(
         `${documentPath} loads ${reference}, which ${elsewhere}, so the bytes it carries are not this app's to budget; rebuild that app and rerun just prerender.`,
       );
-    scripts.push(basename(reference));
+    scripts.push(file);
   }
   if (scripts.length === 0)
     throw new BudgetRefusal(
@@ -267,7 +334,7 @@ function exposedChunkIds(container, expose) {
   return entry === undefined ? undefined : requestedChunkIds(entry);
 }
 
-async function measureApp(directory) {
+async function measureApp(directory, publicPath) {
   const emitted = new Set(
     (await readdir(directory)).filter((file) => file.endsWith(".js")),
   );
@@ -276,7 +343,7 @@ async function measureApp(directory) {
       directory,
       await reachableJsFiles(
         directory,
-        await entryScripts(directory, emitted),
+        await entryScripts(directory, emitted, publicPath),
         emitted,
       ),
     ),
@@ -378,6 +445,7 @@ const measuredApps = {};
 for (const app of artifactApps)
   measuredApps[app] = await measureApp(
     app === shellApp ? root : join(root, "remotes", app),
+    appPublicPath(app),
   );
 const measuredRoutes = Object.fromEntries(
   Object.entries(routeFragments).map(([route, names]) => [
