@@ -77,8 +77,6 @@ async function createArtifactFixture(
 }
 
 beforeAll(async () => {
-  // The remote one test below strips an asset from has to be this fixture's
-  // own bytes, so removing it never reaches the shared build output.
   fixture = await createArtifactFixture([join("remotes", corruptibleRemote)]);
 });
 
@@ -170,6 +168,13 @@ test.each([
 const renamedCourse = "Valuation & Reproducible Modeling";
 const renamedCourseInMarkup = "Valuation &amp; Reproducible Modeling";
 
+function isTitledCourse(value: unknown): value is { title: string } {
+  if (typeof value !== "object" || value === null || !("title" in value))
+    return false;
+  const { title } = value;
+  return typeof title === "string" && title.length > 0;
+}
+
 /**
  * An artifact whose staged CV data renames the first course it carries.
  *
@@ -182,16 +187,19 @@ const renamedCourseInMarkup = "Valuation &amp; Reproducible Modeling";
 async function createRenamedCourseFixture(carriedByDocument: boolean) {
   const root = await createArtifactFixture(["cv-data"]);
   const coursesPath = join(root, "cv-data/domains/courses.json");
-  const staged = JSON.parse(await readFile(coursesPath, "utf8")) as {
-    title?: string;
-  }[];
-  const committed = staged[0]?.title;
-  if (typeof committed !== "string" || committed.length === 0)
+  const parsed: unknown = JSON.parse(await readFile(coursesPath, "utf8"));
+  // The rename below only means anything if the file it edits really is the
+  // staged courses domain, so its shape is established before an entry is read.
+  const staged =
+    Array.isArray(parsed) && parsed.every(isTitledCourse) ? parsed : [];
+  const [committedCourse, ...rest] = staged;
+  if (committedCourse === undefined)
     throw new Error(
-      `${coursesPath} does not read back as the staged courses domain; rebuild the artifact and rerun this spec.`,
+      `${coursesPath} does not read back as a staged courses domain carrying a titled course; rebuild the artifact and rerun this spec.`,
     );
-  staged[0] = { ...staged[0], title: renamedCourse };
-  await writeFile(coursesPath, `${JSON.stringify(staged, null, 2)}\n`);
+  const committed = committedCourse.title;
+  const renamed = [{ ...committedCourse, title: renamedCourse }, ...rest];
+  await writeFile(coursesPath, `${JSON.stringify(renamed, null, 2)}\n`);
   if (carriedByDocument) {
     const page = join(root, "courses/index.html");
     await writeFile(
