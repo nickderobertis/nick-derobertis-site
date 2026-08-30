@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
-import { PageShell } from "./page-shell";
+import { PageShell, type PageShellProps } from "./page-shell";
 
 test("mounts a pane a visitor can find by the name its route gives it", () => {
   render(
@@ -30,10 +30,10 @@ test("holds a contained pane to the reading width beside the app's own class", (
   );
 });
 
-test.each([
+test.each<[PageShellProps["as"], string]>([
   ["article", "ARTICLE"],
   ["div", "DIV"],
-] as const)("renders a %s route as one", (as, tag) => {
+])("renders a %s route as one", (as, tag) => {
   render(
     <PageShell as={as} data-testid="shell">
       <p>Body</p>

@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { SectionHeading } from "./section-heading";
 
@@ -23,14 +23,10 @@ test("opens a section with its eyebrow, title and description in that order", ()
   expect([...(header?.children ?? [])].map((child) => child.className)).toEqual(
     ["eyebrow", "section-title", "section-description"],
   );
+  expect(screen.getByText("Contact").parentElement).toBe(header);
   expect(
-    within(header as HTMLElement).getByText("Contact"),
-  ).toBeInTheDocument();
-  expect(
-    within(header as HTMLElement).getByText(
-      "Reach me wherever you already are.",
-    ),
-  ).toBeInTheDocument();
+    screen.getByText("Reach me wherever you already are.").parentElement,
+  ).toBe(header);
 });
 
 test("renders the rank the route asks for so no heading level is skipped", () => {

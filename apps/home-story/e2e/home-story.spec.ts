@@ -26,11 +26,13 @@ for (const renderPath of paneRenderPaths(pane)) {
     await expect(title).toHaveCSS("color", "rgb(18, 50, 74)");
 
     // The eyebrow and the description are the heading's own parts, so both are
-    // read out of the header the title sits in rather than off the page.
-    const heading = page.locator("header").filter({ has: title });
-    await expect(heading.getByText("My story")).toBeVisible();
+    // read out of the pane the title names rather than off the page: the pane
+    // points its own `aria-labelledby` at this title, so the region resolving
+    // to this name is the same fact as the heading having arrived intact.
+    const storyPane = page.getByRole("region", { name: "Who am I?" });
+    await expect(storyPane.getByText("My story")).toBeVisible();
     await expect(
-      heading.getByText(
+      storyPane.getByText(
         "I am a finance Ph.D., serial entrepreneur, engineer, and product leader.",
         { exact: false },
       ),

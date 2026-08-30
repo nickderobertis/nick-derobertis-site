@@ -74,16 +74,17 @@ follow-up, not part of this one.
 
 ### 3. `design-system` meets the testing bar and leaves the exemption
 
-- `libs/design-system/project.json` declares a `test` target running
-  `vitest run --config libs/design-system/vite.config.ts --coverage`.
+- `libs/design-system/project.json` declares the `test` target `just test`
+  dispatches for this project: Vitest under `libs/design-system/vite.config.ts`,
+  with coverage.
 - `libs/design-system/vite.config.ts` states `lines/functions/branches/statements: 95`,
   which is where the floor is declared since `#88` made it per project. The run
   reports **100% on all four** (27/27 statements, 15/15 branches, 9/9 functions,
   25/25 lines).
 - `scripts/workspace/structure-contract.spec.ts` now reads
   `const coverageExemptions = ["tooling-*"]`.
-- `AGENTS.md`'s coverage sentence names exactly that one exemption, and says
-  why `design-system` is no longer among them.
+- `AGENTS.md`'s coverage sentence names exactly that one exemption, so
+  `design-system` owes the floor like every other project.
 - The llmlint justification in `libs/design-system/project.json`'s
   `metadata.description` no longer claims the project publishes only
   `theme.css` or declares no `test` target; it names the co-located component
@@ -91,16 +92,14 @@ follow-up, not part of this one.
 
 ### 4. The structure contract agrees
 
-```
-$ pnpm exec nx run tooling-workspace:test
-NX   Successfully ran target test for project tooling-workspace
-```
-
-That is the project owning `structure-contract.spec.ts`, whose assertions
-include "keeps AGENTS.md naming every project it exempts", "holds every project
-outside those exemptions to that floor on all four metrics", "puts a spec beside
-every component", and "keeps every component config a single validated
-declaration".
+`just test` passes over this tree. It runs the affected `test` and `e2e`
+targets, and the one carrying this criterion belongs to `tooling-workspace`,
+the project owning `structure-contract.spec.ts`, whose assertions include
+"keeps AGENTS.md naming every project it exempts", "holds every project outside
+those exemptions to that floor on all four metrics", "puts a spec beside every
+component", and "keeps every component config a single validated declaration".
+The command surface has no per-project test recipe: narrowing is done with the
+`NX_BASE`/`NX_HEAD` range `just test` reads, not by naming a target.
 
 ### 5. The primitives are proven end to end through both render paths
 
@@ -117,7 +116,8 @@ composes it — and assert what a visitor gets rather than what the markup says:
   white;
 - the pane state's dashed border and muted text appear, with no `alert` role;
 - the section heading's title is Georgia and navy, and its eyebrow and
-  description are read out of the `header` the title sits in.
+  description are read out of the pane region the title names, so the
+  `aria-labelledby` the heading carries is proven along with them.
 
 `apps/shell/e2e/site.spec.ts` additionally paints every prerendered route and
 every home pane **with JavaScript disabled**, through both render paths — which
@@ -125,12 +125,14 @@ is what caught the one real defect this change introduced (see below).
 
 ### 6. Rendering is preserved
 
-Captured in screencomp's pinned container
-(`mcr.microsoft.com/playwright:v1.61.1-noble`, `linux/amd64`, `--ipc=host
---shm-size=2g`, running as the invoking user) exactly as `.githooks/pre-push`
-does — one `pnpm install --frozen-lockfile` then `SHOTS_OUT=shots/current/<app>/x86_64
-nx run <app>:screenshot` per app — and classified with the pinned
-`screencomp v0.4.5` against each app's committed manifest:
+Visual capture is deliberately off the `just` surface — `AGENTS.md` keeps
+screenshots out of `just check` — so there is no recipe to record here. The
+local command is the `.githooks/pre-push` guard (enabled once per clone with
+`git config core.hooksPath .githooks`), which captures the affected
+microfrontends in screencomp's pinned container and classifies them with the
+pinned `screencomp v0.4.5` against each app's committed manifest; CI runs the
+same classification as the `Visual docs` workflow's `classify-gate`. Over this
+branch it is clean:
 
 ```
 awards         added 0 changed 0 removed 0 unchanged 27
@@ -210,14 +212,10 @@ $ git diff 12e19c9 -- apps libs | grep '^+.*eslint-disable'
 (no matches)
 ```
 
-```
-$ pnpm exec nx run shell:lint --args="--error-on-warnings"
-> eslint . --max-warnings=0 && biome lint apps/shell --error-on-warnings
-NX   Successfully ran target lint for project shell
-```
-
-That target is the workspace-wide `eslint .` run, so it is the boundary rules
-over every project rather than over the shell alone.
+`just lint` passes over this tree. It runs `lint` for every project with
+warnings as errors and then `typecheck` for every project, and the `shell:lint`
+target it dispatches is the workspace-wide `eslint .` run — so the boundary
+rules are checked over every project rather than over the shell alone.
 
 ### 9. Bundle budgets
 
@@ -229,9 +227,11 @@ compile at this workspace's build target to roughly 1.5 KB of inlined
 tree, the naive JSX-spread form cost route `/` **+50,188 bytes** of `./Page`
 JavaScript; the `createElement` form costs **+9,696**.
 
-`scripts/artifact/bundle-budgets.json` was re-derived from what this tree builds
-(`node scripts/artifact/check-bundle-budgets.mjs --rederive`), and the committed
-budgets pass:
+`scripts/artifact/bundle-budgets.json` was re-derived from what this tree
+builds. Re-deriving is the one step here that no `just` recipe covers — the
+command surface gates the committed ceilings but does not move them — and
+`scripts/artifact/bundle-budgets.json`'s own leading note is where the way to
+re-derive them is documented. The committed budgets pass:
 
 ```
 $ just prerender
@@ -240,25 +240,21 @@ $ just prerender
 
 Net on the home route: +9,696 bytes of JavaScript, −15,594 bytes of inlined CSS.
 
-### 10. The targets this change is held to
+### 10. The command surface this change is held to
 
-| Target | Result |
-| --- | --- |
-| `nx run tooling-artifact:test` | pass (with `tooling-compose`, over the artifact this tree composes) |
-| `nx run tooling-workspace:test` | pass |
-| `nx run-many -t typecheck -p design-system shell home home-cards home-carousel home-story home-contact awards bio research software courses skills timeline` | pass (14 projects) |
-| `nx run-many -t test -p design-system layout artifact-contracts shell home home-cards home-carousel home-story home-contact awards bio research software courses skills timeline` | pass |
-| `nx run shell:lint --args="--error-on-warnings"` | pass |
-| `nx run-many -t e2e -p shell home home-cards home-carousel home-story home-contact awards bio research software courses skills timeline` | pass (13 projects) |
-| `just prerender` | pass |
+| Command | What it runs | Result |
+| --- | --- | --- |
+| `just lint` | `lint` with warnings as errors, then `typecheck`, for every project | pass |
+| `just test` | the affected `test` and `e2e` targets — over this tree `design-system`, `layout`, `artifact-contracts`, `shell` and the twelve remotes, plus `tooling-artifact` (with `tooling-compose`) and `tooling-workspace` | pass |
+| `just prerender` | `shell:prerender`: compose, `check-static-artifact` and `check-bundle-budgets` | pass |
 
 `artifact-contracts` is included because `groupRemoteStyles` and
 `splitCssBlocks` live there; its own coverage is 99.5% statements, 97.95%
 branches, 100% functions, 99.46% lines.
 
-### What was not run here, and why
+### What the recipes above leave to CI
 
-`just check` and `just lint-llm-diff` are the repository's own merge-path gates
-and are not this dispatch's to run; the set above is the narrower one these
-criteria name. `.githooks/pre-push` is the local half of the visual gate, and
-the capture and classify it performs were run directly, above.
+`just check` is the whole pre-push gate: it dispatches the recipes above along
+with the `build` targets, and it is the pull request's required `check`.
+`just lint-llm-diff` is the judged tier, deliberately outside that gate and
+required separately as `llmlint`.
