@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
+import { composedArtifactRoot } from "@site/build-config/composed-artifact";
 import {
   createSourceFile,
   isCallExpression,
@@ -150,6 +151,16 @@ function walk(directory: string): string[] {
   });
 }
 
+/**
+ * The one field of `apps/shell/project.json` read below: where `shell:build`
+ * writes, which is the composed artifact's own directory.
+ */
+const shellBuildSchema = z.object({
+  targets: z.object({
+    build: z.object({ options: z.object({ outputPath: workspaceDirectory }) }),
+  }),
+});
+
 describe("app project structure", () => {
   it("gives every app the uniform target set its instructions name", () => {
     const missing = projects
@@ -163,6 +174,20 @@ describe("app project structure", () => {
           ),
       );
     expect(missing).toEqual([]);
+  });
+
+  it("writes the shell's build into the one tree the workspace composes", () => {
+    // Every other declaration of where the composed artifact lives imports
+    // `composedArtifactRoot`. Nx's manifest is JSON, so this one cannot, and
+    // that leaves it free to drift into naming a directory the compose writes
+    // to, the development server mounts siblings out of, and the browser
+    // journeys serve — none of which would be where the shell had built. So the
+    // manifest is held to the constant here instead.
+    const outputPath = shellBuildSchema.parse(
+      JSON.parse(readFileSync("apps/shell/project.json", "utf8")),
+    ).targets.build.options.outputPath;
+
+    expect(outputPath).toBe(composedArtifactRoot);
   });
 
   it("gives every app its own component config and browser suite", () => {
