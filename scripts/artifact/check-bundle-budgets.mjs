@@ -293,9 +293,9 @@ async function measureApp(directory) {
     throw new BudgetRefusal(
       `${join(directory, "remoteEntry.js")} carries no chunk filename resolver, so the ${pageExpose} payload a host composes from it cannot be measured; rebuild that app and rerun just prerender.`,
     );
-  if (!exposed)
+  if (!exposed || exposed.length === 0)
     throw new BudgetRefusal(
-      `${join(directory, "remoteEntry.js")} declares no ${pageExpose} in its expose module map, so the payload a host composes from it cannot be measured; rebuild that app and rerun just prerender.`,
+      `${join(directory, "remoteEntry.js")} declares no ${pageExpose} chunk in its expose module map, so the payload a host composes from it cannot be measured; rebuild that app and rerun just prerender.`,
     );
   const chunks = exposed
     .map((id) => resolve(id))

@@ -43,6 +43,13 @@ export interface RoutePages {
   courses: RoutePage<CoursesPageProps<Courses>>;
 }
 
+/**
+ * The view a loader falls back to when its domain fetch fails. Named at this
+ * type so each loader's fallback stays a RouteView the page can narrow on,
+ * rather than widening to string inside the object literal it is returned in.
+ */
+const failedView: RouteView = "error";
+
 /** The CV domains a route loader fetches, named as the CV publishes them. */
 export type RouteDomainName = "courses" | "research" | "software_projects";
 
@@ -170,10 +177,7 @@ export function createSiteRouter({
         warmSoftwareLogos(projects);
         return { projects, view };
       } catch {
-        // `as const` keeps this branch's view a literal; without it the union
-        // with the branches above widens to string and the page loses the
-        // narrowing it renders from.
-        return { projects: null, view: "error" as const };
+        return { projects: null, view: failedView };
       }
     },
     component: routeComponent(pages.software, (Page) => {
@@ -204,9 +208,7 @@ export function createSiteRouter({
           view,
         };
       } catch {
-        // Same as the software loader above: the literal keeps this branch's
-        // view from widening to string and losing the page's narrowing.
-        return { courses: null, view: "error" as const };
+        return { courses: null, view: failedView };
       }
     },
     component: routeComponent(pages.courses, (Page) => {

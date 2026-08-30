@@ -370,17 +370,28 @@ test("an entry script quoted another way is measured, not skipped", async () => 
 // A container this gate cannot read the ./Page expose out of is refused rather
 // than measured as a remote with no page at all: budgeting it at zero is what
 // --rederive would then write down as the ceiling a host's route composes.
-test("a container with no readable ./Page expose is refused", async () => {
+test.each([
+  [
+    "carries no expose module map",
+    (source: string) => source.replace("moduleMap:{", "moduleMaps:{"),
+  ],
+  [
+    "names no chunk under ./Page",
+    (source: string) =>
+      source.replace(/moduleMap:\{[\s\S]*?\},shareScope/, (map) =>
+        map.replaceAll("__webpack_require__.e(", "__webpack_require__.chunk("),
+      ),
+  ],
+])("a container that %s is refused", async (_case, corrupt) => {
   const fixture = await isolatedArtifact(["bio"]);
   const container = join(fixture, "remotes", "bio", "remoteEntry.js");
-  const source = await readFile(container, "utf8");
-  await writeFile(container, source.replace("moduleMap:{", "moduleMaps:{"));
+  await writeFile(container, corrupt(await readFile(container, "utf8")));
 
   const result = checkBudgets(fixture);
 
   expect(result.status).not.toBe(0);
   expect(result.stderr).toContain(
-    "declares no ./Page in its expose module map",
+    "declares no ./Page chunk in its expose module map",
   );
 });
 
