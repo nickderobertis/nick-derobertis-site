@@ -39,18 +39,18 @@
     },
     "home": {
       "entry": {
-        "measuredBytes": 812968,
-        "ceilingBytes": 813375
+        "measuredBytes": 812972,
+        "ceilingBytes": 813379
       },
       "page": {
-        "measuredBytes": 8062,
-        "ceilingBytes": 8067
+        "measuredBytes": 8063,
+        "ceilingBytes": 8068
       }
     },
     "home-cards": {
       "entry": {
-        "measuredBytes": 787009,
-        "ceilingBytes": 787403
+        "measuredBytes": 787005,
+        "ceilingBytes": 787399
       },
       "page": {
         "measuredBytes": 2377,
@@ -59,8 +59,8 @@
     },
     "home-carousel": {
       "entry": {
-        "measuredBytes": 790158,
-        "ceilingBytes": 790554
+        "measuredBytes": 790154,
+        "ceilingBytes": 790550
       },
       "page": {
         "measuredBytes": 3920,
@@ -69,8 +69,8 @@
     },
     "home-contact": {
       "entry": {
-        "measuredBytes": 786904,
-        "ceilingBytes": 787298
+        "measuredBytes": 786896,
+        "ceilingBytes": 787290
       },
       "page": {
         "measuredBytes": 2157,
@@ -79,8 +79,8 @@
     },
     "home-story": {
       "entry": {
-        "measuredBytes": 786622,
-        "ceilingBytes": 787016
+        "measuredBytes": 786618,
+        "ceilingBytes": 787012
       },
       "page": {
         "measuredBytes": 2099,
@@ -105,8 +105,8 @@
     },
     "skills": {
       "entry": {
-        "measuredBytes": 680803,
-        "ceilingBytes": 681144
+        "measuredBytes": 680805,
+        "ceilingBytes": 681146
       },
       "page": {
         "measuredBytes": 93105,
@@ -136,8 +136,8 @@
   },
   "routes": {
     "/": {
-      "measuredBytes": 143735,
-      "ceilingBytes": 143807
+      "measuredBytes": 143736,
+      "ceilingBytes": 143808
     },
     "/bio": {
       "measuredBytes": 6713,
