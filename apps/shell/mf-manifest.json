@@ -9,7 +9,7 @@
       "buildName": "@site/shell"
     },
     "remoteEntry": {
-      "name": "remoteEntry.js",
+      "name": "",
       "path": "",
       "type": "global"
     },
@@ -34,8 +34,7 @@
         "js": {
           "async": [],
           "sync": [
-            "main.24d1c786bdbab282.js",
-            "remoteEntry.js"
+            "main.24d1c786bdbab282.js"
           ]
         },
         "css": {
@@ -57,8 +56,7 @@
         "js": {
           "async": [],
           "sync": [
-            "main.24d1c786bdbab282.js",
-            "remoteEntry.js"
+            "main.24d1c786bdbab282.js"
           ]
         },
         "css": {
@@ -103,24 +101,5 @@
       "entry": "/nick-derobertis-site/remotes/courses/remoteEntry.js"
     }
   ],
-  "exposes": [
-    {
-      "id": "shell:App",
-      "name": "App",
-      "assets": {
-        "js": {
-          "sync": [
-            "454.60585a232ed50db7.js",
-            "__federation_expose_App.cf937cb5178570ef.js"
-          ],
-          "async": []
-        },
-        "css": {
-          "sync": [],
-          "async": []
-        }
-      },
-      "path": "./App"
-    }
-  ]
+  "exposes": []
 }
