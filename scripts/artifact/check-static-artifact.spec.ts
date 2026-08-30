@@ -11,7 +11,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { afterAll, beforeAll, expect, test } from "vitest";
 
 let fixture: string;

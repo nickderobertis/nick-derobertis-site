@@ -8,7 +8,7 @@ import { expect, type Page, test } from "@playwright/test";
 // spec reads them rather than restating either contract. The e2e tag policy
 // governs application code, so reading those two contracts is exempted here.
 /* eslint-disable @nx/enforce-module-boundaries -- This deploy-topology journey reads the host's canonical base and route contracts while exercising the assembled artifact, not application internals. */
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { parseSiteRoutes } from "@site/route-state";
 
 /* eslint-enable @nx/enforce-module-boundaries */

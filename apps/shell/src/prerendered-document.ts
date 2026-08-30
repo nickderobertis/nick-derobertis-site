@@ -1,5 +1,5 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing and reads only the base its own prerender wrote.
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { prerenderRouteAttribute } from "@site/route-state";
 import { routePath } from "./route-path";
 import type { SiteRouter } from "./router";

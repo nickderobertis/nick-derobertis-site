@@ -8,7 +8,7 @@ import type {
   SoftwareProjects,
 } from "@site/data-access-core";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing and validates route payloads before passing them to remotes.
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import {
   type BioPageProps,
   type CoursesPageProps,

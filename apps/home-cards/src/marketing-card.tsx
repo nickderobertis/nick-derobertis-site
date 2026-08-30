@@ -1,4 +1,4 @@
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 
 /** One area of work, as the bundled home content records it. */
 export interface MarketingCardModel {

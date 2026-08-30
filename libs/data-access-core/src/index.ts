@@ -15,4 +15,3 @@ export {
   validateCvData,
   validateCvDomain,
 } from "./client";
-export { siteBase } from "./site";

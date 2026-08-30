@@ -1,5 +1,5 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries -- This spec drives the build-only shell fragment entry, which reads the CV data through this same client; nothing in the library runtime gains the dependency.
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { renderShellFragment } from "./shell-fragment-entry";
 import { failRenderingRoute } from "./shell-fragment-router.fixture";

@@ -1,4 +1,4 @@
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { MarketingCard } from "./marketing-card";

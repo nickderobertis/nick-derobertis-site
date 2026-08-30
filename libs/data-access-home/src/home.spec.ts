@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { homeContent, readPaneState } from "./home";

@@ -3,7 +3,7 @@
 // real while the app it prerenders stays in this library's tree. Its routes are
 // built from ./shell-fragment-routes.fixture, the table the entry loops over.
 // eslint-disable-next-line @nx/enforce-module-boundaries -- This fixture is a build-only alias target for the shell fragment entry's spec, and takes the site base from the same module the shell router takes it from.
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import {
   createRootRouteWithContext,
   createRoute,
