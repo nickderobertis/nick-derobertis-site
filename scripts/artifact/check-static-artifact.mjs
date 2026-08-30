@@ -24,6 +24,7 @@ process.on("uncaughtException", (error) => {
   process.exit(1);
 });
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This gate has no browser interface: it reads the artifact's own staged CV data at compose time and every route it rejects fails the compose before anything is served. site.spec.ts drives the documents it passes in a real browser on the prerendered and hydrated paths, and check-static-artifact.spec.ts drives this map through the real verifier over an artifact whose CV data was changed.
 // Every prerendered document has to carry its own route's real content, and the
 // artifact already ships the data that content is rendered from: compose stages
 // libs/data-access-core/vendor/codegen at `cv-data`. Naming the titles here
@@ -69,6 +70,7 @@ const routeCvContent = {
 const remoteProseContent = {
   "/bio": "Reproducible Research",
 };
+// llmlint: ignore-end[changed_behavior_has_e2e]
 const realRouteMarkers = {
   "/bio": 'class="bio-page"',
   "/research": 'class="research-page"',
@@ -171,6 +173,7 @@ async function assertReferencedAssetsResolve(artifactPath) {
 }
 // llmlint: ignore-end[changed_behavior_has_e2e]
 
+// llmlint: ignore-block[changed_behavior_has_e2e] This spells a CV value the way the prerendered markup already carries it; it changes what the compose-time gate accepts, never what a visitor is served. check-static-artifact.spec.ts drives it through the real verifier over an artifact whose renamed course carries an ampersand.
 /**
  * A CV value as the prerendered markup carries it.
  *
@@ -188,6 +191,7 @@ function escapeMarkupText(value) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#x27;");
 }
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 // llmlint: ignore-block[changed_behavior_has_e2e] This reads the artifact's staged CV data before anything is served, and every branch it adds ends in a compose that failed; site.spec.ts drives the documents it passes in a real browser on both render paths.
 /**
