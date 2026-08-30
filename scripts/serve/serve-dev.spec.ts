@@ -162,9 +162,12 @@ describe("the host served from source", () => {
 
   it("renders the site from source with every sibling remote from built output", async () => {
     const failures: string[] = [];
+    const siblingScripts: string[] = [];
     page.on("response", (response) => {
       if (response.status() >= 400)
         failures.push(`${response.status()} ${response.url()}`);
+      if (/\/remotes\/[a-z-]+\/[^/]+\.js$/.test(response.url()))
+        siblingScripts.push(response.url());
     });
 
     await page.goto(`${base}/`, { waitUntil: "networkidle" });
@@ -187,6 +190,18 @@ describe("the host served from source", () => {
     await builtRemotePane.waitFor({ timeout: 60_000 });
     expect(await builtRemotePane.isVisible()).toBe(true);
     expect(failures).toEqual([]);
+
+    // And what the siblings were built as, read off the bytes the server just
+    // handed the browser. `built output` means the artifact Pages publishes,
+    // which is minified and ships no source map beside it; a development build
+    // of the same tree appends a sourceMappingURL to every chunk. The recipe
+    // composes under a pinned NODE_ENV precisely so the ambient one — Vitest
+    // sets `test` for this spec — cannot decide which of the two the whole
+    // graph, and the Nx cache entry the gate's browser suites share with it,
+    // ends up holding.
+    expect(siblingScripts.length).toBeGreaterThan(0);
+    const servedSibling = await (await fetch(siblingScripts[0])).text();
+    expect(servedSibling).not.toContain("sourceMappingURL");
   }, 120_000);
 
   it("resolves the shell's routes across that mix", async () => {

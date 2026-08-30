@@ -156,9 +156,20 @@ serve: prerender
 # other app's built output, at the same base path Pages publishes. The argument
 # is validated before anything is built, so a name this workspace cannot serve
 # costs a diagnostic rather than thirteen production builds.
+#
+# The compose below pins NODE_ENV, for the mirror of the reason
+# scripts/serve/serve-dev.mjs pins it to `development` for the server itself:
+# these two builds want opposite modes out of one command, and both read the
+# ambient value. The artifact the siblings come from is the production one Pages
+# publishes, whatever NODE_ENV the caller happened to carry — and a caller does
+# carry one, because Vitest sets NODE_ENV=test for every spec, including the one
+# that drives this recipe. Left ambient, that composed a development artifact
+# into dist/apps/shell and into the Nx cache entry `shell:prerender` shares with
+# every browser suite in the gate, which then hydrated the built site against
+# development bundles and failed on mismatched render output.
 @serve-dev app:
     # llmlint: ignore[changed_behavior_has_e2e] This developer command has no browser interface of its own: it validates a name, claims the artifact, and hands the serving to the real Nx dev-server target. serve-dev.spec.ts drives this exact recipe as a real subprocess and drives the page it serves — and the edit it hot-replaces into that page — through a real browser.
-    status=0; app=$({{node_typestrip}} scripts/serve/serve-dev.mjs --app "$1") || status=$?; if (( status != 0 )); then if (( status == 2 )); then echo "serve-dev: app must name an app this workspace serves from source; the reason above lists every one, so pass one and rerun just serve-dev <app>" >&2; else echo "serve-dev: the servable apps could not be resolved; fix the error above and rerun just serve-dev <app>" >&2; fi; exit "$status"; fi; just prerender; {{node_typestrip}} scripts/serve/serve-dev.mjs "$app" || { echo "serve-dev: the $app development server stopped; fix the error above and rerun just serve-dev $app" >&2; exit 1; }
+    status=0; app=$({{node_typestrip}} scripts/serve/serve-dev.mjs --app "$1") || status=$?; if (( status != 0 )); then if (( status == 2 )); then echo "serve-dev: app must name an app this workspace serves from source; the reason above lists every one, so pass one and rerun just serve-dev <app>" >&2; else echo "serve-dev: the servable apps could not be resolved; fix the error above and rerun just serve-dev <app>" >&2; fi; exit "$status"; fi; NODE_ENV=production just prerender; {{node_typestrip}} scripts/serve/serve-dev.mjs "$app" || { echo "serve-dev: the $app development server stopped; fix the error above and rerun just serve-dev $app" >&2; exit 1; }
 
 e2e-affected-files file:
     # llmlint: ignore[tool_output_is_signal] This proof command intentionally preserves unedited Nx selection and execution output for docs/integration-proof.md.
