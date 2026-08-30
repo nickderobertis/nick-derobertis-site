@@ -325,6 +325,30 @@ test("a bundle resolver that calls through a bracket is refused too", async () =
   );
 });
 
+// An eager entry is measured from the scripts an app's own document loads, and
+// those are reduced to the filenames the app emitted beside it. A document that
+// loads the same filename from somewhere else entirely is refused rather than
+// measured as though those bytes had been this app's.
+test("a document loading its entry from another origin is refused", async () => {
+  const fixture = await isolatedArtifact(["bio"]);
+  const documentPath = join(fixture, "remotes", "bio", "index.html");
+  const document = await readFile(documentPath, "utf8");
+  await writeFile(
+    documentPath,
+    document.replace(
+      /src="[^"]*\/(main\.[^"/]+)"/,
+      'src="https://cdn.example.com/$1"',
+    ),
+  );
+
+  const result = checkBudgets(fixture);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    "which is served from another origin, so the bytes it carries are not this app's to budget",
+  );
+});
+
 test("a budget file that omits an app the artifact contains is refused", async () => {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-file-"));
   fixtures.push(fixture);

@@ -211,9 +211,28 @@ async function totalBytes(directory, files) {
 async function entryScripts(directory, emitted) {
   const documentPath = join(directory, "index.html");
   const document = await readFile(documentPath, "utf8");
-  const scripts = [...document.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(
-    ([, reference]) => basename(reference),
-  );
+  // A reference is reduced to the filename this app emitted beside its own
+  // document, so one that does not name a file there is refused rather than
+  // reduced: a script served from another origin, or reached through a parent
+  // directory, would otherwise be counted against this app's ceiling whenever
+  // its last path segment happened to match a chunk this app did emit.
+  const scripts = [];
+  for (const [, reference = ""] of document.matchAll(
+    /<script\b[^>]*\bsrc="([^"]+)"/g,
+  )) {
+    const elsewhere = /^[A-Za-z][A-Za-z\d+.-]*:/.test(reference)
+      ? "is served from another origin"
+      : reference.startsWith("//")
+        ? "is served from another host"
+        : reference.split("/").includes("..")
+          ? "reaches outside the directory this app emitted"
+          : undefined;
+    if (elsewhere)
+      throw new BudgetRefusal(
+        `${documentPath} loads ${reference}, which ${elsewhere}, so the bytes it carries are not this app's to budget; rebuild that app and rerun just prerender.`,
+      );
+    scripts.push(basename(reference));
+  }
   if (scripts.length === 0)
     throw new BudgetRefusal(
       `${documentPath} loads no script, so its eager entry cannot be measured; rebuild that app and rerun just prerender.`,
