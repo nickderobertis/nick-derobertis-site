@@ -85,6 +85,12 @@ interface ReactTransform {
 }
 
 const reactTransformOf = (rule: unknown): ReactTransform | undefined => {
+  // A module rule's `options` belongs to whichever loader the rule names, so
+  // rspack types it as `unknown` and no published type describes swc's half of
+  // it. The assertion below buys the traversal down to `react` and nothing
+  // else: the value it lands on is still `unknown`, and the return narrows it
+  // before any caller sees it, so what escapes the checker is the path rather
+  // than the value this function answers with.
   const react = (
     rule as {
       options?: { jsc?: { transform?: { react?: unknown } } };

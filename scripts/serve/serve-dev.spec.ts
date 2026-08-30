@@ -21,6 +21,18 @@ import { z } from "zod";
  * server through `scripts/serve/serve-dev.mjs` — opens what it serves in a real
  * browser, edits a real source file of the app under development, and waits for
  * the running page to show it.
+ *
+ * llmlint: ignore-file[browser_journeys_run_against_the_built_app] The subject
+ * of this spec is the development server itself, so a journey against the built
+ * artifact would be a journey against something else. The built artifact keeps
+ * the coverage it already has, from the app e2e projects and from
+ * `scripts/serve/serve-e2e.spec.ts` over `just serve`, and this file leaves
+ * both alone. What it must show is the one thing neither of those can: that one
+ * app compiles from source under hot module replacement while its siblings come
+ * from that same built output and the shell's routes resolve across the mix.
+ * The built half is asserted rather than assumed — the sibling bundles this
+ * server hands the browser are read back off the wire and held to being
+ * production output — so the mix is proven here, not taken on trust.
  */
 
 const workspace = process.cwd();
@@ -39,7 +51,14 @@ interface Edit {
   addition: string;
 }
 
-const probe = '<p data-testid="hmr-probe">hot module replacement probe</p>';
+// The edit a developer would notice: text on the page, found the way a reader
+// finds it, so what the running page is asked for is what a visitor would see
+// rather than a hook this spec planted for itself.
+const probeText = "hot module replacement probe";
+const probe = `<p>${probeText}</p>`;
+
+/** The pane the built remotes are read through, by its own accessible name. */
+const builtPaneName = "Selected awards";
 
 const hostEdit: Edit = {
   file: "apps/shell/src/site-root.tsx",
@@ -172,21 +191,27 @@ describe("the host served from source", () => {
 
     await page.goto(`${base}/`, { waitUntil: "networkidle" });
 
-    // The document is the one rspack is building — it names no content hash,
-    // which every published bundle does — while the pane rendering inside it is
-    // a built remote it resolved over the same origin. Both rendered elements
-    // are waited for rather than read at `networkidle`: this is the first load
-    // of a freshly started server, whose type-checker is still running beside
-    // it, so the document can go quiet before the development bundle it just
-    // delivered has painted anything. The pane additionally fetches its own
-    // slice after its page code arrives; and it is a pane that renders one
-    // settled thing, rather than the carousel beside it, whose visible story
-    // rotates on a timer no assertion should be racing.
-    expect(await page.locator("script[src$='/main.js']").count()).toBe(1);
+    // The document this server answers with is the one rspack is building: it
+    // names an unhashed entry, where every published bundle names a content
+    // hash. That is a fact about the bytes rather than about the page, so it is
+    // read off the response rather than out of the rendered tree.
+    //
+    // What the page is then asked for is what a visitor sees: the site's own
+    // banner, and the pane rendering inside it, which is a built remote this
+    // server resolved over the same origin. Both are waited for rather than
+    // read at `networkidle`, because this is the first load of a freshly
+    // started server whose type-checker is still running beside it, so the
+    // document can go quiet before the development bundle it just delivered has
+    // painted anything. The pane additionally fetches its own slice after its
+    // page code arrives; and it is a pane that renders one settled thing,
+    // rather than the carousel beside it, whose visible story rotates on a
+    // timer no assertion should be racing.
+    const servedDocument = await (await fetch(`${base}/`)).text();
+    expect(servedDocument).toMatch(/<script[^>]+src="[^"]*\/main\.js"/);
     const chrome = page.getByRole("banner");
     await chrome.waitFor({ timeout: 60_000 });
     expect(await chrome.isVisible()).toBe(true);
-    const builtRemotePane = page.locator(".awards-pane");
+    const builtRemotePane = page.getByRole("region", { name: builtPaneName });
     await builtRemotePane.waitFor({ timeout: 60_000 });
     expect(await builtRemotePane.isVisible()).toBe(true);
     expect(failures).toEqual([]);
@@ -199,8 +224,9 @@ describe("the host served from source", () => {
     // sets `test` for this spec — cannot decide which of the two the whole
     // graph, and the Nx cache entry the gate's browser suites share with it,
     // ends up holding.
-    expect(siblingScripts.length).toBeGreaterThan(0);
-    const servedSibling = await (await fetch(siblingScripts[0])).text();
+    const [firstSibling] = siblingScripts;
+    expect(firstSibling).toBeDefined();
+    const servedSibling = await (await fetch(String(firstSibling))).text();
     expect(servedSibling).not.toContain("sourceMappingURL");
   }, 120_000);
 
@@ -222,10 +248,9 @@ describe("the host served from source", () => {
 
     const restore = edit(hostEdit);
     try {
-      await page.getByTestId("hmr-probe").waitFor({ timeout: 120_000 });
-      expect(await page.getByTestId("hmr-probe").innerText()).toBe(
-        "hot module replacement probe",
-      );
+      const hotProbe = page.getByText(probeText, { exact: true });
+      await hotProbe.waitFor({ timeout: 120_000 });
+      expect(await hotProbe.isVisible()).toBe(true);
       // The value set before the edit is still there, so the module was
       // replaced in the running page rather than the page being reloaded — and
       // nothing rebuilt the workspace or restarted the server to do it.
@@ -260,7 +285,7 @@ describe("a pane served from source", () => {
     // host's own first load is: a server this freshly started can answer the
     // document and go quiet before the bundle it delivered has painted.
     await pane.goto(`${base}/remotes/awards/`, { waitUntil: "networkidle" });
-    const servedPane = pane.locator(".awards-pane");
+    const servedPane = pane.getByRole("region", { name: builtPaneName });
     await servedPane.waitFor({ timeout: 60_000 });
     expect(await servedPane.isVisible()).toBe(true);
     await host.goto(`${base}/`, { waitUntil: "networkidle" });
@@ -272,18 +297,16 @@ describe("a pane served from source", () => {
     try {
       // The pane's own document is served from source, so the running page
       // takes the edit without a rebuild or a restart.
-      await pane.getByTestId("hmr-probe").waitFor({ timeout: 120_000 });
-      expect(await pane.getByTestId("hmr-probe").innerText()).toBe(
-        "hot module replacement probe",
-      );
+      const paneProbe = pane.getByText(probeText, { exact: true });
+      await paneProbe.waitFor({ timeout: 120_000 });
+      expect(await paneProbe.isVisible()).toBe(true);
       // And the composed host — served from built output — resolves that same
       // container over this origin, so the shell's routes render the pane
       // under development rather than the published one.
       await host.reload({ waitUntil: "networkidle" });
-      await host.getByTestId("hmr-probe").waitFor({ timeout: 120_000 });
-      expect(await host.getByTestId("hmr-probe").innerText()).toBe(
-        "hot module replacement probe",
-      );
+      const hostProbe = host.getByText(probeText, { exact: true });
+      await hostProbe.waitFor({ timeout: 120_000 });
+      expect(await hostProbe.isVisible()).toBe(true);
     } finally {
       restore();
       await pane.close();

@@ -55,10 +55,12 @@ if (composed.length === 0)
   throw new Error(
     "no app declares a prerender target, so nothing composes the served artifact and the gate has no unconditional lane. Declare prerender on the composing app and rerun just check",
   );
-const uncomposed = composed.filter((app) => !app.targets.includes("e2e"));
-if (uncomposed.length > 0)
+const composedWithoutBrowserSuite = composed.filter(
+  (app) => !app.targets.includes("e2e"),
+);
+if (composedWithoutBrowserSuite.length > 0)
   throw new Error(
-    `${uncomposed.map((app) => app.name).join(", ")} composes the served artifact but declares no e2e target, so gating it on every push would dispatch nothing. Give the composing app a browser suite and rerun just check`,
+    `${composedWithoutBrowserSuite.map((app) => app.name).join(", ")} composes the served artifact but declares no e2e target, so gating it on every push would dispatch nothing. Give the composing app a browser suite and rerun just check`,
   );
 
 const reached = new Set(affected);

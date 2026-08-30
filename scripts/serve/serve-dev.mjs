@@ -27,6 +27,52 @@ const artifactRoot = fileURLToPath(
 );
 
 /**
+ * Whether one app's own declaration names the dev-server target this command
+ * runs.
+ *
+ * A `project.json` is a boundary like argv, and a wider one: the answer here
+ * decides both which names `validatedApp` accepts and which Nx target this
+ * command then runs. So the parsed document is held to the Nx shape this reads
+ * — an object, whose `targets` is an object, whose `serve` is a target
+ * configuration naming an executor — before any of it decides anything. A
+ * directory holding no readable project.json is not an Nx project at all and is
+ * simply not an app; a directory holding one that is not an Nx project
+ * configuration is a declaration to fix, and says so.
+ */
+function declaresServeTarget(path) {
+  let document;
+  try {
+    document = JSON.parse(readFileSync(path, "utf8"));
+  } catch {
+    return false;
+  }
+  // The rerun instruction is the uncaught handler's to add, so what is thrown
+  // here is the reason alone: the declaration at fault and what is wrong with it.
+  const reject = (reason) => {
+    throw new Error(
+      `${path} ${reason}, so this workspace's servable apps could not be read`,
+    );
+  };
+  if (
+    typeof document !== "object" ||
+    document === null ||
+    Array.isArray(document)
+  )
+    reject("is not an Nx project configuration object");
+  const { targets } = document;
+  if (targets === undefined) return false;
+  if (typeof targets !== "object" || targets === null || Array.isArray(targets))
+    reject("declares a targets that is not an object of Nx targets");
+  const serve = targets.serve;
+  if (serve === undefined) return false;
+  if (typeof serve !== "object" || serve === null || Array.isArray(serve))
+    reject("declares a serve target that is not an Nx target configuration");
+  if (typeof serve.executor !== "string")
+    reject("declares a serve target naming no executor to run it");
+  return true;
+}
+
+/**
  * Every app this workspace can serve from source, read from the apps'
  * own declarations rather than listed here: an app is servable exactly when it
  * declares the dev-server target this command runs, so one added tomorrow is
@@ -36,15 +82,7 @@ function servableApps() {
   const apps = readdirSync("apps", { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
-    .filter((name) => {
-      let project;
-      try {
-        project = JSON.parse(readFileSync(`apps/${name}/project.json`, "utf8"));
-      } catch {
-        return false;
-      }
-      return Boolean(project?.targets?.serve);
-    })
+    .filter((name) => declaresServeTarget(`apps/${name}/project.json`))
     .sort();
   if (apps.length === 0)
     throw new Error(
@@ -92,7 +130,7 @@ if (portValue !== undefined) {
   const port = Number(portValue);
   if (!Number.isInteger(port) || port < 1 || port > 65_535)
     throw new Error(
-      `PORT must be an integer from 1 to 65535; received ${JSON.stringify(portValue)}. Set a valid PORT and run just serve-dev ${app} again`,
+      `PORT must be an integer from 1 to 65535; received ${JSON.stringify(portValue)}`,
     );
 }
 
