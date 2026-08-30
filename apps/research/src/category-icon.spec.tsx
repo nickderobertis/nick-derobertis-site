@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { render } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { CategoryIcon } from "./category-icon";

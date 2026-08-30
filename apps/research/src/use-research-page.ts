@@ -1,4 +1,5 @@
-import { cvDataClient, type Research } from "@site/data-access-core";
+import type { Research } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import type { AsyncViewState } from "@site/route-state";
 import { useEffect, useState } from "react";
 

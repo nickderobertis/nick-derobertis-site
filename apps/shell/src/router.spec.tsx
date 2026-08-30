@@ -1,5 +1,5 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns this route-loader boundary; its spec serves the same validated CV domains the deployed loaders fetch.
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing; its spec drives the same base the deployed router uses.
 import { siteBase } from "@site/data-access-core/site";
 import { createMemoryHistory } from "@tanstack/react-router";

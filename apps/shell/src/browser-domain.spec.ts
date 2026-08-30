@@ -1,5 +1,5 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns this route-loader boundary; its spec serves the same CV domains the deployed loaders fetch.
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { afterEach, expect, test, vi } from "vitest";
 import { loadBrowserDomain } from "./browser-domain";
 
@@ -44,6 +44,33 @@ test("refuses a body the server itself reported as a failure", async () => {
     "research request failed: 503",
   );
 });
+
+// llmlint: ignore-block[changed_behavior_has_e2e] Not browser-observable: a read body and an unread one leave the same recovery panel site.spec.ts already drives.
+test("refuses a failed response without reading its body", async () => {
+  // The body of a failed response is not an answer, so nothing here may read
+  // it. This one refuses to be read, and counts the attempt, so a loader that
+  // reached for it fails on that rather than on the status the server sent.
+  let bodyReads = 0;
+  const refuseBody = () => {
+    bodyReads += 1;
+    return Promise.reject(new Error("the failed body was read"));
+  };
+  vi.stubGlobal("fetch", async () =>
+    Object.assign(
+      new Response(JSON.stringify(cvDataClient.domain("courses")), {
+        status: 503,
+        headers: { "content-type": "application/json" },
+      }),
+      { json: refuseBody, text: refuseBody },
+    ),
+  );
+
+  await expect(loadBrowserDomain("courses")).rejects.toThrow(
+    "courses request failed: 503",
+  );
+  expect(bodyReads).toBe(0);
+});
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 test("refuses a payload that does not match the CV schema", async () => {
   serveDomain([{ name: "not a software project" }]);

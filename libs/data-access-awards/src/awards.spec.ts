@@ -1,4 +1,5 @@
-import { type Awards, cvDataClient } from "@site/data-access-core";
+import type { Awards } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { describe, expect, it } from "vitest";
 import {
   buildAwardCards,

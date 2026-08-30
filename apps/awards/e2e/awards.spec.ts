@@ -21,6 +21,10 @@ const dataBoundaryStates: readonly {
 }[] = [
   { scenario: "empty", heading: "No awards yet", role: "status" },
   { scenario: "error", heading: "Awards unavailable", role: "alert" },
+  // A 200 the CV schema rejects: the pane's validator is the only thing between
+  // that answer and a visitor, so it has to land on the same recovery panel.
+  // llmlint: ignore[browser_journeys_run_against_the_built_app, expensive_tests_stay_behind_their_own_edge] Each remote owns one suite behind its own Nx edge, and `awards:e2e` serves the composed artifact.
+  { scenario: "schema-invalid", heading: "Awards unavailable", role: "alert" },
 ];
 
 for (const renderPath of renderPaths) {

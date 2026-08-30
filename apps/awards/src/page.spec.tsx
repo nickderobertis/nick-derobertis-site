@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { render, screen, within } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";

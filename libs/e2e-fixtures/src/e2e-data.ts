@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 /** The CV domains a browser journey can steer into a non-happy state. */
 const scenarioDomains: ReadonlyArray<string> = ["research", "awards"];
-const scenarios = ["empty", "error", "loading"];
+const scenarios = ["empty", "error", "loading", "schema-invalid"];
 
 export interface E2eDataRequest {
   /** The Pages base path the site is served under, without a trailing slash. */
@@ -46,6 +46,20 @@ export async function handleE2eDataRequest({
       .end(JSON.stringify({ error: `${dataDomain} unavailable` }));
     return true;
   }
+  if (scenario === "schema-invalid") {
+    // A degraded or stale data host can answer 200 with something that is not
+    // the domain at all. That is the answer a pane's schema check exists for,
+    // and serving it here is what lets a journey reach that state through the
+    // site's own URL rather than from inside the browser.
+    response
+      .writeHead(200, { "Content-Type": "application/json" })
+      .end(
+        JSON.stringify(
+          dataDomain === "research" ? { projects: [{ id: 42 }] } : [{ id: 42 }],
+        ),
+      );
+    return true;
+  }
   if (scenario === "empty") {
     response
       .writeHead(200, { "Content-Type": "application/json" })
@@ -55,6 +69,7 @@ export async function handleE2eDataRequest({
   try {
     // Read before answering: writing the status line first would leave a failed
     // read unable to report itself, because the headers are already sent.
+    // llmlint: ignore[boundary_inputs_validated] The artifact this workspace just composed; the journeys downstream validate these bytes themselves.
     const fixture = await readFile(
       join(root, `cv-data/domains/${dataDomain}.json`),
     );

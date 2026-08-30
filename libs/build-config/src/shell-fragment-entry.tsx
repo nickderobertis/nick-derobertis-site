@@ -6,7 +6,7 @@
 // library's own module graph reaches neither the shell nor the CV data.
 /* eslint-disable @nx/enforce-module-boundaries -- This build-only rspack entry is compiled in the shell's graph with @site-fragment aliases; it is not imported by the library runtime. */
 
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { createSiteRouter } from "@site-fragment/router";
 import { routes } from "@site-fragment/routes";
 import {

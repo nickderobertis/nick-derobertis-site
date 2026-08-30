@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { buildSkillTree } from "@site/data-access-skills";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";

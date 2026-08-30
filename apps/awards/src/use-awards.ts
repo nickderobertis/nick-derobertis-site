@@ -1,11 +1,12 @@
-import { type Awards, validateCvDomain } from "@site/data-access-core";
+import type { Awards } from "@site/data-access-core";
+import { validateCvDomain } from "@site/data-access-core/validators";
 import { useEffect, useState } from "react";
 
 export type AwardsViewState =
   | { name: "loading" }
   | { name: "error" }
   | { name: "ready"; awards: Awards };
-const scenarios = new Set(["empty", "error", "loading"]);
+const scenarios = new Set(["empty", "error", "loading", "schema-invalid"]);
 
 /**
  * One awards request per URL, so a host that warms the pane and the pane's own

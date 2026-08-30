@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { buildResearchProjectModels } from "@site/data-access-research";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";

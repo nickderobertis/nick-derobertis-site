@@ -183,7 +183,7 @@ describe("affected build economics proof", () => {
 
   it("reports the real Nx build graph for a shared data contract", () => {
     const result = runAffectedBuildProjects(
-      "libs/data-access-core/src/client.ts",
+      "libs/data-access-core/src/bundled.ts",
     );
 
     expect(result.status).toBe(0);
