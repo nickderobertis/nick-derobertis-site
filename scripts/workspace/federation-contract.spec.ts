@@ -242,7 +242,8 @@ describe("the canonical remote registry", () => {
 /** One fabricated app: a remote when it declares an alias, a host otherwise. */
 interface WrittenApp {
   federation?: { alias: string };
-  rspack: string;
+  /** Its rspack configuration, or nothing when the app is written without one. */
+  rspack?: string;
 }
 
 /**
@@ -274,7 +275,8 @@ function deriveOverWrittenApps(apps: Readonly<Record<string, WrittenApp>>) {
           targets: { build: {}, typecheck: {} },
         }),
       );
-      writeFileSync(join(root, "apps", app, "rspack.config.ts"), rspack);
+      if (rspack !== undefined)
+        writeFileSync(join(root, "apps", app, "rspack.config.ts"), rspack);
     }
     const probe = join(root, "probe.mjs");
     writeFileSync(
@@ -431,6 +433,23 @@ describe("the federation fan-in every app depends on", () => {
     expect(derived.status, derived.stdout).not.toBe(0);
     expect(derived.stderr).toContain("apps/shell/rspack.config.ts");
     expect(derived.stderr).toContain("must pass an array literal of remote");
+  });
+
+  it("names the configuration it could not open, and why", () => {
+    // Every app here builds through rspack, so one with no configuration to
+    // read is a project whose remotes cannot be known. Reported as the raw
+    // filesystem error it is, a reader would get a path and an errno with
+    // nothing saying what wanted the file or what to do about it.
+    const derived = deriveOverWrittenApps({
+      bio: { federation: { alias: "bio" }, rspack: 'remoteConfig("bio")' },
+      shell: {},
+    });
+
+    expect(derived.status, derived.stdout).not.toBe(0);
+    expect(derived.stderr).toContain("apps/shell/rspack.config.ts");
+    expect(derived.stderr).toContain("which it could not open");
+    expect(derived.stderr).toContain("ENOENT");
+    expect(derived.stderr).toContain("rerun just check");
   });
 
   it("refuses a remoteMap array holding anything but remote names", () => {

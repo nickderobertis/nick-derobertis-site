@@ -56,7 +56,18 @@ const federatedRemoteName = /^"([a-z][a-z0-9-]*)"$/;
 // llmlint: ignore-block[changed_behavior_has_e2e] This reads a committed rspack configuration while Nx is resolving the project graph -- before any build has started -- and returns the names of the remotes a host composes, which becomes nothing but the order Nx schedules `build` and `typecheck` in. It adds no module, emits no asset, and changes no rendered markup, so a visitor observes the same composed artifact whichever order those tasks ran in. A configuration it refuses stops the graph before a single build input is derived, so nothing is built and there is no document, route, or element for a browser test to reach. federation-contract.spec.ts drives this exact entry point over the committed tree and over configurations whose remoteMap call is unreadable, names an element that is not a string literal, names none, and names a remote no project declares. site.spec.ts and each app's ownership.spec.ts then drive, in a real browser and through both the standalone and host-composed render paths, the artifact every graph that gets past this produces.
 function composedRemotes(source, declared) {
   const configuration = join(dirname(source), "rspack.config.ts");
-  const contents = readFileSync(configuration, "utf8");
+  let contents;
+  try {
+    contents = readFileSync(configuration, "utf8");
+  } catch (unreadable) {
+    // Every app in this workspace builds through rspack, so a project whose
+    // configuration cannot be read is one whose remotes cannot be known --
+    // reported here with the reason the read failed, rather than as a raw
+    // filesystem error the graph would surface without naming what wanted it.
+    throw new Error(
+      `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which it could not open: ${unreadable.message}. Restore that file, or delete the project.json beside it if the app is gone, and rerun just check.`,
+    );
+  }
   const composed = federatedRemoteMap.exec(contents);
   if (composed === null) {
     // An app that federates nothing never writes the call, so a file that
