@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { act, renderHook, waitFor, within } from "@testing-library/react";
 import { createElement } from "react";
 import { prerender } from "react-dom/static";
@@ -94,6 +94,34 @@ test(
     const { result } = renderHook(() => useAwards());
 
     await waitFor(() => expect(result.current).toEqual({ name: "error" }));
+  },
+);
+
+test(
+  "refuses a failed response without reading its body",
+  moduleGraphCeiling,
+  async () => {
+    // The body of a failed response is not an answer, so the pane may not read
+    // it. This one refuses to be read and counts the attempt, so a pane that
+    // reached for it is caught here rather than settling on the same error
+    // state for the wrong reason.
+    let bodyReads = 0;
+    const refuseBody = () => {
+      bodyReads += 1;
+      return Promise.reject(new Error("the failed awards body was read"));
+    };
+    serveAwards(async () =>
+      Object.assign(awardsResponse(awards, 503), {
+        json: refuseBody,
+        text: refuseBody,
+      }),
+    );
+    const { useAwards } = await import("./use-awards");
+
+    const { result } = renderHook(() => useAwards());
+
+    await waitFor(() => expect(result.current).toEqual({ name: "error" }));
+    expect(bodyReads).toBe(0);
   },
 );
 

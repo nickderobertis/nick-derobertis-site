@@ -4,8 +4,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./bundled": "./src/bundled.ts",
     "./site": "./src/site.ts",
-    "./site.config.json": "./src/site.config.json"
+    "./site.config.json": "./src/site.config.json",
+    "./validators": "./src/validators.ts"
   },
   "dependencies": {
     "@site/testing": "workspace:*"

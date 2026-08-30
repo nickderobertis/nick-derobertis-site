@@ -1,4 +1,5 @@
-import { type Awards, validateCvDomain } from "@site/data-access-core";
+import type { Awards } from "@site/data-access-core";
+import { validateCvDomain } from "@site/data-access-core/validators";
 import { useEffect, useState } from "react";
 
 export type AwardsViewState =

@@ -1,7 +1,7 @@
-// eslint-disable-next-line @nx/enforce-module-boundaries -- The shell validates route payloads at its loader boundary; feature apps never gain this data-core dependency.
-import { validateCvDomain } from "@site/data-access-core";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing and reads only the base its own prerender wrote.
 import { siteBase } from "@site/data-access-core/site";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The shell validates route payloads at its loader boundary; feature apps never gain this data-core dependency.
+import { validateCvDomain } from "@site/data-access-core/validators";
 
 /**
  * Fetches one CV domain for a route loader. A failed status is refused before

@@ -1,17 +1,7 @@
 export type * from "../vendor/codegen";
-export {
-  type CvDataClient,
-  CvDataValidationError,
-  type CvDomain,
-  type CvDomainArtifacts,
-  type CvDomains,
-  CvDomainValidationError,
-  createCvDataClient,
-  cvData,
-  cvDataClient,
-  cvDomains,
-  cvSchema,
-  domainNames,
-  validateCvData,
-  validateCvDomain,
-} from "./client";
+export type { CvDataClient } from "./bundled";
+export type {
+  CvDomain,
+  CvDomainArtifacts,
+  CvDomains,
+} from "./validators";

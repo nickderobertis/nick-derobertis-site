@@ -1,5 +1,5 @@
 import { buildAwardCards } from "@site/data-access-awards";
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { AwardCard } from "./award-card";

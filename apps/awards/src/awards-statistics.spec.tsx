@@ -1,5 +1,5 @@
 import { calculateAwardsStats, selectedAwards } from "@site/data-access-awards";
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { AwardsStatistics } from "./awards-statistics";

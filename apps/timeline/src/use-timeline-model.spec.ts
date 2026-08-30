@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { act, renderHook } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { useTimelineModel } from "./use-timeline-model";

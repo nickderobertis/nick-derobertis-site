@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { describe, expect, it } from "vitest";
 import { calculateSoftwareStats, softwareProjectLogo } from "./index";
 

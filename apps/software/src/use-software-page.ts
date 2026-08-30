@@ -1,4 +1,5 @@
-import { cvDataClient, type SoftwareProject } from "@site/data-access-core";
+import type { SoftwareProject } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import type { RouteView } from "@site/route-state";
 import { useEffect, useState } from "react";
 

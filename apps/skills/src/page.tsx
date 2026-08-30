@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core";
+import { cvDataClient } from "@site/data-access-core/bundled";
 import { buildSkillTree } from "@site/data-access-skills";
 import { previewState } from "./preview-state";
 import Skeleton from "./skeleton";
