@@ -262,6 +262,7 @@ describe("the gate's browser lanes", () => {
     const refusal = diagnosticLine(result.stderr, "gate-browser-lanes: ");
     expect(refusal).toContain("base and head must resolve to commits");
     expect(refusal).toContain("just gate-browser-lanes HEAD~1 HEAD");
+    expect(refusal).toContain("rerun just gate-browser-lanes");
   });
 
   it("tells the gate's own caller what failed and what to rerun for a range that names no commit", () => {

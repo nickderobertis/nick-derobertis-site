@@ -1,6 +1,13 @@
-import { type ChildProcess, spawn, spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import {
+  type ChildProcess,
+  execFileSync,
+  spawn,
+  spawnSync,
+} from "node:child_process";
+import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { type Browser, chromium, type Page } from "@playwright/test";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
@@ -330,4 +337,51 @@ describe("an app this workspace cannot serve from source", () => {
     expect(refused.stderr).toContain('"shell"');
     expect(refused.stderr).toContain("rerun just serve-dev <app>");
   }, 60_000);
+});
+
+describe("the built output the sibling apps are served from", () => {
+  it("names what to rerun when that artifact cannot be composed", () => {
+    // The recipe composes the production artifact before it serves anything,
+    // so a compose that fails leaves the siblings with nothing to be served
+    // out of and the developer with a command that stopped. What that
+    // developer is told has to be the way back to serving rather than the way
+    // back to composing, because rerunning the compose alone leaves them
+    // exactly here again.
+    //
+    // The compose is failed at the one seam the recipe reaches it through — a
+    // `pnpm exec nx run shell:prerender` — rather than by breaking a source
+    // file, because a real rspack failure costs a full production build to
+    // reach and the subject here is the diagnostic, not rspack. Everything
+    // else falls through to the real pnpm, so the recipe's own validation
+    // still runs for real ahead of it.
+    const shimDirectory = mkdtempSync(join(tmpdir(), "serve-dev-compose-"));
+    const realPnpm = execFileSync("bash", ["-c", "command -v pnpm"], {
+      encoding: "utf8",
+    }).trim();
+    const shim = join(shimDirectory, "pnpm");
+    writeFileSync(
+      shim,
+      `#!/usr/bin/env bash\n` +
+        `if [ "$1" = exec ] && [ "$3" = run ] && [ "$4" = shell:prerender ]; then\n` +
+        `  echo "rspack: the composed artifact could not be built" >&2; exit 1\n` +
+        `fi\n` +
+        `exec "${realPnpm}" "$@"\n`,
+    );
+    chmodSync(shim, 0o755);
+
+    const refused = spawnSync("just", ["serve-dev", "awards"], {
+      cwd: workspace,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PATH: `${shimDirectory}:${process.env.PATH ?? ""}`,
+      },
+    });
+
+    expect(refused.status).toBe(1);
+    expect(refused.stderr).toContain(
+      "the built output the sibling apps are served from could not be composed",
+    );
+    expect(refused.stderr).toContain("rerun just serve-dev awards");
+  }, 120_000);
 });
