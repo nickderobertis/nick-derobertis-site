@@ -19,32 +19,32 @@
     },
     "bio": {
       "entry": {
-        "measuredBytes": 502335,
-        "ceilingBytes": 502587
+        "measuredBytes": 500892,
+        "ceilingBytes": 501143
       },
       "page": {
-        "measuredBytes": 6702,
-        "ceilingBytes": 6706
+        "measuredBytes": 6762,
+        "ceilingBytes": 6766
       }
     },
     "courses": {
       "entry": {
-        "measuredBytes": 2127225,
-        "ceilingBytes": 2128289
+        "measuredBytes": 2127012,
+        "ceilingBytes": 2128076
       },
       "page": {
-        "measuredBytes": 1632859,
-        "ceilingBytes": 1633676
+        "measuredBytes": 1632844,
+        "ceilingBytes": 1633661
       }
     },
     "home": {
       "entry": {
-        "measuredBytes": 515458,
-        "ceilingBytes": 515716
+        "measuredBytes": 514876,
+        "ceilingBytes": 515134
       },
       "page": {
-        "measuredBytes": 65722,
-        "ceilingBytes": 65755
+        "measuredBytes": 65712,
+        "ceilingBytes": 65745
       }
     },
     "home-cards": {
@@ -89,18 +89,18 @@
     },
     "research": {
       "entry": {
-        "measuredBytes": 2124103,
-        "ceilingBytes": 2125166
+        "measuredBytes": 2123888,
+        "ceilingBytes": 2124950
       },
       "page": {
-        "measuredBytes": 1629601,
-        "ceilingBytes": 1630416
+        "measuredBytes": 1629584,
+        "ceilingBytes": 1630399
       }
     },
     "shell": {
       "entry": {
-        "measuredBytes": 2183538,
-        "ceilingBytes": 2184630
+        "measuredBytes": 2095662,
+        "ceilingBytes": 2096710
       }
     },
     "skills": {
@@ -115,18 +115,18 @@
     },
     "software": {
       "entry": {
-        "measuredBytes": 2122998,
-        "ceilingBytes": 2124060
+        "measuredBytes": 2122783,
+        "ceilingBytes": 2123845
       },
       "page": {
-        "measuredBytes": 1628551,
-        "ceilingBytes": 1629366
+        "measuredBytes": 1628534,
+        "ceilingBytes": 1629349
       }
     },
     "timeline": {
       "entry": {
-        "measuredBytes": 2067905,
-        "ceilingBytes": 2068939
+        "measuredBytes": 2067909,
+        "ceilingBytes": 2068943
       },
       "page": {
         "measuredBytes": 1631925,
@@ -136,24 +136,24 @@
   },
   "routes": {
     "/": {
-      "measuredBytes": 5184642,
-      "ceilingBytes": 5187235
+      "measuredBytes": 5184632,
+      "ceilingBytes": 5187225
     },
     "/bio": {
-      "measuredBytes": 6702,
-      "ceilingBytes": 6706
+      "measuredBytes": 6762,
+      "ceilingBytes": 6766
     },
     "/research": {
-      "measuredBytes": 1629601,
-      "ceilingBytes": 1630416
+      "measuredBytes": 1629584,
+      "ceilingBytes": 1630399
     },
     "/software": {
-      "measuredBytes": 1628551,
-      "ceilingBytes": 1629366
+      "measuredBytes": 1628534,
+      "ceilingBytes": 1629349
     },
     "/courses": {
-      "measuredBytes": 1632859,
-      "ceilingBytes": 1633676
+      "measuredBytes": 1632844,
+      "ceilingBytes": 1633661
     }
   }
 }
