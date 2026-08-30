@@ -1,12 +1,21 @@
-import { mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { rspack } from "@rspack/core";
 import { afterEach, describe, expect, test } from "vitest";
+import { z } from "zod";
 import {
   clearFederatedTypes,
   consumeFederatedTypes,
   FederatedTypesPlugin,
+  federatedTypesRoot,
   federatedTypeUrls,
   hostTypesPath,
   missingRemoteTypes,
@@ -14,6 +23,7 @@ import {
   remoteTypesArchive,
   remoteTypesPath,
 } from "./federated-types";
+import { remoteRegistry } from "./remote-registry";
 
 // Every case works in its own project, alias, and host below the same trees a
 // real build writes into, so nothing here can disturb what a build published.
@@ -25,6 +35,16 @@ const published = resolve(remoteTypesPath(alias));
 const archive = resolve(remoteTypesArchive(alias));
 const consumed = resolve(hostTypesPath(host));
 
+/**
+ * An archive as Module Federation's generator writes one: the bytes below are
+ * a stand-in for its contents, but they open with the ZIP local file header
+ * every real archive opens with, which is the part the consumer reads.
+ */
+const archiveBytes = Buffer.concat([
+  Buffer.from([0x50, 0x4b, 0x03, 0x04]),
+  Buffer.from("Page.d.ts"),
+]);
+
 /** What a remote's declaration generator leaves behind for the publish step. */
 async function generated() {
   await mkdir(join(built, "@mf-types"), { recursive: true });
@@ -32,7 +52,7 @@ async function generated() {
     join(built, "@mf-types", "Page.d.ts"),
     "export { default } from './compiled-types/src/page';\n",
   );
-  await writeFile(join(built, "@mf-types.zip"), "archive");
+  await writeFile(join(built, "@mf-types.zip"), archiveBytes);
 }
 
 /**
@@ -78,6 +98,9 @@ const publishesDuringBuild = {
     };
   }) {
     compiler.hooks.thisCompilation.tap("spec:generate", (raw) => {
+      // rspack types this argument as `never` for a plugin it does not know,
+      // exactly as it does for the plugin under test, so this stand-in reaches
+      // processAssets the same way that one does rather than a way of its own.
       const compilation = raw as unknown as {
         constructor: { PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER: number };
         hooks: {
@@ -208,20 +231,31 @@ describe("a build held to the declarations it owes", () => {
 describe("the archives a host consumes", () => {
   test("names each remote's archive as the bytes the downloader reads", async () => {
     await mkdir(resolve(`${remoteTypesPath(alias)}/..`), { recursive: true });
-    await writeFile(archive, "archive bytes");
+    await writeFile(archive, archiveBytes);
 
     const urls = await federatedTypeUrls([alias])();
 
     expect(urls[alias]).toEqual({
       alias,
       api: "",
-      zip: `data:application/zip;base64,${Buffer.from("archive bytes").toString("base64")}`,
+      zip: `data:application/zip;base64,${archiveBytes.toString("base64")}`,
     });
   });
 
   test("reports a remote whose archive was never published", async () => {
     await expect(federatedTypeUrls([alias])()).rejects.toThrow(
       `${remoteTypesArchive(alias)} does not exist`,
+    );
+  });
+
+  test("reports a published file that is not an archive at all", async () => {
+    await mkdir(resolve(`${remoteTypesPath(alias)}/..`), { recursive: true });
+    // A truncated write, or a generator that reported an archive it never
+    // finished, leaves bytes here that the downloader cannot unpack.
+    await writeFile(archive, "not an archive");
+
+    await expect(federatedTypeUrls([alias])()).rejects.toThrow(
+      `${remoteTypesArchive(alias)} is not a ZIP archive`,
     );
   });
 
@@ -232,5 +266,47 @@ describe("the archives a host consumes", () => {
       typesOnBuild: true,
       consumeAPITypes: false,
     });
+  });
+});
+
+/**
+ * The drift gate over the trees above. Nx restores a cached build from the
+ * outputs that build declares, so an app whose `project.json` does not name
+ * the declaration trees its build writes would replay as a cache hit that
+ * leaves a host with nothing to typecheck against -- and those paths are
+ * written out once per app, away from the module that decides them. Each one
+ * is derived here from the same helpers the build calls.
+ */
+const buildOutputs = z.object({
+  targets: z.object({ build: z.object({ outputs: z.array(z.string()) }) }),
+});
+
+describe("the declaration trees a build declares as its outputs", () => {
+  test("names every tree it writes, in every app that writes one", async () => {
+    const apps = (await readdir("apps", { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+    expect(apps).toContain("shell");
+    for (const app of apps) {
+      const alias: string | undefined =
+        remoteRegistry[app as keyof typeof remoteRegistry];
+      // A host is an app that federates remotes, which it declares by mapping
+      // them in its own rspack configuration and nowhere else.
+      const composes = (
+        await readFile(`apps/${app}/rspack.config.ts`, "utf8")
+      ).includes("remoteMap(");
+      const owed = [
+        ...(composes ? [hostTypesPath(app)] : []),
+        ...(alias ? [remoteTypesPath(alias), remoteTypesArchive(alias)] : []),
+      ].map((tree) => `{workspaceRoot}/${tree}`);
+
+      const declared = buildOutputs
+        .parse(JSON.parse(await readFile(`apps/${app}/project.json`, "utf8")))
+        .targets.build.outputs.filter((output) =>
+          output.includes(federatedTypesRoot),
+        );
+
+      expect(declared.sort(), `apps/${app}/project.json`).toEqual(owed.sort());
+    }
   });
 });

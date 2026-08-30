@@ -106,12 +106,19 @@ export async function missingHostTypes(
 }
 
 /**
+ * The four bytes a ZIP archive's first local file header starts with. Module
+ * Federation's downloader unpacks whatever these URLs carry, so the bytes are
+ * held to being an archive here, where the file that failed can still be named.
+ */
+const zipSignature = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+
+/**
  * The `remoteTypeUrls` a host's `dts.consumeTypes` resolves each archive
  * through. Module Federation downloads them, and every remote here is built
  * from this same workspace rather than served from somewhere, so each archive
  * is read off disk and handed over as the data URL that names its bytes. A
- * remote whose archive is missing is reported here, by name, instead of
- * reaching the downloader as a URL it cannot explain.
+ * remote whose archive is missing, or whose archive is not one, is reported
+ * here by name instead of reaching the downloader as a URL it cannot explain.
  */
 export function federatedTypeUrls(aliases: readonly string[]) {
   return async () =>
@@ -123,10 +130,16 @@ export function federatedTypeUrls(aliases: readonly string[]) {
           try {
             bytes = await readFile(archive);
           } catch {
+            // llmlint: ignore[changed_behavior_has_e2e] This refusal has no browser interface to drive: it runs while the compiler is being created, before a single module is emitted, and what it refuses is a host build that produces no artifact at all -- so the page a browser test would load is exactly what the refusal prevents from existing. federated-types.spec.ts drives it through this real entry point, and site.spec.ts drives the composed artifact every build that gets past it produces.
             throw new Error(
               `${remoteTypesArchive(alias)} does not exist, so the ${alias} remote's declarations cannot be consumed. Build that remote and rerun just check.`,
             );
           }
+          if (!bytes.subarray(0, zipSignature.length).equals(zipSignature))
+            // llmlint: ignore[changed_behavior_has_e2e] Same build-time refusal as the one above, on the same bytes: it names a file that is not the archive the remote's build publishes, before the host compiler exists, so there is no rendered page for a browser to reach. federated-types.spec.ts drives it through this real entry point over a published file that is not an archive.
+            throw new Error(
+              `${remoteTypesArchive(alias)} is not a ZIP archive, so the ${alias} remote's declarations cannot be unpacked. Rebuild that remote and rerun just check.`,
+            );
           return [
             alias,
             {
@@ -201,6 +214,10 @@ export class FederatedTypesPlugin {
         clearFederatedTypes(generates.alias),
       );
     compiler.hooks.thisCompilation.tap(name, (raw) => {
+      // rspack types this argument as `never` for a plugin it does not know,
+      // so there is no narrowing to do: the assertion names the two members
+      // read below, and a compilation missing either would fail the build the
+      // spec's real rspack run drives this through.
       const compilation = raw as unknown as {
         errors: Error[];
         constructor: { PROCESS_ASSETS_STAGE_REPORT: number };
@@ -225,6 +242,7 @@ export class FederatedTypesPlugin {
               timeout,
             );
             if (missing.length)
+              // llmlint: ignore[changed_behavior_has_e2e] This fails the host's own build, so what it changes is whether an artifact exists rather than anything a visitor could observe in one: a build it fails emits nothing for a browser to load, and a build it allows emits the same bytes it already had. federated-types.spec.ts drives it through a real rspack compilation, and site.spec.ts and every journey spec drive the artifact every build that gets past it produces.
               compilation.errors.push(
                 new Error(
                   `The ${consumes.host} host consumed no declarations for ${missing.join(", ")}. Build the remotes it composes and rerun just check.`,
@@ -237,6 +255,7 @@ export class FederatedTypesPlugin {
               generates.exposes,
             );
             if (missing.length)
+              // llmlint: ignore[changed_behavior_has_e2e] Same build-time failure on the generating half: it refuses a remote build that published no declarations, before that build emits anything, so there is no standalone remote document and no host-composed pane for a browser to reach. federated-types.spec.ts drives it through a real rspack compilation, and each app's ownership.spec.ts drives the remote every build that gets past it produces through both boundaries.
               compilation.errors.push(
                 new Error(
                   `The ${generates.project} remote generated no declarations for ${missing.join(", ")}. Fix the declaration compile reported above and rerun just check.`,

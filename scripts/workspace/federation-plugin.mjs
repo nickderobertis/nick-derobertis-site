@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import {
+  declaredAppProjects,
   federationRemotes,
   readDeclaredProject,
 } from "./federation-registry.mjs";
@@ -44,8 +45,15 @@ const federatedRemoteName = /"([a-z][a-z0-9-]*)"/g;
 /**
  * The remotes one app composes, read from its own rspack configuration. An app
  * that federates nothing has no `remoteMap` call and owes no such dependency.
+ *
+ * A TypeScript source read by regex is text until something narrows it, so
+ * every name it yields is held to `declared` — the remotes the workspace's own
+ * project files declare — before it becomes an Nx dependency. What that
+ * refuses is a name the extraction produced that no project answers to,
+ * whether the configuration really names a remote that does not exist or the
+ * pattern matched something that was never a remote list at all.
  */
-function composedRemotes(source) {
+function composedRemotes(source, declared) {
   const configuration = join(dirname(source), "rspack.config.ts");
   const composed = federatedRemoteMap.exec(readFileSync(configuration, "utf8"));
   if (composed === null) return [];
@@ -55,6 +63,11 @@ function composedRemotes(source) {
   if (names.length === 0)
     throw new Error(
       `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which names none. Pass each child remote there as a string literal and rerun just check.`,
+    );
+  const undeclared = names.filter((remote) => !declared.has(remote));
+  if (undeclared.length > 0)
+    throw new Error(
+      `${name} read ${JSON.stringify(undeclared)} from the remoteMap call in ${configuration}, and no project declares metadata.federation.alias under that name. Name only declared remotes there and rerun just check.`,
     );
   return names;
 }
@@ -86,8 +99,13 @@ function federationDependencies(configFiles) {
     .map((project) => ({ target: "prerender", projects: [project.name] }));
   const composed = ["build", remoteBuilds];
   const captured = [...composed, ...composeHosts];
+  // Read from the apps directory rather than from the handed set, because a
+  // host composes remotes whether or not this call was handed their files.
+  const declared = new Set(
+    federationRemotes(declaredAppProjects()).map((remote) => remote.name),
+  );
   return projects.map((project) => {
-    const composedBuilds = composedRemotes(project.source);
+    const composedBuilds = composedRemotes(project.source, declared);
     const federated = composedBuilds.length
       ? [{ target: "build", projects: composedBuilds }]
       : [];

@@ -1,5 +1,12 @@
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -232,6 +239,65 @@ describe("the canonical remote registry", () => {
   });
 });
 
+/** One fabricated app: a remote when it declares an alias, a host otherwise. */
+interface WrittenApp {
+  federation?: { alias: string };
+  rspack: string;
+}
+
+/**
+ * Runs the real plugin over an apps directory this spec writes, entering it
+ * through `createNodesV2` — the path Nx takes, and the only one that reads a
+ * `project.json` and an rspack configuration off disk. A subprocess is what
+ * lets the plugin resolve `apps` from a root of this spec's own making.
+ */
+function deriveOverWrittenApps(apps: Readonly<Record<string, WrittenApp>>) {
+  const root = mkdtempSync(join(tmpdir(), "federation-plugin-apps-"));
+  try {
+    for (const module of ["federation-plugin.mjs", "federation-registry.mjs"])
+      cpSync(`scripts/workspace/${module}`, join(root, module));
+    for (const [app, { federation, rspack }] of Object.entries(apps)) {
+      mkdirSync(join(root, "apps", app), { recursive: true });
+      writeFileSync(
+        join(root, "apps", app, "project.json"),
+        JSON.stringify({
+          name: app,
+          tags: federation ? [`scope:${app}`] : [],
+          ...(federation
+            ? {
+                metadata: {
+                  federation,
+                  boundaries: { onlyDependOnLibsWithTags: ["type:shared"] },
+                },
+              }
+            : {}),
+          targets: { build: {}, typecheck: {} },
+        }),
+      );
+      writeFileSync(join(root, "apps", app, "rspack.config.ts"), rspack);
+    }
+    const probe = join(root, "probe.mjs");
+    writeFileSync(
+      probe,
+      [
+        'import { createNodesV2 } from "./federation-plugin.mjs";',
+        `createNodesV2[1](${JSON.stringify(
+          Object.keys(apps)
+            .sort()
+            .map((app) => `apps/${app}/project.json`),
+        )});`,
+        "",
+      ].join("\n"),
+    );
+    return spawnSync(process.execPath, [probe], {
+      cwd: root,
+      encoding: "utf8",
+    });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
 describe("the federation fan-in every app depends on", () => {
   it("makes every remote's build a prerequisite of composing the site", () => {
     const composing = projects.filter((project) => project.targets?.prerender);
@@ -333,6 +399,24 @@ describe("the federation fan-in every app depends on", () => {
         },
       ],
     ]);
+  });
+
+  it("refuses a host composing a remote no project declares", () => {
+    // The remotes a host composes are read out of a TypeScript source by
+    // regex, so this drives the real plugin over an apps directory whose host
+    // names one that is not there -- what a mistyped remote, or a `remoteMap`
+    // call the pattern matched something else in, would hand the graph.
+    const derived = deriveOverWrittenApps({
+      bio: { federation: { alias: "bio" }, rspack: 'remoteConfig("bio")' },
+      shell: { rspack: 'remoteMap(["bio", "ghost"])' },
+    });
+
+    expect(derived.status, derived.stdout).not.toBe(0);
+    expect(derived.stderr).toContain('read ["ghost"]');
+    expect(derived.stderr).toContain("apps/shell/rspack.config.ts");
+    expect(derived.stderr).toContain(
+      "no project declares metadata.federation.alias under that name",
+    );
   });
 
   it("builds the remotes a host imports before the host itself", async () => {

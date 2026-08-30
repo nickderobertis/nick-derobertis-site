@@ -82,6 +82,9 @@ describe("remote build configuration", () => {
     expect(remoteConfig("bio").plugins.at(-1)).toMatchObject({
       _options: { exposes: { "./Page": "./src/page.tsx" } },
     });
+    // toMatchObject above cannot say a key is absent, and the plugin declares
+    // its options as a private member, so reaching the exposes it was built
+    // with is what lets the absence be asserted rather than assumed.
     expect(
       (
         remoteConfig("bio").plugins.at(-1) as unknown as {
