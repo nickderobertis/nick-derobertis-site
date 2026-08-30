@@ -56,7 +56,6 @@ function ceilings(budgets: Budgets) {
   return byLabel;
 }
 
-/** Re-derives a budget file over the composed artifact, into a fixture. */
 async function rederive(source: string) {
   const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-rederive-"));
   fixtures.push(fixture);

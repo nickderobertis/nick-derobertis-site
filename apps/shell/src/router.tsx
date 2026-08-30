@@ -204,6 +204,8 @@ export function createSiteRouter({
           view,
         };
       } catch {
+        // Same as the software loader above: the literal keeps this branch's
+        // view from widening to string and losing the page's narrowing.
         return { courses: null, view: "error" as const };
       }
     },
