@@ -43,20 +43,16 @@ const devServerExecutor = "@nx/rspack:dev-server";
  *
  * A `project.json` is a boundary like argv, and a wider one: the answer here
  * decides both which names `validatedApp` accepts and which Nx target this
- * command then runs. So the parsed document is held to the Nx shape this reads
- * — an object, whose `targets` is an object, whose `serve` is a target
- * configuration running `devServerExecutor` — before any of it decides
- * anything. A directory holding no readable project.json is not an Nx project
- * at all and is simply not an app; a directory holding one that is not an Nx
- * project configuration is a declaration to fix, and says so.
+ * command then runs. So the document is held to the Nx shape this reads — text
+ * that parses as JSON, an object, whose `targets` is an object, whose `serve`
+ * is a target configuration running `devServerExecutor` — before any of it
+ * decides anything. A directory holding no project.json is not an Nx project at
+ * all and is simply not an app; a project.json that is there and cannot be read
+ * as an Nx project configuration is a declaration to fix, and says so, because
+ * answering "not servable" for it would leave a developer looking for the app
+ * this command silently dropped.
  */
 function declaresServeTarget(path) {
-  let document;
-  try {
-    document = JSON.parse(readFileSync(path, "utf8"));
-  } catch {
-    return false;
-  }
   // The rerun instruction is the uncaught handler's to add, so what is thrown
   // here is the reason alone: the declaration at fault and what is wrong with it.
   const reject = (reason) => {
@@ -64,6 +60,24 @@ function declaresServeTarget(path) {
       `${path} ${reason}, so this workspace's servable apps could not be read`,
     );
   };
+  const detail = (error) =>
+    error instanceof Error ? error.message : String(error);
+  let source;
+  try {
+    source = readFileSync(path, "utf8");
+  } catch (error) {
+    // A directory with no project.json in it declares nothing, so there is
+    // nothing here to fix; any other read failure is a file that is there and
+    // could not be read, which is.
+    if (error?.code === "ENOENT") return false;
+    reject(`could not be read: ${detail(error)}`);
+  }
+  let document;
+  try {
+    document = JSON.parse(source);
+  } catch (error) {
+    reject(`is not valid JSON: ${detail(error)}`);
+  }
   if (
     typeof document !== "object" ||
     document === null ||

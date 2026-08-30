@@ -4,7 +4,14 @@ import {
   spawn,
   spawnSync,
 } from "node:child_process";
-import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -382,4 +389,96 @@ describe("the built output the sibling apps are served from", () => {
     );
     expect(refused.stderr).toContain("rerun just serve-dev awards");
   }, 120_000);
+});
+
+/**
+ * A workspace that is nothing but `apps/` declarations, which is the whole of
+ * what the servable-app scan reads. Each entry is one `project.json`, written
+ * as an editor would leave it.
+ */
+function fixtureWorkspace(declarations: Record<string, string>) {
+  const root = mkdtempSync(join(tmpdir(), "serve-dev-apps-"));
+  for (const [app, declaration] of Object.entries(declarations)) {
+    mkdirSync(join(root, "apps", app), { recursive: true });
+    writeFileSync(join(root, "apps", app, "project.json"), declaration);
+  }
+  return root;
+}
+
+const servableDeclaration = JSON.stringify({
+  name: "servable",
+  targets: { serve: { executor: "@nx/rspack:dev-server" } },
+});
+
+/**
+ * The scan, over one of those workspaces. This is the invocation `just
+ * serve-dev` makes before it builds anything — the CLI, `--app`, the name a
+ * developer typed — and the directory it reads `apps/` from is the only thing
+ * changed, because a declaration the real workspace cannot have is the subject.
+ */
+function scanApps(root: string, app: string) {
+  return spawnSync(
+    process.execPath,
+    [
+      "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+      join(workspace, "scripts/serve/serve-dev.mjs"),
+      "--app",
+      app,
+    ],
+    { cwd: root, encoding: "utf8" },
+  );
+}
+
+describe("a project.json this command cannot read", () => {
+  it("is refused by name rather than counted as an app that cannot be served", () => {
+    const root = fixtureWorkspace({
+      servable: servableDeclaration,
+      malformed: '{ "name": "malformed", "targets": { "serve": }',
+    });
+
+    try {
+      const refused = scanApps(root, "servable");
+
+      expect(refused.status).toBe(1);
+      expect(refused.stderr).toContain("apps/malformed/project.json");
+      expect(refused.stderr).toContain("is not valid JSON");
+      // The name asked for is a servable app, so nothing about the request is
+      // at fault: what stops this is a declaration somebody has to fix, and
+      // saying so is what keeps it from reading as an app that cannot be
+      // served — which is what a developer would go looking for the app under.
+      expect(refused.stderr).not.toContain(
+        "is not an app this workspace serves from source",
+      );
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("is told apart from an app that simply declares no serve target", () => {
+    const root = fixtureWorkspace({
+      servable: servableDeclaration,
+      "no-serve": JSON.stringify({
+        name: "no-serve",
+        targets: { build: { executor: "@nx/rspack:rspack" } },
+      }),
+    });
+
+    try {
+      const refused = scanApps(root, "no-serve");
+
+      // Not servable, and refused the way any unservable name is: the exit
+      // status for a name to change and the names that could replace it, with
+      // nothing said about a declaration to repair.
+      expect(refused.status).toBe(2);
+      expect(refused.stderr).toContain(
+        '"no-serve" is not an app this workspace serves from source',
+      );
+      expect(refused.stderr).toContain('["servable"]');
+      expect(refused.stderr).not.toContain("could not be read");
+      // And the scan itself is intact: the app beside it is still servable.
+      expect(scanApps(root, "servable").stdout.trim()).toBe("servable");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }, 60_000);
 });
