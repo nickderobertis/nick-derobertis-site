@@ -1,5 +1,5 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing; its spec opens the router at the same base the deployed site is served under.
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";

@@ -1,4 +1,4 @@
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { homeContent } from "@site/data-access-home";
 import { Suspense, useState } from "react";
 import { homePanes, resolvedPanes } from "./panes";

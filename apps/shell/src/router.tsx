@@ -8,7 +8,7 @@ import type {
   SoftwareProjects,
 } from "@site/data-access-core";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing and validates route payloads before passing them to remotes.
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import {
   type BioPageProps,
   type CoursesPageProps,
@@ -170,10 +170,7 @@ export function createSiteRouter({
         warmSoftwareLogos(projects);
         return { projects, view };
       } catch {
-        // `as const` keeps this branch's view a literal; without it the union
-        // with the branches above widens to string and the page loses the
-        // narrowing it renders from.
-        return { projects: null, view: "error" as const };
+        return { projects: null, view: "error" satisfies RouteView };
       }
     },
     component: routeComponent(pages.software, (Page) => {
@@ -204,7 +201,7 @@ export function createSiteRouter({
           view,
         };
       } catch {
-        return { courses: null, view: "error" as const };
+        return { courses: null, view: "error" satisfies RouteView };
       }
     },
     component: routeComponent(pages.courses, (Page) => {

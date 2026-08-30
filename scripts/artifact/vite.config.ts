@@ -7,6 +7,7 @@ export default defineConfig({
   root: fileURLToPath(new URL("../..", import.meta.url)),
   test: {
     include: [
+      "scripts/artifact/bundle-budgets.spec.ts",
       "scripts/artifact/check-static-artifact.spec.ts",
       "scripts/artifact/remote-manifest.spec.ts",
     ],

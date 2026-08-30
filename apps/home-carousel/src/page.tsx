@@ -1,4 +1,4 @@
-import { siteBase } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { homeContent, readPaneState } from "@site/data-access-home";
 import { CarouselState } from "./carousel-state";
 import Skeleton from "./skeleton";

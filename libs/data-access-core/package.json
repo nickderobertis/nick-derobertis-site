@@ -4,6 +4,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./site": "./src/site.ts",
     "./site.config.json": "./src/site.config.json"
   },
   "dependencies": {
