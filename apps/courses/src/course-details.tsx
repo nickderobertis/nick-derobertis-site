@@ -1,5 +1,6 @@
 import type { Course } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
+import { Card } from "@site/design-system";
 import { ResourceTree } from "./resource-tree";
 
 export function CourseDetails({ course }: { course: Course }) {
@@ -7,7 +8,7 @@ export function CourseDetails({ course }: { course: Course }) {
   return (
     <div className="course-details">
       {course.long_description ? (
-        <section className="course-pane course-overview">
+        <Card as="section" className="course-pane course-overview">
           <h3>About this course</h3>
           <p>{course.long_description}</p>
           {course.current_period || course.current_time ? (
@@ -23,11 +24,11 @@ export function CourseDetails({ course }: { course: Course }) {
               <strong>Preparation:</strong> {course.daily_prep}
             </p>
           ) : null}
-        </section>
+        </Card>
       ) : null}
 
       {course.textbook ? (
-        <section className="course-pane">
+        <Card as="section" className="course-pane">
           <h3>Textbook</h3>
           <p>
             <strong>{course.textbook.title}</strong> by {course.textbook.author}
@@ -39,11 +40,11 @@ export function CourseDetails({ course }: { course: Course }) {
           {course.textbook.description ? (
             <p>{course.textbook.description}</p>
           ) : null}
-        </section>
+        </Card>
       ) : null}
 
       {course.prerequisites ? (
-        <section className="course-pane">
+        <Card as="section" className="course-pane">
           <h3>Prerequisites</h3>
           {course.prerequisites.description ? (
             <p>{course.prerequisites.description}</p>
@@ -73,11 +74,11 @@ export function CourseDetails({ course }: { course: Course }) {
           {course.prerequisites.technical_skills_description ? (
             <p>{course.prerequisites.technical_skills_description}</p>
           ) : null}
-        </section>
+        </Card>
       ) : null}
 
       {gradingCategories.length ? (
-        <section className="course-pane">
+        <Card as="section" className="course-pane">
           <h3>Grading</h3>
           <dl className="course-grading-categories">
             {gradingCategories.map(([category, weight]) => (
@@ -102,14 +103,14 @@ export function CourseDetails({ course }: { course: Course }) {
               </dl>
             </details>
           ) : null}
-        </section>
+        </Card>
       ) : null}
 
       {course.resources?.length ? (
-        <section className="course-pane course-resources">
+        <Card as="section" className="course-pane course-resources">
           <h3>Resources</h3>
           <ResourceTree resources={course.resources} />
-        </section>
+        </Card>
       ) : null}
     </div>
   );

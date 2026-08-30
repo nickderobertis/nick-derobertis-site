@@ -1,18 +1,15 @@
+import { Skeleton } from "@site/design-system";
 import "./skills.css";
 
 export default function SkillsSkeleton() {
   return (
-    <section
-      className="remote-skeleton skeleton-skills"
-      role="status"
-      aria-label="Loading skills"
-    >
+    <Skeleton className="skeleton-skills" label="Loading skills">
       <div className="skeleton-heading" />
       <div className="skeleton-circle" />
       <div className="skeleton-controls">
         <i />
         <i />
       </div>
-    </section>
+    </Skeleton>
   );
 }

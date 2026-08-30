@@ -1,17 +1,14 @@
-.hero {
-  max-width: 760px;
-}
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--blue);
-  font-weight: 700;
-}
 .courses-page {
   display: grid;
   gap: 0;
 }
 .courses-banner {
+  --eyebrow-color: #8ed2f0;
+  --title-color: currentcolor;
+  --title-margin: 0.25rem 0 1rem;
+  --title-size: clamp(2.5rem, 7vw, 5rem);
+  --title-line-height: 1;
+
   position: relative;
   overflow: hidden;
   margin: calc(-1 * clamp(3rem, 8vw, 7rem)) calc(50% - 50vw) 0;
@@ -37,15 +34,6 @@
   position: relative;
   z-index: 1;
 }
-.courses-banner .eyebrow {
-  color: #8ed2f0;
-}
-.courses-banner h1 {
-  margin: 0.25rem 0 1rem;
-  font:
-    700 clamp(2.5rem, 7vw, 5rem) / 1 Georgia,
-    serif;
-}
 .courses-banner > p:last-child {
   max-width: 720px;
   margin: auto;
@@ -56,13 +44,16 @@
   margin: 0 calc(50% - 50vw);
 }
 .course-card {
-  padding: clamp(2.5rem, 7vw, 6rem)
+  --card-surface: #f5eeee;
+  --card-border: 0;
+  --card-shadow: none;
+  --card-padding: clamp(2.5rem, 7vw, 6rem)
     max(var(--space), calc((100vw - 1100px) / 2));
-  background: #f5eeee;
 }
 .course-card-dark {
+  --card-surface: #302829;
+
   color: #f4f7f8;
-  background: #302829;
 }
 .course-summary {
   display: grid;
@@ -152,19 +143,13 @@
   color: #b9c6cc;
 }
 .course-action {
-  display: inline-block;
-  padding: 0.7rem 1rem;
-  border-radius: 0.2rem;
-  color: #fff;
-  background: #d74c52;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-decoration: none;
-  text-transform: uppercase;
+  --action-padding: 0.7rem 1rem;
+  --action-border: 0;
+  --action-background: #d74c52;
 }
 .course-action:hover,
 .course-action:focus-visible {
-  background: #aa3439;
+  --action-background: #aa3439;
 }
 .course-topics h3 {
   margin: 0 0 1.25rem;
@@ -183,11 +168,16 @@
   list-style: none;
 }
 .course-topics li {
+  /* Every token is restated because these cards nest inside .course-card,
+     whose own tokens custom-property inheritance would otherwise carry in. */
+  --card-surface: var(--paper);
+  --card-border: 0;
+  --card-radius: 0;
+  --card-shadow: 0 0.5rem 1.4rem rgb(18 50 74 / 14%);
+  --card-padding: 1.5rem;
+
   min-height: 8rem;
-  padding: 1.5rem;
   color: var(--ink);
-  background: #fff;
-  box-shadow: 0 0.5rem 1.4rem rgb(18 50 74 / 14%);
   font:
     700 1rem / 1.4 Georgia,
     serif;
@@ -213,10 +203,15 @@
   margin-top: 2rem;
 }
 .course-pane {
-  padding: clamp(1.25rem, 3vw, 2rem);
+  /* Restated for the same reason as .course-topics li: this card nests inside
+     .course-card, whose tokens would otherwise be inherited. */
+  --card-surface: var(--paper);
+  --card-border: 0;
+  --card-radius: 0;
+  --card-shadow: 0 0.3rem 1rem rgb(18 50 74 / 12%);
+  --card-padding: clamp(1.25rem, 3vw, 2rem);
+
   color: var(--ink);
-  background: #fff;
-  box-shadow: 0 0.3rem 1rem rgb(18 50 74 / 12%);
 }
 .course-pane h3 {
   margin-top: 0;
@@ -280,43 +275,6 @@
 .courses-state-error {
   border-color: #ba5b5b;
   background: #fff3f3;
-}
-.remote-skeleton {
-  display: grid;
-  gap: 1.5rem;
-  width: 100%;
-  padding: clamp(1.5rem, 4vw, 4rem);
-  overflow: hidden;
-}
-.remote-skeleton :is(i, b, div) {
-  border-radius: 0.75rem;
-}
-.remote-skeleton :is(i, b),
-.skeleton-heading,
-.skeleton-banner,
-.skeleton-hero,
-.skeleton-cover,
-.skeleton-portrait,
-.skeleton-circle,
-.skeleton-stats {
-  display: block;
-  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
-  background-size: 200% 100%;
-  animation: skeleton-pulse 1.4s ease-in-out infinite;
-}
-@keyframes skeleton-pulse {
-  to {
-    background-position: -200% 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .remote-skeleton :is(i, b, div) {
-    animation: none;
-  }
-}
-.skeleton-hero,
-.skeleton-banner {
-  min-height: 16rem;
 }
 .skeleton-course {
   height: 18rem;

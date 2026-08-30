@@ -1,11 +1,11 @@
+import { Skeleton } from "@site/design-system";
 import "./contact.css";
 
 export default function HomeContactSkeleton() {
   return (
-    <section
-      className="remote-skeleton skeleton-contact"
-      role="status"
-      aria-label="Loading contact options"
+    <Skeleton
+      className="skeleton-contact skeleton-split"
+      label="Loading contact options"
     >
       <div className="skeleton-copy">
         <b />
@@ -17,6 +17,6 @@ export default function HomeContactSkeleton() {
         <i />
         <i />
       </div>
-    </section>
+    </Skeleton>
   );
 }

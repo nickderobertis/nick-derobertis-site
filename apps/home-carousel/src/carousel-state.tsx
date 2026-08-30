@@ -1,3 +1,5 @@
+import { PaneState } from "@site/design-system";
+
 type CarouselStateName = "error" | "empty";
 
 const copy: Record<CarouselStateName, string> = {
@@ -12,5 +14,5 @@ const copy: Record<CarouselStateName, string> = {
  * they came for.
  */
 export function CarouselState({ name }: { name: CarouselStateName }) {
-  return <output className="pane-state">{copy[name]}</output>;
+  return <PaneState>{copy[name]}</PaneState>;
 }

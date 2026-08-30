@@ -1,4 +1,5 @@
 import { homeContent, readPaneState } from "@site/data-access-home";
+import { PageShell, SectionHeading } from "@site/design-system";
 import { ContactState } from "./contact-state";
 import Skeleton from "./skeleton";
 import "./contact.css";
@@ -10,11 +11,18 @@ export default function HomeContactPage() {
   if (state === "loading") return <Skeleton />;
   if (state !== "happy") return <ContactState name={state} />;
   return (
-    <section className="pane contact-pane" aria-labelledby="contact-title">
+    <PageShell
+      className="contact-pane"
+      contained
+      aria-labelledby="contact-title"
+    >
       <div className="contact-copy">
-        <p className="eyebrow">Contact</p>
-        <h2 id="contact-title">{homeContent.contact.title}</h2>
-        <p>{homeContent.contact.description}</p>
+        <SectionHeading
+          eyebrow="Contact"
+          title={homeContent.contact.title}
+          titleId="contact-title"
+          description={homeContent.contact.description}
+        />
       </div>
       <nav className="contact-links" aria-label="Contact options">
         {homeContent.contact.links.map((link) => (
@@ -23,6 +31,6 @@ export default function HomeContactPage() {
           </a>
         ))}
       </nav>
-    </section>
+    </PageShell>
   );
 }

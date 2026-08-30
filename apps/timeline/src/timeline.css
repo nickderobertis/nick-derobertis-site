@@ -10,26 +10,26 @@ body:has(.timeline-pane) {
   color: #27272a;
 }
 .timeline-pane > header {
+  --title-color: currentcolor;
+  --title-size: clamp(2rem, 5vw, 3rem);
+  --title-weight: 400;
+  --title-line-height: 1.1;
+  --title-margin: 0 0 0.5rem;
+
   text-align: center;
   margin-bottom: 3rem;
-}
-.timeline-pane h2 {
-  font:
-    400 clamp(2rem, 5vw, 3rem) / 1.1 Georgia,
-    serif;
-  margin: 0 0 0.5rem;
 }
 .timeline-pane header p {
   margin: 0;
   font-size: 1.1rem;
 }
 .timeline-card {
-  background: #fff;
-  border: 1px solid #ded7d7;
-  border-radius: 4rem;
-  box-shadow: 0 2px 2px #0003;
+  --card-border: 1px solid #ded7d7;
+  --card-radius: 4rem;
+  --card-shadow: 0 2px 2px #0003;
+  --card-padding: 3rem;
+
   min-height: 32rem;
-  padding: 3rem;
 }
 .timeline-filters {
   align-items: center;
@@ -125,6 +125,15 @@ body:has(.timeline-pane) {
 .timeline-compact {
   display: none;
 }
+.skeleton-chart {
+  display: grid;
+  gap: 0.75rem;
+  padding: 2rem;
+  border: 1px solid #e5e7eb;
+}
+.skeleton-chart > i {
+  height: 2rem;
+}
 @media (max-width: 700px) {
   .timeline-pane {
     margin-inline: calc(-1 * var(--space, 1rem));
@@ -136,15 +145,15 @@ body:has(.timeline-pane) {
     margin-inline: 0;
   }
   .timeline-pane > header {
+    --title-size: 2rem;
+
     margin-inline: 1rem;
   }
-  .timeline-pane h2 {
-    font-size: 2rem;
-  }
   .timeline-card {
-    border-radius: 0;
+    --card-radius: 0;
+    --card-padding: 3rem 0 1rem;
+
     min-height: 31rem;
-    padding: 3rem 0 1rem;
   }
   .timeline-filters {
     border-radius: 0.6rem;
@@ -177,50 +186,4 @@ body:has(.timeline-pane) {
   .timeline-compact {
     display: inline;
   }
-}
-.remote-skeleton {
-  display: grid;
-  gap: 1.5rem;
-  width: 100%;
-  padding: clamp(1.5rem, 4vw, 4rem);
-  overflow: hidden;
-}
-.remote-skeleton :is(i, b, div) {
-  border-radius: 0.75rem;
-}
-.remote-skeleton :is(i, b),
-.skeleton-heading,
-.skeleton-banner,
-.skeleton-hero,
-.skeleton-cover,
-.skeleton-portrait,
-.skeleton-circle,
-.skeleton-stats {
-  display: block;
-  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
-  background-size: 200% 100%;
-  animation: skeleton-pulse 1.4s ease-in-out infinite;
-}
-@keyframes skeleton-pulse {
-  to {
-    background-position: -200% 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .remote-skeleton :is(i, b, div) {
-    animation: none;
-  }
-}
-.skeleton-heading {
-  width: min(28rem, 70%);
-  height: 4rem;
-}
-.skeleton-chart {
-  display: grid;
-  gap: 0.75rem;
-  padding: 2rem;
-  border: 1px solid #e5e7eb;
-}
-.skeleton-chart > i {
-  height: 2rem;
 }

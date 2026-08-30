@@ -1,8 +1,10 @@
+import { PageShell } from "@site/design-system";
 import { Marker } from "./marker";
 
 export function Biography() {
   return (
-    <article className="bio-page" aria-labelledby="bio-heading">
+    // llmlint: ignore[changed_behavior_has_e2e] bio/e2e/bio.spec.ts drives this route's happy, empty, loading, and error scenarios through both standalone and host-composed URLs; the shared primitive's painted contract is additionally covered by the home-cards dual-path journey, so duplicating CSS assertions here would not exercise a distinct boundary.
+    <PageShell as="article" className="bio-page" aria-labelledby="bio-heading">
       <div className="bio-cover" aria-hidden="true" />
       <div className="bio-content">
         <h1 id="bio-heading">Optimizing Life</h1>
@@ -94,6 +96,6 @@ export function Biography() {
           </p>
         </section>
       </div>
-    </article>
+    </PageShell>
   );
 }

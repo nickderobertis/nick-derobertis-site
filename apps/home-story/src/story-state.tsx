@@ -1,3 +1,5 @@
+import { PaneState } from "@site/design-system";
+
 type StoryStateName = "error" | "empty";
 
 const copy: Record<StoryStateName, string> = {
@@ -11,5 +13,5 @@ const copy: Record<StoryStateName, string> = {
  * an unwritten story nor an unreachable one interrupts what they came for.
  */
 export function StoryState({ name }: { name: StoryStateName }) {
-  return <output className="pane-state">{copy[name]}</output>;
+  return <PaneState>{copy[name]}</PaneState>;
 }

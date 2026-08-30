@@ -93,12 +93,14 @@ const isApp = (project: Project) => project.root.startsWith("apps/");
 /**
  * The only projects AGENTS.md places below the coverage floor, so the only ones
  * that may declare no `test` target. `tooling-*` drives `just` recipes, hooks,
- * and CLIs as real subprocesses v8 cannot instrument from the parent process,
- * and `design-system` publishes a single stylesheet with no unit-testable
- * interface; both reasons are recorded there, which the assertion below holds
- * AGENTS.md to. A trailing `*` matches a project family.
+ * and CLIs as real subprocesses v8 cannot instrument from the parent process;
+ * that reason is recorded there, which the assertion below holds AGENTS.md to.
+ * `design-system` was the second exemption while it published a stylesheet and
+ * nothing else — it now publishes the shared React primitives every app
+ * composes its pages from, which is an interface a spec can drive, so it owes
+ * the floor like every other project. A trailing `*` matches a project family.
  */
-const coverageExemptions = ["tooling-*", "design-system"];
+const coverageExemptions = ["tooling-*"];
 
 const exemptFromCoverage = (project: Project) =>
   coverageExemptions.some((exemption) =>

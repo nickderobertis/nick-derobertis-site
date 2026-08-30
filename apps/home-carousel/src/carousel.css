@@ -1,30 +1,3 @@
-.pane {
-  position: relative;
-}
-.pane-state {
-  width: min(1100px, calc(100% - 2 * var(--space)));
-  margin: 3rem auto;
-  min-height: 10rem;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  border: 1px dashed var(--line);
-  border-radius: 1rem;
-  color: var(--muted);
-}
-.action {
-  display: inline-block;
-  border: 2px solid var(--coral);
-  border-radius: 0.2rem;
-  padding: 0.65rem 1rem;
-  background: var(--coral);
-  color: white;
-  font-weight: 700;
-  text-decoration: none;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-}
-.action:focus-visible,
 .carousel-control:focus-visible {
   outline: 3px solid white;
   outline-offset: 3px;
@@ -75,41 +48,4 @@
 .carousel-position {
   position: absolute;
   bottom: 1.5rem;
-}
-.remote-skeleton {
-  display: grid;
-  gap: 1.5rem;
-  width: 100%;
-  padding: clamp(1.5rem, 4vw, 4rem);
-  overflow: hidden;
-}
-.remote-skeleton :is(i, b, div) {
-  border-radius: 0.75rem;
-}
-.remote-skeleton :is(i, b),
-.skeleton-heading,
-.skeleton-banner,
-.skeleton-hero,
-.skeleton-cover,
-.skeleton-portrait,
-.skeleton-circle,
-.skeleton-stats {
-  display: block;
-  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
-  background-size: 200% 100%;
-  animation: skeleton-pulse 1.4s ease-in-out infinite;
-}
-@keyframes skeleton-pulse {
-  to {
-    background-position: -200% 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .remote-skeleton :is(i, b, div) {
-    animation: none;
-  }
-}
-.skeleton-hero,
-.skeleton-banner {
-  min-height: 16rem;
 }

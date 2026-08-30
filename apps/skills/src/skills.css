@@ -14,28 +14,31 @@ body:has(.skills-pane) {
   overflow: hidden;
 }
 .skills-intro {
+  --title-color: currentcolor;
+  --title-font: Arial, sans-serif;
+  --title-size: clamp(2.2rem, 4vw, 3.25rem);
+  --title-weight: 400;
+  --title-line-height: 1.1;
+  --title-margin: 0 0 0.5rem;
+
   padding-left: max(var(--space, 1rem), calc((100vw - 1100px) / 2));
   position: relative;
   z-index: 2;
 }
-.skills-intro h2 {
-  font:
-    400 clamp(2.2rem, 4vw, 3.25rem) / 1.1 Arial,
-    sans-serif;
-  margin: 0 0 0.5rem;
-}
-.skills-intro > p {
+.skills-intro .section-description {
   font-size: 1.25rem;
   line-height: 1.5;
   margin: 0 0 1.6rem;
 }
 .skills-widget {
-  background: #f2c9c9;
-  border-radius: 1.25rem;
-  box-shadow: 0 10px 15px #0002;
+  --card-surface: #f2c9c9;
+  --card-border: 0;
+  --card-radius: 1.25rem;
+  --card-shadow: 0 10px 15px #0002;
+  --card-padding: 1rem;
+
   display: grid;
   gap: 0.35rem;
-  padding: 1rem;
   text-align: center;
   width: 16rem;
 }
@@ -152,6 +155,21 @@ body:has(.skills-pane) {
   padding: 1rem;
   width: min(1100px, calc(100% - 2rem));
 }
+.skeleton-circle {
+  width: min(25rem, 80vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  justify-self: center;
+}
+.skeleton-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.skeleton-controls > i {
+  width: 8rem;
+  height: 2.5rem;
+}
 @media (max-width: 700px) {
   .skills-pane {
     display: flex;
@@ -159,13 +177,12 @@ body:has(.skills-pane) {
     min-height: 43rem;
   }
   .skills-intro {
+    --title-size: 2rem;
+
     padding: 0 1rem;
     width: 100%;
   }
-  .skills-intro h2 {
-    font-size: 2rem;
-  }
-  .skills-intro > p {
+  .skills-intro .section-description {
     font-size: 1.15rem;
   }
   .skills-widget {
@@ -184,56 +201,4 @@ body:has(.skills-pane) {
     left: 0.25rem;
     top: 38%;
   }
-}
-.remote-skeleton {
-  display: grid;
-  gap: 1.5rem;
-  width: 100%;
-  padding: clamp(1.5rem, 4vw, 4rem);
-  overflow: hidden;
-}
-.remote-skeleton :is(i, b, div) {
-  border-radius: 0.75rem;
-}
-.remote-skeleton :is(i, b),
-.skeleton-heading,
-.skeleton-banner,
-.skeleton-hero,
-.skeleton-cover,
-.skeleton-portrait,
-.skeleton-circle,
-.skeleton-stats {
-  display: block;
-  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
-  background-size: 200% 100%;
-  animation: skeleton-pulse 1.4s ease-in-out infinite;
-}
-@keyframes skeleton-pulse {
-  to {
-    background-position: -200% 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .remote-skeleton :is(i, b, div) {
-    animation: none;
-  }
-}
-.skeleton-heading {
-  width: min(28rem, 70%);
-  height: 4rem;
-}
-.skeleton-circle {
-  width: min(25rem, 80vw);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  justify-self: center;
-}
-.skeleton-controls {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-.skeleton-controls > i {
-  width: 8rem;
-  height: 2.5rem;
 }

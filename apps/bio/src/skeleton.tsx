@@ -1,12 +1,9 @@
+import { Skeleton } from "@site/design-system";
 import "./bio.css";
 
 export default function BioSkeleton() {
   return (
-    <article
-      className="remote-skeleton skeleton-bio"
-      role="status"
-      aria-label="Loading biography"
-    >
+    <Skeleton as="article" className="skeleton-bio" label="Loading biography">
       <div className="skeleton-cover" />
       <div className="skeleton-copy">
         <b />
@@ -15,6 +12,6 @@ export default function BioSkeleton() {
         <i />
         <i />
       </div>
-    </article>
+    </Skeleton>
   );
 }

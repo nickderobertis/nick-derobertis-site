@@ -1,12 +1,9 @@
+import { Skeleton } from "@site/design-system";
 import "./story.css";
 
 export default function HomeStorySkeleton() {
   return (
-    <section
-      className="remote-skeleton skeleton-story"
-      role="status"
-      aria-label="Loading story"
-    >
+    <Skeleton className="skeleton-story skeleton-split" label="Loading story">
       <div className="skeleton-portrait" />
       <div className="skeleton-copy">
         <b />
@@ -14,6 +11,6 @@ export default function HomeStorySkeleton() {
         <i />
         <i />
       </div>
-    </section>
+    </Skeleton>
   );
 }

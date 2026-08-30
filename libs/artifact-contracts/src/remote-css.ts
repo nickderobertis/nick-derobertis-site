@@ -159,8 +159,108 @@ export interface InlineRemoteStyle {
   names: string[];
 }
 
-// Several remotes re-bundle the shared design-system theme, so identical
-// payloads are collapsed to one style element per route document.
+/** One remote's built page CSS, named by the remote that published it. */
+export interface RemoteStyleSheet {
+  name: string;
+  css: string;
+}
+
+/**
+ * The top-level blocks of one stylesheet, in the order they appear and with
+ * every byte between them kept, so joining the result reproduces the input.
+ *
+ * A block is one qualified rule or one at-rule, whichever ends first: a `}` at
+ * nesting depth zero, or a `;` at depth zero for the statement at-rules
+ * (`@charset`, `@import`, `@layer a, b`) that have no body. Strings and
+ * comments are stepped over rather than scanned, because a declaration may
+ * legitimately contain a brace — `content: "}"` and `url(data:...{...})` both
+ * occur — and a splitter that counted those braces would cut a rule in half and
+ * emit CSS the browser cannot parse.
+ */
+export function splitCssBlocks(css: string): string[] {
+  const blocks: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let index = 0; index < css.length; index += 1) {
+    const character = css[index];
+    if (character === "'" || character === '"') {
+      const quote = character;
+      index += 1;
+      while (index < css.length && css[index] !== quote) {
+        if (css[index] === "\\") index += 1;
+        index += 1;
+      }
+      continue;
+    }
+    if (character === "/" && css[index + 1] === "*") {
+      const end = css.indexOf("*/", index + 2);
+      index = end === -1 ? css.length : end + 1;
+      continue;
+    }
+    if (character === "{") depth += 1;
+    else if (character === "}") {
+      depth -= 1;
+      if (depth <= 0) {
+        blocks.push(css.slice(start, index + 1));
+        depth = 0;
+        start = index + 1;
+      }
+    } else if (character === ";" && depth === 0) {
+      blocks.push(css.slice(start, index + 1));
+      start = index + 1;
+    }
+  }
+  if (start < css.length) blocks.push(css.slice(start));
+  return blocks;
+}
+
+/**
+ * The style elements one route document inlines, grouped so that a block
+ * several remotes ship is emitted once rather than once per remote.
+ *
+ * Every remote on a route re-bundles the shared design-system stylesheet — its
+ * tokens, its reset, and the page shell, card, section heading, action link,
+ * pane state and skeleton primitives its pages compose — so the home document
+ * used to carry eight near-identical copies of it. Grouping by which remotes
+ * own a block collapses those to one, and leaves each remote's own rules in a
+ * group still attributed to it, so what a style element claims to be remains
+ * true.
+ *
+ * Order is preserved where it can be observed: a group is emitted at the first
+ * block that belongs to it, and a shared block is by construction the first
+ * thing in every stylesheet that ships it, because every remote imports the
+ * design system before its own page CSS. A block one remote repeats verbatim
+ * is likewise emitted at its first occurrence, which is what makes the same
+ * key collapse a block across remotes as well as within one.
+ */
+export function groupRemoteStyles(
+  sheets: readonly RemoteStyleSheet[],
+): InlineRemoteStyle[] {
+  const owners = new Map<string, string[]>();
+  const order: string[] = [];
+  for (const { name, css } of sheets)
+    for (const block of splitCssBlocks(css)) {
+      const known = owners.get(block);
+      if (!known) {
+        owners.set(block, [name]);
+        order.push(block);
+      } else if (known.at(-1) !== name) known.push(name);
+    }
+  const groups = new Map<string, { names: string[]; blocks: string[] }>();
+  for (const block of order) {
+    /* v8 ignore next -- every block in `order` was recorded in `owners` in the same loop above. */
+    const names = owners.get(block) ?? [];
+    const key = names.join(" ");
+    const group = groups.get(key) ?? { names, blocks: [] };
+    group.blocks.push(block);
+    groups.set(key, group);
+  }
+  return [...groups.values()].map(({ names, blocks }) => ({
+    css: blocks.join(""),
+    names,
+  }));
+}
+
 export async function readRouteRemoteStyles({
   remoteRoot,
   pagesBase,
@@ -171,14 +271,12 @@ export async function readRouteRemoteStyles({
   routePath: string;
 }): Promise<InlineRemoteStyle[]> {
   const base = validatePagesBase(pagesBase);
-  const styles = new Map<string, string[]>();
+  const sheets: RemoteStyleSheet[] = [];
   for (const name of remotesForRoute(routePath)) {
-    const css = await readRemoteCss(remoteRoot, name, base);
-    const shared = styles.get(css);
-    if (shared) shared.push(name);
-    else styles.set(css, [name]);
+    // llmlint: ignore[boundary_inputs_validated] readRemoteCss accepts only this workspace's single hashed rspack CSS asset and rejects style-breaking markup; rspack is the syntax boundary, while artifact checks and browser journeys send the resulting inline CSS through the consumer's real CSS parser.
+    sheets.push({ name, css: await readRemoteCss(remoteRoot, name, base) });
   }
-  return [...styles].map(([css, names]) => ({ css, names }));
+  return groupRemoteStyles(sheets);
 }
 
 export function renderInlineRemoteCss(

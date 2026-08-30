@@ -1,0 +1,146 @@
+/*
+ * The primitives every route and pane composes: the shell a page mounts into,
+ * the heading that opens a section, the card that carries one record, the
+ * action link that leaves for another route, the state a pane shows instead of
+ * its content, and the skeleton that stands in while it loads.
+ *
+ * Each primitive states the shape all of its uses share and reads the parts
+ * that legitimately differ from custom properties, so an app that looks
+ * different sets a token rather than restating the whole rule. That is what
+ * keeps "how a card looks" one edit here instead of one edit per pane, and it
+ * is what makes the blocks the composed documents inline actually identical
+ * rather than merely similar.
+ */
+
+.pane {
+  position: relative;
+}
+.pane-contained {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: auto;
+}
+
+.section-heading {
+  display: var(--heading-layout, block);
+}
+.eyebrow {
+  color: var(--eyebrow-color, var(--blue));
+  font-weight: var(--eyebrow-weight, 700);
+  letter-spacing: var(--eyebrow-tracking, 0.16em);
+  text-transform: var(--eyebrow-transform, uppercase);
+}
+.section-title {
+  margin: var(--title-margin, 0.2rem 0 1rem);
+  color: var(--title-color, var(--navy));
+  font-family: var(--title-font, Georgia, serif);
+  font-size: var(--title-size, clamp(2.2rem, 4vw, 3.5rem));
+  font-weight: var(--title-weight, 700);
+  line-height: var(--title-line-height, normal);
+}
+
+.card {
+  padding: var(--card-padding, 1.25rem);
+  border: var(--card-border, 1px solid var(--line));
+  border-radius: var(--card-radius, 0);
+  background: var(--card-surface, var(--paper));
+  box-shadow: var(--card-shadow, 0 0.2rem 0.7rem rgb(18 50 74 / 8%));
+}
+
+.action {
+  display: inline-block;
+  padding: var(--action-padding, 0.65rem 1rem);
+  border: var(--action-border, 2px solid var(--coral));
+  border-radius: var(--action-radius, 0.2rem);
+  background: var(--action-background, var(--coral));
+  color: var(--action-color, #fff);
+  font-size: var(--action-size, 0.8rem);
+  font-weight: var(--action-weight, 700);
+  letter-spacing: var(--action-tracking, normal);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.action:focus-visible {
+  outline: 3px solid var(--action-focus-ring, #fff);
+  outline-offset: 3px;
+}
+
+.pane-state {
+  width: min(1100px, calc(100% - 2 * var(--space)));
+  margin: 3rem auto;
+  min-height: 10rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 1rem;
+  color: var(--muted);
+}
+
+.remote-skeleton {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  overflow: hidden;
+}
+.remote-skeleton :is(i, b, div) {
+  border-radius: 0.75rem;
+}
+.remote-skeleton :is(i, b),
+.skeleton-heading,
+.skeleton-banner,
+.skeleton-hero,
+.skeleton-cover,
+.skeleton-portrait,
+.skeleton-circle,
+.skeleton-stats {
+  display: block;
+  background: linear-gradient(100deg, #e5e7eb 20%, #f8fafc 40%, #e5e7eb 60%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .remote-skeleton :is(i, b, div) {
+    animation: none;
+  }
+}
+.skeleton-heading {
+  width: min(28rem, 70%);
+  height: 4rem;
+}
+.skeleton-hero,
+.skeleton-banner {
+  min-height: 16rem;
+}
+.skeleton-portrait {
+  min-height: 22rem;
+}
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.skeleton-grid > i {
+  min-height: 12rem;
+}
+.skeleton-split {
+  grid-template-columns: minmax(10rem, 35%) 1fr;
+}
+.skeleton-list {
+  display: grid;
+  gap: 1rem;
+}
+.skeleton-list > i {
+  height: 7rem;
+}
+@media (max-width: 48rem) {
+  .skeleton-grid,
+  .skeleton-split {
+    grid-template-columns: 1fr;
+  }
+}

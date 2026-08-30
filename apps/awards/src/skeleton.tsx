@@ -1,17 +1,14 @@
+import { Skeleton } from "@site/design-system";
 import "./awards.css";
 
 export default function AwardsSkeleton() {
   return (
-    <section
-      className="remote-skeleton skeleton-awards"
-      role="status"
-      aria-label="Loading awards"
-    >
+    <Skeleton className="skeleton-awards" label="Loading awards">
       <div className="skeleton-grid">
         {[1, 2, 3].map((item) => (
           <i key={item} />
         ))}
       </div>
-    </section>
+    </Skeleton>
   );
 }

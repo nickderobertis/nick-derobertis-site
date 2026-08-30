@@ -1,4 +1,5 @@
 import type { ResearchProjectModel } from "@site/data-access-research";
+import { SectionHeading } from "@site/design-system";
 import { ResearchProjectPane } from "./research-project-pane";
 
 export function ProjectSection({
@@ -16,10 +17,12 @@ export function ProjectSection({
       aria-labelledby={`${id}-heading`}
       id={id}
     >
-      <div className="research-section-heading">
-        <p>{projects.length.toString().padStart(2, "0")}</p>
-        <h2 id={`${id}-heading`}>{heading}</h2>
-      </div>
+      <SectionHeading
+        className="research-section-heading"
+        eyebrow={projects.length.toString().padStart(2, "0")}
+        title={heading}
+        titleId={`${id}-heading`}
+      />
       <div className="research-projects">
         {projects.map(({ categories, coauthors, project }, index) => (
           <ResearchProjectPane
