@@ -4,6 +4,9 @@
   "sourceRoot": "scripts/serve",
   "projectType": "application",
   "tags": ["type:tooling", "scope:e2e"],
+  "metadata": {
+    "description": "llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] The test edge below widens no edge of this browser suite's own — it only orders it after the reader of the directory it recomposes, and a change reaching only that reader still leaves this suite unselected. project.json has no comment syntax, so no narrower directive reaches the declaration."
+  },
   "targets": {
     "lint": {
       "executor": "nx:run-commands",

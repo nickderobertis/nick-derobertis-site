@@ -13,6 +13,8 @@ import rootSchema from "../vendor/codegen/cv.schema.json" with { type: "json" };
 
 export type * from "../vendor/codegen";
 
+// `as const` because `CvDomain` below is this list's own members; widened to
+// `string[]`, every domain lookup in this module would key on `string`.
 export const domainNames = [
   "awards",
   "courses",
