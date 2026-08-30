@@ -59,17 +59,27 @@ export async function clearFederatedTypes(alias: string) {
 
 // llmlint: ignore-block[changed_behavior_has_e2e] This moves declaration files, and only declaration files, out of a remote's build output while that build is still running. Nothing it touches is ever served: `dist/mf-types` sits outside every app's published bundle, so a visitor loading the standalone remote or the host that composes it receives byte-for-byte the same document whether this ran, moved nothing, or threw -- there is no route, no state, and no rendered element for a browser test to drive here. The only observable consequence is on the build that follows, and that is what federated-types.spec.ts drives: a real rspack compilation that publishes a real archive and then asserts what the trees hold. Each app's ownership.spec.ts drives, in a real browser and through both the standalone and host-composed render paths, the remote every build that ran this produces.
 /**
+ * The directory the declaration generator writes into, below the output
+ * directory of the build that ran it. It is Module Federation's default
+ * `typesFolder`, which this workspace's remotes leave unset.
+ */
+const generatedTypesFolder = "@mf-types";
+
+/**
  * Moves one remote's freshly generated declarations and their archive out of
  * the bundle it publishes and into the tree above. Leaving them behind would
  * deploy them to Pages with the remote's own bytes.
+ *
+ * `outputPath` is where that build wrote, which is the only place its
+ * declarations can be: the generator resolves them against the same value.
  */
-export async function publishFederatedTypes(project: string, alias: string) {
-  const generated = resolve(`dist/apps/${project}/@mf-types`);
+export async function publishFederatedTypes(outputPath: string, alias: string) {
+  const generated = resolve(outputPath, generatedTypesFolder);
   const published = resolve(remoteTypesPath(alias));
   await mkdir(dirname(published), { recursive: true });
   await rename(generated, published);
   await rename(
-    resolve(`dist/apps/${project}/@mf-types.zip`),
+    resolve(outputPath, `${generatedTypesFolder}.zip`),
     resolve(remoteTypesArchive(alias)),
   );
 }
@@ -247,12 +257,40 @@ interface FederatedTypesOptions {
  * build published before generation, waits for a consumption that has not
  * landed yet, and fails the compilation when either leaves a declaration a
  * host imports missing.
+ *
+ * It also carries the output directory of the build it was applied to over to
+ * `publish`, which is the hook the generator hands its result to: the
+ * declarations exist wherever that build wrote and nowhere else.
  */
 // llmlint: ignore-block[changed_behavior_has_e2e] This plugin decides whether a build fails, and nothing else. It reads what the declaration compile left on disk and pushes a compilation error when a declaration a host imports is missing; it adds no module, emits no asset, and changes no rendered markup, so a build it allows produces the same bytes it already produced and a build it fails produces none at all -- there is no document, route, or element for a browser test to reach in the failing case, because failing is what stops one from being built. federated-types.spec.ts drives both halves through a real rspack compilation and asserts the errors that compilation finished with. site.spec.ts and each app's ownership.spec.ts then drive, in a real browser and through both the standalone and host-composed render paths, the artifact every build that gets past this produces.
 export class FederatedTypesPlugin {
   constructor(private readonly options: FederatedTypesOptions) {}
 
+  /**
+   * Where the build this was applied to writes, read off its compiler rather
+   * than assumed from the project name. Module Federation's generator resolves
+   * the declarations it writes against this same value, so a build directed
+   * anywhere else -- a spec compiling a remote's own configuration into a
+   * directory of its own -- generates them there too.
+   */
+  private outputPath: string | undefined;
+
+  /**
+   * Publishes what the generator just wrote, as the `afterGenerate` hook every
+   * remote's `dts.generateTypes` passes.
+   */
+  async publish() {
+    const { generates } = this.options;
+    if (!generates) return;
+    if (this.outputPath === undefined)
+      throw new Error(
+        `The ${generates.project} remote generated declarations for a build this plugin was never applied to, so there is no output directory to publish them from. Keep FederatedTypesPlugin in that build's plugin list and rerun just check.`,
+      );
+    await publishFederatedTypes(this.outputPath, generates.alias);
+  }
+
   apply(compiler: {
+    options: { output: { path?: string } };
     hooks: {
       beforeCompile: {
         tapPromise: (name: string, fn: () => Promise<void>) => void;
@@ -264,6 +302,11 @@ export class FederatedTypesPlugin {
   }) {
     const { generates, consumes, timeout = 30_000 } = this.options;
     const name = "mf:federated-types";
+    // The generator resolves its own output against this same field. rspack
+    // has not copied it onto `compiler.outputPath` yet -- that happens after
+    // every plugin has applied -- which is why the generator's own read falls
+    // back to exactly this, and why reading it here names one directory.
+    this.outputPath = compiler.options.output.path;
     if (generates)
       compiler.hooks.beforeCompile.tapPromise(name, () =>
         clearFederatedTypes(generates.alias),

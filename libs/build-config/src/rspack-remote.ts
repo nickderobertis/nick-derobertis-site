@@ -3,11 +3,7 @@ import { resolve } from "node:path";
 import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
-import {
-  consumeFederatedTypes,
-  FederatedTypesPlugin,
-  publishFederatedTypes,
-} from "./federated-types";
+import { consumeFederatedTypes, FederatedTypesPlugin } from "./federated-types";
 import { PublishedFragmentPlugin } from "./published-fragment";
 import { type RemoteProject, remoteRegistry } from "./remote-registry";
 
@@ -61,6 +57,17 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
     ...(options.skeleton ? { "./Skeleton": "./src/skeleton.tsx" } : undefined),
   };
   const composed = Object.keys(options.remotes ?? {});
+  // Held here as well as in the plugin list below because the declaration
+  // generator hands its result back to this same instance: it is the one that
+  // knows where this build wrote, which is where the declarations landed.
+  const federatedTypes = new FederatedTypesPlugin({
+    generates: {
+      project: name,
+      alias: federationName,
+      exposes: Object.keys(exposes),
+    },
+    ...(composed.length ? { consumes: { host: name, aliases: composed } } : {}),
+  });
   return {
     // Nx's app plugin sets this same project root on the compiler options it
     // is given, but it does so after the compiler was constructed, so the
@@ -86,16 +93,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
       // llmlint: ignore[changed_behavior_has_e2e] Each app's ownership.spec.ts drives its published remote through standalone and host-composed browser boundaries, and the feature journey specs cover their happy and recovery states.
       new PublishedFragmentPlugin(name),
       // llmlint: ignore[changed_behavior_has_e2e] This holds a build to the declarations it owes, which is a compile-time contract with no browser interface: what it refuses is a build that produced no artifact for a visitor to load, and what it allows is the same bytes the build already emitted. federated-types.spec.ts drives both halves, and every app's ownership.spec.ts drives the remote this configuration builds through both boundaries.
-      new FederatedTypesPlugin({
-        generates: {
-          project: name,
-          alias: federationName,
-          exposes: Object.keys(exposes),
-        },
-        ...(composed.length
-          ? { consumes: { host: name, aliases: composed } }
-          : {}),
-      }),
+      federatedTypes,
       new ModuleFederationPlugin({
         name: federationName,
         filename: "remoteEntry.js",
@@ -118,7 +116,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
             // consumer here.
             generateAPITypes: false,
             deleteTypesFolder: false,
-            afterGenerate: () => publishFederatedTypes(name, federationName),
+            afterGenerate: () => federatedTypes.publish(),
           },
           // A remote that composes remotes of its own consumes their
           // declarations here, because the modules its own exposes are

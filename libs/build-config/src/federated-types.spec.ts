@@ -33,6 +33,11 @@ const project = "federated-types-spec-remote";
 const alias = "federatedTypesSpecRemote";
 const host = "federated-types-spec-host";
 const built = resolve(`dist/apps/${project}`);
+// Where the compilations below are pointed instead. It sits under `dist` for
+// the same reason every real build's output does: publishing is a rename, and
+// a rename cannot cross a filesystem, so a build writing to the system's
+// temporary directory could never publish into this repository's tree.
+const elsewhere = resolve("dist/build-config/federated-types-spec");
 const published = resolve(remoteTypesPath(alias));
 const archive = resolve(remoteTypesArchive(alias));
 const consumed = resolve(hostTypesPath(host));
@@ -82,11 +87,15 @@ function edited(rewrite: (zip: Buffer, end: number) => void) {
   return copy;
 }
 
-/** What a remote's declaration generator leaves behind for the publish step. */
-async function generated() {
-  await mkdir(join(built, "@mf-types"), { recursive: true });
-  await writeFile(join(built, "@mf-types", "Page.d.ts"), declaration);
-  await writeFile(join(built, "@mf-types.zip"), archiveBytes);
+/**
+ * What a remote's declaration generator leaves behind for the publish step,
+ * written where that generator writes it: below the output directory of the
+ * build that ran it, whatever directory that build was pointed at.
+ */
+async function generated(outputPath: string) {
+  await mkdir(join(outputPath, "@mf-types"), { recursive: true });
+  await writeFile(join(outputPath, "@mf-types", "Page.d.ts"), declaration);
+  await writeFile(join(outputPath, "@mf-types.zip"), archiveBytes);
 }
 
 /**
@@ -101,7 +110,7 @@ async function compile(...plugins: unknown[]) {
     mode: "production",
     context,
     entry: "./main.js",
-    output: { path: join(context, "out") },
+    output: { path: join(elsewhere, "out") },
     // biome-ignore lint/suspicious/noExplicitAny: rspack types its plugin list against its own Plugin union, which the plugin under test is not declared as.
     plugins: plugins as any,
   });
@@ -124,45 +133,63 @@ async function compile(...plugins: unknown[]) {
   }
 }
 
-/** A stand-in generator: the real publish step, run where the real one runs. */
-const publishesDuringBuild = {
-  apply(compiler: {
-    hooks: {
-      thisCompilation: { tap: (name: string, fn: (c: never) => void) => void };
-    };
-  }) {
-    compiler.hooks.thisCompilation.tap("spec:generate", (raw) => {
-      // rspack types this argument as `never` for a plugin it does not know,
-      // exactly as it does for the plugin under test, so this stand-in reaches
-      // processAssets the same way that one does rather than a way of its own.
-      // llmlint: ignore[suppressions_justified] The escape is necessary for the same reason it is in the plugin under test: rspack declares this hook's argument as `never` for a plugin outside its own Plugin union, and `never` admits no property access and no type guard, so there is nothing to narrow from. It is deliberately the same shape as the one in federated-types.ts -- if this stand-in reached processAssets some typed way of its own, it would stop being the generator the plugin really runs beside.
-      const compilation = raw as unknown as {
-        constructor: { PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER: number };
-        hooks: {
-          processAssets: {
-            tapPromise: (
-              options: { name: string; stage: number },
-              fn: () => Promise<void>,
-            ) => void;
-          };
+/**
+ * A stand-in generator: the real publish step, run where the real one runs and
+ * handed the result the way a remote's configuration hands it over, through
+ * the plugin's own `afterGenerate` hook. It writes into the output directory
+ * of the build it is applied to, because that is the only directory Module
+ * Federation's generator ever writes into -- a build pointed somewhere other
+ * than `dist/apps/<project>` generates its declarations there too.
+ */
+function publishesDuringBuild(plugin: FederatedTypesPlugin) {
+  return {
+    apply(compiler: {
+      options: { output: { path?: string } };
+      hooks: {
+        thisCompilation: {
+          tap: (name: string, fn: (c: never) => void) => void;
         };
       };
-      compilation.hooks.processAssets.tapPromise(
-        {
-          name: "spec:generate",
-          stage: compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
-        },
-        async () => {
-          await generated();
-          await publishFederatedTypes(project, alias);
-        },
-      );
-    });
-  },
-};
+    }) {
+      const outputPath = compiler.options.output.path;
+      if (outputPath === undefined)
+        throw new Error("this compilation must declare an output directory");
+      compiler.hooks.thisCompilation.tap("spec:generate", (raw) => {
+        // rspack types this argument as `never` for a plugin it does not know,
+        // exactly as it does for the plugin under test, so this stand-in
+        // reaches processAssets the same way that one does rather than a way
+        // of its own.
+        // llmlint: ignore[suppressions_justified] The escape is necessary for the same reason it is in the plugin under test: rspack declares this hook's argument as `never` for a plugin outside its own Plugin union, and `never` admits no property access and no type guard, so there is nothing to narrow from. It is deliberately the same shape as the one in federated-types.ts -- if this stand-in reached processAssets some typed way of its own, it would stop being the generator the plugin really runs beside.
+        const compilation = raw as unknown as {
+          constructor: { PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER: number };
+          hooks: {
+            processAssets: {
+              tapPromise: (
+                options: { name: string; stage: number },
+                fn: () => Promise<void>,
+              ) => void;
+            };
+          };
+        };
+        compilation.hooks.processAssets.tapPromise(
+          {
+            name: "spec:generate",
+            stage:
+              compilation.constructor.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
+          },
+          async () => {
+            await generated(outputPath);
+            await plugin.publish();
+          },
+        );
+      });
+    },
+  };
+}
 
 afterEach(async () => {
   await rm(built, { recursive: true, force: true });
+  await rm(elsewhere, { recursive: true, force: true });
   await rm(published, { recursive: true, force: true });
   await rm(archive, { force: true });
   await rm(consumed, { recursive: true, force: true });
@@ -170,9 +197,9 @@ afterEach(async () => {
 
 describe("a remote's published declarations", () => {
   test("moves what was generated out of the bundle the remote publishes", async () => {
-    await generated();
+    await generated(built);
 
-    await publishFederatedTypes(project, alias);
+    await publishFederatedTypes(built, alias);
 
     expect(await readdir(published)).toEqual(["Page.d.ts"]);
     // Nothing a host reads is left in the bytes Pages serves for this remote.
@@ -209,16 +236,30 @@ describe("a build held to the declarations it owes", () => {
       join(published, "Skeleton.d.ts"),
       "an expose since removed",
     );
+    const plugin = new FederatedTypesPlugin({
+      generates: { project, alias, exposes: ["./Page"] },
+    });
 
-    const errors = await compile(
-      new FederatedTypesPlugin({
-        generates: { project, alias, exposes: ["./Page"] },
-      }),
-      publishesDuringBuild,
-    );
+    // `compile` builds into a throwaway directory of its own rather than into
+    // `dist/apps/<project>`, which is what a spec compiling a remote's real
+    // configuration does too, so this also holds the publish step to the
+    // directory the build wrote in rather than one named after the project.
+    const errors = await compile(plugin, publishesDuringBuild(plugin));
 
     expect(errors).toEqual([]);
     expect(await readdir(published)).toEqual(["Page.d.ts"]);
+    // Nothing was taken from the tree a build pointed elsewhere never wrote.
+    await expect(readdir(built)).rejects.toThrow("ENOENT");
+  });
+
+  test("refuses to publish for a build it was never applied to", async () => {
+    const plugin = new FederatedTypesPlugin({
+      generates: { project, alias, exposes: ["./Page"] },
+    });
+
+    await expect(plugin.publish()).rejects.toThrow(
+      `The ${project} remote generated declarations for a build this plugin was never applied to`,
+    );
   });
 
   test("fails when the declaration generator produced nothing", async () => {
