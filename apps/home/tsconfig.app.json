@@ -14,10 +14,7 @@
     // yet, a host would have nothing to typecheck against. Both hold the same
     // declarations, compiled once by the remote that owns them.
     "paths": {
-      "*": [
-        "../../dist/mf-types/hosts/home/*",
-        "../../dist/mf-types/remotes/*"
-      ]
+      "*": ["../../dist/mf-types/hosts/home/*", "../../dist/mf-types/remotes/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "rspack.config.ts"]
