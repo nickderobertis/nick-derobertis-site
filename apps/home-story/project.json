@@ -60,6 +60,9 @@
     },
     "serve": {
       "executor": "@nx/rspack:dev-server",
+      "metadata": {
+        "description": "llmlint: ignore[changed_behavior_has_e2e] This target only declares the shared @nx/rspack:dev-server executor for home-story; it builds no byte a visitor is served, because just serve-dev composes the published artifact for every app it is not developing. The one code path the declaration reaches is scripts/serve/serve-dev.mjs, and serve-dev.spec.ts drives that path in a real browser through both shapes an app can take under it \u2014 the composing host (shell) and a remote pane (awards), whose edit it also follows into the composed host \u2014 while apps/home-story/e2e/home-story.spec.ts and apps/home-story/e2e/ownership.spec.ts keep home-story's published bytes covered standalone and host-composed."
+      },
       "options": { "buildTarget": "home-story:build" }
     }
   }

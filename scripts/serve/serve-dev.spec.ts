@@ -45,13 +45,11 @@ import { z } from "zod";
 const workspace = process.cwd();
 const addressSchema = z.object({ port: z.number().int().min(1).max(65_535) });
 
-/** The running recipe, and everything it has said about itself so far. */
 interface StartedRecipe {
   recipe: ChildProcess;
   reported: string[];
 }
 
-/** A source file this spec edits, and the edit it makes to it. */
 interface Edit {
   file: string;
   anchor: string;

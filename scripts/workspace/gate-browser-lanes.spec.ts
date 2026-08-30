@@ -36,9 +36,7 @@ const taskGraphSchema = z.object({
   tasks: z.object({ tasks: z.record(z.string(), z.unknown()) }),
 });
 
-/** Where `just check` and `just gate-browser-lanes` write their scratch files. */
 let scratch: string;
-/** The real pnpm the recording shim below falls through to. */
 let realPnpm: string;
 
 beforeAll(() => {
