@@ -16,7 +16,7 @@
     "types": {
       "path": "",
       "name": "",
-      "zip": "",
+      "zip": "@mf-types.zip",
       "api": ""
     },
     "globalName": "software",
@@ -37,7 +37,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.9321f97fd65a615f.js"
+            "main.1b556542cdcea297.js"
           ]
         },
         "css": {
@@ -64,7 +64,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.9321f97fd65a615f.js"
+            "main.1b556542cdcea297.js"
           ]
         },
         "css": {
@@ -94,34 +94,16 @@
       "assets": {
         "js": {
           "sync": [
-            "239.7531b5fc1f57ae3c.js",
-            "common.001c19f31ae80287.js",
-            "754.24300254fab10b32.js"
+            "239.ee394d454508214e.js",
+            "266.8f0502bf700b01f3.js",
+            "__federation_expose_Page.4febdb4ff024ef2c.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "common.d6305951046704f6.css",
-            "__federation_expose_Page.7fc66cd77766a671.css"
+            "__federation_expose_Page.094b3df20928996d.css"
           ],
-          "async": []
-        }
-      }
-    },
-    {
-      "path": "./Skeleton",
-      "id": "software:Skeleton",
-      "name": "Skeleton",
-      "requires": [],
-      "file": "src/skeleton.tsx",
-      "assets": {
-        "js": {
-          "sync": [],
-          "async": []
-        },
-        "css": {
-          "sync": [],
           "async": []
         }
       }
