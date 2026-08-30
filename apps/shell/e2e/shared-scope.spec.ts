@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
+import { sharedSingletons } from "@site/build-config";
 import { z } from "zod";
 
 // llmlint: ignore-file[browser_journeys_run_against_the_built_app] This workspace deliberately owns browser journeys on each app rather than in separate e2e projects. `shell:e2e` depends on `shell:prerender`, and this spec drives that composed production artifact plus its built standalone bio remote, never a development server.
@@ -76,7 +77,11 @@ const federationManifestSchema = z.object({
 // react and react-dom are excluded throughout: they are the eager pair, so
 // their code is in every container's own entry chunk by design, and these
 // journeys are about the non-eager shares beside them.
-const eagerShares = new Set(["react", "react-dom"]);
+const eagerShares = new Set(
+  Object.entries(sharedSingletons)
+    .filter(([, config]) => "eager" in config && config.eager)
+    .map(([name]) => name),
+);
 
 /**
  * The non-eager shares one built container declares, read from the manifest
