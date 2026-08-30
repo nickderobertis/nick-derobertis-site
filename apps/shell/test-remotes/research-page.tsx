@@ -1,4 +1,4 @@
-// eslint-disable-next-line @nx/enforce-module-boundaries -- This stand-in remote mirrors the host-owned declaration in apps/shell/src/remotes.d.ts for the shell's own tests.
+// eslint-disable-next-line @nx/enforce-module-boundaries -- This stand-in remote mirrors the validated payload the shell owns at its route boundary, for the shell's own tests.
 import type { Research } from "@site/data-access-core";
 import type { ResearchPageProps } from "@site/route-state";
 

@@ -1,6 +1,13 @@
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { execFileSync, spawnSync } from "node:child_process";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { readdir, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -232,6 +239,67 @@ describe("the canonical remote registry", () => {
   });
 });
 
+/** One fabricated app: a remote when it declares an alias, a host otherwise. */
+interface WrittenApp {
+  federation?: { alias: string };
+  /** Its rspack configuration, or nothing when the app is written without one. */
+  rspack?: string;
+}
+
+/**
+ * Runs the real plugin over an apps directory this spec writes, entering it
+ * through `createNodesV2` — the path Nx takes, and the only one that reads a
+ * `project.json` and an rspack configuration off disk. A subprocess is what
+ * lets the plugin resolve `apps` from a root of this spec's own making.
+ */
+function deriveOverWrittenApps(apps: Readonly<Record<string, WrittenApp>>) {
+  const root = mkdtempSync(join(tmpdir(), "federation-plugin-apps-"));
+  try {
+    for (const module of ["federation-plugin.mjs", "federation-registry.mjs"])
+      cpSync(`scripts/workspace/${module}`, join(root, module));
+    for (const [app, { federation, rspack }] of Object.entries(apps)) {
+      mkdirSync(join(root, "apps", app), { recursive: true });
+      writeFileSync(
+        join(root, "apps", app, "project.json"),
+        JSON.stringify({
+          name: app,
+          tags: federation ? [`scope:${app}`] : [],
+          ...(federation
+            ? {
+                metadata: {
+                  federation,
+                  boundaries: { onlyDependOnLibsWithTags: ["type:shared"] },
+                },
+              }
+            : {}),
+          targets: { build: {}, typecheck: {} },
+        }),
+      );
+      if (rspack !== undefined)
+        writeFileSync(join(root, "apps", app, "rspack.config.ts"), rspack);
+    }
+    const probe = join(root, "probe.mjs");
+    writeFileSync(
+      probe,
+      [
+        'import { createNodesV2 } from "./federation-plugin.mjs";',
+        `createNodesV2[1](${JSON.stringify(
+          Object.keys(apps)
+            .sort()
+            .map((app) => `apps/${app}/project.json`),
+        )});`,
+        "",
+      ].join("\n"),
+    );
+    return spawnSync(process.execPath, [probe], {
+      cwd: root,
+      encoding: "utf8",
+    });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
 describe("the federation fan-in every app depends on", () => {
   it("makes every remote's build a prerequisite of composing the site", () => {
     const composing = projects.filter((project) => project.targets?.prerender);
@@ -289,6 +357,12 @@ describe("the federation fan-in every app depends on", () => {
     // The same call over a set Nx really would match still derives the fan-in,
     // so the check refuses the malformed set rather than the plugin's own work.
     const composed = ["build", { target: "build", projects: ["bio"] }];
+    const routeRemotes = [
+      {
+        target: "build",
+        projects: ["home", "bio", "research", "software", "courses"],
+      },
+    ];
     expect(
       deriveDependencies(["apps/bio/project.json", "apps/shell/project.json"]),
     ).toEqual([
@@ -313,11 +387,124 @@ describe("the federation fan-in every app depends on", () => {
         "apps/shell/project.json",
         {
           projects: {
-            "apps/shell": { targets: { prerender: { dependsOn: composed } } },
+            "apps/shell": {
+              targets: {
+                prerender: { dependsOn: composed },
+                // Read from the shell's own rspack configuration rather than
+                // from the file set, which is why the build names the whole
+                // route fan-in while the composed one above is only bio.
+                typecheck: { dependsOn: ["build"] },
+                build: { dependsOn: routeRemotes },
+              },
+            },
           },
         },
       ],
     ]);
+  });
+
+  it("refuses a host composing a remote no project declares", () => {
+    // The remotes a host composes are read out of a TypeScript source by
+    // regex, so this drives the real plugin over an apps directory whose host
+    // names one that is not there -- what a mistyped remote, or a `remoteMap`
+    // call the pattern matched something else in, would hand the graph.
+    const derived = deriveOverWrittenApps({
+      bio: { federation: { alias: "bio" }, rspack: 'remoteConfig("bio")' },
+      shell: { rspack: 'remoteMap(["bio", "ghost"])' },
+    });
+
+    expect(derived.status, derived.stdout).not.toBe(0);
+    expect(derived.stderr).toContain('read ["ghost"]');
+    expect(derived.stderr).toContain("apps/shell/rspack.config.ts");
+    expect(derived.stderr).toContain(
+      "no project declares metadata.federation.alias under that name",
+    );
+  });
+
+  it("refuses a host whose remoteMap call it cannot read", () => {
+    // Reading nothing here would be read as a host that federates nothing, and
+    // its remotes would go unbuilt before it -- a missing dependency reported
+    // as an absent one, which is the failure this refuses to produce.
+    const derived = deriveOverWrittenApps({
+      bio: { federation: { alias: "bio" }, rspack: 'remoteConfig("bio")' },
+      shell: { rspack: "remoteMap(routeRemotes)" },
+    });
+
+    expect(derived.status, derived.stdout).not.toBe(0);
+    expect(derived.stderr).toContain("apps/shell/rspack.config.ts");
+    expect(derived.stderr).toContain("must pass an array literal of remote");
+  });
+
+  it("names the configuration it could not open, and why", () => {
+    // Every app here builds through rspack, so one with no configuration to
+    // read is a project whose remotes cannot be known. Reported as the raw
+    // filesystem error it is, a reader would get a path and an errno with
+    // nothing saying what wanted the file or what to do about it.
+    const derived = deriveOverWrittenApps({
+      bio: { federation: { alias: "bio" }, rspack: 'remoteConfig("bio")' },
+      shell: {},
+    });
+
+    expect(derived.status, derived.stdout).not.toBe(0);
+    expect(derived.stderr).toContain("apps/shell/rspack.config.ts");
+    expect(derived.stderr).toContain("which it could not open");
+    expect(derived.stderr).toContain("ENOENT");
+    expect(derived.stderr).toContain("rerun just check");
+  });
+
+  it("refuses a remoteMap array holding anything but remote names", () => {
+    // Reading the quoted elements out of whatever the array holds would drop
+    // the rest and return a shorter list, which is the same missing dependency
+    // as above wearing a plausible answer.
+    const derived = deriveOverWrittenApps({
+      bio: { federation: { alias: "bio" }, rspack: 'remoteConfig("bio")' },
+      shell: { rspack: 'remoteMap(["bio", dynamicRemote])' },
+    });
+
+    expect(derived.status, derived.stdout).not.toBe(0);
+    expect(derived.stderr).toContain('passes ["dynamicRemote"]');
+  });
+
+  it("builds the remotes a host imports before the host itself", async () => {
+    for (const name of ["shell", "home"]) {
+      const host = projects.find((project) => project.name === name);
+      expect(host, name).toBeDefined();
+      if (!host) continue;
+      // The host no longer restates what its remotes expose, so what it
+      // consumes is read from the federated imports it writes, and the
+      // schedule is held to that rather than to the plugin's own parsing.
+      const modules = await hostModules(`apps/${name}/src`);
+      const imported = remotes
+        .filter((remote) => modules.includes(`"${aliasOf(remote)}/Page"`))
+        .map((remote) => remote.name)
+        .sort();
+      expect(imported.length, `${name} imports no remote`).toBeGreaterThan(0);
+      const scheduled = dependencyOn(host, "build", "build");
+      expect(
+        typeof scheduled === "string" || scheduled === undefined
+          ? scheduled
+          : [...scheduled.projects].sort(),
+        `${name}:build`,
+      ).toEqual(imported);
+    }
+    // A remote composes nothing, so its build stays a single app's build.
+    const bio = projects.find((project) => project.name === "bio");
+    expect(bio && dependencyOn(bio, "build", "build")).toBeUndefined();
+  });
+
+  it("typechecks a host against the declarations its own build consumed", () => {
+    for (const name of ["shell", "home"]) {
+      const host = projects.find((project) => project.name === name);
+      expect(host, name).toBeDefined();
+      // A host's build is what extracts each remote's published archive into
+      // the directory its tsconfig resolves federated imports through, so the
+      // typecheck reads what that build wrote rather than fetching anything.
+      expect(host?.targets?.typecheck?.dependsOn, `${name}:typecheck`).toEqual([
+        "build",
+      ]);
+    }
+    const bio = projects.find((project) => project.name === "bio");
+    expect(bio?.targets?.typecheck?.dependsOn).toBeUndefined();
   });
 });
 
@@ -363,6 +550,23 @@ describe("the module boundary every remote publishes under", () => {
   });
 });
 
+/**
+ * Every module a host is built from, as one string to search for the federated
+ * specifiers it imports. The hosts no longer restate what their remotes expose,
+ * so what a host consumes is read out of the imports it actually writes.
+ */
+// llmlint: ignore-block[boundary_inputs_validated] The tree walked here is this repository's own checkout: `directory` is built from a host's name inside this spec, and the entries are the committed sources under it, so nothing external reaches the read. Each entry is validated by the read that uses it -- a name the listing produced that cannot be opened relative to the same directory it was listed from fails this test with that path -- and there is no path for one to escape, because a recursive `readdir` yields only descendants of the directory it was given. Re-checking each name against a grammar would restate what the listing already guarantees rather than reject anything it can produce.
+async function hostModules(directory: string) {
+  const entries = await readdir(directory, { recursive: true });
+  const sources = await Promise.all(
+    entries
+      .filter((entry) => entry.endsWith(".ts") || entry.endsWith(".tsx"))
+      .map((entry) => readFile(join(directory, entry), "utf8")),
+  );
+  return sources.join("\n");
+}
+// llmlint: ignore-end[boundary_inputs_validated]
+
 describe("the wiring each remote still declares by hand", () => {
   it("builds every remote through its own federated rspack configuration", async () => {
     await expectContract(
@@ -383,44 +587,60 @@ describe("the wiring each remote still declares by hand", () => {
     const hosts = await Promise.all(
       ["apps/shell", "apps/home"].map(async (host) => ({
         composition: await readFile(`${host}/rspack.config.ts`, "utf8"),
-        declarations: await readFile(`${host}/src/remotes.d.ts`, "utf8"),
+        modules: await hostModules(`${host}/src`),
       })),
     );
-    // llmlint: ignore-block[tests_mirror_real_usage] Which remotes a host federates and which the compose step assembles are build-wiring facts with no interface to drive: a composition that drops a remote still produces a page that loads, and the omission surfaces as a missing fragment at deploy time. Each remote's own journey spec and site.spec.ts drive the composed result in a real browser.
+    const imports = hosts.map((host) => host.modules).join("\n");
+    // llmlint: ignore-block[tests_mirror_real_usage] Which remotes a host federates, which exposes it imports, and which the compose step assembles are build-wiring facts with no interface to drive: a composition that drops a remote still produces a page that loads, and the omission surfaces as a missing fragment at deploy time. Each remote's own journey spec and site.spec.ts drive the composed result in a real browser.
     const unwired = remotes
       .filter(
         (remote) =>
           !hosts.some((host) => host.composition.includes(`"${remote.name}"`)),
       )
       .map((remote) => `${remote.name} is federated by no host`);
-    const undeclared = remotes
-      .filter(
-        (remote) =>
-          !hosts.some((host) =>
-            host.declarations.includes(
-              `declare module "${aliasOf(remote)}/Page"`,
-            ),
-          ),
-      )
-      .map((remote) => `${aliasOf(remote)}/Page is declared by no host`);
+    // Each host resolves these specifiers through the declarations the remote's
+    // own build compiles from its exposes, so an expose no host imports is
+    // surface that is built, published, and typed for nobody.
+    const unconsumed = remotes
+      .filter((remote) => !imports.includes(`"${aliasOf(remote)}/Page"`))
+      .map((remote) => `${aliasOf(remote)}/Page is imported by no host`);
+    const skeletons = await Promise.all(
+      remotes.map(async (remote) => ({
+        exposed: (
+          await readFile(`apps/${remote.name}/rspack.config.ts`, "utf8")
+        ).includes("skeleton: true"),
+        imported: imports.includes(`"${aliasOf(remote)}/Skeleton"`),
+        alias: aliasOf(remote),
+      })),
+    );
+    const straySkeletons = skeletons
+      .filter((skeleton) => skeleton.exposed !== skeleton.imported)
+      .map(
+        (skeleton) =>
+          `${skeleton.alias}/Skeleton is ${skeleton.exposed ? "exposed but imported by no host" : "imported by a host but exposed by no remote"}`,
+      );
     const composition = await readFile("scripts/compose/compose.mjs", "utf8");
     const uncomposed = remotes
       .filter((remote) => !composition.includes(`"${remote.name}"`))
       .map((remote) => `${remote.name} is assembled into no route fragment`);
-    expect([...unwired, ...undeclared, ...uncomposed]).toEqual([]);
+    expect([
+      ...unwired,
+      ...unconsumed,
+      ...straySkeletons,
+      ...uncomposed,
+    ]).toEqual([]);
     // llmlint: ignore-end[tests_mirror_real_usage]
   });
 });
 
-// The shell declares home/Page ambiently, so the remote's preload export, the
-// host's declaration of it, and the router wiring have to move together. Home
-// warms its panes from the module that owns them and re-exports that warming at
-// its route boundary, which is the surface the shell reaches. The explicit
-// tuple typing keeps every declaration compatible with expectContract.
+// The shell reaches home/Page across the federation boundary, so the remote's
+// preload export and the router wiring that calls it have to move together.
+// Home warms its panes from the module that owns them and re-exports that
+// warming at its route boundary, which is the surface the shell reaches. The
+// explicit tuple typing keeps every entry compatible with expectContract.
 const homePreloadContract: ReadonlyArray<ContractEntry> = [
   ["apps/home/src/panes.ts", "export function preload(): Promise<void>"],
   ["apps/home/src/page.tsx", 'export { preload } from "./panes"'],
-  ["apps/shell/src/remotes.d.ts", "export function preload(): Promise<void>;"],
   [
     "apps/shell/src/main.tsx",
     "homePreload: async () => (await loadHome()).preload()",
@@ -428,7 +648,6 @@ const homePreloadContract: ReadonlyArray<ContractEntry> = [
   ["apps/shell/src/router.tsx", "homePreload?: () => Promise<void>"],
   ["apps/awards/src/page.tsx", "export { preloadAwards as preload }"],
   ["apps/awards/src/use-awards.ts", "export async function preloadAwards()"],
-  ["apps/home/src/remotes.d.ts", "export function preload(): Promise<void>;"],
   ["apps/home/src/panes.ts", "await awards.preload()"],
 ];
 

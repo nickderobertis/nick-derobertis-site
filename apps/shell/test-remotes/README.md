@@ -2,7 +2,8 @@
 
 The shell reaches its route pages across a Module Federation boundary: each one
 is a separate deployable resolved by the federation runtime at load time, and
-`apps/shell/src/remotes.d.ts` is the only contract the shell has with them.
+the declarations each remote's own build compiles from its exposes are the only
+contract the shell has with them.
 
 Vitest has no federation runtime, so `apps/shell/vite.config.ts` maps each of
 those specifiers to a module here — that mapping is the single place the list
