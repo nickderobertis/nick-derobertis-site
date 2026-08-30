@@ -14,7 +14,7 @@ body:has(.skills-pane) {
   overflow: hidden;
 }
 .skills-intro {
-  --title-color: inherit;
+  --title-color: currentcolor;
   --title-font: Arial, sans-serif;
   --title-size: clamp(2.2rem, 4vw, 3.25rem);
   --title-weight: 400;

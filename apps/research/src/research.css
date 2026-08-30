@@ -5,7 +5,7 @@
 .research-banner {
   --heading-layout: grid;
   --eyebrow-color: #b9e2f5;
-  --title-color: inherit;
+  --title-color: currentcolor;
   --title-margin: 0.15em 0;
   --title-size: clamp(2.5rem, 7vw, 4.75rem);
   --title-line-height: 1;
@@ -29,7 +29,7 @@
   --action-border: 1px solid rgb(255 255 255 / 65%);
   --action-radius: 0;
   --action-background: transparent;
-  --action-color: inherit;
+  --action-color: currentcolor;
   --action-weight: 400;
   --action-tracking: 0.12em;
   --action-size: 0.75rem;

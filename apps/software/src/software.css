@@ -4,7 +4,7 @@
 }
 .software-banner {
   --eyebrow-color: #8ed2f0;
-  --title-color: inherit;
+  --title-color: currentcolor;
   --title-margin: 0.25rem 0 1rem;
   --title-size: clamp(2.5rem, 7vw, 5rem);
   --title-line-height: 1;

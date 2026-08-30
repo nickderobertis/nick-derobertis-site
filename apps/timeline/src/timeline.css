@@ -10,7 +10,7 @@ body:has(.timeline-pane) {
   color: #27272a;
 }
 .timeline-pane > header {
-  --title-color: inherit;
+  --title-color: currentcolor;
   --title-size: clamp(2rem, 5vw, 3rem);
   --title-weight: 400;
   --title-line-height: 1.1;
