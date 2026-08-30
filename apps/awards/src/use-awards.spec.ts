@@ -97,6 +97,7 @@ test(
   },
 );
 
+// llmlint: ignore-block[changed_behavior_has_e2e] A browser cannot see this: reading a failed body and refusing to leaves the same visible error state, which awards.spec.ts already drives standalone and host-composed on both the 503 and the schema-rejected answer. Only a response that throws when read tells the two apart.
 test(
   "refuses a failed response without reading its body",
   moduleGraphCeiling,
@@ -124,6 +125,7 @@ test(
     expect(bodyReads).toBe(0);
   },
 );
+// llmlint: ignore-end[changed_behavior_has_e2e]
 
 test(
   "reports an error rather than rendering awards that failed the CV schema",

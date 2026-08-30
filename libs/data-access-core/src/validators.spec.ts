@@ -28,6 +28,8 @@ describe("CV validators", () => {
       validateCvData({ schema_version: "wrong" });
     } catch (error) {
       expect(error).toBeInstanceOf(CvDataValidationError);
+      // `catch` binds `unknown`; the assertion on the line above is what says
+      // this is the error type whose issues are read next.
       expect((error as CvDataValidationError).issues.length).toBeGreaterThan(0);
     }
     expect(new CvDataValidationError().issues).toEqual([]);

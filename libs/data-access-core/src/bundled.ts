@@ -53,7 +53,7 @@ function validateDomain<Name extends CvDomain>(
  * aggregate they are cut from, and reads them back through one client.
  *
  * This is the CV's integrity check, and `bundled.spec.ts` is where it runs:
- * once per `nx run data-access-core:test`, over exactly the files below.
+ * once per run of this project's `test` target, over exactly the files below.
  * Running it at module scope instead made every browser that imported this
  * library compile seven validators and serialise the whole dataset twice on
  * load, for an answer that cannot differ between two loads of the same commit.
@@ -97,8 +97,9 @@ const importedArtifacts = {
  * — `kind`, `display_case`, `status` — to `string`, so the generated types are
  * out of inference's reach from here. `createCvDataClient` above is what
  * proves these assertions, and `bundled.spec.ts` runs it over exactly these
- * files on every `nx run data-access-core:test`.
+ * files on every run of this project's `test` target.
  */
+// llmlint: ignore-block[boundary_inputs_validated] Nothing crosses a trust boundary here: these are this repository's own committed files, imported by the bundler at build time from `libs/data-access-core/vendor/codegen`, so no request, no filesystem read and no runtime input reaches them. They are validated ahead of use rather than at it — `bundled.spec.ts` runs `createCvDataClient` above over these exact exports on every run of this project's `test` target, holding each against `cv.schema.json` and against the aggregate, and a file that disagreed would fail that target rather than reach a build. Validating again on load is the per-visitor cost this split exists to remove, and it cannot report anything a commit's own test run did not already.
 export const cvData = rootData as unknown as CvData;
 export const cvDomains = importedArtifacts as unknown as CvDomains;
 
@@ -112,3 +113,4 @@ export const cvDataClient: CvDataClient = {
   root: () => cvData,
   schema: () => cvSchema,
 };
+// llmlint: ignore-end[boundary_inputs_validated]

@@ -21,6 +21,9 @@ const dataBoundaryStates: readonly {
 }[] = [
   { scenario: "empty", heading: "No awards yet", role: "status" },
   { scenario: "error", heading: "Awards unavailable", role: "alert" },
+  // A 200 the CV schema rejects: the pane's validator is the only thing between
+  // that answer and a visitor, so it has to land on the same recovery panel.
+  { scenario: "schema-invalid", heading: "Awards unavailable", role: "alert" },
 ];
 
 for (const renderPath of renderPaths) {
@@ -100,37 +103,6 @@ for (const renderPath of renderPaths) {
         ).toHaveCount(0);
       });
     }
-
-    test("reaches its error state when the awards payload fails the CV schema", async ({
-      page,
-    }) => {
-      // llmlint: ignore-block[e2e_not_mocked] Nothing about the pane is stubbed: this makes the awards endpoint answer 200 with a body that is not an awards collection, which is the upstream failure the pane's schema check exists for, and everything below it — the fetch, the validator, the state the pane settles on — is the real remote in a real browser. The e2e provider serves only the committed fixture on this path, so a schema-invalid answer has to come from the network.
-      await page.route("**/cv-data/domains/awards.json*", (route) =>
-        route.fulfill({
-          status: 200,
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify([{ id: 42 }]),
-        }),
-      );
-      // llmlint: ignore-end[e2e_not_mocked]
-
-      await page.goto(renderPath.path);
-
-      const alert = page
-        .getByRole("alert")
-        .filter({ hasText: "Awards unavailable" });
-      await expect(alert).toBeVisible();
-      await expect(
-        alert.getByRole("heading", { name: "Awards unavailable" }),
-      ).toBeVisible();
-      // Named awards rather than every article on the page: the host-composed
-      // path renders six other panes' cards beside this one.
-      await expect(
-        page.getByRole("article", {
-          name: /GMAT Score|Finance Student of the Year/,
-        }),
-      ).toHaveCount(0);
-    });
 
     test("renders its skeleton while the awards boundary is pending", async ({
       page,

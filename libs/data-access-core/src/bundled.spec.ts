@@ -48,6 +48,8 @@ describe("bundled CV data", () => {
     (name) => {
       const artifacts: CvDomainArtifacts = structuredClone(cvDomains);
       const drifted = artifacts[name];
+      // `CvDomainArtifacts` values are `unknown` by design, so spreading the
+      // one non-list domain needs the assertion the `isArray` branch does not.
       artifacts[name] = Array.isArray(drifted)
         ? drifted.slice(1)
         : { ...(drifted as object), projects: [] };

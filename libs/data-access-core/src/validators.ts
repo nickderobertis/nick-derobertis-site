@@ -52,6 +52,8 @@ export function deriveSchemaDomainNames(input: unknown): string[] {
     throw new Error(
       "cv.schema.json must define object properties and a string required list",
     );
+  // Narrowed by the guard directly above, which TypeScript cannot carry across
+  // an `in`-and-`typeof` chain onto one named shape.
   const schema = input as CvRootSchemaContract;
   return Object.keys(schema.properties).filter(
     (name) => !schema.required.includes(name),
@@ -103,11 +105,15 @@ function domainValidator<Name extends CvDomain>(
   name: Name,
 ): ValidateFunction<CvDomains[Name]> {
   const cached = domainValidators.get(name);
+  // The map is keyed by domain name and written only below, so an entry under
+  // `name` is that domain's validator; one map cannot hold six payload types.
   if (cached) return cached as ValidateFunction<CvDomains[Name]>;
   const compiled = validatorEngine().compile<CvDomains[Name]>({
     $defs: rootSchema.$defs,
     ...rootSchema.properties[name],
   });
+  // Widened only to store it, for the same reason: the cache is one map over
+  // six payload types, and the read above restores this domain's own.
   domainValidators.set(name, compiled as ValidateFunction);
   return compiled;
 }

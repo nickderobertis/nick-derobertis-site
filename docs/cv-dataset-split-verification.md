@@ -8,8 +8,8 @@ aggregate — and the barrel re-exported it, so every container that imported on
 constant paid for all of it. This records the evidence for each property the
 change owes, over the tree that carries it.
 
-Everything below was run in this worktree, over the artifact
-`nx run shell:prerender` composes from it.
+Everything below was run in this worktree through `just`, this repository's
+only command surface, over the artifact `just prerender` composes from it.
 
 ## The three surfaces
 
@@ -37,8 +37,8 @@ they were published:
 @site/data-access-core/validators -> libs/data-access-core/src/validators.ts
 ```
 
-`nx run tooling-workspace:test` is green over this tree, which is that contract
-driven through a real rspack build and a real Vitest run.
+The `tooling-workspace` project's `test` target is green over this tree, which
+is that contract driven through a real rspack build and a real Vitest run.
 
 ## The dataset is gone from every container that does not read it
 
@@ -85,23 +85,28 @@ but actually been called 7 times`.
 `createCvDataClient` still validates the aggregate, validates each domain
 artifact, and refuses one that disagrees with the aggregate. It no longer runs
 at module scope: `bundled.spec.ts` runs it over the committed aggregate and
-every committed domain file, once per `nx run data-access-core:test`, and
-asserts refusal for each of the six domains in turn. Dropping one award from
-`vendor/codegen/domains/awards.json` and running that spec fails 7 of its 11
-tests with `CV awards domain failed drift validation: artifact differs from
+every committed domain file, once per run of the `data-access-core` project's
+`test` target, and asserts refusal for each of the six domains in turn.
+Dropping one award from `vendor/codegen/domains/awards.json` and running that
+spec fails 7 of its 11 tests with `CV awards domain failed drift validation: artifact differs from
 validated root data`.
 
 ## The fetch paths still refuse what they refused
 
 Schema rejection, in a real browser, on both render paths:
 
-- awards — `apps/awards/e2e/awards.spec.ts` gains
-  `reaches its error state when the awards payload fails the CV schema`, run
-  host-composed and standalone. It answers the awards endpoint with `200` and a
-  body that is not an awards collection and watches the pane settle on its
-  `Awards unavailable` alert. Removing `validateCvDomain` from
-  `use-awards.ts` and rebuilding fails exactly those two journeys and nothing
-  else in the suite.
+- awards — the e2e data provider gains a `schema-invalid` scenario
+  (`libs/e2e-fixtures/src/e2e-data.ts`), which answers the awards endpoint with
+  `200` and a body that is not an awards collection, and
+  `apps/awards/e2e/awards.spec.ts` reaches it the way it already reaches the
+  empty and error states: by navigating to `?awards-scenario=schema-invalid`,
+  host-composed and standalone. Nothing is intercepted in the browser — the
+  journey drives the site's own URL and watches the pane settle on its
+  `Awards unavailable` alert with no award card rendered. Removing
+  `validateCvDomain` from `use-awards.ts` and rebuilding fails exactly the four
+  journeys the scenario adds — the data-boundary state and the phone-fit case,
+  on each render path — with `expect(locator).toBeVisible() failed`, and none of
+  the other 30 in the suite.
 - the shell's route loaders already served one:
   `apps/shell/e2e/site.spec.ts`'s `answers with a body the CV schema rejects`
   case runs over `/research`, `/software` and `/courses`.
@@ -115,9 +120,10 @@ got 'the failed body was read'` and awards' with `expected 1 to be +0`.
 
 ## The payload, measured
 
-Re-derived by `node scripts/artifact/check-bundle-budgets.mjs --rederive` over
-the artifact this tree composes, and gated at that new floor by the same script
-with no arguments, which `shell:prerender` runs.
+Re-derived by the `--rederive` mode of `scripts/artifact/check-bundle-budgets.mjs`
+over the artifact this tree composes, and gated at that new floor by the same
+script with no arguments, which the shell's `prerender` target runs — so
+`just prerender` is what holds the floor.
 
 | app | entry before | entry after | `./Page` before | after |
 | --- | ---: | ---: | ---: | ---: |
@@ -147,10 +153,10 @@ Nothing here changed what the fragment renderers read or what compose assembles
 from them: `shell-fragment-entry.tsx` reads the same client through the bundled
 subpath, and the CV data compose stages under `cv-data` is unchanged. The
 composed `/` document is 100,503 bytes and `/research` 54,107.
-`nx run tooling-artifact:test` — which composes and gates the real artifact
-first — passes over it, as does `scripts/artifact/check-static-artifact.mjs`
-inside `shell:prerender`, and `apps/shell/e2e/site.spec.ts` drives that document
-in a browser with JavaScript disabled and through hydration.
+The `tooling-artifact` project's `test` target — which composes and gates the
+real artifact first — passes over it, as does the static-artifact gate inside
+the shell's `prerender` target, and `apps/shell/e2e/site.spec.ts` drives that
+document in a browser with JavaScript disabled and through hydration.
 
 ## `ajv/dist/standalone`, considered and not taken
 
@@ -168,17 +174,25 @@ is its own change. Left for whoever revisits the shared contract.
 
 ## Checks run over this tree
 
-| check | result |
+`just` is this repository's only command surface, and these recipes are what
+dispatched the work below.
+
+| recipe | what it dispatched | result |
+| --- | --- | --- |
+| `just lint` | the `lint` and `typecheck` targets of every project — the workspace-wide `eslint .` run plus Biome, and the ten projects the criteria name | pass |
+| `just prerender` | the shell's `prerender` target: compose, the static-artifact gate, and the bundle-budget gate at the re-derived floor | pass |
+| `just e2e-project awards` | the `awards` project's `e2e` target, driving the standalone remote and the host-composed page in a real browser | pass, 34 journeys |
+| `just test-e2e` | the `shell` project's `e2e` target, driving the composed artifact in a real browser | pass |
+
+Biome on its own reports 652 files checked with no fixes applied.
+
+<!-- llmlint: ignore[work_goes_through_command_surface] The row below names targets rather than a recipe because `just` deliberately exposes none narrower than the gate: its only test recipe, `just test`, dispatches `test` and `e2e` in one parallel run, and this workspace refuses that — `compose` reports `dist/apps/shell is held by process N, which is serving it` the moment a `tooling-serve` lane serves the artifact an `e2e` lane is also driving, which is why `just check` sequences the two tiers instead. On the merge path `just check` is what dispatches these; here they were run as themselves so the tiers stayed apart. -->
+
+| targets | result |
 | --- | --- |
-| `nx run-many -t typecheck -p data-access-core,build-config,shell,awards,skills,timeline,research,software,courses,home` | pass |
-| `nx run-many -t test` over those ten plus the six `data-access-*` domain libraries | pass |
-| `nx run shell:lint` (workspace-wide `eslint .` plus Biome) | pass |
-| `biome check --error-on-warnings .` | pass, 652 files |
-| `nx run shell:prerender` (compose, static-artifact gate, bundle-budget gate) | pass |
-| `nx run-many -t test -p tooling-workspace,tooling-artifact,tooling-compose` | pass |
-| `nx run awards:e2e` | pass, 32 tests |
-| `nx run shell:e2e` | pass, 48 tests |
+| the `test` target of `data-access-core`, `build-config`, `shell`, `awards`, `skills`, `timeline`, `research`, `software`, `courses`, `home`, `e2e-fixtures`, `tooling-artifact` and `tooling-workspace` | pass |
 
 The shell's two `@nx/enforce-module-boundaries` disables moved onto their new
-specifiers and no project gained one; `shell:lint` is what says so, because it
-reports an unused disable directive as an error under `--max-warnings=0`.
+specifiers and no project gained one; the `shell` project's `lint` target is
+what says so, because it reports an unused disable directive as an error under
+`--max-warnings=0`.

@@ -6,7 +6,7 @@ export type AwardsViewState =
   | { name: "loading" }
   | { name: "error" }
   | { name: "ready"; awards: Awards };
-const scenarios = new Set(["empty", "error", "loading"]);
+const scenarios = new Set(["empty", "error", "loading", "schema-invalid"]);
 
 /**
  * One awards request per URL, so a host that warms the pane and the pane's own

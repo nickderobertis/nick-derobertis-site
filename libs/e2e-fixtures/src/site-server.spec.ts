@@ -236,6 +236,23 @@ describe("the Pages-base site server", () => {
     expect(await empty.json()).toEqual([]);
   });
 
+  it("answers the schema-invalid scenario with a 200 the CV schema rejects", async () => {
+    const root = await artifact();
+    const origin = await serve({ root });
+
+    const awards = await fetch(
+      `${origin}${base}/cv-data/domains/awards.json?scenario=schema-invalid`,
+    );
+    const research = await fetch(
+      `${origin}${base}/cv-data/domains/research.json?scenario=schema-invalid`,
+    );
+
+    expect(awards.status).toBe(200);
+    expect(await awards.json()).toEqual([{ id: 42 }]);
+    expect(research.status).toBe(200);
+    expect(await research.json()).toEqual({ projects: [{ id: 42 }] });
+  });
+
   it("reports a domain whose fixture the artifact does not carry", async () => {
     const root = await artifact();
     await rm(join(root, "cv-data/domains/awards.json"));
