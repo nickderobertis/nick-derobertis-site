@@ -1,5 +1,13 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { chmodSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
@@ -160,6 +168,12 @@ let cloneRoot: string;
 // clone has an object store of its own and cannot see the range written here.
 let cloneVisual: PushRange;
 let repoVisual: PushRange;
+// A second clone that can resolve the workspace: its node_modules is a symlink
+// to this repository's, which is all `pnpm exec nx` needs to report the affected
+// microfrontends. That lets a test reach the stages after Nx while every file it
+// writes stays inside a disposable tree.
+let installedClone: string;
+let installedVisual: PushRange;
 let docsOnlyHead: string;
 let docsOnlyBase: string;
 
@@ -180,6 +194,30 @@ beforeAll(() => {
     "--detach",
     git("rev-parse", "HEAD"),
   ]);
+  installedClone = path.join(cloneRoot, "installed");
+  execFileSync("git", [
+    "clone",
+    "--shared",
+    "--no-checkout",
+    REPO,
+    installedClone,
+  ]);
+  execFileSync("git", [
+    "-C",
+    installedClone,
+    "checkout",
+    "--detach",
+    git("rev-parse", "HEAD"),
+  ]);
+  symlinkSync(
+    path.join(REPO, "node_modules"),
+    path.join(installedClone, "node_modules"),
+    "dir",
+  );
+  installedVisual = writeVisualRange(
+    installedClone,
+    path.join(cloneRoot, "installed-index"),
+  );
   repoVisual = writeVisualRange(REPO, path.join(cloneRoot, "repo-index"));
   cloneVisual = writeVisualRange(
     uninstalledClone,
@@ -310,6 +348,49 @@ describe("visual guard pre-push hook", () => {
     } finally {
       noDocker.cleanup();
     }
+  });
+  // llmlint: ignore-end[e2e_not_mocked]
+
+  // A capture that ran as root left shots/ and shots/current/ owned by root, and
+  // the host side then has to create shots/review/<app> beside them: that mkdir
+  // failed with EACCES, and the guard announced the failure as a drift-review
+  // problem on every later push from the worktree. Ownership cannot be forged
+  // without privileges, so this fixture reproduces the wedge as the filesystem
+  // sees it — a shots/ this user can neither write into nor empty — and the hook
+  // has to clear it and go on to reach a verdict of its own.
+  // llmlint: ignore-block[e2e_not_mocked] The layer under test is the unchanged real pre-push hook subprocess over a real filesystem; the PATH shim only makes the external Docker provider give its documented daemon-unavailable response, which ends the run at the guard's next real decision rather than at a capture this case is not about.
+  test("capture output the pusher cannot write beside is reclaimed, not a wedge", () => {
+    const shots = path.join(installedClone, "shots");
+    mkdirSync(path.join(shots, "current", "courses", "x86_64"), {
+      recursive: true,
+    });
+    writeFileSync(
+      path.join(shots, "current", "courses", "x86_64", "a.png"),
+      "",
+    );
+    chmodSync(shots, 0o555);
+    expect(() => mkdirSync(path.join(shots, "review"))).toThrow(/EACCES/);
+    const noDocker = dockerUnavailableFixture();
+    try {
+      const run = runHook({
+        cwd: installedClone,
+        localSha: installedVisual.head,
+        remoteSha: installedVisual.base,
+        env: { NX_DAEMON: "false", PATH: noDocker.PATH },
+      });
+      expect(run.stderr).toContain("reclaiming it");
+      expect(run.stderr).toContain("the steps below can write into it again");
+      // Past the wedge and on to the guard's own verdict, rather than dead on a
+      // filesystem error it would have announced as visual drift.
+      expect(run.stderr).toContain("Docker is not available");
+      expect(run.status).toBe(1);
+    } finally {
+      noDocker.cleanup();
+      chmodSync(shots, 0o755);
+    }
+    // What the wedge blocked is possible again, and the unusable tree is gone.
+    mkdirSync(path.join(shots, "review", "courses"), { recursive: true });
+    expect(existsSync(path.join(shots, "current"))).toBe(false);
   });
   // llmlint: ignore-end[e2e_not_mocked]
 
