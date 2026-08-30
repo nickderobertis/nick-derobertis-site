@@ -1,0 +1,382 @@
+import { readdir, readFile, stat } from "node:fs/promises";
+import { basename, join } from "node:path";
+import { runInNewContext } from "node:vm";
+import { parseRemoteManifest } from "@site/artifact-contracts";
+import remoteManifest from "@site/build-config/remotes.json" with {
+  type: "json",
+};
+// Compose owns the route composition this gate sums over, so the route
+// budgets are derived from the same declaration compose builds documents
+// from rather than a second list that could drift away from it. This is a
+// sibling tooling module reached by path, the way this project already
+// reaches apps/shell/src/routes.json from check-static-artifact.mjs.
+import { routeFragments } from "../compose/compose.mjs";
+
+process.on("uncaughtException", (error) => {
+  console.error(
+    `check-bundle-budgets: ${error instanceof Error ? error.message : String(error)}`,
+  );
+  process.exit(1);
+});
+
+// llmlint: ignore-block[changed_behavior_has_e2e] This override exists only so bundle-budgets.spec.ts can point the gate at an isolated artifact fixture and exercise its refusals; the artifact it passes is driven in a real browser by site.spec.ts and every feature journey.
+const root = process.env.STATIC_ARTIFACT_ROOT ?? "dist/apps/shell";
+const budgetsPath =
+  process.env.BUNDLE_BUDGETS ?? "scripts/artifact/bundle-budgets.json";
+for (const [name, value] of [
+  ["STATIC_ARTIFACT_ROOT", root],
+  ["BUNDLE_BUDGETS", budgetsPath],
+])
+  if (typeof value !== "string" || value.length === 0 || value.includes("\0"))
+    throw new Error(
+      `${name} must be a non-empty filesystem path; fix it and rerun just prerender.`,
+    );
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
+/** The app whose bundle sits at the artifact root rather than under remotes/. */
+const shellApp = "shell";
+/** The one expose whose payload every route composes, so the one budgeted. */
+const pageExpose = "./Page";
+
+/**
+ * Reads the chunk-id-to-filename function a bundle's own runtime carries.
+ * Which file a chunk id names is the bundler's decision, not a naming
+ * convention: an id can be renamed (`5` becomes `common`), can carry no
+ * JavaScript at all, and the mapping changes shape with the chunks a build
+ * emits. So the id is resolved with the very function the browser resolves it
+ * with, extracted by scanning the expression's own brackets rather than by
+ * guessing where it ends.
+ */
+function chunkFileResolver(source) {
+  const marker = "__webpack_require__.u=";
+  const start = source.indexOf(marker);
+  if (start === -1) return undefined;
+  let index = start + marker.length;
+  let depth = 0;
+  let quote = "";
+  for (; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote) {
+      if (character === "\\") index += 1;
+      else if (character === quote) quote = "";
+      continue;
+    }
+    if (character === '"' || character === "'" || character === "`") {
+      quote = character;
+      continue;
+    }
+    if (character === "(" || character === "[" || character === "{") depth += 1;
+    else if (character === ")" || character === "]" || character === "}") {
+      if (depth === 0) break;
+      depth -= 1;
+    } else if (depth === 0 && (character === ";" || character === ",")) break;
+  }
+  const expression = source.slice(start + marker.length, index);
+  const resolve = runInNewContext(`(${expression})`, Object.create(null), {
+    timeout: 1000,
+  });
+  if (typeof resolve !== "function")
+    throw new Error(
+      `A bundle runtime declares a chunk filename resolver that is not a function. Rebuild the artifact and rerun just prerender.`,
+    );
+  return (id) => {
+    const file = resolve(id);
+    return typeof file === "string" ? file : undefined;
+  };
+}
+
+/**
+ * Every chunk id a bundle asks its runtime to fetch. A chunk that belongs to
+ * another container resolves to a filename this app never emitted, and is
+ * dropped below rather than counted against this app's budget.
+ */
+function requestedChunkIds(source) {
+  return [...source.matchAll(/\.e\("([^"\\]{1,32})"\)/g)].map(
+    ([, id]) => /** @type {string} */ (id),
+  );
+}
+
+/**
+ * Everything loading `files` pulls in: each file, plus every chunk reachable
+ * from it through the runtime that loads it, shared chunks included. Payload
+ * moved out of a chunk and into one it imports stays inside this set, so it
+ * still counts against the same ceiling.
+ */
+async function reachableJsFiles(directory, files, emitted) {
+  const reached = new Set();
+  const queue = files.map((file) => ({ file, resolve: undefined }));
+  while (queue.length > 0) {
+    const { file, resolve } = /** @type {{file: string, resolve: unknown}} */ (
+      queue.shift()
+    );
+    if (reached.has(file)) continue;
+    reached.add(file);
+    const source = await readFile(join(directory, file), "utf8");
+    // A runtime chunk resolves the ids raised inside it and inside every chunk
+    // it goes on to load, exactly as one page's webpack runtime does.
+    const resolveHere = chunkFileResolver(source) ?? resolve;
+    if (!resolveHere) continue;
+    for (const id of requestedChunkIds(source)) {
+      const chunk = resolveHere(id);
+      // A chunk id with no emitted JavaScript — a CSS-only expose chunk, or
+      // another container's — carries none of this app's bytes.
+      if (chunk && emitted.has(chunk))
+        queue.push({ file: chunk, resolve: resolveHere });
+    }
+  }
+  return reached;
+}
+
+async function totalBytes(directory, files) {
+  let bytes = 0;
+  for (const file of files) bytes += (await stat(join(directory, file))).size;
+  return bytes;
+}
+
+/**
+ * The scripts an app's own document loads before anything else runs. This is
+ * the eager entry: what a visitor pays for reaching the app at all, ahead of
+ * any route or pane it goes on to resolve.
+ */
+async function entryScripts(directory, emitted) {
+  const documentPath = join(directory, "index.html");
+  const document = await readFile(documentPath, "utf8");
+  const scripts = [...document.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(
+    ([, reference]) => basename(reference),
+  );
+  if (scripts.length === 0)
+    throw new Error(
+      `${documentPath} loads no script, so its eager entry cannot be measured; rebuild that app and rerun just prerender.`,
+    );
+  for (const script of scripts)
+    if (!emitted.has(script))
+      throw new Error(
+        `${documentPath} loads ${script}, which ${directory} does not contain; rebuild that app and rerun just prerender.`,
+      );
+  return scripts;
+}
+
+/**
+ * The chunks a host has to fetch to render one of this container's exposes,
+ * read from the container's own expose module map — the same map the Module
+ * Federation runtime reads when a host imports `<remote>/Page`.
+ */
+function exposedChunkIds(container, expose) {
+  const moduleMap = /moduleMap:\{([\s\S]*?)\},shareScope/.exec(container)?.[1];
+  if (moduleMap === undefined) return undefined;
+  const entry = moduleMap
+    .split(/(?="\.\/)/)
+    .find((segment) => segment.startsWith(`"${expose}":`));
+  return entry === undefined ? undefined : requestedChunkIds(entry);
+}
+
+async function measureApp(directory) {
+  const emitted = new Set(
+    (await readdir(directory)).filter((file) => file.endsWith(".js")),
+  );
+  const measured = {
+    entry: await totalBytes(
+      directory,
+      await reachableJsFiles(
+        directory,
+        await entryScripts(directory, emitted),
+        emitted,
+      ),
+    ),
+  };
+  if (!emitted.has("remoteEntry.js")) return measured;
+  const container = await readFile(join(directory, "remoteEntry.js"), "utf8");
+  const resolve = chunkFileResolver(container);
+  const exposed = exposedChunkIds(container, pageExpose);
+  if (!exposed || !resolve) return measured;
+  const chunks = exposed
+    .map((id) => resolve(id))
+    .filter((chunk) => chunk !== undefined && emitted.has(chunk));
+  return {
+    ...measured,
+    page: await totalBytes(
+      directory,
+      await reachableJsFiles(directory, chunks, emitted),
+    ),
+  };
+}
+
+// llmlint: ignore-block[changed_behavior_has_e2e] The budget file is a committed build input read before any artifact is served: a file this rejects gates the compose lane, so nothing it refuses reaches a visitor. bundle-budgets.spec.ts drives this exact CLI as a real subprocess over isolated artifact fixtures and over a budget file with an app removed.
+function parsedBudgets(value, path) {
+  const refuse = (detail) => {
+    throw new Error(
+      `${path} is invalid: ${detail}. Fix the committed budgets and rerun just prerender.`,
+    );
+  };
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    refuse("it must contain an object");
+  const { marginPercent, apps, routes } = value;
+  if (
+    typeof marginPercent !== "number" ||
+    !Number.isFinite(marginPercent) ||
+    marginPercent < 0
+  )
+    refuse("marginPercent must be a non-negative number");
+  const readCeiling = (entry, label) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry))
+      refuse(`${label} must declare an object`);
+    const { measuredBytes, ceilingBytes } = entry;
+    for (const [field, bytes] of [
+      ["measuredBytes", measuredBytes],
+      ["ceilingBytes", ceilingBytes],
+    ])
+      if (!Number.isInteger(bytes) || bytes < 0)
+        refuse(`${label} ${field} must be a non-negative integer`);
+    // One margin covers every ceiling in the file, so a ceiling cannot be
+    // widened for a single app or route to make room for a regression there.
+    const derived = Math.ceil(measuredBytes * (1 + marginPercent / 100));
+    if (ceilingBytes !== derived)
+      refuse(
+        `${label} declares a ${ceilingBytes}-byte ceiling, but ${measuredBytes} bytes at the ${marginPercent}% margin derives ${derived}`,
+      );
+    return { measuredBytes, ceilingBytes };
+  };
+  const readGroup = (group, label, shape) => {
+    if (!group || typeof group !== "object" || Array.isArray(group))
+      refuse(`${label} must declare an object`);
+    return Object.fromEntries(
+      Object.entries(group).map(([key, entry]) => [
+        key,
+        shape(entry, `${label} ${key}`),
+      ]),
+    );
+  };
+  return {
+    marginPercent,
+    apps: readGroup(apps, "apps", (entry, label) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        refuse(`${label} must declare an object`);
+      const budget = { entry: readCeiling(entry.entry, `${label} entry`) };
+      return "page" in entry
+        ? { ...budget, page: readCeiling(entry.page, `${label} ./Page`) }
+        : budget;
+    }),
+    routes: readGroup(routes, "routes", readCeiling),
+  };
+}
+// llmlint: ignore-end[changed_behavior_has_e2e]
+
+// llmlint: ignore-block[changed_behavior_has_e2e] Every refusal below happens before the artifact is served and fails the compose lane, so a payload it rejects never reaches a visitor; bundle-budgets.spec.ts drives each one over a real artifact fixture, and site.spec.ts drives the artifact this gate passes.
+const budgets = parsedBudgets(
+  JSON.parse(await readFile(budgetsPath, "utf8")),
+  budgetsPath,
+);
+const declaredRemotes = Object.keys(parseRemoteManifest(remoteManifest));
+// Staged app subtrees are resolved through `stat` rather than by directory
+// entry type, because an isolated artifact fixture links the app subtrees it
+// does not corrupt instead of copying them.
+const stagedRemotes = [];
+for (const entry of await readdir(join(root, "remotes")))
+  if ((await stat(join(root, "remotes", entry))).isDirectory())
+    stagedRemotes.push(entry);
+const artifactApps = [shellApp, ...stagedRemotes];
+
+const measuredApps = {};
+for (const app of artifactApps)
+  measuredApps[app] = await measureApp(
+    app === shellApp ? root : join(root, "remotes", app),
+  );
+const measuredRoutes = Object.fromEntries(
+  Object.entries(routeFragments).map(([route, names]) => [
+    route,
+    names.reduce((sum, name) => sum + (measuredApps[name]?.page ?? 0), 0),
+  ]),
+);
+
+// Re-deriving is how a ceiling moves: this prints the whole committed file
+// with every ceiling recomputed from the tree in front of it, so a change that
+// alters a payload deliberately lands as a diff a reader can weigh.
+if (process.argv.includes("--print")) {
+  const ceiling = (measuredBytes) => ({
+    measuredBytes,
+    ceilingBytes: Math.ceil(measuredBytes * (1 + budgets.marginPercent / 100)),
+  });
+  const printed = JSON.parse(await readFile(budgetsPath, "utf8"));
+  printed.apps = Object.fromEntries(
+    artifactApps
+      .toSorted()
+      .map((app) => [
+        app,
+        Object.fromEntries(
+          Object.entries(measuredApps[app]).map(([kind, bytes]) => [
+            kind,
+            ceiling(bytes),
+          ]),
+        ),
+      ]),
+  );
+  printed.routes = Object.fromEntries(
+    Object.entries(measuredRoutes).map(([route, bytes]) => [
+      route,
+      ceiling(bytes),
+    ]),
+  );
+  console.log(JSON.stringify(printed, null, 2));
+  process.exit(0);
+}
+
+// Every app the registry declares owes a budget, and no app may reach the
+// artifact unbudgeted: an app missing from either side is refused rather than
+// measured against nothing.
+const unbudgeted = [...new Set([...declaredRemotes, ...artifactApps])].filter(
+  (app) => !(app in budgets.apps),
+);
+if (unbudgeted.length > 0)
+  throw new Error(
+    `${budgetsPath} declares no budget for ${unbudgeted.join(", ")}; derive the ceilings with node scripts/artifact/check-bundle-budgets.mjs --print and commit the result, then rerun just prerender.`,
+  );
+const unknownApps = Object.keys(budgets.apps).filter(
+  (app) => !artifactApps.includes(app),
+);
+if (unknownApps.length > 0)
+  throw new Error(
+    `${budgetsPath} budgets ${unknownApps.join(", ")}, which the artifact at ${root} does not contain; align the budgets with libs/build-config/src/remotes.json and rerun just prerender.`,
+  );
+const routePaths = Object.keys(routeFragments);
+const unbudgetedRoutes = routePaths.filter(
+  (route) => !(route in budgets.routes),
+);
+const unknownRoutes = Object.keys(budgets.routes).filter(
+  (route) => !routePaths.includes(route),
+);
+if (unbudgetedRoutes.length > 0 || unknownRoutes.length > 0)
+  throw new Error(
+    `${budgetsPath} budgets the routes ${Object.keys(budgets.routes).join(", ")}, but compose composes ${routePaths.join(", ")}; align the budgets with scripts/compose/compose.mjs and rerun just prerender.`,
+  );
+
+const violations = [];
+for (const [app, measured] of Object.entries(measuredApps)) {
+  const budget = budgets.apps[app];
+  for (const [kind, label] of [
+    ["entry", "eager entry"],
+    ["page", `${pageExpose} chunk`],
+  ]) {
+    if (measured[kind] === undefined && budget[kind] === undefined) continue;
+    if (measured[kind] === undefined || budget[kind] === undefined) {
+      violations.push(
+        `${app} ${budget[kind] === undefined ? `exposes a ${label} the budgets do not declare` : `declares a ${label} budget for bytes the artifact does not contain`}`,
+      );
+      continue;
+    }
+    if (measured[kind] > budget[kind].ceilingBytes)
+      violations.push(
+        `${app} ${label} is ${measured[kind]} bytes, over its ${budget[kind].ceilingBytes}-byte ceiling`,
+      );
+  }
+}
+for (const [route, bytes] of Object.entries(measuredRoutes))
+  if (bytes > budgets.routes[route].ceilingBytes)
+    violations.push(
+      `route ${route} composes ${bytes} bytes of ${pageExpose} chunks, over its ${budgets.routes[route].ceilingBytes}-byte ceiling`,
+    );
+
+if (violations.length > 0)
+  throw new Error(
+    `The composed artifact exceeds its committed bundle budgets:\n${violations.map((violation) => `  ${violation}`).join("\n")}\nRemove the payload, or re-derive every ceiling with node scripts/artifact/check-bundle-budgets.mjs --print and commit the result.`,
+  );
+// llmlint: ignore-end[changed_behavior_has_e2e]

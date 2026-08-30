@@ -1,0 +1,159 @@
+{
+  "derivation": [
+    "Every ceiling here was measured over the composed artifact this tree produces, by scripts/artifact/check-bundle-budgets.mjs itself: run `node scripts/artifact/check-bundle-budgets.mjs --print > scripts/artifact/bundle-budgets.json` after `just prerender` to re-derive them all. Nothing in this file is a target somebody picked; it is the floor this tree reaches, so a payload cannot rise back into it silently.",
+    "An app's `entry` is every JavaScript byte its own document loads eagerly, plus every chunk reachable from those scripts through the runtime that loads them. Its `page` is the same closure for the `./Page` expose a host composes, read from the container's own expose module map. Shared chunks count inside both, so payload moved out of a chunk and into one it imports still counts against the same ceiling instead of escaping it. Only JavaScript is counted; page CSS is inlined into the composed documents and is measured by the artifact gate beside this one.",
+    "A route's ceiling is the sum of the `./Page` chunks it composes, over exactly the remotes `routeFragments` in scripts/compose/compose.mjs declares for it. Per-app ceilings alone would not have caught the regression this file exists for: seven panes each a little larger is a route several megabytes larger.",
+    "`marginPercent` is the one margin every ceiling in this file carries, so no single app or route can be given room a regression could hide in. It is bounded by what it must not absorb: the smallest CV domain is libs/data-access-core/vendor/codegen/domains/awards.json at 1256 bytes, and the largest budgeted `./Page` chunk is 1635955 bytes, so any margin at or above 1256 / 1635955 = 0.0768% would let a CV domain back into that chunk unnoticed. 0.05% is that bound rounded down, and scripts/artifact/bundle-budgets.spec.ts holds it there by appending that domain to that chunk and requiring this gate to refuse the result."
+  ],
+  "marginPercent": 0.05,
+  "apps": {
+    "awards": {
+      "entry": {
+        "measuredBytes": 2071845,
+        "ceilingBytes": 2072881
+      },
+      "page": {
+        "measuredBytes": 1635955,
+        "ceilingBytes": 1636773
+      }
+    },
+    "bio": {
+      "entry": {
+        "measuredBytes": 502335,
+        "ceilingBytes": 502587
+      },
+      "page": {
+        "measuredBytes": 6702,
+        "ceilingBytes": 6706
+      }
+    },
+    "courses": {
+      "entry": {
+        "measuredBytes": 2127227,
+        "ceilingBytes": 2128291
+      },
+      "page": {
+        "measuredBytes": 1632861,
+        "ceilingBytes": 1633678
+      }
+    },
+    "home": {
+      "entry": {
+        "measuredBytes": 515462,
+        "ceilingBytes": 515720
+      },
+      "page": {
+        "measuredBytes": 65722,
+        "ceilingBytes": 65755
+      }
+    },
+    "home-cards": {
+      "entry": {
+        "measuredBytes": 495596,
+        "ceilingBytes": 495844
+      },
+      "page": {
+        "measuredBytes": 59638,
+        "ceilingBytes": 59668
+      }
+    },
+    "home-carousel": {
+      "entry": {
+        "measuredBytes": 497206,
+        "ceilingBytes": 497455
+      },
+      "page": {
+        "measuredBytes": 61204,
+        "ceilingBytes": 61235
+      }
+    },
+    "home-contact": {
+      "entry": {
+        "measuredBytes": 470884,
+        "ceilingBytes": 471120
+      },
+      "page": {
+        "measuredBytes": 34764,
+        "ceilingBytes": 34782
+      }
+    },
+    "home-story": {
+      "entry": {
+        "measuredBytes": 495414,
+        "ceilingBytes": 495662
+      },
+      "page": {
+        "measuredBytes": 59387,
+        "ceilingBytes": 59417
+      }
+    },
+    "research": {
+      "entry": {
+        "measuredBytes": 2124103,
+        "ceilingBytes": 2125166
+      },
+      "page": {
+        "measuredBytes": 1629601,
+        "ceilingBytes": 1630416
+      }
+    },
+    "shell": {
+      "entry": {
+        "measuredBytes": 2183538,
+        "ceilingBytes": 2184630
+      }
+    },
+    "skills": {
+      "entry": {
+        "measuredBytes": 2072026,
+        "ceilingBytes": 2073063
+      },
+      "page": {
+        "measuredBytes": 1636047,
+        "ceilingBytes": 1636866
+      }
+    },
+    "software": {
+      "entry": {
+        "measuredBytes": 2122998,
+        "ceilingBytes": 2124060
+      },
+      "page": {
+        "measuredBytes": 1628551,
+        "ceilingBytes": 1629366
+      }
+    },
+    "timeline": {
+      "entry": {
+        "measuredBytes": 2067909,
+        "ceilingBytes": 2068943
+      },
+      "page": {
+        "measuredBytes": 1631925,
+        "ceilingBytes": 1632741
+      }
+    }
+  },
+  "routes": {
+    "/": {
+      "measuredBytes": 5184642,
+      "ceilingBytes": 5187235
+    },
+    "/bio": {
+      "measuredBytes": 6702,
+      "ceilingBytes": 6706
+    },
+    "/research": {
+      "measuredBytes": 1629601,
+      "ceilingBytes": 1630416
+    },
+    "/software": {
+      "measuredBytes": 1628551,
+      "ceilingBytes": 1629366
+    },
+    "/courses": {
+      "measuredBytes": 1632861,
+      "ceilingBytes": 1633678
+    }
+  }
+}
