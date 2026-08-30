@@ -1,10 +1,10 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
 import { describe, expect, it } from "vitest";
+import { courses } from "./data";
 import { buildCourseDetails } from "./index";
 
 describe("course shaping", () => {
   it("builds optional detail metadata", () => {
-    const course = cvDataClient.domain("courses")[0];
+    const course = courses[0];
     expect(course).toBeDefined();
     if (!course) return;
     const details = buildCourseDetails(course);
@@ -25,7 +25,7 @@ describe("course shaping", () => {
       gradingCategories: [],
       hasDetails: false,
     });
-    for (const item of cvDataClient.domain("courses")) {
+    for (const item of courses) {
       expect(buildCourseDetails(item).hasDetails).toBe(
         Boolean(
           item.long_description ||

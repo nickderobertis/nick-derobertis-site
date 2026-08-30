@@ -1,23 +1,11 @@
 import type { CvData } from "../vendor/codegen";
 import rootData from "../vendor/codegen/cv.json" with { type: "json" };
-import awards from "../vendor/codegen/domains/awards.json" with {
-  type: "json",
-};
-import courses from "../vendor/codegen/domains/courses.json" with {
-  type: "json",
-};
-import research from "../vendor/codegen/domains/research.json" with {
-  type: "json",
-};
-import skills from "../vendor/codegen/domains/skills.json" with {
-  type: "json",
-};
-import softwareProjects from "../vendor/codegen/domains/software_projects.json" with {
-  type: "json",
-};
-import timeline from "../vendor/codegen/domains/timeline.json" with {
-  type: "json",
-};
+import { awardsArtifact } from "./domains/awards";
+import { coursesArtifact } from "./domains/courses";
+import { researchArtifact } from "./domains/research";
+import { skillsArtifact } from "./domains/skills";
+import { softwareProjectsArtifact } from "./domains/software_projects";
+import { timelineArtifact } from "./domains/timeline";
 import {
   type CvDomain,
   type CvDomainArtifacts,
@@ -83,12 +71,12 @@ export function createCvDataClient(
 }
 
 const importedArtifacts = {
-  awards,
-  courses,
-  research,
-  skills,
-  software_projects: softwareProjects,
-  timeline,
+  awards: awardsArtifact,
+  courses: coursesArtifact,
+  research: researchArtifact,
+  skills: skillsArtifact,
+  software_projects: softwareProjectsArtifact,
+  timeline: timelineArtifact,
 } satisfies CvDomainArtifacts;
 
 /**

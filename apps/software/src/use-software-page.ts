@@ -1,5 +1,5 @@
 import type { SoftwareProject } from "@site/data-access-core";
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { softwareProjects } from "@site/data-access-software";
 import type { RouteView } from "@site/route-state";
 import { useEffect, useState } from "react";
 
@@ -14,7 +14,7 @@ export function useSoftwarePage(
     return () => window.clearTimeout(timer);
   }, [view]);
   return {
-    projects: initialProjects ?? cvDataClient.domain("software_projects"),
+    projects: initialProjects ?? softwareProjects,
     view,
   };
 }

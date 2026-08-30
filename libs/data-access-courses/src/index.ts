@@ -1,5 +1,7 @@
 import type { Course } from "@site/data-access-core";
 
+export { courses } from "./data";
+
 export interface CourseDetailsModel {
   gradingCategories: [string, number][];
   gradeScale: [string, { maximum: number; minimum: number }][];

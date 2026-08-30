@@ -1,9 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { softwareProjects } from "@site/data-access-software";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { ProjectCard } from "./project-card";
 
-const projects = cvDataClient.domain("software_projects");
+const projects = softwareProjects;
 
 function projectById(id: string) {
   const project = projects.find((candidate) => candidate.id === id);

@@ -1,11 +1,13 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
-import { calculateSoftwareStats } from "@site/data-access-software";
+import {
+  calculateSoftwareStats,
+  softwareProjects,
+} from "@site/data-access-software";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { formatNumber } from "./format-number";
 import { SoftwareCollection } from "./software-collection";
 
-const projects = cvDataClient.domain("software_projects");
+const projects = softwareProjects;
 
 function statistics() {
   const totals = screen.getByLabelText("Software statistics");

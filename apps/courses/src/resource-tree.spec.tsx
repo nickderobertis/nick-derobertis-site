@@ -1,9 +1,8 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { courses } from "@site/data-access-courses";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { ResourceTree } from "./resource-tree";
 
-const courses = cvDataClient.domain("courses");
 const financialModeling = courses.find((course) => course.id === "FIN-4934");
 if (!financialModeling)
   throw new Error("The CV no longer records the FIN-4934 course");

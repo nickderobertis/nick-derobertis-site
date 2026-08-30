@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "@site/build-config": "workspace:*",
-    "@site/data-access-core": "workspace:*",
     "@site/data-access-skills": "workspace:*",
     "@site/design-system": "workspace:*",
     "@site/e2e-harness": "workspace:*",

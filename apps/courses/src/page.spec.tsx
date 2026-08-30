@@ -1,10 +1,10 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { courses } from "@site/data-access-courses";
 import { act, render, screen, within } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import CoursesPage from "./page";
 
-const published = cvDataClient.domain("courses");
+const published = courses;
 
 function pageHeading() {
   return screen.getByRole("heading", { level: 1, name: "Courses" });

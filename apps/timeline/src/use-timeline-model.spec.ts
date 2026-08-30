@@ -1,9 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { timeline } from "@site/data-access-timeline";
 import { act, renderHook } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { useTimelineModel } from "./use-timeline-model";
 
-const entries = cvDataClient.domain("timeline");
+const entries = timeline;
 
 function organizations(groups: ReadonlyArray<readonly [string, unknown]>) {
   return groups.map(([organization]) => organization);

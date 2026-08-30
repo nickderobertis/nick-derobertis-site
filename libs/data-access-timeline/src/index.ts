@@ -1,5 +1,7 @@
 import type { Timeline } from "@site/data-access-core";
 
+export { timeline } from "./data";
+
 export type TimelineEntry = Timeline[number];
 
 export function groupTimelineEntries(entries: Timeline) {

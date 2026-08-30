@@ -1,4 +1,4 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { timeline } from "@site/data-access-timeline";
 import { previewState } from "./preview-state";
 import Skeleton from "./skeleton";
 import { TimelineChart } from "./timeline-chart";
@@ -9,7 +9,7 @@ export default function TimelinePage() {
   const state = previewState();
   if (state === "loading") return <Skeleton />;
   if (state === "error") return <TimelineState name="error" />;
-  const entries = state === "empty" ? [] : cvDataClient.domain("timeline");
+  const entries = state === "empty" ? [] : timeline;
   return (
     <section className="timeline-pane" aria-labelledby="timeline-heading">
       <header>

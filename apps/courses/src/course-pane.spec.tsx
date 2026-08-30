@@ -1,10 +1,8 @@
 import type { Course } from "@site/data-access-core";
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { courses } from "@site/data-access-courses";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { CoursePane } from "./course-pane";
-
-const courses = cvDataClient.domain("courses");
 
 function courseById(id: string): Course {
   const course = courses.find((candidate) => candidate.id === id);

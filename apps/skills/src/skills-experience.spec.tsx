@@ -1,10 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
-import { buildSkillTree } from "@site/data-access-skills";
+import { buildSkillTree, skills } from "@site/data-access-skills";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { SkillsExperience } from "./skills-experience";
 
-const tree = buildSkillTree(cvDataClient.domain("skills"));
+const tree = buildSkillTree(skills);
 
 function pane() {
   return screen.getByRole("region", { name: "Skilled in…" });

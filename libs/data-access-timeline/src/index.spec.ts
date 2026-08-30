@@ -1,5 +1,5 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
 import { describe, expect, it } from "vitest";
+import { timeline } from "./data";
 import {
   groupTimelineEntries,
   timelineFinalYear,
@@ -9,8 +9,6 @@ import {
 } from "./index";
 
 describe("timeline shaping", () => {
-  const timeline = cvDataClient.domain("timeline");
-
   it("groups entries and derives display values", () => {
     const groups = groupTimelineEntries(timeline);
     const entry = timeline[0];

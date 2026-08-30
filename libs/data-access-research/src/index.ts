@@ -5,6 +5,8 @@ import type {
   ResearchProject,
 } from "@site/data-access-core";
 
+export { research } from "./data";
+
 export interface ResearchProjectModel {
   categories: ResearchCategory[];
   coauthors: Person[];

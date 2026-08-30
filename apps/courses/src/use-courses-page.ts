@@ -1,5 +1,5 @@
 import type { Course } from "@site/data-access-core";
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { courses } from "@site/data-access-courses";
 import type { RouteView } from "@site/route-state";
 import { useEffect, useState } from "react";
 
@@ -9,7 +9,7 @@ export function useCoursesPage(
 ) {
   const [view, setView] = useState<RouteView>(initialView ?? "default");
   // `loading` is a preview scenario, not a real fetch state: courses arrive
-  // synchronously from the data client below. The timer resolves it back to
+  // synchronously from the committed slice below. The timer resolves it back to
   // `default` so a previewed skeleton demonstrates itself and then leaves,
   // rather than sticking for the rest of the session.
   useEffect(() => {
@@ -18,7 +18,7 @@ export function useCoursesPage(
     return () => window.clearTimeout(timer);
   }, [view]);
   return {
-    courses: initialCourses ?? cvDataClient.domain("courses"),
+    courses: initialCourses ?? courses,
     view,
   };
 }

@@ -1,9 +1,7 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { research } from "@site/data-access-research";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { ResearchContent } from "./research-content";
-
-const research = cvDataClient.domain("research");
 
 test("splits the portfolio into the two sections the CV files work under", () => {
   render(<ResearchContent research={research} />);

@@ -1,9 +1,7 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
+import { courses } from "@site/data-access-courses";
 import { render, screen, within } from "@testing-library/react";
 import { expect, test } from "vitest";
 import { CourseCollection } from "./course-collection";
-
-const courses = cvDataClient.domain("courses");
 
 test("gives every course the CV records its own card in the list", () => {
   render(<CourseCollection courses={courses} />);

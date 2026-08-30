@@ -1,10 +1,9 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
 import { describe, expect, it } from "vitest";
+import { research } from "./data";
 import { buildResearchProjectModels } from "./index";
 
 describe("research shaping", () => {
   it("resolves project relationships and filters status", () => {
-    const research = cvDataClient.domain("research");
     const models = buildResearchProjectModels(research, "working_paper");
     expect(
       models.every(({ project }) => project.status === "working_paper"),

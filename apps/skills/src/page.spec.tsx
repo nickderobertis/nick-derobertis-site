@@ -1,5 +1,4 @@
-import { cvDataClient } from "@site/data-access-core/bundled";
-import { buildSkillTree } from "@site/data-access-skills";
+import { buildSkillTree, skills } from "@site/data-access-skills";
 import { render, screen } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
@@ -10,7 +9,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 // Far past that rather than just past it, so it still bounds a genuine hang.
 const moduleGraphCeiling = { timeout: 120_000 };
 
-const tree = buildSkillTree(cvDataClient.domain("skills"));
+const tree = buildSkillTree(skills);
 
 async function renderPane() {
   const { default: SkillsPage } = await import("./page");
