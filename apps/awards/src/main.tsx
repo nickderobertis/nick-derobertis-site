@@ -2,6 +2,7 @@
 import "@site/design-system/styles.css";
 import { lazy, Suspense } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
+import "./awards.css";
 
 // A share cannot be reached from an entry's own chunk: Module Federation
 // resolves an initial consume synchronously, before this container has a share
