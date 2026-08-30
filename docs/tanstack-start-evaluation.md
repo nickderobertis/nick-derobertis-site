@@ -139,9 +139,10 @@ Static-only output is therefore supported and Pages is not ruled out. But what t
 repository deploys is not one app's prerendered pages. The composed
 `dist/apps/shell` from the build above holds five route documents
 (`index.html`, `bio/`, `research/`, `software/`, `courses/`), a `remotes/`
-tree with twelve `remoteEntry.js` files totalling 1,547,149 bytes, a `cv-data/`
+tree with twelve `remoteEntry.js` files totalling 1,547,143 bytes, a `cv-data/`
 copy, and `404.html` — assembled from thirteen independently published
-subtrees.
+subtrees. That byte total is the one figure here that is not build-stable: it
+moves by a few bytes between runs, so re-measure it rather than diff it.
 
 What compose does that Start has no counterpart for exists because the document
 is assembled from many apps, not because SSR was hand-rolled:
