@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
-import { rspack, type Stats, type StatsCompilation } from "@rspack/core";
+import { rspack, type Stats } from "@rspack/core";
 import { remoteConfig } from "@site/build-config";
 import { remoteRegistry } from "@site/build-config/remote-registry";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -47,15 +47,21 @@ import { overlappingSpecifiers } from "./published-subpaths";
  */
 
 /**
- * Whether a browser bundle can hold what a subpath publishes. rspack polyfills
- * no Node builtin, so a module that imports one is never bundled and no
- * production build ever asks for it; the test-runner half below imports every
- * published subpath, which is where those are covered.
+ * Whether a target's own source names no Node builtin. rspack polyfills none of
+ * them, so a module that imports one is never bundled and no production build
+ * ever asks for it; the test-runner half below imports every published subpath,
+ * which is where those are covered. A JSON target imports nothing at all.
+ *
+ * What is read is the source text, so this is named after that reading rather
+ * than after a verdict on bundling it cannot reach: a `node:` specifier is a
+ * quoted string under every import form there is — static, dynamic, or a
+ * re-export — but a module could still reach one indirectly through another
+ * module. Erring towards excluding a target is the safe direction: the build
+ * half skips it and the test-runner half resolves it for real either way.
  */
-function bundlable(target: string) {
+function importsNoNodeBuiltin(target: string) {
   return (
-    target.endsWith(".json") ||
-    !/from "node:/.test(readFileSync(target, "utf8"))
+    target.endsWith(".json") || !/["']node:/.test(readFileSync(target, "utf8"))
   );
 }
 
@@ -76,7 +82,9 @@ function aRemoteUnderBuild(): string {
 
 const remoteUnderBuild = aRemoteUnderBuild();
 const subjects = overlappingSpecifiers();
-const builtSubjects = subjects.filter((subject) => bundlable(subject.target));
+const builtSubjects = subjects.filter((subject) =>
+  importsNoNodeBuiltin(subject.target),
+);
 
 /** Where each build writes the entry it compiles and the artifact it emits. */
 const buildRoot = resolve("dist/tooling-workspace/subpath-build");
@@ -98,6 +106,37 @@ function entryImporting(specifiers: readonly string[]): string {
     "",
   ].join("\n");
 }
+
+/**
+ * The fields this contract reads out of a build's own stats. `toJson` hands
+ * back rspack's serialization of its compilation rather than a value produced
+ * here, and what it carries is set by the bundler's version rather than by this
+ * file, so it is narrowed at that boundary rather than trusted because a
+ * declaration says what it holds. Everything outside this schema is dropped.
+ */
+const reportSchema = z.object({
+  errors: z.array(z.object({ message: z.string() })).optional(),
+  assets: z
+    .array(
+      z.object({
+        name: z.string(),
+        chunkNames: z.array(z.string()).nullish(),
+      }),
+    )
+    .optional(),
+  modules: z
+    .array(
+      z.object({
+        nameForCondition: z.string().nullish(),
+        reasons: z
+          .array(z.object({ userRequest: z.string().nullish() }))
+          .nullish(),
+      }),
+    )
+    .optional(),
+});
+
+type Report = z.infer<typeof reportSchema>;
 
 /** What one real build produced, read back from its own output. */
 type Build = {
@@ -142,13 +181,19 @@ async function build(
       else done(produced);
     });
   });
-  const report = stats.toJson({
+  const printed: unknown = stats.toJson({
     all: false,
     errors: true,
     assets: true,
     modules: true,
     reasons: true,
   });
+  const read = reportSchema.safeParse(printed);
+  if (!read.success)
+    throw new Error(
+      `the ${remoteUnderBuild} build reported stats this contract cannot read, so nothing it says about resolution can be trusted:\n${z.prettifyError(read.error)}`,
+    );
+  const report = read.data;
   await new Promise<void>((done) => compiler.close(() => done()));
   return {
     errors: (report.errors ?? []).map((error) => error.message),
@@ -162,14 +207,14 @@ async function build(
  * appears once per module that made it, and every one of them has to have been
  * answered with the same file, so the answers are collected as a set.
  */
-function answersIn(report: StatsCompilation): Map<string, Set<string>> {
+function answersIn(report: Report): Map<string, Set<string>> {
   const answers = new Map<string, Set<string>>();
   for (const module of report.modules ?? []) {
     const answer = module.nameForCondition;
-    if (answer === undefined) continue;
+    if (!answer) continue;
     for (const reason of module.reasons ?? []) {
       const request = reason.userRequest;
-      if (request === undefined) continue;
+      if (!request) continue;
       const answered = answers.get(request) ?? new Set<string>();
       answered.add(answer);
       answers.set(request, answered);
@@ -183,7 +228,7 @@ function answersIn(report: StatsCompilation): Map<string, Set<string>> {
  * A build that reported no error can still have emitted nothing for it, so the
  * asset is located through the stats rather than guessed at from the directory.
  */
-function emittedFor(report: StatsCompilation, outputPath: string): string {
+function emittedFor(report: Report, outputPath: string): string {
   const asset = (report.assets ?? []).find(
     (candidate) =>
       candidate.name.endsWith(".js") &&
@@ -320,6 +365,12 @@ describe("the workspace test runner resolves published subpaths", () => {
       // The probe states the same contract against Vite's resolver, under a
       // config the shared harness produced. Its own diagnostics are the report,
       // so everything it printed is carried into the failure here.
+      // llmlint: ignore[work_goes_through_command_surface] No documented recipe
+      // runs the probe: it belongs to no Nx project, and what this needs is one
+      // Vitest run per component config so the same subject is answered under
+      // each order of the `remotes` map — which is the contract, not a step a
+      // recipe wraps. `just test` runs this file, through the `test` target of
+      // the project that owns it, and this subprocess is that subject.
       const run = await promisify(execFile)(
         "pnpm",
         ["exec", "vitest", "run", "--config", probeConfig],
