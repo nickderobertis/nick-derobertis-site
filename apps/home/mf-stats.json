@@ -16,7 +16,7 @@
     "types": {
       "path": "",
       "name": "",
-      "zip": "",
+      "zip": "@mf-types.zip",
       "api": ""
     },
     "globalName": "home",
@@ -234,32 +234,15 @@
       "file": "src/page.tsx",
       "assets": {
         "js": {
-          "sync": [],
-          "async": []
-        },
-        "css": {
-          "sync": [],
-          "async": []
-        }
-      }
-    },
-    {
-      "path": "./Skeleton",
-      "id": "home:Skeleton",
-      "name": "Skeleton",
-      "requires": [],
-      "file": "src/skeleton.tsx",
-      "assets": {
-        "js": {
           "sync": [
-            "common.e48bf4a6a74fe442.js",
-            "__federation_expose_Skeleton.d2259be05ef83b29.js"
+            "348.b64d6989e068ec37.js",
+            "__federation_expose_Page.a025b787a349dc4d.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "common.007c18010b0d2af7.css"
+            "__federation_expose_Page.007c18010b0d2af7.css"
           ],
           "async": []
         }
