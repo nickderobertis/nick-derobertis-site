@@ -354,6 +354,11 @@ describe("the declaration trees a build declares as its outputs", () => {
       .map((entry) => entry.name);
     expect(apps).toContain("shell");
     for (const app of apps) {
+      // The registry is typed by the remotes it names, and a directory listing
+      // is not: the shell is an app the registry has no key for, which is the
+      // case this indexing is here to report as `undefined` rather than
+      // exclude. The annotation above admits that, which the index signature
+      // on its own does not.
       const alias: string | undefined =
         remoteRegistry[app as keyof typeof remoteRegistry];
       // A host is an app that federates remotes, which it declares by mapping

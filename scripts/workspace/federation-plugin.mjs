@@ -55,8 +55,18 @@ const federatedRemoteName = /"([a-z][a-z0-9-]*)"/g;
  */
 function composedRemotes(source, declared) {
   const configuration = join(dirname(source), "rspack.config.ts");
-  const composed = federatedRemoteMap.exec(readFileSync(configuration, "utf8"));
-  if (composed === null) return [];
+  const contents = readFileSync(configuration, "utf8");
+  const composed = federatedRemoteMap.exec(contents);
+  if (composed === null) {
+    // An app that federates nothing never writes the call, so a file that
+    // writes it in a form this cannot read is a host whose remotes would go
+    // unbuilt -- which is a missing dependency rather than an absent one.
+    if (contents.includes("remoteMap("))
+      throw new Error(
+        `${name} reads the remotes a host composes from the remoteMap call in ${configuration}, which it could not read: the call must pass an array literal of remote names. Write it that way and rerun just check.`,
+      );
+    return [];
+  }
   const names = [...composed[1].matchAll(federatedRemoteName)].map(
     (match) => match[1],
   );

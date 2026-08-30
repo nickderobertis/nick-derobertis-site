@@ -419,6 +419,20 @@ describe("the federation fan-in every app depends on", () => {
     );
   });
 
+  it("refuses a host whose remoteMap call it cannot read", () => {
+    // Reading nothing here would be read as a host that federates nothing, and
+    // its remotes would go unbuilt before it -- a missing dependency reported
+    // as an absent one, which is the failure this refuses to produce.
+    const derived = deriveOverWrittenApps({
+      bio: { federation: { alias: "bio" }, rspack: 'remoteConfig("bio")' },
+      shell: { rspack: "remoteMap(routeRemotes)" },
+    });
+
+    expect(derived.status, derived.stdout).not.toBe(0);
+    expect(derived.stderr).toContain("apps/shell/rspack.config.ts");
+    expect(derived.stderr).toContain("must pass an array literal of remote");
+  });
+
   it("builds the remotes a host imports before the host itself", async () => {
     for (const name of ["shell", "home"]) {
       const host = projects.find((project) => project.name === name);
