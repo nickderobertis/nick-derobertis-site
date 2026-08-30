@@ -36,6 +36,25 @@ const taskGraphSchema = z.object({
   tasks: z.object({ tasks: z.record(z.string(), z.unknown()) }),
 });
 
+/**
+ * The identity every scenario commit below is authored and committed with.
+ *
+ * `git commit-tree` demands both, and a checkout has no reason to have
+ * configured either: a CI runner's account carries no name to fall back on, so
+ * a spec that inherited the machine's identity built its commits only where one
+ * happened to exist and failed outright everywhere else. Supplying it here puts
+ * it in the environment of this spec's own git calls and nowhere else — no
+ * configuration is written, and every other command in this repository,
+ * including the gate subprocesses below, still reads whatever identity it
+ * would have read.
+ */
+const scenarioIdentity = {
+  GIT_AUTHOR_NAME: "Gate browser lanes fixture",
+  GIT_AUTHOR_EMAIL: "gate-browser-lanes@example.test",
+  GIT_COMMITTER_NAME: "Gate browser lanes fixture",
+  GIT_COMMITTER_EMAIL: "gate-browser-lanes@example.test",
+};
+
 let scratch: string;
 let realPnpm: string;
 
@@ -60,7 +79,7 @@ function scenarioCommit(path: string, appended: string) {
     execFileSync("git", args, {
       cwd: workspace,
       encoding: "utf8",
-      env: { ...process.env, GIT_INDEX_FILE: index },
+      env: { ...process.env, ...scenarioIdentity, GIT_INDEX_FILE: index },
     }).trim();
   const existing = git(["show", `HEAD:${path}`]);
   const blob = execFileSync("git", ["hash-object", "-w", "--stdin"], {
@@ -71,9 +90,18 @@ function scenarioCommit(path: string, appended: string) {
   git(["read-tree", "HEAD"]);
   git(["update-index", "--cacheinfo", `100644,${blob},${path}`]);
   const tree = git(["write-tree"]);
-  return commitSha.parse(
+  const commit = commitSha.parse(
     git(["commit-tree", tree, "-p", "HEAD", "-m", `scenario: ${path}`]),
   );
+  // Read back off the commit rather than trusted: a scenario authored from the
+  // ambient identity instead of this spec's own would still be a commit Nx can
+  // diff, so nothing downstream would notice, and the spec would go back to
+  // being a function of the machine it runs on.
+  expect(git(["show", "-s", "--format=%an <%ae>|%cn <%ce>", commit])).toBe(
+    `${scenarioIdentity.GIT_AUTHOR_NAME} <${scenarioIdentity.GIT_AUTHOR_EMAIL}>` +
+      `|${scenarioIdentity.GIT_COMMITTER_NAME} <${scenarioIdentity.GIT_COMMITTER_EMAIL}>`,
+  );
+  return commit;
 }
 
 /** The real recipe over a real push range, narrowed to the lanes it printed. */
