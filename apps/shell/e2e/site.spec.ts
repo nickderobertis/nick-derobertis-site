@@ -64,6 +64,11 @@ test("every route has useful HTML with JavaScript disabled", async ({
  * to show unproven: a document that dropped every paper but the first, or every
  * project below the fold, would still pass. `where` names the render path, so a
  * missing title says which of them lost it.
+ *
+ * A title can also be spelled inside copy a visitor cannot see yet — one
+ * course's prerequisites name another course — so the visible matches are what
+ * this reads: the claim is that someone on this page can read the title, not
+ * that the markup mentions it somewhere.
  */
 async function expectSubstantiveContent(
   page: Page,
@@ -72,7 +77,10 @@ async function expectSubstantiveContent(
 ): Promise<void> {
   for (const feature of route.features)
     await expect(
-      page.getByText(feature, { exact: false }).first(),
+      page
+        .getByText(feature, { exact: false })
+        .filter({ visible: true })
+        .first(),
       `${route.link} ${where}: ${feature}`,
     ).toBeVisible();
 }
