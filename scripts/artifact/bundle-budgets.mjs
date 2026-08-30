@@ -5,6 +5,16 @@
  */
 export class BudgetRefusal extends Error {}
 
+// llmlint: ignore-file[changed_behavior_has_e2e] This module has no browser
+// interface: it is the boundary a committed build input is read through, it
+// runs inside shell:prerender, and a file it refuses fails that lane before
+// compose can assemble an artifact, so nothing it accepts or rejects is
+// something a visitor could observe. bundle-budgets.spec.ts drives every
+// refusal it raises through the real gate CLI as a subprocess, over isolated
+// artifact fixtures and over budget files with an app removed, a property
+// nothing reads, and prose that is not prose; site.spec.ts drives the artifact
+// it passes in a real browser with and without JavaScript.
+
 /**
  * @typedef {{measuredBytes: number, ceilingBytes: number}} Ceiling
  * @typedef {{entry: Ceiling, page?: Ceiling}} AppBudget
@@ -29,14 +39,17 @@ export function parseBundleBudgets(value, path) {
   if (!value || typeof value !== "object" || Array.isArray(value))
     refuse("it must contain an object");
   // What --rederive writes back is what this function returns, so every property
-  // the file carries has to be read here or refused here: one that is neither
-  // would be copied into the rewritten file as though a boundary had checked it.
-  const read = ["derivation", "marginPercent", "apps", "routes"];
-  const unread = Object.keys(value).filter((key) => !read.includes(key));
-  if (unread.length > 0)
-    refuse(
-      `it declares ${unread.join(", ")}, which nothing here reads; ${path} may declare only ${read.join(", ")}`,
-    );
+  // the file carries, at every level of it, has to be read here or refused
+  // here: one that is neither would be copied into the rewritten file as though
+  // a boundary had checked it.
+  const onlyReads = (object, label, read) => {
+    const unread = Object.keys(object).filter((key) => !read.includes(key));
+    if (unread.length > 0)
+      refuse(
+        `${label} declares ${unread.join(", ")}, which nothing here reads; it may declare only ${read.join(", ")}`,
+      );
+  };
+  onlyReads(value, "it", ["derivation", "marginPercent", "apps", "routes"]);
   const { derivation, marginPercent, apps, routes } = value;
   // The prose recording how these ceilings were derived is optional, because a
   // budget file assembled for one gate run carries none, but a file that does
@@ -57,6 +70,7 @@ export function parseBundleBudgets(value, path) {
   const readCeiling = (entry, label) => {
     if (!entry || typeof entry !== "object" || Array.isArray(entry))
       refuse(`${label} must declare an object`);
+    onlyReads(entry, label, ["measuredBytes", "ceilingBytes"]);
     const { measuredBytes, ceilingBytes } = entry;
     for (const [field, bytes] of [
       ["measuredBytes", measuredBytes],
@@ -89,6 +103,7 @@ export function parseBundleBudgets(value, path) {
     apps: readGroup(apps, "apps", (entry, label) => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry))
         refuse(`${label} must declare an object`);
+      onlyReads(entry, label, ["entry", "page"]);
       const budget = { entry: readCeiling(entry.entry, `${label} entry`) };
       return "page" in entry
         ? { ...budget, page: readCeiling(entry.page, `${label} ./Page`) }

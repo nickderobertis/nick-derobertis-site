@@ -360,6 +360,36 @@ test("a budget file carrying a property nothing reads is refused", async () => {
   );
 });
 
+// The same holds all the way down: a ceiling carrying headroom of its own would
+// be a budget widened for one app, written back by --rederive as though the
+// file's one margin had covered it.
+test("a ceiling carrying a property nothing reads is refused too", async () => {
+  const fixture = await mkdtemp(join(tmpdir(), "bundle-budgets-headroom-"));
+  fixtures.push(fixture);
+  const path = join(fixture, "bundle-budgets.json");
+  const committed = await readBudgets();
+  await writeFile(
+    path,
+    JSON.stringify({
+      ...committed,
+      apps: {
+        ...committed.apps,
+        bio: {
+          entry: committed.apps.bio?.entry,
+          page: { ...committed.apps.bio?.page, headroomBytes: 200_000 },
+        },
+      },
+    }),
+  );
+
+  const result = checkBudgets(artifact, path);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    "apps bio ./Page declares headroomBytes, which nothing here reads",
+  );
+});
+
 // The derivation prose is rewritten by --rederive, so it is read at the same
 // boundary the numbers are rather than carried across unchecked.
 test("a budget file whose derivation is not prose is refused", async () => {

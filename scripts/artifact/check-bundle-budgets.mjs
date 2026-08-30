@@ -17,6 +17,18 @@ import {
   parseBundleBudgets,
 } from "./bundle-budgets.mjs";
 
+// llmlint: ignore-file[changed_behavior_has_e2e] This gate has no browser
+// interface. It runs inside shell:prerender, ahead of the compose lane, so a
+// payload or an artifact it refuses is one no document was assembled from and
+// no visitor is ever served, and its --rederive mode rewrites a committed build
+// input from a developer's terminal for a reviewer to weigh. bundle-budgets.spec.ts
+// drives every one of those paths through this real CLI as a subprocess over
+// isolated artifact fixtures — the unrecognised argument, the budget file
+// missing an app, a container whose chunk resolver reaches for a host global, a
+// pane and the route composing it over their ceilings, and the re-derivation
+// itself; site.spec.ts drives the artifact this gate passes in a real browser
+// with and without JavaScript.
+
 // A refusal already ends with the action that clears it. Anything else landing
 // here is unexpected — an unreadable chunk, a budget file that is not JSON — and
 // says nothing about what to do next, so the recovery step is appended to it.
@@ -142,6 +154,11 @@ function chunkFileResolver(source) {
  * another container resolves to a filename this app never emitted, and is
  * dropped below rather than counted against this app's budget.
  */
+// llmlint: ignore[boundary_inputs_validated] This finds the chunk requests a
+// bundle makes; it is not a boundary that admits or refuses one. Text it does
+// not match is not a malformed request but the rest of the bundle, and every id
+// it does yield is validated where it is used: resolved by the bundle's own
+// checked resolver and then required to name a file the app emitted.
 function requestedChunkIds(source) {
   return [...source.matchAll(/\.e\("([^"\\]{1,32})"\)/g)].flatMap(([, id]) =>
     id === undefined ? [] : [id],
@@ -254,7 +271,6 @@ async function measureApp(directory) {
   };
 }
 
-// llmlint: ignore-block[changed_behavior_has_e2e] Everything from here to the re-derivation below runs inside shell:prerender, before compose can assemble an artifact: the argument surface, the coverage refusals and the measurement have no browser interface, and a tree they refuse is one no visitor is ever served. bundle-budgets.spec.ts drives each of them as a real subprocess over isolated artifact fixtures — the unrecognised argument, the budget file missing an app, the container whose chunk resolver reads a host global — and site.spec.ts drives the artifact they pass in a real browser with and without JavaScript.
 // The CLI shape is validated before anything is read: an unrecognised flag is
 // a caller asking for something this gate does not do, and silently gating
 // instead would report a pass the caller never requested.
@@ -332,9 +348,6 @@ const measuredRoutes = Object.fromEntries(
   ]),
 );
 
-// llmlint: ignore-end[changed_behavior_has_e2e]
-
-// llmlint: ignore-block[changed_behavior_has_e2e] Re-deriving rewrites a committed build input for a reviewer to weigh; it runs from a developer's terminal and never inside a lane that serves anything, so it has no browser interface. bundle-budgets.spec.ts drives it as a real subprocess over the composed artifact and reads the file it wrote back through the same boundary the gate reads it through.
 // Re-deriving is how a ceiling moves: this rewrites the committed file with
 // every ceiling recomputed from the tree in front of it, so a change that
 // alters a payload deliberately lands as a diff a reader can weigh.
@@ -377,9 +390,6 @@ if (rederiving) {
   process.exit(0);
 }
 
-// llmlint: ignore-end[changed_behavior_has_e2e]
-
-// llmlint: ignore-block[changed_behavior_has_e2e] This refusal fails shell:prerender before the compose lane runs, so a payload it names is one no artifact was assembled from and no visitor could observe. bundle-budgets.spec.ts drives it as a real subprocess for a pane over its ceiling, for the route that composes it, and for growth one byte past the declared margin; site.spec.ts drives the artifact it passes in a real browser.
 const violations = [];
 for (const [app, measured] of Object.entries(measuredApps)) {
   const budget = budgets.apps[app];
@@ -410,4 +420,3 @@ if (violations.length > 0)
   throw new BudgetRefusal(
     `The composed artifact exceeds its committed bundle budgets:\n${violations.map((violation) => `  ${violation}`).join("\n")}\nRemove the payload, or re-derive every ceiling with node scripts/artifact/check-bundle-budgets.mjs --rederive and commit the result.`,
   );
-// llmlint: ignore-end[changed_behavior_has_e2e]
