@@ -12,9 +12,6 @@
   },
   "targets": {
     "e2e": {
-      "metadata": {
-        "description": "llmlint: ignore[browser_journeys_run_against_the_built_app] This journey already runs against the built app: the target depends on shell:prerender, so Playwright drives the composed, prerendered artifact the deploy publishes, through this app's standalone document and its host-composed boundary alike. What the rule asks for beyond that is a separate e2e project, and this workspace deliberately gives each app its own journeys -- AGENTS.md makes coverage and capture the property of the app whose scenarios they are, scripts/workspace/structure-contract.spec.ts derives the owed project set from that sentence, and .github/CODEOWNERS routes each app subtree to its owner, so a separate project would move a remote's journeys out from under all three."
-      },
       "executor": "nx:run-commands",
       "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
       "options": {
