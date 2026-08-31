@@ -1,30 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { heldRemoteCodeHeader, holdRemoteCodeQuery } from "@site/e2e-fixtures";
-import { remoteContract } from "@site/e2e-harness";
+import { remoteContract, remoteOwnershipTests } from "@site/e2e-harness";
 
 const contract = remoteContract("home");
 
-for (const [render, route] of [
-  ["host-composed", contract.host],
-  ["standalone", contract.standalone],
-] as const)
-  test(`renders through its ${render} boundary`, async ({ page }) => {
-    const failures: string[] = [];
-    page.on("console", (message) => {
-      if (message.type() === "error")
-        failures.push(`console: ${message.text()}`);
-    });
-    page.on("pageerror", (error) => failures.push(`page: ${error.message}`));
-    page.on("response", (response) => {
-      if (response.status() >= 400)
-        failures.push(`${response.status()} ${response.url()}`);
-    });
-    await page.goto(route);
-    await expect(
-      page.getByRole(contract.role, { name: contract.name, exact: true }),
-    ).toBeVisible();
-    expect(failures).toEqual([]);
-  });
+remoteOwnershipTests("home", { includeStandaloneLoading: false });
 
 test("shows its skeleton while loading through its standalone boundary", async ({
   page,

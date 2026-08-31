@@ -23,13 +23,20 @@ function countHeldPageCode(page: Page, name: RemoteName) {
   return () => held;
 }
 
+interface RemoteOwnershipOptions {
+  includeStandaloneLoading?: boolean;
+}
+
 /**
  * Registers the ownership journeys one remote owns: it renders through its
  * standalone and host-composed boundaries, and it shows its own skeleton while
  * its page resolves. The contract comes from the shared site contract, so an
  * app declares only which remote it owns.
  */
-export function remoteOwnershipTests(name: RemoteName): void {
+export function remoteOwnershipTests(
+  name: RemoteName,
+  { includeStandaloneLoading = true }: RemoteOwnershipOptions = {},
+): void {
   const contract = remoteContract(name);
   for (const [render, route] of [
     ["host-composed", contract.host],
@@ -56,10 +63,13 @@ export function remoteOwnershipTests(name: RemoteName): void {
   // A pane Home composes reaches its host-composed skeleton through a client
   // navigation to Home; every other remote needs its route's loading query.
   const nestedHomeOwner = homePanes().some((pane) => pane.remote === name);
-  const loadingBoundaries =
+  const ownedLoadingBoundaries =
     nestedHomeOwner || contract.loadingQuery
       ? (["host-composed", "standalone"] as const)
       : (["standalone"] as const);
+  const loadingBoundaries = ownedLoadingBoundaries.filter(
+    (render) => render !== "standalone" || includeStandaloneLoading,
+  );
 
   for (const render of loadingBoundaries)
     test(`shows its skeleton while loading through its ${render} boundary`, async ({
