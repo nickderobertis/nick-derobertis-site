@@ -70,7 +70,7 @@ const publishStartClient = (): RsbuildPlugin => ({
         ...asyncJs.map((path) =>
           rename(
             resolve(clientPath, path),
-            resolve(clientPath, path.split("/").at(-1)!),
+            resolve(clientPath, path.slice(path.lastIndexOf("/") + 1)),
           ),
         ),
       ]);
@@ -111,6 +111,7 @@ export default defineConfig({
     pluginReact(),
     tanstackStart({
       prerender: { enabled: true, crawlLinks: false },
+      router: { basepath: "/nick-derobertis-site/remotes/awards" },
       srcDirectory: "start",
       rsbuild: { client: { output: "iife" } },
     }),

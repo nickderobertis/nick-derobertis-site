@@ -89,7 +89,12 @@ function checkArtifact(root: string = fixture) {
     process.execPath,
     ["scripts/artifact/check-static-artifact.mjs"],
     {
-      env: { ...process.env, STATIC_ARTIFACT_ROOT: root },
+      env: {
+        ...process.env,
+        FORCE_COLOR: undefined,
+        NO_COLOR: "1",
+        STATIC_ARTIFACT_ROOT: root,
+      },
       encoding: "utf8",
     },
   );

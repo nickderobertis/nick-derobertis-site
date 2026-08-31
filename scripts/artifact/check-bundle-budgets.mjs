@@ -264,18 +264,20 @@ async function measureApp(directory, publicPath) {
   const exposed = exposedChunkIds(container, pageExpose);
   if (!exposed || exposed.length === 0) {
     const manifestChunks = await manifestPageChunks(directory);
-    if (manifestChunks)
+    if (manifestChunks) {
+      for (const chunk of manifestChunks)
+        if (!emitted.has(chunk))
+          throw new BudgetRefusal(
+            `${join(directory, "mf-manifest.json")} declares ${pageExpose} chunk ${chunk}, which ${directory} does not contain; rebuild that app and rerun just prerender.`,
+          );
       return {
         ...measured,
         page: await totalBytes(
           directory,
-          await reachableJsFiles(
-            directory,
-            manifestChunks.filter((chunk) => emitted.has(chunk)),
-            emitted,
-          ),
+          await reachableJsFiles(directory, manifestChunks, emitted),
         ),
       };
+    }
   }
   // A container whose expose map or chunk resolver cannot be read is refused
   // rather than measured as an app with no page: passing it through would

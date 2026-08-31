@@ -389,6 +389,23 @@ test("a bundle resolver that reads a host global is refused, not evaluated", asy
   expect(result.stderr).toContain("reads process, which is not its parameter");
 });
 
+test("a manifest-declared ./Page chunk missing from the artifact is refused", async () => {
+  const fixture = await isolatedArtifact(["awards"]);
+  const directory = join(fixture, "remotes", "awards");
+  const pageChunk = (await readdir(directory)).find((file) =>
+    file.startsWith("__federation_expose_Page."),
+  );
+  expect(pageChunk).toBeDefined();
+  await rm(join(directory, pageChunk ?? ""));
+
+  const result = checkBudgets(fixture);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    `mf-manifest.json declares ./Page chunk ${pageChunk}`,
+  );
+});
+
 // Naming only the parameter is not enough on its own, because a string literal
 // is removed before the names are read: reaching a host global through a
 // bracketed property and calling it names nothing else at all.

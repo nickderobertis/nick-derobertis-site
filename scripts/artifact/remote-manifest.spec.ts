@@ -133,9 +133,21 @@ test("remote manifest matches published fragment composition", {
       targets: {
         build: {
           outputs: expect.arrayContaining([
-            "{options.outputPath}/fragment.html",
-            "{options.outputPath}/fragment.css",
-            "{options.outputPath}/fragment.json",
+            expect.stringMatching(
+              new RegExp(
+                `(?:\\{options\\.outputPath\\}|\\{workspaceRoot\\}/dist/apps/${remote})/fragment\\.html$`,
+              ),
+            ),
+            expect.stringMatching(
+              new RegExp(
+                `(?:\\{options\\.outputPath\\}|\\{workspaceRoot\\}/dist/apps/${remote})/fragment\\.css$`,
+              ),
+            ),
+            expect.stringMatching(
+              new RegExp(
+                `(?:\\{options\\.outputPath\\}|\\{workspaceRoot\\}/dist/apps/${remote})/fragment\\.json$`,
+              ),
+            ),
           ]),
         },
       },
