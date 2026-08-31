@@ -26,6 +26,84 @@
   "shared": [
     {
       "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/data-access-core/validators",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "software:@site/data-access-core/validators",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "785.28f9bc53a2cc9d79.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "software:@site/design-system",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.cd703344fd4350d4.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/route-state",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "software:@site/route-state",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "107.ef326a9ceaeeccf8.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
       "requiredVersion": "^19.2.7",
       "shareScope": "default",
       "eager": true,
@@ -37,13 +115,13 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.17793a84c8fb279c.js"
+            "main.890a5030e3d67eee.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.2f7c207952ca34c7.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
         }
       },
@@ -64,19 +142,43 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.17793a84c8fb279c.js"
+            "main.890a5030e3d67eee.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.2f7c207952ca34c7.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
         }
       },
       "usedIn": [
         "./Page"
       ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "shareScope": "default",
+      "name": "zod",
+      "version": "4.4.3",
+      "eager": false,
+      "id": "software:zod",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.c4c7500c9a921788.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [],
       "usedExports": [],
       "fallback": ""
     }
@@ -88,22 +190,28 @@
       "id": "software:Page",
       "name": "Page",
       "requires": [
-        "react"
+        "react",
+        "@site/design-system",
+        "@site/data-access-core/validators"
       ],
       "file": "src/page.tsx",
       "assets": {
         "js": {
           "sync": [
-            "894.453f467798c56816.js",
-            "__federation_expose_Page.c2bb2b2952d76cab.js"
+            "882.b097a341fd684a42.js",
+            "__federation_expose_Page.b34fb39bc789001a.js"
           ],
-          "async": []
+          "async": [
+            "459.b8f5947d689c5d06.js"
+          ]
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.2f7c207952ca34c7.css"
+            "__federation_expose_Page.2022d305d7554275.css"
           ],
-          "async": []
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     }
