@@ -98,6 +98,9 @@ export function remoteOwnershipTests(
         }
       } else {
         const query = new URLSearchParams({ "client-render": "1" });
+        if (contract.loadingQuery)
+          for (const [key, value] of new URLSearchParams(contract.loadingQuery))
+            query.set(key, value);
         if (holdStandalonePageCode) query.set(holdRemoteCodeQuery, name);
         await page.goto(`${contract.standalone}?${query}`, {
           waitUntil: "domcontentloaded",

@@ -184,6 +184,7 @@ const remoteContracts = {
     role: "heading",
     name: "Selected awards",
     loadingName: "Loading awards",
+    loadingQuery: "awards-scenario=loading",
   },
 } as const satisfies Record<string, RemoteContract>;
 

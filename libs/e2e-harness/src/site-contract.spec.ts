@@ -109,6 +109,7 @@ test("gives every remote the workspace federates an ownership contract", () => {
     role: "heading",
     name: "Selected awards",
     loadingName: "Loading awards",
+    loadingQuery: "awards-scenario=loading",
   });
   expect(remoteContract("bio").loadingQuery).toBe("bio-view=loading");
 });
