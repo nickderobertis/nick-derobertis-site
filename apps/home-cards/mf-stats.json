@@ -26,6 +26,35 @@
   "shared": [
     {
       "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "homeCards:@site/design-system",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.40fbf26865c9c697.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Skeleton",
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
       "requiredVersion": "^19.2.7",
       "shareScope": "default",
       "eager": true,
@@ -37,7 +66,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.417a3e8ea5cc76d0.js"
+            "main.04213c4318537670.js"
           ]
         },
         "css": {
@@ -64,7 +93,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.417a3e8ea5cc76d0.js"
+            "main.04213c4318537670.js"
           ]
         },
         "css": {
@@ -77,6 +106,32 @@
       "usedIn": [],
       "usedExports": [],
       "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "shareScope": "default",
+      "name": "zod",
+      "version": "4.4.3",
+      "eager": false,
+      "id": "homeCards:zod",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.8bb5c85cd5a44b86.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
     }
   ],
   "remotes": [],
@@ -85,16 +140,25 @@
       "path": "./Page",
       "id": "homeCards:Page",
       "name": "Page",
-      "requires": [],
+      "requires": [
+        "@site/design-system",
+        "zod"
+      ],
       "file": "src/page.tsx",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Page.96291943284a009a.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Page.6b96fa0fe55c0f65.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     },
@@ -102,16 +166,24 @@
       "path": "./Skeleton",
       "id": "homeCards:Skeleton",
       "name": "Skeleton",
-      "requires": [],
+      "requires": [
+        "@site/design-system"
+      ],
       "file": "src/skeleton.tsx",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Skeleton.ab2649a4aeec8e5a.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Skeleton.6b96fa0fe55c0f65.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     }
