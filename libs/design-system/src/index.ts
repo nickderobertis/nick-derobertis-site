@@ -1,5 +1,4 @@
-import "./theme.css";
-import "./primitives.css";
+import "./styles.css";
 
 export { ActionLink, type ActionLinkProps } from "./action-link";
 export { Card, type CardProps } from "./card";

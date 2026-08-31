@@ -1,5 +1,6 @@
 import type { Course } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { ActionLink, Card } from "@site/design-system";
 import { CourseDetails } from "./course-details";
 

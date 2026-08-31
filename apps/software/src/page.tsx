@@ -1,4 +1,5 @@
 import type { SoftwareProject } from "@site/data-access-core";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { PageShell, SectionHeading } from "@site/design-system";
 import type { SoftwarePageProps } from "@site/route-state";
 import "./software.css";

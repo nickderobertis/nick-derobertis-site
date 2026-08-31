@@ -3,11 +3,13 @@ import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
 import { NxAppRspackPlugin } from "@nx/rspack/app-plugin.js";
 import { NxReactRspackPlugin } from "@nx/rspack/react-plugin.js";
 import {
+  asyncShareStartup,
   consumeFederatedTypes,
   FederatedTypesPlugin,
   isDevelopmentBuild,
   PublishedFragmentPlugin,
   remoteMap,
+  sharedSingletons,
   withDevelopmentOverrides,
 } from "@site/build-config";
 
@@ -62,6 +64,11 @@ export default withDevelopmentOverrides(
       new ModuleFederationPlugin({
         name: "shell",
         filename: "remoteEntry.js",
+        // This document's entry reaches the site's route contracts through its
+        // own router, so its chunk consumes a share before the share scope
+        // exists. This is what puts startup behind that scope instead. No
+        // remote declares it, and none may: see asyncShareStartup.
+        experiments: asyncShareStartup,
         remotes: routeRemotes,
         // The shell publishes no exposes, so it has no declarations of its own
         // to compile. It reads each route remote's from the archive that
@@ -74,15 +81,18 @@ export default withDevelopmentOverrides(
         // The default `version-first` strategy loads every declared remote's
         // remoteEntry.js during share-scope startup to negotiate versions, which
         // would fetch all five route containers no matter how late the shell
-        // imports their pages. Nothing here needs that negotiation: react and
-        // react-dom below are eager singletons with version checks off, so the
-        // host's instance always wins, and each container can wait until the
-        // router asks for its route.
+        // imports their pages. Nothing here needs that negotiation: every share
+        // below is a singleton with version checks off, so the host's instance
+        // always wins, and each container can wait until the router asks for
+        // its route. That is also why only react and react-dom are eager there:
+        // an eager share is resolved during share-scope startup, which is the
+        // moment this strategy exists to keep free of work no route asked for.
         shareStrategy: "loaded-first",
-        shared: {
-          react: { singleton: true, requiredVersion: false, eager: true },
-          "react-dom": { singleton: true, requiredVersion: false, eager: true },
-        },
+        // The same share scope every container is built with, because this host
+        // is what supplies those singletons to the containers it composes: a
+        // module either side declared alone would be one each container carried
+        // its own copy of again.
+        shared: sharedSingletons,
       }),
     ],
   },

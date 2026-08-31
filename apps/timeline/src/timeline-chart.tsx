@@ -1,4 +1,5 @@
 import type { Timeline } from "@site/data-access-core";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { Card } from "@site/design-system";
 import { TimelineFilters } from "./timeline-filters";
 import { TimelineRow } from "./timeline-row";

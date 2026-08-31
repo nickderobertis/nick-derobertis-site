@@ -1,3 +1,5 @@
+import { runInNewContext } from "node:vm";
+
 /**
  * A refusal this gate raises on purpose. Every message carries the action that
  * clears it, which is what lets the CLI tell a deliberate refusal apart from an
@@ -127,4 +129,127 @@ export function deriveCeiling(measuredBytes, marginPercent) {
     measuredBytes,
     ceilingBytes: Math.ceil(measuredBytes * (1 + marginPercent / 100)),
   };
+}
+
+/**
+ * The resolver expression, checked before it is evaluated rather than after.
+ * It comes out of a build artifact, so what may be executed is stated here as a
+ * shape: an arrow function of one parameter whose body, once its string
+ * literals are removed, names nothing but that parameter. That admits the
+ * concatenations and chunk-id maps a bundler emits — `e=>"common.9f2.js"`,
+ * `e=>""+({5:"a"})[e]+".js"` — and refuses anything that could call out to a
+ * host global, so nothing unvalidated ever reaches runInNewContext.
+ */
+function validatedResolverExpression(expression) {
+  const refuse = (detail) => {
+    throw new BudgetRefusal(
+      `A bundle runtime declares a chunk filename resolver that ${detail}. Rebuild the artifact and rerun just prerender.`,
+    );
+  };
+  if (expression.length > 8192) refuse("is longer than any bundler emits");
+  const arrow = /^\(?\s*([A-Za-z_$][\w$]*)\s*\)?\s*=>([\s\S]*)$/.exec(
+    expression,
+  );
+  const [, parameter = "", body = ""] = arrow ?? [];
+  if (!parameter) refuse("is not an arrow function of one parameter");
+  if (body.includes("`")) refuse("interpolates a template literal");
+  const withoutStrings = body
+    .replace(/"(?:[^"\\]|\\.)*"/g, "")
+    .replace(/'(?:[^'\\]|\\.)*'/g, "");
+  for (const [name] of withoutStrings.matchAll(/[A-Za-z_$][\w$]*/g))
+    if (name !== parameter) refuse(`reads ${name}, which is not its parameter`);
+  // Naming nothing but the parameter is not enough on its own: a string
+  // literal is removed above, so `e["constructor"]("…")()` would reach the
+  // evaluator naming only `e`. What a bundler actually writes never opens a
+  // bracket after a name — it groups after `+` and indexes the object literal
+  // it just closed — so each opener is required to sit where those do.
+  for (const [, before, opener] of withoutStrings.matchAll(/(\S)\s*([([])/g)) {
+    if (opener === "(" && !"+(?:,".includes(before))
+      refuse("calls something rather than only grouping a concatenation");
+    if (opener === "[" && !")}".includes(before))
+      refuse("indexes a value that is not the object literal before it");
+  }
+  return expression;
+}
+
+/**
+ * Reads the chunk-id-to-filename function a bundle's own runtime carries.
+ * Which file a chunk id names is the bundler's decision, not a naming
+ * convention: an id can be renamed (`5` becomes `common`), can carry no
+ * JavaScript at all, and the mapping changes shape with the chunks a build
+ * emits. So the id is resolved with the very function the browser resolves it
+ * with, extracted by scanning the expression's own brackets rather than by
+ * guessing where it ends.
+ */
+export function chunkFileResolver(source) {
+  const marker = "__webpack_require__.u=";
+  const start = source.indexOf(marker);
+  if (start === -1) return undefined;
+  let index = start + marker.length;
+  let depth = 0;
+  let quote = "";
+  for (; index < source.length; index += 1) {
+    const character = source[index];
+    if (quote) {
+      if (character === "\\") index += 1;
+      else if (character === quote) quote = "";
+      continue;
+    }
+    if (character === '"' || character === "'" || character === "`") {
+      quote = character;
+      continue;
+    }
+    if (character === "(" || character === "[" || character === "{") depth += 1;
+    else if (character === ")" || character === "]" || character === "}") {
+      if (depth === 0) break;
+      depth -= 1;
+    } else if (depth === 0 && (character === ";" || character === ",")) break;
+  }
+  const expression = validatedResolverExpression(
+    source.slice(start + marker.length, index),
+  );
+  const resolve = runInNewContext(`(${expression})`, Object.create(null), {
+    timeout: 1000,
+  });
+  if (typeof resolve !== "function")
+    throw new BudgetRefusal(
+      `A bundle runtime declares a chunk filename resolver that is not a function. Rebuild the artifact and rerun just prerender.`,
+    );
+  return (id) => {
+    const file = resolve(id);
+    return typeof file === "string" ? file : undefined;
+  };
+}
+
+/**
+ * Every chunk id a bundle asks its runtime to fetch. A chunk that belongs to
+ * another container resolves to a filename this app never emitted, and is
+ * dropped below rather than counted against this app's budget.
+ */
+// llmlint: ignore-block[boundary_inputs_validated] This finds the chunk requests
+// a bundle makes; it is not a boundary that admits or refuses one. What it does
+// not match is not a malformed request but the rest of the bundle — minified
+// application code, string data, the runtime's own scaffolding — so there is
+// nothing here to refuse. Every id it does yield is validated where it is used:
+// resolved by the bundle's own checked resolver, then required to name a file
+// the app emitted before a byte of it is counted.
+export function requestedChunkIds(source) {
+  return [...source.matchAll(/\.e\("([^"\\]{1,32})"\)/g)].flatMap(([, id]) =>
+    id === undefined ? [] : [id],
+  );
+}
+// llmlint: ignore-end[boundary_inputs_validated]
+
+/**
+ * The chunks a host has to fetch to render one of this container's exposes,
+ * read from the container's own expose module map — the same map the Module
+ * Federation runtime reads when a host imports `<remote>/Page`.
+ */
+export function exposedChunkIds(container, expose) {
+  const moduleMap = /moduleMap:\{([\s\S]*?)\},shareScope/.exec(container)?.[1];
+  if (moduleMap === undefined) return undefined;
+  const entry = moduleMap
+    .split(/(?="\.\/)/)
+    .find((segment) => segment.startsWith(`"${expose}":`));
+  return entry === undefined ? undefined : requestedChunkIds(entry);
 }

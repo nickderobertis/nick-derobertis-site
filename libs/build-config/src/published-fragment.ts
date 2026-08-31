@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
-import { basename, resolve } from "node:path";
+import { resolve } from "node:path";
 import { type Compiler, rspack } from "@rspack/core";
 import { serializeFragmentContract } from "./fragment-contract";
 
@@ -114,6 +114,72 @@ export async function renderFragmentHtml(
 
 // llmlint: ignore-block[changed_behavior_has_e2e] Renderer compilation is a build boundary with no direct browser interface; site.spec.ts and every feature journey drive its published output through hydration and standalone/host-composed rendering, and container screenshot capture exercises the real compiler lifecycle.
 /* v8 ignore start -- Compiling a renderer and emitting a fragment happen inside the rspack build that owns this plugin, which v8 cannot instrument from a test process; every app build drives both, the artifact gate rejects what they emit wrongly, and every route journey drives the published bytes. */
+/**
+ * The design system publishes the tokens every other stylesheet in this
+ * workspace is written against, and it is one of the share-scope singletons in
+ * rspack-remote.ts, so its rules are emitted in the chunk the share resolves
+ * rather than inside the app's own stylesheet. This is the declaration that
+ * identifies that chunk among the ones a build emitted; it is read from the
+ * design system rather than restated, so a theme whose first token moved fails
+ * the assembly below by name instead of silently ordering it wrongly.
+ */
+const designTokensSource = "libs/design-system/src/theme.css";
+
+async function designTokenDeclaration() {
+  const theme = await readFile(resolve(designTokensSource), "utf8");
+  const declaration = /--[a-z-]+:\s*[^;]+/.exec(theme)?.[0];
+  if (!declaration)
+    throw new Error(
+      `${designTokensSource} must declare at least one custom property for a fragment's stylesheet to be assembled around; add one and rebuild.`,
+    );
+  return withoutWhitespace(declaration);
+}
+
+function withoutWhitespace(css: string) {
+  return css.replace(/\s+/g, "");
+}
+
+/**
+ * One app's prerendered markup is inlined into every document that composes it,
+ * and so is the CSS that styles it, which is why this is assembled from every
+ * stylesheet the build emitted rather than read from the entry's own: the
+ * design system is a share, so an app reaches it through a dynamic import and
+ * its tokens land in the chunk the share scope resolves. Those tokens come
+ * first and the app's own rules follow in a stable order, which is the cascade
+ * a browser loading those chunks arrives at, and a stylesheet emitted twice is
+ * inlined once.
+ */
+async function fragmentStylesheet(
+  name: string,
+  outputPath: string,
+  emitted: readonly string[],
+) {
+  const tokens = await designTokenDeclaration();
+  const stylesheets = await Promise.all(
+    [...emitted]
+      .filter((asset) => asset.endsWith(".css"))
+      .sort()
+      .map((asset: string) => readFile(resolve(outputPath, asset), "utf8")),
+  );
+  const carriesTokens = (css: string) =>
+    withoutWhitespace(css).includes(tokens);
+  if (!stylesheets.some(carriesTokens))
+    throw new Error(
+      `The ${name} build emitted no stylesheet carrying the design tokens from ${designTokensSource}; check that this app imports @site/design-system, then rebuild.`,
+    );
+  const seen = new Set<string>();
+  return [
+    ...stylesheets.filter(carriesTokens),
+    ...stylesheets.filter((css) => !carriesTokens(css)),
+  ]
+    .filter((css) => {
+      if (seen.has(css)) return false;
+      seen.add(css);
+      return true;
+    })
+    .join("\n");
+}
+
 function compileRenderer(name: string, outputPath: string) {
   return new Promise<void>((resolveCompilation, rejectCompilation) => {
     const compiler = rspack({
@@ -209,15 +275,10 @@ export class PublishedFragmentPlugin {
           resolve(rendererPath, "render.cjs"),
         );
         const html = await renderFragmentHtml(rendererModule, this.name);
-        const index = await readFile(resolve(outputPath, "index.html"), "utf8");
-        const stylesheet = /href="([^"]*main\.[0-9a-f]+\.css)"/.exec(
-          index,
-        )?.[1];
-        if (!stylesheet)
-          throw new Error(`The ${this.name} build has no page stylesheet`);
-        const css = await readFile(
-          resolve(outputPath, basename(stylesheet)),
-          "utf8",
+        const css = await fragmentStylesheet(
+          this.name,
+          outputPath,
+          Object.keys(compilation.assets),
         );
         await Promise.all([
           writeFile(resolve(outputPath, "fragment.html"), html),

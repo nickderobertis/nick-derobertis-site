@@ -20,7 +20,12 @@ import { afterAll, expect, test } from "vitest";
 // and this spec reaches them through that same validator rather than through a
 // type annotation over unchecked JSON: what it proves is then about the shape
 // the gate itself accepted.
-import { deriveCeiling, parseBundleBudgets } from "./bundle-budgets.mjs";
+import {
+  chunkFileResolver,
+  deriveCeiling,
+  exposedChunkIds,
+  parseBundleBudgets,
+} from "./bundle-budgets.mjs";
 
 const artifact = "dist/apps/shell";
 const budgetsPath = "scripts/artifact/bundle-budgets.json";
@@ -204,14 +209,36 @@ async function isolatedArtifact(copied: readonly string[]) {
   return fixture;
 }
 
-/** The one numbered chunk an app emits is the chunk its `./Page` resolves to. */
+/**
+ * A chunk inside an app's `./Page` payload, resolved the way the gate resolves
+ * it: out of the container's own expose module map, through the chunk filename
+ * resolver that container carries. Filenames cannot say which chunks those are
+ * — every app also emits the fallback chunks its share scope resolves, and a
+ * page chunk can be renamed (`5` becomes `common`) — so the map is the only
+ * place that knows. An expose can reach several, and appending to any of them
+ * grows the same measurement, so the largest is taken to keep the choice
+ * deterministic.
+ */
 async function pageChunk(fixture: string, app: string) {
   const directory = join(fixture, "remotes", app);
-  const chunks = (await readdir(directory)).filter((file) =>
-    /^\d+\.[0-9a-f]+\.js$/.test(file),
+  const container = await readFile(join(directory, "remoteEntry.js"), "utf8");
+  const resolveChunk = chunkFileResolver(container);
+  const emitted = new Set(await readdir(directory));
+  const chunks = (exposedChunkIds(container, "./Page") ?? [])
+    .map((id: string) => resolveChunk?.(id))
+    .filter(
+      (chunk: string | undefined): chunk is string =>
+        chunk !== undefined && emitted.has(chunk),
+    );
+  const sized = await Promise.all(
+    chunks.map(async (chunk) => ({
+      chunk,
+      bytes: (await stat(join(directory, chunk))).size,
+    })),
   );
-  expect(chunks).toHaveLength(1);
-  return join(directory, chunks[0] ?? "");
+  const largest = sized.sort((a, b) => b.bytes - a.bytes)[0];
+  expect(largest, `${app} declares no ./Page chunk to grow`).toBeDefined();
+  return join(directory, largest?.chunk ?? "");
 }
 
 /**

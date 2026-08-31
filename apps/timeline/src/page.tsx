@@ -1,4 +1,5 @@
 import { timeline } from "@site/data-access-timeline";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { PageShell, SectionHeading } from "@site/design-system";
 import { previewState } from "./preview-state";
 import Skeleton from "./skeleton";

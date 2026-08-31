@@ -1,5 +1,6 @@
 import type { SoftwareProject } from "@site/data-access-core";
 import { softwareProjectLogo } from "@site/data-access-software";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { Card } from "@site/design-system";
 import { formatNumber } from "./format-number";
 

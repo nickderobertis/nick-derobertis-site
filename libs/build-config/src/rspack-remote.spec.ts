@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
 import { z } from "zod";
-import { remoteConfig, remoteMap } from "./rspack-remote";
+import { remoteConfig, remoteMap, sharedSingletons } from "./rspack-remote";
 
 // `@nx/rspack`'s app plugin reads the app it is configuring from the task
 // environment Nx sets around a build, and normalizes the paths it was given
@@ -126,6 +126,44 @@ describe("remote build configuration", () => {
     inBuildTaskFor("shell");
     expect(remoteConfig("shell").plugins.at(-1)).toMatchObject({
       _options: { name: "shell" },
+    });
+  });
+});
+
+describe("federated share scope", () => {
+  test("builds every container from the share scope the host supplies", () => {
+    inBuildTaskFor("awards");
+
+    expect(remoteConfig("awards").plugins.at(-1)).toMatchObject({
+      _options: { shared: sharedSingletons },
+    });
+  });
+
+  test("shares the libraries a route would otherwise duplicate per container", () => {
+    expect(sharedSingletons).toMatchObject({
+      "@site/route-state": { singleton: true, requiredVersion: false },
+      "@site/design-system": { singleton: true, requiredVersion: false },
+      "@site/data-access-core/validators": {
+        singleton: true,
+        requiredVersion: false,
+      },
+      zod: { singleton: true, requiredVersion: false },
+    });
+  });
+
+  test("keeps react and react-dom the only eager pair", () => {
+    // An eager share is resolved during share-scope startup rather than when a
+    // route asks for it, which is the work the shell's `loaded-first` strategy
+    // exists to defer. react and react-dom are the exception because every
+    // container's own entry chunk uses them before it reaches a boundary.
+    expect(
+      Object.entries(sharedSingletons)
+        .filter(([, config]) => "eager" in config)
+        .map(([name]) => name),
+    ).toEqual(["react", "react-dom"]);
+    expect(sharedSingletons).toMatchObject({
+      react: { singleton: true, requiredVersion: false, eager: true },
+      "react-dom": { singleton: true, requiredVersion: false, eager: true },
     });
   });
 });

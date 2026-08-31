@@ -1,4 +1,5 @@
 import type { Course } from "@site/data-access-core";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { PageShell, SectionHeading } from "@site/design-system";
 import type { CoursesPageProps } from "@site/route-state";
 import "./courses.css";

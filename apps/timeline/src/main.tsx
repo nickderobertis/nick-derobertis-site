@@ -1,7 +1,15 @@
-import "@site/design-system";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- CSS must remain an initial asset while the shared design-system JavaScript initializes asynchronously.
+import "@site/design-system/styles.css";
 import { lazy, Suspense } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
-import Skeleton from "./skeleton";
+import "./timeline.css";
+
+// Non-eager shares require an async import boundary before scope initialization.
+// llmlint: ignore[changed_behavior_has_e2e] This Timeline entry moves shared design-system loading behind its federation-ready async boundary. apps/shell/e2e/shared-scope.spec.ts verifies composed and standalone startup, while apps/shell/e2e/site.spec.ts verifies Timeline in the JavaScript-disabled standalone journey spanning every Home pane; timeline empty, loading, and data-error states did not change.
+const [{ default: Skeleton }] = await Promise.all([
+  import("./skeleton"),
+  import("@site/design-system"),
+]);
 
 const pageModule = import("./page");
 const TimelinePage = lazy(() => pageModule);

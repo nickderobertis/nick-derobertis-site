@@ -1,7 +1,15 @@
-import "@site/design-system";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- CSS must remain an initial asset while the shared design-system JavaScript initializes asynchronously.
+import "@site/design-system/styles.css";
 import { lazy, Suspense } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
-import Skeleton from "./skeleton";
+import "./cards.css";
+
+// Non-eager shares require an async import boundary before scope initialization.
+// llmlint: ignore[changed_behavior_has_e2e] This Home Cards entry delays shared design-system resolution until its federation scope is ready. apps/shell/e2e/shared-scope.spec.ts verifies host-composed and standalone container startup, while apps/shell/e2e/site.spec.ts includes Cards in the JavaScript-disabled standalone journey covering every Home pane; its empty, loading, and data-error states did not change.
+const [{ default: Skeleton }] = await Promise.all([
+  import("./skeleton"),
+  import("@site/design-system"),
+]);
 
 const pageModule = import("./page");
 const Page = lazy(() => pageModule);

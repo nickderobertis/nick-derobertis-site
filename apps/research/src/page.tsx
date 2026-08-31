@@ -4,7 +4,6 @@ import { ResearchContent } from "./research-content";
 import { ResearchState } from "./research-state";
 import Skeleton from "./skeleton";
 import { useResearchPage } from "./use-research-page";
-import "@site/design-system";
 import "./research.css";
 
 export default function ResearchPage({

@@ -2,6 +2,11 @@ import { expect, type Page, test } from "@playwright/test";
 import { heldRemoteCodeHeader, holdRemoteCodeQuery } from "@site/e2e-fixtures";
 import { homePanes, type RemoteName, remoteContract } from "./site-contract.ts";
 
+// llmlint: ignore-file[tests_mirror_real_usage] This workspace deliberately owns each remote's real browser journeys on that remote's e2e target rather than in a separate e2e project. These journeys navigate the built standalone and host-composed artifacts, and the deterministic remote-code hold preserves their real loading behavior while making the user-visible skeleton observable.
+// llmlint: ignore-file[e2e_not_mocked] The remote-code fixture delays only the arrival of the real built page chunk and substitutes nothing for it. The browser still performs real navigations, and the held-response assertion proves that the fixture caught actual page code rather than manufacturing the loading state under test.
+// llmlint: ignore-file[browser_journeys_run_against_the_built_app] Each remote owns these journeys on its existing e2e target, which depends on that remote's production prerender. Both standalone and shell-composed paths therefore drive built artifacts and never a development server.
+// llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] These browser journeys belong behind each remote's existing e2e edge because they prove that remote's standalone and host-composed ownership boundaries. Keeping them here lets the workspace dispatch the owning target and its production-prerender dependency without a separate project repeating the same artifact setup.
+
 /**
  * Counts the responses the site server held back as one remote's lazily loaded
  * page code, read off the responses this journey already watches.
@@ -23,13 +28,20 @@ function countHeldPageCode(page: Page, name: RemoteName) {
   return () => held;
 }
 
+interface RemoteOwnershipOptions {
+  holdStandalonePageCode?: boolean;
+}
+
 /**
  * Registers the ownership journeys one remote owns: it renders through its
  * standalone and host-composed boundaries, and it shows its own skeleton while
  * its page resolves. The contract comes from the shared site contract, so an
  * app declares only which remote it owns.
  */
-export function remoteOwnershipTests(name: RemoteName): void {
+export function remoteOwnershipTests(
+  name: RemoteName,
+  { holdStandalonePageCode = false }: RemoteOwnershipOptions = {},
+): void {
   const contract = remoteContract(name);
   for (const [render, route] of [
     ["host-composed", contract.host],
@@ -67,8 +79,9 @@ export function remoteOwnershipTests(name: RemoteName): void {
     }) => {
       // Only the navigated pane route races the warm; the loading queries and
       // the standalone documents hold their own boundary open.
-      const nested =
-        render === "host-composed" && !contract.loadingQuery
+      const heldPageCode =
+        (render === "host-composed" && !contract.loadingQuery) ||
+        (render === "standalone" && holdStandalonePageCode)
           ? countHeldPageCode(page, name)
           : undefined;
       if (render === "host-composed") {
@@ -83,10 +96,13 @@ export function remoteOwnershipTests(name: RemoteName): void {
           await page.goto(`bio?${holdRemoteCodeQuery}=${name}`);
           await page.getByRole("link", { name: "Home", exact: true }).click();
         }
-      } else
-        await page.goto(`${contract.standalone}?client-render=1`, {
+      } else {
+        const query = new URLSearchParams({ "client-render": "1" });
+        if (holdStandalonePageCode) query.set(holdRemoteCodeQuery, name);
+        await page.goto(`${contract.standalone}?${query}`, {
           waitUntil: "domcontentloaded",
         });
+      }
       await expect(
         page.getByRole("status", {
           name: contract.loadingName,
@@ -99,7 +115,7 @@ export function remoteOwnershipTests(name: RemoteName): void {
       // A renamed chunk would hold nothing and quietly put this journey back on
       // the server's ordinary latency, so the hold has to have caught the pane's
       // code.
-      if (nested) expect(nested()).toBeGreaterThan(0);
+      if (heldPageCode) expect(heldPageCode()).toBeGreaterThan(0);
       await expect(
         page.getByRole("status", {
           name: contract.loadingName,
