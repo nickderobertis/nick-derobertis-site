@@ -181,10 +181,16 @@ import { tanstackStart } from '@tanstack/react-start/plugin/rsbuild'
 import { shared } from '../federation-shared.js'
 
 const requestedMode = process.env.SPIKE_MODE ?? 'combined'
-if (!['start', 'federation', 'combined'].includes(requestedMode)) {
-  throw new Error(`Unsupported SPIKE_MODE: ${requestedMode}`)
-}
-const mode = requestedMode as 'start' | 'federation' | 'combined'
+const mode = (() => {
+  switch (requestedMode) {
+    case 'start':
+    case 'federation':
+    case 'combined':
+      return requestedMode
+    default:
+      throw new Error(`Unsupported SPIKE_MODE: ${requestedMode}`)
+  }
+})()
 const useStart = mode === 'start' || mode === 'combined'
 const useFederation = mode === 'federation' || mode === 'combined'
 
@@ -200,11 +206,11 @@ export default defineConfig({
   },
   plugins: [
     pluginReact(),
-    ...(useStart ? [tanstackStart({
+    ...(useStart ? [tanstackStart(useFederation ? {
       prerender: { enabled: true, crawlLinks: false },
-      ...(useFederation
-        ? { rsbuild: { client: { output: 'iife' as const } } }
-        : {}),
+      rsbuild: { client: { output: 'iife' } },
+    } : {
+      prerender: { enabled: true, crawlLinks: false },
     })] : []),
     ...(useFederation ? [pluginModuleFederation({
       name: 'start_remote',
