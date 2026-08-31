@@ -23,20 +23,13 @@ function countHeldPageCode(page: Page, name: RemoteName) {
   return () => held;
 }
 
-interface RemoteOwnershipOptions {
-  holdStandalonePageCode?: boolean;
-}
-
 /**
  * Registers the ownership journeys one remote owns: it renders through its
  * standalone and host-composed boundaries, and it shows its own skeleton while
  * its page resolves. The contract comes from the shared site contract, so an
  * app declares only which remote it owns.
  */
-export function remoteOwnershipTests(
-  name: RemoteName,
-  { holdStandalonePageCode = false }: RemoteOwnershipOptions = {},
-): void {
+export function remoteOwnershipTests(name: RemoteName): void {
   const contract = remoteContract(name);
   for (const [render, route] of [
     ["host-composed", contract.host],
@@ -71,12 +64,11 @@ export function remoteOwnershipTests(
   for (const render of loadingBoundaries)
     test(`shows its skeleton while loading through its ${render} boundary`, async ({
       page,
-    }) => {
+    }, testInfo) => {
       // Only the navigated pane route races the warm; the loading queries and
       // the standalone documents hold their own boundary open.
       const heldPageCode =
-        (render === "host-composed" && !contract.loadingQuery) ||
-        (render === "standalone" && holdStandalonePageCode)
+        render === "host-composed" && !contract.loadingQuery
           ? countHeldPageCode(page, name)
           : undefined;
       if (render === "host-composed") {
@@ -92,9 +84,19 @@ export function remoteOwnershipTests(
           await page.getByRole("link", { name: "Home", exact: true }).click();
         }
       } else {
-        const query = new URLSearchParams({ "client-render": "1" });
-        if (holdStandalonePageCode) query.set(holdRemoteCodeQuery, name);
-        await page.goto(`${contract.standalone}?${query}`, {
+        const latency =
+          testInfo.config.metadata.standaloneLoadingNetworkLatencyMs;
+        if (typeof latency === "number" && latency > 0) {
+          const session = await page.context().newCDPSession(page);
+          await session.send("Network.enable");
+          await session.send("Network.emulateNetworkConditions", {
+            offline: false,
+            latency,
+            downloadThroughput: -1,
+            uploadThroughput: -1,
+          });
+        }
+        await page.goto(`${contract.standalone}?client-render=1`, {
           waitUntil: "domcontentloaded",
         });
       }
