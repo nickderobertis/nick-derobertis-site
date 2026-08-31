@@ -156,16 +156,35 @@ both packages use `"type": "module"`, and the remote TypeScript options are
 `jsx: react-jsx`, `moduleResolution: Bundler`, `module: ESNext`, and target
 ES2022.
 
-Use this remote configuration (the environment variable makes the controls
-repeatable without changing source):
+Put the federation share contract in a workspace-root
+`federation-shared.ts`, so the producer and consumer cannot silently drift:
+
+```ts
+import type { pluginModuleFederation } from '@module-federation/rsbuild-plugin'
+
+type FederationOptions = Parameters<typeof pluginModuleFederation>[0]
+
+export const shared: FederationOptions['shared'] = {
+  react: { singleton: true, requiredVersion: '^19.2.8' },
+  'react-dom': { singleton: true, requiredVersion: '^19.2.8' },
+}
+```
+
+Use this remote configuration (the validated environment variable makes the
+controls repeatable without changing source):
 
 ```ts
 import { defineConfig } from '@rsbuild/core'
 import { pluginReact } from '@rsbuild/plugin-react'
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin'
 import { tanstackStart } from '@tanstack/react-start/plugin/rsbuild'
+import { shared } from '../federation-shared.js'
 
-const mode = process.env.SPIKE_MODE ?? 'combined'
+const requestedMode = process.env.SPIKE_MODE ?? 'combined'
+if (!['start', 'federation', 'combined'].includes(requestedMode)) {
+  throw new Error(`Unsupported SPIKE_MODE: ${requestedMode}`)
+}
+const mode = requestedMode as 'start' | 'federation' | 'combined'
 const useStart = mode === 'start' || mode === 'combined'
 const useFederation = mode === 'federation' || mode === 'combined'
 
@@ -195,10 +214,7 @@ export default defineConfig({
           'function() { return "http://127.0.0.1:3101/" }',
       } : {}),
       exposes: { './Page': './src/Page.tsx' },
-      shared: {
-        react: { singleton: true, requiredVersion: '^19.2.8' },
-        'react-dom': { singleton: true, requiredVersion: '^19.2.8' },
-      },
+      shared,
       shareStrategy: 'loaded-first',
     }, useStart ? { environment: 'client' } : undefined)] : []),
   ],
@@ -220,6 +236,7 @@ Use this separate host configuration:
 import { defineConfig } from '@rsbuild/core'
 import { pluginReact } from '@rsbuild/plugin-react'
 import { pluginModuleFederation } from '@module-federation/rsbuild-plugin'
+import { shared } from '../federation-shared.js'
 
 export default defineConfig({
   server: { port: 3100 },
@@ -230,10 +247,7 @@ export default defineConfig({
       start_remote:
         'start_remote@http://127.0.0.1:3101/mf-manifest.json',
     },
-    shared: {
-      react: { singleton: true, requiredVersion: '^19.2.8' },
-      'react-dom': { singleton: true, requiredVersion: '^19.2.8' },
-    },
+    shared,
     shareStrategy: 'loaded-first',
   })],
 })
