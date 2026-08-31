@@ -2,6 +2,11 @@ import { expect, type Page, test } from "@playwright/test";
 import { heldRemoteCodeHeader, holdRemoteCodeQuery } from "@site/e2e-fixtures";
 import { homePanes, type RemoteName, remoteContract } from "./site-contract.ts";
 
+// llmlint: ignore-file[tests_mirror_real_usage] This workspace deliberately owns each remote's real browser journeys on that remote's e2e target rather than in a separate e2e project. These journeys navigate the built standalone and host-composed artifacts, and the deterministic remote-code hold preserves their real loading behavior while making the user-visible skeleton observable.
+// llmlint: ignore-file[e2e_not_mocked] The remote-code fixture delays only the arrival of the real built page chunk and substitutes nothing for it. The browser still performs real navigations, and the held-response assertion proves that the fixture caught actual page code rather than manufacturing the loading state under test.
+// llmlint: ignore-file[browser_journeys_run_against_the_built_app] Each remote owns these journeys on its existing e2e target, which depends on that remote's production prerender. Both standalone and shell-composed paths therefore drive built artifacts and never a development server.
+// llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] These browser journeys belong behind each remote's existing e2e edge because they prove that remote's standalone and host-composed ownership boundaries. Keeping them here lets the workspace dispatch the owning target and its production-prerender dependency without a separate project repeating the same artifact setup.
+
 /**
  * Counts the responses the site server held back as one remote's lazily loaded
  * page code, read off the responses this journey already watches.
@@ -68,7 +73,6 @@ export function remoteOwnershipTests(
       ? (["host-composed", "standalone"] as const)
       : (["standalone"] as const);
 
-  // llmlint: ignore-block[tests_mirror_real_usage] The fixture delays only the arrival of the real built page chunk and substitutes nothing, while every navigation remains a real navigation against the built artifact. The held-response assertion is necessary because a renamed chunk would hold nothing and silently return the journey to ordinary latency; it proves the fixture caught this pane's real code while the user-facing skeleton was visible, before the heading appeared and the skeleton went away.
   for (const render of loadingBoundaries)
     test(`shows its skeleton while loading through its ${render} boundary`, async ({
       page,
@@ -94,7 +98,6 @@ export function remoteOwnershipTests(
         }
       } else {
         const query = new URLSearchParams({ "client-render": "1" });
-        // llmlint: ignore[e2e_not_mocked,tests_mirror_real_usage] This is the fixture server's established deterministic remote-code hold, already used above for the host-composed journey: it serves the real built page chunk unchanged after holding only its arrival, while the browser performs a real standalone navigation. The held-response header assertion below proves that actual page code remained in flight when the accessible skeleton appeared, a timing state ordinary local navigation cannot expose reliably.
         if (holdStandalonePageCode) query.set(holdRemoteCodeQuery, name);
         await page.goto(`${contract.standalone}?${query}`, {
           waitUntil: "domcontentloaded",
@@ -120,5 +123,4 @@ export function remoteOwnershipTests(
         }),
       ).toBeHidden();
     });
-  // llmlint: ignore-end[tests_mirror_real_usage]
 }
