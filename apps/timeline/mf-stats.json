@@ -26,6 +26,61 @@
   "shared": [
     {
       "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/data-access-core/validators",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "timeline:@site/data-access-core/validators",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "785.6eb312c26e7c24d7.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "timeline:@site/design-system",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.335a30334a5c9195.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Skeleton",
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
       "requiredVersion": "^19.2.7",
       "shareScope": "default",
       "eager": true,
@@ -37,7 +92,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.d06131ceeb857460.js"
+            "main.80c245bc6ae550d6.js"
           ]
         },
         "css": {
@@ -64,7 +119,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.d06131ceeb857460.js"
+            "main.80c245bc6ae550d6.js"
           ]
         },
         "css": {
@@ -88,17 +143,28 @@
       "id": "timeline:Page",
       "name": "Page",
       "requires": [
-        "react"
+        "react",
+        "@site/design-system",
+        "@site/data-access-core/validators"
       ],
       "file": "src/page.tsx",
       "assets": {
         "js": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "956.6f12a1e54650f22d.js",
+            "__federation_expose_Page.21cd288c24cd124d.js"
+          ],
+          "async": [
+            "459.255a19873da58690.js"
+          ]
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Page.681567d45b16d8ee.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     },
@@ -106,16 +172,24 @@
       "path": "./Skeleton",
       "id": "timeline:Skeleton",
       "name": "Skeleton",
-      "requires": [],
+      "requires": [
+        "@site/design-system"
+      ],
       "file": "src/skeleton.tsx",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Skeleton.5f703d674c5379b9.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Skeleton.681567d45b16d8ee.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     }
