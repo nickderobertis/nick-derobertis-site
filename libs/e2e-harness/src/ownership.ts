@@ -65,10 +65,12 @@ export function remoteOwnershipTests(name: RemoteName): void {
     test(`shows its skeleton while loading through its ${render} boundary`, async ({
       page,
     }) => {
-      // Only the navigated pane route races the warm; the loading queries and
-      // the standalone documents hold their own boundary open.
-      const nested =
-        render === "host-composed" && !contract.loadingQuery
+      // Only the navigated pane route and Home's fast standalone page need a
+      // deterministic hold; the loading queries and sibling standalone page
+      // graphs already keep their own boundaries open.
+      const held =
+        (render === "host-composed" && !contract.loadingQuery) ||
+        (render === "standalone" && name === "home")
           ? countHeldPageCode(page, name)
           : undefined;
       if (render === "host-composed") {
@@ -83,10 +85,13 @@ export function remoteOwnershipTests(name: RemoteName): void {
           await page.goto(`bio?${holdRemoteCodeQuery}=${name}`);
           await page.getByRole("link", { name: "Home", exact: true }).click();
         }
-      } else
-        await page.goto(`${contract.standalone}?client-render=1`, {
+      } else {
+        const standaloneQuery = new URLSearchParams({ "client-render": "1" });
+        if (name === "home") standaloneQuery.set(holdRemoteCodeQuery, name);
+        await page.goto(`${contract.standalone}?${standaloneQuery}`, {
           waitUntil: "domcontentloaded",
         });
+      }
       await expect(
         page.getByRole("status", {
           name: contract.loadingName,
@@ -99,7 +104,7 @@ export function remoteOwnershipTests(name: RemoteName): void {
       // A renamed chunk would hold nothing and quietly put this journey back on
       // the server's ordinary latency, so the hold has to have caught the pane's
       // code.
-      if (nested) expect(nested()).toBeGreaterThan(0);
+      if (held) expect(held()).toBeGreaterThan(0);
       await expect(
         page.getByRole("status", {
           name: contract.loadingName,
