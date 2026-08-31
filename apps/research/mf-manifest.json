@@ -25,6 +25,68 @@
   },
   "shared": [
     {
+      "id": "research:@site/data-access-core/validators",
+      "name": "@site/data-access-core/validators",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "785.e5f67c9015938c2e.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "research:@site/design-system",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.795d0661f921c92a.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "research:@site/route-state",
+      "name": "@site/route-state",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "107.3c4bba3d88c911e1.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
       "id": "research:react-dom",
       "name": "react-dom",
       "version": "19.2.7",
@@ -35,13 +97,13 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.c68ce003f5a64721.js"
+            "main.53652a7f7263618b.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.1a037bab36d55d3b.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
         }
       },
@@ -58,14 +120,34 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.c68ce003f5a64721.js"
+            "main.53652a7f7263618b.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.1a037bab36d55d3b.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "research:zod",
+      "name": "zod",
+      "version": "4.4.3",
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.465e8976a5ba7a6a.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
         }
       },
       "fallback": ""
@@ -79,16 +161,20 @@
       "assets": {
         "js": {
           "sync": [
-            "880.9fce5ac337ed3796.js",
-            "__federation_expose_Page.0d4f4ce6f6269d8c.js"
+            "247.427422d16b9c5e94.js",
+            "__federation_expose_Page.05c1161233330439.js"
           ],
-          "async": []
+          "async": [
+            "459.44dd8474f7f075b7.js"
+          ]
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.1a037bab36d55d3b.css"
+            "__federation_expose_Page.5d44b43fe5a7fcbb.css"
           ],
-          "async": []
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       },
       "path": "./Page"
