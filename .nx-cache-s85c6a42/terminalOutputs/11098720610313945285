@@ -1,0 +1,22 @@
+(node:3699851) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/rspack:rspack` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/rspack:convert-to-inferred` to migrate to the `@nx/rspack/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+(node:3701422) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ Module Federation DTS ] Federated types created correctly
+Entrypoint [1mmain[39m[22m [1m[33m[big][39m[22m 309 KiB = [1m[32mmain.2f2aa06b391d4027.js[39m[22m 305 KiB [1m[32mmain.8e6a99df7fb75c0d.css[39m[22m 3.91 KiB
+Entrypoint [1mresearch[39m[22m 127 KiB = [1m[32mremoteEntry.js[39m[22m
+chunk (runtime: main, research) [1m[32m107.d9e4e6ea61cd7af1.js[39m[22m 42 bytes (consume-shared) 1.4 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) 42 bytes
+chunk (runtime: main, research) [1m[32m241.4c701f8e09e2e8e8.js[39m[22m, [1m[32m241.8e6a99df7fb75c0d.css[39m[22m 4.5 KiB (css/mini-extract) 7.78 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main, research) [1m[32m247.95f443dbd806cf85.js[39m[22m (id hint: default) 42 bytes (consume-shared) 42 KiB (javascript) [1m[32m[rendered][39m[22m [1m[33msplit chunk (cache group: default)[39m[22m
+chunk (runtime: main) [1m[32m387.188ca58a56b9602f.js[39m[22m, [1m[32m387.5d44b43fe5a7fcbb.css[39m[22m 3.66 KiB (css/mini-extract) 958 bytes (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main, research) (id hint: default) 42 bytes [1m[33msplit chunk (cache group: default)[39m[22m
+chunk (runtime: main, research) [1m[32m459.44dd8474f7f075b7.js[39m[22m (id hint: vendors) 254 KiB [1m[32m[rendered][39m[22m [1m[33msplit chunk (cache group: defaultVendors)[39m[22m
+chunk (runtime: main, research) [1m[32m581.465e8976a5ba7a6a.js[39m[22m (id hint: vendors) 555 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: research) [1m[32m__federation_expose_Page.5d44b43fe5a7fcbb.css[39m[22m, [1m[32m__federation_expose_Page.dfb2e863ad93bf47.js[39m[22m (__federation_expose_Page) 3.66 KiB (css/mini-extract) 2.09 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m768.5d44b43fe5a7fcbb.css[39m[22m, [1m[32m768.ad11e71d3361dd5c.js[39m[22m 3.66 KiB (css/mini-extract) 958 bytes (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: research) [1m[32mremoteEntry.js[39m[22m (research) 42 bytes (consume-shared) 42 bytes (expose) 256 KiB (javascript) 13.2 KiB (runtime) 252 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: main, research) [1m[32m785.e5f67c9015938c2e.js[39m[22m 25.2 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32mmain.2f2aa06b391d4027.js[39m[22m, [1m[32mmain.8e6a99df7fb75c0d.css[39m[22m (main) 84 bytes (consume-shared) 4.5 KiB (css/mini-extract) 796 KiB (javascript) 17.1 KiB (runtime) 252 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+Rspack compiled [1m[32msuccessfully[39m[22m (e0f57822a37abdd8)

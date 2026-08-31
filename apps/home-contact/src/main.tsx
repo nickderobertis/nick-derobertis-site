@@ -5,6 +5,7 @@ import { createRoot, hydrateRoot } from "react-dom/client";
 import "./contact.css";
 
 // Non-eager shares require an async import boundary before scope initialization.
+// llmlint: ignore[changed_behavior_has_e2e] This Home Contact entry now waits for share-scope initialization before importing its shared design system. apps/shell/e2e/shared-scope.spec.ts drives composed and standalone startup, and apps/shell/e2e/site.spec.ts drives Contact in the JavaScript-disabled standalone journey across every Home pane; contact empty, loading, and data-error states are outside this unchanged data path.
 const [{ default: Skeleton }] = await Promise.all([
   import("./skeleton"),
   import("@site/design-system"),

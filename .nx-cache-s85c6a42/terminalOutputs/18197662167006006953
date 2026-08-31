@@ -1,0 +1,19 @@
+(node:3695682) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/rspack:rspack` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/rspack:convert-to-inferred` to migrate to the `@nx/rspack/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+(node:3698183) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ Module Federation DTS ] Federated types created correctly
+Entrypoint [1mmain[39m[22m [1m[33m[big][39m[22m 311 KiB = [1m[32mmain.98e6ee3030766d4d.js[39m[22m 304 KiB [1m[32mmain.84b01feb0dcfcbee.css[39m[22m 7.2 KiB
+Entrypoint [1mskills[39m[22m 127 KiB = [1m[32mremoteEntry.js[39m[22m
+chunk (runtime: skills) [1m[32m__federation_expose_Skeleton.2b6100194e45e0dd.js[39m[22m, [1m[32m__federation_expose_Skeleton.300ee752960ee319.css[39m[22m (__federation_expose_Skeleton) 3.82 KiB (css/mini-extract) 2.12 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main, skills) [1m[32m241.8e6a99df7fb75c0d.css[39m[22m, [1m[32m241.ce616adac1f04919.js[39m[22m 4.5 KiB (css/mini-extract) 7.78 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main, skills) (id hint: default) 42 bytes [1m[33msplit chunk (cache group: default)[39m[22m
+chunk (runtime: main, skills) [1m[32m459.2f8d0c2fb862d619.js[39m[22m (id hint: vendors) 254 KiB [1m[32m[rendered][39m[22m [1m[33msplit chunk (cache group: defaultVendors)[39m[22m
+chunk (runtime: skills) [1m[32m__federation_expose_Page.300ee752960ee319.css[39m[22m, [1m[32m__federation_expose_Page.bafed281fecb285f.js[39m[22m (__federation_expose_Page) 3.82 KiB (css/mini-extract) 1.16 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m768.e0d4762ded17a046.js[39m[22m 983 bytes [1m[32m[rendered][39m[22m
+chunk (runtime: main, skills) [1m[32m785.c0ffa79c88e9ee1e.js[39m[22m 25.2 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: skills) [1m[32mremoteEntry.js[39m[22m (skills) 42 bytes (consume-shared) 42 bytes (expose) 256 KiB (javascript) 12.9 KiB (runtime) 168 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32mmain.84b01feb0dcfcbee.css[39m[22m, [1m[32mmain.98e6ee3030766d4d.js[39m[22m (main) 84 bytes (consume-shared) 8.32 KiB (css/mini-extract) 796 KiB (javascript) 16 KiB (runtime) 168 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: main, skills) [1m[32m941.da7f6a8ef6bf69a8.js[39m[22m (id hint: default) 42 bytes (consume-shared) 112 KiB (javascript) [1m[32m[rendered][39m[22m [1m[33msplit chunk (cache group: default)[39m[22m
+Rspack compiled [1m[32msuccessfully[39m[22m (acf28e46ffdac076)

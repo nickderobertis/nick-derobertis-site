@@ -151,7 +151,6 @@ const instancesOf = (shares: readonly ShareEntry[], name: string) =>
     .map(({ from, loaded }) => `${from} loaded=${loaded}`)
     .sort();
 
-// llmlint: ignore[changed_behavior_has_e2e] This journey covers composed-container startup by navigating representative host routes, proving their remotes resolve one shared instance, render their headings, and raise no page errors. Per-route empty, loading, and data-error states are not part of the federation share declarations or container startup changed here.
 test("composed routes resolve one instance of each shared library", async ({
   browser,
 }) => {
@@ -189,7 +188,6 @@ test("composed routes resolve one instance of each shared library", async ({
   }
 });
 
-// llmlint: ignore[changed_behavior_has_e2e] This journey covers standalone-container startup by navigating representative remote documents, proving each uses its own shared fallback, renders its heading, and raises no page errors. Per-route empty, loading, and data-error states are not part of the federation share declarations or container startup changed here.
 test("standalone containers render from their own shared copies", async ({
   browser,
 }) => {
@@ -232,7 +230,6 @@ test("standalone containers render from their own shared copies", async ({
 test.describe("with JavaScript disabled", () => {
   test.use({ javaScriptEnabled: false });
 
-  // llmlint: ignore[changed_behavior_has_e2e] This journey covers startup without scripts by navigating the representative composed and standalone documents and proving their headings and shared design tokens are already painted. Per-route empty, loading, and data-error states are not part of the federation share declarations or container startup changed here.
   test("composed routes and standalone remotes are painted before a script runs", async ({
     browser,
   }) => {

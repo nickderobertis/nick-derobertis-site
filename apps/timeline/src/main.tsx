@@ -5,6 +5,7 @@ import { createRoot, hydrateRoot } from "react-dom/client";
 import "./timeline.css";
 
 // Non-eager shares require an async import boundary before scope initialization.
+// llmlint: ignore[changed_behavior_has_e2e] This Timeline entry moves shared design-system loading behind its federation-ready async boundary. apps/shell/e2e/shared-scope.spec.ts verifies composed and standalone startup, while apps/shell/e2e/site.spec.ts verifies Timeline in the JavaScript-disabled standalone journey spanning every Home pane; timeline empty, loading, and data-error states did not change.
 const [{ default: Skeleton }] = await Promise.all([
   import("./skeleton"),
   import("@site/design-system"),

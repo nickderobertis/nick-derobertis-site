@@ -1,0 +1,22 @@
+(node:3701584) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/rspack:rspack` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/rspack:convert-to-inferred` to migrate to the `@nx/rspack/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+(node:3702832) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ Module Federation DTS ] Federated types created correctly
+Entrypoint [1mmain[39m[22m [1m[33m[big][39m[22m 308 KiB = [1m[32mmain.8e6a99df7fb75c0d.css[39m[22m 3.91 KiB [1m[32mmain.4fe7add91f77c905.js[39m[22m 305 KiB
+Entrypoint [1msoftware[39m[22m 127 KiB = [1m[32mremoteEntry.js[39m[22m
+chunk (runtime: main, software) [1m[32m107.fa4306719cc8f4c7.js[39m[22m 42 bytes (consume-shared) 1.4 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) 42 bytes
+chunk (runtime: main, software) [1m[32m241.37b45aa7a484467d.js[39m[22m, [1m[32m241.8e6a99df7fb75c0d.css[39m[22m 4.5 KiB (css/mini-extract) 7.78 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m387.2022d305d7554275.css[39m[22m, [1m[32m387.d59c782b16476c01.js[39m[22m 3.61 KiB (css/mini-extract) 1.05 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main, software) (id hint: default) 42 bytes [1m[33msplit chunk (cache group: default)[39m[22m
+chunk (runtime: main, software) [1m[32m459.b8f5947d689c5d06.js[39m[22m (id hint: vendors) 254 KiB [1m[32m[rendered][39m[22m [1m[33msplit chunk (cache group: defaultVendors)[39m[22m
+chunk (runtime: main, software) [1m[32m581.c4c7500c9a921788.js[39m[22m (id hint: vendors) 555 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: software) [1m[32m__federation_expose_Page.2022d305d7554275.css[39m[22m, [1m[32m__federation_expose_Page.4d7c019223beb7e6.js[39m[22m (__federation_expose_Page) 3.61 KiB (css/mini-extract) 2.21 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: software) [1m[32mremoteEntry.js[39m[22m (software) 42 bytes (consume-shared) 42 bytes (expose) 256 KiB (javascript) 13.2 KiB (runtime) 252 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m768.2022d305d7554275.css[39m[22m, [1m[32m768.e77d06eaa440f97d.js[39m[22m 3.61 KiB (css/mini-extract) 1.05 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main, software) [1m[32m785.28f9bc53a2cc9d79.js[39m[22m 25.2 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: main, software) [1m[32m882.de2a1ee103857de2.js[39m[22m (id hint: default) 42 bytes (consume-shared) 594 KiB (javascript) [1m[32m[rendered][39m[22m [1m[33msplit chunk (cache group: default)[39m[22m
+chunk (runtime: main) [1m[32mmain.4fe7add91f77c905.js[39m[22m, [1m[32mmain.8e6a99df7fb75c0d.css[39m[22m (main) 84 bytes (consume-shared) 4.5 KiB (css/mini-extract) 796 KiB (javascript) 17.1 KiB (runtime) 252 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+Rspack compiled [1m[32msuccessfully[39m[22m (3616834e532741c6)

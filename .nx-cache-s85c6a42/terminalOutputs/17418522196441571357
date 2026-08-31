@@ -1,0 +1,29 @@
+(node:3702392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/rspack:rspack` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/rspack:convert-to-inferred` to migrate to the `@nx/rspack/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+[ Module Federation DTS ] Federated types extraction completed
+(node:3703811) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ Module Federation DTS ] Federated types created correctly
+Entrypoint [1mmain[39m[22m [1m[33m[big][39m[22m 314 KiB = [1m[32mmain.8e6a99df7fb75c0d.css[39m[22m 3.91 KiB [1m[32mmain.9c88a5fd251694d1.js[39m[22m 310 KiB
+Entrypoint [1mhome[39m[22m 134 KiB = [1m[32mremoteEntry.js[39m[22m
+chunk (runtime: home, main) [1m[32m107.2c5d0799962eaef4.js[39m[22m 1.4 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: home, main) (id hint: default) 42 bytes (consume-shared) 42 bytes (remote) 42 bytes (share-init) [1m[33msplit chunk (cache group: default)[39m[22m
+chunk (runtime: home, main) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: home, main) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: home, main) (id hint: default) 42 bytes [1m[33msplit chunk (cache group: default)[39m[22m
+chunk (runtime: home, main) [1m[32m241.8e6a99df7fb75c0d.css[39m[22m, [1m[32m241.b230b98820651ec3.js[39m[22m 4.5 KiB (css/mini-extract) 7.78 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: home, main) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: main) [1m[32m348.6cf756049c3ca567.css[39m[22m, [1m[32m348.b52b34aa583e2cc4.js[39m[22m 338 bytes (css/mini-extract) 19 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: home, main) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: home, main) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: home, main) (id hint: default) 42 bytes [1m[33msplit chunk (cache group: default)[39m[22m
+chunk (runtime: home, main) [1m[32m488.bb7993a8bae26c7e.js[39m[22m 1.4 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: home, main) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: home, main) [1m[32m581.5af615a82de35c91.js[39m[22m (id hint: vendors) 555 KiB [1m[32m[rendered][39m[22m
+chunk (runtime: home) [1m[32mremoteEntry.js[39m[22m (home) 42 bytes (consume-shared) 42 bytes (expose) 259 KiB (javascript) 18.8 KiB (runtime) 210 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+chunk (runtime: home) [1m[32m__federation_expose_Page.6cf756049c3ca567.css[39m[22m, [1m[32m__federation_expose_Page.9e6fbd3495737932.js[39m[22m (__federation_expose_Page) 338 bytes (css/mini-extract) 20.2 KiB (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: main) [1m[32m768.48aeb1a1d3b850af.js[39m[22m, [1m[32m768.6cf756049c3ca567.css[39m[22m 338 bytes (css/mini-extract) 939 bytes (javascript) [1m[32m[rendered][39m[22m
+chunk (runtime: home, main) 6 bytes (remote) 6 bytes (share-init)
+chunk (runtime: main) [1m[32mmain.8e6a99df7fb75c0d.css[39m[22m, [1m[32mmain.9c88a5fd251694d1.js[39m[22m (main) 84 bytes (consume-shared) 4.5 KiB (css/mini-extract) 798 KiB (javascript) 18.3 KiB (runtime) 210 bytes (share-init) [1m[33m[entry][39m[22m [1m[32m[rendered][39m[22m
+Rspack compiled [1m[32msuccessfully[39m[22m (b52bd06b11db2feb)

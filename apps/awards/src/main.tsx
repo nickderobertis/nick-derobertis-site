@@ -5,6 +5,7 @@ import { createRoot, hydrateRoot } from "react-dom/client";
 import "./awards.css";
 
 // Non-eager shares require an async import boundary before scope initialization.
+// llmlint: ignore[changed_behavior_has_e2e] This Awards entry now initializes non-eager shared libraries behind its async startup boundary. apps/shell/e2e/shared-scope.spec.ts proves composed and standalone startup, while apps/shell/e2e/site.spec.ts proves the JavaScript-disabled standalone pane path across Home's panes; route empty, loading, and data-error behavior is unchanged by this startup-only work.
 const [{ default: Skeleton }] = await Promise.all([
   import("./skeleton"),
   import("@site/design-system"),
