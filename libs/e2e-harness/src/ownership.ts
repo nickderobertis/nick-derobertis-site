@@ -2,11 +2,6 @@ import { expect, type Page, test } from "@playwright/test";
 import { heldRemoteCodeHeader, holdRemoteCodeQuery } from "@site/e2e-fixtures";
 import { homePanes, type RemoteName, remoteContract } from "./site-contract.ts";
 
-// llmlint: ignore-file[tests_mirror_real_usage] These journeys make real browser navigations and assert the visitor-visible skeleton, heading, and cleared loading state. The held-code response assertion additionally proves the fixture caught the pane's real page chunk, because a renamed chunk would otherwise hold nothing and silently return the loading journey to ordinary latency.
-// llmlint: ignore-file[e2e_not_mocked] The fixture's remote-code hold delays only the arrival of the real built page chunk and substitutes no response, module, or application behavior, so these journeys continue to exercise the production artifact through the browser.
-// llmlint: ignore-file[browser_journeys_run_against_the_built_app] Each consuming remote's e2e target depends on the production prerender and uses these shared journey definitions to navigate the built standalone and host-composed artifacts rather than a development server.
-// llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] This workspace deliberately owns each remote's browser journeys on that remote's own e2e target instead of a separate e2e project; this shared registrar keeps the same boundary contract while each remote target remains the edge that executes its journeys.
-
 /**
  * Counts the responses the site server held back as one remote's lazily loaded
  * page code, read off the responses this journey already watches.
@@ -73,6 +68,7 @@ export function remoteOwnershipTests(
       ? (["host-composed", "standalone"] as const)
       : (["standalone"] as const);
 
+  // llmlint: ignore-block[tests_mirror_real_usage] The fixture delays only the arrival of the real built page chunk and substitutes nothing, while every navigation remains a real navigation against the built artifact. The held-response assertion is necessary because a renamed chunk would hold nothing and silently return the journey to ordinary latency; it proves the fixture caught this pane's real code while the user-facing skeleton was visible, before the heading appeared and the skeleton went away.
   for (const render of loadingBoundaries)
     test(`shows its skeleton while loading through its ${render} boundary`, async ({
       page,
@@ -124,4 +120,5 @@ export function remoteOwnershipTests(
         }),
       ).toBeHidden();
     });
+  // llmlint: ignore-end[tests_mirror_real_usage]
 }
