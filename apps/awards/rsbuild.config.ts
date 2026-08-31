@@ -111,7 +111,18 @@ export default defineConfig({
     pluginReact(),
     tanstackStart({
       prerender: { enabled: true, crawlLinks: false },
-      router: { basepath: "/nick-derobertis-site/remotes/awards" },
+      router: {
+        basepath: "/nick-derobertis-site/remotes/awards",
+        routeTreeFileHeader: [
+          "// llmlint: ignore-block[suppressions_justified] TanStack Router owns this generated file and emits its lint, type-check, IDE, and update-input escapes because the precise route types are completed by the declarations it generates below.",
+          "/* eslint-disable */",
+          "// @ts-nocheck",
+          "// noinspection JSUnusedGlobalSymbols",
+        ],
+        routeTreeFileFooter: [
+          "// llmlint: ignore-end[suppressions_justified]",
+        ],
+      },
       srcDirectory: "start",
       rsbuild: { client: { output: "iife" } },
     }),
