@@ -150,6 +150,8 @@ Start's default ESM client format for federated remotes.
 
 ## Reproduction
 
+<!-- llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] This recipe records a throwaway scratch workspace that no longer exists in this repository, so its quoted configuration listings have no shipped producer or consumer to drift against. A person rebuilding the spike must be able to retype each complete, self-contained block without referring to a missing shared endpoint constant; the repeated ports and origins are therefore deliberate. Where drift does matter, the recipe does centralize the real producer-consumer share contract in federation-shared.ts so it cannot silently diverge. -->
+
 Create an npm workspace with `remote` and `host` packages. Install the exact
 versions in the table. Both package scripts are `"build": "rsbuild build"`,
 both packages use `"type": "module"`, and the remote TypeScript options are
@@ -278,6 +280,8 @@ messages, `requestfailed`, and uncaught page errors, and verify the remote
 manifest, entry, and exposed chunk requests are all 200 responses from port
 3101. Reading `dist/<mode>/client/index.html` for the markers and
 `mf-manifest.json` for `./Page` completes the emitted-artifact checks.
+
+<!-- llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate] -->
 
 ## Consequence for the evaluation
 
