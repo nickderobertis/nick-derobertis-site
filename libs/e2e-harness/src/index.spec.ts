@@ -10,7 +10,6 @@ test("defines the shared app Playwright contract", () => {
     retries: 1,
     expect: { timeout: 15_000 },
     timeout: 60_000,
-    metadata: { standaloneLoadingNetworkLatencyMs: 0 },
     use: {
       baseURL: "http://127.0.0.1:4321/nick-derobertis-site/",
       trace: "retain-on-failure",
@@ -29,14 +28,6 @@ test.each([
   [{ project: "../shell", port: 4301 }, "project"],
   [{ project: "shell", port: 0 }, "port"],
   [{ project: "shell", port: 65_536 }, "port"],
-  [
-    {
-      project: "shell",
-      port: 4301,
-      standaloneLoadingNetworkLatencyMs: -1,
-    },
-    "standaloneLoadingNetworkLatencyMs",
-  ],
 ])("rejects invalid app config %j", (options, message) => {
   expect(() => defineAppE2eConfig(options)).toThrow(message);
 });

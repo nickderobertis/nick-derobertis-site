@@ -1,7 +1,3 @@
 import { defineAppE2eConfig } from "@site/e2e-harness";
 
-export default defineAppE2eConfig({
-  project: "home",
-  port: 4310,
-  standaloneLoadingNetworkLatencyMs: 750,
-});
+export default defineAppE2eConfig({ project: "home", port: 4310 });

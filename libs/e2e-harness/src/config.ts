@@ -32,7 +32,6 @@ export function validateSiteConfig(config: unknown): string {
 export function defineAppE2eConfig(options: {
   project: string;
   port: number;
-  standaloneLoadingNetworkLatencyMs?: number;
 }): PlaywrightTestConfig {
   if (!/^[a-z][a-z0-9-]*$/.test(options.project))
     throw new Error("project must be a lowercase Nx project name");
@@ -42,20 +41,8 @@ export function defineAppE2eConfig(options: {
     options.port > 65_535
   )
     throw new Error("port must be an integer from 1 to 65535");
-  if (
-    options.standaloneLoadingNetworkLatencyMs !== undefined &&
-    (!Number.isInteger(options.standaloneLoadingNetworkLatencyMs) ||
-      options.standaloneLoadingNetworkLatencyMs < 0)
-  )
-    throw new Error(
-      "standaloneLoadingNetworkLatencyMs must be a non-negative integer",
-    );
   const baseURL = `http://127.0.0.1:${options.port}${pagesBase()}/`;
   return defineConfig({
-    metadata: {
-      standaloneLoadingNetworkLatencyMs:
-        options.standaloneLoadingNetworkLatencyMs ?? 0,
-    },
     testDir: path.join(workspaceRoot, "apps", options.project, "e2e"),
     workers: 1,
     retries: 1,
