@@ -26,6 +26,59 @@
   "shared": [
     {
       "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "home:@site/design-system",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.bd216002a122a5e8.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/route-state",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "home:@site/route-state",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "107.89b33dcad1ab6851.js",
+            "488.7591ae0d21f61c1b.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
       "requiredVersion": "^19.2.7",
       "shareScope": "default",
       "eager": true,
@@ -37,13 +90,13 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.5d77dc44b0ca05de.js"
+            "main.0c8024e51ae7fd1c.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.41f8fdc985321a11.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
         }
       },
@@ -64,19 +117,43 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.5d77dc44b0ca05de.js"
+            "main.0c8024e51ae7fd1c.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.41f8fdc985321a11.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
         }
       },
       "usedIn": [
         "./Page"
       ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "shareScope": "default",
+      "name": "zod",
+      "version": "4.4.3",
+      "eager": false,
+      "id": "home:zod",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.5af615a82de35c91.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [],
       "usedExports": [],
       "fallback": ""
     }
@@ -229,22 +306,24 @@
       "id": "home:Page",
       "name": "Page",
       "requires": [
-        "react"
+        "react",
+        "@site/design-system"
       ],
       "file": "src/page.tsx",
       "assets": {
         "js": {
           "sync": [
-            "348.24aa56d3c6835f10.js",
-            "__federation_expose_Page.754cb6541c88c009.js"
+            "__federation_expose_Page.90cd0e22683610ff.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.41f8fdc985321a11.css"
+            "__federation_expose_Page.6cf756049c3ca567.css"
           ],
-          "async": []
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     }

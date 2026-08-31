@@ -1,0 +1,1 @@
+.main:has(.home-main){width:100%;padding-top:0;padding-bottom:0}.home-main{gap:max(3rem,min(7vw,6rem));min-width:0;display:grid;overflow-x:clip}
