@@ -25,6 +25,28 @@
   },
   "shared": [
     {
+      "id": "homeStory:@site/design-system",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.21531b182bad03ce.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
       "id": "homeStory:react-dom",
       "name": "react-dom",
       "version": "19.2.7",
@@ -35,7 +57,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.31b1fcb9c655f4be.js"
+            "main.35edb52855d215dc.js"
           ]
         },
         "css": {
@@ -58,7 +80,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.31b1fcb9c655f4be.js"
+            "main.35edb52855d215dc.js"
           ]
         },
         "css": {
@@ -66,6 +88,26 @@
           "sync": [
             "main.d36059d6cd22665e.css"
           ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "homeStory:zod",
+      "name": "zod",
+      "version": "4.4.3",
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.48d073cbed98dc97.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
         }
       },
       "fallback": ""
@@ -78,12 +120,18 @@
       "name": "Page",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Page.0a29e3becea013db.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Page.9bb23d51181c03b6.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       },
       "path": "./Page"
@@ -93,12 +141,18 @@
       "name": "Skeleton",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Skeleton.600c590ece57a9b4.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Skeleton.9bb23d51181c03b6.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       },
       "path": "./Skeleton"
