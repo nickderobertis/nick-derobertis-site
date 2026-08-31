@@ -28,9 +28,10 @@ import {
   extractStartFragment,
   rewriteStartAssetReferences,
 } from "./start-output";
+import { awardsPublicPath } from "./start-contract";
 
 const outputPath = resolve("dist/apps/awards");
-const publicPath = "/nick-derobertis-site/remotes/awards/";
+const publicPath = awardsPublicPath;
 // Start executes the prerendered route during its synchronous hydration entry,
 // before Module Federation can cross the async boundary used by conventional
 // remote main entries. Its route dependencies must therefore be available
@@ -41,11 +42,12 @@ const startSharedSingletons = Object.fromEntries(
     { ...options, eager: true },
   ]),
 );
+const exposes = remoteExposes({ skeleton: true });
 const federatedTypes = new FederatedTypesPlugin({
   generates: {
     project: "awards",
     alias: "awards",
-    exposes: ["./Page", "./Skeleton"],
+    exposes: Object.keys(exposes),
   },
 });
 
@@ -171,7 +173,7 @@ export default defineConfig({
         name: "awards",
         filename: "remoteEntry.js",
         getPublicPath: `function() { return "${publicPath}" }`,
-        exposes: remoteExposes({ skeleton: true }),
+        exposes,
         dts: {
           generateTypes: {
             abortOnError: true,

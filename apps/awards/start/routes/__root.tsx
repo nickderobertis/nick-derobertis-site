@@ -7,6 +7,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { awardsPublicPath } from "../../start-contract";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -31,7 +32,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
       <head>
-        <base href="/nick-derobertis-site/remotes/awards/" />
+        <base href={awardsPublicPath} />
         <HeadContent />
       </head>
       <body>
