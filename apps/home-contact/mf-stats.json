@@ -26,6 +26,35 @@
   "shared": [
     {
       "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "homeContact:@site/design-system",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.5fa6d8cc16c0bb3c.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Skeleton",
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
       "requiredVersion": "^19.2.7",
       "shareScope": "default",
       "eager": true,
@@ -37,7 +66,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.15dbfbe9ba997509.js"
+            "main.296325bad9feed04.js"
           ]
         },
         "css": {
@@ -64,7 +93,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.15dbfbe9ba997509.js"
+            "main.296325bad9feed04.js"
           ]
         },
         "css": {
@@ -77,6 +106,32 @@
       "usedIn": [],
       "usedExports": [],
       "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "shareScope": "default",
+      "name": "zod",
+      "version": "4.4.3",
+      "eager": false,
+      "id": "homeContact:zod",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.f676fd9d330152d5.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
     }
   ],
   "remotes": [],
@@ -85,16 +140,25 @@
       "path": "./Page",
       "id": "homeContact:Page",
       "name": "Page",
-      "requires": [],
+      "requires": [
+        "@site/design-system",
+        "zod"
+      ],
       "file": "src/page.tsx",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Page.65e48ca1db59282f.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Page.872a135d13559c28.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     },
@@ -102,16 +166,24 @@
       "path": "./Skeleton",
       "id": "homeContact:Skeleton",
       "name": "Skeleton",
-      "requires": [],
+      "requires": [
+        "@site/design-system"
+      ],
       "file": "src/skeleton.tsx",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Skeleton.638558f79f1eab88.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Skeleton.872a135d13559c28.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     }
