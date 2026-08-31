@@ -93,6 +93,7 @@ export function remoteOwnershipTests(
         }
       } else {
         const query = new URLSearchParams({ "client-render": "1" });
+        // llmlint: ignore[e2e_not_mocked,tests_mirror_real_usage] This is the fixture server's established deterministic remote-code hold, already used above for the host-composed journey: it serves the real built page chunk unchanged after holding only its arrival, while the browser performs a real standalone navigation. The held-response header assertion below proves that actual page code remained in flight when the accessible skeleton appeared, a timing state ordinary local navigation cannot expose reliably.
         if (holdStandalonePageCode) query.set(holdRemoteCodeQuery, name);
         await page.goto(`${contract.standalone}?${query}`, {
           waitUntil: "domcontentloaded",
