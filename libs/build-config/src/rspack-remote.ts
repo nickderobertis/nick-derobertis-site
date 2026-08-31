@@ -135,6 +135,13 @@ interface RemoteOptions {
   skeleton?: boolean;
 }
 
+export function remoteExposes(options: Pick<RemoteOptions, "skeleton"> = {}) {
+  return {
+    "./Page": "./src/page.tsx",
+    ...(options.skeleton ? { "./Skeleton": "./src/skeleton.tsx" } : undefined),
+  };
+}
+
 export function remoteConfig(name: string, options: RemoteOptions = {}) {
   const root = `apps/${name}`;
   const publicPath = `${pagesBase}/remotes/${name}/`;
@@ -142,10 +149,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
   // narrow an arbitrary string to a manifest key, so the branch says so.
   const federationName =
     name in remoteRegistry ? remoteRegistry[name as RemoteProject] : name;
-  const exposes = {
-    "./Page": "./src/page.tsx",
-    ...(options.skeleton ? { "./Skeleton": "./src/skeleton.tsx" } : undefined),
-  };
+  const exposes = remoteExposes(options);
   const composed = Object.keys(options.remotes ?? {});
   // Declarations are the contract between the build that publishes a remote's
   // bytes and the host build that typechecks against them, and a development

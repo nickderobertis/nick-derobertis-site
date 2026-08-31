@@ -1,4 +1,12 @@
-import { cp, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
+import {
+  cp,
+  readFile,
+  readdir,
+  rename,
+  rm,
+  stat,
+  writeFile,
+} from "node:fs/promises";
 import { resolve } from "node:path";
 import { pluginModuleFederation } from "@module-federation/rsbuild-plugin";
 import {
@@ -12,6 +20,7 @@ import { pluginReact } from "@rsbuild/plugin-react";
 import {
   FederatedTypesPlugin,
   PublishedFragmentPlugin,
+  remoteExposes,
   sharedSingletons,
 } from "@site/build-config";
 import { tanstackStart } from "@tanstack/react-start/plugin/rsbuild";
@@ -76,17 +85,19 @@ const publishStartClient = (): RsbuildPlugin => ({
       ]);
       for (const path of await readdir(clientPath, { recursive: true })) {
         const file = resolve(clientPath, path);
-        const source = await readFile(file).catch(() => undefined);
-        if (!source) continue;
+        if (!/\.(?:css|html|js|json|txt)$/.test(path)) continue;
+        const metadata = await stat(file);
+        if (!metadata.isFile()) continue;
+        const source = await readFile(file, "utf8");
         const updated = source
-          .toString()
           .replaceAll(initialCss, publishedCss)
           .replaceAll(initialJs, publishedJs)
           .replaceAll("assets/css/async/main.", "assets/css/async/route.")
           .replaceAll("assets/js/async/", "")
+          .replaceAll(/"\/(\d+\.[0-9a-f]+\.js)"/g, '"$1"')
           .replaceAll('"/assets/', '"assets/')
           .replaceAll('"/main.', '"main.');
-        if (updated !== source.toString()) await writeFile(file, updated);
+        if (updated !== source) await writeFile(file, updated);
       }
       for (const entry of await readdir(clientPath))
         await cp(resolve(clientPath, entry), resolve(outputPath, entry), {
@@ -114,14 +125,12 @@ export default defineConfig({
       router: {
         basepath: "/nick-derobertis-site/remotes/awards",
         routeTreeFileHeader: [
-          "// llmlint: ignore-block[suppressions_justified] TanStack Router owns this generated file and emits its lint, type-check, IDE, and update-input escapes because the precise route types are completed by the declarations it generates below.",
+          "// llmlint: ignore-block[suppressions_justified, comments_earn_their_place] TanStack Router owns this generated file and emits its lint, type-check, IDE, update-input escapes, and generic exclusion advice; the precise route types are completed by the declarations it generates below, and the repository deliberately checks the file despite that upstream advice.",
           "/* eslint-disable */",
           "// @ts-nocheck",
           "// noinspection JSUnusedGlobalSymbols",
         ],
-        routeTreeFileFooter: [
-          "// llmlint: ignore-end[suppressions_justified]",
-        ],
+        routeTreeFileFooter: ["// llmlint: ignore-end[suppressions_justified]"],
       },
       srcDirectory: "start",
       rsbuild: { client: { output: "iife" } },
@@ -131,10 +140,7 @@ export default defineConfig({
         name: "awards",
         filename: "remoteEntry.js",
         getPublicPath: `function() { return "${publicPath}" }`,
-        exposes: {
-          "./Page": "./src/page.tsx",
-          "./Skeleton": "./src/skeleton.tsx",
-        },
+        exposes: remoteExposes({ skeleton: true }),
         dts: {
           generateTypes: {
             abortOnError: true,

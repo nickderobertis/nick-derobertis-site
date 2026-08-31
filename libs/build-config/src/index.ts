@@ -14,6 +14,7 @@ export { isDevelopmentBuild, withDevelopmentOverrides } from "./rspack-dev";
 export {
   asyncShareStartup,
   remoteConfig,
+  remoteExposes,
   remoteMap,
   sharedSingletons,
 } from "./rspack-remote";
