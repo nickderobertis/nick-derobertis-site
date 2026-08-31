@@ -24,7 +24,7 @@ function countHeldPageCode(page: Page, name: RemoteName) {
 }
 
 interface RemoteOwnershipOptions {
-  includeStandaloneLoading?: boolean;
+  holdStandalonePageCode?: boolean;
 }
 
 /**
@@ -35,7 +35,7 @@ interface RemoteOwnershipOptions {
  */
 export function remoteOwnershipTests(
   name: RemoteName,
-  { includeStandaloneLoading = true }: RemoteOwnershipOptions = {},
+  { holdStandalonePageCode = false }: RemoteOwnershipOptions = {},
 ): void {
   const contract = remoteContract(name);
   for (const [render, route] of [
@@ -63,13 +63,10 @@ export function remoteOwnershipTests(
   // A pane Home composes reaches its host-composed skeleton through a client
   // navigation to Home; every other remote needs its route's loading query.
   const nestedHomeOwner = homePanes().some((pane) => pane.remote === name);
-  const ownedLoadingBoundaries =
+  const loadingBoundaries =
     nestedHomeOwner || contract.loadingQuery
       ? (["host-composed", "standalone"] as const)
       : (["standalone"] as const);
-  const loadingBoundaries = ownedLoadingBoundaries.filter(
-    (render) => render !== "standalone" || includeStandaloneLoading,
-  );
 
   for (const render of loadingBoundaries)
     test(`shows its skeleton while loading through its ${render} boundary`, async ({
@@ -77,8 +74,9 @@ export function remoteOwnershipTests(
     }) => {
       // Only the navigated pane route races the warm; the loading queries and
       // the standalone documents hold their own boundary open.
-      const nested =
-        render === "host-composed" && !contract.loadingQuery
+      const heldPageCode =
+        (render === "host-composed" && !contract.loadingQuery) ||
+        (render === "standalone" && holdStandalonePageCode)
           ? countHeldPageCode(page, name)
           : undefined;
       if (render === "host-composed") {
@@ -93,10 +91,13 @@ export function remoteOwnershipTests(
           await page.goto(`bio?${holdRemoteCodeQuery}=${name}`);
           await page.getByRole("link", { name: "Home", exact: true }).click();
         }
-      } else
-        await page.goto(`${contract.standalone}?client-render=1`, {
+      } else {
+        const query = new URLSearchParams({ "client-render": "1" });
+        if (holdStandalonePageCode) query.set(holdRemoteCodeQuery, name);
+        await page.goto(`${contract.standalone}?${query}`, {
           waitUntil: "domcontentloaded",
         });
+      }
       await expect(
         page.getByRole("status", {
           name: contract.loadingName,
@@ -109,7 +110,7 @@ export function remoteOwnershipTests(
       // A renamed chunk would hold nothing and quietly put this journey back on
       // the server's ordinary latency, so the hold has to have caught the pane's
       // code.
-      if (nested) expect(nested()).toBeGreaterThan(0);
+      if (heldPageCode) expect(heldPageCode()).toBeGreaterThan(0);
       await expect(
         page.getByRole("status", {
           name: contract.loadingName,
