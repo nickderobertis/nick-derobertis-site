@@ -1,7 +1,7 @@
 const rootStart = '<div id="root" data-prerendered-remote="awards">';
 const rootEnd = '</div><script class="$tsr"';
 
-export function rewriteStartAssetReferences(source: string): string {
+export function relativizeStartNumericRouteChunks(source: string): string {
   return source.replaceAll(/"\/(\d+\.[0-9a-f]+\.js)"/g, '"$1"');
 }
 

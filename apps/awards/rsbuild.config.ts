@@ -26,7 +26,7 @@ import {
 import { tanstackStart } from "@tanstack/react-start/plugin/rsbuild";
 import {
   extractStartFragment,
-  rewriteStartAssetReferences,
+  relativizeStartNumericRouteChunks,
 } from "./start-output";
 import { awardsPublicPath, awardsRouterBasepath } from "./start-contract";
 
@@ -113,7 +113,7 @@ const publishStartClient = (): RsbuildPlugin => ({
           .replaceAll(initialJs, publishedJs)
           .replaceAll("assets/css/async/main.", "assets/css/async/route.")
           .replaceAll("assets/js/async/", "");
-        const updated = rewriteStartAssetReferences(relocated)
+        const updated = relativizeStartNumericRouteChunks(relocated)
           .replaceAll('"/assets/', '"assets/')
           .replaceAll('"/main.', '"main.');
         if (updated !== source) await writeFile(file, updated);
@@ -156,13 +156,13 @@ export default defineConfig({
       router: {
         basepath: awardsRouterBasepath,
         routeTreeFileHeader: [
-          "// llmlint: ignore-block[suppressions_justified, comments_earn_their_place] TanStack Router owns this generated file and emits its lint, type-check, IDE, update-input escapes, and generic exclusion advice; the precise route types are completed by the declarations it generates below, and the repository deliberately checks the file despite that upstream advice.",
+          "// llmlint: ignore-block[suppressions_justified, comments_earn_their_place, no_unjustified_any_or_non_null] TanStack Router owns this generated file and emits its lint, type-check, IDE, update-input escapes, generic exclusion advice, and the `as any` required by its generated route update; the precise route types are completed by the declarations it generates below, and the repository deliberately checks the file despite that upstream advice.",
           "/* eslint-disable */",
           "// @ts-nocheck",
           "// noinspection JSUnusedGlobalSymbols",
         ],
         routeTreeFileFooter: [
-          "// llmlint: ignore-end[suppressions_justified, comments_earn_their_place]",
+          "// llmlint: ignore-end[suppressions_justified, comments_earn_their_place, no_unjustified_any_or_non_null]",
         ],
       },
       srcDirectory: "start",

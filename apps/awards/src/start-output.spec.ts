@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
   extractStartFragment,
-  rewriteStartAssetReferences,
+  relativizeStartNumericRouteChunks,
 } from "../start-output";
 
 describe("Awards Start output adapter", () => {
@@ -23,7 +23,7 @@ describe("Awards Start output adapter", () => {
 
   test("makes Start route chunks relative to the remote base", () => {
     expect(
-      rewriteStartAssetReferences(
+      relativizeStartNumericRouteChunks(
         'href="/421.abc123.js";preloads:["/421.abc123.js"]',
       ),
     ).toBe('href="421.abc123.js";preloads:["421.abc123.js"]');

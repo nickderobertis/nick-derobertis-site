@@ -1,4 +1,4 @@
-// llmlint: ignore-block[suppressions_justified, comments_earn_their_place] TanStack Router owns this generated file and emits its lint, type-check, IDE, update-input escapes, and generic exclusion advice; the precise route types are completed by the declarations it generates below, and the repository deliberately checks the file despite that upstream advice.
+// llmlint: ignore-block[suppressions_justified, comments_earn_their_place, no_unjustified_any_or_non_null] TanStack Router owns this generated file and emits its lint, type-check, IDE, update-input escapes, generic exclusion advice, and the `as any` required by its generated route update; the precise route types are completed by the declarations it generates below, and the repository deliberately checks the file despite that upstream advice.
 
 /* eslint-disable */
 
@@ -69,4 +69,4 @@ declare module '@tanstack/react-start' {
   }
 }
 
-// llmlint: ignore-end[suppressions_justified, comments_earn_their_place]
+// llmlint: ignore-end[suppressions_justified, comments_earn_their_place, no_unjustified_any_or_non_null]
