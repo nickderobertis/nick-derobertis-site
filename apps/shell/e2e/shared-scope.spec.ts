@@ -5,6 +5,7 @@ import { z } from "zod";
 
 // llmlint: ignore-file[browser_journeys_run_against_the_built_app] This workspace deliberately owns browser journeys on each app rather than in separate e2e projects. `shell:e2e` depends on `shell:prerender`, and this spec drives that composed production artifact plus its built standalone bio remote, never a development server.
 // llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] The share-scope contract is observable only after the shell composes the federated production artifact, so its browser proof belongs behind the shell's existing e2e edge; `just check` dispatches that edge once for the affected range rather than making unrelated projects own or repeat it.
+// llmlint: ignore-file[changed_behavior_has_e2e] These journeys cover Module Federation container startup through representative composed routes, standalone remotes, and no-JavaScript documents. The twelve remotes share one generated `sharedSingletons` map and one `main.tsx` startup shape, so repeating every route's unrelated empty, loading, and data-error states would multiply suite cost without exercising behavior changed here.
 // llmlint: ignore-block[tests_mirror_real_usage] "One container evaluated this library and the rest used that instance" is a statement about module instances, and a page renders identically either way — eight copies of a stateless library and one produce the same DOM, which is why this duplication went unnoticed long enough to become issue #92. Module Federation's share scope is where a page records which instance each container resolved, so that is what these journeys read. Every navigation is a real one against the composed artifact, and each test also asserts what a visitor sees and that nothing threw.
 
 /**
@@ -151,7 +152,6 @@ const instancesOf = (shares: readonly ShareEntry[], name: string) =>
     .map(({ from, loaded }) => `${from} loaded=${loaded}`)
     .sort();
 
-// llmlint: ignore[changed_behavior_has_e2e] This journey covers composed-container startup by navigating representative host routes, proving their remotes resolve one shared instance, render their headings, and raise no page errors. Per-route empty, loading, and data-error states are not part of the federation share declarations or container startup changed here.
 test("composed routes resolve one instance of each shared library", async ({
   browser,
 }) => {
@@ -189,7 +189,6 @@ test("composed routes resolve one instance of each shared library", async ({
   }
 });
 
-// llmlint: ignore[changed_behavior_has_e2e] This journey covers standalone-container startup by navigating representative remote documents, proving each uses its own shared fallback, renders its heading, and raises no page errors. Per-route empty, loading, and data-error states are not part of the federation share declarations or container startup changed here.
 test("standalone containers render from their own shared copies", async ({
   browser,
 }) => {
@@ -232,7 +231,6 @@ test("standalone containers render from their own shared copies", async ({
 test.describe("with JavaScript disabled", () => {
   test.use({ javaScriptEnabled: false });
 
-  // llmlint: ignore[changed_behavior_has_e2e] This journey covers startup without scripts by navigating the representative composed and standalone documents and proving their headings and shared design tokens are already painted. Per-route empty, loading, and data-error states are not part of the federation share declarations or container startup changed here.
   test("composed routes and standalone remotes are painted before a script runs", async ({
     browser,
   }) => {
