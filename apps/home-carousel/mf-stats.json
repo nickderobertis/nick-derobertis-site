@@ -26,6 +26,35 @@
   "shared": [
     {
       "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "homeCarousel:@site/design-system",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.258c69a0b359ad8e.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Skeleton",
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
       "requiredVersion": "^19.2.7",
       "shareScope": "default",
       "eager": true,
@@ -37,7 +66,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.820f6e10fdd1fb36.js"
+            "main.28db154ca813e68d.js"
           ]
         },
         "css": {
@@ -64,7 +93,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.820f6e10fdd1fb36.js"
+            "main.28db154ca813e68d.js"
           ]
         },
         "css": {
@@ -72,6 +101,32 @@
           "sync": [
             "main.8a8d6bbc7a34b67d.css"
           ]
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "shareScope": "default",
+      "name": "zod",
+      "version": "4.4.3",
+      "eager": false,
+      "id": "homeCarousel:zod",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.f2e4c07576eb473d.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
         }
       },
       "usedIn": [
@@ -88,17 +143,25 @@
       "id": "homeCarousel:Page",
       "name": "Page",
       "requires": [
-        "react"
+        "react",
+        "@site/design-system",
+        "zod"
       ],
       "file": "src/page.tsx",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Page.a20bd84c387511be.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Page.13ec824a33064fb6.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     },
@@ -106,16 +169,24 @@
       "path": "./Skeleton",
       "id": "homeCarousel:Skeleton",
       "name": "Skeleton",
-      "requires": [],
+      "requires": [
+        "@site/design-system"
+      ],
       "file": "src/skeleton.tsx",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Skeleton.483f02f81f14cce6.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Skeleton.13ec824a33064fb6.css"
+          ],
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       }
     }

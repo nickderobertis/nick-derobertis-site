@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkhome_carousel=self.webpackChunkhome_carousel||[]).push([["768"],{4707(e,s,a){a.r(s),a.d(s,{default:()=>r});var l=a(9793),o=a(1745);function r(){return(0,l.jsxs)(o.Skeleton,{className:"skeleton-carousel",label:"Loading featured work",children:[(0,l.jsx)("div",{className:"skeleton-hero"}),(0,l.jsx)("div",{className:"skeleton-dots"})]})}}}]);
