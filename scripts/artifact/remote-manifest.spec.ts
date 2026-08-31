@@ -55,6 +55,7 @@ test("remote manifest matches published fragment composition", {
   // this target, so the fan-in exists only in the resolved graph and there is no
   // declaration to compare against. What Nx actually schedules is read instead.
   // llmlint: ignore-block[tests_mirror_real_usage] Which builds Nx schedules ahead of shell:prerender is a scheduling contract with no user-visible interface to drive: a prerender that rebuilds every remote from source and one that composes their published fragments emit the same bytes, so nothing a visitor can do distinguishes them, and only the graph reveals that an app-only change no longer drags the other twelve units into the deploy. The artifact those builds produce is driven through the real browser by site.spec.ts and every feature journey.
+  // llmlint: ignore[work_goes_through_command_surface] This test needs Nx's graph-only serialization, which no user-facing recipe exposes; `just prerender` executes the build and emits no graph, so routing this internal assertion through it would stop testing the scheduling contract.
   const taskGraphOutput = execFileSync(
     "pnpm",
     ["exec", "nx", "run", "shell:prerender", "--graph=stdout"],

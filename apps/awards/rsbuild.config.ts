@@ -188,7 +188,7 @@ export default defineConfig({
       { environment: "client" },
     ),
     {
-      name: "awards-published-fragment",
+      name: "awards-client-federation-types",
       setup(api) {
         api.modifyEnvironmentConfig(
           (
@@ -196,12 +196,14 @@ export default defineConfig({
             { name }: ModifyEnvironmentConfigUtils,
           ) => {
             if (name !== "client") return;
-            const addFragmentPlugin: ModifyRspackConfigFn = (rspackConfig) => {
+            const configureClientFederation: ModifyRspackConfigFn = (
+              rspackConfig,
+            ) => {
               rspackConfig.plugins ??= [];
               rspackConfig.output.publicPath = publicPath;
               rspackConfig.plugins.push(federatedTypes);
             };
-            config.tools.rspack = addFragmentPlugin;
+            config.tools.rspack = configureClientFederation;
           },
         );
       },
