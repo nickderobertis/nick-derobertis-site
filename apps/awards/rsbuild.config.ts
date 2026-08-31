@@ -28,7 +28,7 @@ import {
   extractStartFragment,
   rewriteStartAssetReferences,
 } from "./start-output";
-import { awardsPublicPath } from "./start-contract";
+import { awardsPublicPath, awardsRouterBasepath } from "./start-contract";
 
 const outputPath = resolve("dist/apps/awards");
 const publicPath = awardsPublicPath;
@@ -154,7 +154,7 @@ export default defineConfig({
     tanstackStart({
       prerender: { enabled: true, crawlLinks: false },
       router: {
-        basepath: "/nick-derobertis-site/remotes/awards",
+        basepath: awardsRouterBasepath,
         routeTreeFileHeader: [
           "// llmlint: ignore-block[suppressions_justified, comments_earn_their_place] TanStack Router owns this generated file and emits its lint, type-check, IDE, update-input escapes, and generic exclusion advice; the precise route types are completed by the declarations it generates below, and the repository deliberately checks the file despite that upstream advice.",
           "/* eslint-disable */",
