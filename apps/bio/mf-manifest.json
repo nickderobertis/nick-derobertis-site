@@ -25,6 +25,48 @@
   },
   "shared": [
     {
+      "id": "bio:@site/design-system",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.33753478aeed27e7.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "bio:@site/route-state",
+      "name": "@site/route-state",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "107.8e6d593e59042a36.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
       "id": "bio:react-dom",
       "name": "react-dom",
       "version": "19.2.7",
@@ -34,14 +76,14 @@
         "js": {
           "async": [],
           "sync": [
-            "main.8d86342531a1154f.js",
+            "main.e5cef7fe855e88fd.js",
             "remoteEntry.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.a35adde09d408f7d.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
         }
       },
@@ -57,15 +99,35 @@
         "js": {
           "async": [],
           "sync": [
-            "main.8d86342531a1154f.js",
+            "main.e5cef7fe855e88fd.js",
             "remoteEntry.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.a35adde09d408f7d.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "bio:zod",
+      "name": "zod",
+      "version": "4.4.3",
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.2ff4b2fae99cdbd9.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
         }
       },
       "fallback": ""
@@ -79,16 +141,17 @@
       "assets": {
         "js": {
           "sync": [
-            "common.a51c4a05b807903e.js",
-            "__federation_expose_Page.083cbbde33e64f50.js"
+            "__federation_expose_Page.57a8687602bb33ed.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.a35adde09d408f7d.css"
+            "__federation_expose_Page.f33863bf9e692158.css"
           ],
-          "async": []
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       },
       "path": "./Page"
