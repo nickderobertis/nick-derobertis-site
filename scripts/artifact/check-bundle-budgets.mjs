@@ -167,13 +167,23 @@ async function totalBytes(directory, files) {
 }
 
 async function manifestPageChunks(directory) {
+  const manifestPath = join(directory, "mf-manifest.json");
+  let source;
+  try {
+    source = await readFile(manifestPath, "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") return undefined;
+    throw new BudgetRefusal(
+      `${manifestPath} could not be read: ${error instanceof Error ? error.message : String(error)}. Rebuild that app and rerun just prerender.`,
+    );
+  }
   let manifest;
   try {
-    manifest = JSON.parse(
-      await readFile(join(directory, "mf-manifest.json"), "utf8"),
+    manifest = JSON.parse(source);
+  } catch (error) {
+    throw new BudgetRefusal(
+      `${manifestPath} is not valid JSON: ${error instanceof Error ? error.message : String(error)}. Rebuild that app and rerun just prerender.`,
     );
-  } catch {
-    return undefined;
   }
   const exposes = manifest?.exposes;
   if (!Array.isArray(exposes))

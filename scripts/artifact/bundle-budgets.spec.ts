@@ -406,6 +406,17 @@ test("a manifest-declared ./Page chunk missing from the artifact is refused", as
   );
 });
 
+test("a malformed remote manifest reports its own contract failure", async () => {
+  const fixture = await isolatedArtifact(["awards"]);
+  const manifest = join(fixture, "remotes", "awards", "mf-manifest.json");
+  await writeFile(manifest, "not json");
+
+  const result = checkBudgets(fixture);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain("mf-manifest.json is not valid JSON");
+});
+
 // Naming only the parameter is not enough on its own, because a string literal
 // is removed before the names are read: reaching a host global through a
 // bracketed property and calling it names nothing else at all.

@@ -275,34 +275,43 @@ export class PublishedFragmentPlugin {
           resolve(rendererPath, "render.cjs"),
         );
         const html = await renderFragmentHtml(rendererModule, this.name);
-        const css = await fragmentStylesheet(
+        await publishFragment(
           this.name,
           outputPath,
           Object.keys(compilation.assets),
+          html,
+          compilation.outputOptions.publicPath?.toString() ?? "",
         );
-        await Promise.all([
-          writeFile(resolve(outputPath, "fragment.html"), html),
-          writeFile(
-            resolve(outputPath, "fragment.css"),
-            absolutizeCssUrls(
-              css,
-              compilation.outputOptions.publicPath?.toString() ?? "",
-            ),
-          ),
-          writeFile(
-            resolve(outputPath, "fragment.json"),
-            serializeFragmentContract({
-              schemaVersion: 1,
-              name: this.name,
-              react: packageDependencies.react,
-              reactDom: packageDependencies.reactDom,
-              revision: sourceRevision(),
-            }),
-          ),
-        ]);
       },
     );
   }
+}
+
+export async function publishFragment(
+  name: string,
+  outputPath: string,
+  emitted: readonly string[],
+  html: string,
+  publicPath: string,
+) {
+  const css = await fragmentStylesheet(name, outputPath, emitted);
+  await Promise.all([
+    writeFile(resolve(outputPath, "fragment.html"), html),
+    writeFile(
+      resolve(outputPath, "fragment.css"),
+      absolutizeCssUrls(css, publicPath),
+    ),
+    writeFile(
+      resolve(outputPath, "fragment.json"),
+      serializeFragmentContract({
+        schemaVersion: 1,
+        name,
+        react: packageDependencies.react,
+        reactDom: packageDependencies.reactDom,
+        revision: sourceRevision(),
+      }),
+    ),
+  ]);
 }
 /* v8 ignore stop */
 // llmlint: ignore-end[changed_behavior_has_e2e]

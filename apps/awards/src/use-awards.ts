@@ -78,10 +78,11 @@ export async function preloadAwards(): Promise<void> {
   }
 }
 
-export function useAwards(): AwardsViewState {
-  // Reading a settled request during the initial render is what removes the
-  // loading frame. Server rendering never warms, so its markup is unchanged.
+export function useAwards(initialAwards?: Awards): AwardsViewState {
+  // A host warm or Start's validated loader data removes the loading frame
+  // without making the initial render depend on a browser-only request.
   const [state, setState] = useState<AwardsViewState>(() => {
+    if (initialAwards) return { name: "ready", awards: initialAwards };
     if (typeof window === "undefined") return { name: "loading" };
     const warmed = awardsRequests.get(awardsRequestUrl().href)?.value;
     return warmed ? { name: "ready", awards: warmed } : { name: "loading" };
@@ -90,6 +91,8 @@ export function useAwards(): AwardsViewState {
     // The request is shared, so an unmount stops listening rather than
     // aborting it out from under whoever else is waiting on the same URL.
     let listening = true;
+    if (initialAwards && awardsRequestUrl().searchParams.has("scenario"))
+      setState({ name: "loading" });
     awardsRequest(awardsRequestUrl()).promise.then(
       (awards) => {
         if (listening) setState({ name: "ready", awards });
@@ -101,6 +104,6 @@ export function useAwards(): AwardsViewState {
     return () => {
       listening = false;
     };
-  }, []);
+  }, [initialAwards]);
   return state;
 }

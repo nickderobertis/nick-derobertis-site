@@ -36,10 +36,9 @@ async function startRemote() {
 }
 
 /**
- * Starts the remote against an awards boundary that never answers, holding the
- * pane on its loading frame. That frame is the only moment at which adopting
- * the published fragment and throwing it away look different in the document:
- * once the awards arrive, both paths have replaced it with the same pane.
+ * Starts the remote against an awards boundary that never answers. The
+ * committed awards remain visible while the default request is pending, which
+ * makes adopting the published fragment observable without a network race.
  */
 async function startRemoteOnPendingAwards() {
   vi.stubGlobal("fetch", () => new Promise<Response>(() => {}));
@@ -48,8 +47,8 @@ async function startRemoteOnPendingAwards() {
   });
 }
 
-function loadingFrame() {
-  return screen.getByRole("status", { name: "Loading awards" });
+function selectedPane() {
+  return screen.getByRole("region", { name: "Selected awards" });
 }
 
 beforeEach(() => {
@@ -77,9 +76,7 @@ test(
   moduleGraphCeiling,
   async () => {
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-    expect(
-      screen.getByRole("status", { name: "Loading awards" }),
-    ).toBeInTheDocument();
+    expect(selectedPane()).toBeInTheDocument();
 
     await startRemote();
 
@@ -127,34 +124,37 @@ test(
 );
 
 test(
-  "adopts the loading frame a visitor is already looking at",
+  "adopts the resolved awards a visitor is already looking at",
   moduleGraphCeiling,
   async () => {
     document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-    const published = loadingFrame();
+    const published = selectedPane();
 
     await startRemoteOnPendingAwards();
 
-    // Hydration takes over the shipped nodes in place, so the frame the visitor
+    // Hydration takes over the shipped nodes in place, so the pane the visitor
     // has been watching since first paint is never torn down and repainted.
-    expect(loadingFrame()).toBe(published);
+    expect(selectedPane()).toBe(published);
   },
 );
 
 test(
-  "throws the published frame away when it was rendered for another view",
+  "throws the published pane away when it was rendered for another view",
   moduleGraphCeiling,
   async () => {
+    const fragment = await publishedFragment();
     window.history.replaceState(null, "", "/?awards-view=all");
-    document.body.innerHTML = `<div id="root">${await publishedFragment()}</div>`;
-    const published = loadingFrame();
+    document.body.innerHTML = `<div id="root">${fragment}</div>`;
+    const published = selectedPane();
 
     await startRemoteOnPendingAwards();
 
     // The fragment was published for the selected view. Adopting it would leave
     // one view's markup underneath another view's render, so this visitor's
-    // frame has to be a fresh one.
+    // pending frame has to be a fresh one.
     expect(published).not.toBeInTheDocument();
-    expect(loadingFrame()).not.toBe(published);
+    expect(
+      screen.getByRole("status", { name: "Loading awards" }),
+    ).toBeInTheDocument();
   },
 );

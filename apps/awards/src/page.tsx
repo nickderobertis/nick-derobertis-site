@@ -3,30 +3,31 @@ import {
   calculateAwardsStats,
   selectedAwards,
 } from "@site/data-access-awards";
+import type { Awards } from "@site/data-access-core";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { PageShell } from "@site/design-system";
 import { AwardCard } from "./award-card";
 import { AwardsState } from "./awards-state";
 import { AwardsStatistics } from "./awards-statistics";
+import { committedAwards } from "./committed-awards";
 import Skeleton from "./skeleton";
 import { preloadAwards, useAwards } from "./use-awards";
+import { useAwardsView } from "./use-awards-view";
 import "./awards.css";
 
 // Hosts reach this through the remote's existing ./Page expose, so warming the
 // pane costs no new federation surface.
 export { preloadAwards as preload };
 
-export default function AwardsPage() {
-  const state = useAwards();
+export default function AwardsPage({
+  initialAwards = committedAwards,
+  initialShowAll,
+}: Readonly<{ initialAwards?: Awards; initialShowAll?: boolean }> = {}) {
+  const state = useAwards(initialAwards);
+  const showAll = useAwardsView(initialShowAll);
   if (state.name === "loading") return <Skeleton />;
   if (state.name !== "ready") return <AwardsState name={state.name} />;
   if (state.awards.length === 0) return <AwardsState name="empty" />;
-  // The prerendered fragment has no location to read; a visitor who asks for
-  // the full set arrives with the query only the client render can see.
-  const showAll =
-    new URLSearchParams(
-      typeof window === "undefined" ? "" : window.location.search,
-    ).get("awards-view") === "all";
   const awards = showAll ? state.awards : selectedAwards(state.awards);
   const label = showAll ? "Awards & honors" : "Selected awards";
   return (

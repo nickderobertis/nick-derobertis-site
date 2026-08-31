@@ -12,8 +12,8 @@ import TimelineSkeleton from "timeline/Skeleton";
 // hydration. The page modules remain behind Suspense and the eager skeletons
 // remain the visible fallback on client-side navigation.
 //
-// Awards is named on its own because it is the one pane whose data is fetched
-// rather than bundled, so warming it needs its module and not just its render.
+// Awards is named on its own because it refreshes its committed initial data,
+// so warming it needs its module and not just its render.
 const awardsModule = import("awards/Page");
 const paneModules = [
   {
@@ -97,11 +97,9 @@ export function resolvedPanes(): readonly ResolvedPane[] | undefined {
 }
 
 // Panes own their data. Carousel, cards, story and contact read bundled
-// homeContent, and timeline and skills read bundled CV domains, so all six
-// render their content on the first frame. Awards is the one pane that fetches,
-// so warming it is what lets a preloaded Home mount with no skeleton anywhere.
-// The entry-at-"/" path deliberately does not warm: its prerendered markup
-// contains the awards skeleton, and seeding past it would break hydration.
+// homeContent, and timeline, skills, and Awards read committed CV domains, so
+// all seven render their content on the first frame. Awards additionally
+// refreshes from the deployed data boundary when Home is preloaded.
 async function warmPaneData(): Promise<void> {
   const awards = await awardsModule;
   await awards.preload();

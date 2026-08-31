@@ -1,7 +1,7 @@
 import {
   cp,
-  readFile,
   readdir,
+  readFile,
   rename,
   rm,
   stat,
@@ -19,14 +19,28 @@ import {
 import { pluginReact } from "@rsbuild/plugin-react";
 import {
   FederatedTypesPlugin,
-  PublishedFragmentPlugin,
+  publishFragment,
   remoteExposes,
   sharedSingletons,
 } from "@site/build-config";
 import { tanstackStart } from "@tanstack/react-start/plugin/rsbuild";
+import {
+  extractStartFragment,
+  rewriteStartAssetReferences,
+} from "./start-output";
 
 const outputPath = resolve("dist/apps/awards");
 const publicPath = "/nick-derobertis-site/remotes/awards/";
+// Start executes the prerendered route during its synchronous hydration entry,
+// before Module Federation can cross the async boundary used by conventional
+// remote main entries. Its route dependencies must therefore be available
+// during share-scope startup in both the standalone document and the shell.
+const startSharedSingletons = Object.fromEntries(
+  Object.entries(sharedSingletons).map(([name, options]) => [
+    name,
+    { ...options, eager: true },
+  ]),
+);
 const federatedTypes = new FederatedTypesPlugin({
   generates: {
     project: "awards",
@@ -38,6 +52,9 @@ const federatedTypes = new FederatedTypesPlugin({
 const publishStartClient = (): RsbuildPlugin => ({
   name: "awards-publish-start-client",
   setup(api) {
+    api.onBeforeBuild(async () => {
+      await rm(outputPath, { force: true, recursive: true });
+    });
     api.onAfterBuild(async () => {
       const clientPath = resolve(outputPath, "client");
       const emitted = await readdir(clientPath, { recursive: true });
@@ -89,16 +106,27 @@ const publishStartClient = (): RsbuildPlugin => ({
         const metadata = await stat(file);
         if (!metadata.isFile()) continue;
         const source = await readFile(file, "utf8");
-        const updated = source
+        const relocated = source
           .replaceAll(initialCss, publishedCss)
           .replaceAll(initialJs, publishedJs)
           .replaceAll("assets/css/async/main.", "assets/css/async/route.")
-          .replaceAll("assets/js/async/", "")
-          .replaceAll(/"\/(\d+\.[0-9a-f]+\.js)"/g, '"$1"')
+          .replaceAll("assets/js/async/", "");
+        const updated = rewriteStartAssetReferences(relocated)
           .replaceAll('"/assets/', '"assets/')
           .replaceAll('"/main.', '"main.');
         if (updated !== source) await writeFile(file, updated);
       }
+      const document = await readFile(
+        resolve(clientPath, "index.html"),
+        "utf8",
+      );
+      await publishFragment(
+        "awards",
+        clientPath,
+        await readdir(clientPath, { recursive: true }),
+        extractStartFragment(document),
+        publicPath,
+      );
       for (const entry of await readdir(clientPath))
         await cp(resolve(clientPath, entry), resolve(outputPath, entry), {
           recursive: true,
@@ -115,6 +143,7 @@ export default defineConfig({
   root: resolve("apps/awards"),
   output: {
     assetPrefix: publicPath,
+    cleanDistPath: true,
     distPath: { root: outputPath, css: "." },
     filename: { css: "main.[contenthash:10].css" },
   },
@@ -130,7 +159,9 @@ export default defineConfig({
           "// @ts-nocheck",
           "// noinspection JSUnusedGlobalSymbols",
         ],
-        routeTreeFileFooter: ["// llmlint: ignore-end[suppressions_justified]"],
+        routeTreeFileFooter: [
+          "// llmlint: ignore-end[suppressions_justified, comments_earn_their_place]",
+        ],
       },
       srcDirectory: "start",
       rsbuild: { client: { output: "iife" } },
@@ -150,7 +181,7 @@ export default defineConfig({
             afterGenerate: () => federatedTypes.publish(),
           },
         },
-        shared: sharedSingletons,
+        shared: startSharedSingletons,
       },
       { environment: "client" },
     ),
@@ -166,10 +197,7 @@ export default defineConfig({
             const addFragmentPlugin: ModifyRspackConfigFn = (rspackConfig) => {
               rspackConfig.plugins ??= [];
               rspackConfig.output.publicPath = publicPath;
-              rspackConfig.plugins.push(
-                new PublishedFragmentPlugin("awards"),
-                federatedTypes,
-              );
+              rspackConfig.plugins.push(federatedTypes);
             };
             config.tools.rspack = addFragmentPlugin;
           },

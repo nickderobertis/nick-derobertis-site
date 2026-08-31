@@ -48,16 +48,13 @@ afterEach(() => {
 });
 
 test(
-  "settles from its loading frame onto the selected awards",
+  "hydrates directly onto the selected awards",
   moduleGraphCeiling,
   async () => {
     serveAwards(awards);
 
     await renderPane();
 
-    expect(
-      screen.getByRole("status", { name: "Loading awards" }),
-    ).toBeInTheDocument();
     const pane = await screen.findByRole("region", { name: "Selected awards" });
     expect(
       screen.queryByRole("status", { name: "Loading awards" }),
@@ -133,7 +130,7 @@ test(
 );
 
 test(
-  "prerenders the loading frame the built fragment ships",
+  "prerenders the resolved awards the built fragment ships",
   moduleGraphCeiling,
   async () => {
     const { default: AwardsPage } = await import("./page");
@@ -147,9 +144,9 @@ test(
     // it the way a browser does before asking what a visitor finds in it.
     document.body.innerHTML = html;
     expect(
-      screen.getByRole("status", { name: "Loading awards" }),
+      screen.getByRole("region", { name: "Selected awards" }),
     ).toBeInTheDocument();
-    expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   },
 );
 

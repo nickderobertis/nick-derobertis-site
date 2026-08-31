@@ -69,4 +69,4 @@ declare module '@tanstack/react-start' {
   }
 }
 
-// llmlint: ignore-end[suppressions_justified]
+// llmlint: ignore-end[suppressions_justified, comments_earn_their_place]

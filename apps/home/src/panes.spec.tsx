@@ -82,10 +82,10 @@ test("mounts a visitor who entered at the home route straight onto its panes", a
   expect(
     screen.getByRole("region", { name: "Educated and Experienced" }),
   ).toBeInTheDocument();
-  // Awards is the one pane whose data is fetched, and the entry path
-  // deliberately leaves it to mount on its own skeleton so hydration matches.
+  // Awards now shares its committed initial data with Start's fragment, so the
+  // entry path can hydrate the resolved pane without a mismatched skeleton.
   expect(
-    screen.getByRole("status", { name: "Loading awards" }),
+    screen.getByRole("region", { name: "Selected awards" }),
   ).toBeInTheDocument();
 });
 

@@ -190,6 +190,45 @@ test(
 );
 
 test(
+  "hydrates Start's resolved awards without replacing them with a loading frame",
+  moduleGraphCeiling,
+  async () => {
+    serveAwards(async () => awardsResponse(awards));
+    const { useAwards } = await import("./use-awards");
+
+    const { result } = renderHook(() => useAwards(awards));
+
+    expect(result.current).toEqual({ name: "ready", awards });
+    await waitFor(() => expect(requested).toHaveLength(1));
+    expect(result.current).toEqual({ name: "ready", awards });
+  },
+);
+
+test(
+  "replaces Start's committed awards while loading a requested preview scenario",
+  moduleGraphCeiling,
+  async () => {
+    window.history.replaceState(null, "", "/?awards-scenario=empty");
+    let respond: (() => void) | undefined;
+    serveAwards(async () => {
+      await new Promise<void>((resolve) => {
+        respond = resolve;
+      });
+      return awardsResponse([]);
+    });
+    const { useAwards } = await import("./use-awards");
+
+    const { result } = renderHook(() => useAwards(awards));
+
+    await waitFor(() => expect(result.current).toEqual({ name: "loading" }));
+    await act(async () => respond?.());
+    await waitFor(() =>
+      expect(result.current).toEqual({ name: "ready", awards: [] }),
+    );
+  },
+);
+
+test(
   "lets the pane make its own request after a warm that could not reach the CV",
   moduleGraphCeiling,
   async () => {
