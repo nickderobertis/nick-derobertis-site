@@ -95,14 +95,13 @@ describe("what CV data each feature's build graph can reach", () => {
     );
   });
 
-  it("leaves the awards pane reaching no CV data at all", () => {
-    // Awards fetches its published slice and validates the response, so its
-    // bundle holds the validators and none of the data. It is the control for
-    // the five above: the same walk over a pane that reads a CV domain without
-    // bundling one comes back empty.
+  it("gives the Start-prerendered awards pane only its own CV data", () => {
+    // Start renders Awards during its build, so the route imports the committed
+    // slice as validated loader data. The browser still refreshes that initial
+    // value from the published slice when a scenario query is present.
     expect(
       cvDataReachableFrom(appSourceModules("awards")).payloadFiles,
-    ).toEqual([]);
+    ).toEqual([domainFile("awards")]);
   });
 
   it("still finds all seven files where they really are", () => {
