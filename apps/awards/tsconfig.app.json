@@ -3,5 +3,12 @@
   "compilerOptions": {
     "types": ["node", "vitest/globals", "@testing-library/jest-dom/vitest"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "rspack.config.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "start/**/*.ts",
+    "start/**/*.tsx",
+    "rsbuild.config.ts",
+    "rspack.config.ts"
+  ]
 }

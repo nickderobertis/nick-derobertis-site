@@ -202,6 +202,25 @@ test("compose assembles a coherent site when one app's fragment is newer", async
   );
 });
 
+test("compose preserves a remote document produced by its own prerender", async () => {
+  const store = await writeContentStore({ awards: "beefbee" });
+  const awardsDocument = join(store.apps, "awards", "index.html");
+  await writeFile(
+    awardsDocument,
+    '<!doctype html><html lang="en"><head><title>Awards</title></head><body><div id="root" data-prerendered-remote="awards"><main class="awards-page"><h1>awards</h1><p>awards at revision beefbee</p></main></div><script class="$tsr">self.$_TSR={streamEnded:true}</script></body></html>',
+  );
+
+  await compose({ fragmentRoot: store.apps, output: store.output });
+
+  const staged = await readFile(
+    join(store.output, "remotes", "awards", "index.html"),
+    "utf8",
+  );
+  expect(staged).toContain('data-prerendered-remote="awards"');
+  expect(staged).toContain("awards at revision beefbee");
+  expect(staged).toContain('class="$tsr"');
+});
+
 test("compose stages every app's bundle and withholds its fragment inputs", async () => {
   const store = await writeContentStore({ shell: "5ce11ed", bio: "b10b10b" });
 

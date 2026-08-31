@@ -166,6 +166,37 @@ async function totalBytes(directory, files) {
   return bytes;
 }
 
+async function manifestPageChunks(directory) {
+  let manifest;
+  try {
+    manifest = JSON.parse(
+      await readFile(join(directory, "mf-manifest.json"), "utf8"),
+    );
+  } catch {
+    return undefined;
+  }
+  const exposes = manifest?.exposes;
+  if (!Array.isArray(exposes))
+    throw new BudgetRefusal(
+      `${join(directory, "mf-manifest.json")} has no exposes array; rebuild that app and rerun just prerender.`,
+    );
+  const page = exposes.find((expose) => expose?.path === pageExpose);
+  const sync = page?.assets?.js?.sync;
+  const async = page?.assets?.js?.async;
+  if (!Array.isArray(sync) || !Array.isArray(async))
+    throw new BudgetRefusal(
+      `${join(directory, "mf-manifest.json")} declares no ${pageExpose} JavaScript assets; rebuild that app and rerun just prerender.`,
+    );
+  const chunks = [...sync, ...async];
+  if (
+    !chunks.every((chunk) => typeof chunk === "string" && !chunk.includes("/"))
+  )
+    throw new BudgetRefusal(
+      `${join(directory, "mf-manifest.json")} names ${pageExpose} assets outside the app's published root; rebuild that app and rerun just prerender.`,
+    );
+  return chunks;
+}
+
 /**
  * The scripts an app's own document loads before anything else runs. This is
  * the eager entry: what a visitor pays for reaching the app at all, ahead of
@@ -231,6 +262,21 @@ async function measureApp(directory, publicPath) {
   const container = await readFile(join(directory, "remoteEntry.js"), "utf8");
   const resolve = chunkFileResolver(container);
   const exposed = exposedChunkIds(container, pageExpose);
+  if (!exposed || exposed.length === 0) {
+    const manifestChunks = await manifestPageChunks(directory);
+    if (manifestChunks)
+      return {
+        ...measured,
+        page: await totalBytes(
+          directory,
+          await reachableJsFiles(
+            directory,
+            manifestChunks.filter((chunk) => emitted.has(chunk)),
+            emitted,
+          ),
+        ),
+      };
+  }
   // A container whose expose map or chunk resolver cannot be read is refused
   // rather than measured as an app with no page: passing it through would
   // budget a remote at zero, and --rederive would write that zero down as the

@@ -471,17 +471,23 @@ export async function compose({
         join(destination, "index.html"),
         "utf8",
       );
-      if (!remoteDocument.includes('<div id="root"></div>'))
+      const emptyRoot = '<div id="root"></div>';
+      const prerenderedRoot = `id="root" data-prerendered-remote="${name}"`;
+      if (
+        !remoteDocument.includes(emptyRoot) &&
+        !remoteDocument.includes(prerenderedRoot)
+      )
         throw new Error(
-          `The published ${name} remote document lacks its root placeholder. Rebuild ${name} and rerun just prerender.`,
+          `The published ${name} remote document lacks its root placeholder or owned prerender. Rebuild ${name} and rerun just prerender.`,
         );
-      await writeFile(
-        join(destination, "index.html"),
-        remoteDocument.replace(
-          '<div id="root"></div>',
-          `<div id="root" data-prerendered-remote="${name}">${fragments.get(name)?.html ?? ""}</div>`,
-        ),
-      );
+      if (remoteDocument.includes(emptyRoot))
+        await writeFile(
+          join(destination, "index.html"),
+          remoteDocument.replace(
+            emptyRoot,
+            `<div id="root" data-prerendered-remote="${name}">${fragments.get(name)?.html ?? ""}</div>`,
+          ),
+        );
     }
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);

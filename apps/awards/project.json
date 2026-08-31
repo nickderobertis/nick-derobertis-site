@@ -27,22 +27,17 @@
       }
     },
     "build": {
-      "executor": "@nx/rspack:rspack",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{options.outputPath}",
+        "{workspaceRoot}/dist/apps/awards",
         "{workspaceRoot}/dist/mf-types/remotes/awards",
         "{workspaceRoot}/dist/mf-types/remotes/awards.zip",
-        "{options.outputPath}/fragment.html",
-        "{options.outputPath}/fragment.css",
-        "{options.outputPath}/fragment.json"
+        "{workspaceRoot}/dist/apps/awards/fragment.html",
+        "{workspaceRoot}/dist/apps/awards/fragment.css",
+        "{workspaceRoot}/dist/apps/awards/fragment.json"
       ],
       "options": {
-        "rspackConfig": "apps/awards/rspack.config.ts",
-        "outputPath": "dist/apps/awards",
-        "main": "apps/awards/src/main.tsx",
-        "tsConfig": "apps/awards/tsconfig.app.json",
-        "index": "apps/awards/src/index.html",
-        "assets": []
+        "command": "rsbuild build --config apps/awards/rsbuild.config.ts"
       }
     },
     "lint": {
@@ -69,8 +64,10 @@
       }
     },
     "serve": {
-      "executor": "@nx/rspack:dev-server",
-      "options": { "buildTarget": "awards:build" }
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "rsbuild dev --config apps/awards/rsbuild.config.ts"
+      }
     }
   }
 }
