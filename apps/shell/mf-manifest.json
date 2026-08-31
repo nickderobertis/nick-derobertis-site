@@ -25,6 +25,68 @@
   },
   "shared": [
     {
+      "id": "shell:@site/data-access-core/validators",
+      "name": "@site/data-access-core/validators",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "785.ef75818012e3d730.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "shell:@site/design-system",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.fb30bbb212badbc6.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "shell:@site/route-state",
+      "name": "@site/route-state",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "107.c38500683b0ce28d.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
       "id": "shell:react-dom",
       "name": "react-dom",
       "version": "19.2.7",
@@ -34,13 +96,13 @@
         "js": {
           "async": [],
           "sync": [
-            "main.46e92bbc74d54112.js"
+            "main.499e76d0bbe70db2.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.54f66e2cb1650b2e.css"
+            "main.e4fe399c5c91eb85.css"
           ]
         }
       },
@@ -56,14 +118,34 @@
         "js": {
           "async": [],
           "sync": [
-            "main.46e92bbc74d54112.js"
+            "main.499e76d0bbe70db2.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.54f66e2cb1650b2e.css"
+            "main.e4fe399c5c91eb85.css"
           ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "shell:zod",
+      "name": "zod",
+      "version": "4.4.3",
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.2f795a9361b9e9ef.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
         }
       },
       "fallback": ""
