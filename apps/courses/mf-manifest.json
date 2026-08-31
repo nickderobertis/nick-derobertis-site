@@ -25,6 +25,68 @@
   },
   "shared": [
     {
+      "id": "courses:@site/data-access-core/validators",
+      "name": "@site/data-access-core/validators",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "785.ebfdd7512f4ac58e.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "courses:@site/design-system",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "241.5f1fc53ace917734.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "courses:@site/route-state",
+      "name": "@site/route-state",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "107.21de4b53048601af.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
       "id": "courses:react-dom",
       "name": "react-dom",
       "version": "19.2.7",
@@ -35,13 +97,13 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.10a5520f53377dc4.js"
+            "main.585df6ca26e25e81.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.e6fa01f060a5b602.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
         }
       },
@@ -58,14 +120,34 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.10a5520f53377dc4.js"
+            "main.585df6ca26e25e81.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.e6fa01f060a5b602.css"
+            "main.8e6a99df7fb75c0d.css"
           ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "courses:zod",
+      "name": "zod",
+      "version": "4.4.3",
+      "singleton": true,
+      "requiredVersion": "^4.4.3",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "581.fe6ab338427e606a.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
         }
       },
       "fallback": ""
@@ -79,16 +161,20 @@
       "assets": {
         "js": {
           "sync": [
-            "399.a99d8125716c4a94.js",
-            "__federation_expose_Page.eebfc557ee63fb0e.js"
+            "117.00a114f1ed0e217b.js",
+            "__federation_expose_Page.35715bb3c3cfc16b.js"
           ],
-          "async": []
+          "async": [
+            "459.73419d66b9094a95.js"
+          ]
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.e6fa01f060a5b602.css"
+            "__federation_expose_Page.d54c5dae76e49f7e.css"
           ],
-          "async": []
+          "async": [
+            "241.8e6a99df7fb75c0d.css"
+          ]
         }
       },
       "path": "./Page"
