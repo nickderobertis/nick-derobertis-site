@@ -292,6 +292,7 @@ fi
 # so node_modules is normally already here; that is an inference about another
 # command's success rather than a guarantee, and `mkdir -p` costs nothing when it
 # holds.
+# llmlint: ignore[changed_behavior_has_e2e] This local Git-hook filesystem preflight has no browser or render path, and it runs before any capture exists to render: visual-guard-hook.spec.ts drives the real hook as a subprocess over a worktree with no node_modules and asserts, at the instant the capture container would start, that this mkdir created its mountpoint owned by the invoking user rather than leaving it for Docker to create as root.
 mkdir -p "$container_scratch/node_modules" "$container_scratch/home" \
   "$container_scratch/bin" node_modules ||
   block_push "Could not create the capture container's scratch directories or its node_modules mountpoint (error above)."

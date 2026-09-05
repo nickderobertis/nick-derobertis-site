@@ -243,7 +243,6 @@ beforeAll(() => {
     "--detach",
     git("rev-parse", "HEAD"),
   ]);
-  // Deliberately no node_modules symlink here.
   captureVisual = writeVisualRange(
     captureClone,
     path.join(cloneRoot, "capture-index"),
@@ -383,29 +382,54 @@ for arg in "$@"; do
   fi
   prev="$arg"
 done
-echo 'the capture container could not be started' >&2
+echo "docker: this fixture records the capture invocation and never starts a container, so the capture failed by construction." >&2
+echo "docker: its argv is recorded at ${argvFile} and the host paths it would have written into at ${hostPathsFile}; read those, or run the guard against a real daemon to capture for real." >&2
 exit 1
 `,
   );
   chmodSync(docker, 0o755);
+  // Both records come back from a subprocess, so they are read as untrusted
+  // input: a truncated or malformed one would otherwise be asserted against as
+  // though the container had been invoked that way, and report the fixture's own
+  // breakage as the hook's.
+  const readArgv = (): string[] => {
+    const fields = readFileSync(argvFile, "utf8").split("\0");
+    const argv = fields.slice(0, -1);
+    if (fields.at(-1) !== "" || argv[0] !== "run") {
+      throw new Error(
+        `the recorded capture invocation is not a NUL-terminated 'docker run' argv: ${JSON.stringify(fields.slice(0, 4))}`,
+      );
+    }
+    return argv;
+  };
+  const readHostPaths = (): Map<string, string> => {
+    const observed = new Map<string, string>();
+    for (const line of readFileSync(hostPathsFile, "utf8").split("\n")) {
+      if (line === "") {
+        continue;
+      }
+      const fields = line.split("\t");
+      const [label, state] = fields;
+      if (fields.length !== 2 || label === undefined || state === undefined) {
+        throw new Error(
+          `a recorded host path is not a <label>TAB<state> pair: ${JSON.stringify(line)}`,
+        );
+      }
+      observed.set(label, state);
+    }
+    if (observed.size === 0) {
+      throw new Error("no host paths were recorded when the container started");
+    }
+    return observed;
+  };
   return {
     PATH: `${shim}${path.delimiter}${CLEAN_PATH}`,
-    argv: () => readFileSync(argvFile, "utf8").split("\0").slice(0, -1),
-    hostPaths: () =>
-      new Map(
-        readFileSync(hostPathsFile, "utf8")
-          .split("\n")
-          .filter((line) => line !== "")
-          .map((line) => {
-            const [label, owner] = line.split("\t");
-            return [label, owner] as [string, string];
-          }),
-      ),
+    argv: readArgv,
+    hostPaths: readHostPaths,
     cleanup: () => rmSync(shim, { force: true, recursive: true }),
   };
 }
 
-// The values a repeated `docker run` flag was given, in order.
 function valuesOf(argv: string[], flag: string): string[] {
   return argv.filter((_, index) => index > 0 && argv[index - 1] === flag);
 }
@@ -532,23 +556,11 @@ describe("visual guard pre-push hook", () => {
   });
   // llmlint: ignore-end[e2e_not_mocked]
 
-  // The capture container bind-mounts this worktree, so it runs as the pusher
-  // rather than as root: a root capture leaves ~39,000 files there that their
-  // owner cannot delete, and a disposable worktree reclaimed by a sweeper that
-  // is not root is then permanent residue. That mapping only works as a package
-  // of four, and none of the four can be carried without the others. A mapped
-  // uid cannot install into an anonymous Docker volume, which is created
-  // root-owned, so the node_modules mask is a host directory the hook made; it
-  // has no entry in the image's passwd file, so HOME is one too; Docker
-  // materializes a missing bind-mount destination as root, so the mask's
-  // mountpoint inside the tree is made here as well; and the scratch holding all
-  // of it goes away however the hook exits, including this refusal.
-  //
-  // The tree this runs in has no node_modules, which is the only state in which
-  // that third part is load-bearing: with nothing at /work/node_modules on the
-  // host, Docker is the one that creates it, and it creates it root-owned inside
-  // the bind mount. So the hook has to have made it — as the pusher, before
-  // `docker run` — and that is what the recorder observes.
+  // The four parts of the container-user contract, asserted where they are
+  // observable: at the instant the container would have started. This tree has
+  // no node_modules, which is the state that makes the mountpoint part
+  // load-bearing — with nothing there, whatever Docker creates it creates as
+  // root, inside the bind mount.
   // llmlint: ignore-block[e2e_not_mocked] The subject is the unchanged real hook subprocess over a real clone and a real filesystem, driven through git's push-ref stdin protocol; the two external providers are stood in for because Nx cannot run in the uninstalled tree this case requires and the real capture would run a containerized workspace install and browser capture — and would remove the host scratch whose ownership at container-start is exactly what this case has to observe. The capture container's own render path stays owned by the app screenshot targets the hook dispatches.
   test("the capture container runs as the pusher, over host paths already theirs", () => {
     const uid = process.getuid?.();
@@ -571,8 +583,6 @@ describe("visual guard pre-push hook", () => {
         remoteSha: captureVisual.base,
         env: { NX_DAEMON: "false", PATH: capture.PATH },
       });
-      // A container that cannot start is a refusal, and it names what it was
-      // capturing when it happened.
       expect(run.status).toBe(1);
       expect(run.stderr).toContain("PUSH BLOCKED");
       expect(run.stderr).toContain("Capturing courses");
@@ -588,11 +598,10 @@ describe("visual guard pre-push hook", () => {
       expect(containerCommand).toContain("pnpm install --frozen-lockfile");
       expect(containerCommand).toContain('nx run "$app:screenshot"');
 
-      // 1. It runs as the user who invoked the hook.
       expect(valuesOf(argv, "--user")).toEqual([hostUser]);
 
-      // 2. Every mount is a host path, and the one masking node_modules is a
-      //    directory that user already owned when the container started.
+      // Every mount is a host path: an anonymous volume would be root-owned,
+      // and a container mapped to this uid could not install into it.
       const mounts = valuesOf(argv, "-v");
       expect(mounts.filter((mount) => !mount.includes(":"))).toEqual([]);
       const mask = mounts.find((mount) =>
@@ -610,15 +619,14 @@ describe("visual guard pre-push hook", () => {
       // create there as root. It was absent until the hook ran.
       expect(observed.get("tree-node-modules")).toBe(`${hostUser} directory`);
 
-      // 3. HOME is a host directory that user owns, for a uid the image's
-      //    passwd file does not know.
+      // The mapped uid has no entry in the image's passwd file, so its home
+      // has to be one of these host directories.
       const home = valuesOf(argv, "-e").find((value) =>
         value.startsWith("HOME="),
       );
       expect(home).toBeDefined();
       expect(observed.get("home")).toBe(`${hostUser} directory`);
 
-      // 4. The scratch behind both is gone, on the way out of a refusal.
       expect(existsSync(path.dirname(maskSource))).toBe(false);
     } finally {
       capture.cleanup();
