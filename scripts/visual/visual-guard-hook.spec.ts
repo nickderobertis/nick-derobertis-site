@@ -353,7 +353,17 @@ exit 1
     docker,
     `#!/usr/bin/env bash
 set -uo pipefail
-if [ "\${1:-}" != "run" ]; then exit 0; fi
+# The hook reaches Docker two ways, and this answers those two and nothing else,
+# so it can never quietly stand in for a boundary this case is not about: the
+# daemon probe, which reports up, and the capture run, which is recorded below.
+case "\${1:-}" in
+  info) exit 0 ;;
+  run) ;;
+  *)
+    echo "docker: this fixture answers only 'docker info' and 'docker run'; asked for: $*" >&2
+    exit 1
+    ;;
+esac
 printf '%s\\0' "$@" >"${argvFile}"
 : >"${hostPathsFile}"
 record() {
