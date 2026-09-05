@@ -284,7 +284,17 @@ if ! container_scratch="$(mktemp -d "${TMPDIR:-/tmp}/screencomp-guard-XXXXXX")";
   # llmlint: ignore[changed_behavior_has_e2e] This local Git-hook failure has no browser render path; it guards scratch storage before any browser capture can start.
   block_push "Could not create a scratch directory for the capture container (error above)."
 fi
-mkdir -p "$container_scratch/node_modules" "$container_scratch/home" "$container_scratch/bin"
+# The mask's mountpoint has to exist in this worktree as well. Docker
+# materializes a missing bind-mount destination itself, and it does that as root
+# — planting inside the bind-mounted tree exactly the root-owned residue the user
+# mapping above exists to prevent, in the one directory nothing here would think
+# to look at. `pnpm exec nx` above only ran because this worktree is installed,
+# so node_modules is normally already here; that is an inference about another
+# command's success rather than a guarantee, and `mkdir -p` costs nothing when it
+# holds.
+mkdir -p "$container_scratch/node_modules" "$container_scratch/home" \
+  "$container_scratch/bin" node_modules ||
+  block_push "Could not create the capture container's scratch directories or its node_modules mountpoint (error above)."
 
 # Pass the host CA bundle into the container so a TLS-intercepting proxy does not
 # break `pnpm install`; no-op when none is configured.
