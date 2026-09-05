@@ -176,12 +176,9 @@ let repoVisual: PushRange;
 // writes stays inside a disposable tree.
 let installedClone: string;
 let installedVisual: PushRange;
-// A third clone, for the one test that reaches the capture container — and the
-// only one with NO node_modules at all, which is the state that test is about:
-// the container's /work/node_modules mountpoint has to exist in the tree before
-// Docker starts, because Docker creates a missing bind-mount destination itself
-// and creates it as root. No other test may touch this tree, since what the hook
-// created in it is the assertion.
+// A third clone with NO node_modules, for the one test that reaches the capture
+// container: what the hook creates in this tree is that test's assertion, so no
+// other test may touch it.
 let captureClone: string;
 let captureVisual: PushRange;
 let docsOnlyHead: string;
@@ -301,25 +298,12 @@ function dockerUnavailableFixture(): { PATH: string; cleanup: () => void } {
   };
 }
 
-// The two boundaries between an uninstalled worktree and the capture container,
-// so the hook can be driven over the whole of that stretch for real.
-//
-// `pnpm exec nx show projects` is the first. It is the reason no test could
-// reach the capture step from a tree with no node_modules: Nx cannot load this
-// workspace's own plugins from an uninstalled tree — it reports "Failed to load
-// 1 Nx plugin(s): ./scripts/workspace/federation-plugin.mjs" and exits nonzero —
-// and an uninstalled tree is precisely the state the capture step has to be
-// observed in. The stand-in answers that one query and refuses every other, so
-// it can never quietly answer for a boundary this case is not about. Real
-// affected-project discovery stays covered by the two tests above, which run the
-// real `pnpm exec nx` in an installed clone and reach the same app.
-//
-// Docker is the second, and it also has to record. What this case asserts cannot
-// be read back after the hook returns: the host scratch the container writes
-// into is removed on the way out, so ownership has to be observed at the instant
-// the container would have started. The stand-in reports the daemon up, records
-// that instant, and then fails the way a container that cannot start does —
-// which is a refusal path the hook owns.
+// Stand-ins for the two providers between an uninstalled worktree and the
+// capture container. Nx cannot load this workspace's own plugins from a tree
+// with no node_modules — the state the capture step has to be observed in — and
+// the host scratch Docker would write into is removed as the hook exits, so
+// ownership has to be recorded at the instant the container would have started.
+// Real affected-project discovery stays covered by the two tests above.
 // llmlint: ignore[e2e_not_mocked] The layer under test is the unchanged real pre-push hook subprocess, driven over git's stdin protocol against a real clone and a real filesystem; these executable doubles stand in only for the two external providers, because Nx cannot run in the uninstalled tree this case requires and the real capture would run a containerized workspace install and browser capture that deletes the very scratch state this case exists to observe.
 function captureBoundaryFixture(): {
   PATH: string;
@@ -353,9 +337,8 @@ exit 1
     docker,
     `#!/usr/bin/env bash
 set -uo pipefail
-# The hook reaches Docker two ways, and this answers those two and nothing else,
-# so it can never quietly stand in for a boundary this case is not about: the
-# daemon probe, which reports up, and the capture run, which is recorded below.
+# Two Docker calls and no others, so this can never quietly stand in for a
+# boundary the case is not about: the daemon probe, and the capture run.
 case "\${1:-}" in
   info) exit 0 ;;
   run) ;;
@@ -374,13 +357,34 @@ record() {
   fi
 }
 record tree-node-modules "$PWD/node_modules"
+# Every path recorded below is derived from Docker's own argument grammar, so
+# each argument is refused unless it already has the form it is about to be read
+# as: an unvalidated one would be recorded as a plausible host path and asserted
+# against as though the container had been invoked that way.
+refuse() {
+  printf 'refused\\t%s\\n' "$1" >>"${hostPathsFile}"
+  echo "docker: $1" >&2
+  exit 2
+}
 home=""
+prev=""
 for arg in "$@"; do
-  case "$arg" in HOME=*) home="\${arg#HOME=}" ;; esac
+  if [ "$prev" = "-e" ]; then
+    case "$arg" in
+      HOME=/*) home="\${arg#HOME=}" ;;
+      HOME=*) refuse "the container HOME is not an absolute path: $arg" ;;
+    esac
+  fi
+  prev="$arg"
 done
+[ -n "$home" ] || refuse "the capture invocation passes no -e HOME=<absolute path>"
 prev=""
 for arg in "$@"; do
   if [ "$prev" = "-v" ]; then
+    case "$arg" in
+      /*:/*) ;;
+      *) refuse "a -v value is not <host path>:<container path>[:options]: $arg" ;;
+    esac
     src="\${arg%%:*}"
     dest="\${arg#*:}"
     dest="\${dest%%:*}"
@@ -426,6 +430,12 @@ exit 1
         );
       }
       observed.set(label, state);
+    }
+    const refusal = observed.get("refused");
+    if (refusal !== undefined) {
+      throw new Error(
+        `the capture fixture refused the invocation it was asked to record: ${refusal}`,
+      );
     }
     if (observed.size === 0) {
       throw new Error("no host paths were recorded when the container started");
@@ -566,11 +576,8 @@ describe("visual guard pre-push hook", () => {
   });
   // llmlint: ignore-end[e2e_not_mocked]
 
-  // The four parts of the container-user contract, asserted where they are
-  // observable: at the instant the container would have started. This tree has
-  // no node_modules, which is the state that makes the mountpoint part
-  // load-bearing — with nothing there, whatever Docker creates it creates as
-  // root, inside the bind mount.
+  // The four parts of the container-user contract, asserted at the one instant
+  // they are observable: when the container would have started.
   // llmlint: ignore-block[e2e_not_mocked] The subject is the unchanged real hook subprocess over a real clone and a real filesystem, driven through git's push-ref stdin protocol; the two external providers are stood in for because Nx cannot run in the uninstalled tree this case requires and the real capture would run a containerized workspace install and browser capture — and would remove the host scratch whose ownership at container-start is exactly what this case has to observe. The capture container's own render path stays owned by the app screenshot targets the hook dispatches.
   test("the capture container runs as the pusher, over host paths already theirs", () => {
     const uid = process.getuid?.();
@@ -582,8 +589,6 @@ describe("visual guard pre-push hook", () => {
     }
     const hostUser = `${uid}:${gid}`;
     const treeMountpoint = path.join(captureClone, "node_modules");
-    // Nothing here for Docker to find, and so nothing but the hook can have put
-    // it there by the time the container starts.
     expect(existsSync(treeMountpoint)).toBe(false);
     const capture = captureBoundaryFixture();
     try {
@@ -600,9 +605,7 @@ describe("visual guard pre-push hook", () => {
       const argv = capture.argv();
       const observed = capture.hostPaths();
       const containerCommand = argv.at(-1) ?? "";
-      // This repository's adaptations reached the container intact: the app Nx
-      // reported affected, and the corepack-installed pnpm that installs the
-      // workspace before the screenshot target runs.
+      // This repository's adaptations reached the container intact.
       expect(valuesOf(argv, "-e")).toContain("SCREENCOMP_APPS=courses");
       expect(containerCommand).toContain("corepack enable");
       expect(containerCommand).toContain("pnpm install --frozen-lockfile");
@@ -641,8 +644,7 @@ describe("visual guard pre-push hook", () => {
     } finally {
       capture.cleanup();
     }
-    // The mountpoint the hook made outlives it, owned by the pusher: it is a
-    // real directory in the tree, not a root-owned one Docker left behind.
+    // The mountpoint outlives the hook as the pusher's, not as root's.
     expect(statSync(treeMountpoint).uid).toBe(uid);
     expect(statSync(treeMountpoint).isDirectory()).toBe(true);
   });
