@@ -304,7 +304,7 @@ function dockerUnavailableFixture(): { PATH: string; cleanup: () => void } {
 // the host scratch Docker would write into is removed as the hook exits, so
 // ownership has to be recorded at the instant the container would have started.
 // Real affected-project discovery stays covered by the two tests above.
-// llmlint: ignore[e2e_not_mocked] The layer under test is the unchanged real pre-push hook subprocess, driven over git's stdin protocol against a real clone and a real filesystem; these executable doubles stand in only for the two external providers, because Nx cannot run in the uninstalled tree this case requires and the real capture would run a containerized workspace install and browser capture that deletes the very scratch state this case exists to observe.
+// llmlint: ignore[e2e_not_mocked] The subject is the unchanged real hook subprocess over a real clone and filesystem; these doubles stand in only for the two external providers, neither of which can run here — Nx cannot load this workspace from an uninstalled tree, and a real capture would delete the scratch state this case observes.
 function captureBoundaryFixture(): {
   PATH: string;
   argv: () => string[];
@@ -315,7 +315,7 @@ function captureBoundaryFixture(): {
   const argvFile = path.join(shim, "argv");
   const hostPathsFile = path.join(shim, "host-paths");
   const pnpm = path.join(shim, "pnpm");
-  // llmlint: ignore[e2e_not_mocked] This replaces only the external Nx project-graph query, which cannot run at all in the uninstalled worktree under test; the hook's own JSON validation, filesystem work, and capture invocation downstream of it are the unmodified real thing.
+  // llmlint: ignore[e2e_not_mocked] This replaces only the external Nx project-graph query, which cannot run in the uninstalled worktree under test; everything downstream of it in the hook is the unmodified real thing.
   writeFileSync(
     pnpm,
     `#!/usr/bin/env bash
@@ -332,7 +332,7 @@ exit 1
   const docker = path.join(shim, "docker");
   // NUL-separated, because the capture invocation's last argument is a whole
   // shell script and a line-separated record could not be split back into it.
-  // llmlint: ignore[e2e_not_mocked] This replaces only the external Docker CLI, reporting the daemon's real "up" status and a real container-start failure; spawnSync still drives the unmodified hook through its public stdin/environment boundary.
+  // llmlint: ignore[e2e_not_mocked] This replaces only the external Docker CLI; spawnSync still drives the unmodified hook through its public stdin/environment boundary.
   writeFileSync(
     docker,
     `#!/usr/bin/env bash
@@ -578,7 +578,7 @@ describe("visual guard pre-push hook", () => {
 
   // The four parts of the container-user contract, asserted at the one instant
   // they are observable: when the container would have started.
-  // llmlint: ignore-block[e2e_not_mocked] The subject is the unchanged real hook subprocess over a real clone and a real filesystem, driven through git's push-ref stdin protocol; the two external providers are stood in for because Nx cannot run in the uninstalled tree this case requires and the real capture would run a containerized workspace install and browser capture — and would remove the host scratch whose ownership at container-start is exactly what this case has to observe. The capture container's own render path stays owned by the app screenshot targets the hook dispatches.
+  // llmlint: ignore-block[e2e_not_mocked] The subject is the unchanged real hook subprocess over a real clone and filesystem; the two external providers are stood in for because Nx cannot run in the uninstalled tree this case requires and a real capture would remove the host scratch whose ownership at container-start is what this case observes. The capture's own render path stays owned by the app screenshot targets the hook dispatches.
   test("the capture container runs as the pusher, over host paths already theirs", () => {
     const uid = process.getuid?.();
     const gid = process.getgid?.();
@@ -605,7 +605,6 @@ describe("visual guard pre-push hook", () => {
       const argv = capture.argv();
       const observed = capture.hostPaths();
       const containerCommand = argv.at(-1) ?? "";
-      // This repository's adaptations reached the container intact.
       expect(valuesOf(argv, "-e")).toContain("SCREENCOMP_APPS=courses");
       expect(containerCommand).toContain("corepack enable");
       expect(containerCommand).toContain("pnpm install --frozen-lockfile");

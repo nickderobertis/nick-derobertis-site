@@ -288,10 +288,11 @@ fi
 # missing bind-mount destination itself, and as root — planting inside the
 # bind-mounted tree exactly the root-owned residue the user mapping above exists
 # to prevent, in the one directory nothing here would think to look at.
-# llmlint: ignore[changed_behavior_has_e2e] This local Git-hook filesystem preflight has no browser or render path, and it runs before any capture exists to render: visual-guard-hook.spec.ts drives the real hook as a subprocess over a worktree with no node_modules and asserts, at the instant the capture container would start, that this mkdir created its mountpoint owned by the invoking user rather than leaving it for Docker to create as root.
+# llmlint: ignore-block[changed_behavior_has_e2e] This filesystem preflight has no browser or render path and runs before any capture exists to render; visual-guard-hook.spec.ts drives the real hook over a worktree with no node_modules and asserts this mountpoint's owner at the instant the container would start.
 mkdir -p "$container_scratch/node_modules" "$container_scratch/home" \
   "$container_scratch/bin" node_modules ||
   block_push "Could not create the capture container's scratch directories or its node_modules mountpoint (error above)."
+# llmlint: ignore-end[changed_behavior_has_e2e]
 
 # Pass the host CA bundle into the container so a TLS-intercepting proxy does not
 # break `pnpm install`; no-op when none is configured.
