@@ -130,7 +130,7 @@ screenshots out of `just check` — so there is no recipe to record here. The
 local command is the `.githooks/pre-push` guard (enabled once per clone with
 `git config core.hooksPath .githooks`), which captures the affected
 microfrontends in screencomp's pinned container and classifies them with the
-pinned `screencomp v0.4.5` against each app's committed manifest; CI runs the
+pinned `screencomp v0.4.8` against each app's committed manifest; CI runs the
 same classification as the `Visual docs` workflow's `classify-gate`. Over this
 branch it is clean:
 
