@@ -90,11 +90,11 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5
+    uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.8
     with:
       projects: ${{ needs.affected.outputs.projects || '[]' }}
       container: mcr.microsoft.com/playwright:v1.61.1-noble
-      screencomp-version: v0.4.5
+      screencomp-version: v0.4.8
       gallery-title: Nick DeRobertis site visual docs
       fail-on-drift: true
       pages-repository: nickderobertis/nick-derobertis-site-visual-docs

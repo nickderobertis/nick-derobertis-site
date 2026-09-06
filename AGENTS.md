@@ -11,7 +11,7 @@
 Use pnpm; never add backend or runtime API infrastructure. The shell owns routing and layout. It consumes five route remotes; Home is itself a host for seven feature remotes. Remotes expose only route pages and compose only declared child remotes. Libraries flow `shared -> layout -> shell`, enforced by Nx tags. See `docs/architecture.md`.
 
 Visual regression uses screencomp's canonical reusable workflow
-(`nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.5`)
+(`nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.8`)
 via `.github/workflows/visual-docs.yml`, superseding the prior hand-rolled
 capture/classify/gallery/comment/Pages pipeline (whose host-based capture proof
 `docs/integration-proof.md` records). Capture is owned by screencomp's pinned
@@ -35,7 +35,7 @@ There is no root index; the aggregated pull-request comment carries the direct
 links and is the intended entry point. Only affected projects are deployed, so
 most projects have no gallery at any given moment. Galleries cannot be hosted
 on this repository's `gh-pages` branch because its production Pages site is
-served from an Actions artifact, so GitHub does not serve that branch. Pin screencomp `v0.4.5`
+served from an Actions artifact, so GitHub does not serve that branch. Pin screencomp `v0.4.8`
 consistently across the
 reusable-workflow ref, the `screencomp-version` input, and the bootstrap CLI
 install; `scripts/visual/verify-visual-contract.mjs` guards that and the toggle/baseline
