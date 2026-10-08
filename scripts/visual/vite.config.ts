@@ -9,6 +9,7 @@ export default defineConfig({
     include: [
       "scripts/visual/visual-affected.spec.ts",
       "scripts/visual/visual-guard-hook.spec.ts",
+      "scripts/visual/llmlint-pre-push-hook.spec.ts",
     ],
     environment: "node",
     // A test here costs whatever its subject's real work costs — set by the
