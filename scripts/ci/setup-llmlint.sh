@@ -3,8 +3,12 @@
 # llmlint: ignore-file[changed_behavior_has_e2e,tool_output_is_signal,boundary_inputs_validated] This developer-only PyPI installer has no browser interface. It deliberately logs and continues so registry availability cannot block a session; uv validates the registry packages before executing their installed entry points.
 set -uo pipefail
 
-# 0.3.17 supplies the diff scoping and deterministic validation used by justfile.
-readonly LLMLINT_MIN="0.3.17"
+# 0.3.23 is the floor: it finds `oneharness` beside its own executable, restricts
+# `--diff` to changed files with merge-base `--diff-base` semantics, ships the
+# model-free `validate` gate `just lint-llm-validate` and the pre-push hook run,
+# and bundles config_lint v1.2 so `line_localizable_rules_require_attribution`
+# is enforced.
+readonly LLMLINT_MIN="0.3.23"
 readonly BIN_DIR="$HOME/.local/bin"
 
 log() { printf 'setup-llmlint: %s\n' "$*" >&2; }
