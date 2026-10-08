@@ -1,0 +1,37 @@
+# Comment on each pull request with the lint and type-check suppressions it adds,
+# so a reviewer sees every new bypass without reading the diff line by line.
+#
+# Deliberately NOT a required status check. It skips fork pull requests (whose
+# read-only token cannot upsert a comment), and a required context that never
+# reports would block them forever. It is a review artifact, not a gate — the gate
+# is `just check`, reported as the `check` context by ci.yml.
+
+name: notignored
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# Cancel superseded runs on the same ref: only the newest comment is wanted.
+concurrency:
+  group: notignored-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  suppressions:
+    # A fork's pull request is granted a read-only token, so the comment upsert
+    # would fail on something the contributor has no way to fix.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The scan diffs against the base branch, which a shallow checkout omits.
+          fetch-depth: 0
+
+      # `@v0` follows every released 0.x, so fixes arrive without a pin bump.
+      # llmlint: ignore[changed_behavior_has_e2e] This posts a review comment through GitHub's API, which only a live pull request can exercise; the job's event selection and fork guard were driven with act against same-repository, fork and push payloads, and the scan the action runs was driven through the real notignored CLI on commits with and without a suppression.
+      - uses: nickderobertis/notignored@v0

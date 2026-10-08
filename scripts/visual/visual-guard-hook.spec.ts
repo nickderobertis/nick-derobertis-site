@@ -41,15 +41,28 @@ if (SUBPROCESS_HOME === undefined || SUBPROCESS_HOME === "") {
 // The test runner prepends this workspace's node_modules/.bin to PATH, which
 // would let an uninstalled clone resolve *this* repository's nx and defeat the
 // fixture. Strip those entries so "no workspace install" means it.
+//
+// The hook runs `llmlint validate` before the guard, and that step is
+// llmlint-pre-push-hook.spec.ts's subject. Whether llmlint is installed varies
+// by host — CI's check job does not install it — so every run here finds a
+// validate that passes quietly first, and what each test observes is the
+// visual guard alone.
+// llmlint: ignore[e2e_not_mocked] This double stands in only for the llmlint step that precedes the subject, which llmlint-pre-push-hook.spec.ts drives with the real llmlint; the visual guard under test here is the unmodified hook subprocess.
+const LLMLINT_PASSES = mkdtempSync(path.join(tmpdir(), "pre-push-llmlint-"));
+writeFileSync(path.join(LLMLINT_PASSES, "llmlint"), "#!/bin/sh\nexit 0\n", {
+  mode: 0o755,
+});
 // llmlint: ignore[boundary_inputs_validated] PATH is test-runner infrastructure, not product input; entries are preserved only to resolve the real git, bash, pnpm, node, and screencomp subprocesses, while workspace node_modules entries are deliberately removed for the uninstalled-clone fixture.
-const CLEAN_PATH = (process.env.PATH ?? "")
-  .split(path.delimiter)
-  .filter(
-    (entry) =>
-      entry !== "" &&
-      !path.resolve(entry).startsWith(path.join(REPO, "node_modules")),
-  )
-  .join(path.delimiter);
+const CLEAN_PATH = [
+  LLMLINT_PASSES,
+  ...(process.env.PATH ?? "")
+    .split(path.delimiter)
+    .filter(
+      (entry) =>
+        entry !== "" &&
+        !path.resolve(entry).startsWith(path.join(REPO, "node_modules")),
+    ),
+].join(path.delimiter);
 
 function git(...args: string[]): string {
   return execFileSync("git", args, { encoding: "utf8", input: "" }).trim();
@@ -277,6 +290,7 @@ beforeAll(() => {
 
 afterAll(() => {
   rmSync(cloneRoot, { force: true, recursive: true });
+  rmSync(LLMLINT_PASSES, { force: true, recursive: true });
 });
 
 // Docker down is how a real machine reports it: the client is installed, the

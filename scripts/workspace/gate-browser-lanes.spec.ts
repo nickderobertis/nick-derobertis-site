@@ -301,15 +301,15 @@ describe("the gate's browser lanes", () => {
     ]);
   });
 
-  it("leaves the non-affected sweep dispatching every project and the composed artifact", () => {
-    // check-all is CI's safety sweep over the whole workspace, deliberately
-    // unchanged: its `--all` run already reaches every project, so the shape
-    // asserted here is the one it had before the affected gate's lanes existed.
+  it("has the non-affected sweep dispatch the composed host's suite once, inside its --all run", () => {
+    // check-all is CI's safety sweep over the whole workspace. Its `--all` run
+    // already reaches every project, the shell included, and `e2e` is uncached,
+    // so a second `nx run shell:e2e` would run the heaviest suite twice on the
+    // same commit. The sweep's only browser dispatch is the run-many.
     const dispatched = gateDispatches("check-all");
 
     expect(browserDispatches(dispatched)).toEqual([
       "exec nx run-many -t e2e,screenshot --all --parallel=3",
-      "exec nx run shell:e2e",
     ]);
   });
 

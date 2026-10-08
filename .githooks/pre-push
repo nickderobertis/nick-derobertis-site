@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
-# screencomp local pre-push guard — the strict gate's local half, adapted for
-# this affected-only Nx monorepo.
+# Local pre-push hook: llmlint's model-free `validate` gate, then the screencomp
+# visual guard — the strict gate's local half, adapted for this affected-only Nx
+# monorepo.
+#
+# `llmlint validate` checks llmlint.yml, every `llmlint: ignore` directive, and
+# fragment version bumps in about a second with no model call, the same static
+# tier CI's llmlint job runs first. Without llmlint installed it says so and
+# skips; a failing validate refuses the push, but only once the visual guard
+# below has run too, so neither check hides the other's verdict.
 #
 # CI (.github/workflows/visual-docs.yml) hard-fails when a microfrontend's
 # capture drifts from its committed baseline manifest. This hook lets you
@@ -84,9 +91,52 @@ block_push() {
   exit 1
 }
 
-# No-op under CI: the visual-docs workflow already captures and classifies there.
+# No-op under CI: the visual-docs workflow already captures and classifies there,
+# and CI's llmlint job runs `llmlint validate` itself.
 if [ -n "${CI:-}" ]; then
   exit 0
+fi
+
+# Every exit below goes through this trap, which is how a failed llmlint
+# validate refuses the push without ending the hook before the visual guard has
+# reached its own verdict: an exit the guard meant as a pass becomes a refusal,
+# and one it meant as a refusal stays one.
+container_scratch=""
+llmlint_failed=""
+# llmlint: ignore[changed_behavior_has_e2e] This local Git-hook exit handler has no browser or render path; llmlint-pre-push-hook.spec.ts drives the real hook through git's pre-push stdin protocol and asserts a failed validate refuses a push the visual guard passed.
+# shellcheck disable=SC2329  # invoked by the EXIT trap below, not by name.
+finish() {
+  local status=$?
+  if [ -n "$container_scratch" ]; then rm -rf "$container_scratch"; fi
+  if [ -n "$llmlint_failed" ]; then
+    echo "pre-push: refusing the push because 'llmlint validate' failed (its output is above)." >&2
+    if [ "$status" -eq 0 ]; then exit 1; fi
+  fi
+  exit "$status"
+}
+trap finish EXIT
+
+# llmlint's static gate. It reads nothing from stdin, which still holds the push
+# refs the visual guard reads below. Quiet on a pass, like the guard.
+if command -v llmlint >/dev/null 2>&1; then
+  llmlint_args=(validate)
+  if git rev-parse --verify --quiet origin/HEAD >/dev/null; then
+    llmlint_args+=(--diff-base origin/HEAD)
+  fi
+  llmlint_output=""
+  if ! llmlint_output="$(llmlint "${llmlint_args[@]}" </dev/null 2>&1)"; then
+    llmlint_failed=1
+    {
+      echo
+      echo "pre-push: 'llmlint ${llmlint_args[*]}' failed:"
+      printf '%s\n' "$llmlint_output"
+      echo "          Fix the config or the ignore directives it names, then push again."
+      echo
+    } >&2
+  fi
+else
+  # llmlint: ignore[changed_behavior_has_e2e] This local Git-hook dependency skip has no browser render path; llmlint-pre-push-hook.spec.ts runs the real hook with llmlint absent from PATH and asserts the skip message and that the visual guard still runs.
+  echo "pre-push: llmlint is not installed, so 'llmlint validate' was skipped; install it with 'just setup-llmlint'." >&2
 fi
 
 # Without the CLI the guard cannot evaluate the push.
@@ -271,15 +321,7 @@ host_user="$(id -u):$(id -g)"
 # The anonymous Docker volume that used to provide it is created root-owned, so a
 # container running as the pusher cannot install into it. This scratch directory
 # supplies that mask and, because an arbitrary uid has no home inside the image,
-# the container HOME and corepack shim directory as well. It is removed when the
-# hook exits, however it exits.
-container_scratch=""
-# llmlint: ignore[changed_behavior_has_e2e] This local Git-hook cleanup handler has no browser or render path; it only removes the hook's own host-side scratch directory.
-# shellcheck disable=SC2329  # invoked by the EXIT trap below, not by name.
-remove_container_scratch() {
-  if [ -n "$container_scratch" ]; then rm -rf "$container_scratch"; fi
-}
-trap remove_container_scratch EXIT
+# the container HOME and corepack shim directory as well.
 if ! container_scratch="$(mktemp -d "${TMPDIR:-/tmp}/screencomp-guard-XXXXXX")"; then
   # llmlint: ignore[changed_behavior_has_e2e] This local Git-hook failure has no browser render path; it guards scratch storage before any browser capture can start.
   block_push "Could not create a scratch directory for the capture container (error above)."
