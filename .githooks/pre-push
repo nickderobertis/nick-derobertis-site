@@ -322,7 +322,6 @@ host_user="$(id -u):$(id -g)"
 # container running as the pusher cannot install into it. This scratch directory
 # supplies that mask and, because an arbitrary uid has no home inside the image,
 # the container HOME and corepack shim directory as well.
-# The EXIT trap installed above removes this directory however the hook exits.
 if ! container_scratch="$(mktemp -d "${TMPDIR:-/tmp}/screencomp-guard-XXXXXX")"; then
   # llmlint: ignore[changed_behavior_has_e2e] This local Git-hook failure has no browser render path; it guards scratch storage before any browser capture can start.
   block_push "Could not create a scratch directory for the capture container (error above)."

@@ -60,10 +60,6 @@ breaks deploys.
 <!-- llmlint: ignore[contracts_have_one_source_or_a_drift_gate] This contributor-facing ownership inventory is deliberately explicit; module-boundaries.spec.ts verifies every scripts project is tagged tooling and owns the required targets, while Nx remains the project source of truth. -->
 Use `just` as the only command surface. `just check` is the full pre-push gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is owned by the app whose scenarios it takes, never by a centralized script, and is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow, with the `.githooks/pre-push` guard as its local half (it re-captures only affected microfrontends when `[guard].paths` change and blocks the push until a regenerated baseline is committed).
 
-Before the visual guard, `.githooks/pre-push` runs `llmlint validate`. It skips
-with a message when llmlint is not installed, and a failure refuses the push only
-after the visual guard has run.
-
 Dependency freshness is checked with `pnpm outdated`; every dependency's
 `current` version must equal its `wanted` version. Major rspack and TypeScript
 updates remain outside those constraints until their Nx integrations support
@@ -89,17 +85,14 @@ Substantial scenarios must remain real-browser covered through both the standalo
 <!-- llmlint: ignore[instruction_layer_localized] Localizing the root instruction layer into nested per-project AGENTS.md files is tracked separately, and is out of scope for any change that does not itself alter subtree routing. This paragraph records where review routing lives; it adds no instruction that belongs in a subtree. -->
 Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override. `.github/CODEOWNERS` routes each subtree's review to its owner, so a change under `apps/`, `libs/`, `scripts/`, `docs/`, or `.github/` reaches that owner rather than whoever notices the pull request. The visual drift gate is requirable as the `Visual docs` workflow's `classify-gate` status check — a stable aggregate over screencomp's per-app classify legs (whose own matrix contexts, `visual-docs / report (x86_64, <app>, …)`, vary with the affected set), passing when classify is clean or when no visual microfrontend was affected.
 
-`.github/workflows/notignored.yml` comments each same-repository pull request
-with the suppressions it adds. It is a review artifact, not a required check: it
-skips fork pull requests, so requiring it would block them.
-
-Pull requests run the affected tier: `just check` with `NX_BASE` set to the
-merge base with `origin/master`. Every push to `master` runs the full sweep,
-`just check-all`, and that same push publishes the site to Pages (`pages.yml`).
-The site releases on merge — the merged commit is the deployed commit — so the
-broader tier runs at merge, and nothing later sweeps that commit again.
+<!-- llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] ci.yml and pages.yml are the single source of these triggers; these paragraphs record the decisions behind them, which create-repo's ci.md and llmlint.md require this section to state, and their reasons, which no workflow can carry. -->
+Pull requests run the affected tier against their merge base; the full sweep
+runs on every push to `master`, the same push that publishes the site to Pages.
+The site releases on merge, so the merged commit is the deployed one: the broader
+tier belongs there, and nothing later sweeps that commit again.
 
 Standing deviation: the `llmlint` job finishes green after static validation
 when `OPENAI_API_KEY` is absent. `just lint-llm-validate` still runs; only the
 model judge (`just lint-llm-diff`) is skipped, because GitHub withholds
 repository secrets from fork pull requests and those must still be able to pass.
+<!-- llmlint: ignore-end[contracts_have_one_source_or_a_drift_gate] -->

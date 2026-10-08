@@ -1,11 +1,5 @@
-# Comment on every pull request with the lint and type-check suppressions it adds.
-#
-# A `# noqa`, an `#[allow(dead_code)]`, an `llmlint: ignore` — each costs one line
-# to add and scrolls past review unremarked, and in agent-written code silencing a
-# rule is often easier than fixing it. notignored posts one sticky comment listing
-# the suppressions *this change introduced*, each with its rule, its stated reason,
-# and a link to the line — so a human reviewing at a high level sees every bypass
-# without reading the diff line by line. It is drop-in: no config, no install.
+# Comment on each pull request with the lint and type-check suppressions it adds,
+# so a reviewer sees every new bypass without reading the diff line by line.
 #
 # Deliberately NOT a required status check. It skips fork pull requests (whose
 # read-only token cannot upsert a comment), and a required context that never
@@ -17,7 +11,6 @@ name: notignored
 on:
   pull_request:
 
-# Least privilege: read the tree, write the one sticky comment, nothing else.
 permissions:
   contents: read
   pull-requests: write
@@ -39,10 +32,6 @@ jobs:
           # The scan diffs against the base branch, which a shallow checkout omits.
           fetch-depth: 0
 
-      # `@v0` is a floating major tag: it follows every 0.x release and moves only
-      # once that release's artifacts have published, so it never resolves to
-      # unreleased work. Pin exactly (`@v0.1.11`) only where a reproducible build
-      # matters more than picking up fixes. Every input has a usable default —
-      # `diff-base` is the PR's base branch, `paths` the whole repo — so a repo
-      # that wants the default review artifact passes none.
+      # `@v0` follows every released 0.x, so fixes arrive without a pin bump.
+      # llmlint: ignore[changed_behavior_has_e2e] This posts a review comment through GitHub's API, which only a live pull request can exercise; the job's event selection and fork guard were driven with act against same-repository, fork and push payloads, and the scan the action runs was driven through the real notignored CLI on commits with and without a suppression.
       - uses: nickderobertis/notignored@v0
