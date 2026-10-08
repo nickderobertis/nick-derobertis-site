@@ -128,10 +128,11 @@ beforeAll(() => {
     "fix(courses): a screenshot-relevant change",
   );
   // A suppression naming a rule llmlint.yml does not configure: the stale
-  // directive `llmlint validate` exists to catch.
+  // directive `llmlint validate` exists to catch. It is assembled at runtime so
+  // this file does not itself carry the directive validate would reject.
   staleHead = commitFile(
     "STALE_SUPPRESSION.md",
-    "<!-- llmlint: ignore[no_such_rule] this rule does not exist -->\nText.\n",
+    `<!-- ${"llmlint"}: ignore[no_such_rule] this rule does not exist -->\nText.\n`,
     "docs: a stale suppression",
   );
   // The hook validates the checked-out tree, so tests start from the one
