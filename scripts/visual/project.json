@@ -21,7 +21,14 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "scripts/ci/run-tooling-target.sh visual test vitest run --reporter=dot --maxWorkers=1 --config scripts/visual/vite.config.ts"
-      }
+      },
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/justfile",
+        "{workspaceRoot}/.githooks/**/*",
+        "{workspaceRoot}/apps/*/visual/baseline/*.json"
+      ]
     }
   }
 }

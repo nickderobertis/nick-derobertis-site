@@ -41,7 +41,6 @@ const sources = [
   ["workflow", readFileSync(".github/workflows/visual-docs.yml", "utf8")],
   ["bootstrap", readFileSync("justfile", "utf8")],
   ["repository instructions", readFileSync("AGENTS.md", "utf8")],
-  ["pre-push guard", readFileSync(".githooks/pre-push", "utf8")],
   ["screencomp config", readFileSync("screencomp.toml", "utf8")],
   [
     "affected selector",
@@ -204,11 +203,10 @@ const expectedConsumers = {
     "repository instructions",
     "screencomp config",
     "affected selector",
-    "pre-push guard",
     ...visualProjectNames.map((project) => `${project} screenshot target`),
   ],
   pagesRepository: ["workflow"],
-  playwrightContainer: ["workflow", "pre-push guard"],
+  playwrightContainer: ["workflow"],
   screencompVersion: ["workflow", "bootstrap", "repository instructions"],
 };
 for (const [key, value] of Object.entries(contract)) {
@@ -287,6 +285,4 @@ for (const value of [
       `Visual toggle value ${value} is missing from screencomp.toml`,
     );
 }
-console.log(
-  "visual tool contract matches workflow, pre-push guard, and screencomp config",
-);
+console.log("visual tool contract matches workflow and screencomp config");

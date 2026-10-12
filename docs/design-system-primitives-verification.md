@@ -127,12 +127,11 @@ is what caught the one real defect this change introduced (see below).
 
 Visual capture is deliberately off the `just` surface — `AGENTS.md` keeps
 screenshots out of `just check` — so there is no recipe to record here. The
-local command is the `.githooks/pre-push` guard (enabled once per clone with
-`git config core.hooksPath .githooks`), which captures the affected
-microfrontends in screencomp's pinned container and classifies them with the
-pinned `screencomp v0.4.8` against each app's committed manifest; CI runs the
-same classification as the `Visual docs` workflow's `classify-gate`. Over this
-branch it is clean:
+historical local verification used the former pre-push guard to capture and
+classify affected microfrontends. That hook has since been removed; CI owns
+classification through the `Visual docs` workflow's `classify-gate`, and manual
+screencomp capture and baseline commands remain available. The historical
+result over this branch was clean:
 
 ```
 awards         added 0 changed 0 removed 0 unchanged 27
@@ -254,7 +253,7 @@ branches, 100% functions, 99.46% lines.
 
 ### What the recipes above leave to CI
 
-`just check` is the whole pre-push gate: it dispatches the recipes above along
+`just check` is the whole manual verification gate: it dispatches the recipes above along
 with the `build` targets, and it is the pull request's required `check`.
 `just lint-llm-diff` is the judged tier, deliberately outside that gate and
 required separately as `llmlint`.

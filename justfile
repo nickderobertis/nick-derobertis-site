@@ -29,7 +29,7 @@ bootstrap-ci:
 lint-workflows:
     scripts/ci/setup-ci-tools.sh --verify >/dev/null
     .tools/bin/actionlint .github/workflows/*.yml || { echo "lint-workflows: GitHub workflow validation failed; fix the actionlint findings above, then rerun just lint-workflows" >&2; exit 1; }
-    .tools/bin/shellcheck scripts/ci/*.sh .githooks/pre-push || { echo "lint-workflows: shell validation failed; fix the shellcheck findings above, then rerun just lint-workflows" >&2; exit 1; }
+    .tools/bin/shellcheck scripts/ci/*.sh || { echo "lint-workflows: shell validation failed; fix the shellcheck findings above, then rerun just lint-workflows" >&2; exit 1; }
     # screencomp runs its injected capture callback with the container's /bin/sh,
     # and actionlint only shellchecks literal run: blocks, so check them as POSIX sh here.
     callbacks=$(mktemp -d); trap 'rm -rf "$callbacks"' EXIT; node scripts/visual/extract-injected-callbacks.mjs "$callbacks" >/dev/null && .tools/bin/shellcheck --shell=sh "$callbacks"/*.sh || { echo "lint-workflows: screencomp's injected capture callback is not valid POSIX sh; rewrite it without bash-only constructs, then rerun just lint-workflows" >&2; exit 1; }
@@ -69,7 +69,7 @@ check: lint-workflows
     @# llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
     @base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just check" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; pnpm exec biome check --error-on-warnings . >"$log" 2>&1 && CI=1 pnpm exec nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 pnpm exec nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 pnpm exec nx run-many -t e2e,screenshot -p "$lanes" --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
 
-# Canonical full pre-push gate used by orchestration and contributors.
+# Canonical manual verification gate used by orchestration and contributors.
 # llmlint: ignore[changed_behavior_has_e2e] This command-only alias has no browser interface and delegates unchanged to check, whose dispatched Playwright targets own real-browser coverage.
 gate: check
 

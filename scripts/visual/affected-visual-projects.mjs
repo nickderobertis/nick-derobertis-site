@@ -54,7 +54,7 @@ const projects = [...new Set(names)].sort().map((id) => {
   const manifest = `apps/${id}/visual/baseline/${ARCH}.json`;
   if (!existsSync(manifest))
     throw new Error(
-      `affected project ${id} has no committed baseline ${manifest}; seed it with the pre-push guard before enabling its screenshot target`,
+      `affected project ${id} has no committed baseline ${manifest}; seed it with manual screencomp capture and baseline commands before enabling its screenshot target`,
     );
   return {
     id,

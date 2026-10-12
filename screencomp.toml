@@ -1,9 +1,8 @@
 [capture]
 arches = ["x86_64"]
 
-# Local pre-push guard: which changed paths make .githooks/pre-push re-capture the
-# affected microfrontends. Screenshot-relevant source and the capture harness;
-# baselines are the guard's output, so they are deliberately excluded.
+# Screenshot-relevant paths retained for manual screencomp guard use.
+# CI selects affected microfrontends through Nx; ordinary pushes do not capture.
 [guard]
 paths = [
   "apps/**/*.ts",
