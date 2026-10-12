@@ -5,21 +5,22 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
 import { expect, test } from "vitest";
+import { z } from "zod";
 
 // Git itself owns hook dispatch here: this repository has no hook manager or
 // installer. Existing clones retain core.hooksPath after the tracked hook is
 // deleted. Drive that real configuration without check-command doubles.
 test("ordinary local pushes stay check-free with the former hooksPath", () => {
-  const root = mkdtempSync(
-    path.resolve(
-      process.env.ONEPIPELINE_NODE_SCRATCH_DIR ?? ".",
-      "local-push-",
-    ),
-  );
+  const scratch = z
+    .string()
+    .refine((value) => path.isAbsolute(value) && statSync(value).isDirectory())
+    .parse(process.env.ONEPIPELINE_NODE_SCRATCH_DIR ?? process.cwd());
+  const root = mkdtempSync(path.join(scratch, "local-push-"));
   const clone = path.join(root, "clone");
   const remote = path.join(root, "remote.git");
   const trace = path.join(root, "git-trace.json");
@@ -27,7 +28,12 @@ test("ordinary local pushes stay check-free with the former hooksPath", () => {
     execFileSync("git", args, {
       cwd: clone,
       encoding: "utf8",
-      env: { ...process.env, GIT_TRACE2_EVENT: path.resolve(trace) },
+      env: {
+        PATH: "/usr/bin:/bin",
+        HOME: root,
+        GIT_CONFIG_NOSYSTEM: "1",
+        GIT_TRACE2_EVENT: trace,
+      },
     }).trim();
   try {
     mkdirSync(clone);
@@ -82,10 +88,14 @@ test("ordinary local pushes stay check-free with the former hooksPath", () => {
       expect(git("config", "--get", "core.hooksPath")).toBe(".githooks");
       push();
     }
+    const traceEvent = z.object({
+      event: z.string(),
+      argv: z.array(z.string()).optional(),
+    });
     const events = readFileSync(trace, "utf8")
       .trim()
       .split("\n")
-      .map((line) => JSON.parse(line) as { event: string; argv?: string[] });
+      .map((line) => traceEvent.parse(JSON.parse(line)));
     const children = events.filter((event) => event.event === "child_start");
     expect(children.length).toBeGreaterThan(0);
     expect(
