@@ -96,7 +96,7 @@ hand-rolled task-runner invocation:
   `HEAD~1..HEAD`, so `NX_BASE` pointed at this branch's base selects every
   project above — and, through this branch's lockfile change, every other
   project in the workspace too.
-- `just check` is the full pre-push gate: the whole-tree Biome pass, then lint,
+- `just check` is the full manual verification gate: the whole-tree Biome pass, then lint,
   typecheck, test, build, prerender, e2e and screenshot over what is affected.
   It is left to the merge path.
 

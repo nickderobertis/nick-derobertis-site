@@ -5,7 +5,7 @@ set -uo pipefail
 
 # 0.3.23 is the floor: it finds `oneharness` beside its own executable, restricts
 # `--diff` to changed files with merge-base `--diff-base` semantics, ships the
-# model-free `validate` gate `just lint-llm-validate` and the pre-push hook run,
+# model-free `validate` gate `just lint-llm-validate` and CI run,
 # and bundles config_lint v1.2 so `line_localizable_rules_require_attribution`
 # is enforced.
 readonly LLMLINT_MIN="0.3.23"

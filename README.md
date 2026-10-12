@@ -47,7 +47,7 @@ remotes are available at
 
 ## Test and build
 
-`just check` is the complete pre-push gate. It formats-checks the workspace,
+`just check` is the complete manual verification gate. It formats-checks the workspace,
 lints workflows and shell scripts, and runs affected lint, typecheck, unit,
 build, prerender, browser, and visual targets plus the complete shell browser
 integration suite.

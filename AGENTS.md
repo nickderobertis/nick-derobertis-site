@@ -28,9 +28,7 @@ so an unaffected app is never captured or classified — never reported as remov
 That per-project `manifest` wiring is the mechanism used here; it is equivalent
 to `screencomp classify --include project=<app>` scoping against a shared
 baseline. The single drift gate is the reusable workflow's classify job (surfaced
-as the `Visual docs` workflow's stable `classify-gate` status check); its local
-half is `.githooks/pre-push` (enable once per clone with `git config
-core.hooksPath .githooks`). Galleries are published per project from the
+as the `Visual docs` workflow's stable `classify-gate` status check); CI owns visual drift verification; ordinary pushes run no local checks. Galleries are published per project from the
 dedicated visual-docs repository — canonical ones at
 `https://nickderobertis.github.io/nick-derobertis-site-visual-docs/<project>/x86_64/`
 and pull-request previews at
@@ -58,7 +56,7 @@ breaks deploys.
 ## Workflow
 
 <!-- llmlint: ignore[contracts_have_one_source_or_a_drift_gate] This contributor-facing ownership inventory is deliberately explicit; module-boundaries.spec.ts verifies every scripts project is tagged tooling and owns the required targets, while Nx remains the project source of truth. -->
-Use `just` as the only command surface. `just check` is the full pre-push gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is owned by the app whose scenarios it takes, never by a centralized script, and is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow, with the `.githooks/pre-push` guard as its local half (it re-captures only affected microfrontends when `[guard].paths` change and blocks the push until a regenerated baseline is committed).
+Use `just` as the only command surface. `just check` is the full manual verification gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is owned by the app whose scenarios it takes, never by a centralized script, and is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow. CI owns llmlint validation and visual classification; neither runs in a local pre-push hook.
 
 Dependency freshness is checked with `pnpm outdated`; every dependency's
 `current` version must equal its `wanted` version. Major rspack and TypeScript
