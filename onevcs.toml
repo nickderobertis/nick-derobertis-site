@@ -1,0 +1,6 @@
+# onevcs reads this file from the publication checkout's base as this repository's default publication policy.
+schema_version = 2
+
+[policy]
+publication = "change-auto"
+approvals = "none"
