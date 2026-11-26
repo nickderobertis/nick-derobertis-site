@@ -27,6 +27,23 @@ export const homeContent = {
       linkLabel: "Software projects",
       tone: "software",
     },
+    // SPIKE MOCK (throwaway): slides so every original carousel banner is reachable.
+    {
+      title: "Data scientist",
+      description:
+        "Turning messy data into models, visualizations, and decisions.",
+      link: "/research",
+      linkLabel: "View research",
+      tone: "research",
+    },
+    {
+      title: "Educator",
+      description:
+        "Teaching finance, programming, and data skills at the university level.",
+      link: "/courses",
+      linkLabel: "View courses",
+      tone: "software",
+    },
   ],
   cards: [
     {
