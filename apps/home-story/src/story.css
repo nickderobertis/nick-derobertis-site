@@ -28,3 +28,7 @@
     min-height: 19rem;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.story-pane { border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow-soft); }
+.story-portrait { background: url("./assets/nick-derobertis.jpg") 40% 30% / cover; }

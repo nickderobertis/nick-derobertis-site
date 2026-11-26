@@ -293,3 +293,7 @@
     grid-column: auto;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.courses-banner { min-height: 26rem; display: grid; align-content: center; background: linear-gradient(rgb(6 14 20 / 55%), rgb(6 14 20 / 80%)), url("./assets/courses-banner.jpg") center / cover; }
+.courses-banner::after { content: none; }

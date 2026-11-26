@@ -49,3 +49,13 @@
   position: absolute;
   bottom: 1.5rem;
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.home-carousel { position: relative; min-height: min(42rem, 80vh); background-size: cover; background-position: center; }
+.home-carousel[data-slide="0"] { background: linear-gradient(180deg, rgb(10 25 38 / 45%), rgb(10 25 38 / 78%)), url("./assets/finance-research-banner.jpg") center / cover; }
+.home-carousel[data-slide="1"] { background: linear-gradient(180deg, rgb(10 25 38 / 45%), rgb(10 25 38 / 78%)), url("./assets/software-engineering-banner.jpg") center / cover; }
+.home-carousel[data-slide="2"] { background: linear-gradient(180deg, rgb(10 25 38 / 45%), rgb(10 25 38 / 78%)), url("./assets/data-science-banner.jpg") center / cover; }
+.home-carousel[data-slide="3"] { background: linear-gradient(180deg, rgb(10 25 38 / 45%), rgb(10 25 38 / 78%)), url("./assets/teaching-banner.jpg") center / cover; }
+.carousel-copy h1 { font-family: inherit; font-weight: 750; letter-spacing: -0.025em; font-size: var(--step-3); }
+.carousel-control { width: 3rem; height: 3rem; border-radius: 999px; background: rgb(255 255 255 / 14%); backdrop-filter: blur(6px); font-size: 1.75rem; line-height: 1; }
+.carousel-position { padding: 0.3rem 0.8rem; border-radius: 999px; background: rgb(0 0 0 / 35%); font-size: 0.85rem; }

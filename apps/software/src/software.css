@@ -175,3 +175,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.software-banner { min-height: 26rem; display: grid; align-content: center; background: linear-gradient(90deg, rgb(7 18 27 / 82%), rgb(10 30 45 / 55%)), url("./assets/software-banner.jpg") center / cover; }
+.software-banner::after { content: none; }

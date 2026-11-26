@@ -23,6 +23,7 @@ export default function HomeCarouselPage() {
     <PageShell
       className="home-carousel"
       data-tone={slide.tone}
+      data-slide={active}
       aria-roledescription="carousel"
       aria-label="Featured work"
     >

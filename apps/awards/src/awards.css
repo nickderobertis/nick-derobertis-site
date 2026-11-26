@@ -87,3 +87,8 @@
     gap: 40px 44px;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.awards-pane { background: var(--blush); padding-block: 3rem; }
+.award-card { --card-radius: var(--radius-lg); --card-shadow: var(--shadow-soft); }
+.award-laurel { display: block; width: 200px; height: 150px; background: url("./assets/laurel.svg") center / contain no-repeat; }

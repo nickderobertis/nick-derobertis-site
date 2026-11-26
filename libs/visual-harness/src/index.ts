@@ -100,6 +100,7 @@ export async function captureVisualSuite(
       ".js": "text/javascript; charset=utf-8",
       ".json": "application/json; charset=utf-8",
       ".png": "image/png",
+      ".jpg": "image/jpeg",
       ".svg": "image/svg+xml",
     },
     // A `loading` capture must still show its skeleton when the shot is taken, so

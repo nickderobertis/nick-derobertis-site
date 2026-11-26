@@ -17,6 +17,7 @@ export default function HomeContactPage() {
       contained
       aria-labelledby="contact-title"
     >
+      <div className="contact-map" role="img" aria-label="Map" />
       <div className="contact-copy">
         <SectionHeading
           eyebrow="Contact"

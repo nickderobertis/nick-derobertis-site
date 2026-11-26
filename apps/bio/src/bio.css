@@ -126,3 +126,8 @@
     min-height: 16rem;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.bio-page { background: #0f2a3f; }
+.bio-cover { opacity: 1; background: linear-gradient(180deg, rgb(15 42 63 / 55%), rgb(15 42 63 / 92%)), url("./assets/story-cover.png") center top / cover; }
+.bio-content h1 { font-weight: 750; letter-spacing: -0.02em; font-size: var(--step-3); }

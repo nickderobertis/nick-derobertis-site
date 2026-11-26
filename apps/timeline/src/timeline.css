@@ -187,3 +187,7 @@ body:has(.timeline-pane) {
     display: inline;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.timeline-card { border-radius: var(--radius-lg); box-shadow: var(--shadow-soft); border: 1px solid var(--line); background: #fff; }
+.timeline-period { border-radius: 999px; }

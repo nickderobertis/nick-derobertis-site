@@ -13,7 +13,8 @@ export function SiteLayout({
       <header className="site-header">
         <div className="header-inner">
           <Link className="brand" to="/">
-            Nick DeRobertis
+            <span className="brand-logo" aria-hidden="true" />
+            <span>Nick DeRobertis</span>
           </Link>
           <nav aria-label="Primary">
             <ul className="nav-list">

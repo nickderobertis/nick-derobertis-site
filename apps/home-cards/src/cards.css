@@ -33,3 +33,9 @@
     min-height: auto;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.home-cards { padding-block: 3rem; }
+.marketing-card { --card-surface: #fff; --card-radius: var(--radius-lg); --card-shadow: var(--shadow-soft); --card-padding: 2rem 1.5rem; --card-border: 1px solid var(--line); }
+.card-icon { color: var(--blue); font-size: 3rem; }
+.marketing-card h2 { font-family: inherit; font-weight: 700; letter-spacing: -0.015em; font-size: var(--step-2); }

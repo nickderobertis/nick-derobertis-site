@@ -18,7 +18,7 @@
   color: #fff;
   background:
     linear-gradient(rgb(18 30 38 / 62%), rgb(18 30 38 / 62%)),
-    url("./assets/research-bookshelf.png") center 48% / cover;
+    url("./assets/research-banner.jpg") center 48% / cover;
 }
 .research-banner > p:not(.eyebrow) {
   max-width: 43rem;
@@ -170,3 +170,6 @@
     grid-row: 1;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.research-banner { min-height: 26rem; }

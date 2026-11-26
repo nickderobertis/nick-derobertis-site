@@ -202,3 +202,7 @@ body:has(.skills-pane) {
     top: 38%;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.skills-widget { border-radius: var(--radius-lg); box-shadow: var(--shadow-soft); background: #fff; border: 1px solid var(--line); }
+.skills-dropdowns select { border-radius: var(--radius-sm); }

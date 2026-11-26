@@ -38,3 +38,8 @@
     padding-inline: 0;
   }
 }
+
+/* SPIKE MOCK (throwaway): redesign direction */
+.contact-pane { border-top: 0; margin-block: 2rem; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow-soft); }
+.contact-map { min-height: 18rem; border-radius: var(--radius-md); background: url("./assets/contact-map.png") center / cover; }
+.contact-links a { border: 1px solid var(--line); border-radius: var(--radius-sm); }
