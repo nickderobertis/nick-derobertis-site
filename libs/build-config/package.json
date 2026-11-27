@@ -7,7 +7,8 @@
     "./composed-artifact": "./src/composed-artifact.ts",
     "./fragment-contract": "./src/fragment-contract.ts",
     "./remote-registry": "./src/remote-registry.ts",
-    "./remotes.json": "./src/remotes.json"
+    "./remotes.json": "./src/remotes.json",
+    "./router-hydration": "./src/router-hydration.ts"
   },
   "dependencies": {
     "@site/data-access-core": "workspace:*",

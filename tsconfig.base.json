@@ -16,5 +16,8 @@
     // so permitting the `.ts` specifier changes nothing but resolution.
     "allowImportingTsExtensions": true,
     "skipLibCheck": true
-  }
+  },
+  // Every project extends this file, so the stylesheet declaration below is
+  // part of every program without each tsconfig restating it.
+  "files": ["./css-side-effect-imports.d.ts"]
 }

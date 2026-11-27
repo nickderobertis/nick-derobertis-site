@@ -42,6 +42,7 @@ export default withDevelopmentOverrides(
     output: { publicPath: base, uniqueName: "shell", clean: true },
     plugins: [
       new NxAppRspackPlugin({
+        outputPath: "dist/apps/shell",
         tsConfig: "apps/shell/tsconfig.app.json",
         main: "apps/shell/src/main.tsx",
         index: "apps/shell/src/index.html",

@@ -184,6 +184,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
       optimization: { runtimeChunk: false },
       plugins: [
         new NxAppRspackPlugin({
+          outputPath: `dist/${root}`,
           tsConfig: `${root}/tsconfig.app.json`,
           main: `${root}/src/main.tsx`,
           index: `${root}/src/index.html`,
