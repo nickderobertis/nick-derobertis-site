@@ -26,8 +26,7 @@ s2() { bun x nx run-many -t build -p "$PAIR" --skip-nx-cache --exclude-task-depe
 # 3a host-composed: the shell's e2e journeys. 3b standalone: every route and feature
 # remote's own serve target, opened in Chromium (the per-app e2e targets depend on
 # shell:prerender, so they do not establish that a remote serves standalone).
-REMOTES=(bio)
-s3() { node spike-bun/pair-composed.mjs; }
+s3() { node spike-bun/pair-composed.mjs && node spike-bun/standalone-serve.mjs "bio=Optimizing Life"; }
 s4() { bun x nx run-many -t test -p "$PAIR" --skip-nx-cache; }
 s5() { just prerender && echo "just prerender: shell:prerender (build + artifact validation) succeeded"; }
 s6() { set -e; ws="$OUT/capture-ws"; rm -rf "$ws"
@@ -50,7 +49,7 @@ s7() { python3 ~/.claude/skills/create-repo/scripts/check_repo_baseline.py "$ROO
 
 stage 1 "bun install --frozen-lockfile on a clean clone" s1
 stage 2 "nx run-many -t build -p shell,bio" s2
-stage 3 "Module Federation in a real browser (shell composing bio + bio standalone serve)" s3
+stage 3 "pair MF probe: shell composing bio (production builds) + bio standalone build and bio:serve in Chromium; shell:e2e NOT run" s3
 stage 4 "shell and bio test targets with coverage at the 95% floor" s4
 stage 5 "just prerender + artifact validation" s5
 stage 6 "screencomp v0.4.8 reusable workflow capture x2 + reproducibility gate ($APP)" s6
