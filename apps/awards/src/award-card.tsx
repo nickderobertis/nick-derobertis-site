@@ -1,6 +1,7 @@
 import type { AwardCardModel } from "@site/data-access-awards";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { Card } from "@site/design-system";
+import { AwardIcon } from "./award-icon";
 
 /**
  * One award. Its heading names the card, so the parts list stays optional: an
@@ -12,6 +13,9 @@ export function AwardCard({ award }: { award: AwardCardModel }) {
       <div className="award-visual">
         <time dateTime={award.received}>{award.received}</time>
         <span className="award-laurel" aria-hidden="true" data-icon={award.icon} />
+        <svg className="award-own-icon" viewBox="40 55 70 70" width="32" height="32" aria-hidden="true">
+          <AwardIcon name={award.icon} />
+        </svg>
       </div>
       <h3 id={`${award.id}-title`}>{award.title}</h3>
       {award.parts.length > 0 ? (

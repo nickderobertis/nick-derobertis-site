@@ -1,6 +1,6 @@
 import { homeContent, readPaneState } from "@site/data-access-home";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
-import { PageShell, SectionHeading } from "@site/design-system";
+import { PageShell, SectionHeading, SpikeIcon, spikeContact } from "@site/design-system";
 import { ContactState } from "./contact-state";
 import Skeleton from "./skeleton";
 import "./contact.css";
@@ -17,21 +17,23 @@ export default function HomeContactPage() {
       contained
       aria-labelledby="contact-title"
     >
-      <div className="contact-map" role="img" aria-label="Map" />
       <div className="contact-copy">
         <SectionHeading
           eyebrow="Contact"
           title={homeContent.contact.title}
           titleId="contact-title"
-          description={homeContent.contact.description}
+          description="Reach out by email or phone, or connect on LinkedIn and GitHub."
         />
       </div>
       <nav className="contact-links" aria-label="Contact options">
-        {homeContent.contact.links.map((link) => (
-          <a href={link.href} key={link.label}>
-            {link.label} →
-          </a>
-        ))}
+        <ul className="contact-details">
+          {spikeContact.map((c) => (
+            <li key={c.icon}>
+              <SpikeIcon name={c.icon} size={22} />
+              {c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}
+            </li>
+          ))}
+        </ul>
       </nav>
     </PageShell>
   );

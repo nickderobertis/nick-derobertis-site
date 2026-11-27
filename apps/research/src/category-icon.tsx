@@ -4,7 +4,9 @@
  * the same mark, wherever it appears. It is decoration beside the category's
  * own name, so it stays out of the accessibility tree.
  */
+import { SpikeIcon } from "@site/design-system";
 export function CategoryIcon({ id }: { id: string }) {
+  if (id) return <SpikeIcon name="book-open" size={32} className="category-icon" />;
   const variant = id.length % 4;
   return (
     <svg className="category-icon" viewBox="0 0 32 32" aria-hidden="true">

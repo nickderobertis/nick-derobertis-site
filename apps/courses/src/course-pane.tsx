@@ -1,7 +1,29 @@
 import type { Course } from "@site/data-access-core";
 import { buildCourseDetails } from "@site/data-access-courses";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
-import { ActionLink, Card } from "@site/design-system";
+import { ActionLink, Card, SpikeIcon } from "@site/design-system";
+
+// SPIKE MOCK (throwaway): Topics Covered transcribed from the live /courses page.
+const spikeTopics: Record<string, [string, string[]][]> = {
+  "FIN-4934": [
+    ["Introduction to Financial Modeling", ["Overview", "Basic technical skills and setup – Excel and Python", "Time value of money models", "Basic statistical tools", "Monte Carlo methods"]],
+    ["Corporate Valuation", ["Capital budgeting", "Estimating beta", "Estimating market value of debt", "Weighted average cost of capital (WACC)", "Free cash flow (FCF)", "Pro forma financial statements", "Discounted cash flow (DCF) valuation"]],
+  ],
+  "FIN-4243": [
+    ["Debt Analysis", ["Time value of money", "Bond pricing", "Yield to Maturity", "Interest Rates", "Types of debt", "Risk factors for debt", "Term structure of interest rates"]],
+    ["Debt Portfolio Management", ["Duration", "Immunization", "Convexity", "Credit risk analysis", "Bond options", "Interest rate swaps", "Credit default swaps"]],
+  ],
+  "FIRE-311": [["Excel", ["Cell references", "Formulas", "Pivot tables", "Iteration", "Macros", "Regressions"]]],
+};
+function SpikeUniversityLogo({ name }: { name: string }) {
+  const vcu = name.includes("Virginia");
+  return (
+    <svg className="course-university-logo" viewBox="0 0 64 32" width="64" height="32" role="img" aria-label={`${name} logo`}>
+      {vcu ? <circle cx="10" cy="16" r="8" fill="#000" stroke="#f8b00f" strokeWidth="2.5" /> : null}
+      <text x={vcu ? 40 : 32} y="25" textAnchor="middle" fontFamily="Georgia, serif" fontWeight="900" fontSize={vcu ? 20 : 26} fill={vcu ? "#f8b00f" : "#0021a5"}>{vcu ? "VCU" : "UF"}</text>
+    </svg>
+  );
+}
 import { CourseDetails } from "./course-details";
 
 export function CoursePane({
@@ -30,7 +52,9 @@ export function CoursePane({
           <dl className="course-facts">
             {course.evaluation_score != null ? (
               <div>
-                <dt>Evaluation score</dt>
+                <dt>
+                  <SpikeIcon name="tasks" size={22} /> Evaluations
+                </dt>
                 <dd>
                   {course.evaluation_score}
                   <span> / {course.evaluation_max_score ?? 5}</span>
@@ -39,7 +63,9 @@ export function CoursePane({
             ) : null}
             {course.university_name ? (
               <div>
-                <dt>University</dt>
+                <dt>
+                  <SpikeUniversityLogo name={course.university_name} />
+                </dt>
                 <dd>{course.university_name}</dd>
                 {course.university_location ? (
                   <dd className="course-location">
@@ -60,11 +86,16 @@ export function CoursePane({
             className="course-topics"
             aria-label={`${course.title} topics`}
           >
-            <h3>Topics covered</h3>
-            <ul>
-              {course.topics.map((topic) => (
-                <Card as="li" key={topic}>
-                  {topic}
+            <h3>Topics Covered</h3>
+            <ul className="course-topic-cards">
+              {(spikeTopics[course.id] ?? course.topics.map((t) => [t, []] as [string, string[]])).map(([topic, children]) => (
+                <Card as="li" className="course-topic-card" key={topic}>
+                  <h4>{topic}</h4>
+                  <ol type="i">
+                    {children.map((child) => (
+                      <li key={child}>{child}</li>
+                    ))}
+                  </ol>
                 </Card>
               ))}
             </ul>

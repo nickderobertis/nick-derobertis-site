@@ -1,5 +1,6 @@
 import type { TimelineEntry } from "@site/data-access-timeline";
 import { timelineOrganization } from "@site/data-access-timeline";
+import { SpikeIcon } from "@site/design-system";
 import { TimelinePeriod } from "./timeline-period";
 
 /**
@@ -20,6 +21,7 @@ export function TimelineRow({
   return (
     <div className="timeline-row">
       <span className="timeline-organization">
+        <SpikeIcon name={"degree" in first ? "graduation-cap" : "building"} size={16} />
         <span className="timeline-wide">{timelineOrganization(first)}</span>
         <span className="timeline-compact">
           {timelineOrganization(first, true)}

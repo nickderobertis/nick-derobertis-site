@@ -41,5 +41,9 @@
 
 /* SPIKE MOCK (throwaway): redesign direction */
 .contact-pane { border-top: 0; margin-block: 2rem; border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow-soft); }
-.contact-map { min-height: 18rem; border-radius: var(--radius-md); background: url("./assets/contact-map.png") center / cover; }
 .contact-links a { border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.contact-pane { grid-template-columns: 1fr; }
+.contact-details { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
+.contact-details li { display: flex; align-items: center; gap: 0.75rem; color: var(--navy); }
+.contact-details a { color: inherit; text-decoration: none; border: 0; }
+.contact-links .contact-details a { padding: 0; background: none; border: 0; }

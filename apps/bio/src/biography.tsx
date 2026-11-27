@@ -1,6 +1,6 @@
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
 import { PageShell } from "@site/design-system";
-import { Marker } from "./marker";
+import { SpikeIcon } from "@site/design-system";
 
 export function Biography() {
   return (
@@ -24,7 +24,7 @@ export function Biography() {
           <h2 id="philosophy">Philosophy</h2>
           <h3>
             Continuous Learning, Innovation, and Open Collaboration{" "}
-            <Marker>💡</Marker>
+            <SpikeIcon name="lightbulb" size={24} />
           </h3>
           <p>
             When taking on a project, I always try to learn something new and
@@ -40,7 +40,7 @@ export function Biography() {
           </p>
 
           <h3>
-            Reproducible Research <Marker>♻</Marker>
+            Reproducible Research <SpikeIcon name="recycle" size={24} />
           </h3>
           <p>
             Another reason for my focus on software and automation is because I
@@ -49,7 +49,7 @@ export function Biography() {
           </p>
 
           <h4 className="bio-problem">
-            The Problem <Marker>▲</Marker>
+            The Problem <SpikeIcon name="exclamation-triangle" size={24} />
           </h4>
           <p>
             Our studies often require complex manipulations of data for
@@ -64,7 +64,7 @@ export function Biography() {
           </p>
 
           <h4 className="bio-solution">
-            The Solution <Marker>✓</Marker>
+            The Solution <SpikeIcon name="check-circle" size={24} />
           </h4>
           <p>
             Automation, open source software, and version control are the keys

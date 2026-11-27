@@ -6,3 +6,4 @@ export { PageShell, type PageShellProps } from "./page-shell";
 export { PaneState, type PaneStateProps } from "./pane-state";
 export { SectionHeading, type SectionHeadingProps } from "./section-heading";
 export { Skeleton, type SkeletonProps } from "./skeleton";
+export { SpikeIcon, spikeContact } from "./spike-icons";

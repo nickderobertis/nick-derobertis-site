@@ -1,3 +1,4 @@
+import { SpikeIcon } from "@site/design-system";
 import { useId } from "react";
 
 /**
@@ -20,7 +21,9 @@ export function TimelineFilters({
   const educationId = useId();
   return (
     <fieldset className="timeline-filters">
-      <legend>Filters:</legend>
+      <legend>
+        <SpikeIcon name="filter" size={16} /> Filters:
+      </legend>
       <label htmlFor={employmentId}>
         <input
           id={employmentId}

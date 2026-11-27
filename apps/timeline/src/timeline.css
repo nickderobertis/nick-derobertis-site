@@ -191,3 +191,5 @@ body:has(.timeline-pane) {
 /* SPIKE MOCK (throwaway): redesign direction */
 .timeline-card { border-radius: var(--radius-lg); box-shadow: var(--shadow-soft); border: 1px solid var(--line); background: #fff; }
 .timeline-period { border-radius: 999px; }
+.timeline-organization { display: inline-flex; align-items: center; gap: 0.4rem; }
+.timeline-filters legend { display: inline-flex; align-items: center; gap: 0.35rem; }

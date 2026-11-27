@@ -92,3 +92,5 @@
 .awards-pane { background: var(--blush); padding-block: 3rem; }
 .award-card { --card-radius: var(--radius-lg); --card-shadow: var(--shadow-soft); }
 .award-laurel { display: block; width: 200px; height: 150px; background: url("./assets/laurel.svg") center / contain no-repeat; }
+.award-visual { position: relative; }
+.award-own-icon { position: absolute; left: 84px; top: 50px; }

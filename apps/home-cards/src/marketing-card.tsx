@@ -1,6 +1,7 @@
 import { siteBase } from "@site/data-access-core/site";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
-import { ActionLink, Card } from "@site/design-system";
+import { ActionLink, Card, SpikeIcon } from "@site/design-system";
+const spikeCardIcons: Record<string, string> = { "⚙": "cogs", "◆": "graduation-cap", "▥": "chart-bar" };
 
 /** One area of work, as the bundled home content records it. */
 export interface MarketingCardModel {
@@ -20,7 +21,7 @@ export function MarketingCard({ card }: { card: MarketingCardModel }) {
   return (
     <Card className="marketing-card">
       <span className="card-icon" aria-hidden="true">
-        {card.icon}
+        <SpikeIcon name={spikeCardIcons[card.icon] ?? "cogs"} size={32} />
       </span>
       <h2>{card.title}</h2>
       <p>{card.description}</p>

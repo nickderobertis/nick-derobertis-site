@@ -1,7 +1,7 @@
 import type { SoftwareProject } from "@site/data-access-core";
 import { softwareProjectLogo } from "@site/data-access-software";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
-import { Card } from "@site/design-system";
+import { Card, SpikeIcon } from "@site/design-system";
 import { formatNumber } from "./format-number";
 
 export function ProjectCard({ project }: { project: SoftwareProject }) {
@@ -19,7 +19,7 @@ export function ProjectCard({ project }: { project: SoftwareProject }) {
           />
         ) : (
           <span className="software-logo-fallback" aria-hidden="true">
-            {"</>"}
+            <SpikeIcon name="microchip" size={32} />
           </span>
         )}
         <div>
@@ -44,9 +44,13 @@ export function ProjectCard({ project }: { project: SoftwareProject }) {
       </dl>
       <div className="software-links">
         {project.repository_url ? (
-          <a href={project.repository_url}>Repository</a>
+          <a href={project.repository_url}>
+            <SpikeIcon name="github" size={16} /> GitHub
+          </a>
         ) : null}
-        {project.docs_url ? <a href={project.docs_url}>Documentation</a> : null}
+        {project.docs_url ? <a href={project.docs_url}>
+            <SpikeIcon name="book" size={16} /> Docs
+          </a> : null}
         {project.site_url && project.site_url !== project.repository_url ? (
           <a href={project.site_url}>Project site</a>
         ) : null}

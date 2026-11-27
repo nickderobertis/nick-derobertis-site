@@ -297,3 +297,13 @@
 /* SPIKE MOCK (throwaway): redesign direction */
 .courses-banner { min-height: 26rem; display: grid; align-content: center; background: linear-gradient(rgb(6 14 20 / 55%), rgb(6 14 20 / 80%)), url("./assets/courses-banner.jpg") center / cover; }
 .courses-banner::after { content: none; }
+.course-topics ol { display: block; padding-left: 1.5rem; margin: 0.5rem 0 0; }
+.course-topics ol li { --card-shadow: none; min-height: 0; font: 400 0.9rem / 1.45 var(--font-sans, system-ui), sans-serif; color: var(--muted); padding: 0.1rem 0; }
+.course-topic-card { border-radius: var(--radius-md, 0.75rem); }
+.course-topic-card h4 { margin: 0; font: 600 1.05rem / 1.3 var(--font-sans, system-ui), sans-serif; color: var(--navy); }
+.course-card-dark .course-topic-card h4 { color: var(--navy); }
+.course-facts dt { display: inline-flex; align-items: center; gap: 0.4rem; }
+.course-university-logo { display: block; }
+@media (max-width: 720px) { .course-topics ul { grid-template-columns: 1fr; } }
+.course-card-dark .course-topics h3 { color: #fff; }
+.course-university-logo { background: #fff; border-radius: 0.4rem; padding: 0.15rem 0.35rem; box-sizing: content-box; }

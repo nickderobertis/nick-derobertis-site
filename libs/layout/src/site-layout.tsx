@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { SpikeIcon, spikeContact } from "./spike-icons";
+const headerLinks = spikeContact.filter((c) => c.icon !== "map-marker");
 export type NavRoute = { path: string; label: string };
 export function SiteLayout({
   routes,
@@ -31,6 +33,15 @@ export function SiteLayout({
               ))}
             </ul>
           </nav>
+          <ul className="header-icons" aria-label="Contact">
+            {headerLinks.map((c) => (
+              <li key={c.icon}>
+                <a className="header-icon" href={c.href} aria-label={c.label}>
+                  <SpikeIcon name={c.icon} size={20} />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </header>
       <main className="main" id="main-content" tabIndex={-1}>
@@ -38,7 +49,16 @@ export function SiteLayout({
       </main>
       <footer className="site-footer">
         <div className="footer-inner">
-          © {new Date().getFullYear()} Nick DeRobertis
+          <span>© {new Date().getFullYear()} Nick DeRobertis</span>
+          <ul className="footer-icons" aria-label="Contact links">
+            {headerLinks.map((c) => (
+              <li key={c.icon}>
+                <a href={c.href} aria-label={c.label}>
+                  <SpikeIcon name={c.icon} size={18} />
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </footer>
     </>

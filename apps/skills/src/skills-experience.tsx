@@ -1,6 +1,6 @@
 import type { SkillTree } from "@site/data-access-skills";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The app deliberately initializes this shared library asynchronously at startup; this primitive still must be a static component dependency.
-import { Card, PageShell, SectionHeading } from "@site/design-system";
+import { Card, PageShell, SectionHeading, SpikeIcon } from "@site/design-system";
 import { useState } from "react";
 import { Chart } from "./chart";
 import { Dropdowns } from "./dropdowns";
@@ -33,7 +33,9 @@ export function SkillsExperience({ tree }: { tree: SkillTree }) {
           className="skills-widget"
           aria-label="Skills options"
         >
-          <h3>Skills Options</h3>
+          <h3>
+            <SpikeIcon name="info-circle" size={18} /> Skills Options
+          </h3>
           <button type="button" onClick={() => setView("chart")}>
             View chart
           </button>
