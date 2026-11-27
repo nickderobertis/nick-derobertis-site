@@ -30,7 +30,7 @@ export default function HomeContactPage() {
           {spikeContact.map((c) => (
             <li key={c.icon}>
               <SpikeIcon name={c.icon} size={22} />
-              {c.href ? <a href={c.href}>{c.label}</a> : <span>{c.label}</span>}
+              <a href={c.href}>{c.label}</a>
             </li>
           ))}
         </ul>

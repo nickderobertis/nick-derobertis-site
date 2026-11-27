@@ -173,3 +173,9 @@
 
 /* SPIKE MOCK (throwaway): redesign direction */
 .research-banner { min-height: 26rem; }
+.category-svg { display: inline-block; width: 32px; height: 32px; background: center / contain no-repeat; flex: none; }
+.category-svg-portfolioanalysis { background-image: url("./assets/categories/portfolio-analysis-logo.svg"); }
+.category-svg-options { background-image: url("./assets/categories/call-option-logo.svg"); }
+.category-svg-volatility { background-image: url("./assets/categories/sigma-lower.svg"); }
+.category-svg-insidertrading { background-image: url("./assets/categories/insider.svg"); }
+.category-svg-shortsales { background-image: url("./assets/categories/chart-line-down.svg"); }

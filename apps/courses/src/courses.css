@@ -306,4 +306,6 @@
 .course-university-logo { display: block; }
 @media (max-width: 720px) { .course-topics ul { grid-template-columns: 1fr; } }
 .course-card-dark .course-topics h3 { color: #fff; }
-.course-university-logo { background: #fff; border-radius: 0.4rem; padding: 0.15rem 0.35rem; box-sizing: content-box; }
+.course-university-logo { display: block; height: 32px; background: left center / contain no-repeat; }
+.course-university-logo-uf { width: 47px; background-image: url("./assets/uf-logo.png"); }
+.course-university-logo-vcu { width: 109px; background-image: url("./assets/vcu-logo.png"); }

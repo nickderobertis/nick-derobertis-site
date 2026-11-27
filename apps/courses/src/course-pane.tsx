@@ -16,13 +16,8 @@ const spikeTopics: Record<string, [string, string[]][]> = {
   "FIRE-311": [["Excel", ["Cell references", "Formulas", "Pivot tables", "Iteration", "Macros", "Regressions"]]],
 };
 function SpikeUniversityLogo({ name }: { name: string }) {
-  const vcu = name.includes("Virginia");
-  return (
-    <svg className="course-university-logo" viewBox="0 0 64 32" width="64" height="32" role="img" aria-label={`${name} logo`}>
-      {vcu ? <circle cx="10" cy="16" r="8" fill="#000" stroke="#f8b00f" strokeWidth="2.5" /> : null}
-      <text x={vcu ? 40 : 32} y="25" textAnchor="middle" fontFamily="Georgia, serif" fontWeight="900" fontSize={vcu ? 20 : 26} fill={vcu ? "#f8b00f" : "#0021a5"}>{vcu ? "VCU" : "UF"}</text>
-    </svg>
-  );
+  const which = name.includes("Virginia") ? "vcu" : "uf";
+  return <span className={`course-university-logo course-university-logo-${which}`} role="img" aria-label={`${name} logo`} />;
 }
 import { CourseDetails } from "./course-details";
 

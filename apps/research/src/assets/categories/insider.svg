@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   aria-hidden="true"
+   focusable="false"
+   data-prefix="fas"
+   data-icon="male"
+   class="svg-inline--fa fa-male fa-w-6"
+   role="img"
+   viewBox="0 0 294.59708 602.17657"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="insider.svg"
+   width="294.59708"
+   height="602.17657"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+    <style
+     id="style-insider-logo">
+.insider-logo-fill {
+      fill: #000000;
+}
+.insider-logo-stroke {
+      stroke: #000000;
+}
+  </style>
+  <defs
+     id="defs8">
+    <linearGradient
+       id="linearGradient821"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop819" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1848"
+     inkscape:window-height="1016"
+     id="namedview6"
+     showgrid="false"
+     inkscape:zoom="1.3037281"
+     inkscape:cx="-26.221308"
+     inkscape:cy="139.3913"
+     inkscape:window-x="72"
+     inkscape:window-y="147"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <path
+     d="m 147.41968,44.126133 c 35.346,0 64,28.654 64,63.999997 0,35.34601 -28.654,64.00001 -64,64.00001 -35.346,0 -64.000001,-28.654 -64.000001,-64.00001 0,-35.345997 28.654001,-63.999997 64.000001,-63.999997 m 48,144.000007 h -11.36 c -22.711,10.443 -49.59,10.894 -73.28,0 H 99.419679 c -26.51,0 -48,21.49 -48,48 v 136 c 0,13.255 10.745,24 24,24 h 16 v 136 c 0,13.255 10.745001,24 24.000001,24 h 64 c 13.255,0 24,-10.745 24,-24 v -136 h 16 c 13.255,0 24,-10.745 24,-24 v -136 c 0,-26.51 -21.49,-48 -48,-48 z"
+     id="path2"
+     inkscape:connector-curvature="0"
+     class="insider-logo-fill"
+     />
+  <rect
+     style="opacity:1;fill:none;fill-opacity:1;stroke-width:20.45032501;stroke-miterlimit:4;stroke-dasharray:none"
+     class="insider-logo-stroke"
+     id="rect817"
+     width="274.14676"
+     height="581.72626"
+     x="10.225163"
+     y="10.225163" />
+</svg>

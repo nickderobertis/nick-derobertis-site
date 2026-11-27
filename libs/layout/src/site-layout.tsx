@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { SpikeIcon, spikeContact } from "./spike-icons";
-const headerLinks = spikeContact.filter((c) => c.icon !== "map-marker");
+const headerLinks = spikeContact;
 export type NavRoute = { path: string; label: string };
 export function SiteLayout({
   routes,

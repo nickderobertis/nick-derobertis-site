@@ -5,8 +5,19 @@
  * own name, so it stays out of the accessibility tree.
  */
 import { SpikeIcon } from "@site/design-system";
+// SPIKE MOCK (throwaway): the live site's per-category icons (derobertis-cv research_categories.py).
+const spikeCategorySvgs = new Set(["portfolioanalysis", "options", "volatility", "insidertrading", "shortsales"]);
+const spikeCategoryIcons: Record<string, string> = {
+  marketintervention: "hand-holding-usd", behavioralfinance: "brain", alternativeassets: "ethereum", cryptoassets: "bitcoin",
+  assetpricing: "search-dollar", investorattention: "exclamation", investorsentiment: "smile", monetarypolicy: "money-bill-alt",
+  internationalfinance: "globe-americas", informedtrading: "lightbulb", liquidity: "tint", corporatefinancing: "money-check-alt",
+  equity: "handshake", debt: "university", executivecompensation: "money-bill-alt", investorscrutiny: "bullhorn",
+  informationtransmission: "exchange-alt", regulation: "gavel",
+};
 export function CategoryIcon({ id }: { id: string }) {
-  if (id) return <SpikeIcon name="book-open" size={32} className="category-icon" />;
+  const key = id.toLowerCase().replace(/[^a-z]/g, "");
+  if (spikeCategorySvgs.has(key)) return <span className={`category-icon category-svg category-svg-${key}`} aria-hidden="true" />;
+  if (id) return <SpikeIcon name={spikeCategoryIcons[key] ?? "book-open"} size={32} className="category-icon" />;
   const variant = id.length % 4;
   return (
     <svg className="category-icon" viewBox="0 0 32 32" aria-hidden="true">

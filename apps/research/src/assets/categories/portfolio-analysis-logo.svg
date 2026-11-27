@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="220.09035mm"
+   height="220.8463mm"
+   viewBox="0 0 220.09035 220.8463"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="portfolio-analysis-logo.svg">
+  <style
+     id="style-portfolio-analysis-logo">
+.portfolio-analysis-logo {
+    stroke-linejoin:miter;
+    stroke-opacity:1;
+    stroke:#000000;
+    stroke-linecap:butt;
+    stroke-dasharray:none;
+    stroke-miterlimit:4;
+    stroke-width:14.11111111;
+}
+.portfolio-analysis-logo-fill {
+      fill: #000000;
+}
+  </style>
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="-1106.3954"
+     inkscape:cy="359.60464"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1163"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(1.7096781,-32.203863)">
+    <path
+       class="portfolio-analysis-logo"
+       inkscape:connector-curvature="0"
+       id="path815"
+       d="m 96.005952,216.11309 c 0,0 -74.083333,-67.27976 86.178568,-92.22619"
+       style="fill:none" />
+    <path
+       class="portfolio-analysis-logo"
+       inkscape:connector-curvature="0"
+       id="path817"
+       d="M 19.654762,207.79762 172.35714,92.892855"
+       style="fill:none" />
+    <path
+       class="portfolio-analysis-logo"
+       inkscape:connector-curvature="0"
+       id="path819"
+       d="m 17.386905,52.82738 2.267857,181.42857 c -4.535714,0.75595 179.160718,0.75595 179.160718,0.75595"
+       style="fill:none" />
+    <path
+       class="portfolio-analysis-logo portfolio-analysis-logo-fill"
+       inkscape:connector-curvature="0"
+       id="path821"
+       d="m 23.099638,53.356547 h -11.53357 l 5.766786,-8.542502 z"
+       />
+    <path
+       class="portfolio-analysis-logo portfolio-analysis-logo-fill"
+       inkscape:connector-curvature="0"
+       id="path821-3"
+       d="m 197.22797,239.77443 v -11.53357 l 8.54251,5.76679 z"
+       />
+  </g>
+</svg>
