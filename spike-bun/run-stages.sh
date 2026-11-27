@@ -20,7 +20,11 @@ stage() { local n=$1 name=$2; shift 2; { [ "$n" -lt "$FIRST" ] || [ "$n" -gt "${
 
 s1() { d="$OUT/clone"; rm -rf "$d"; git clone -q --branch "$(git rev-parse --abbrev-ref HEAD)" "file://$ROOT" "$d" && cd "$d" && bun install --frozen-lockfile; }
 s2() { bun x nx run-many -t build --parallel=3 --skip-nx-cache; }
-s3() { bun x nx run shell:e2e --skip-nx-cache && bun x nx run-many -t e2e --exclude=shell --parallel=1 --skip-nx-cache; }
+# 3a host-composed: the shell's e2e journeys. 3b standalone: every route and feature
+# remote's own serve target, opened in Chromium (the per-app e2e targets depend on
+# shell:prerender, so they do not establish that a remote serves standalone).
+REMOTES=(awards bio courses home home-cards home-carousel home-contact home-story research skills software timeline)
+s3() { bun x nx run shell:e2e --skip-nx-cache && node spike-bun/standalone-serve.mjs "${REMOTES[@]}"; }
 s4() { bun x nx run-many -t test --parallel=3 --skip-nx-cache; }
 s5() { just prerender && echo "just prerender: shell:prerender (build + artifact validation) succeeded"; }
 s6() { set -e; ws="$OUT/capture-ws"; rm -rf "$ws"
@@ -43,7 +47,7 @@ s7() { python3 ~/.claude/skills/create-repo/scripts/check_repo_baseline.py "$ROO
 
 stage 1 "bun install --frozen-lockfile on a clean clone" s1
 stage 2 "nx run-many -t build" s2
-stage 3 "Module Federation in a real browser (shell:e2e host-composed + each remote's e2e standalone)" s3
+stage 3 "Module Federation in a real browser (shell:e2e host-composed + each remote's standalone serve rendering)" s3
 stage 4 "every project's test target with coverage at the 95% floor" s4
 stage 5 "just prerender + artifact validation" s5
 stage 6 "screencomp v0.4.8 reusable workflow capture x2 + reproducibility gate ($APP)" s6
