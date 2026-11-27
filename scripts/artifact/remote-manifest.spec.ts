@@ -33,6 +33,9 @@ function taskDependencyNames(
   for (const [task, dependencies] of Object.entries(value)) {
     if (!Array.isArray(dependencies)) return undefined;
     const named: string[] = [];
+    // `Array.isArray` narrows to `any[]`, which would let an element through
+    // unchecked; widening it to `unknown[]` makes every element pass the
+    // guards below before it is read.
     for (const dependency of dependencies as unknown[]) {
       if (typeof dependency === "string") named.push(dependency);
       else if (

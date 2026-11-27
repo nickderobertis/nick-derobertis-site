@@ -2,11 +2,13 @@ import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { type Browser, chromium, type Page } from "@playwright/test";
 import { holdArtifactRoot } from "@site/artifact-contracts/artifact-hold";
+import { sharedSingletons } from "@site/build-config";
 import { composedArtifactRoot } from "@site/build-config/composed-artifact";
 import {
   type RemoteProject,
   remoteRegistry,
 } from "@site/build-config/remote-registry";
+import { siteBase } from "@site/data-access-core/site";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -32,7 +34,6 @@ import { z } from "zod";
  */
 
 const workspace = process.cwd();
-const siteBase = "/nick-derobertis-site";
 
 /** One remote, the route that composes it, and what a visitor reads there. */
 interface Composed {
@@ -114,8 +115,16 @@ const home: Composed = {
 const remotes: Composed[] = [home, ...routeRemotes, ...homePanes];
 const apps = ["shell", ...remotes.map((remote) => remote.app)];
 
-/** The shared modules the build config declares singletons. */
-const singletons = ["react", "react-dom"];
+/**
+ * Every shared module the build config declares a singleton, read from that
+ * declaration. Each one a container resolves must come from the shell; the
+ * eager ones are what every container shares on its first render, so each
+ * listed container must resolve those.
+ */
+const singletons = Object.keys(sharedSingletons);
+const eagerSingletons = Object.entries(sharedSingletons)
+  .filter(([, share]) => "eager" in share && share.eager)
+  .map(([name]) => name);
 
 const serveTarget = z.object({
   targets: z.object({
@@ -140,8 +149,12 @@ const origin = (app: string) => `http://127.0.0.1:${declaredPort(app)}`;
  * Federation runtime records which container supplied each version it
  * resolved, so this is the runtime's own account rather than an inference.
  */
-function sharedSingletons(page: Page) {
+function resolvedSingletons(page: Page) {
   return page.evaluate((names) => {
+    // The runtime publishes this global untyped, so the shape its share scope
+    // records is stated here; every level is optional and read with `?.`/`??`
+    // or guarded by `if`, so a page whose runtime recorded nothing yields an
+    // empty account, which the assertions below then refuse.
     const federation = (
       globalThis as {
         __FEDERATION__?: {
@@ -208,7 +221,7 @@ async function expectComposed(page: Page, { landmark }: Composed) {
  * supplied by the shell, and that no container on the page holds a second.
  */
 async function expectSingletonsResolvedOnce(page: Page, apps: string[]) {
-  const resolved = await sharedSingletons(page);
+  const resolved = await resolvedSingletons(page);
   // The runtime keys a container by its federation name, which the registry
   // maps from the app's project name; the shell is not a registered remote.
   const isRemote = (app: string): app is RemoteProject => app in remoteRegistry;
@@ -216,7 +229,7 @@ async function expectSingletonsResolvedOnce(page: Page, apps: string[]) {
     isRemote(app) ? remoteRegistry[app] : app,
   );
   for (const container of containers)
-    for (const name of singletons)
+    for (const name of eagerSingletons)
       expect(
         Object.values(resolved[`${container}/${name}`] ?? {}),
         `${container} resolves ${name} once, from the shell`,
@@ -295,6 +308,16 @@ beforeAll(async () => {
   browser = await chromium.launch();
 }, 1_800_000);
 
+/** A body a server answered successfully, refusing any other answer. */
+async function fetchedText(url: string) {
+  const response = await fetch(url);
+  if (!response.ok)
+    throw new Error(
+      `${url} answered ${response.status} ${response.statusText}`,
+    );
+  return response.text();
+}
+
 /** Whether anything still answers on a port. */
 async function answers(url: string) {
   try {
@@ -332,6 +355,14 @@ afterAll(async () => {
   );
 }, 180_000);
 
+describe("the journeys below", () => {
+  it("cover every remote the registry declares, once each", () => {
+    expect(remotes.map((remote) => remote.app).sort()).toEqual(
+      Object.keys(remoteRegistry).sort(),
+    );
+  });
+});
+
 describe("the shell's development server", () => {
   it("composes every route remote and Home's seven panes with React resolved once", async () => {
     const page = await browser.newPage();
@@ -359,9 +390,7 @@ describe("the shell's development server", () => {
 
     // The document is the one the shell's development compilation built: it
     // names an unhashed entry, where every published document names a hash.
-    const document = await (
-      await fetch(`${origin("shell")}${siteBase}/`)
-    ).text();
+    const document = await fetchedText(`${origin("shell")}${siteBase}/`);
     expect(document).toMatch(/<script[^>]+src="[^"]*\/main\.js"/);
     expect(problems).toEqual([]);
     await page.close();
@@ -381,11 +410,9 @@ describe("each remote's own development server", () => {
 
       // The container this server hands out is its development build, which
       // carries source maps; the published one carries none.
-      const container = await (
-        await fetch(
-          `${origin(remote.app)}${siteBase}/remotes/${remote.app}/remoteEntry.js`,
-        )
-      ).text();
+      const container = await fetchedText(
+        `${origin(remote.app)}${siteBase}/remotes/${remote.app}/remoteEntry.js`,
+      );
       expect(container).toContain("sourceMappingURL");
       expect(problems).toEqual([]);
       await page.close();

@@ -63,21 +63,7 @@
   "plugins": [
     {
       "plugin": "@nx/rspack/plugin",
-      "include": [
-        "apps/shell/**/*",
-        "apps/home/**/*",
-        "apps/bio/**/*",
-        "apps/research/**/*",
-        "apps/software/**/*",
-        "apps/courses/**/*",
-        "apps/awards/**/*",
-        "apps/skills/**/*",
-        "apps/timeline/**/*",
-        "apps/home-cards/**/*",
-        "apps/home-carousel/**/*",
-        "apps/home-contact/**/*",
-        "apps/home-story/**/*"
-      ],
+      "include": ["apps/*/**/*"],
       "options": {
         "buildTargetName": "build",
         "serveTargetName": "serve",
