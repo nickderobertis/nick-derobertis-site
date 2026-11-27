@@ -30,6 +30,7 @@
     "@nx/workspace": "24.1.0",
     "@onebudgetspec/cli": "0.2.2",
     "@playwright/test": "1.65.1",
+    "@rspack/cli": "2.3.4",
     "@site/artifact-contracts": "workspace:*",
     "@site/build-config": "workspace:*",
     "@site/data-access-awards": "workspace:*",

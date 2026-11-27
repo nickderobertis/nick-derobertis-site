@@ -3,12 +3,19 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/bio/src",
   "projectType": "application",
-  "tags": ["type:remote", "scope:bio"],
+  "tags": [
+    "type:remote",
+    "scope:bio"
+  ],
   "metadata": {
     "description": "llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] This project's browser and visual suites sit behind this project's own affected edge, and just check dispatches each of them exactly once per push through just gate-browser-lanes rather than once per selection that reached the app. Giving them a second Nx project purely to narrow that edge is a workspace-wide restructuring, and this change neither makes it nor adds a suite that would need it. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about.",
-    "federation": { "alias": "bio" },
+    "federation": {
+      "alias": "bio"
+    },
     "boundaries": {
-      "onlyDependOnLibsWithTags": ["type:shared"]
+      "onlyDependOnLibsWithTags": [
+        "type:shared"
+      ]
     }
   },
   "targets": {
@@ -17,33 +24,40 @@
       "metadata": {
         "description": "llmlint: ignore-file[browser_journeys_run_against_the_built_app] This workspace declares each app's browser journey on the app itself rather than in a second Nx project, and the journey still drives the built artifact rather than a development server: the e2e target here dependsOn shell:prerender, so Playwright only ever opens the composed production bundle Pages publishes. Splitting a per-app e2e project out is a workspace-wide restructuring, and this change neither makes it nor adds a journey that would need it. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about."
       },
-      "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
+      "dependsOn": [
+        {
+          "target": "prerender",
+          "projects": [
+            "shell"
+          ]
+        }
+      ],
       "options": {
         "command": "playwright test --config apps/bio/e2e/playwright.config.ts"
       }
     },
     "build": {
-      "executor": "@nx/rspack:rspack",
       "outputs": [
-        "{options.outputPath}",
+        "{workspaceRoot}/dist/apps/bio",
         "{workspaceRoot}/dist/mf-types/remotes/bio",
         "{workspaceRoot}/dist/mf-types/remotes/bio.zip",
-        "{options.outputPath}/fragment.html",
-        "{options.outputPath}/fragment.css",
-        "{options.outputPath}/fragment.json"
+        "{workspaceRoot}/dist/apps/bio/fragment.html",
+        "{workspaceRoot}/dist/apps/bio/fragment.css",
+        "{workspaceRoot}/dist/apps/bio/fragment.json"
       ],
       "options": {
-        "rspackConfig": "apps/bio/rspack.config.ts",
-        "outputPath": "dist/apps/bio",
-        "main": "apps/bio/src/main.tsx",
-        "tsConfig": "apps/bio/tsconfig.app.json",
-        "index": "apps/bio/src/index.html",
-        "assets": []
+        "cwd": ".",
+        "args": [
+          "--config=apps/bio/rspack.config.ts",
+          "--node-env=production"
+        ]
       }
     },
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": "biome lint apps/bio" }
+      "options": {
+        "command": "biome lint apps/bio"
+      }
     },
     "typecheck": {
       "executor": "nx:run-commands",
@@ -64,11 +78,25 @@
       }
     },
     "serve": {
-      "executor": "@nx/rspack:dev-server",
       "metadata": {
-        "description": "llmlint: ignore-file[changed_behavior_has_e2e] The serve target here only declares the shared @nx/rspack:dev-server executor for bio; it builds no byte a visitor is served, because just serve-dev composes the published artifact for every app it is not developing. The one code path the declaration reaches is scripts/serve/serve-dev.mjs, and serve-dev.spec.ts drives that path in a real browser through both shapes an app can take under it — the composing host (shell) and a remote pane (awards), whose edit it also follows into the composed host — while apps/bio/e2e/bio.spec.ts and apps/bio/e2e/ownership.spec.ts keep bio's published bytes covered standalone and host-composed. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about."
+        "description": "llmlint: ignore-file[changed_behavior_has_e2e] The serve target here only declares the shared @nx/rspack:dev-server executor for bio; it builds no byte a visitor is served, because just serve-dev composes the published artifact for every app it is not developing. The one code path the declaration reaches is scripts/serve/serve-dev.mjs, and serve-dev.spec.ts drives that path in a real browser through both shapes an app can take under it \u2014 the composing host (shell) and a remote pane (awards), whose edit it also follows into the composed host \u2014 while apps/bio/e2e/bio.spec.ts and apps/bio/e2e/ownership.spec.ts keep bio's published bytes covered standalone and host-composed. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about."
       },
-      "options": { "buildTarget": "bio:build" }
+      "options": {
+        "cwd": ".",
+        "args": [
+          "--config=apps/bio/rspack.config.ts",
+          "--node-env=development"
+        ]
+      }
+    },
+    "preview": {
+      "options": {
+        "cwd": ".",
+        "args": [
+          "--config=apps/bio/rspack.config.ts",
+          "--node-env=production"
+        ]
+      }
     }
   }
 }

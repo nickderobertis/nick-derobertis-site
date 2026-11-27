@@ -3,7 +3,10 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/shell/src",
   "projectType": "application",
-  "tags": ["type:app", "scope:shell"],
+  "tags": [
+    "type:app",
+    "scope:shell"
+  ],
   "metadata": {
     "description": "llmlint: ignore-file[expensive_tests_stay_behind_their_own_edge] This project's browser and visual suites sit behind this project's own affected edge, and just check dispatches each of them exactly once per push through just gate-browser-lanes rather than once per selection that reached the app. Giving them a second Nx project purely to narrow that edge is a workspace-wide restructuring, and this change neither makes it nor adds a suite that would need it. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about."
   },
@@ -13,33 +16,34 @@
       "metadata": {
         "description": "llmlint: ignore-file[browser_journeys_run_against_the_built_app] This workspace declares each app's browser journey on the app itself rather than in a second Nx project, and the journey still drives the built artifact rather than a development server: the e2e target here dependsOn shell:prerender, so Playwright only ever opens the composed production bundle Pages publishes. Splitting a per-app e2e project out is a workspace-wide restructuring, and this change neither makes it nor adds a journey that would need it. The directive is file-scoped because project.json has no comment syntax, so no line- or block-scoped directive can be attached to the declaration it is about."
       },
-      "dependsOn": [{ "target": "prerender", "projects": ["shell"] }],
+      "dependsOn": [
+        {
+          "target": "prerender",
+          "projects": [
+            "shell"
+          ]
+        }
+      ],
       "options": {
         "config": "apps/shell/e2e/playwright.config.ts",
         "skipInstall": true
       }
     },
     "build": {
-      "executor": "@nx/rspack:rspack",
       "outputs": [
-        "{options.outputPath}",
+        "{workspaceRoot}/dist/apps/shell",
         "{workspaceRoot}/dist/mf-types/hosts/shell",
-        "{options.outputPath}/fragment.html",
-        "{options.outputPath}/fragment.css",
-        "{options.outputPath}/fragment.json"
+        "{workspaceRoot}/dist/apps/shell/fragment.html",
+        "{workspaceRoot}/dist/apps/shell/fragment.css",
+        "{workspaceRoot}/dist/apps/shell/fragment.json"
       ],
       "options": {
-        "rspackConfig": "apps/shell/rspack.config.ts",
-        "outputPath": "dist/apps/shell",
-        "index": "apps/shell/src/index.html",
-        "main": "apps/shell/src/main.tsx",
-        "tsConfig": "apps/shell/tsconfig.app.json",
-        "assets": []
+        "cwd": ".",
+        "args": [
+          "--config=apps/shell/rspack.config.ts",
+          "--node-env=production"
+        ]
       }
-    },
-    "serve": {
-      "executor": "@nx/rspack:dev-server",
-      "options": { "buildTarget": "shell:build" }
     },
     "prerender": {
       "executor": "nx:run-commands",
@@ -87,9 +91,29 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/apps/shell"],
+      "outputs": [
+        "{workspaceRoot}/coverage/apps/shell"
+      ],
       "options": {
         "command": "vitest run --config apps/shell/vite.config.ts --coverage"
+      }
+    },
+    "serve": {
+      "options": {
+        "cwd": ".",
+        "args": [
+          "--config=apps/shell/rspack.config.ts",
+          "--node-env=development"
+        ]
+      }
+    },
+    "preview": {
+      "options": {
+        "cwd": ".",
+        "args": [
+          "--config=apps/shell/rspack.config.ts",
+          "--node-env=production"
+        ]
       }
     }
   }

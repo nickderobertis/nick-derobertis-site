@@ -2,39 +2,64 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "master",
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
-    "wholeWorkspace": ["{workspaceRoot}/**/*"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
+    "wholeWorkspace": [
+      "{workspaceRoot}/**/*"
+    ],
     "production": [
       "default",
       "!{projectRoot}/**/*.spec.ts",
       "!{projectRoot}/**/*.spec.tsx"
     ],
-    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json"]
+    "sharedGlobals": [
+      "{workspaceRoot}/tsconfig.base.json"
+    ]
   },
   "targetDefaults": {
     "build": {
       "cache": true,
-      "inputs": ["production", "^production"],
-      "outputs": ["{options.outputPath}"]
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{options.outputPath}"
+      ]
     },
     "test": {
       "cache": true,
-      "inputs": ["default", "^default"]
+      "inputs": [
+        "default",
+        "^default"
+      ]
     },
     "lint": {
       "cache": true,
-      "inputs": ["default", "^default", "{workspaceRoot}/biome.json"]
+      "inputs": [
+        "default",
+        "^default",
+        "{workspaceRoot}/biome.json"
+      ]
     },
     "typecheck": {
       "cache": true,
-      "inputs": ["default", "^production"]
+      "inputs": [
+        "default",
+        "^production"
+      ]
     },
     "e2e": {
       "cache": false
     },
     "serve": {
       "cache": false,
-      "options": { "host": "127.0.0.1", "port": 4200 }
+      "options": {
+        "host": "127.0.0.1",
+        "port": 4200
+      }
     },
     "prerender": {
       "cache": false
@@ -46,11 +71,32 @@
       "cache": true,
       "inputs": [
         "wholeWorkspace",
-        { "env": "LLMLINT_DIFF_BASE" },
-        { "env": "LLMLINT_DIFF_FILES" },
-        { "env": "LLMLINT_JUDGE_FINGERPRINT" }
+        {
+          "env": "LLMLINT_DIFF_BASE"
+        },
+        {
+          "env": "LLMLINT_DIFF_FILES"
+        },
+        {
+          "env": "LLMLINT_JUDGE_FINGERPRINT"
+        }
       ]
     }
   },
-  "plugins": ["./scripts/workspace/federation-plugin.mjs"]
+  "plugins": [
+    {
+      "plugin": "@nx/rspack/plugin",
+      "include": [
+        "apps/shell/**/*",
+        "apps/bio/**/*"
+      ],
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static"
+      }
+    },
+    "./scripts/workspace/federation-plugin.mjs"
+  ]
 }
