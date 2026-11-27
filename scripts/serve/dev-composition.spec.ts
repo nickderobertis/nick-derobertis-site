@@ -151,34 +151,32 @@ const origin = (app: string) => `http://127.0.0.1:${declaredPort(app)}`;
  */
 function resolvedSingletons(page: Page) {
   return page.evaluate((names) => {
-    // The runtime publishes this global untyped, so the shape its share scope
-    // records is stated here; every level is optional and read with `?.`/`??`
-    // or guarded by `if`, so a page whose runtime recorded nothing yields an
-    // empty account, which the assertions below then refuse.
-    const federation = (
-      globalThis as {
-        __FEDERATION__?: {
-          __SHARE__?: Record<
-            string,
-            Record<string, Record<string, Record<string, { from: string }>>>
-          >;
-        };
-      }
-    ).__FEDERATION__;
+    // The runtime publishes this global untyped, so every level of its share
+    // scope is checked to be an object before it is read, and a share whose
+    // `from` is not a string is skipped. A page whose runtime recorded nothing,
+    // or something of another shape, yields an empty account, which the
+    // assertions below then refuse.
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === "object" && value !== null && !Array.isArray(value);
+    const federation: unknown = Reflect.get(globalThis, "__FEDERATION__");
+    const shareScopes = isRecord(federation) ? federation.__SHARE__ : undefined;
     const resolved: Record<string, Record<string, string>> = {};
-    for (const [container, scopes] of Object.entries(
-      federation?.__SHARE__ ?? {},
-    ))
-      for (const scope of Object.values(scopes))
-        for (const name of names)
-          if (scope[name])
-            resolved[`${container.replace(/:local$/, "")}/${name}`] =
-              Object.fromEntries(
-                Object.entries(scope[name]).map(([version, share]) => [
-                  version,
-                  share.from,
-                ]),
-              );
+    if (!isRecord(shareScopes)) return resolved;
+    for (const [container, scopes] of Object.entries(shareScopes)) {
+      if (!isRecord(scopes)) continue;
+      for (const scope of Object.values(scopes)) {
+        if (!isRecord(scope)) continue;
+        for (const name of names) {
+          const versions = scope[name];
+          if (!isRecord(versions)) continue;
+          const sources: Record<string, string> = {};
+          for (const [version, share] of Object.entries(versions))
+            if (isRecord(share) && typeof share.from === "string")
+              sources[version] = share.from;
+          resolved[`${container.replace(/:local$/, "")}/${name}`] = sources;
+        }
+      }
+    }
     return resolved;
   }, singletons);
 }

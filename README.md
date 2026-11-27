@@ -7,7 +7,7 @@ continues to use the legacy AWS deployment until it is migrated separately.
 
 ## Local development
 
-Install Node 26, the bun release `.tool-versions` pins, and
+Install the Node and bun releases `.tool-versions` pins, and
 [`just`](https://just.systems/), then bootstrap the pinned bun workspace:
 
 ```bash

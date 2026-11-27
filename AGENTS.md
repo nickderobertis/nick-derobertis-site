@@ -63,7 +63,7 @@ Use `just` as the only command surface. `just check` is the full manual verifica
 Dependency freshness is checked with `bun outdated`; every dependency's
 `current` version must equal its `wanted` version, and every dependency is
 pinned at its npm latest unless a peer range holds it back. One is held:
-TypeScript stays on 6 (latest 7) because Nx 24's `@nx/js`, `@nx/vite`,
+TypeScript stays on 6, a major below its npm latest, because Nx 24's `@nx/js`, `@nx/vite`,
 `@nx/vitest`, `@nx/react` and `@nx/eslint-plugin` declare the peer
 `typescript: ^5.8.0 || ^6.0.0`, `@typescript-eslint/parser` 8 declares
 `>=4.8.4 <6.1.0`, and `@swc-node/register` declares `>= 4.3 < 7`.
