@@ -19,13 +19,16 @@ stage() { local n=$1 name=$2; shift 2; { [ "$n" -lt "$FIRST" ] || [ "$n" -gt "${
   SUMMARY+=("stage $n | $name | exit $rc | $v"); echo "=== stage $n: $name -> exit $rc $v"; }
 
 s1() { d="$OUT/clone"; rm -rf "$d"; git clone -q --branch "$(git rev-parse --abbrev-ref HEAD)" "file://$ROOT" "$d" && cd "$d" && bun install --frozen-lockfile; }
-s2() { bun x nx run-many -t build --parallel=3 --skip-nx-cache; }
+# Continuation scope: only shell and bio are converted to Nx 24's inferred
+# @nx/rspack/plugin; the other 11 remotes still name the removed executors.
+PAIR=shell,bio
+s2() { bun x nx run-many -t build -p "$PAIR" --skip-nx-cache --exclude-task-dependencies; }
 # 3a host-composed: the shell's e2e journeys. 3b standalone: every route and feature
 # remote's own serve target, opened in Chromium (the per-app e2e targets depend on
 # shell:prerender, so they do not establish that a remote serves standalone).
-REMOTES=(awards bio courses home home-cards home-carousel home-contact home-story research skills software timeline)
-s3() { bun x nx run shell:e2e --skip-nx-cache && node spike-bun/standalone-serve.mjs "${REMOTES[@]}"; }
-s4() { bun x nx run-many -t test --parallel=3 --skip-nx-cache; }
+REMOTES=(bio)
+s3() { node spike-bun/pair-composed.mjs; }
+s4() { bun x nx run-many -t test -p "$PAIR" --skip-nx-cache; }
 s5() { just prerender && echo "just prerender: shell:prerender (build + artifact validation) succeeded"; }
 s6() { set -e; ws="$OUT/capture-ws"; rm -rf "$ws"
   # affected job, under bun: its Compute affected visual projects step, then the app matrix entry.
@@ -46,9 +49,9 @@ s6() { set -e; ws="$OUT/capture-ws"; rm -rf "$ws"
 s7() { python3 ~/.claude/skills/create-repo/scripts/check_repo_baseline.py "$ROOT"; }
 
 stage 1 "bun install --frozen-lockfile on a clean clone" s1
-stage 2 "nx run-many -t build" s2
-stage 3 "Module Federation in a real browser (shell:e2e host-composed + each remote's standalone serve rendering)" s3
-stage 4 "every project's test target with coverage at the 95% floor" s4
+stage 2 "nx run-many -t build -p shell,bio" s2
+stage 3 "Module Federation in a real browser (shell composing bio + bio standalone serve)" s3
+stage 4 "shell and bio test targets with coverage at the 95% floor" s4
 stage 5 "just prerender + artifact validation" s5
 stage 6 "screencomp v0.4.8 reusable workflow capture x2 + reproducibility gate ($APP)" s6
 stage 7 "create-repo check_repo_baseline.py (deterministic tier)" s7
