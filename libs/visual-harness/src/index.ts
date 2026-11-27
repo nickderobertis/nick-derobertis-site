@@ -84,7 +84,7 @@ export async function captureVisualSuite(
     throw new Error(`Invalid hostPath for ${project}`);
   if (!existsSync(path.join(projectRoot, "index.html")))
     throw new Error(
-      `Built remote not found: ${projectRoot}; run pnpm exec nx build ${project} first`,
+      `Built remote not found: ${projectRoot}; run bun x nx build ${project} first`,
     );
   const pagesBase = readPagesBase();
   const routePrefix = `${pagesBase}/remotes/${project}/`;

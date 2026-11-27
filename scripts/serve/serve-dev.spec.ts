@@ -248,6 +248,7 @@ describe("the host served from source", () => {
     // A route the shell owns, rendered by a remote it fetched from the built
     // artifact: both halves of the mix in one page.
     expect(
+      // biome-ignore lint/performance/useDomNodeTextContent: This is Playwright's Locator.innerText(), which reads the rendered text a visitor sees; it is not a DOM node property, so textContent is not the equivalent the rule assumes.
       await page.getByRole("heading", { level: 1 }).first().innerText(),
     ).toBe("Optimizing Life");
   }, 120_000);
@@ -354,23 +355,23 @@ describe("the built output the sibling apps are served from", () => {
     // exactly here again.
     //
     // The compose is failed at the one seam the recipe reaches it through — a
-    // `pnpm exec nx run shell:prerender` — rather than by breaking a source
+    // `bun x nx run shell:prerender` — rather than by breaking a source
     // file, because a real rspack failure costs a full production build to
     // reach and the subject here is the diagnostic, not rspack. Everything
-    // else falls through to the real pnpm, so the recipe's own validation
+    // else falls through to the real bun, so the recipe's own validation
     // still runs for real ahead of it.
     const shimDirectory = mkdtempSync(join(tmpdir(), "serve-dev-compose-"));
-    const realPnpm = execFileSync("bash", ["-c", "command -v pnpm"], {
+    const realBun = execFileSync("bash", ["-c", "command -v bun"], {
       encoding: "utf8",
     }).trim();
-    const shim = join(shimDirectory, "pnpm");
+    const shim = join(shimDirectory, "bun");
     writeFileSync(
       shim,
       `#!/usr/bin/env bash\n` +
-        `if [ "$1" = exec ] && [ "$3" = run ] && [ "$4" = shell:prerender ]; then\n` +
+        `if [ "$1" = x ] && [ "$3" = run ] && [ "$4" = shell:prerender ]; then\n` +
         `  echo "rspack: the composed artifact could not be built" >&2; exit 1\n` +
         `fi\n` +
-        `exec "${realPnpm}" "$@"\n`,
+        `exec "${realBun}" "$@"\n`,
     );
     chmodSync(shim, 0o755);
 
@@ -407,7 +408,17 @@ function fixtureWorkspace(declarations: Record<string, string>) {
 
 const servableDeclaration = JSON.stringify({
   name: "servable",
-  targets: { serve: { executor: "@nx/rspack:dev-server" } },
+  targets: {
+    serve: {
+      options: {
+        cwd: ".",
+        args: [
+          "--config=apps/servable/rspack.config.ts",
+          "--node-env=development",
+        ],
+      },
+    },
+  },
 });
 
 /**
@@ -459,7 +470,7 @@ describe("a project.json this command cannot read", () => {
       servable: servableDeclaration,
       "no-serve": JSON.stringify({
         name: "no-serve",
-        targets: { build: { executor: "@nx/rspack:rspack" } },
+        targets: { build: { options: { cwd: "." } } },
       }),
     });
 
@@ -477,6 +488,61 @@ describe("a project.json this command cannot read", () => {
       expect(refused.stderr).not.toContain("could not be read");
       // And the scan itself is intact: the app beside it is still servable.
       expect(scanApps(root, "servable").stdout.trim()).toBe("servable");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("does not count a serve target that is not the app's own rspack dev server", () => {
+    const serving = (serve: unknown) => JSON.stringify({ targets: { serve } });
+    const root = fixtureWorkspace({
+      servable: servableDeclaration,
+      // A serve target with its own executor is not the one Nx infers.
+      "own-executor": serving({ executor: "nx:run-commands" }),
+      // Nor is one handing rspack some other app's configuration.
+      borrowed: serving({
+        options: {
+          args: [
+            "--config=apps/servable/rspack.config.ts",
+            "--node-env=development",
+          ],
+        },
+      }),
+      // Nor one building production output, which it could not hot-update.
+      production: serving({
+        options: {
+          args: [
+            "--config=apps/production/rspack.config.ts",
+            "--node-env=production",
+          ],
+        },
+      }),
+    });
+
+    try {
+      for (const app of ["own-executor", "borrowed", "production"]) {
+        const refused = scanApps(root, app);
+        expect(refused.status, refused.stderr).toBe(2);
+        expect(refused.stderr).toContain('["servable"]');
+      }
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("refuses serve arguments that are not a list of strings", () => {
+    const root = fixtureWorkspace({
+      servable: servableDeclaration,
+      garbled: JSON.stringify({
+        targets: { serve: { options: { args: "--node-env=development" } } },
+      }),
+    });
+
+    try {
+      const refused = scanApps(root, "servable");
+      expect(refused.status).toBe(1);
+      expect(refused.stderr).toContain("apps/garbled/project.json");
+      expect(refused.stderr).toContain("not a list of strings");
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

@@ -57,7 +57,7 @@ interface StandIn {
   /**
    * The signal the Nx dispatch is terminated by instead of running.
    *
-   * Set, `pnpm` stands in too: the recipe's own child is the `pnpm exec nx` it
+   * Set, `bun` stands in too: the recipe's own child is the `bun x nx` it
    * spawns, and only that process being killed puts a signal on the close the
    * recipe has to report. Left unset, the real one dispatches real Nx.
    */
@@ -73,7 +73,7 @@ function endsWith(end: { exit?: number; signal?: string }): string[] {
       [`kill -s ${end.signal} "$$"`, "sleep 30"];
 }
 
-// llmlint: ignore-block[e2e_not_mocked] These tests drive the real `just lint-llm-diff` CLI as a user does; the stand-ins are the processes downstream of it, not the recipe under test. llmlint is stood in for because it is the billed and networked third-party judge: running the real one would spend a model call per case, make a deterministic gate depend on the network, and break `just check` for anyone who has not also run `just setup-llmlint`, which `just bootstrap` does not. `pnpm` is stood in for only by the case whose subject is a killed dispatch, because the host killing a real Nx run is not something a test can ask for on demand; every other case here dispatches the real one. The real llmlint is driven by `just lint-llm-diff` itself, which is the gate.
+// llmlint: ignore-block[e2e_not_mocked] These tests drive the real `just lint-llm-diff` CLI as a user does; the stand-ins are the processes downstream of it, not the recipe under test. llmlint is stood in for because it is the billed and networked third-party judge: running the real one would spend a model call per case, make a deterministic gate depend on the network, and break `just check` for anyone who has not also run `just setup-llmlint`, which `just bootstrap` does not. `bun` is stood in for only by the case whose subject is a killed dispatch, because the host killing a real Nx run is not something a test can ask for on demand; every other case here dispatches the real one. The real llmlint is driven by `just lint-llm-diff` itself, which is the gate.
 /**
  * Runs the recipe with `llmlint` replaced by a stub that records its arguments
  * NUL-separated, so a recorded argument is exactly the one llmlint received even
@@ -107,10 +107,10 @@ function runLintLlmDiff(args: string[], standIn: StandIn = {}): Invocation {
     );
     if (standIn.nxSignal !== undefined)
       writeFileSync(
-        path.join(stubDir, "pnpm"),
+        path.join(stubDir, "bun"),
         [
           "#!/usr/bin/env bash",
-          "printf 'pnpm stand-in: killed before dispatching Nx\\n' >&2",
+          "printf 'bun stand-in: killed before dispatching Nx\\n' >&2",
           ...endsWith({ signal: standIn.nxSignal }),
           "",
         ].join("\n"),
@@ -121,7 +121,7 @@ function runLintLlmDiff(args: string[], standIn: StandIn = {}): Invocation {
       encoding: "utf8",
       timeout: 120_000,
       env: {
-        // llmlint: ignore[boundary_inputs_validated] What survives the filter is forwarded, never read: `just` and the `pnpm exec nx` it dispatches need the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. Every Nx setting is dropped instead of forwarded, and the ones these runs depend on are set below, from a directory the test itself created.
+        // llmlint: ignore[boundary_inputs_validated] What survives the filter is forwarded, never read: `just` and the `bun x nx` it dispatches need the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. Every Nx setting is dropped instead of forwarded, and the ones these runs depend on are set below, from a directory the test itself created.
         ...Object.fromEntries(
           Object.entries(process.env).filter(
             ([name]) => !name.startsWith("NX_"),
@@ -343,7 +343,7 @@ describe("just lint-llm-diff argument routing", () => {
 
   // Same termination one level out: the recipe's own child is the Nx dispatch,
   // and a signal there left it reporting a generic pre-judge failure that sends
-  // a reader to fix Nx, pnpm, or this target's configuration — none of which
+  // a reader to fix Nx, bun, or this target's configuration — none of which
   // failed. The status is the shell's for a killed process, so a caller reading
   // only that still learns the run was terminated rather than judged.
   test("names the signal that terminated the Nx dispatch instead of a generic pre-judge failure", () => {

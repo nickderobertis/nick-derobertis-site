@@ -7,8 +7,8 @@ continues to use the legacy AWS deployment until it is migrated separately.
 
 ## Local development
 
-Install Node 26 and [`just`](https://just.systems/), then bootstrap the pinned
-pnpm workspace:
+Install Node 26, the bun release `.tool-versions` pins, and
+[`just`](https://just.systems/), then bootstrap the pinned bun workspace:
 
 ```bash
 just bootstrap
@@ -25,8 +25,9 @@ Reach for this while you are writing code. It builds the complete artifact
 once, then serves the app you named from source with hot module replacement
 while every other app is answered for out of that build, all on one origin at
 the Pages base path. Editing a source file of the app under development updates
-the running page — no workspace rebuild, no restart. It listens on the address
-`nx.json` gives every `serve` target, which is the one `just serve` uses below,
+the running page — no workspace rebuild, no restart. It listens on 127.0.0.1 at
+the port that app's own `serve` target declares — the shell's is 4200, the one
+`just serve` uses below, and every remote has its own so two can run at once —
 and answers there for the shell and for each standalone pane alike; either way
 the shell's routes resolve across the mix. `PORT` moves the server off that
 port, and an app name the workspace cannot serve is refused before anything is

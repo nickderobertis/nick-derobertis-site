@@ -8,8 +8,8 @@ import { z } from "zod";
  * The drift gate over the `@tanstack/router-core` pin, which exists because
  * `shell-fragment-entry.tsx` drives that package's framework-only `serverSsr`
  * and `@tanstack/react-router` does not carry it. It is declared as a direct
- * dependency rather than a `pnpm.overrides` entry because AGENTS.md holds every
- * dependency's `pnpm outdated` `current` to its `wanted`, and only a declared
+ * dependency rather than an `overrides` entry because AGENTS.md holds every
+ * dependency's `bun outdated` `current` to its `wanted`, and only a declared
  * one is reported there. A react-router upgrade that moved its own router-core
  * requirement would leave that declaration pinning a copy nothing renders with,
  * so both halves are asserted below.
@@ -43,7 +43,7 @@ test("the workspace declares @tanstack/router-core at the version it installs", 
 
   expect(
     dependencies["@tanstack/router-core"],
-    "package.json declares a @tanstack/router-core version the install does not produce. Set that dependency to the exact version pnpm resolves, and commit the lockfile with it.",
+    "package.json declares a @tanstack/router-core version the install does not produce. Set that dependency to the exact version bun resolves, and commit the lockfile with it.",
   ).toBe(installedVersion("@tanstack/router-core"));
 });
 

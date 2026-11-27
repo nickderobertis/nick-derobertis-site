@@ -62,9 +62,9 @@ function affectedProjects(
 ): string[] {
   return projectNames(
     execFileSync(
-      "pnpm",
+      "bun",
       [
-        "exec",
+        "x",
         "nx",
         "show",
         "projects",

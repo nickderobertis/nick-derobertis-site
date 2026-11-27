@@ -1,6 +1,5 @@
-// eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns its loader boundary; this spec serves the same validated CV domains the deployed shell does.
-
 import { takeRouterHydration } from "@site/build-config/router-hydration";
+// eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns its loader boundary; this spec serves the same validated CV domains the deployed shell does.
 import { cvDataClient } from "@site/data-access-core/bundled";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing; this spec serves the same base the deployed shell does.
 import { siteBase } from "@site/data-access-core/site";

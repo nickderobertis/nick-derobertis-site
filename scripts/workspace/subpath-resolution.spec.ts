@@ -363,8 +363,8 @@ describe("the workspace test runner resolves published subpaths", () => {
       // so everything it printed is carried into the failure here.
       // llmlint: ignore-block[work_goes_through_command_surface] No documented recipe reaches this run and none should: the probe belongs to no Nx project, so no `test` target selects it, and what this case needs is one Vitest run per component config so that one subject is answered under each order of the `remotes` map. That pair is the contract itself, not a step a recipe wraps. The recipe surface still owns the work: `just test` dispatches `tooling-workspace:test`, which runs this file, and this subprocess is the subject it drives.
       const run = await promisify(execFile)(
-        "pnpm",
-        ["exec", "vitest", "run", "--config", probeConfig],
+        "bun",
+        ["x", "vitest", "run", "--config", probeConfig],
         { encoding: "utf8" },
       ).catch((error: unknown) => {
         throw new Error(

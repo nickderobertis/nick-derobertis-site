@@ -21,9 +21,9 @@ import { describe, expect, test } from "vitest";
 
 function affectedScreenshotProjects(file: string): string[] {
   const output = execFileSync(
-    "pnpm",
+    "bun",
     [
-      "exec",
+      "x",
       "nx",
       "show",
       "projects",

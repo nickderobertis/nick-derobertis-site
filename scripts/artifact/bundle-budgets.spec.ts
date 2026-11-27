@@ -25,6 +25,7 @@ import {
   deriveCeiling,
   exposedChunkIds,
   parseBundleBudgets,
+  requestedChunkIds,
 } from "./bundle-budgets.mjs";
 
 const artifact = "dist/apps/shell";
@@ -225,7 +226,7 @@ async function pageChunk(fixture: string, app: string) {
   const resolveChunk = chunkFileResolver(container);
   const emitted = new Set(await readdir(directory));
   const chunks = (exposedChunkIds(container, "./Page") ?? [])
-    .map((id: string) => resolveChunk?.(id))
+    .map((id: string | number) => resolveChunk?.(id))
     .filter(
       (chunk: string | undefined): chunk is string =>
         chunk !== undefined && emitted.has(chunk),
@@ -396,11 +397,15 @@ test("a bundle resolver that calls through a bracket is refused too", async () =
   const fixture = await isolatedArtifact(["bio"]);
   const container = join(fixture, "remotes", "bio", "remoteEntry.js");
   const source = await readFile(container, "utf8");
+  // The injection names the resolver's own parameter, whatever the bundler
+  // called it, so the only thing it adds is the bracketed call under test.
+  const parameter =
+    /__webpack_require__\.u=\(?([A-Za-z_$][\w$]*)/.exec(source)?.[1] ?? "e";
   await writeFile(
     container,
     source.replace(
       "__webpack_require__.u=",
-      '__webpack_require__.u=e=>e["constructor"]["constructor"]("return 1")()+',
+      `__webpack_require__.u=${parameter}=>${parameter}["constructor"]["constructor"]("return 1")()+`,
     ),
   );
 
@@ -480,6 +485,46 @@ test.each([
   expect(result.status).not.toBe(0);
   expect(result.stderr).toContain(
     "declares no ./Page chunk in its expose module map",
+  );
+});
+
+test("a container whose ./Page maps to no chunk the app emitted is refused, not budgeted at zero", async () => {
+  const fixture = await writtenArtifact({
+    "remotes/bio/remoteEntry.js": (source) =>
+      source.replace(
+        '__webpack_require__.e("page")',
+        '__webpack_require__.e("gone")',
+      ),
+  });
+
+  const result = checkBudgets(fixture);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    "maps its ./Page expose to no chunk this app emitted",
+  );
+});
+
+test("a container in rspack 2's form, a bare id its resolver compares strictly, is measured", async () => {
+  const fixture = await writtenArtifact({
+    "remotes/bio/remoteEntry.js": (source) =>
+      source
+        .replace(
+          '__webpack_require__.u=e=>e+".chunk.js";',
+          '__webpack_require__.u=t=>(293===t?"page":t)+".chunk.js";',
+        )
+        .replace('__webpack_require__.e("page")', "__webpack_require__.e(293)"),
+  });
+
+  const path = join(fixture, "bundle-budgets.json");
+  await cp(budgetsPath, path);
+
+  const result = checkBudgets(fixture, path, "--rederive");
+
+  expect(result.status, result.stderr).toBe(0);
+  const page = "console.log('bio page');\n";
+  expect((await readBudgets(path)).apps.bio?.page?.measuredBytes).toBe(
+    Buffer.byteLength(page),
   );
 });
 
@@ -728,4 +773,21 @@ test("an unrecognised argument is refused rather than gated silently", () => {
 
   expect(result.status).not.toBe(0);
   expect(result.stderr).toContain("it was given --print");
+});
+
+test("reads a chunk request whether its id is a string or a bare number", () => {
+  // rspack 1 raised `"674"`, rspack 2 raises `674` and resolves it with `===`,
+  // so each keeps its type; a runtime's own `.e(chunkId)` names a variable,
+  // not a chunk, and must not be counted.
+  expect(
+    requestedChunkIds(
+      'r.e("common");r.e(674);r.e(t);r.e=t=>t;Promise.all([r.e(8),r.e("9a")])',
+    ),
+  ).toEqual(["common", 674, 8, "9a"]);
+  const resolve = chunkFileResolver(
+    '__webpack_require__.u=t=>(293===t?"__federation_expose_Page":t)+".js";',
+  );
+  expect(requestedChunkIds("r.e(293)").map((id) => resolve?.(id))).toEqual([
+    "__federation_expose_Page.js",
+  ]);
 });

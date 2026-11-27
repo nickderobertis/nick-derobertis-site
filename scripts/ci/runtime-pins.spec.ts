@@ -4,9 +4,9 @@ import { describe, expect, test } from "vitest";
 
 // scripts/ci/verify-runtime-pins.mjs is the CLI these tests own, reached the way
 // a contributor reaches it: through `just lint-workflows`.
-// Every workflow provisions pnpm and Node itself, so those pins are a contract
+// Every workflow provisions bun and Node itself, so those pins are a contract
 // with exactly one authoritative source: package.json's `packageManager` for
-// pnpm, and — because nothing declares Node — agreement across workflows for
+// bun, and — because nothing declares Node — agreement across workflows for
 // Node. `just lint-workflows` is the gate that enforces it, and it is the only
 // interface these tests use: each drift case moves one pin in the committed
 // tree exactly as a contributor would, runs the real recipe, and restores the
@@ -17,6 +17,8 @@ import { describe, expect, test } from "vitest";
 
 const pinnedWorkflow = ".github/workflows/pages.yml";
 const manifest = "package.json";
+const captureWorkflow = ".github/workflows/visual-docs.yml";
+const toolVersions = ".tool-versions";
 
 /** package.json is config on disk, so the pin is narrowed before it is used. */
 function declaredPackageManager(): string {
@@ -59,26 +61,50 @@ function lintWithDrift(edits: Record<string, readonly [string, string]>) {
 
 describe("workflow runtime pins", () => {
   test("the gate reports the committed pins agreeing", () => {
-    const declared = declaredPackageManager().replace("pnpm@", "");
+    const declared = declaredPackageManager().replace("bun@", "");
 
     const result = lintWorkflows();
 
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout).toContain(`runtime pins agree: pnpm ${declared}`);
+    expect(result.stdout).toContain(`runtime pins agree: bun ${declared}`);
   }, 180_000);
 
-  test("a workflow provisioning a different pnpm than package.json fails the gate", () => {
+  test("a workflow provisioning a different bun than package.json fails the gate", () => {
+    const declared = declaredPackageManager().replace("bun@", "");
     const result = lintWithDrift({
-      [pinnedWorkflow]: ["PNPM_VERSION: 10.13.1", "PNPM_VERSION: 9.0.0"],
+      [pinnedWorkflow]: [`BUN_VERSION: ${declared}`, "BUN_VERSION: 1.0.0"],
     });
 
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(
-      /package\.json pins pnpm [\d.]+ but .*pages\.yml pins 9\.0\.0/,
+      /package\.json pins bun [\d.]+ but .*pages\.yml pins 1\.0\.0/,
     );
     expect(result.stderr).toContain(
       "lint-workflows: workflow runtime pins drifted",
     );
+  }, 180_000);
+
+  test("a capture command installing a different bun inside its container fails the gate", () => {
+    const declared = declaredPackageManager().replace("bun@", "");
+    const result = lintWithDrift({
+      [captureWorkflow]: [
+        `npm install -g bun@${declared}`,
+        "npm install -g bun@1.0.0",
+      ],
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/visual-docs\.yml pins 1\.0\.0/);
+  }, 180_000);
+
+  test("a .tool-versions naming a different bun fails the gate", () => {
+    const declared = declaredPackageManager().replace("bun@", "");
+    const result = lintWithDrift({
+      [toolVersions]: [`bun ${declared}`, "bun 1.0.0"],
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/\.tool-versions pins 1\.0\.0/);
   }, 180_000);
 
   test("workflows that disagree on the Node runtime fail the gate", () => {
@@ -98,23 +124,28 @@ describe("workflow runtime pins", () => {
     const result = lintWithDrift({
       [manifest]: [
         `"packageManager": "${declared}"`,
-        '"packageManager": "pnpm@latest"',
+        '"packageManager": "bun@latest"',
       ],
     });
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toMatch(/authoritative pnpm pin/);
+    expect(result.stderr).toMatch(/authoritative bun pin/);
   }, 180_000);
 
   test("every drift case leaves the committed pins exactly as it found them", () => {
+    const declared = declaredPackageManager().replace("bun@", "");
     expect(readFileSync(pinnedWorkflow, "utf8")).toContain(
-      "PNPM_VERSION: 10.13.1",
+      `BUN_VERSION: ${declared}`,
     );
+    expect(readFileSync(captureWorkflow, "utf8")).toContain(
+      `npm install -g bun@${declared}`,
+    );
+    expect(readFileSync(toolVersions, "utf8")).toContain(`bun ${declared}`);
     expect(readFileSync(pinnedWorkflow, "utf8")).toContain(
       "NODE_VERSION: 26.5.0",
     );
     expect(readFileSync(manifest, "utf8")).toMatch(
-      /"packageManager": "pnpm@\d+\.\d+\.\d+"/,
+      /"packageManager": "bun@\d+\.\d+\.\d+"/,
     );
   });
 });

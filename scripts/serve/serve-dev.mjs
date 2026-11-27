@@ -31,28 +31,35 @@ const artifactRoot = fileURLToPath(
 );
 
 /**
- * The one executor that serves an app from source with hot module replacement,
- * which is what this command promises. A `serve` target running anything else
- * is some other command's, so it does not make its app servable here.
+ * What a `serve` target must say to serve its app from source with hot module
+ * replacement, which is what this command promises: no executor of its own, so
+ * it is the `rspack serve` target `@nx/rspack/plugin` infers, given that app's
+ * own rspack configuration in development mode. A `serve` target running
+ * anything else is some other command's, so it does not make its app servable
+ * here.
  */
-const devServerExecutor = "@nx/rspack:dev-server";
+const devServerArguments = (app) => [
+  `--config=apps/${app}/rspack.config.ts`,
+  "--node-env=development",
+];
 
 /**
- * Whether one app's own declaration names the dev-server target this command
- * runs.
+ * Whether one app's own declaration configures the dev-server target this
+ * command runs.
  *
  * A `project.json` is a boundary like argv, and a wider one: the answer here
  * decides both which names `validatedApp` accepts and which Nx target this
  * command then runs. So the document is held to the Nx shape this reads — text
  * that parses as JSON, an object, whose `targets` is an object, whose `serve`
- * is a target configuration running `devServerExecutor` — before any of it
+ * is a target configuration passing `devServerArguments` — before any of it
  * decides anything. A directory holding no project.json is not an Nx project at
  * all and is simply not an app; a project.json that is there and cannot be read
  * as an Nx project configuration is a declaration to fix, and says so, because
  * answering "not servable" for it would leave a developer looking for the app
  * this command silently dropped.
  */
-function declaresServeTarget(path) {
+function declaresServeTarget(app) {
+  const path = `apps/${app}/project.json`;
   // The rerun instruction is the uncaught handler's to add, so what is thrown
   // here is the reason alone: the declaration at fault and what is wrong with it.
   const reject = (reason) => {
@@ -92,9 +99,14 @@ function declaresServeTarget(path) {
   if (serve === undefined) return false;
   if (typeof serve !== "object" || serve === null || Array.isArray(serve))
     reject("declares a serve target that is not an Nx target configuration");
-  if (typeof serve.executor !== "string")
-    reject("declares a serve target naming no executor to run it");
-  return serve.executor === devServerExecutor;
+  if (serve.executor !== undefined) return false;
+  const args = serve.options?.args;
+  if (
+    args !== undefined &&
+    (!Array.isArray(args) || args.some((arg) => typeof arg !== "string"))
+  )
+    reject("declares serve arguments that are not a list of strings");
+  return devServerArguments(app).every((arg) => args?.includes(arg));
 }
 
 /**
@@ -107,11 +119,11 @@ function servableApps() {
   const apps = readdirSync("apps", { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
-    .filter((name) => declaresServeTarget(`apps/${name}/project.json`))
+    .filter((name) => declaresServeTarget(name))
     .sort();
   if (apps.length === 0)
     throw new Error(
-      `no app under apps/ declares a ${devServerExecutor} serve target, so there is nothing a development server could build from source`,
+      "no app under apps/ declares a serve target running its own rspack configuration in development mode, so there is nothing a development server could build from source",
     );
   return apps;
 }
@@ -191,9 +203,9 @@ process.on("exit", release);
 // diagnostic line and an exit status.
 // llmlint: ignore-block[tool_output_is_signal] This dispatch has no success to be quiet about: it is a foreground server whose stream — compilations, hot replacements, build and type errors — is the whole reason a developer runs it, so it is inherited rather than captured, for the reason set out directly above.
 const server = spawn(
-  "pnpm",
+  "bun",
   [
-    "exec",
+    "x",
     "nx",
     "run",
     `${app}:serve`,

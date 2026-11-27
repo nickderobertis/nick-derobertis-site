@@ -35,7 +35,7 @@ beforeAll(() => {
     mkdtempSync(join(tmpdir(), "affected-build-projects-")),
     "graph.json",
   );
-  execFileSync("pnpm", ["exec", "nx", "graph", `--file=${graphFile}`], {
+  execFileSync("bun", ["x", "nx", "graph", `--file=${graphFile}`], {
     encoding: "utf8",
     stdio: "pipe",
   });

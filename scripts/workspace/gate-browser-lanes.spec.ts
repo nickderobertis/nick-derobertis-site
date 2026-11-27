@@ -56,14 +56,14 @@ const scenarioIdentity = {
 };
 
 let scratch: string;
-let realPnpm: string;
+let realBun: string;
 
 beforeAll(() => {
   scratch = mkdtempSync(join(tmpdir(), "gate-browser-lanes-"));
-  realPnpm = execFileSync("bash", ["-c", "command -v pnpm"], {
+  realBun = execFileSync("bash", ["-c", "command -v bun"], {
     encoding: "utf8",
   }).trim();
-  expect(realPnpm).not.toBe("");
+  expect(realBun).not.toBe("");
 });
 
 /**
@@ -119,9 +119,9 @@ function lanesFor(base: string, head: string) {
 /**
  * Every work dispatch a gate recipe makes, in order.
  *
- * The gate reaches Nx and Biome as `pnpm exec`, so a `pnpm` earlier on PATH
+ * The gate reaches Nx and Biome as `bun x`, so a `bun` earlier on PATH
  * records and stubs exactly the invocations that do work — `affected`,
- * `run-many`, `run`, and the formatter — and falls through to the real pnpm for
+ * `run-many`, `run`, and the formatter — and falls through to the real bun for
  * everything else. The selection the gate dispatches over is therefore resolved
  * by the real project graph against the real range; only the running of the
  * suites is withheld, which is the one thing a spec cannot afford to do for
@@ -134,14 +134,14 @@ function gateDispatches(
   const shimDirectory = mkdtempSync(join(scratch, "dispatch-"));
   const log = join(shimDirectory, "dispatched.log");
   writeFileSync(log, "");
-  const shim = join(shimDirectory, "pnpm");
+  const shim = join(shimDirectory, "bun");
   writeFileSync(
     shim,
     `#!/usr/bin/env bash\n` +
-      `if [ "$1" = exec ] && { [ "$3" = affected ] || [ "$3" = run-many ] || [ "$3" = run ] || [ "$2" = biome ]; }; then\n` +
+      `if [ "$1" = x ] && { [ "$3" = affected ] || [ "$3" = run-many ] || [ "$3" = run ] || [ "$2" = biome ]; }; then\n` +
       `  printf '%s\\n' "$*" >> "${log}"; exit 0\n` +
       `fi\n` +
-      `exec "${realPnpm}" "$@"\n`,
+      `exec "${realBun}" "$@"\n`,
   );
   chmodSync(shim, 0o755);
   const result = spawnSync("just", [recipe], {
@@ -161,9 +161,9 @@ function gateDispatches(
 function browserTasks(lanes: readonly string[]) {
   const graphFile = join(scratch, `tasks-${lanes.join("-")}.json`);
   execFileSync(
-    "pnpm",
+    "bun",
     [
-      "exec",
+      "x",
       "nx",
       "run-many",
       "-t",
@@ -232,7 +232,7 @@ describe("the gate's browser lanes", () => {
 
     const dispatched = gateDispatches("check", { base: "HEAD", head });
     expect(browserDispatches(dispatched)).toEqual([
-      "exec nx run-many -t e2e,screenshot -p awards,shell --parallel=3",
+      "x nx run-many -t e2e,screenshot -p awards,shell --parallel=3",
     ]);
     // One dispatch, and one `shell:e2e` inside it. Before this the same range
     // reached that suite through the affected batch and again unconditionally.
@@ -257,7 +257,7 @@ describe("the gate's browser lanes", () => {
 
     const dispatched = gateDispatches("check", { base: "HEAD", head });
     expect(browserDispatches(dispatched)).toEqual([
-      "exec nx run-many -t e2e,screenshot -p shell,software --parallel=3",
+      "x nx run-many -t e2e,screenshot -p shell,software --parallel=3",
     ]);
     expect(browserTasks(lanes).filter((task) => task === "shell:e2e")).toEqual([
       "shell:e2e",
@@ -275,7 +275,7 @@ describe("the gate's browser lanes", () => {
 
     const dispatched = gateDispatches("check", { base: "HEAD", head });
     expect(browserDispatches(dispatched)).toEqual([
-      "exec nx run-many -t e2e,screenshot -p shell --parallel=3",
+      "x nx run-many -t e2e,screenshot -p shell --parallel=3",
     ]);
     expect(browserTasks(lanes)).toEqual(["shell:e2e"]);
   });
@@ -287,17 +287,17 @@ describe("the gate's browser lanes", () => {
     // holds for every range they can be handed rather than for most of them.
     expect(
       browserDispatches([
-        "exec nx affected -t lint --base=HEAD" +
+        "x nx affected -t lint --base=HEAD" +
           " --head=23e25e5709b76d0fe3c6ae2e61a820ec9db6b53b" +
           " --parallel=3 --args=--error-on-warnings",
-        "exec nx affected -t typecheck,test,build,prerender --base=HEAD" +
+        "x nx affected -t typecheck,test,build,prerender --base=HEAD" +
           " --head=23e25e5709b76d0fe3c6ae2e61a820ec9db6b53b --parallel=3",
-        "exec nx run-many -t e2e,screenshot -p shell --parallel=3",
-        "exec nx run shell:e2e",
+        "x nx run-many -t e2e,screenshot -p shell --parallel=3",
+        "x nx run shell:e2e",
       ]),
     ).toEqual([
-      "exec nx run-many -t e2e,screenshot -p shell --parallel=3",
-      "exec nx run shell:e2e",
+      "x nx run-many -t e2e,screenshot -p shell --parallel=3",
+      "x nx run shell:e2e",
     ]);
   });
 
@@ -309,7 +309,7 @@ describe("the gate's browser lanes", () => {
     const dispatched = gateDispatches("check-all");
 
     expect(browserDispatches(dispatched)).toEqual([
-      "exec nx run-many -t e2e,screenshot --all --parallel=3",
+      "x nx run-many -t e2e,screenshot --all --parallel=3",
     ]);
   });
 

@@ -246,6 +246,10 @@ async function measureApp(directory, publicPath) {
   const chunks = exposed
     .map((id) => resolve(id))
     .filter((chunk) => chunk !== undefined && emitted.has(chunk));
+  if (chunks.length === 0)
+    throw new BudgetRefusal(
+      `${join(directory, "remoteEntry.js")} maps its ${pageExpose} expose to no chunk this app emitted, so the payload a host composes from it cannot be measured; rebuild that app and rerun just prerender.`,
+    );
   return {
     ...measured,
     page: await totalBytes(

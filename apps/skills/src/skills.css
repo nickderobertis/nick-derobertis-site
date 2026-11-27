@@ -73,6 +73,7 @@ body:has(.skills-pane) {
   gap: 0.25rem;
   justify-content: center;
 }
+/* biome-ignore lint/style/noDescendingSpecificity: Biome 2.6 newly flags this unchanged rule. Specificity already makes the earlier, more specific selector it is compared with win where both match; moving this rule would reorder it against its equal-specificity neighbours and could change the cascade, which this file's styling must not. */
 .chart-keyboard-controls button {
   background: transparent;
   border: 1px solid transparent;
@@ -92,6 +93,7 @@ body:has(.skills-pane) {
   max-width: 100%;
   overflow: visible;
 }
+/* biome-ignore lint/style/noDescendingSpecificity: Biome 2.6 newly flags this unchanged rule. Specificity already makes the earlier, more specific selector it is compared with win where both match; moving this rule would reorder it against its equal-specificity neighbours and could change the cascade, which this file's styling must not. */
 .skill-sector {
   cursor: pointer;
   stroke: #fff;
@@ -138,6 +140,7 @@ body:has(.skills-pane) {
   position: relative;
   width: min(32rem, 100%);
 }
+/* biome-ignore lint/style/noDescendingSpecificity: Biome 2.6 newly flags this unchanged rule. Specificity already makes the earlier, more specific selector it is compared with win where both match; moving this rule would reorder it against its equal-specificity neighbours and could change the cascade, which this file's styling must not. */
 .skills-dropdowns select {
   background: #fff;
   border: 1px solid #9c8d8d;

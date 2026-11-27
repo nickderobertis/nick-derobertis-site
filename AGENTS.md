@@ -5,12 +5,13 @@
 - Product shape: React web app monorepo (Nx, rspack, Module Federation 2.0).
 - Language: TypeScript.
 - References composed: `base.md`, `shapes/web-app.md`, `shapes/react.md`, `languages/typescript.md`, `ci.md`, `llmlint.md`, `project-graph.md`.
-- Excluded: bun, because it is incompatible with the supported workspace path for Nx's rspack Module Federation executor; pnpm's workspace linker is required here. Also excluded: release automation, because GitHub Pages deployment is the artifact lifecycle; server/auth guidance, because this is a public static site with no privileged actions.
+- Package manager: bun, with its default isolated linker. pnpm was kept only because Nx's `@nx/rspack:rspack` Module Federation executor supported this workspace through pnpm's linker; Nx 24 removed that executor, and every app now builds and serves through the targets `@nx/rspack/plugin` infers, which compose under bun's isolated linker with React's shared singletons resolving from bun's store.
+- Excluded: release automation, because GitHub Pages deployment is the artifact lifecycle; server/auth guidance, because this is a public static site with no privileged actions.
 - Coverage is 95% on lines, functions, branches, and statements, for app UI as well as library code. One exemption exists, and it is the only one: the `tooling-*` projects, because their subjects run as real subprocesses v8 cannot instrument — every workspace script, `just` recipe, and hook must instead be driven by a spec or record why it cannot be. Every other project owes a `test` target and that floor, declared as thresholds in its own component config rather than inherited from the shared harness; `scripts/workspace/structure-contract.spec.ts` derives the owed set from this sentence rather than from what each project happens to declare.
 
 ## Architecture
 
-Use pnpm; never add backend or runtime API infrastructure. The shell owns routing and layout. It consumes five route remotes; Home is itself a host for seven feature remotes. Remotes expose only route pages and compose only declared child remotes. Libraries flow `shared -> layout -> shell`, enforced by Nx tags. See `docs/architecture.md`.
+Use bun; never add backend or runtime API infrastructure. The shell owns routing and layout. It consumes five route remotes; Home is itself a host for seven feature remotes. Remotes expose only route pages and compose only declared child remotes. Libraries flow `shared -> layout -> shell`, enforced by Nx tags. See `docs/architecture.md`.
 
 ## Visual regression
 
@@ -58,10 +59,15 @@ breaks deploys.
 <!-- llmlint: ignore[contracts_have_one_source_or_a_drift_gate] This contributor-facing ownership inventory is deliberately explicit; module-boundaries.spec.ts verifies every scripts project is tagged tooling and owns the required targets, while Nx remains the project source of truth. -->
 Use `just` as the only command surface. `just check` is the full manual verification gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is owned by the app whose scenarios it takes, never by a centralized script, and is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow. CI owns llmlint validation and visual classification; neither runs in a local pre-push hook.
 
-Dependency freshness is checked with `pnpm outdated`; every dependency's
-`current` version must equal its `wanted` version. Major rspack and TypeScript
-updates remain outside those constraints until their Nx integrations support
-them; `just upgrade` deliberately opts into testing latest releases.
+Dependency freshness is checked with `bun outdated`; every dependency's
+`current` version must equal its `wanted` version, and every dependency is
+pinned at its npm latest unless a peer range holds it back. One is held:
+TypeScript stays on 6 (latest 7) because Nx 24's `@nx/js`, `@nx/vite`,
+`@nx/vitest`, `@nx/react` and `@nx/eslint-plugin` declare the peer
+`typescript: ^5.8.0 || ^6.0.0`, `@typescript-eslint/parser` 8 declares
+`>=4.8.4 <6.1.0`, and `@swc-node/register` declares `>= 4.3 < 7`.
+`just upgrade` deliberately opts into testing latest releases, the held one
+included; pin it back by exact version until those peers accept it.
 
 `just lint-llm-diff` is the LLM-judge tier, deliberately outside `just check`.
 

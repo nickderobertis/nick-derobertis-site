@@ -150,7 +150,7 @@ beforeAll(() => {
     mkdtempSync(join(tmpdir(), "cache-keying-")),
     "graph.json",
   );
-  execFileSync("pnpm", ["exec", "nx", "graph", `--file=${graphFile}`], {
+  execFileSync("bun", ["x", "nx", "graph", `--file=${graphFile}`], {
     encoding: "utf8",
     stdio: "pipe",
   });
@@ -233,8 +233,8 @@ const ansiEscape = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
  */
 function nxKeysTaskOn(task: string, file: string): boolean {
   const result = spawnSync(
-    "pnpm",
-    ["exec", "nx", "show", "target", "inputs", task, "--check", file],
+    "bun",
+    ["x", "nx", "show", "target", "inputs", task, "--check", file],
     { encoding: "utf8" },
   );
   const printed = (result.stdout ?? "").replace(ansiEscape, "");
@@ -247,8 +247,8 @@ function nxKeysTaskOn(task: string, file: string): boolean {
 
 function nxInputFiles(task: string): string[] {
   const printed = execFileSync(
-    "pnpm",
-    ["exec", "nx", "show", "target", "inputs", task, "--json"],
+    "bun",
+    ["x", "nx", "show", "target", "inputs", task, "--json"],
     { encoding: "utf8" },
   );
   return z.object({ files: z.array(workspacePath) }).parse(JSON.parse(printed))
@@ -262,9 +262,9 @@ function nxInputFiles(task: string): string[] {
  */
 function selectedFor(target: string, ...files: string[]): string[] {
   const printed = execFileSync(
-    "pnpm",
+    "bun",
     [
-      "exec",
+      "x",
       "nx",
       "show",
       "projects",
@@ -555,9 +555,9 @@ function outcomesOf(
 ) {
   // llmlint: ignore-block[work_goes_through_command_surface] The Nx dispatch is the subject here, not the means: this reads whether Nx ran or replayed one named task, which requires this exact invocation — one project, one task at a time, and the static reporter that prints a per-task outcome. Every `just` recipe that dispatches targets does so for the whole affected set and reports a pass or a failure rather than a cache outcome, and this spec runs inside one of them, so routing through the surface would both hide the signal and recurse.
   const result = spawnSync(
-    "pnpm",
+    "bun",
     [
-      "exec",
+      "x",
       "nx",
       "run-many",
       "-t",
@@ -569,7 +569,7 @@ function outcomesOf(
     {
       encoding: "utf8",
       env: {
-        // llmlint: ignore[boundary_inputs_validated] What survives the filter is forwarded, never read: `pnpm exec nx` needs the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. Every Nx setting is dropped instead of forwarded, and the four values this run's answer depends on are set below, from directories the test itself created.
+        // llmlint: ignore[boundary_inputs_validated] What survives the filter is forwarded, never read: `bun x nx` needs the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. Every Nx setting is dropped instead of forwarded, and the four values this run's answer depends on are set below, from directories the test itself created.
         ...withoutNxSettings(process.env),
         NX_CACHE_DIRECTORY: join(cacheDirectory, "cache"),
         NX_DAEMON: "false",
@@ -637,8 +637,8 @@ function withInertEdit<T>(
     writeFileSync(file, probed);
     // llmlint: ignore-block[work_goes_through_command_surface] This asks Biome about one file, the scratch edit just written, while the tree is deliberately in a state no gate should see. `just lint` and `just check` answer for the whole tree and would fail here for everything except the question being asked; there is no recipe that formats-checks a single path, and adding one would exist only for this line.
     const checked = spawnSync(
-      "pnpm",
-      ["exec", "biome", "check", "--error-on-warnings", file],
+      "bun",
+      ["x", "biome", "check", "--error-on-warnings", file],
       { encoding: "utf8" },
     );
     // llmlint: ignore-end[work_goes_through_command_surface]

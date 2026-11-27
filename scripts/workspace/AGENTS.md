@@ -22,7 +22,7 @@ Resolve that fingerprint in the judge's environment, never the caller's:
 fingerprint that reads it from the caller keys one judged diff differently per
 dispatch. The recipe computes it and passes it as an environment input rather
 than declaring an Nx `runtime` input, because Nx scores a failing runtime input
-as *no contribution* rather than as an error — which would drop the judge
+as _no contribution_ rather than as an error — which would drop the judge
 configuration out of the key in silence. The target holds the recipe's answer to
 what it resolves itself, so a disagreement fails the tier instead.
 

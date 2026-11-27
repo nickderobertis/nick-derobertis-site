@@ -43,9 +43,14 @@ test("reads a spell the CV leaves open as running to the present", () => {
   expect(period).toHaveAccessibleName(
     "Co-Founder and Chief Technology Officer at Spendoso, LLC, 2022-08-01 to present",
   );
-  expect(period.style.width).toBe(
-    `${100 - Number.parseFloat(period.style.left)}%`,
-  );
+  // The bar ends at the timeline's right edge. jsdom serializes each
+  // percentage at its own precision, so the two are summed rather than one
+  // compared as text against arithmetic on the other.
+  expect(period.style.width).toMatch(/%$/);
+  expect(
+    Number.parseFloat(period.style.left) +
+      Number.parseFloat(period.style.width),
+  ).toBeCloseTo(100, 6);
 });
 
 test("keeps a spell too short to draw wide enough to see", () => {

@@ -233,9 +233,17 @@ export function chunkFileResolver(source) {
 // nothing here to refuse. Every id it does yield is validated where it is used:
 // resolved by the bundle's own checked resolver, then required to name a file
 // the app emitted before a byte of it is counted.
+//
+// rspack 1 raised every id as a string literal; rspack 2 raises a numeric id as
+// a bare number, and its filename resolver compares ids with `===`, so each id
+// is returned in the type it was raised as. A bare argument is matched only
+// when it is all digits, so a runtime's own `.e(chunkId)` calls are never read
+// as a chunk.
 export function requestedChunkIds(source) {
-  return [...source.matchAll(/\.e\("([^"\\]{1,32})"\)/g)].flatMap(([, id]) =>
-    id === undefined ? [] : [id],
+  return [
+    ...source.matchAll(/\.e\((?:"([^"\\]{1,32})"|(\d{1,32}))\)/g),
+  ].flatMap(([, quoted, bare]) =>
+    quoted !== undefined ? [quoted] : bare !== undefined ? [Number(bare)] : [],
   );
 }
 // llmlint: ignore-end[boundary_inputs_validated]

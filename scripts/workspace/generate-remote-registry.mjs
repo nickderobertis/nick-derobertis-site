@@ -55,7 +55,7 @@ function graphProjects() {
   try {
     const file = join(directory, "graph.json");
     try {
-      execFileSync("pnpm", ["exec", "nx", "graph", `--file=${file}`], {
+      execFileSync("bun", ["x", "nx", "graph", `--file=${file}`], {
         encoding: "utf8",
         stdio: "pipe",
       });

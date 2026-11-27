@@ -21,12 +21,32 @@ function isRemoteManifest(value: unknown): value is Record<string, string> {
  * depends on. Validating that shape here is what lets this test compare the
  * scheduled dependencies as strings instead of trusting the graph's JSON.
  */
-function isTaskDependencies(value: object): value is Record<string, string[]> {
-  return Object.values(value).every(
-    (tasks: unknown) =>
-      Array.isArray(tasks) &&
-      tasks.every((task: unknown) => typeof task === "string"),
-  );
+/**
+ * Nx 23 listed a task's dependencies as task names; Nx 24 lists `{ id }`
+ * objects naming them. Either is read down to the names, and anything else is
+ * refused rather than guessed at.
+ */
+function taskDependencyNames(
+  value: object,
+): Record<string, string[]> | undefined {
+  const names: Record<string, string[]> = {};
+  for (const [task, dependencies] of Object.entries(value)) {
+    if (!Array.isArray(dependencies)) return undefined;
+    const named: string[] = [];
+    for (const dependency of dependencies as unknown[]) {
+      if (typeof dependency === "string") named.push(dependency);
+      else if (
+        dependency &&
+        typeof dependency === "object" &&
+        "id" in dependency &&
+        typeof dependency.id === "string"
+      )
+        named.push(dependency.id);
+      else return undefined;
+    }
+    names[task] = named;
+  }
+  return names;
 }
 
 // Computing the task graph below is a real spawn with the Nx daemon disabled,
@@ -56,8 +76,8 @@ test("remote manifest matches published fragment composition", {
   // declaration to compare against. What Nx actually schedules is read instead.
   // llmlint: ignore-block[tests_mirror_real_usage] Which builds Nx schedules ahead of shell:prerender is a scheduling contract with no user-visible interface to drive: a prerender that rebuilds every remote from source and one that composes their published fragments emit the same bytes, so nothing a visitor can do distinguishes them, and only the graph reveals that an app-only change no longer drags the other twelve units into the deploy. The artifact those builds produce is driven through the real browser by site.spec.ts and every feature journey.
   const taskGraphOutput = execFileSync(
-    "pnpm",
-    ["exec", "nx", "run", "shell:prerender", "--graph=stdout"],
+    "bun",
+    ["x", "nx", "run", "shell:prerender", "--graph=stdout"],
     {
       encoding: "utf8",
       env: { ...process.env, NX_DAEMON: "false" },
@@ -76,10 +96,10 @@ test("remote manifest matches published fragment composition", {
     typeof taskGraph.tasks.dependencies !== "object"
   )
     throw new Error("Nx must return a validated task dependency graph");
-  const dependencies = taskGraph.tasks.dependencies;
-  if (!isTaskDependencies(dependencies))
+  const dependencies = taskDependencyNames(taskGraph.tasks.dependencies);
+  if (!dependencies)
     throw new Error(
-      `Nx must report every task's dependencies as a list of task names, got ${JSON.stringify(dependencies)}`,
+      `Nx must report every task's dependencies as a list of task names or task ids, got ${JSON.stringify(taskGraph.tasks.dependencies)}`,
     );
   const prerenderDependencies = dependencies["shell:prerender"];
   if (!prerenderDependencies)
@@ -95,9 +115,9 @@ test("remote manifest matches published fragment composition", {
     targets: {
       build: {
         outputs: expect.arrayContaining([
-          "{options.outputPath}/fragment.html",
-          "{options.outputPath}/fragment.css",
-          "{options.outputPath}/fragment.json",
+          "{workspaceRoot}/dist/apps/shell/fragment.html",
+          "{workspaceRoot}/dist/apps/shell/fragment.css",
+          "{workspaceRoot}/dist/apps/shell/fragment.json",
         ]),
       },
     },
@@ -123,7 +143,7 @@ test("remote manifest matches published fragment composition", {
         `dist/mf-types/remotes/${remoteManifest[remote]}/Page.d.ts`,
         "utf8",
       ),
-    ).resolves.toContain("./compiled-types/src/page");
+    ).resolves.toContain(`./compiled-types/apps/${remote}/src/page`);
     // llmlint: ignore-block[tests_mirror_real_usage] Same cache-and-wiring contract per remote: nothing a visitor can do reveals whether this remote is named in the composition map or declares its fragment files as build outputs, and both are already driven end to end by each app's ownership.spec.ts through the standalone and host-composed artifacts.
     expect(compose).toContain(`"${remote}"`);
     const remoteProject: unknown = JSON.parse(
@@ -133,9 +153,9 @@ test("remote manifest matches published fragment composition", {
       targets: {
         build: {
           outputs: expect.arrayContaining([
-            "{options.outputPath}/fragment.html",
-            "{options.outputPath}/fragment.css",
-            "{options.outputPath}/fragment.json",
+            `{workspaceRoot}/dist/apps/${remote}/fragment.html`,
+            `{workspaceRoot}/dist/apps/${remote}/fragment.css`,
+            `{workspaceRoot}/dist/apps/${remote}/fragment.json`,
           ]),
         },
       },
