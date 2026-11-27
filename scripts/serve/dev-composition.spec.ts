@@ -225,16 +225,16 @@ async function expectSingletonsResolvedOnce(page: Page, apps: string[]) {
     expect(Object.values(versions), key).toEqual(["shell"]);
 }
 
-let servers: ChildProcess | undefined;
+let nx: ChildProcess | undefined;
 let reported = "";
 let release: (() => void) | undefined;
 let browser: Browser;
 
 async function waitUntilServing(url: string) {
   for (let attempt = 0; attempt < 600; attempt += 1) {
-    if (servers?.exitCode != null)
+    if (nx?.exitCode != null)
       throw new Error(
-        `the serve targets exited with ${servers.exitCode} before ${url} answered: ${reported.trim()}`,
+        `the serve targets exited with ${nx.exitCode} before ${url} answered: ${reported.trim()}`,
       );
     try {
       if ((await fetch(url)).ok) return;
@@ -260,9 +260,10 @@ beforeAll(async () => {
       `just prerender failed, so there is no artifact to serve beside the app under development: ${composed.stderr}`,
     );
   release = holdArtifactRoot(`${workspace}/${composedArtifactRoot}`, "serving");
-  // One Nx process runs every app's own serve target, in its own process group
-  // so stopping it stops every server it started.
-  servers = spawn(
+  // One Nx process runs every app's own serve target. It leads a process group
+  // of its own so the teardown can interrupt it as a group; the servers it
+  // starts are torn down by Nx, as the teardown below waits for.
+  nx = spawn(
     "bun",
     [
       "x",
@@ -282,7 +283,7 @@ beforeAll(async () => {
       stdio: ["ignore", "pipe", "pipe"],
     },
   );
-  for (const stream of [servers.stdout, servers.stderr])
+  for (const stream of [nx.stdout, nx.stderr])
     stream?.on("data", (chunk: Buffer) => {
       reported = `${reported}${chunk.toString()}`.slice(-20_000);
     });
@@ -306,13 +307,13 @@ async function answers(url: string) {
 
 afterAll(async () => {
   await browser?.close();
-  const nx = servers;
-  if (nx?.pid !== undefined && nx.exitCode === null) {
+  const running = nx;
+  if (running?.pid !== undefined && running.exitCode === null) {
     // Nx starts each serve task in a session of its own, so the servers are
     // not in this group; they stop when Nx is interrupted and tears them down,
     // which is waited for rather than assumed.
-    const exited = new Promise((resolve) => nx.once("exit", resolve));
-    process.kill(-nx.pid, "SIGINT");
+    const exited = new Promise((resolve) => running.once("exit", resolve));
+    process.kill(-running.pid, "SIGINT");
     await Promise.race([
       exited,
       new Promise((resolve) => setTimeout(resolve, 60_000)),

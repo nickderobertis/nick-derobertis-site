@@ -76,7 +76,6 @@
   "trustedDependencies": [
     "@biomejs/biome",
     "@rspack/core",
-    "esbuild",
     "nx"
   ]
 }

@@ -2,7 +2,14 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, test } from "vitest";
 import { z } from "zod";
-import { remoteConfig, remoteMap, sharedSingletons } from "./rspack-remote";
+import { composedArtifactRoot } from "./composed-artifact";
+import { remoteRegistry } from "./remote-registry";
+import {
+  remoteConfig,
+  remoteMap,
+  remoteOutputPath,
+  sharedSingletons,
+} from "./rspack-remote";
 
 // `@nx/rspack`'s app plugin reads the app it is configuring from the task
 // environment Nx sets around a build, and normalizes the paths it was given
@@ -165,5 +172,37 @@ describe("federated share scope", () => {
       react: { singleton: true, requiredVersion: false, eager: true },
       "react-dom": { singleton: true, requiredVersion: false, eager: true },
     });
+  });
+});
+
+// Nx restores a cached build from the outputs its `project.json` declares, and
+// each app restates the directory its rspack build writes there. An app whose
+// declared output drifted from that directory would replay a cache hit that
+// restores nothing the composer reads, so each one is held to the module the
+// build takes its path from.
+const buildOutputs = z.object({
+  targets: z.object({ build: z.object({ outputs: z.array(z.string()) }) }),
+});
+
+function declaredBuildOutputs(app: string) {
+  return buildOutputs.parse(
+    JSON.parse(readFileSync(`apps/${app}/project.json`, "utf8")),
+  ).targets.build.outputs;
+}
+
+describe("the bundle directory a build declares as its output", () => {
+  test.each(Object.keys(remoteRegistry))(
+    "%s declares the directory its remote build writes",
+    (app) => {
+      expect(declaredBuildOutputs(app)).toContain(
+        `{workspaceRoot}/${remoteOutputPath(app)}`,
+      );
+    },
+  );
+
+  test("the shell declares the directory its host build writes", () => {
+    expect(declaredBuildOutputs("shell")).toContain(
+      `{workspaceRoot}/${composedArtifactRoot}`,
+    );
   });
 });

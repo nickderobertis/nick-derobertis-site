@@ -205,6 +205,9 @@ describe("affected build economics proof", () => {
 
       expect(result.status).toBe(2);
       expect(result.stderr).toContain("file must be a workspace-relative file");
+      expect(result.stderr).toContain(
+        "correct the path and rerun just affected-build-projects <file>",
+      );
     },
   );
 });

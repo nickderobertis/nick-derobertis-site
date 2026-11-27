@@ -17,7 +17,7 @@
     "allowImportingTsExtensions": true,
     "skipLibCheck": true
   },
-  // Every project extends this file, so the stylesheet declaration below is
-  // part of every program without each tsconfig restating it.
-  "files": ["./css-side-effect-imports.d.ts"]
+  // Every project extends this file, so the stylesheet declaration build-config
+  // owns is part of every program without each tsconfig restating it.
+  "files": ["./libs/build-config/src/css-side-effect-imports.d.ts"]
 }

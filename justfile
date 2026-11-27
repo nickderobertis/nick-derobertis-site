@@ -93,7 +93,7 @@ check-all: lint-workflows
     log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x biome check --error-on-warnings . >"$log" 2>&1 && CI=1 bun x nx run-many -t lint --all --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 bun x nx run-many -t typecheck,test,build,prerender --all --parallel=3 >>"$log" 2>&1 && CI=1 bun x nx run-many -t e2e,screenshot --all --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check-all: quality gate failed; fix warnings and errors above, then rerun just check-all" >&2; exit 1; }
 
 test:
-    base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "test: NX_BASE and NX_HEAD must resolve to commits" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x nx affected -t test,e2e --base="$base" --head="$head" --parallel=3 >"$log" 2>&1 || { cat "$log" >&2; echo "test: browser or unit tests failed; fix the findings above and rerun just test" >&2; exit 1; }
+    base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "test: NX_BASE and NX_HEAD must resolve to commits; set each to a commit git rev-parse accepts, such as NX_BASE=origin/master, or unset both to test HEAD~1..HEAD, then rerun just test" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x nx affected -t test,e2e --base="$base" --head="$head" --parallel=3 >"$log" 2>&1 || { cat "$log" >&2; echo "test: browser or unit tests failed; fix the findings above and rerun just test" >&2; exit 1; }
 
 lint:
     log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x nx run-many -t lint --all --args="--error-on-warnings" >"$log" 2>&1 && bun x nx run-many -t typecheck --all >>"$log" 2>&1 || { cat "$log" >&2; echo "lint: lint or typecheck failed; fix the findings above and rerun just lint" >&2; exit 1; }
@@ -187,7 +187,7 @@ e2e-affected-files file:
 # Print the build projects selected by a prospective single-file edit.
 # llmlint: ignore[changed_behavior_has_e2e] This developer CLI has no browser interface; affected-build-projects.spec.ts drives its real `just` subprocess through success and validation failures.
 affected-build-projects file:
-    file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "affected-build-projects: file must be a workspace-relative file" >&2; exit 2; }; bun x nx show projects --affected --files="$file" --with-target=build --json
+    file="$1"; [[ "$file" != /* && "$file" != *..* && -f "$file" ]] || { echo "affected-build-projects: file must be a workspace-relative file that exists, such as apps/awards/src/page.tsx; correct the path and rerun just affected-build-projects <file>" >&2; exit 2; }; bun x nx show projects --affected --files="$file" --with-target=build --json
 
 # Print the projects whose prerender a prospective single-file edit selects,
 # which is the other half of the composition economics the build selection
@@ -198,7 +198,7 @@ affected-prerender-projects file:
 # llmlint: ignore-end[changed_behavior_has_e2e]
 
 e2e-project project:
-    project="$1"; [[ "$project" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "e2e-project: project must be a valid Nx project name" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x nx run "$project:e2e" >"$log" 2>&1 || { cat "$log" >&2; echo "e2e-project: remote browser journey failed; fix the failure above and rerun just e2e-project $project" >&2; exit 1; }
+    project="$1"; [[ "$project" =~ ^[a-z][a-z0-9-]*$ ]] || { echo "e2e-project: project must be a valid Nx project name; list the ones with an e2e target with bun x nx show projects --with-target=e2e, then rerun just e2e-project <project>" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x nx run "$project:e2e" >"$log" 2>&1 || { cat "$log" >&2; echo "e2e-project: remote browser journey failed; fix the failure above and rerun just e2e-project $project" >&2; exit 1; }
 
 setup-llmlint:
     # llmlint: ignore[changed_behavior_has_e2e] This developer-only installer has no browser interface; its success and failure output contracts are exercised through real subprocess tests in tooling-ci.

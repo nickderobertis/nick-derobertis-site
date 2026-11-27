@@ -26,7 +26,7 @@ once, then serves the app you named from source with hot module replacement
 while every other app is answered for out of that build, all on one origin at
 the Pages base path. Editing a source file of the app under development updates
 the running page — no workspace rebuild, no restart. It listens on 127.0.0.1 at
-the port that app's own `serve` target declares — the shell's is 4200, the one
+the port that app's own `serve` target declares — the shell's is the one
 `just serve` uses below, and every remote has its own so two can run at once —
 and answers there for the shell and for each standalone pane alike; either way
 the shell's routes resolve across the mix. `PORT` moves the server off that
