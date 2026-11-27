@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Throwaway bun spike: re-runs every stage of the spike in order and prints each
 # stage's name, exit status and PASS/FAIL. Usage: spike-bun/run-stages.sh [first-stage]
-# Logs go to $SPIKE_OUT (default: a temp dir). Stage 6 replays the capture job of
+# SPIKE_LAST=<n> stops after stage n. Logs go to $SPIKE_OUT (default: a temp dir). Stage 6 replays the capture job of
 # screencomp v0.4.8's published visual-docs-reusable.yml in its container.
 set -uo pipefail
 ROOT=$(cd "$(dirname "$0")/.." && pwd); cd "$ROOT"
@@ -13,7 +13,7 @@ IMAGE=$(python3 -c 'import re;print(re.search(r"container: (\S+)",open(".github/
 CAPTURE=$(python3 -c 'import yaml;print(yaml.safe_load(open(".github/workflows/visual-docs.yml"))["jobs"]["visual-docs"]["with"]["capture-command"])')
 APP=${SPIKE_APP:-bio}
 declare -a SUMMARY
-stage() { local n=$1 name=$2; shift 2; [ "$n" -lt "$FIRST" ] && return 0
+stage() { local n=$1 name=$2; shift 2; { [ "$n" -lt "$FIRST" ] || [ "$n" -gt "${SPIKE_LAST:-7}" ]; } && return 0
   echo "=== stage $n: $name"; ( "$@" ) >"$OUT/stage$n.log" 2>&1; local rc=$?
   tail -n 25 "$OUT/stage$n.log"; local v=PASS; [ $rc -eq 0 ] || v=FAIL
   SUMMARY+=("stage $n | $name | exit $rc | $v"); echo "=== stage $n: $name -> exit $rc $v"; }
