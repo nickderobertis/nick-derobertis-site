@@ -266,6 +266,7 @@ beforeAll(async () => {
   const composed = spawnSync("just", ["prerender"], {
     cwd: workspace,
     encoding: "utf8",
+    // llmlint: ignore[boundary_inputs_validated] The inherited environment is forwarded, never read: `just` and the Nx it runs need the caller's PATH, HOME and cache settings to start at all, and nothing here parses, branches on or interpolates any of it. The one value this compose depends on, NODE_ENV, is set here rather than taken from the caller.
     env: { ...process.env, NODE_ENV: "production" },
   });
   if (composed.status !== 0)
@@ -292,6 +293,7 @@ beforeAll(async () => {
     {
       cwd: workspace,
       detached: true,
+      // llmlint: ignore[boundary_inputs_validated] Forwarded, never read, as for the compose above: the two values these servers depend on, NODE_ENV and NX_DAEMON, are set here rather than taken from the caller.
       env: { ...process.env, NODE_ENV: "development", NX_DAEMON: "false" },
       stdio: ["ignore", "pipe", "pipe"],
     },

@@ -17,14 +17,11 @@ function isRemoteManifest(value: unknown): value is Record<string, string> {
 }
 
 /**
- * Nx reports `tasks.dependencies` as a map from task id to the task ids it
- * depends on. Validating that shape here is what lets this test compare the
- * scheduled dependencies as strings instead of trusting the graph's JSON.
- */
-/**
- * Nx 23 listed a task's dependencies as task names; Nx 24 lists `{ id }`
- * objects naming them. Either is read down to the names, and anything else is
- * refused rather than guessed at.
+ * Nx reports `tasks.dependencies` as a map from task id to the tasks it
+ * depends on, each named by a task-id string (Nx 23) or an `{ id }` object
+ * (Nx 24). Either is read down to the task-id strings, so this test compares
+ * the scheduled dependencies as strings, and any other shape is refused rather
+ * than guessed at.
  */
 function taskDependencyNames(
   value: object,

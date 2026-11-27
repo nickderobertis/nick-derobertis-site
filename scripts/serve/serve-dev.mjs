@@ -100,7 +100,11 @@ function declaresServeTarget(app) {
   if (typeof serve !== "object" || serve === null || Array.isArray(serve))
     reject("declares a serve target that is not an Nx target configuration");
   if (serve.executor !== undefined) return false;
-  const args = serve.options?.args;
+  const { options } = serve;
+  if (options === undefined) return false;
+  if (typeof options !== "object" || options === null || Array.isArray(options))
+    reject("declares serve options that are not an object of target options");
+  const { args } = options;
   if (
     args !== undefined &&
     (!Array.isArray(args) || args.some((arg) => typeof arg !== "string"))

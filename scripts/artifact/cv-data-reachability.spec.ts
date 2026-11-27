@@ -64,7 +64,7 @@ const buildEntrySchema = z.object({
   entry: z.string().regex(/^\.\/apps\/[a-z-]+\/src\/[\w.-]+\.tsx?$/),
 });
 
-async function declaredBuildMain(app: string) {
+async function declaredBuildEntry(app: string) {
   process.env.NX_TASK_TARGET_PROJECT = app;
   process.env.NX_TASK_TARGET_TARGET = "build";
   try {
@@ -81,7 +81,7 @@ async function declaredBuildMain(app: string) {
 describe("what CV data each feature's build graph can reach", () => {
   it("walks the entry the app's own build declares", async () => {
     for (const app of features)
-      expect(appSourceModules(app)).toContain(await declaredBuildMain(app));
+      expect(appSourceModules(app)).toContain(await declaredBuildEntry(app));
   });
 
   it.each(features)(

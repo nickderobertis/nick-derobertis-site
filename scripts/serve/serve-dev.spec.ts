@@ -499,6 +499,8 @@ describe("a project.json this command cannot read", () => {
       servable: servableDeclaration,
       // A serve target with its own executor is not the one Nx infers.
       "own-executor": serving({ executor: "nx:run-commands" }),
+      // Nor is one passing rspack no configuration of its own at all.
+      "no-options": serving({}),
       // Nor is one handing rspack some other app's configuration.
       borrowed: serving({
         options: {
@@ -520,11 +522,34 @@ describe("a project.json this command cannot read", () => {
     });
 
     try {
-      for (const app of ["own-executor", "borrowed", "production"]) {
+      for (const app of [
+        "own-executor",
+        "no-options",
+        "borrowed",
+        "production",
+      ]) {
         const refused = scanApps(root, app);
         expect(refused.status, refused.stderr).toBe(2);
         expect(refused.stderr).toContain('["servable"]');
       }
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  it("refuses serve options that are not an object", () => {
+    const root = fixtureWorkspace({
+      servable: servableDeclaration,
+      garbled: JSON.stringify({
+        targets: { serve: { options: ["--node-env=development"] } },
+      }),
+    });
+
+    try {
+      const refused = scanApps(root, "servable");
+      expect(refused.status).toBe(1);
+      expect(refused.stderr).toContain("apps/garbled/project.json");
+      expect(refused.stderr).toContain("serve options that are not an object");
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
