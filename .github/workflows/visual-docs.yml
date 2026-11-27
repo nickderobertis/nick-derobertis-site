@@ -37,11 +37,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - uses: pnpm/action-setup@v4
-        with: { version: 10.13.1 }
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.4.5 }
       - uses: actions/setup-node@v4
-        with: { node-version: 26.5.0, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
+        with: { node-version: 26.5.0 }
+      - run: bun install --frozen-lockfile
       - name: Resolve affected range
         id: range
         env:
@@ -70,7 +70,7 @@ jobs:
           NX_BASE: ${{ steps.range.outputs.base }}
           NX_HEAD: ${{ steps.range.outputs.head }}
         run: |
-          affected="$(pnpm exec nx show projects --affected --with-target screenshot --base="$NX_BASE" --head="$NX_HEAD" --json)"
+          affected="$(bun x nx show projects --affected --with-target screenshot --base="$NX_BASE" --head="$NX_HEAD" --json)"
           projects="$(printf '%s' "$affected" | node scripts/visual/affected-visual-projects.mjs)"
           echo "projects=$projects" >> "$GITHUB_OUTPUT"
           echo "Affected visual projects: $projects"
@@ -93,7 +93,7 @@ jobs:
     uses: nickderobertis/screencomp/.github/workflows/visual-docs-reusable.yml@v0.4.8
     with:
       projects: ${{ needs.affected.outputs.projects || '[]' }}
-      container: mcr.microsoft.com/playwright:v1.61.1-noble
+      container: mcr.microsoft.com/playwright:v1.65.1-noble
       screencomp-version: v0.4.8
       gallery-title: Nick DeRobertis site visual docs
       fail-on-drift: true
@@ -112,8 +112,8 @@ jobs:
       # below spell out the old ^[a-z][a-z0-9-]*$ — empty, a first character that
       # is not a lowercase letter, or any later character outside [a-z0-9-].
       capture-command: |
-        corepack enable
-        pnpm install --frozen-lockfile
+        npm install -g bun@1.4.5
+        bun install --frozen-lockfile
         export SOURCE_REVISION="$GITHUB_SHA"
         case "$SCREENCOMP_PROJECT" in
           "" | [!a-z]* | [a-z]*[!a-z0-9-]*)
@@ -121,7 +121,7 @@ jobs:
             exit 2
             ;;
         esac
-        pnpm exec nx run "$SCREENCOMP_PROJECT:screenshot"
+        bun x nx run "$SCREENCOMP_PROJECT:screenshot"
     secrets:
       # llmlint: ignore[boundary_inputs_validated] The pinned reusable workflow's pages-preflight job rejects a missing token before any consumer or external write; GitHub masks the secret and owns token syntax/authorization validation.
       pages-token: ${{ secrets.GH_TOKEN }}

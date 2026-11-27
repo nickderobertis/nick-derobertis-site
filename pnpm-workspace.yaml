@@ -1,9 +1,0 @@
-packages:
-  - apps/*
-  - libs/*
-  - scripts/*
-onlyBuiltDependencies:
-  - '@biomejs/biome'
-  - '@rspack/core'
-  - esbuild
-  - nx
