@@ -44,7 +44,9 @@ interface Composed {
   link?: string;
 }
 
-const routeRemotes: Composed[] = [
+// The four route remotes a visitor reaches through a Primary navigation link;
+// Home, the fifth, owns `/` and is declared with its panes below.
+const linkedRouteRemotes: Composed[] = [
   {
     app: "bio",
     route: "/bio",
@@ -112,7 +114,7 @@ const home: Composed = {
   route: "/",
   landmark: ["region", { name: "Who am I?" }],
 };
-const remotes: Composed[] = [home, ...routeRemotes, ...homePanes];
+const remotes: Composed[] = [home, ...linkedRouteRemotes, ...homePanes];
 const apps = ["shell", ...remotes.map((remote) => remote.app)];
 
 /**
@@ -379,7 +381,7 @@ describe("the shell's development server", () => {
     // Through the shell's own navigation, as a visitor moves between routes:
     // each route remote is fetched when its link is followed.
     const primary = page.getByRole("navigation", { name: "Primary" });
-    for (const remote of routeRemotes) {
+    for (const remote of linkedRouteRemotes) {
       await primary
         .getByRole("link", { name: remote.link, exact: true })
         .click();
