@@ -24,7 +24,9 @@ function siteRouter() {
 }
 
 /** One request through router-core's real handler, as the fragment entry runs it. */
-async function hydrationFor(take: Parameters<typeof takeRouterHydration>[0]) {
+async function hydrationFor(
+  hydrationSource: Parameters<typeof takeRouterHydration>[0],
+) {
   let hydration = "";
   await createRequestHandler({
     request: new Request("https://fragment.invalid/"),
@@ -32,7 +34,7 @@ async function hydrationFor(take: Parameters<typeof takeRouterHydration>[0]) {
   })(async ({ router }) => {
     const { prelude } = await prerender(<RouterServer router={router} />);
     router.serverSsr?.setRenderFinished();
-    hydration = takeRouterHydration(take ?? router.serverSsr);
+    hydration = takeRouterHydration(hydrationSource ?? router.serverSsr);
     return new Response(await new Response(prelude).text());
   });
   return hydration;

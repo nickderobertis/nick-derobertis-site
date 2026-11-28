@@ -91,6 +91,46 @@ if (drifted.length > 0)
     `package.json pins bun ${declaredBun} but ${drifted.map((pin) => `${pin.path} pins ${pin.version}`).join(", ")}`,
   );
 
+// Two tool configurations name a version package.json already pins: Biome's
+// schema URL, which describes the options the installed Biome accepts, and the
+// Playwright image visual capture runs in, whose browsers must be the ones the
+// installed @playwright/test drives. package.json is the source for both.
+const toolPins = [
+  {
+    path: "biome.json",
+    dependency: "@biomejs/biome",
+    read: (source) =>
+      /biomejs\.dev\/schemas\/(\d+\.\d+\.\d+)\/schema\.json/.exec(
+        JSON.parse(source)?.$schema ?? "",
+      )?.[1],
+  },
+  {
+    path: "visual-tools.json",
+    dependency: "@playwright/test",
+    read: (source) =>
+      /^mcr\.microsoft\.com\/playwright:v(\d+\.\d+\.\d+)-/.exec(
+        JSON.parse(source)?.playwrightContainer ?? "",
+      )?.[1],
+  },
+];
+for (const { path, dependency, read } of toolPins) {
+  const declared = manifest?.devDependencies?.[dependency];
+  if (typeof declared !== "string" || !/^\d+\.\d+\.\d+$/.test(declared))
+    fail(`package.json must pin ${dependency} to an exact version`);
+  let pinned;
+  try {
+    pinned = read(readFileSync(path, "utf8"));
+  } catch (error) {
+    fail(
+      `${path} could not be read as JSON (${error instanceof Error ? error.message : String(error)}); restore it`,
+    );
+  }
+  if (pinned !== declared)
+    fail(
+      `package.json pins ${dependency} ${declared} but ${path} names ${pinned ?? "no version"}`,
+    );
+}
+
 const nodeVersions = [...new Set(nodePins.map((pin) => pin.version))];
 if (nodeVersions.length > 1)
   fail(
@@ -98,5 +138,5 @@ if (nodeVersions.length > 1)
   );
 
 process.stdout.write(
-  `runtime pins agree: bun ${declaredBun} (${bunPins.length} references), Node ${nodeVersions[0]} (${nodePins.length} references)\n`,
+  `runtime pins agree: bun ${declaredBun} (${bunPins.length} references), Node ${nodeVersions[0]} (${nodePins.length} references), ${toolPins.map((pin) => pin.dependency).join(" and ")} matching package.json\n`,
 );
