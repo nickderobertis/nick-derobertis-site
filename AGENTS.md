@@ -72,6 +72,8 @@ included; pin it back by exact version until those peers accept it.
 
 `just lint-llm-diff` is the LLM-judge tier, deliberately outside `just check`.
 
+Biome formats and checks the whole tree from the root, through `just format` and `check`, so no project declares a `format` target; one would only duplicate that run. A nested `AGENTS.md` exists only where a subtree has rules of its own. No target is promoted out of the affected tier, so no promotion threshold is set. Per-target cost is measured by the onebudgetspec budgets each domain registers in its own `budgets.yaml`, and any threshold is taken from those figures, never carried over from another repository.
+
 The `justfile` is the authoritative source for the repo-scoped
 `NX_CACHE_DIRECTORY` default beneath the user's standard cache directory, so
 disposable worktrees reuse Nx's content-addressed local cache. An existing
@@ -88,7 +90,7 @@ Substantial scenarios must remain real-browser covered through both the standalo
 ## Commits, releases, and merging
 
 <!-- llmlint: ignore[instruction_layer_localized] Localizing the root instruction layer into nested per-project AGENTS.md files is tracked separately, and is out of scope for any change that does not itself alter subtree routing. This paragraph records where review routing lives; it adds no instruction that belongs in a subtree. -->
-Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override. `.github/CODEOWNERS` routes each subtree's review to its owner, so a change under `apps/`, `libs/`, `scripts/`, `docs/`, or `.github/` reaches that owner rather than whoever notices the pull request. The visual drift gate is requirable as the `Visual docs` workflow's `classify-gate` status check — a stable aggregate over screencomp's per-app classify legs (whose own matrix contexts, `visual-docs / report (x86_64, <app>, …)`, vary with the affected set), passing when classify is clean or when no visual microfrontend was affected.
+Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override. The `commitlint` job (`.github/workflows/pr-title.yml`) lints each pull request title against Conventional Commits, because the squash commit takes the title as its subject. `.github/CODEOWNERS` routes each subtree's review to its owner, so a change under `apps/`, `libs/`, `scripts/`, `docs/`, or `.github/` reaches that owner rather than whoever notices the pull request. The visual drift gate is requirable as the `Visual docs` workflow's `classify-gate` status check — a stable aggregate over screencomp's per-app classify legs (whose own matrix contexts, `visual-docs / report (x86_64, <app>, …)`, vary with the affected set), passing when classify is clean or when no visual microfrontend was affected.
 
 <!-- llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] ci.yml and pages.yml are the single source of these triggers; these paragraphs record the decisions behind them, which create-repo's ci.md and llmlint.md require this section to state, and their reasons, which no workflow can carry. -->
 Pull requests run the affected tier against their merge base; the full sweep
