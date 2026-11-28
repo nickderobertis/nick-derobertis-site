@@ -69,10 +69,11 @@ just serve                # the composed production artifact, served
 just serve-dev <app>      # one app from source with hot module replacement
 just lint                 # all-project lint and typecheck
 just format               # apply Biome formatting
+just budgets              # affected onebudgetspec budgets; `just budgets all` sweeps every project
 ```
 
 Set `NX_BASE` and `NX_HEAD` to override the affected range used by `just check`
-and `just test`. CI runs `just check-all` on `master` as a non-affected safety
+and `just test`. CI runs `just check all` on `master` as a non-affected safety
 sweep. See [the architecture](docs/architecture.md) for project boundaries,
 hosting, and affected-test behavior.
 

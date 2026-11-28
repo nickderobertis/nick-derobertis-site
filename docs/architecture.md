@@ -207,7 +207,7 @@ staging, CV data, and fallback behavior are otherwise equivalent.
 Pull-request gates use Nx's dependency graph between `NX_BASE` and `NX_HEAD`.
 They run expensive build, prerender, e2e, and screenshot work only where a
 change can have an effect, while always running the shell-wide integration
-suite. Pushes to `master` add `check-all`, so affected selection is an
+suite. Pushes to `master` run `just check all` instead, so affected selection is an
 optimization rather than the only safety net.
 
 The measured integration review is recorded in

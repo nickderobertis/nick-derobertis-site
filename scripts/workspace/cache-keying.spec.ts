@@ -861,8 +861,8 @@ function recipeBody(recipe: string): string {
 }
 
 describe("the gate keeps the cache it can replay", () => {
-  it("discards no cached task in check or check-all", () => {
-    const discarding = ["check", "check-all"]
+  it("discards no cached task in check at either tier", () => {
+    const discarding = ["check"]
       .filter((recipe) => recipeBody(recipe).includes("--skip-nx-cache"))
       .map(
         (recipe) =>

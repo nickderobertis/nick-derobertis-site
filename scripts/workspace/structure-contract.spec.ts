@@ -598,7 +598,6 @@ describe("tooling subject inventory", () => {
    */
   const undrivenRecipes: Record<string, string> = {
     "bootstrap-ci": "installs dependencies and pinned CI tools into the runner",
-    "check-all": "dispatches every Nx target for every project",
     "e2e-affected-files":
       "dispatches Nx affected selection and its e2e targets",
     "e2e-project": "dispatches one project's Nx e2e target",

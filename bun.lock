@@ -27,6 +27,7 @@
         "@nx/rspack": "24.1.0",
         "@nx/vite": "24.1.0",
         "@nx/workspace": "24.1.0",
+        "@onebudgetspec/cli": "0.2.2",
         "@playwright/test": "1.65.1",
         "@rspack/cli": "2.3.4",
         "@rspack/dev-server": "2.2.2",
@@ -844,6 +845,18 @@
     "@nx/web": ["@nx/web@24.1.0", "", { "dependencies": { "@nx/devkit": "24.1.0", "@nx/js": "24.1.0", "detect-port": "^2.1.0", "http-server": "^14.1.0", "picocolors": "^1.1.0", "tslib": "^2.3.0" }, "peerDependencies": { "@nx/cypress": "24.1.0", "@nx/eslint": "24.1.0", "@nx/jest": "24.1.0", "@nx/playwright": "24.1.0", "@nx/vite": "24.1.0", "@nx/webpack": "24.1.0" }, "optionalPeers": ["@nx/cypress", "@nx/eslint", "@nx/jest", "@nx/playwright", "@nx/vite", "@nx/webpack"] }, "sha512-NUXvserxJZ1bWWagR65IpRJrnjcTDNOlvtqQjZyplKWzH/qj+dP4kjHFifQbVlyZ+5mfS8ZYuvPJeCq1MQJD6w=="],
 
     "@nx/workspace": ["@nx/workspace@24.1.0", "", { "dependencies": { "@nx/devkit": "24.1.0", "@zkochan/js-yaml": "0.0.7", "chalk": "^4.1.0", "nx": "24.1.0", "picomatch": "^4.0.7", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" } }, "sha512-R2pviTuczkhskBPzp1knHTeaThm5knV9hXaAWNnKJ1fYxfemmZfusRSAVX9dIxxk1Y8SHRKV1m72Uc6DNTyIMw=="],
+
+    "@onebudgetspec/cli": ["@onebudgetspec/cli@0.2.2", "", { "optionalDependencies": { "@onebudgetspec/cli-darwin-arm64": "0.2.2", "@onebudgetspec/cli-linux-arm64": "0.2.2", "@onebudgetspec/cli-linux-x64": "0.2.2", "@onebudgetspec/cli-win32-arm64": "0.2.2", "@onebudgetspec/cli-win32-x64": "0.2.2" }, "bin": { "onebudgetspec": "bin/onebudgetspec.js" } }, "sha512-/ac0bPfZbT+/0O2hTr03QfmFgaRLq74Ax2N0SweATFKy/KRroi44nC6K3brL4tJCg17oSFgCcWx3+Q8Q2HHZHw=="],
+
+    "@onebudgetspec/cli-darwin-arm64": ["@onebudgetspec/cli-darwin-arm64@0.2.2", "", { "os": "darwin", "cpu": "arm64" }, "sha512-q0hF9+Ti1FBbcdp8gBlqwurClAQysUmAZYp54QZtn2Xn9E7bD4VrMp4cTRkmg5WNe95wxQ136S0UkSRWHnGh+A=="],
+
+    "@onebudgetspec/cli-linux-arm64": ["@onebudgetspec/cli-linux-arm64@0.2.2", "", { "os": "linux", "cpu": "arm64" }, "sha512-MPCkjSL/nkcQm2pkV2ecQmKNW5zc5hVSpPC4pb7ItSCzf9c67D1huTuAj6bWLDZmHLJ+zf3Su23IMnCN5p5Qbg=="],
+
+    "@onebudgetspec/cli-linux-x64": ["@onebudgetspec/cli-linux-x64@0.2.2", "", { "os": "linux", "cpu": "x64" }, "sha512-mU1N4E+a3Jx0a0w2it8y92hE627zJZx3zmzVyF3xW44kJliF6P1ObyPqnxC9JGyRcql9RPvW37p0n0pWcTu9Sg=="],
+
+    "@onebudgetspec/cli-win32-arm64": ["@onebudgetspec/cli-win32-arm64@0.2.2", "", { "os": "win32", "cpu": "arm64" }, "sha512-QgEY0yFgLkw2CFvdCc5YzMrmdpHbQAidsAb1nnE9GM6mFSyBDz2c9FPLX4lM+tgU28rzucap/vlM4NePepYK6A=="],
+
+    "@onebudgetspec/cli-win32-x64": ["@onebudgetspec/cli-win32-x64@0.2.2", "", { "os": "win32", "cpu": "x64" }, "sha512-IBivT1n/d2ZWsBiTdhU7R+WoqlrTB1BMUTUEVLFzfaMc8Jg3rkwcC5uTmSKtJwxNx15apopesBexwZxq/UJg0g=="],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.10.0", "", {}, "sha512-lMkyes8iHrG+mk6WH7X70MdCLI2RS0FwNBY1PyQ8UemaijE2m5mv5A0Niy3HtbYTFrgkUEQjFMXmSAk2hQDuPQ=="],
 
