@@ -207,8 +207,8 @@ staging, CV data, and fallback behavior are otherwise equivalent.
 Pull-request gates use Nx's dependency graph between `NX_BASE` and `NX_HEAD`.
 They run expensive build, prerender, e2e, and screenshot work only where a
 change can have an effect, while always running the shell-wide integration
-suite. Pushes to `master` run `just check all` instead, so affected selection is an
-optimization rather than the only safety net.
+suite. Pushes to `master` run the full sweep `.github/workflows/ci.yml` names
+instead, so affected selection is an optimization rather than the only safety net.
 
 The measured integration review is recorded in
 [integration-proof.md](integration-proof.md). Its `nx affected --files` proof
