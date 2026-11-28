@@ -47,8 +47,8 @@
         }
       },
       "usedIn": [
-        "./Page",
-        "./Skeleton"
+        "./Skeleton",
+        "./Page"
       ],
       "usedExports": [],
       "fallback": ""
@@ -66,7 +66,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.c56ad14eda36d808.js"
+            "main.c2906eb8c8515516.js"
           ]
         },
         "css": {
@@ -93,7 +93,7 @@
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.c56ad14eda36d808.js"
+            "main.c2906eb8c8515516.js"
           ]
         },
         "css": {
@@ -151,7 +151,7 @@
       "assets": {
         "js": {
           "sync": [
-            "__federation_expose_Page.8cc68d66ed2990f1.js"
+            "__federation_expose_Page.fdfcf5a56447322e.js"
           ],
           "async": []
         },
