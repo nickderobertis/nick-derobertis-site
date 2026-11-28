@@ -110,12 +110,14 @@ function commitAll(copy: string, message: string) {
 
 /** A budgets file whose one budget reports `actual` bytes against 100. */
 function budgetsFile(id: string, actual: number) {
-  const report = `require("node:fs").writeFileSync(process.env.ONEBUDGETSPEC_RESULT, JSON.stringify({ value: ${actual} }))`;
+  // onebudgetspec names the file a `reported` measure writes; the fixture
+  // refuses to run without one rather than writing to an unnamed path.
+  const report = `const out = process.env.ONEBUDGETSPEC_RESULT; if (!out) { console.error("fixture: ONEBUDGETSPEC_RESULT must name the result file onebudgetspec reads"); process.exit(2); } require("node:fs").writeFileSync(out, JSON.stringify({ value: ${actual} }))`;
   return [
     "schema_version: 1",
     "budgets:",
     `  - id: ${id}`,
-    "    description: Bytes the fixture reports, standing in for a payload size.",
+    "    description: Payload bytes the fixture reports; guards that a budget over its threshold fails the gate.",
     "    measure: reported",
     `    command: ["node", "-e", ${JSON.stringify(report)}]`,
     "    unit: bytes",

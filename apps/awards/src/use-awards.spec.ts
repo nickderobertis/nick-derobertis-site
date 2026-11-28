@@ -303,3 +303,24 @@ test(
     expect(within(container).getByRole("status")).toHaveTextContent("loading");
   },
 );
+
+test(
+  "takes the site's own Pages base and refuses a config that names no valid one",
+  moduleGraphCeiling,
+  async () => {
+    const { sitePagesBase } = await import("./use-awards");
+
+    expect(sitePagesBase({ pagesBase: siteBase })).toBe(siteBase);
+    for (const config of [
+      null,
+      "/site",
+      {},
+      { pagesBase: 7 },
+      { pagesBase: "site" },
+      { pagesBase: "/Site/../x" },
+    ])
+      expect(() => sitePagesBase(config)).toThrow(
+        "site.config.json pagesBase must be one lowercase path segment",
+      );
+  },
+);

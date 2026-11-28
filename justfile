@@ -85,15 +85,17 @@ lint-workflows:
 # The full sweep's `--all` browser dispatch already includes `shell:e2e`, and
 # `e2e` is uncached, so there too the composed host's suite runs once.
 #
-# The budgets run after the body, at the same tier, so a registered budget
-# over its threshold fails the gate.
+# The budgets run at the end of the body, at the same tier, so a registered
+# budget over its threshold fails the gate. They are called from the body rather
+# than as a dependency so the tier reaches them only once `check` has accepted
+# it: a tier `check` refuses is reported as `check`'s, naming `just check`.
 #
 # The body below is `@`-prefixed, and its comments live here rather than in it,
 # so a passing gate says one line: what it dispatched is fixed by this file, and
 # what it found is what a reader is here for.
-check tier="affected": lint-workflows && (budgets tier)
+check tier="affected": lint-workflows
     @# llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
-    @{{ if tier == "all" { "" } else if tier == "affected" { "base=" + quote(base) + "; head=" + quote(head) + '; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just check" >&2; exit 2; }; ' } else { error("check: unknown tier '" + tier + "'; use affected (the default) or all, then rerun just check") } }}log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x biome check --error-on-warnings . >"$log" 2>&1 && CI=1 bun x nx {{ if tier == "all" { "run-many --all" } else { 'affected --base="$base" --head="$head"' } }} -t lint --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 bun x nx {{ if tier == "all" { "run-many --all" } else { 'affected --base="$base" --head="$head"' } }} -t typecheck,test,build,prerender --parallel=3 >>"$log" 2>&1 && {{ if tier == "all" { "CI=1 bun x nx run-many -t e2e,screenshot --all" } else { 'lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 bun x nx run-many -t e2e,screenshot -p "$lanes"' } }} --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check{{ if tier == "all" { " all" } else { "" } }}" >&2; exit 1; }
+    @{{ if tier == "all" { "" } else if tier == "affected" { "base=" + quote(base) + "; head=" + quote(head) + '; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just check" >&2; exit 2; }; ' } else { error("check: unknown tier '" + tier + "'; use affected (the default) or all, then rerun just check") } }}log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x biome check --error-on-warnings . >"$log" 2>&1 && CI=1 bun x nx {{ if tier == "all" { "run-many --all" } else { 'affected --base="$base" --head="$head"' } }} -t lint --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 bun x nx {{ if tier == "all" { "run-many --all" } else { 'affected --base="$base" --head="$head"' } }} -t typecheck,test,build,prerender --parallel=3 >>"$log" 2>&1 && {{ if tier == "all" { "CI=1 bun x nx run-many -t e2e,screenshot --all" } else { 'lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 bun x nx run-many -t e2e,screenshot -p "$lanes"' } }} --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check{{ if tier == "all" { " all" } else { "" } }}" >&2; exit 1; }; just budgets {{ tier }}
 
 # Canonical manual verification gate used by orchestration and contributors.
 # llmlint: ignore[changed_behavior_has_e2e] This command-only alias has no browser interface and delegates unchanged to check, whose dispatched Playwright targets own real-browser coverage.

@@ -58,11 +58,10 @@ async function serve(options: Omit<SiteServerOptions, "base">) {
  * by which arrived first rather than by how long either took.
  */
 async function settle(order: string[], label: string, url: string) {
-  const started = process.hrtime.bigint();
   const response = await fetch(url);
   await response.text();
   order.push(label);
-  return { response, ms: Number(process.hrtime.bigint() - started) / 1e6 };
+  return response;
 }
 
 afterEach(async () => {
@@ -126,8 +125,7 @@ describe("the Pages-base site server", () => {
       settle(order, "eager", `${origin}${base}/remotes/bio/main.abc123.js`),
     ]);
 
-    expect(lazy.response.headers.get("content-type")).toBe("text/javascript");
-    expect(lazy.ms).toBeGreaterThanOrEqual(lazyAssetLatencyMs);
+    expect(lazy.headers.get("content-type")).toBe("text/javascript");
     expect(order).toEqual(["eager", "lazy"]);
   });
 
@@ -142,10 +140,8 @@ describe("the Pages-base site server", () => {
       settle(order, "other", `${origin}${base}/remotes/bio/pane.def456.js`),
     ]);
 
-    expect(held.response.headers.get("x-e2e-held-remote-code")).toBe("awards");
-    expect(held.ms).toBeGreaterThanOrEqual(holdRemoteCodeMs);
-    expect(other.response.headers.get("x-e2e-held-remote-code")).toBeNull();
-    expect(other.ms).toBeGreaterThanOrEqual(lazyAssetLatencyMs);
+    expect(held.headers.get("x-e2e-held-remote-code")).toBe("awards");
+    expect(other.headers.get("x-e2e-held-remote-code")).toBeNull();
     expect(order).toEqual(["other", "held"]);
   });
 

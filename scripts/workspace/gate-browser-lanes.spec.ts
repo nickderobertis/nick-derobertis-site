@@ -354,8 +354,11 @@ describe("the gate's browser lanes", () => {
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain(
-      "check: unknown tier 'everything'; use affected (the default) or all",
+      "check: unknown tier 'everything'; use affected (the default) or all, then rerun just check",
     );
+    // The refused tier never reaches the budgets, whose own refusal would send
+    // the caller to a recipe they did not run.
+    expect(result.stderr).not.toContain("budgets: ");
   });
 
   it("tells the gate's own caller what failed and what to rerun for a range that names no commit", () => {

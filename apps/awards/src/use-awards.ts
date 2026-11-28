@@ -2,8 +2,7 @@ import type { Awards } from "@site/data-access-core";
 // The base comes straight from the committed site config rather than through
 // @site/data-access-core/site: that module validates it with zod, which this
 // remote has no other use for and which would otherwise ride into its eager
-// entry. build-config/rspack-remote.ts holds this same value to its shape before
-// this bundle can be built.
+// entry. It is held to that module's shape here instead, by `sitePagesBase`.
 import siteConfig from "@site/data-access-core/site.config.json" with {
   type: "json",
 };
@@ -15,6 +14,24 @@ export type AwardsViewState =
   | { name: "error" }
   | { name: "ready"; awards: Awards };
 const scenarios = new Set(["empty", "error", "loading", "schema-invalid"]);
+
+/**
+ * The Pages base a site config names, refused unless it is the single
+ * lowercase path segment `@site/data-access-core/site` accepts, so a malformed
+ * config fails loudly instead of sending every awards request somewhere else.
+ */
+export function sitePagesBase(config: unknown): string {
+  const base =
+    typeof config === "object" && config !== null && "pagesBase" in config
+      ? config.pagesBase
+      : undefined;
+  if (typeof base !== "string" || !/^\/[a-z0-9-]+$/.test(base))
+    throw new Error(
+      `site.config.json pagesBase must be one lowercase path segment such as /site; received ${JSON.stringify(base)}`,
+    );
+  return base;
+}
+const pagesBase = sitePagesBase(siteConfig);
 
 /**
  * One awards request per URL, so a host that warms the pane and the pane's own
@@ -34,7 +51,7 @@ const awardsRequests = new Map<string, AwardsRequest>();
 // of the response warmed for the default view, or the other way round.
 function awardsRequestUrl(): URL {
   const url = new URL(
-    `${siteConfig.pagesBase}/cv-data/domains/awards.json`,
+    `${pagesBase}/cv-data/domains/awards.json`,
     window.location.origin,
   );
   const scenario = new URLSearchParams(window.location.search).get(
