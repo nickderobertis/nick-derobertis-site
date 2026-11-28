@@ -30,7 +30,7 @@
   font-size: clamp(1rem, 2vw, 1.35rem);
   line-height: 1.6;
 }
-/* biome-ignore lint/style/noDescendingSpecificity: Biome 2.6 newly flags this unchanged rule. Specificity already makes the earlier, more specific selector it is compared with win where both match; moving this rule would reorder it against its equal-specificity neighbours and could change the cascade, which this file's styling must not. */
+/* biome-ignore lint/style/noDescendingSpecificity: the earlier rule styles only the focused control and must keep winning over these base styles. */
 .carousel-control {
   position: absolute;
   top: 50%;
