@@ -72,8 +72,7 @@ just format               # apply Biome formatting
 ```
 
 Set `NX_BASE` and `NX_HEAD` to override the affected range used by `just check`
-and `just test`. CI runs `just check-all` on `master` as a non-affected safety
-sweep. See [the architecture](docs/architecture.md) for project boundaries,
+and `just test`. `.github/workflows/ci.yml` defines what each CI trigger runs. See [the architecture](docs/architecture.md) for project boundaries,
 hosting, and affected-test behavior.
 
 Pull requests with affected visual projects get one aggregated screencomp

@@ -1,4 +1,11 @@
 import type { Awards } from "@site/data-access-core";
+// The base comes from the committed site config through the zod-free
+// `site-base` reader rather than `@site/data-access-core/site`, whose zod
+// schema would otherwise ride into this remote's eager entry.
+import siteConfig from "@site/data-access-core/site.config.json" with {
+  type: "json",
+};
+import { readPagesBase } from "@site/data-access-core/site-base";
 import { validateCvDomain } from "@site/data-access-core/validators";
 import { useEffect, useState } from "react";
 
@@ -7,6 +14,8 @@ export type AwardsViewState =
   | { name: "error" }
   | { name: "ready"; awards: Awards };
 const scenarios = new Set(["empty", "error", "loading", "schema-invalid"]);
+
+const pagesBase = readPagesBase(siteConfig);
 
 /**
  * One awards request per URL, so a host that warms the pane and the pane's own
@@ -26,7 +35,7 @@ const awardsRequests = new Map<string, AwardsRequest>();
 // of the response warmed for the default view, or the other way round.
 function awardsRequestUrl(): URL {
   const url = new URL(
-    "/nick-derobertis-site/cv-data/domains/awards.json",
+    `${pagesBase}/cv-data/domains/awards.json`,
     window.location.origin,
   );
   const scenario = new URLSearchParams(window.location.search).get(
@@ -71,11 +80,7 @@ function awardsRequest(url: URL): AwardsRequest {
 // llmlint: ignore[changed_behavior_has_e2e] Only a host calls this, so there is no standalone trigger to drive: awards.spec.ts already covers the standalone remote's happy, empty, and error paths, and every one of them now runs through the shared request below. preload.spec.ts covers the warmed and unavailable host paths.
 export async function preloadAwards(): Promise<void> {
   if (typeof window === "undefined") return;
-  try {
-    await awardsRequest(awardsRequestUrl()).promise;
-  } catch {
-    return;
-  }
+  await awardsRequest(awardsRequestUrl()).promise.catch(() => undefined);
 }
 
 export function useAwards(): AwardsViewState {

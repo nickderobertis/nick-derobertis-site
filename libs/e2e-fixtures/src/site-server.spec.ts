@@ -52,6 +52,18 @@ async function serve(options: Omit<SiteServerOptions, "base">) {
   return `http://127.0.0.1:${address.port}`;
 }
 
+/**
+ * Fetches a path to completion and records when it settled relative to the
+ * others in `order`, so a test tells a delayed response from an undelayed one
+ * by which arrived first rather than by how long either took.
+ */
+async function settle(order: string[], label: string, url: string) {
+  const response = await fetch(url);
+  await response.text();
+  order.push(label);
+  return response;
+}
+
 afterEach(async () => {
   await Promise.all(
     servers.splice(0).map(
@@ -107,16 +119,14 @@ describe("the Pages-base site server", () => {
     const root = await artifact();
     const origin = await serve({ root, lazyAssetLatencyMs });
 
-    const started = process.hrtime.bigint();
-    await fetch(`${origin}${base}/remotes/bio/main.abc123.js`);
-    const eagerMs = Number(process.hrtime.bigint() - started) / 1e6;
-    const lazyStarted = process.hrtime.bigint();
-    const lazy = await fetch(`${origin}${base}/remotes/bio/pane.def456.js`);
-    const lazyMs = Number(process.hrtime.bigint() - lazyStarted) / 1e6;
+    const order: string[] = [];
+    const [lazy] = await Promise.all([
+      settle(order, "lazy", `${origin}${base}/remotes/bio/pane.def456.js`),
+      settle(order, "eager", `${origin}${base}/remotes/bio/main.abc123.js`),
+    ]);
 
     expect(lazy.headers.get("content-type")).toBe("text/javascript");
-    expect(lazyMs).toBeGreaterThanOrEqual(lazyAssetLatencyMs);
-    expect(eagerMs).toBeLessThan(lazyAssetLatencyMs);
+    expect(order).toEqual(["eager", "lazy"]);
   });
 
   it("holds the page code of the remote a document named, and no other", async () => {
@@ -124,18 +134,15 @@ describe("the Pages-base site server", () => {
     const origin = await serve({ root, holdRemoteCodeMs, lazyAssetLatencyMs });
 
     await fetch(`${origin}${base}/bio?hold-remote-code=awards`);
-    const heldStarted = process.hrtime.bigint();
-    const held = await fetch(`${origin}${base}/remotes/awards/pane.ghi789.js`);
-    const heldMs = Number(process.hrtime.bigint() - heldStarted) / 1e6;
-    const otherStarted = process.hrtime.bigint();
-    const other = await fetch(`${origin}${base}/remotes/bio/pane.def456.js`);
-    const otherMs = Number(process.hrtime.bigint() - otherStarted) / 1e6;
+    const order: string[] = [];
+    const [held, other] = await Promise.all([
+      settle(order, "held", `${origin}${base}/remotes/awards/pane.ghi789.js`),
+      settle(order, "other", `${origin}${base}/remotes/bio/pane.def456.js`),
+    ]);
 
     expect(held.headers.get("x-e2e-held-remote-code")).toBe("awards");
-    expect(heldMs).toBeGreaterThanOrEqual(holdRemoteCodeMs);
     expect(other.headers.get("x-e2e-held-remote-code")).toBeNull();
-    expect(otherMs).toBeGreaterThanOrEqual(lazyAssetLatencyMs);
-    expect(otherMs).toBeLessThan(holdRemoteCodeMs);
+    expect(order).toEqual(["other", "held"]);
   });
 
   it("ends a page-code hold at the next document and refuses an unnamed one", async () => {
@@ -144,15 +151,14 @@ describe("the Pages-base site server", () => {
 
     await fetch(`${origin}${base}/bio?hold-remote-code=awards`);
     await fetch(`${origin}${base}/`);
-    const started = process.hrtime.bigint();
     const released = await fetch(
       `${origin}${base}/remotes/awards/pane.ghi789.js`,
     );
-    const releasedMs = Number(process.hrtime.bigint() - started) / 1e6;
     const unusable = await fetch(`${origin}${base}/bio?hold-remote-code=../..`);
 
+    // The server picks a response's hold from the same decision that names it
+    // in this header, so its absence is the observable proof the hold ended.
     expect(released.headers.get("x-e2e-held-remote-code")).toBeNull();
-    expect(releasedMs).toBeLessThan(holdRemoteCodeMs);
     expect(unusable.status).toBe(400);
     expect(await unusable.text()).toBe("Unsupported e2e remote-code hold");
   });

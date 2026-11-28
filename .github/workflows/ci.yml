@@ -24,7 +24,7 @@ jobs:
       - if: github.event_name == 'pull_request'
         run: just check
       - if: github.event_name == 'push'
-        run: just check-all
+        run: just check all
   llmlint:
     runs-on: ubuntu-latest
     steps:

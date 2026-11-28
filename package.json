@@ -29,7 +29,7 @@
     "@nx/workspace": "24.1.0",
     "@playwright/test": "1.65.1",
     "@rspack/cli": "2.3.4",
-    "@rspack/dev-server": "2.2.2",
+    "@rspack/dev-server": "2.2.3",
     "@site/artifact-contracts": "workspace:*",
     "@site/build-config": "workspace:*",
     "@site/data-access-awards": "workspace:*",
@@ -66,7 +66,8 @@
     "typescript": "6.0.3",
     "vite": "8.4.0",
     "vitest": "5.1.2",
-    "@eslint/js": "10.0.1"
+    "@eslint/js": "10.0.1",
+    "@onebudgetspec/cli": "0.2.2"
   },
   "workspaces": [
     "apps/*",

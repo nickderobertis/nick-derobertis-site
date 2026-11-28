@@ -1,8 +1,8 @@
 # Production visual baseline
 
-These images capture the deployed site at <https://nickderobertis.com>. Regenerate
-them from the repository root with `just screenshots` after installing Node
-dependencies and the Playwright Chromium browser (`npx playwright install chromium`).
+These images capture the deployed site at <https://nickderobertis.com>. They are an
+immutable import and are not regenerated; each app's screencomp scenarios own
+ongoing capture.
 
 The baseline contains full-page captures for every public route and focused
 captures for each substantial home-page pane at mobile, tablet, and desktop
@@ -17,7 +17,7 @@ manifests under each `apps/<remote>/visual/baseline/` directory. The checked-in
 `screencomp-migration.json` records which remote owns every reference group and
 the review disposition used when seeding those manifests.
 
-`just verify-visual-reference` verifies that every recorded PR
+`scripts/visual/verify-reference-migration.mjs` verifies that every recorded PR
 #12 PNG is still present, every owner has a per-project screencomp baseline, and
 no reference group is left unmapped. This preserves the original images as the
 explicit fidelity reference while screencomp owns reproducible ongoing diffs.

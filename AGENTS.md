@@ -4,9 +4,11 @@
 
 - Product shape: React web app monorepo (Nx, rspack, Module Federation 2.0).
 - Language: TypeScript.
-- References composed: `base.md`, `shapes/web-app.md`, `shapes/react.md`, `languages/typescript.md`, `ci.md`, `llmlint.md`, `project-graph.md`.
+<!-- llmlint: ignore[contracts_have_one_source_or_a_drift_gate] create-repo's baseline checker reads this References line from AGENTS.md itself; its source is the composer's printed output, which no file in this tree holds to derive from. -->
+- References composed: `base.md`, `project-graph.md`, `shapes/web-app.md`, `shapes/react.md`, `languages/typescript.md`, `ci.md`, `llmlint.md`, `tools/onebudgetspec.md`.
 - Package manager: bun, with its default isolated linker. No Nx executor here needs another linker: every app builds and serves through the targets `@nx/rspack/plugin` infers, which compose under bun's isolated linker with React's shared singletons resolving from bun's store.
-- Excluded: release automation, because GitHub Pages deployment is the artifact lifecycle; server/auth guidance, because this is a public static site with no privileged actions.
+<!-- llmlint: ignore[contracts_have_one_source_or_a_drift_gate] create-repo's baseline checker reads this Excluded line from AGENTS.md itself; it records why the composed CI/CD shape departs from the workflows, which those workflows cannot carry. -->
+- Excluded: release automation, because GitHub Pages deployment is the artifact lifecycle; server/auth guidance, because this is a public static site with no privileged actions; and the composed CI/CD shape (`compose_repo_plan.py --ci-cd`: its `ci.yml`, release workflows, budget report job, CI/CD budgets and `.github/governance.json`), because the Pages deploy is the CD and nothing is released, the full sweep `just check all` runs on every push to `master`, the deploy commit, screencomp's reusable workflow runs an affected per-app visual matrix, and the required checks are `check` and `llmlint`. `setup_github_governance.py --verify` therefore has no `.github/governance.json` to read.
 - Coverage is 95% on lines, functions, branches, and statements, for app UI as well as library code. One exemption exists, and it is the only one: the `tooling-*` projects, because their subjects run as real subprocesses v8 cannot instrument — every workspace script, `just` recipe, and hook must instead be driven by a spec or record why it cannot be. Every other project owes a `test` target and that floor, declared as thresholds in its own component config rather than inherited from the shared harness; `scripts/workspace/structure-contract.spec.ts` derives the owed set from this sentence rather than from what each project happens to declare.
 
 ## Architecture
@@ -57,7 +59,7 @@ breaks deploys.
 ## Workflow
 
 <!-- llmlint: ignore[contracts_have_one_source_or_a_drift_gate] This contributor-facing ownership inventory is deliberately explicit; module-boundaries.spec.ts verifies every scripts project is tagged tooling and owns the required targets, while Nx remains the project source of truth. -->
-Use `just` as the only command surface. `just check` is the full manual verification gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is owned by the app whose scenarios it takes, never by a centralized script, and is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow. CI owns llmlint validation and visual classification; neither runs in a local pre-push hook.
+Use `just` as the only command surface. `just check` is the full manual verification gate at the affected tier, and `just check all` is the full sweep; each runs the onebudgetspec budgets (`just budgets`) at its tier, so a budget a project registers is enforced by the gate. Workspace tooling lives in `scripts/`, which is eight Nx projects that each own their CLIs and the specs driving them; add a new tooling spec to the project that owns its subject. Add user-visible behavior with accessible real-browser coverage. Validate imported CV data with schemas at the boundary. Screenshot capture is owned by the app whose scenarios it takes, never by a centralized script, and is intentionally not part of `just check`: the deterministic visual drift gate is screencomp's reusable workflow. CI owns llmlint validation and visual classification; neither runs in a local pre-push hook.
 
 <!-- llmlint: ignore[agents_md_durable_and_terse] The held-dependency record is a standing instruction rather than history: every dependency must sit at npm latest, so the one exception has to name itself and the exact peer ranges holding it, which is what tells the next `just upgrade` what to retry and when the pin may go. It is rewritten whenever those peers move, exactly as the rule it qualifies requires. -->
 Dependency freshness is checked with `bun outdated`; every dependency's
@@ -72,6 +74,8 @@ included; pin it back by exact version until those peers accept it.
 
 `just lint-llm-diff` is the LLM-judge tier, deliberately outside `just check`.
 
+Formatting is the `justfile`'s `format` recipe, which runs Biome from the root. A nested `AGENTS.md` exists only where a subtree has rules of its own. No target is promoted out of the affected tier. Per-target cost thresholds come from the figures a domain's own `budgets.yaml` measures, never from another repository.
+
 The `justfile` is the authoritative source for the repo-scoped
 `NX_CACHE_DIRECTORY` default beneath the user's standard cache directory, so
 disposable worktrees reuse Nx's content-addressed local cache. An existing
@@ -85,10 +89,12 @@ cache locking or a remote cache.
 
 Substantial scenarios must remain real-browser covered through both the standalone remote and the host-composed boundary, and all 12 remotes must render without failed assets through both. Keep one Nx-bounded remote per feature domain, exposed only at the route boundary; no cross-remote internals or mixed domains.
 
+Browser suites stay with the app they drive, as each app's `project.json` declares, rather than in a separate e2e project: splitting them out would restructure the whole workspace. Import boundaries are enforced between projects only, because one remote is one feature domain, so an in-project rule would have nothing to separate.
+
 ## Commits, releases, and merging
 
 <!-- llmlint: ignore[instruction_layer_localized] Localizing the root instruction layer into nested per-project AGENTS.md files is tracked separately, and is out of scope for any change that does not itself alter subtree routing. This paragraph records where review routing lives; it adds no instruction that belongs in a subtree. -->
-Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override. `.github/CODEOWNERS` routes each subtree's review to its owner, so a change under `apps/`, `libs/`, `scripts/`, `docs/`, or `.github/` reaches that owner rather than whoever notices the pull request. The visual drift gate is requirable as the `Visual docs` workflow's `classify-gate` status check — a stable aggregate over screencomp's per-app classify legs (whose own matrix contexts, `visual-docs / report (x86_64, <app>, …)`, vary with the affected set), passing when classify is clean or when no visual microfrontend was affected.
+Use Conventional Commits. GitHub uses squash-only merging, auto-merge, deleted head branches, and protected `master` requiring `check` and `llmlint`; admins may override. `.github/workflows/pr-title.yml` is the source for pull request title linting, which matters because the squash commit takes the title as its subject. `.github/CODEOWNERS` routes each subtree's review to its owner, so a change under `apps/`, `libs/`, `scripts/`, `docs/`, or `.github/` reaches that owner rather than whoever notices the pull request. The visual drift gate is requirable as the `Visual docs` workflow's `classify-gate` status check — a stable aggregate over screencomp's per-app classify legs (whose own matrix contexts, `visual-docs / report (x86_64, <app>, …)`, vary with the affected set), passing when classify is clean or when no visual microfrontend was affected.
 
 <!-- llmlint: ignore-block[contracts_have_one_source_or_a_drift_gate] ci.yml and pages.yml are the single source of these triggers; these paragraphs record the decisions behind them, which create-repo's ci.md and llmlint.md require this section to state, and their reasons, which no workflow can carry. -->
 Pull requests run the affected tier against their merge base; the full sweep

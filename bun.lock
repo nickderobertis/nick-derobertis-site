@@ -27,9 +27,10 @@
         "@nx/rspack": "24.1.0",
         "@nx/vite": "24.1.0",
         "@nx/workspace": "24.1.0",
+        "@onebudgetspec/cli": "0.2.2",
         "@playwright/test": "1.65.1",
         "@rspack/cli": "2.3.4",
-        "@rspack/dev-server": "2.2.2",
+        "@rspack/dev-server": "2.2.3",
         "@site/artifact-contracts": "workspace:*",
         "@site/build-config": "workspace:*",
         "@site/data-access-awards": "workspace:*",
@@ -845,6 +846,18 @@
 
     "@nx/workspace": ["@nx/workspace@24.1.0", "", { "dependencies": { "@nx/devkit": "24.1.0", "@zkochan/js-yaml": "0.0.7", "chalk": "^4.1.0", "nx": "24.1.0", "picomatch": "^4.0.7", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" } }, "sha512-R2pviTuczkhskBPzp1knHTeaThm5knV9hXaAWNnKJ1fYxfemmZfusRSAVX9dIxxk1Y8SHRKV1m72Uc6DNTyIMw=="],
 
+    "@onebudgetspec/cli": ["@onebudgetspec/cli@0.2.2", "", { "optionalDependencies": { "@onebudgetspec/cli-darwin-arm64": "0.2.2", "@onebudgetspec/cli-linux-arm64": "0.2.2", "@onebudgetspec/cli-linux-x64": "0.2.2", "@onebudgetspec/cli-win32-arm64": "0.2.2", "@onebudgetspec/cli-win32-x64": "0.2.2" }, "bin": { "onebudgetspec": "bin/onebudgetspec.js" } }, "sha512-/ac0bPfZbT+/0O2hTr03QfmFgaRLq74Ax2N0SweATFKy/KRroi44nC6K3brL4tJCg17oSFgCcWx3+Q8Q2HHZHw=="],
+
+    "@onebudgetspec/cli-darwin-arm64": ["@onebudgetspec/cli-darwin-arm64@0.2.2", "", { "os": "darwin", "cpu": "arm64" }, "sha512-q0hF9+Ti1FBbcdp8gBlqwurClAQysUmAZYp54QZtn2Xn9E7bD4VrMp4cTRkmg5WNe95wxQ136S0UkSRWHnGh+A=="],
+
+    "@onebudgetspec/cli-linux-arm64": ["@onebudgetspec/cli-linux-arm64@0.2.2", "", { "os": "linux", "cpu": "arm64" }, "sha512-MPCkjSL/nkcQm2pkV2ecQmKNW5zc5hVSpPC4pb7ItSCzf9c67D1huTuAj6bWLDZmHLJ+zf3Su23IMnCN5p5Qbg=="],
+
+    "@onebudgetspec/cli-linux-x64": ["@onebudgetspec/cli-linux-x64@0.2.2", "", { "os": "linux", "cpu": "x64" }, "sha512-mU1N4E+a3Jx0a0w2it8y92hE627zJZx3zmzVyF3xW44kJliF6P1ObyPqnxC9JGyRcql9RPvW37p0n0pWcTu9Sg=="],
+
+    "@onebudgetspec/cli-win32-arm64": ["@onebudgetspec/cli-win32-arm64@0.2.2", "", { "os": "win32", "cpu": "arm64" }, "sha512-QgEY0yFgLkw2CFvdCc5YzMrmdpHbQAidsAb1nnE9GM6mFSyBDz2c9FPLX4lM+tgU28rzucap/vlM4NePepYK6A=="],
+
+    "@onebudgetspec/cli-win32-x64": ["@onebudgetspec/cli-win32-x64@0.2.2", "", { "os": "win32", "cpu": "x64" }, "sha512-IBivT1n/d2ZWsBiTdhU7R+WoqlrTB1BMUTUEVLFzfaMc8Jg3rkwcC5uTmSKtJwxNx15apopesBexwZxq/UJg0g=="],
+
     "@opentelemetry/api": ["@opentelemetry/api@1.10.0", "", {}, "sha512-lMkyes8iHrG+mk6WH7X70MdCLI2RS0FwNBY1PyQ8UemaijE2m5mv5A0Niy3HtbYTFrgkUEQjFMXmSAk2hQDuPQ=="],
 
     "@oxc-parser/binding-android-arm-eabi": ["@oxc-parser/binding-android-arm-eabi@0.152.0", "", { "os": "android", "cpu": "arm" }, "sha512-393VtirINkae4XHBTkq/yQxhOwEr4V+r0et37P2fp+sYZSdYgZTRDPo5Um8vBh0QjMZ+RmaMy4PP0qwr4cTMwA=="],
@@ -1029,7 +1042,7 @@
 
     "@rspack/dev-middleware": ["@rspack/dev-middleware@2.0.6", "", { "peerDependencies": { "@rspack/core": "^2.0.0" }, "optionalPeers": ["@rspack/core"] }, "sha512-Rcx7dlDZQ9ddUJGuutFvnSeAKl+ZOc1fnC3htibs8yew3zMD9VgvSUe4MAwEn94Gb390l5heA+s/j5KhoSG5MQ=="],
 
-    "@rspack/dev-server": ["@rspack/dev-server@2.2.2", "", { "dependencies": { "@rspack/dev-middleware": "^2.0.6" }, "peerDependencies": { "@rspack/core": "^2.0.0", "selfsigned": "^5.0.0" }, "optionalPeers": ["selfsigned"] }, "sha512-pK4V9YJW8dkfjy6WYJ2T6DrPkcIn2yjA1HiaU146141j8UCxHok5lsplyqudLzerOhvwqMrNFmnsuXLnFbfn4Q=="],
+    "@rspack/dev-server": ["@rspack/dev-server@2.2.3", "", { "dependencies": { "@rspack/dev-middleware": "^2.0.6" }, "peerDependencies": { "@rspack/core": "^2.0.0", "selfsigned": "^5.0.0" }, "optionalPeers": ["selfsigned"] }, "sha512-MGv34e1xJaTLUUNVMFv5t1jKAO91POds8Tr0dg65XEO7a3BT3Vyw4XqfQEV9JmwZSg/6kw0NzfcDZz+ZxtN/9Q=="],
 
     "@rspack/lite-tapable": ["@rspack/lite-tapable@1.3.0", "", {}, "sha512-YQLaGRltBp5wzh9ee7PMmh1pErbx0E3zDlfO4K3iQpsEcJcBcgj3+9gq6/wqB/zbXbluoWoRCvL+odkft/Qt3A=="],
 

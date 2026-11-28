@@ -136,7 +136,7 @@ function lanesFor(base: string, head: string) {
  * real and the one thing this is not asserting about.
  */
 function gateDispatches(
-  recipe: string,
+  recipe: readonly string[],
   range?: { base: string; head: string },
 ) {
   const shimDirectory = mkdtempSync(join(scratch, "dispatch-"));
@@ -152,7 +152,7 @@ function gateDispatches(
       `exec "${realBun}" "$@"\n`,
   );
   chmodSync(shim, 0o755);
-  const result = spawnSync("just", [recipe], {
+  const result = spawnSync("just", recipe, {
     cwd: workspace,
     encoding: "utf8",
     env: {
@@ -238,7 +238,7 @@ describe("the gate's browser lanes", () => {
     const lanes = lanesFor("HEAD", head);
     expect(lanes).toEqual(["awards", "shell"]);
 
-    const dispatched = gateDispatches("check", { base: "HEAD", head });
+    const dispatched = gateDispatches(["check"], { base: "HEAD", head });
     expect(browserDispatches(dispatched)).toEqual([
       "x nx run-many -t e2e,screenshot -p awards,shell --parallel=3",
     ]);
@@ -263,7 +263,7 @@ describe("the gate's browser lanes", () => {
     const lanes = lanesFor("HEAD", head);
     expect(lanes).toEqual(["shell", "software"]);
 
-    const dispatched = gateDispatches("check", { base: "HEAD", head });
+    const dispatched = gateDispatches(["check"], { base: "HEAD", head });
     expect(browserDispatches(dispatched)).toEqual([
       "x nx run-many -t e2e,screenshot -p shell,software --parallel=3",
     ]);
@@ -281,7 +281,7 @@ describe("the gate's browser lanes", () => {
     const lanes = lanesFor("HEAD", head);
     expect(lanes).toEqual(["shell"]);
 
-    const dispatched = gateDispatches("check", { base: "HEAD", head });
+    const dispatched = gateDispatches(["check"], { base: "HEAD", head });
     expect(browserDispatches(dispatched)).toEqual([
       "x nx run-many -t e2e,screenshot -p shell --parallel=3",
     ]);
@@ -310,11 +310,16 @@ describe("the gate's browser lanes", () => {
   });
 
   it("has the non-affected sweep dispatch the composed host's suite once, inside its --all run", () => {
-    // check-all is CI's safety sweep over the whole workspace. Its `--all` run
+    // `just check all` is CI's safety sweep over the whole workspace. Its `--all` run
     // already reaches every project, the shell included, and `e2e` is uncached,
     // so a second `nx run shell:e2e` would run the heaviest suite twice on the
     // same commit. The sweep's only browser dispatch is the run-many.
-    const dispatched = gateDispatches("check-all");
+    const dispatched = gateDispatches(["check", "all"]);
+
+    // Every batch is the full sweep: no affected selection, no range.
+    expect(
+      dispatched.filter((line) => / nx affected /.test(` ${line} `)),
+    ).toEqual([]);
 
     expect(browserDispatches(dispatched)).toEqual([
       "x nx run-many -t e2e,screenshot --all --parallel=3",
@@ -339,6 +344,21 @@ describe("the gate's browser lanes", () => {
     expect(refusal).toContain("base and head must resolve to commits");
     expect(refusal).toContain("just gate-browser-lanes HEAD~1 HEAD");
     expect(refusal).toContain("rerun just gate-browser-lanes");
+  });
+
+  it("refuses a tier it does not know rather than running a weaker one", () => {
+    const result = spawnSync("just", ["check", "everything"], {
+      cwd: workspace,
+      encoding: "utf8",
+    });
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      "check: unknown tier 'everything'; use affected (the default) or all, then rerun just check",
+    );
+    // The refused tier never reaches the budgets, whose own refusal would send
+    // the caller to a recipe they did not run.
+    expect(result.stderr).not.toContain("budgets: ");
   });
 
   it("tells the gate's own caller what failed and what to rerun for a range that names no commit", () => {

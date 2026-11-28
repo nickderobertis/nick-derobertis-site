@@ -1,0 +1,29 @@
+# Lint the pull request title against Conventional Commits. Squash merges take
+# the title as the commit subject that lands on `master`, so a malformed title
+# would otherwise become permanent history.
+#
+# This is its own workflow so that editing a title re-runs only this check, not
+# the `check` gate in ci.yml. Its job reports as the `commitlint` context.
+
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: pr-title-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # llmlint: ignore[changed_behavior_has_e2e] This step reads the pull request's title through GitHub's API, which only a live pull request can exercise, and has no browser interface. It runs no code from this repository, and actionlint validates the job in just lint-workflows.
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

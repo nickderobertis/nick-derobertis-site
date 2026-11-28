@@ -11,6 +11,13 @@ node_typestrip := "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON"
 # llmlint: ignore[boundary_inputs_validated] just passes this path as one environment value to Nx; it is never interpolated into a shell command, and Nx owns directory-path validation.
 export NX_CACHE_DIRECTORY := env_var_or_default("NX_CACHE_DIRECTORY", env_var_or_default("XDG_CACHE_HOME", env_var("HOME") + "/.cache") + "/nx/nick-derobertis-site")
 
+# The push range the affected tier keys off, from the environment, defaulting to
+# the last commit. The recipes that read it quote it into the shell and resolve
+# it with `git rev-parse` before anything runs, so a value naming no commit is
+# refused with the recipe's own message rather than handed to Nx.
+base := env_var_or_default("NX_BASE", "HEAD~1")
+head := env_var_or_default("NX_HEAD", "HEAD")
+
 # package.json's `packageManager` names the one bun release this workspace
 # installs with; a different bun can rewrite bun.lock, so bootstrap refuses it
 # rather than installing through it.
@@ -48,30 +55,47 @@ lint-workflows:
     @# llmlint: ignore[changed_behavior_has_e2e] These gates read committed configuration and have no browser interface: they fail a push before any workflow runs, so nothing they reject can reach a visitor. runtime-pins.spec.ts and content-store-contract.spec.ts drive this exact command as a real subprocess over the committed tree and over copies with one pin or one restatement moved.
     @pins=$(node scripts/ci/verify-runtime-pins.mjs) || { echo "lint-workflows: workflow runtime pins drifted; align every workflow with package.json's packageManager and one Node version, then rerun just lint-workflows" >&2; exit 1; }; names=$({{node_typestrip}} scripts/publish/verify-content-store-contract.mjs) || { echo "lint-workflows: the content-store branch, checkout, or workdir names drifted; align every restatement with libs/publish-config/src/publish-fragment.ts, then rerun just lint-workflows" >&2; exit 1; }; echo "lint-workflows: $pins; $names"
 
-# `test` is not a dependency here: this recipe's own affected batch below runs
-# the `test` target, and the `test` recipe's other half is an `e2e` batch, which
+# `just check` is the AFFECTED tier: every target the push range
+# NX_BASE..NX_HEAD (default HEAD~1..HEAD) can reach, which pull requests run
+# against their merge base. `just check all` is the BROADER tier: one full
+# sweep over every project, which CI runs on every push to `master` — the
+# commit Pages deploys — so affected selection is never the only gate. The
+# tier is a parameter of this one command rather than a second gate, so the
+# two cannot drift, and just resolves it rather than a shell `if`: `just -n
+# check all` prints the one command that will run, and a mistyped tier aborts
+# instead of quietly buying the weaker one.
+#
+# `test` is not a dependency here: this recipe's own batch below runs the
+# `test` target, and the `test` recipe's other half is an `e2e` batch, which
 # is the composed host's suite a second time. What that dependency contributed
 # beyond this recipe was exactly the duplicate the browser lanes exist to end.
 #
 # CI=1 is the supported warnings-as-errors contract for the Nx compiler,
 # bundler, prerender, Playwright, and screenshot executors in this workspace.
 #
-# The browser and visual suites are one dispatch over the lanes
-# `just gate-browser-lanes` selects, which is the affected selection unioned
-# with the project that composes the served artifact. That union is what
-# gates the composed artifact when the affected selection is empty, and it
-# is also why the composed host's suite is dispatched exactly once: it used
+# On the affected tier the browser and visual suites are one dispatch over the
+# lanes `just gate-browser-lanes` selects, which is the affected selection
+# unioned with the project that composes the served artifact. That union is
+# what gates the composed artifact when the affected selection is empty, and
+# it is also why the composed host's suite is dispatched exactly once: it used
 # to run inside `nx affected -t e2e,screenshot` — which selects the shell
 # for nearly any TypeScript change, because the shell owns the workspace's
 # single `eslint .` run — and then again as an unconditional `nx run
 # shell:e2e`, so the heaviest suite in the repository ran twice per commit.
+# The full sweep's `--all` browser dispatch already includes `shell:e2e`, and
+# `e2e` is uncached, so there too the composed host's suite runs once.
+#
+# The budgets run at the end of the body, at the same tier, so a registered
+# budget over its threshold fails the gate. They are called from the body rather
+# than as a dependency so the tier reaches them only once `check` has accepted
+# it: a tier `check` refuses is reported as `check`'s, naming `just check`.
 #
 # The body below is `@`-prefixed, and its comments live here rather than in it,
 # so a passing gate says one line: what it dispatched is fixed by this file, and
 # what it found is what a reader is here for.
-check: lint-workflows
+check tier="affected": lint-workflows
     @# llmlint: ignore[changed_behavior_has_e2e] This developer/CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets, whose user journeys and failure paths own browser coverage.
-    @base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just check" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x biome check --error-on-warnings . >"$log" 2>&1 && CI=1 bun x nx affected -t lint --base="$base" --head="$head" --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 bun x nx affected -t typecheck,test,build,prerender --base="$base" --head="$head" --parallel=3 >>"$log" 2>&1 && lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 bun x nx run-many -t e2e,screenshot -p "$lanes" --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check" >&2; exit 1; }
+    @{{ if tier == "all" { "" } else if tier == "affected" { "base=" + quote(base) + "; head=" + quote(head) + '; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "check: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just check" >&2; exit 2; }; ' } else { error("check: unknown tier '" + tier + "'; use affected (the default) or all, then rerun just check") } }}log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x biome check --error-on-warnings . >"$log" 2>&1 && CI=1 bun x nx {{ if tier == "all" { "run-many --all" } else { 'affected --base="$base" --head="$head"' } }} -t lint --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 bun x nx {{ if tier == "all" { "run-many --all" } else { 'affected --base="$base" --head="$head"' } }} -t typecheck,test,build,prerender --parallel=3 >>"$log" 2>&1 && {{ if tier == "all" { "CI=1 bun x nx run-many -t e2e,screenshot --all" } else { 'lanes=$(just gate-browser-lanes "$base" "$head" 2>>"$log") && CI=1 bun x nx run-many -t e2e,screenshot -p "$lanes"' } }} --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check: quality gate failed; fix warnings and errors above, then rerun just check{{ if tier == "all" { " all" } else { "" } }}" >&2; exit 1; }; just budgets {{ tier }}
 
 # Canonical manual verification gate used by orchestration and contributors.
 # llmlint: ignore[changed_behavior_has_e2e] This command-only alias has no browser interface and delegates unchanged to check, whose dispatched Playwright targets own real-browser coverage.
@@ -86,15 +110,6 @@ gate: check
 @gate-browser-lanes base="" head="":
     # llmlint: ignore[changed_behavior_has_e2e] This selection command has no browser interface; gate-browser-lanes.spec.ts drives this exact recipe as a real subprocess over a range reaching the composed host, one reaching only a remote, and one reaching nothing, and drives Nx's own task graph for the dispatch its output produces.
     base="${1:-${NX_BASE:-HEAD~1}}"; head="${2:-${NX_HEAD:-HEAD}}"; [[ "$base" != -* && "$head" != -* ]] && git rev-parse --verify "$base^{commit}" >/dev/null 2>&1 && git rev-parse --verify "$head^{commit}" >/dev/null 2>&1 || { echo "gate-browser-lanes: base and head must resolve to commits; pass the push range (for example just gate-browser-lanes HEAD~1 HEAD after fetching it), or pass no arguments to use the range just check would, then rerun just gate-browser-lanes <base> <head>" >&2; exit 2; }; err=$(mktemp); trap 'rm -f "$err"' EXIT; affected=$(bun x nx show projects --affected --base="$base" --head="$head" --json 2>"$err") || { cat "$err" >&2; echo "gate-browser-lanes: Nx could not resolve the affected projects between $base and $head; fix the error above, or fetch the missing commits, then rerun just gate-browser-lanes $base $head" >&2; exit 1; }; printf '%s' "$affected" | node scripts/workspace/gate-browser-lanes.mjs || { echo "gate-browser-lanes: the gate's browser lanes could not be derived from the affected selection; fix what the reason above names, then rerun just gate-browser-lanes $base $head" >&2; exit 1; }
-
-# CI runs this non-PR safety sweep so affected detection is never the only gate.
-# Its `--all` browser dispatch already includes `shell:e2e`, and `e2e` is
-# uncached, so the composed host's suite is dispatched there and nowhere else:
-# each commit is gated once per tier.
-check-all: lint-workflows
-    # Keep the same CI warnings-as-errors contract during the non-affected sweep.
-    # llmlint: ignore[changed_behavior_has_e2e] This CI command has no browser interface; it dispatches the real Playwright e2e and screenshot targets for every project and propagates their exit status.
-    log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x biome check --error-on-warnings . >"$log" 2>&1 && CI=1 bun x nx run-many -t lint --all --parallel=3 --args="--error-on-warnings" >>"$log" 2>&1 && CI=1 bun x nx run-many -t typecheck,test,build,prerender --all --parallel=3 >>"$log" 2>&1 && CI=1 bun x nx run-many -t e2e,screenshot --all --parallel=3 >>"$log" 2>&1 || { cat "$log" >&2; echo "check-all: quality gate failed; fix warnings and errors above, then rerun just check-all" >&2; exit 1; }
 
 test:
     base="${NX_BASE:-HEAD~1}"; head="${NX_HEAD:-HEAD}"; git rev-parse --verify "$base^{commit}" >/dev/null && git rev-parse --verify "$head^{commit}" >/dev/null || { echo "test: NX_BASE and NX_HEAD must resolve to commits; set each to a commit git rev-parse accepts, such as NX_BASE=origin/master, or unset both to test HEAD~1..HEAD, then rerun just test" >&2; exit 2; }; log=$(mktemp); trap 'rm -f "$log"' EXIT; CI=1 bun x nx affected -t test,e2e --base="$base" --head="$head" --parallel=3 >"$log" 2>&1 || { cat "$log" >&2; echo "test: browser or unit tests failed; fix the findings above and rerun just test" >&2; exit 1; }
@@ -232,3 +247,13 @@ lint-llm:
 
 lint-llm-validate *args:
     llmlint validate {{args}}
+
+# The onebudgetspec budgets `check` runs at its tier: every budget domain's
+# `budgets` and `budgets-host` targets (references/tools/onebudgetspec.md in the
+# create-repo skill), then the root `budgets.yaml` when one exists — strictly,
+# leaving out only the `release-tail` and `host-variable` labels this site
+# registers no budget under. The affected tier refuses a range naming no commit
+# itself, because it also runs on its own.
+budgets tier="affected":
+    @# llmlint: ignore[changed_behavior_has_e2e] This gate command has no browser interface; budgets.spec.ts drives this exact recipe and `just check` as real subprocesses over workspaces whose budget passes and fails.
+    @{{ if tier == "all" { "" } else if tier == "affected" { "base=" + quote(base) + "; head=" + quote(head) + '; git rev-parse --verify "$base^{commit}" >/dev/null 2>&1 && git rev-parse --verify "$head^{commit}" >/dev/null 2>&1 || { echo "budgets: NX_BASE and NX_HEAD must resolve to commits; set them to commits this clone has, or unset them to use the default HEAD~1..HEAD range, then rerun just budgets" >&2; exit 2; }; ' } else { error("budgets: unknown tier '" + tier + "'; use affected (the default) or all, then rerun just budgets") } }}log=$(mktemp); trap 'rm -f "$log"' EXIT; CI=1 bun x nx {{ if tier == "all" { "run-many --all" } else { 'affected --base="$base" --head="$head"' } }} -t budgets budgets-host --parallel=3 --output-style=static >"$log" 2>&1 || { cat "$log" >&2; echo "budgets: a project budget is over its threshold or could not be measured; fix what the report above names, then rerun just budgets{{ if tier == "all" { " all" } else { "" } }}" >&2; exit 1; }; [ ! -f budgets.yaml ] || bun x onebudgetspec check budgets.yaml --exclude-label release-tail --exclude-label host-variable >"$log" 2>&1 || { cat "$log" >&2; echo "budgets: a budget in budgets.yaml is over its threshold or could not be measured; fix what the report above names, then rerun just budgets{{ if tier == "all" { " all" } else { "" } }}" >&2; exit 1; }
