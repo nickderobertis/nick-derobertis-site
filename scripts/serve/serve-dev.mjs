@@ -60,8 +60,6 @@ const devServerArguments = (app) => [
  */
 function declaresServeTarget(app) {
   const path = `apps/${app}/project.json`;
-  // The rerun instruction is the uncaught handler's to add, so what is thrown
-  // here is the reason alone: the declaration at fault and what is wrong with it.
   const reject = (reason) => {
     throw new Error(
       `${path} ${reason}, so this workspace's servable apps could not be read`,
