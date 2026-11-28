@@ -20,30 +20,85 @@
       "api": ""
     },
     "globalName": "awards",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/awards/"
   },
   "shared": [
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/data-access-core/validators",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "awards:@site/data-access-core/validators",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "645.337d608a83db3cf5.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "usedIn": [
+        "./Page"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "shareScope": "default",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "eager": false,
+      "id": "awards:@site/design-system",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "623.25c9ceaabfc335cf.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "623.d13c11caf09d4a6c.css"
+          ]
+        }
+      },
+      "usedIn": [
+        "./Page",
+        "./Skeleton"
+      ],
+      "usedExports": [],
+      "fallback": ""
+    },
+    {
+      "singleton": true,
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "awards:react-dom",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.df06078b3b2ad5ba.js"
+            "main.e93e5f9e644bf6b4.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.cd6f2ee305b9eb22.css"
+            "main.7be35c1a5e3bb482.css"
           ]
         }
       },
@@ -53,24 +108,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "awards:react",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.df06078b3b2ad5ba.js"
+            "main.e93e5f9e644bf6b4.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.cd6f2ee305b9eb22.css"
+            "main.7be35c1a5e3bb482.css"
           ]
         }
       },
@@ -88,17 +143,28 @@
       "id": "awards:Page",
       "name": "Page",
       "requires": [
-        "react"
+        "react",
+        "@site/design-system",
+        "@site/data-access-core/validators"
       ],
       "file": "src/page.tsx",
       "assets": {
         "js": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "508.e99a36ce1d1b77fe.js",
+            "__federation_expose_Page.83ff2e8a2be82394.js"
+          ],
+          "async": [
+            "234.c4be058414ad07e9.js"
+          ]
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Page.f3d7b2c5572a7314.css"
+          ],
+          "async": [
+            "623.d13c11caf09d4a6c.css"
+          ]
         }
       }
     },
@@ -106,16 +172,24 @@
       "path": "./Skeleton",
       "id": "awards:Skeleton",
       "name": "Skeleton",
-      "requires": [],
+      "requires": [
+        "@site/design-system"
+      ],
       "file": "src/skeleton.tsx",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Skeleton.04ae75bb45d1ac7d.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Skeleton.f3d7b2c5572a7314.css"
+          ],
+          "async": [
+            "623.d13c11caf09d4a6c.css"
+          ]
         }
       }
     }

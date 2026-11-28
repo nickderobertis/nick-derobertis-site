@@ -20,28 +20,70 @@
       "api": ""
     },
     "globalName": "awards",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/awards/"
   },
   "shared": [
     {
-      "id": "awards:react-dom",
-      "name": "react-dom",
-      "version": "19.2.7",
+      "id": "awards:@site/data-access-core/validators",
+      "name": "@site/data-access-core/validators",
+      "version": "0.0.0",
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^0.0.0",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "remoteEntry.js",
-            "main.df06078b3b2ad5ba.js"
+            "645.337d608a83db3cf5.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": []
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "awards:@site/design-system",
+      "name": "@site/design-system",
+      "version": "0.0.0",
+      "singleton": true,
+      "requiredVersion": "^0.0.0",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "623.25c9ceaabfc335cf.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.cd6f2ee305b9eb22.css"
+            "623.d13c11caf09d4a6c.css"
+          ]
+        }
+      },
+      "fallback": ""
+    },
+    {
+      "id": "awards:react-dom",
+      "name": "react-dom",
+      "version": "19.3.1",
+      "singleton": true,
+      "requiredVersion": "^19.3.1",
+      "assets": {
+        "js": {
+          "async": [],
+          "sync": [
+            "remoteEntry.js",
+            "main.e93e5f9e644bf6b4.js"
+          ]
+        },
+        "css": {
+          "async": [],
+          "sync": [
+            "main.7be35c1a5e3bb482.css"
           ]
         }
       },
@@ -50,21 +92,21 @@
     {
       "id": "awards:react",
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.df06078b3b2ad5ba.js"
+            "main.e93e5f9e644bf6b4.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.cd6f2ee305b9eb22.css"
+            "main.7be35c1a5e3bb482.css"
           ]
         }
       },
@@ -78,12 +120,21 @@
       "name": "Page",
       "assets": {
         "js": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "508.e99a36ce1d1b77fe.js",
+            "__federation_expose_Page.83ff2e8a2be82394.js"
+          ],
+          "async": [
+            "234.c4be058414ad07e9.js"
+          ]
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Page.f3d7b2c5572a7314.css"
+          ],
+          "async": [
+            "623.d13c11caf09d4a6c.css"
+          ]
         }
       },
       "path": "./Page"
@@ -93,12 +144,18 @@
       "name": "Skeleton",
       "assets": {
         "js": {
-          "sync": [],
+          "sync": [
+            "__federation_expose_Skeleton.04ae75bb45d1ac7d.js"
+          ],
           "async": []
         },
         "css": {
-          "sync": [],
-          "async": []
+          "sync": [
+            "__federation_expose_Skeleton.f3d7b2c5572a7314.css"
+          ],
+          "async": [
+            "623.d13c11caf09d4a6c.css"
+          ]
         }
       },
       "path": "./Skeleton"

@@ -1,0 +1,1 @@
+"use strict";(self.rspackChunkawards=self.rspackChunkawards||[]).push([[768],{4707(s,a,e){e.r(a);var r=e(7462),n=e(1745);e.d(a,{},{default:function(){return(0,r.jsx)(n.Skeleton,{className:"skeleton-awards",label:"Loading awards",children:(0,r.jsx)("div",{className:"skeleton-grid",children:[1,2,3].map(function(s){return(0,r.jsx)("i",{},s)})})})}})}}]);
