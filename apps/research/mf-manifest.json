@@ -20,7 +20,7 @@
       "api": ""
     },
     "globalName": "research",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/research/"
   },
   "shared": [
@@ -34,7 +34,7 @@
         "js": {
           "async": [],
           "sync": [
-            "785.e5f67c9015938c2e.js"
+            "645.5a547450960bb28a.js"
           ]
         },
         "css": {
@@ -54,13 +54,13 @@
         "js": {
           "async": [],
           "sync": [
-            "241.795d0661f921c92a.js"
+            "623.1d4e637f4e76c19b.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -76,7 +76,7 @@
         "js": {
           "async": [],
           "sync": [
-            "107.3c4bba3d88c911e1.js"
+            "314.7e1873f03166c9de.js"
           ]
         },
         "css": {
@@ -89,21 +89,21 @@
     {
       "id": "research:react-dom",
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.53652a7f7263618b.js"
+            "main.46e284beb5b7f7d0.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8e6a99df7fb75c0d.css"
+            "main.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -112,21 +112,21 @@
     {
       "id": "research:react",
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.53652a7f7263618b.js"
+            "main.46e284beb5b7f7d0.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8e6a99df7fb75c0d.css"
+            "main.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -135,14 +135,14 @@
     {
       "id": "research:zod",
       "name": "zod",
-      "version": "4.4.3",
+      "version": "4.6.7",
       "singleton": true,
-      "requiredVersion": "^4.4.3",
+      "requiredVersion": "^4.6.7",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "581.465e8976a5ba7a6a.js"
+            "206.ff54a74117e23075.js"
           ]
         },
         "css": {
@@ -161,19 +161,19 @@
       "assets": {
         "js": {
           "sync": [
-            "247.427422d16b9c5e94.js",
-            "__federation_expose_Page.05c1161233330439.js"
+            "396.2a1aec94c4be9d67.js",
+            "__federation_expose_Page.49e3906bf5ccab98.js"
           ],
           "async": [
-            "459.44dd8474f7f075b7.js"
+            "234.83178dc372822ecf.js"
           ]
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.5d44b43fe5a7fcbb.css"
+            "__federation_expose_Page.bc88617b20f50d88.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
