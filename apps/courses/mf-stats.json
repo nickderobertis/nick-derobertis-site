@@ -20,7 +20,7 @@
       "api": ""
     },
     "globalName": "courses",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/courses/"
   },
   "shared": [
@@ -36,7 +36,7 @@
         "js": {
           "async": [],
           "sync": [
-            "785.ebfdd7512f4ac58e.js"
+            "645.7322167403309102.js"
           ]
         },
         "css": {
@@ -62,13 +62,13 @@
         "js": {
           "async": [],
           "sync": [
-            "241.5f1fc53ace917734.js"
+            "623.204db9d56c020a10.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -90,7 +90,7 @@
         "js": {
           "async": [],
           "sync": [
-            "107.21de4b53048601af.js"
+            "314.566ce42a3fa8b23f.js"
           ]
         },
         "css": {
@@ -104,24 +104,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "courses:react-dom",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.585df6ca26e25e81.js"
+            "main.01c4611f7ff5d932.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8e6a99df7fb75c0d.css"
+            "main.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -131,24 +131,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "courses:react",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.585df6ca26e25e81.js"
+            "main.01c4611f7ff5d932.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8e6a99df7fb75c0d.css"
+            "main.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -160,17 +160,17 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^4.4.3",
+      "requiredVersion": "^4.6.7",
       "shareScope": "default",
       "name": "zod",
-      "version": "4.4.3",
+      "version": "4.6.7",
       "eager": false,
       "id": "courses:zod",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "581.fe6ab338427e606a.js"
+            "206.29b88f4f17a70234.js"
           ]
         },
         "css": {
@@ -198,19 +198,19 @@
       "assets": {
         "js": {
           "sync": [
-            "117.00a114f1ed0e217b.js",
-            "__federation_expose_Page.35715bb3c3cfc16b.js"
+            "947.56f053ffb4e99237.js",
+            "__federation_expose_Page.dbc047f19b32287d.js"
           ],
           "async": [
-            "459.73419d66b9094a95.js"
+            "234.e6065088258348c9.js"
           ]
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.d54c5dae76e49f7e.css"
+            "__federation_expose_Page.06a1346a825da1d0.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       }
