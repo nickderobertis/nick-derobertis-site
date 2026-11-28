@@ -9,7 +9,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -32,6 +32,13 @@ import { z } from "zod";
 const workspace = process.cwd();
 /** The real bun the gate shim falls through to; see gate-browser-lanes.spec.ts. */
 const executablePath = z.string().regex(/^\/[A-Za-z0-9._+/-]+$/);
+/** A path inside the copied tree: relative, and never climbing out of it. */
+const workspacePath = z
+  .string()
+  .min(1)
+  .refine((path) => !isAbsolute(path) && !path.split("/").includes(".."), {
+    message: "must be a workspace-relative path that stays inside the tree",
+  });
 const budgetResults = z.object({
   results: z.array(z.object({ id: z.string(), verdict: z.string() })),
 });
@@ -61,7 +68,9 @@ beforeAll(() => {
     { cwd: workspace, encoding: "utf8" },
   )
     .split("\0")
-    .filter((path) => path !== "" && existsSync(join(workspace, path)));
+    .filter((path) => path !== "")
+    .map((path) => workspacePath.parse(path))
+    .filter((path) => existsSync(join(workspace, path)));
   // The installed dependencies and pinned CI tools are linked rather than
   // copied: they are the same install the gate runs from here.
   installTrees = execFileSync(
@@ -73,7 +82,9 @@ beforeAll(() => {
     { cwd: workspace, encoding: "utf8" },
   )
     .split("\n")
-    .filter((path) => path !== "" && existsSync(join(workspace, path)));
+    .filter((path) => path !== "")
+    .map((path) => workspacePath.parse(path))
+    .filter((path) => existsSync(join(workspace, path)));
 });
 
 /** A one-commit git copy of this working tree, with `extra` files added. */
@@ -100,6 +111,7 @@ function commitAll(copy: string, message: string) {
   const git = (args: string[]) =>
     execFileSync("git", args, {
       cwd: copy,
+      // llmlint: ignore[boundary_inputs_validated] The environment is forwarded to git, never read here; git needs the caller's PATH and HOME to start, and the only values this commit depends on are the fixture identity set from constants above.
       env: { ...process.env, ...fixtureIdentity },
       stdio: "pipe",
     });
@@ -111,8 +123,8 @@ function commitAll(copy: string, message: string) {
 /** A budgets file whose one budget reports `actual` bytes against 100. */
 function budgetsFile(id: string, actual: number) {
   // onebudgetspec names the file a `reported` measure writes; the fixture
-  // refuses to run without one rather than writing to an unnamed path.
-  const report = `const out = process.env.ONEBUDGETSPEC_RESULT; if (!out) { console.error("fixture: ONEBUDGETSPEC_RESULT must name the result file onebudgetspec reads"); process.exit(2); } require("node:fs").writeFileSync(out, JSON.stringify({ value: ${actual} }))`;
+  // refuses to run unless that is an absolute path rather than guess at one.
+  const report = `const out = process.env.ONEBUDGETSPEC_RESULT; if (!out || !require("node:path").isAbsolute(out)) { console.error("fixture: ONEBUDGETSPEC_RESULT must be the absolute path of the result file onebudgetspec reads"); process.exit(2); } require("node:fs").writeFileSync(out, JSON.stringify({ value: ${actual} }))`;
   return [
     "schema_version: 1",
     "budgets:",
@@ -171,6 +183,7 @@ function domainProject(actual: number) {
  */
 function nxEnvironment(copy: string, extra: Record<string, string> = {}) {
   return {
+    // llmlint: ignore[boundary_inputs_validated] The environment is forwarded to just and Nx, never read here; they need the caller's PATH, HOME and Node resolution to start, and every Nx setting a scenario depends on is overridden below from the copy the test created.
     ...process.env,
     NX_DAEMON: "false",
     NX_NO_CLOUD: "true",
@@ -323,6 +336,7 @@ describe("just check runs the budgets", () => {
     );
     chmodSync(shim, 0o755);
     const result = just(copy, args, {
+      // llmlint: ignore[boundary_inputs_validated] The ambient PATH is only forwarded behind the shim so just and Nx can start; the one binary resolved from it, bun, is validated as an absolute path in beforeAll.
       PATH: `${shimDirectory}:${process.env.PATH ?? ""}`,
     });
     const dispatched = readFileSync(log, "utf8").trim().split("\n");
