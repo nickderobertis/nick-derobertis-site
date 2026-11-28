@@ -14,3 +14,10 @@ test("refuses a config that names no valid Pages base", () => {
       "site.config.json pagesBase must be one lowercase path segment",
     );
 });
+
+test("refuses a non-string Pages base that RegExp.test would coerce into a match", () => {
+  for (const pagesBase of [["/site"], { toString: () => "/site" }, 1, null])
+    expect(() => readPagesBase({ pagesBase })).toThrow(
+      "site.config.json pagesBase must be one lowercase path segment",
+    );
+});
