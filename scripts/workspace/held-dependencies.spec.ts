@@ -4,11 +4,11 @@ import { z } from "zod";
 
 /**
  * AGENTS.md's dependency-freshness paragraph names the one dependency held
- * below its npm latest major and quotes the peer ranges holding it, so the
- * next `just upgrade` knows what to retry. Those facts come from `bun.lock`;
- * this spec is the gate that keeps the prose and the lockfile agreeing, so a
- * peer that widens its range, or a TypeScript that moves, fails here rather
- * than leaving the instructions quietly wrong.
+ * below its npm latest major and quotes the peers holding it, with their majors
+ * and ranges, so the next `just upgrade` knows what to retry. Those facts come
+ * from `bun.lock`; this spec is the gate that keeps the prose and the lockfile
+ * agreeing, so a peer that moves major or widens its range, or a TypeScript
+ * that moves, fails here rather than leaving the instructions quietly wrong.
  */
 
 const lockEntrySchema = z.tuple([
@@ -70,6 +70,15 @@ describe("held dependency record", () => {
     const locked = Number(
       lockedPackage(lock, "typescript").version.split(".")[0],
     );
+    expect(stated).toBe(locked);
+  });
+
+  it.each([
+    ["nx", /\bNx (\d+)'s\b/],
+    ["@typescript-eslint/parser", /`@typescript-eslint\/parser` (\d+)\b/],
+  ])("states the %s major bun.lock resolves", (name, label) => {
+    const stated = z.coerce.number().int().parse(label.exec(paragraph)?.[1]);
+    const locked = Number(lockedPackage(lock, name).version.split(".")[0]);
     expect(stated).toBe(locked);
   });
 

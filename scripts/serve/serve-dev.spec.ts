@@ -119,13 +119,16 @@ function startRecipe(app: string, port: number) {
   return { recipe, reported };
 }
 
-/** Signals every process in `group`, answering whether any was left to signal. */
 function signalGroup(group: number, signal: NodeJS.Signals | 0): boolean {
   try {
     process.kill(-group, signal);
     return true;
   } catch (error) {
-    return (error as NodeJS.ErrnoException).code !== "ESRCH";
+    return !(
+      error instanceof Error &&
+      "code" in error &&
+      error.code === "ESRCH"
+    );
   }
 }
 
