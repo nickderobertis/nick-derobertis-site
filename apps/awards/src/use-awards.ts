@@ -77,15 +77,9 @@ function awardsRequest(url: URL): AwardsRequest {
  * pane's own request runs on mount, and that request owns the error state.
  */
 // llmlint: ignore[changed_behavior_has_e2e] Only a host calls this, so there is no standalone trigger to drive: awards.spec.ts already covers the standalone remote's happy, empty, and error paths, and every one of them now runs through the shared request below. preload.spec.ts covers the warmed and unavailable host paths.
-// It is a plain promise chain rather than an async function with a try block,
-// because this bundle is down-levelled and the generator that form compiles to
-// costs the ./Page chunk more than its bundle budget leaves room for.
-export function preloadAwards(): Promise<void> {
-  if (typeof window === "undefined") return Promise.resolve();
-  return awardsRequest(awardsRequestUrl()).promise.then(
-    () => undefined,
-    () => undefined,
-  );
+export async function preloadAwards(): Promise<void> {
+  if (typeof window === "undefined") return;
+  await awardsRequest(awardsRequestUrl()).promise.catch(() => undefined);
 }
 
 export function useAwards(): AwardsViewState {
