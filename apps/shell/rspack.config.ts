@@ -12,6 +12,7 @@ import {
   sharedSingletons,
   withDevelopmentOverrides,
 } from "@site/build-config";
+import { composedArtifactRoot } from "@site/build-config/composed-artifact";
 
 const base = "/nick-derobertis-site/";
 const routeRemotes = remoteMap([
@@ -42,6 +43,7 @@ export default withDevelopmentOverrides(
     output: { publicPath: base, uniqueName: "shell", clean: true },
     plugins: [
       new NxAppRspackPlugin({
+        outputPath: composedArtifactRoot,
         tsConfig: "apps/shell/tsconfig.app.json",
         main: "apps/shell/src/main.tsx",
         index: "apps/shell/src/index.html",

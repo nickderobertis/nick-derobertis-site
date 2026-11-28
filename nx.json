@@ -34,7 +34,9 @@
     },
     "serve": {
       "cache": false,
-      "options": { "host": "127.0.0.1", "port": 4200 }
+      "options": {
+        "host": "127.0.0.1"
+      }
     },
     "prerender": {
       "cache": false
@@ -46,11 +48,32 @@
       "cache": true,
       "inputs": [
         "wholeWorkspace",
-        { "env": "LLMLINT_DIFF_BASE" },
-        { "env": "LLMLINT_DIFF_FILES" },
-        { "env": "LLMLINT_JUDGE_FINGERPRINT" }
+        {
+          "env": "LLMLINT_DIFF_BASE"
+        },
+        {
+          "env": "LLMLINT_DIFF_FILES"
+        },
+        {
+          "env": "LLMLINT_JUDGE_FINGERPRINT"
+        }
       ]
     }
   },
-  "plugins": ["./scripts/workspace/federation-plugin.mjs"]
+  "plugins": [
+    {
+      "plugin": "@nx/rspack/plugin",
+      "include": ["apps/*/**/*"],
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static"
+      }
+    },
+    "./scripts/workspace/federation-plugin.mjs"
+  ],
+  "affected": {
+    "legacy": true
+  }
 }

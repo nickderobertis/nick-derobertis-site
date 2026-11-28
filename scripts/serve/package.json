@@ -6,6 +6,7 @@
     "@site/artifact-contracts": "workspace:*",
     "@site/build-config": "workspace:*",
     "@site/data-access-core": "workspace:*",
-    "@site/e2e-fixtures": "workspace:*"
+    "@site/e2e-fixtures": "workspace:*",
+    "@site/e2e-harness": "workspace:*"
   }
 }

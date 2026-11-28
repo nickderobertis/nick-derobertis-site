@@ -81,7 +81,7 @@ test("ordinary local pushes stay check-free with the former hooksPath", () => {
         stdio: ["ignore", "pipe", "pipe"],
       });
       expect(setup.status).toBe(0);
-      expect(setup.stderr).toContain("pnpm install");
+      expect(setup.stderr).toContain("bun install");
       expect(setup.stdout + setup.stderr).not.toMatch(
         /hooksPath|hook-install|pre-push/,
       );

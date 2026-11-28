@@ -121,7 +121,7 @@ beforeAll(async () => {
     mkdtempSync(join(tmpdir(), "federation-contract-")),
     "graph.json",
   );
-  execFileSync("pnpm", ["exec", "nx", "graph", `--file=${graphFile}`], {
+  execFileSync("bun", ["x", "nx", "graph", `--file=${graphFile}`], {
     encoding: "utf8",
     env: { ...process.env, NX_DAEMON: "false" },
     stdio: "pipe",
@@ -218,12 +218,20 @@ describe("the canonical remote registry", () => {
     // was dropped would read exactly like one that never named them.
     // JSON.parse establishes syntax and nothing else, so the one field this
     // reads is narrowed before it is read: a nx.json holding null, a list, or a
-    // plugins that is not a list of paths is a finding of its own, not a
-    // registration this assertion should report as missing.
+    // plugins that is not a list of Nx plugin registrations — a path, or an
+    // object naming one — is a finding of its own, not a registration this
+    // assertion should report as missing.
     expect(
       z
-        .object({ plugins: z.array(z.string()) })
-        .parse(JSON.parse(nxConfiguration ?? "")).plugins,
+        .object({
+          plugins: z.array(
+            z.union([z.string(), z.object({ plugin: z.string() })]),
+          ),
+        })
+        .parse(JSON.parse(nxConfiguration ?? ""))
+        .plugins.map((entry) =>
+          typeof entry === "string" ? entry : entry.plugin,
+        ),
     ).toContain("./scripts/workspace/federation-plugin.mjs");
     const restating = remotes
       .flatMap((remote) => [

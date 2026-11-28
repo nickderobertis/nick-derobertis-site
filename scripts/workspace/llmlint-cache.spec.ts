@@ -119,7 +119,7 @@ interface Dispatch {
   environment?: Record<string, string>;
 }
 
-// llmlint: ignore-block[boundary_inputs_validated] What survives the filter is forwarded, never read: `just` and the `pnpm exec nx` it dispatches need the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. Every Nx setting is dropped instead of forwarded, and the ones these journeys depend on are set from a directory the journey itself created.
+// llmlint: ignore-block[boundary_inputs_validated] What survives the filter is forwarded, never read: `just` and the `bun x nx` it dispatches need the caller's PATH, HOME, and Node resolution to start at all, and nothing here parses, branches on, or interpolates any of it. Every Nx setting is dropped instead of forwarded, and the ones these journeys depend on are set from a directory the journey itself created.
 /** One `just lint-llm-diff`, exactly as a contributor or a gate runs it. */
 function lintLlmDiff({ args = [], judge, environment = {} }: Dispatch): Run {
   const result = spawnSync("just", ["lint-llm-diff", ...args], {

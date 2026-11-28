@@ -1,3 +1,4 @@
+import { takeRouterHydration } from "@site/build-config/router-hydration";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns its loader boundary; this spec serves the same validated CV domains the deployed shell does.
 import { cvDataClient } from "@site/data-access-core/bundled";
 // eslint-disable-next-line @nx/enforce-module-boundaries -- The shell owns site-base routing; this spec serves the same base the deployed shell does.
@@ -62,13 +63,11 @@ async function publishedDocument(path: string) {
       }),
   });
   await handler(async ({ router }) => {
-    while (!router.serverSsr?.isSerializationFinished())
-      await new Promise<void>((resolve) => setImmediate(resolve));
     const { prelude } = await prerender(<RouterServer router={router} />);
     router.serverSsr?.setRenderFinished();
     rendered = {
       html: await new Response(prelude).text(),
-      hydration: router.serverSsr?.takeBufferedHtml() ?? "",
+      hydration: takeRouterHydration(router.serverSsr),
     };
     return new Response(rendered.html);
   });

@@ -30,6 +30,7 @@
   font-size: clamp(1rem, 2vw, 1.35rem);
   line-height: 1.6;
 }
+/* biome-ignore lint/style/noDescendingSpecificity: the earlier rule styles only the focused control and must keep winning over these base styles. */
 .carousel-control {
   position: absolute;
   top: 50%;

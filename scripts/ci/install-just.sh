@@ -16,7 +16,7 @@ readonly bin_dir
 github_token="${GITHUB_TOKEN:-}"
 [[ -z "$github_token" || "$github_token" =~ ^[A-Za-z0-9_.-]+$ ]] || { echo "install-just: GITHUB_TOKEN must be a GitHub token — letters, digits, '_', '.', or '-' only; correct or unset it, then retry" >&2; exit 2; }
 readonly github_token
-readonly installer_sha256="a87d0419dab916fca62627809b3e6e0dd175fcd9c7f91275c655d5978c86ee6f"
+readonly installer_sha256="64738ce6bec65ba39848dad0da0b35a467ef32003603bd8e4a419167fa58b1d0"
 resolve_tag="$(dirname -- "${BASH_SOURCE[0]}")/resolve-just-tag.sh"
 readonly resolve_tag
 readonly latest_release="https://api.github.com/repos/casey/just/releases/latest"

@@ -14,6 +14,7 @@ import {
   RouterServer,
 } from "@tanstack/react-router/ssr/server";
 import { prerender } from "react-dom/static";
+import { takeRouterHydration } from "./router-hydration";
 
 function slot(name: string) {
   return function PublishedFragmentSlot() {
@@ -62,13 +63,11 @@ export async function renderShellFragment() {
     // holds that framework-only surface to a version this workspace declares.
     await handler(async ({ router }) => {
       try {
-        while (!router.serverSsr?.isSerializationFinished())
-          await new Promise<void>((resolve) => setImmediate(resolve));
         const { prelude } = await prerender(<RouterServer router={router} />);
         router.serverSsr?.setRenderFinished();
         rendered = {
           html: await new Response(prelude).text(),
-          hydration: router.serverSsr?.takeBufferedHtml() ?? "",
+          hydration: takeRouterHydration(router.serverSsr),
         };
         return new Response(rendered.html);
       } finally {

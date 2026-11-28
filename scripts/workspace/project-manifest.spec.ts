@@ -145,7 +145,7 @@ function documentOf(path: string, remedy: string): unknown {
 }
 
 /**
- * The environment `pnpm exec nx graph` is given. The ambient environment is an
+ * The environment `bun x nx graph` is given. The ambient environment is an
  * input like any other, so it is not forwarded wholesale: nx needs the
  * interpreter and package manager on `PATH`, a home directory to resolve its
  * own configuration under, and the cache settings `just check` runs it with —
@@ -156,7 +156,7 @@ function documentOf(path: string, remedy: string): unknown {
 const absolutePath = z.string().regex(/^\/[^\0]*$/);
 
 const nxEnvironment = {
-  // pnpm exec prepends its own relative ./node_modules/.bin, which is how the
+  // bun x prepends its own relative ./node_modules/.bin, which is how the
   // workspace's pinned binaries are found at all, so a segment is held only to
   // being a real one: an empty segment silently means the current directory.
   PATH: {
@@ -166,7 +166,7 @@ const nxEnvironment = {
   HOME: { schema: absolutePath, expected: "an absolute path" },
   TMPDIR: { schema: absolutePath, expected: "an absolute path" },
   XDG_CACHE_HOME: { schema: absolutePath, expected: "an absolute path" },
-  PNPM_HOME: { schema: absolutePath, expected: "an absolute path" },
+  BUN_INSTALL: { schema: absolutePath, expected: "an absolute path" },
   NX_CACHE_DIRECTORY: { schema: absolutePath, expected: "an absolute path" },
   CI: { schema: z.string().regex(/^[\w-]+$/), expected: "a bare word" },
 };
@@ -187,8 +187,8 @@ function graphEnvironment(): NodeJS.ProcessEnv {
   }
   if (forwarded.PATH === undefined)
     fail(
-      "this process was run with no PATH, so the nx graph subprocess could find neither pnpm nor node",
-      "Run just check from a shell whose PATH names the pnpm and node this workspace pins.",
+      "this process was run with no PATH, so the nx graph subprocess could find neither bun nor node",
+      "Run just check from a shell whose PATH names the bun and node this workspace pins.",
     );
   return forwarded;
 }
@@ -313,17 +313,14 @@ beforeAll(() => {
   const graphRemedy =
     "Fix what nx reports — a project.json it cannot read is the usual cause — then rerun just check.";
   stdoutOf(
-    "pnpm exec nx graph",
-    "pnpm",
-    ["exec", "nx", "graph", `--file=${graphFile}`],
+    "bun x nx graph",
+    "bun",
+    ["x", "nx", "graph", `--file=${graphFile}`],
     graphRemedy,
     { env: graphEnvironment() },
   );
   if (!existsSync(graphFile))
-    fail(
-      `pnpm exec nx graph wrote no project graph to ${graphFile}`,
-      graphRemedy,
-    );
+    fail(`bun x nx graph wrote no project graph to ${graphFile}`, graphRemedy);
   const graph = narrowed(
     graphSchema,
     documentOf(graphFile, graphRemedy),
@@ -365,24 +362,26 @@ describe("every project declares itself", () => {
     expect(findings).toEqual([]);
   });
 
-  it("keeps every project root inside the pnpm workspace", () => {
-    const globs = contentsOf(
-      "pnpm-workspace.yaml",
-      "Restore it from git, then rerun just check.",
-    )
-      .split("\n")
-      .flatMap((line) => /^\s+-\s+(\S+\/\*)$/.exec(line)?.[1] ?? []);
+  it("keeps every project root inside the bun workspace", () => {
+    const remedy = "Restore it from git, then rerun just check.";
+    const { workspaces } = narrowed(
+      z.object({ workspaces: z.array(z.string()) }),
+      documentOf("package.json", remedy),
+      "package.json",
+      "Give it a workspaces list with one <directory>/* glob per project tree, then rerun just check.",
+    );
+    const globs = workspaces.filter((glob) => /^[^*]+\/\*$/.test(glob));
     expect(
       globs.length,
-      "pnpm-workspace.yaml declares no <directory>/* packages glob, so pnpm links nothing; give it one glob per project tree and run just bootstrap",
+      "package.json declares no <directory>/* workspaces glob, so bun links nothing; give it one glob per project tree and run just bootstrap",
     ).toBeGreaterThan(0);
-    // A manifest outside every workspace glob is a package pnpm never links,
+    // A manifest outside every workspace glob is a package bun never links,
     // so nothing it declares is resolvable however well-formed it reads.
     const outside = projects
       .filter((project) => !globs.includes(`${dirname(project.root)}/*`))
       .map(
         (project) =>
-          `${project.root} is not covered by pnpm-workspace.yaml, so pnpm links none of the packages it depends on; add ${dirname(project.root)}/* to its packages list and run just bootstrap`,
+          `${project.root} is not covered by package.json's workspaces, so bun links none of the packages it depends on; add ${dirname(project.root)}/* to that list and run just bootstrap`,
       );
     expect(outside).toEqual([]);
   });
@@ -403,7 +402,7 @@ describe("every project declares itself", () => {
           .filter((name) => !declared.has(name))
           .map(
             (name) =>
-              `${project.root}/package.json imports ${name} but does not depend on it, so pnpm links nothing for it; add "${name}": "workspace:*" to its dependencies and run just bootstrap`,
+              `${project.root}/package.json imports ${name} but does not depend on it, so bun links nothing for it; add "${name}": "workspace:*" to its dependencies and run just bootstrap`,
           ),
         ...[...declared]
           .filter((name) => !imported.has(name))
@@ -551,7 +550,7 @@ describe("Node resolves what every import site writes", () => {
     const findings = [...byDirectory].flatMap(([directory, specifiers]) =>
       unresolvedSpecifiersIn(directory, [...specifiers]).map(
         ({ specifier, reason }) =>
-          `${directory} imports ${specifier}, which Node cannot resolve from there: ${reason}; declare that subpath in the exports map of the package that owns it and run just bootstrap so pnpm links it`,
+          `${directory} imports ${specifier}, which Node cannot resolve from there: ${reason}; declare that subpath in the exports map of the package that owns it and run just bootstrap so bun links it`,
       ),
     );
     expect(findings).toEqual([]);

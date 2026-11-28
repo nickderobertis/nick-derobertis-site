@@ -223,6 +223,7 @@
 .course-pane h4 {
   color: var(--navy);
 }
+/* biome-ignore lint/style/noDescendingSpecificity: only `p:not(.course-code)` inside a summary div, which never sits in a pane, is more specific. */
 .course-pane p,
 .course-pane li {
   line-height: 1.55;
@@ -243,7 +244,9 @@
   justify-content: space-between;
   gap: 1rem;
 }
+/* biome-ignore lint/style/noDescendingSpecificity: `.course-facts dd` never matches a grading list. */
 .course-grading-categories dd,
+/* biome-ignore lint/style/noDescendingSpecificity: `.course-facts dd` never matches the grade scale. */
 .course-grade-scale dd {
   margin: 0;
   font-weight: 700;
@@ -258,6 +261,7 @@
 .course-resource-list li + li {
   margin-top: 0.45rem;
 }
+/* biome-ignore lint/style/noDescendingSpecificity: only `p:not(.course-code)` inside a summary div, which never sits in a resource list, is more specific. */
 .course-resource-list p {
   margin: 0.2rem 0 0.75rem;
   color: var(--muted);

@@ -12,6 +12,7 @@ export default defineConfig({
       "scripts/workspace/federation-contract.spec.ts",
       "scripts/workspace/federation-registry.spec.ts",
       "scripts/workspace/gate-browser-lanes.spec.ts",
+      "scripts/workspace/held-dependencies.spec.ts",
       "scripts/workspace/lint-llm-diff.spec.ts",
       "scripts/workspace/llmlint-cache.spec.ts",
       "scripts/workspace/module-boundaries.spec.ts",

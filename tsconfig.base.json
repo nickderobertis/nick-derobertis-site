@@ -15,6 +15,10 @@
     // the real file extension. Every project here already compiles with noEmit,
     // so permitting the `.ts` specifier changes nothing but resolution.
     "allowImportingTsExtensions": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // Module Federation's declaration generator derives its compile root from
+    // the program's root files when none is set, and a remote's exposes reach
+    // into libs/, so the root is pinned to the workspace that holds both.
+    "rootDir": "."
   }
 }

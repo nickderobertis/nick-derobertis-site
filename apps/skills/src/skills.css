@@ -73,6 +73,7 @@ body:has(.skills-pane) {
   gap: 0.25rem;
   justify-content: center;
 }
+/* biome-ignore lint/style/noDescendingSpecificity: the earlier focus ring must keep winning over these base button styles. */
 .chart-keyboard-controls button {
   background: transparent;
   border: 1px solid transparent;
@@ -92,6 +93,7 @@ body:has(.skills-pane) {
   max-width: 100%;
   overflow: visible;
 }
+/* biome-ignore lint/style/noDescendingSpecificity: the earlier focus ring must keep winning over these base sector styles. */
 .skill-sector {
   cursor: pointer;
   stroke: #fff;
@@ -138,6 +140,7 @@ body:has(.skills-pane) {
   position: relative;
   width: min(32rem, 100%);
 }
+/* biome-ignore lint/style/noDescendingSpecificity: the earlier focus ring must keep winning over these base select styles. */
 .skills-dropdowns select {
   background: #fff;
   border: 1px solid #9c8d8d;

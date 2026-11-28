@@ -5,9 +5,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./composed-artifact": "./src/composed-artifact.ts",
+    "./css-side-effect-imports": "./src/css-side-effect-imports.d.ts",
     "./fragment-contract": "./src/fragment-contract.ts",
     "./remote-registry": "./src/remote-registry.ts",
-    "./remotes.json": "./src/remotes.json"
+    "./remotes.json": "./src/remotes.json",
+    "./router-hydration": "./src/router-hydration.ts"
   },
   "dependencies": {
     "@site/data-access-core": "workspace:*",

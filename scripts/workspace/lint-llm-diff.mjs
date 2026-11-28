@@ -123,12 +123,16 @@ const replayMarkers = [
 
 // llmlint: ignore[boundary_inputs_validated] Every value handed over was validated above — the base resolved to commits by git, each file to an existing path inside this repository, the fingerprint to what llmlint itself reported — and the inherited environment is forwarded rather than read, with the two ambient cache switches this tier refuses already dropped.
 const nx = spawn(
-  "pnpm",
+  "bun",
   [
-    "exec",
+    "x",
     "nx",
     "run",
     "tooling-workspace:lint-llm-diff",
+    // Nx 24 inlines a task's output only in the static style; any other style
+    // run off a terminal prints a log path instead, which would hide both the
+    // judge's verdict line and the replay markers this reads.
+    "--output-style=static",
     ...(rejudge ? ["--skip-nx-cache"] : []),
   ],
   {
@@ -173,7 +177,7 @@ nx.on("close", (status, signal) => {
   process.stderr.write(reported);
   console.error(provenance);
   // A dispatch the host killed carries no exit status, and the generic message
-  // below would send a reader to Nx, pnpm, or this target's configuration for a
+  // below would send a reader to Nx, bun, or this target's configuration for a
   // failure none of them caused — a wrong cause costs the session the diff was
   // supposed to spend on findings. The signal is the cause, so it is what gets
   // named, and it exits the way a shell reports one: 128 plus the signal number.
@@ -184,11 +188,11 @@ nx.on("close", (status, signal) => {
     process.exit(128 + (constants.signals[signal] ?? 0));
   }
   // The judge names its own verdict, so a failure that carries neither name is
-  // one the judge never got to — Nx, pnpm, or the target's own configuration —
+  // one the judge never got to — Nx, bun, or the target's own configuration —
   // and is reported as that rather than as findings to go and clear.
   if (!/^lint-llm-diff: the judge (reported|never reached)/m.test(printed))
     console.error(
-      `lint-llm-diff: the judged tier failed before the judge could answer, so no verdict was reached or recorded; fix the Nx or pnpm error above — 'just bootstrap' if the workspace is not installed — then rerun just lint-llm-diff ${named}`,
+      `lint-llm-diff: the judged tier failed before the judge could answer, so no verdict was reached or recorded; fix the Nx or bun error above — 'just bootstrap' if the workspace is not installed — then rerun just lint-llm-diff ${named}`,
     );
   process.exit(status ?? 1);
 });

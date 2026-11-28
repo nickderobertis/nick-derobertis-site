@@ -135,6 +135,15 @@ interface RemoteOptions {
   skeleton?: boolean;
 }
 
+/**
+ * Where a remote's build writes its bundle, relative to the workspace root.
+ * Each app's `project.json` restates it as a cached build output, so
+ * rspack-remote.spec.ts holds every one of those to this function.
+ */
+export function remoteOutputPath(name: string) {
+  return `dist/apps/${name}`;
+}
+
 export function remoteConfig(name: string, options: RemoteOptions = {}) {
   const root = `apps/${name}`;
   const publicPath = `${pagesBase}/remotes/${name}/`;
@@ -184,6 +193,7 @@ export function remoteConfig(name: string, options: RemoteOptions = {}) {
       optimization: { runtimeChunk: false },
       plugins: [
         new NxAppRspackPlugin({
+          outputPath: remoteOutputPath(name),
           tsConfig: `${root}/tsconfig.app.json`,
           main: `${root}/src/main.tsx`,
           index: `${root}/src/index.html`,

@@ -7,6 +7,7 @@ export default defineConfig({
   root: fileURLToPath(new URL("../..", import.meta.url)),
   test: {
     include: [
+      "scripts/serve/dev-composition.spec.ts",
       "scripts/serve/serve-dev.spec.ts",
       "scripts/serve/serve-e2e.spec.ts",
     ],

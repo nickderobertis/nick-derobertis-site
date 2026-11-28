@@ -141,6 +141,7 @@ body:has(.timeline-pane) {
   #root > .timeline-pane {
     margin-inline: 0;
   }
+  /* biome-ignore lint/style/noDescendingSpecificity: `#root > .timeline-pane` is standalone-only and never matches inside Home. */
   .home-main .timeline-pane {
     margin-inline: 0;
   }

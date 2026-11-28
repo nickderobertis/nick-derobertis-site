@@ -23,9 +23,15 @@
     "test": {
       "executor": "nx:run-commands",
       "metadata": {
-        "description": "serve-dev.spec.ts drives the real `just serve-dev`, whose first step is `NODE_ENV=production just prerender` — a compose that removes and restages `dist/apps/shell/remotes` in place. Nothing else in the unit tier writes that artifact, and `tooling-artifact:test` reads it, so without this edge `nx affected -t test --parallel=3` runs the two at once and the compose pulls `remotes` out from under a fixture mid-read: `ENOENT ... stat 'remotes/awards'` from the budget gate, or `ENOENT ... scandir 'dist/apps/shell/remotes'`. The reader goes first over what `shell:prerender` composed, and this recompose follows it. Declared on the writer so a second reader needs no edit of its own, and pointed at the reader rather than the reverse so a change reaching only `tooling-artifact` does not drag this Playwright suite in behind it."
+        "description": "llmlint: ignore-file[browser_journeys_run_against_the_built_app] dev-composition.spec.ts and serve-dev.spec.ts exist to drive development servers: their subject is that Module Federation composes under each app's own `serve` target and that `just serve-dev` hot-replaces from source, which no built artifact can exercise. The production bundle stays covered by every app's e2e target, which dependsOn shell:prerender, and by site.spec.ts. They live in this tooling project because their subject is the workspace's serve tooling across all thirteen apps rather than any one app. The directive is file-scoped because project.json has no comment syntax. serve-dev.spec.ts drives the real `just serve-dev`, whose first step is `NODE_ENV=production just prerender` — a compose that removes and restages `dist/apps/shell/remotes` in place. Nothing else in the unit tier writes that artifact, and `tooling-artifact:test` reads it, so without this edge `nx affected -t test --parallel=3` runs the two at once and the compose pulls `remotes` out from under a fixture mid-read: `ENOENT ... stat 'remotes/awards'` from the budget gate, or `ENOENT ... scandir 'dist/apps/shell/remotes'`. The reader goes first over what `shell:prerender` composed, and this recompose follows it. Declared on the writer so a second reader needs no edit of its own, and pointed at the reader rather than the reverse so a change reaching only `tooling-artifact` does not drag this Playwright suite in behind it. It also runs alone (`parallelism: false`): dev-composition.spec.ts starts all thirteen apps' development servers at once, whose rspack compilers and type-checkers peak near 11 GB resident, so Nx must not schedule other tasks beside it on a 16 GB runner."
       },
-      "dependsOn": [{ "target": "test", "projects": ["tooling-artifact"] }],
+      "dependsOn": [
+        {
+          "target": "test",
+          "projects": ["tooling-artifact"]
+        }
+      ],
+      "parallelism": false,
       "options": {
         "command": "scripts/ci/run-tooling-target.sh serve test vitest run --reporter=dot --maxWorkers=1 --config scripts/serve/vite.config.ts"
       }

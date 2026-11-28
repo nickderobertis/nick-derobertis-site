@@ -127,7 +127,7 @@ function deriveOverWrittenApps(documents: Readonly<Record<string, string>>) {
 
 /**
  * Runs the real generator CLI over a project graph this spec fabricates, by
- * shadowing the `pnpm exec nx graph` it shells out to with a stub that writes
+ * shadowing the `bun x nx graph` it shells out to with a stub that writes
  * the caller's graph to the file the CLI asked Nx for.
  *
  * Nx cannot be made to print an entry that is not a project node, so the
@@ -141,7 +141,7 @@ function deriveOverWrittenApps(documents: Readonly<Record<string, string>>) {
  * registry it wrote comes back, because the CLI's other path rewrites that file
  * and what it did to it is the observation.
  */
-// llmlint: ignore-block[work_goes_through_command_surface] The CLI boundary is the subject of every case below: the arguments it recognises, the exit status it answers with, and the stderr it names a cause in. `just generate-remote-registry` cannot reach any of them — it takes no arguments, runs against the committed workspace rather than a disposable tree whose `pnpm exec nx graph` is stubbed, and rewrites the committed registry, which is exactly the file these cases hold unchanged. The recipe is the surface for the work it performs, and the two cases over the committed tree at the end of this file drive it as one.
+// llmlint: ignore-block[work_goes_through_command_surface] The CLI boundary is the subject of every case below: the arguments it recognises, the exit status it answers with, and the stderr it names a cause in. `just generate-remote-registry` cannot reach any of them — it takes no arguments, runs against the committed workspace rather than a disposable tree whose `bun x nx graph` is stubbed, and rewrites the committed registry, which is exactly the file these cases hold unchanged. The recipe is the surface for the work it performs, and the two cases over the committed tree at the end of this file drive it as one.
 function generateFromGraph(
   graph: unknown,
   commit?: (path: string) => void,
@@ -164,7 +164,7 @@ function generateFromGraph(
   // expansion, which inside a JavaScript string reads as a template placeholder
   // that was never interpolated.
   writeFileSync(
-    join(bin, "pnpm"),
+    join(bin, "bun"),
     [
       "#!/bin/sh",
       // Nx prints the plugin's refusal on its own stderr and exits non-zero,

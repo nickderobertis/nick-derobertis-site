@@ -70,7 +70,7 @@ beforeAll(() => {
     mkdtempSync(join(tmpdir(), "structure-contract-")),
     "graph.json",
   );
-  execFileSync("pnpm", ["exec", "nx", "graph", `--file=${graphFile}`], {
+  execFileSync("bun", ["x", "nx", "graph", `--file=${graphFile}`], {
     encoding: "utf8",
     env: { ...process.env, NX_DAEMON: "false" },
     stdio: "pipe",
@@ -158,9 +158,7 @@ function walk(directory: string): string[] {
  * writes, which is the composed artifact's own directory.
  */
 const shellBuildSchema = z.object({
-  targets: z.object({
-    build: z.object({ options: z.object({ outputPath: workspaceDirectory }) }),
-  }),
+  targets: z.object({ build: z.object({ outputs: z.array(z.string()) }) }),
 });
 
 describe("app project structure", () => {
@@ -184,12 +182,17 @@ describe("app project structure", () => {
     // that leaves it free to drift into naming a directory the compose writes
     // to, the development server mounts siblings out of, and the browser
     // journeys serve — none of which would be where the shell had built. So the
-    // manifest is held to the constant here instead.
-    const outputPath = shellBuildSchema.parse(
+    // manifest's declared build output, the directory Nx caches and restores,
+    // is held to the constant here instead. Where rspack writes is the shell's
+    // rspack configuration, which imports the constant itself.
+    const [outputDirectory] = shellBuildSchema.parse(
       JSON.parse(readFileSync("apps/shell/project.json", "utf8")),
-    ).targets.build.options.outputPath;
+    ).targets.build.outputs;
 
-    expect(outputPath).toBe(composedArtifactRoot);
+    expect(outputDirectory).toBe(`{workspaceRoot}/${composedArtifactRoot}`);
+    expect(readFileSync("apps/shell/rspack.config.ts", "utf8")).toContain(
+      "outputPath: composedArtifactRoot,",
+    );
   });
 
   it("gives every app its own component config and browser suite", () => {
@@ -268,8 +271,8 @@ describe("typecheck inputs", () => {
   async function programFiles(config: string) {
     // llmlint: ignore-block[work_goes_through_command_surface] `--listFilesOnly` prints the files in a project's program and stops without checking them, so this runs no typecheck and re-implements no recipe: it asks the compiler which files one project compiles, which is the subject this describe block reads. The workspace typecheck itself stays behind `just check` and `just lint`, and neither reports a file list — both report a verdict — so there is no recipe to route this through, and adding one whose only caller is this spec would put a command surface between the question and the compiler that answers it.
     const { stdout } = await compile(
-      "pnpm",
-      ["exec", "tsc", "-p", config, "--listFilesOnly"],
+      "bun",
+      ["x", "tsc", "-p", config, "--listFilesOnly"],
       { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
     );
     // llmlint: ignore-end[work_goes_through_command_surface]

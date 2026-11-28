@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
@@ -57,25 +55,33 @@ function domainFile(domain: string) {
 
 /**
  * The module rspack is configured to build an app from, taken from that app's
- * own project.json rather than restated here, so the walk below is anchored to
- * the entry the real build compiles.
+ * own rspack configuration rather than restated here, so the walk below is
+ * anchored to the entry the real build compiles. Nx's app plugin reads the app
+ * it configures from the build task Nx sets around it, so the configuration is
+ * loaded inside that task's environment, as `nx run <app>:build` loads it.
  */
-const buildMainSchema = z.object({
-  targets: z.object({
-    build: z.object({ options: z.object({ main: z.string() }) }),
-  }),
+const buildEntrySchema = z.object({
+  entry: z.string().regex(/^\.\/apps\/[a-z-]+\/src\/[\w.-]+\.tsx?$/),
 });
 
-function declaredBuildMain(app: string) {
-  return buildMainSchema.parse(
-    JSON.parse(readFileSync(join("apps", app, "project.json"), "utf8")),
-  ).targets.build.options.main;
+async function declaredBuildEntry(app: string) {
+  process.env.NX_TASK_TARGET_PROJECT = app;
+  process.env.NX_TASK_TARGET_TARGET = "build";
+  try {
+    const { default: config } = await import(
+      `../../apps/${app}/rspack.config.ts`
+    );
+    return buildEntrySchema.parse(config).entry.slice("./".length);
+  } finally {
+    delete process.env.NX_TASK_TARGET_PROJECT;
+    delete process.env.NX_TASK_TARGET_TARGET;
+  }
 }
 
 describe("what CV data each feature's build graph can reach", () => {
-  it("walks the entry the app's own build declares", () => {
+  it("walks the entry the app's own build declares", async () => {
     for (const app of features)
-      expect(appSourceModules(app)).toContain(declaredBuildMain(app));
+      expect(appSourceModules(app)).toContain(await declaredBuildEntry(app));
   });
 
   it.each(features)(
