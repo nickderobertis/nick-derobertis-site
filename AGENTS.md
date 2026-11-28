@@ -87,6 +87,8 @@ cache locking or a remote cache.
 
 Substantial scenarios must remain real-browser covered through both the standalone remote and the host-composed boundary, and all 12 remotes must render without failed assets through both. Keep one Nx-bounded remote per feature domain, exposed only at the route boundary; no cross-remote internals or mixed domains.
 
+Each app declares its own `e2e` and `screenshot` targets rather than a separate e2e project. `just gate-browser-lanes` dispatches each suite once per push, and splitting them out would restructure the whole workspace. Import boundaries are enforced between projects only: one remote is one feature domain, and app `src/` folders hold no feature subfolders, so an in-project rule would have nothing to separate.
+
 ## Commits, releases, and merging
 
 <!-- llmlint: ignore[instruction_layer_localized] Localizing the root instruction layer into nested per-project AGENTS.md files is tracked separately, and is out of scope for any change that does not itself alter subtree routing. This paragraph records where review routing lives; it adds no instruction that belongs in a subtree. -->
