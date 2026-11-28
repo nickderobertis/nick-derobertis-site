@@ -1,5 +1,12 @@
 import type { Awards } from "@site/data-access-core";
-import { siteBase } from "@site/data-access-core/site";
+// The base comes straight from the committed site config rather than through
+// @site/data-access-core/site: that module validates it with zod, which this
+// remote has no other use for and which would otherwise ride into its eager
+// entry. build-config/rspack-remote.ts holds this same value to its shape before
+// this bundle can be built.
+import siteConfig from "@site/data-access-core/site.config.json" with {
+  type: "json",
+};
 import { validateCvDomain } from "@site/data-access-core/validators";
 import { useEffect, useState } from "react";
 
@@ -27,7 +34,7 @@ const awardsRequests = new Map<string, AwardsRequest>();
 // of the response warmed for the default view, or the other way round.
 function awardsRequestUrl(): URL {
   const url = new URL(
-    `${siteBase}/cv-data/domains/awards.json`,
+    `${siteConfig.pagesBase}/cv-data/domains/awards.json`,
     window.location.origin,
   );
   const scenario = new URLSearchParams(window.location.search).get(
@@ -70,13 +77,15 @@ function awardsRequest(url: URL): AwardsRequest {
  * pane's own request runs on mount, and that request owns the error state.
  */
 // llmlint: ignore[changed_behavior_has_e2e] Only a host calls this, so there is no standalone trigger to drive: awards.spec.ts already covers the standalone remote's happy, empty, and error paths, and every one of them now runs through the shared request below. preload.spec.ts covers the warmed and unavailable host paths.
-export async function preloadAwards(): Promise<void> {
-  if (typeof window === "undefined") return;
-  try {
-    await awardsRequest(awardsRequestUrl()).promise;
-  } catch {
-    return;
-  }
+// It is a plain promise chain rather than an async function with a try block,
+// because this bundle is down-levelled and the generator that form compiles to
+// costs the ./Page chunk more than its bundle budget leaves room for.
+export function preloadAwards(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  return awardsRequest(awardsRequestUrl()).promise.then(
+    () => undefined,
+    () => undefined,
+  );
 }
 
 export function useAwards(): AwardsViewState {
