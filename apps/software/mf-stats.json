@@ -20,7 +20,7 @@
       "api": ""
     },
     "globalName": "software",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/software/"
   },
   "shared": [
@@ -36,7 +36,7 @@
         "js": {
           "async": [],
           "sync": [
-            "785.28f9bc53a2cc9d79.js"
+            "645.606710ff08e239fc.js"
           ]
         },
         "css": {
@@ -62,13 +62,13 @@
         "js": {
           "async": [],
           "sync": [
-            "241.cd703344fd4350d4.js"
+            "623.4bf907f6781ed55d.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -90,7 +90,7 @@
         "js": {
           "async": [],
           "sync": [
-            "107.ef326a9ceaeeccf8.js"
+            "314.d389c27d367ff626.js"
           ]
         },
         "css": {
@@ -104,24 +104,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "software:react-dom",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.890a5030e3d67eee.js"
+            "main.00e049da0ec1d252.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8e6a99df7fb75c0d.css"
+            "main.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -131,24 +131,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "software:react",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.890a5030e3d67eee.js"
+            "main.00e049da0ec1d252.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8e6a99df7fb75c0d.css"
+            "main.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -160,17 +160,17 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^4.4.3",
+      "requiredVersion": "^4.6.7",
       "shareScope": "default",
       "name": "zod",
-      "version": "4.4.3",
+      "version": "4.6.7",
       "eager": false,
       "id": "software:zod",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "581.c4c7500c9a921788.js"
+            "206.ecda450da6492ea1.js"
           ]
         },
         "css": {
@@ -198,19 +198,19 @@
       "assets": {
         "js": {
           "sync": [
-            "882.b097a341fd684a42.js",
-            "__federation_expose_Page.b34fb39bc789001a.js"
+            "690.410c58a4848f3578.js",
+            "__federation_expose_Page.7805b28547fede4f.js"
           ],
           "async": [
-            "459.b8f5947d689c5d06.js"
+            "234.b63fc67f401bebe9.js"
           ]
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.2022d305d7554275.css"
+            "__federation_expose_Page.c770dd32464cd9de.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       }
