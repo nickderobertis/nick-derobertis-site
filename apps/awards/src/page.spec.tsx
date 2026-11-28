@@ -1,4 +1,5 @@
 import { cvDataClient } from "@site/data-access-core/bundled";
+import { siteBase } from "@site/data-access-core/site";
 import { render, screen, within } from "@testing-library/react";
 import { prerender } from "react-dom/static";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
@@ -169,7 +170,7 @@ test(
     await preload();
 
     expect(warmed).toEqual([
-      "/nick-derobertis-site/cv-data/domains/awards.json",
+      `${siteBase}/cv-data/domains/awards.json`,
     ]);
     await renderPane();
     // A warmed pane must mount straight onto its awards: the skeleton frame is

@@ -1,4 +1,5 @@
 import type { Awards } from "@site/data-access-core";
+import { siteBase } from "@site/data-access-core/site";
 import { validateCvDomain } from "@site/data-access-core/validators";
 import { useEffect, useState } from "react";
 
@@ -26,7 +27,7 @@ const awardsRequests = new Map<string, AwardsRequest>();
 // of the response warmed for the default view, or the other way round.
 function awardsRequestUrl(): URL {
   const url = new URL(
-    "/nick-derobertis-site/cv-data/domains/awards.json",
+    `${siteBase}/cv-data/domains/awards.json`,
     window.location.origin,
   );
   const scenario = new URLSearchParams(window.location.search).get(

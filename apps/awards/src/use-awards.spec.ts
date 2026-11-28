@@ -1,4 +1,5 @@
 import { cvDataClient } from "@site/data-access-core/bundled";
+import { siteBase } from "@site/data-access-core/site";
 import { act, renderHook, waitFor, within } from "@testing-library/react";
 import { createElement } from "react";
 import { prerender } from "react-dom/static";
@@ -61,7 +62,7 @@ test(
     );
     expect(requested).toHaveLength(1);
     expect(requested[0]?.pathname).toBe(
-      "/nick-derobertis-site/cv-data/domains/awards.json",
+      `${siteBase}/cv-data/domains/awards.json`,
     );
     expect(requested[0]?.search).toBe("");
   },
