@@ -9,6 +9,11 @@ import {
   remoteRegistry,
 } from "@site/build-config/remote-registry";
 import { siteBase } from "@site/data-access-core/site";
+import {
+  homePanes as homePaneContracts,
+  remoteContract,
+  siteRoutes,
+} from "@site/e2e-harness";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -37,83 +42,40 @@ const workspace = process.cwd();
 
 /** One remote, the route that composes it, and what a visitor reads there. */
 interface Composed {
-  app: string;
+  app: RemoteProject;
   route: string;
   landmark: Parameters<Page["getByRole"]>;
   /** The Primary navigation link a visitor follows to the route. */
   link?: string;
 }
 
-// The four route remotes a visitor reaches through a Primary navigation link;
-// Home, the fifth, owns `/` and is declared with its panes below.
-const linkedRouteRemotes: Composed[] = [
-  {
-    app: "bio",
-    route: "/bio",
-    link: "Bio",
-    landmark: ["heading", { name: "Optimizing Life", level: 1 }],
-  },
-  {
-    app: "research",
-    route: "/research",
-    link: "Research",
-    landmark: ["heading", { name: "Research Works" }],
-  },
-  {
-    app: "software",
-    route: "/software",
-    link: "Software",
-    landmark: ["heading", { name: "Open-Source Software" }],
-  },
-  {
-    app: "courses",
-    route: "/courses",
-    link: "Courses",
-    landmark: ["heading", { name: "Courses", exact: true }],
-  },
-];
+// Each remote's route and landmark are the ones its own ownership journeys
+// assert, read from the shared site contract, and each route's link label is
+// the one the shell's route manifest gives it; this spec declares none of them.
+const routes = siteRoutes(workspace);
+function composed(app: RemoteProject): Composed {
+  const { host, role, name } = remoteContract(app, workspace);
+  const link = routes.find((route) => host !== "" && route.path === host)?.link;
+  return {
+    app,
+    route: `/${host}`,
+    landmark: [role, { name, exact: true }],
+    ...(link === undefined ? {} : { link }),
+  };
+}
 
-const homePanes: Composed[] = [
-  {
-    app: "home-carousel",
-    route: "/",
-    landmark: ["button", { name: "Next featured story" }],
-  },
-  {
-    app: "home-cards",
-    route: "/",
-    landmark: ["region", { name: "Areas of work" }],
-  },
-  {
-    app: "home-story",
-    route: "/",
-    landmark: ["region", { name: "Who am I?" }],
-  },
-  {
-    app: "home-contact",
-    route: "/",
-    landmark: ["navigation", { name: "Contact options" }],
-  },
-  {
-    app: "awards",
-    route: "/",
-    landmark: ["region", { name: "Selected awards" }],
-  },
-  { app: "skills", route: "/", landmark: ["region", { name: "Skilled in…" }] },
-  {
-    app: "timeline",
-    route: "/",
-    landmark: ["region", { name: "Educated and Experienced" }],
-  },
-];
-
-// Home is the fifth route remote and the host of the seven panes. It renders
-// nothing of its own, so a pane rendering on `/` is what it composing reads as.
-const home: Composed = {
-  app: "home",
-  route: "/",
-  landmark: ["region", { name: "Who am I?" }],
-};
+const registered = Object.keys(remoteRegistry).filter(
+  (app): app is RemoteProject => app in remoteRegistry,
+);
+// The route remotes a visitor reaches through a Primary navigation link, in
+// the order the registry lists them; Home owns `/` and hosts the panes.
+const linkedRouteRemotes = registered
+  .map(composed)
+  .filter((remote) => remote.link !== undefined);
+const homePanes = homePaneContracts(workspace).map((pane) =>
+  composed(pane.remote),
+);
+const home = composed("home");
 const remotes: Composed[] = [home, ...linkedRouteRemotes, ...homePanes];
 const apps = ["shell", ...remotes.map((remote) => remote.app)];
 
