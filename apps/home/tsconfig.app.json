@@ -1,7 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node", "vitest/globals", "@testing-library/jest-dom/vitest"],
+    "types": [
+      "node",
+      "vitest/globals",
+      "@testing-library/jest-dom/vitest",
+      "@site/build-config/css-side-effect-imports"
+    ],
     // Every pane compiles its own exposes to declarations as part of its build
     // and publishes the archive of them. Home's build consumes those archives
     // into the first directory below, which is what this typecheck target
