@@ -1,0 +1,1 @@
+"use strict";(self.rspackChunkhome_cards=self.rspackChunkhome_cards||[]).push([[768],{4707(e,s,r){r.r(s);var a=r(7462),n=r(1745);r.d(s,{},{default:function(){return(0,a.jsx)(n.Skeleton,{className:"skeleton-cards",label:"Loading areas of work",children:(0,a.jsx)("div",{className:"skeleton-grid",children:[1,2,3].map(function(e){return(0,a.jsx)("i",{},e)})})})}})}}]);
