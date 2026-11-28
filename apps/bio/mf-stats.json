@@ -20,7 +20,7 @@
       "api": ""
     },
     "globalName": "bio",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/bio/"
   },
   "shared": [
@@ -36,13 +36,13 @@
         "js": {
           "async": [],
           "sync": [
-            "241.33753478aeed27e7.js"
+            "623.dbba9e043dde8002.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -64,7 +64,7 @@
         "js": {
           "async": [],
           "sync": [
-            "107.8e6d593e59042a36.js"
+            "314.aa1fec0b4ace7ae2.js"
           ]
         },
         "css": {
@@ -78,24 +78,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "bio:react-dom",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "main.e5cef7fe855e88fd.js",
+            "main.9d0c3c78ed43ab75.js",
             "remoteEntry.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8e6a99df7fb75c0d.css"
+            "main.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -105,24 +105,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "bio:react",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "main.e5cef7fe855e88fd.js",
+            "main.9d0c3c78ed43ab75.js",
             "remoteEntry.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8e6a99df7fb75c0d.css"
+            "main.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -134,17 +134,17 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^4.4.3",
+      "requiredVersion": "^4.6.7",
       "shareScope": "default",
       "name": "zod",
-      "version": "4.4.3",
+      "version": "4.6.7",
       "eager": false,
       "id": "bio:zod",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "581.2ff4b2fae99cdbd9.js"
+            "206.8f8a8484de301dee.js"
           ]
         },
         "css": {
@@ -171,16 +171,16 @@
       "assets": {
         "js": {
           "sync": [
-            "__federation_expose_Page.57a8687602bb33ed.js"
+            "__federation_expose_Page.d40efdcc387a9d32.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.f33863bf9e692158.css"
+            "__federation_expose_Page.f31d3133a0d0b781.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       }
