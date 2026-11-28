@@ -20,7 +20,7 @@
       "api": ""
     },
     "globalName": "shell",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/"
   },
   "shared": [
@@ -34,7 +34,7 @@
         "js": {
           "async": [],
           "sync": [
-            "785.ef75818012e3d730.js"
+            "645.6e32e9533ee961bc.js"
           ]
         },
         "css": {
@@ -54,13 +54,13 @@
         "js": {
           "async": [],
           "sync": [
-            "241.fb30bbb212badbc6.js"
+            "623.20e18166dad3888c.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -76,7 +76,7 @@
         "js": {
           "async": [],
           "sync": [
-            "107.c38500683b0ce28d.js"
+            "314.b4b724cf4373a8e8.js"
           ]
         },
         "css": {
@@ -89,20 +89,20 @@
     {
       "id": "shell:react-dom",
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "main.499e76d0bbe70db2.js"
+            "main.573b2dbed7ba19ee.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.e4fe399c5c91eb85.css"
+            "main.6464a74c588da342.css"
           ]
         }
       },
@@ -111,20 +111,20 @@
     {
       "id": "shell:react",
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "main.499e76d0bbe70db2.js"
+            "main.573b2dbed7ba19ee.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.e4fe399c5c91eb85.css"
+            "main.6464a74c588da342.css"
           ]
         }
       },
@@ -133,14 +133,14 @@
     {
       "id": "shell:zod",
       "name": "zod",
-      "version": "4.4.3",
+      "version": "4.6.7",
       "singleton": true,
-      "requiredVersion": "^4.4.3",
+      "requiredVersion": "^4.6.7",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "581.2f795a9361b9e9ef.js"
+            "206.28e5d8ed683d3dbb.js"
           ]
         },
         "css": {
