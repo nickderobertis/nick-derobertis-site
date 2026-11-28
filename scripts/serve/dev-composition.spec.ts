@@ -217,8 +217,9 @@ async function expectComposed(page: Page, { landmark }: Composed) {
 }
 
 /**
- * Asserts each listed container resolved every singleton to one version,
- * supplied by the shell, and that no container on the page holds a second.
+ * Asserts each listed container resolved every eager singleton from the
+ * shell alone, and that every singleton resolution the page has recorded so
+ * far, in any container, came from the shell.
  */
 async function expectSingletonsResolvedOnce(page: Page, apps: string[]) {
   const resolved = await resolvedSingletons(page);
@@ -366,7 +367,7 @@ describe("the journeys below", () => {
 });
 
 describe("the shell's development server", () => {
-  it("composes every route remote and Home's seven panes with React resolved once", async () => {
+  it("composes every route remote and Home's seven panes with each shared singleton resolved once, from the shell", async () => {
     const page = await browser.newPage();
     const problems = watch(page, origin("shell"));
 
