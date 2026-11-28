@@ -169,9 +169,7 @@ test(
 
     await preload();
 
-    expect(warmed).toEqual([
-      `${siteBase}/cv-data/domains/awards.json`,
-    ]);
+    expect(warmed).toEqual([`${siteBase}/cv-data/domains/awards.json`]);
     await renderPane();
     // A warmed pane must mount straight onto its awards: the skeleton frame is
     // exactly what the host paid the preload to avoid showing.
