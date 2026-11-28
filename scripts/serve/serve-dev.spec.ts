@@ -119,13 +119,35 @@ function startRecipe(app: string, port: number) {
   return { recipe, reported };
 }
 
-function stopRecipe({ recipe }: StartedRecipe) {
-  if (recipe.pid === undefined) return;
+/** Signals every process in `group`, answering whether any was left to signal. */
+function signalGroup(group: number, signal: NodeJS.Signals | 0): boolean {
   try {
-    process.kill(-recipe.pid, "SIGTERM");
-  } catch {
-    // Already gone: the recipe failed before it started a server.
+    process.kill(-group, signal);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code !== "ESRCH";
   }
+}
+
+/**
+ * Stops the recipe's whole group and waits until none of it is left.
+ *
+ * The group's `serve-dev.mjs` holds the composed artifact as a reader until its
+ * dev server has shut down, so the next suite's `just serve-dev` composes into
+ * that artifact only once the hold is gone: a group still shutting down would
+ * have that compose refused as a second run over a served artifact.
+ */
+async function stopRecipe({ recipe }: StartedRecipe) {
+  const group = recipe.pid;
+  if (group === undefined || !signalGroup(group, "SIGTERM")) return;
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    if (!signalGroup(group, 0)) return;
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
+  }
+  signalGroup(group, "SIGKILL");
+  throw new Error(
+    `just serve-dev (process group ${group}) was still running 60s after SIGTERM and was killed`,
+  );
 }
 
 /**
