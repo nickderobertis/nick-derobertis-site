@@ -20,6 +20,7 @@ type HydrationSource = Pick<
  * callback runs; a payload missing its assignment or its completion is
  * refused rather than published as a document that never hydrates.
  */
+// llmlint: ignore[changed_behavior_has_e2e] The script this extracts already reaches a real browser in composed-artifact.spec.ts's "hydrates and navigates without a document request" and site.spec.ts's leaf-route hydration journeys, which fail if it is missing or broken, and its refusal fires while the shell fragment is built, before any page exists for a browser to load, so router-hydration.spec.tsx is the only place that path can run.
 export function takeRouterHydration(
   serverSsr: HydrationSource | undefined,
 ): string {

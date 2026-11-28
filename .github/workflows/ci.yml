@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
+      # llmlint: ignore[changed_behavior_has_e2e] Provisioning the pinned bun release is CI setup with no browser interface; just bootstrap refuses any other bun, and the e2e targets this job dispatches own browser coverage.
       - uses: oven-sh/setup-bun@v2
         with: { bun-version: 1.4.5 }
       - uses: actions/setup-node@v4
@@ -30,6 +31,7 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - uses: astral-sh/setup-uv@v6
+      # llmlint: ignore[changed_behavior_has_e2e] Provisioning the pinned bun release for the lint tier is CI setup with no browser interface; just bootstrap-ci installs through it and fails the job on any install error.
       - uses: oven-sh/setup-bun@v2
         with: { bun-version: 1.4.5 }
       # llmlint: ignore[changed_behavior_has_e2e] Pinning the Node runtime for a CI-only CLI installer has no browser interface; the installer verifies the real npm package and executable.

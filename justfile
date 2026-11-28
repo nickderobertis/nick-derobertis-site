@@ -14,15 +14,19 @@ export NX_CACHE_DIRECTORY := env_var_or_default("NX_CACHE_DIRECTORY", env_var_or
 # package.json's `packageManager` names the one bun release this workspace
 # installs with; a different bun can rewrite bun.lock, so bootstrap refuses it
 # rather than installing through it.
+# llmlint: ignore[changed_behavior_has_e2e] Bootstrap is developer and CI setup with no browser interface; it refuses a bun other than the pinned release with an actionable message before anything is installed.
 bootstrap:
     want=$(node -p 'require("./package.json").packageManager'); [[ "$want" =~ ^bun@[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "bootstrap: package.json must declare an exact \"packageManager\": \"bun@x.y.z\"; restore it and rerun just bootstrap" >&2; exit 1; }; have="bun@$(bun --version 2>/dev/null || true)"; [[ "$have" = "$want" ]] || { echo "bootstrap: this workspace installs with $want but PATH provides ${have/#bun@/bun }; install $want (asdf install reads .tool-versions) and rerun just bootstrap" >&2; exit 1; }
+    # llmlint: ignore[changed_behavior_has_e2e] Installing the locked dependencies is developer and CI setup with no browser interface; a failed install prints bun's log and stops bootstrap.
     log=$(mktemp); trap 'rm -f "$log"' EXIT; bun install --frozen-lockfile >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: dependency install failed; check the lockfile and registry access, then rerun just bootstrap" >&2; exit 1; }
     scripts/ci/setup-ci-tools.sh || { echo "bootstrap: pinned CI tool installation failed; check the reported checksum or network error, then rerun just bootstrap" >&2; exit 1; }
+    # llmlint: ignore[changed_behavior_has_e2e] Installing Chromium is developer and CI setup with no browser interface of its own; every Playwright journey fails loudly if the browser it provides is absent.
     log=$(mktemp); trap 'rm -f "$log"' EXIT; bun x playwright install chromium >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: Chromium install failed; check Playwright system requirements, then rerun just bootstrap" >&2; exit 1; }
     # llmlint: ignore[changed_behavior_has_e2e] Bootstrap is a developer CLI with no browser interface; this path verifies the installer bytes and propagates download, integrity, and installation failures directly.
     if ! command -v screencomp >/dev/null; then installer=$(mktemp); log=$(mktemp); trap 'rm -f "$installer" "$log"' EXIT; curl -fsSL -o "$installer" https://raw.githubusercontent.com/nickderobertis/screencomp/2b801cc5d4f51d50264b7ff968b4b030ff054fdf/scripts/install.sh 2>"$log" || { cat "$log" >&2; echo "bootstrap: screencomp installer download failed; check network access and rerun just bootstrap" >&2; exit 1; }; actual=$(node -e 'const fs = require("node:fs"); const crypto = require("node:crypto"); process.stdout.write(crypto.createHash("sha256").update(fs.readFileSync(process.argv[1])).digest("hex"));' "$installer"); [[ "$actual" = dd4e02daf93c3f056b84b0555c03c60b8e8bfb29ecb462e7dfa4b84fd84202b4 ]] || { echo "bootstrap: screencomp installer checksum mismatch; verify GitHub repository access and rerun just bootstrap" >&2; exit 1; }; sh "$installer" --version v0.4.8 >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap: screencomp install failed; check network access and rerun just bootstrap" >&2; exit 1; }; fi
 
 bootstrap-ci:
+    # llmlint: ignore[changed_behavior_has_e2e] Installing the locked dependencies is CI setup with no browser interface; a failed install prints bun's log and stops the lint job.
     log=$(mktemp); trap 'rm -f "$log"' EXIT; bun install --frozen-lockfile >"$log" 2>&1 || { cat "$log" >&2; echo "bootstrap-ci: dependency install failed; check the lockfile and registry access, then rerun just bootstrap-ci" >&2; exit 1; }
     scripts/ci/setup-ci-tools.sh || { echo "bootstrap-ci: pinned CI tool installation failed; check the reported checksum or network error, then rerun just bootstrap-ci" >&2; exit 1; }
 

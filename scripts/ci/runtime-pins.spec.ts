@@ -43,8 +43,8 @@ function declaredDevDependency(name: string): string {
       ? parsed.devDependencies
       : undefined;
   const declared: unknown =
-    dependencies && typeof dependencies === "object" && name in dependencies
-      ? (dependencies as Record<string, unknown>)[name]
+    dependencies && typeof dependencies === "object"
+      ? new Map(Object.entries(dependencies)).get(name)
       : undefined;
   if (typeof declared !== "string")
     throw new Error(`${manifest} must pin ${name} as a string`);
