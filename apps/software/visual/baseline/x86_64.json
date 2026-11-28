@@ -62,7 +62,7 @@
         "state": "happy",
         "viewport": "desktop"
       },
-      "hash": "46796c0c79fdf551310e533e87c32063ab988e44d0f8c01f9ccc51e2db6eb475"
+      "hash": "011f7fc4afa1ba85a27626412e8ad2e97c8261911f60a70f11b3bb7a645d97e6"
     },
     {
       "name": "software",
@@ -71,7 +71,7 @@
         "state": "happy",
         "viewport": "mobile"
       },
-      "hash": "8e138faaf9b04fe9b587f986179c3afe24a754e61bb87a534f003ba07f118efe"
+      "hash": "144c1b941f0c7f4ea50d398e6f66cb8ffc474544b011eb818d5a336708eb352c"
     },
     {
       "name": "software",
@@ -80,7 +80,7 @@
         "state": "happy",
         "viewport": "tablet"
       },
-      "hash": "0c1c8c4209bf53048b63821dea4787d09b5e418eba336febe73e04be139ee671"
+      "hash": "c5a7c7796431c60daec630fc96ed5c0ff0aaa584d9aac3b17fc27e294f639b76"
     },
     {
       "name": "software",
@@ -143,7 +143,7 @@
         "state": "happy",
         "viewport": "desktop"
       },
-      "hash": "a2e06058e2d6f573fa7b69e0865e99318057ec13ac17c42c924ab621c5e7ffac"
+      "hash": "9bd6e855dbeb7deb6309446f792202bd2244c584c3935f435dcfaf5f60c2a155"
     },
     {
       "name": "software",
@@ -152,7 +152,7 @@
         "state": "happy",
         "viewport": "mobile"
       },
-      "hash": "b59793d4f32359618cd20c96a1c3594ddc2ed93ddac8aa4b25c56d325c39d4ea"
+      "hash": "bfbbf505534f7d91c48054a061697728b17a02bc6e95ced73b8dfbfa4d6715af"
     },
     {
       "name": "software",
@@ -161,7 +161,7 @@
         "state": "happy",
         "viewport": "tablet"
       },
-      "hash": "626cf861be79f5dceaafd4c28744d88c597795c1c743f878e429db408e3f2087"
+      "hash": "2044ac4961d5670993aa9a5d9c5cfde3e6816559d534b73d69a84719f6315b6c"
     },
     {
       "name": "software",
