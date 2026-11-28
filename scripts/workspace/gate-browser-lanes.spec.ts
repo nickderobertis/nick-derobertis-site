@@ -32,6 +32,13 @@ import { z } from "zod";
 const workspace = process.cwd();
 const commitSha = z.string().regex(/^[0-9a-f]{40}$/);
 const laneName = z.string().regex(/^[a-z][a-z0-9-]*$/);
+/**
+ * The real bun the dispatch shim falls through to, which is interpolated into
+ * a generated shell script: only an absolute path made of characters inert
+ * inside a double-quoted shell string is accepted, so a PATH entry carrying
+ * quotes, `$`, backticks or whitespace fails here rather than rewriting the shim.
+ */
+const executablePath = z.string().regex(/^\/[A-Za-z0-9._+/-]+$/);
 const taskGraphSchema = z.object({
   tasks: z.object({ tasks: z.record(z.string(), z.unknown()) }),
 });
@@ -60,10 +67,11 @@ let realBun: string;
 
 beforeAll(() => {
   scratch = mkdtempSync(join(tmpdir(), "gate-browser-lanes-"));
-  realBun = execFileSync("bash", ["-c", "command -v bun"], {
-    encoding: "utf8",
-  }).trim();
-  expect(realBun).not.toBe("");
+  realBun = executablePath.parse(
+    execFileSync("bash", ["-c", "command -v bun"], {
+      encoding: "utf8",
+    }).trim(),
+  );
 });
 
 /**

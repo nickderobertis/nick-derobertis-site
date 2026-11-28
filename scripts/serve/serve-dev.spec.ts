@@ -386,9 +386,18 @@ describe("the built output the sibling apps are served from", () => {
     // else falls through to the real bun, so the recipe's own validation
     // still runs for real ahead of it.
     const shimDirectory = mkdtempSync(join(tmpdir(), "serve-dev-compose-"));
-    const realBun = execFileSync("bash", ["-c", "command -v bun"], {
-      encoding: "utf8",
-    }).trim();
+    // The real bun is interpolated into the shim below, so only an absolute
+    // path made of characters inert inside a double-quoted shell string is
+    // accepted: a PATH entry carrying quotes, `$`, backticks or whitespace
+    // fails here rather than rewriting the shim.
+    const realBun = z
+      .string()
+      .regex(/^\/[A-Za-z0-9._+/-]+$/)
+      .parse(
+        execFileSync("bash", ["-c", "command -v bun"], {
+          encoding: "utf8",
+        }).trim(),
+      );
     const shim = join(shimDirectory, "bun");
     writeFileSync(
       shim,
