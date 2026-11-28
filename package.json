@@ -29,7 +29,7 @@
     "@nx/workspace": "24.1.0",
     "@playwright/test": "1.65.1",
     "@rspack/cli": "2.3.4",
-    "@rspack/dev-server": "2.2.2",
+    "@rspack/dev-server": "2.2.3",
     "@site/artifact-contracts": "workspace:*",
     "@site/build-config": "workspace:*",
     "@site/data-access-awards": "workspace:*",
