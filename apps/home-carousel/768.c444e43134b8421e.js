@@ -1,0 +1,1 @@
+"use strict";(self.rspackChunkhome_carousel=self.rspackChunkhome_carousel||[]).push([[768],{4707(e,s,a){a.r(s);var l=a(7462),o=a(1745);a.d(s,{},{default:function(){return(0,l.jsxs)(o.Skeleton,{className:"skeleton-carousel",label:"Loading featured work",children:[(0,l.jsx)("div",{className:"skeleton-hero"}),(0,l.jsx)("div",{className:"skeleton-dots"})]})}})}}]);

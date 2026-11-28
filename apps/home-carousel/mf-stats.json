@@ -20,7 +20,7 @@
       "api": ""
     },
     "globalName": "homeCarousel",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/home-carousel/"
   },
   "shared": [
@@ -36,43 +36,43 @@
         "js": {
           "async": [],
           "sync": [
-            "241.258c69a0b359ad8e.js"
+            "623.9a58e17871333c41.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
       "usedIn": [
-        "./Skeleton",
-        "./Page"
+        "./Page",
+        "./Skeleton"
       ],
       "usedExports": [],
       "fallback": ""
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "homeCarousel:react-dom",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.28db154ca813e68d.js"
+            "main.c56ad14eda36d808.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8a8d6bbc7a34b67d.css"
+            "main.e15bad206539d37e.css"
           ]
         }
       },
@@ -82,24 +82,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "homeCarousel:react",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.28db154ca813e68d.js"
+            "main.c56ad14eda36d808.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.8a8d6bbc7a34b67d.css"
+            "main.e15bad206539d37e.css"
           ]
         }
       },
@@ -111,17 +111,17 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^4.4.3",
+      "requiredVersion": "^4.6.7",
       "shareScope": "default",
       "name": "zod",
-      "version": "4.4.3",
+      "version": "4.6.7",
       "eager": false,
       "id": "homeCarousel:zod",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "581.f2e4c07576eb473d.js"
+            "206.9890ccdeef9c07a4.js"
           ]
         },
         "css": {
@@ -151,7 +151,7 @@
       "assets": {
         "js": {
           "sync": [
-            "__federation_expose_Page.a20bd84c387511be.js"
+            "__federation_expose_Page.8cc68d66ed2990f1.js"
           ],
           "async": []
         },
@@ -160,7 +160,7 @@
             "__federation_expose_Page.13ec824a33064fb6.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       }
@@ -176,7 +176,7 @@
       "assets": {
         "js": {
           "sync": [
-            "__federation_expose_Skeleton.483f02f81f14cce6.js"
+            "__federation_expose_Skeleton.7fac97b67322b4cf.js"
           ],
           "async": []
         },
@@ -185,7 +185,7 @@
             "__federation_expose_Skeleton.13ec824a33064fb6.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       }
