@@ -9,12 +9,12 @@
   "apps": {
     "awards": {
       "entry": {
-        "measuredBytes": 639720,
-        "ceilingBytes": 640040
+        "measuredBytes": 639895,
+        "ceilingBytes": 640215
       },
       "page": {
-        "measuredBytes": 12895,
-        "ceilingBytes": 12902
+        "measuredBytes": 13068,
+        "ceilingBytes": 13075
       }
     },
     "bio": {
@@ -136,8 +136,8 @@
   },
   "routes": {
     "/": {
-      "measuredBytes": 144123,
-      "ceilingBytes": 144196
+      "measuredBytes": 144296,
+      "ceilingBytes": 144369
     },
     "/bio": {
       "measuredBytes": 6734,

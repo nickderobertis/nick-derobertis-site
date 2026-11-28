@@ -13,6 +13,7 @@
     "./domains/software_projects": "./src/domains/software_projects.ts",
     "./domains/timeline": "./src/domains/timeline.ts",
     "./site": "./src/site.ts",
+    "./site-base": "./src/site-base.ts",
     "./site.config.json": "./src/site.config.json",
     "./validators": "./src/validators.ts"
   },
