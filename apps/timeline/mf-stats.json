@@ -20,7 +20,7 @@
       "api": ""
     },
     "globalName": "timeline",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/timeline/"
   },
   "shared": [
@@ -36,7 +36,7 @@
         "js": {
           "async": [],
           "sync": [
-            "785.6eb312c26e7c24d7.js"
+            "645.2a627e77adf4a425.js"
           ]
         },
         "css": {
@@ -62,43 +62,43 @@
         "js": {
           "async": [],
           "sync": [
-            "241.335a30334a5c9195.js"
+            "623.02f887d38e6212af.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
       "usedIn": [
-        "./Skeleton",
-        "./Page"
+        "./Page",
+        "./Skeleton"
       ],
       "usedExports": [],
       "fallback": ""
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "timeline:react-dom",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.80c245bc6ae550d6.js"
+            "main.998c4abb8201d1b4.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.3f2eb956c33ad957.css"
+            "main.6d428cf6926618b2.css"
           ]
         }
       },
@@ -108,24 +108,24 @@
     },
     {
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "shareScope": "default",
       "eager": true,
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "id": "timeline:react",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.80c245bc6ae550d6.js"
+            "main.998c4abb8201d1b4.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.3f2eb956c33ad957.css"
+            "main.6d428cf6926618b2.css"
           ]
         }
       },
@@ -151,19 +151,19 @@
       "assets": {
         "js": {
           "sync": [
-            "956.6f12a1e54650f22d.js",
-            "__federation_expose_Page.21cd288c24cd124d.js"
+            "581.4a9f01bc3153998f.js",
+            "__federation_expose_Page.2be275f39de08dbe.js"
           ],
           "async": [
-            "459.255a19873da58690.js"
+            "234.df74d3d66c331920.js"
           ]
         },
         "css": {
           "sync": [
-            "__federation_expose_Page.681567d45b16d8ee.css"
+            "__federation_expose_Page.67cb0f7d1775cec1.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       }
@@ -179,16 +179,16 @@
       "assets": {
         "js": {
           "sync": [
-            "__federation_expose_Skeleton.5f703d674c5379b9.js"
+            "__federation_expose_Skeleton.bf7cb8b630062eee.js"
           ],
           "async": []
         },
         "css": {
           "sync": [
-            "__federation_expose_Skeleton.681567d45b16d8ee.css"
+            "__federation_expose_Skeleton.67cb0f7d1775cec1.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       }
