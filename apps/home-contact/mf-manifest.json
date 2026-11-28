@@ -20,7 +20,7 @@
       "api": ""
     },
     "globalName": "homeContact",
-    "pluginVersion": "2.8.0",
+    "pluginVersion": "2.9.4",
     "publicPath": "/nick-derobertis-site/remotes/home-contact/"
   },
   "shared": [
@@ -34,13 +34,13 @@
         "js": {
           "async": [],
           "sync": [
-            "241.5fa6d8cc16c0bb3c.js"
+            "623.aede72cbf2c11bb1.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -49,21 +49,21 @@
     {
       "id": "homeContact:react-dom",
       "name": "react-dom",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.296325bad9feed04.js"
+            "main.919e5352912d1abc.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.c2249fd209e0b7fe.css"
+            "main.4b0c87425d99e123.css"
           ]
         }
       },
@@ -72,21 +72,21 @@
     {
       "id": "homeContact:react",
       "name": "react",
-      "version": "19.2.7",
+      "version": "19.3.1",
       "singleton": true,
-      "requiredVersion": "^19.2.7",
+      "requiredVersion": "^19.3.1",
       "assets": {
         "js": {
           "async": [],
           "sync": [
             "remoteEntry.js",
-            "main.296325bad9feed04.js"
+            "main.919e5352912d1abc.js"
           ]
         },
         "css": {
           "async": [],
           "sync": [
-            "main.c2249fd209e0b7fe.css"
+            "main.4b0c87425d99e123.css"
           ]
         }
       },
@@ -95,14 +95,14 @@
     {
       "id": "homeContact:zod",
       "name": "zod",
-      "version": "4.4.3",
+      "version": "4.6.7",
       "singleton": true,
-      "requiredVersion": "^4.4.3",
+      "requiredVersion": "^4.6.7",
       "assets": {
         "js": {
           "async": [],
           "sync": [
-            "581.f676fd9d330152d5.js"
+            "206.27c48aae4c24ca24.js"
           ]
         },
         "css": {
@@ -121,7 +121,7 @@
       "assets": {
         "js": {
           "sync": [
-            "__federation_expose_Page.65e48ca1db59282f.js"
+            "__federation_expose_Page.eabeb50546940b2a.js"
           ],
           "async": []
         },
@@ -130,7 +130,7 @@
             "__federation_expose_Page.872a135d13559c28.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
@@ -142,7 +142,7 @@
       "assets": {
         "js": {
           "sync": [
-            "__federation_expose_Skeleton.638558f79f1eab88.js"
+            "__federation_expose_Skeleton.dac93205c5c075e7.js"
           ],
           "async": []
         },
@@ -151,7 +151,7 @@
             "__federation_expose_Skeleton.872a135d13559c28.css"
           ],
           "async": [
-            "241.8e6a99df7fb75c0d.css"
+            "623.d13c11caf09d4a6c.css"
           ]
         }
       },
